@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "A",
+    "#"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:flower_pot"
+    },
+    "A": {
+      "item": "minecraft:wither_rose"
+    }
+  },
+  "result": {
+    "id": "oririmod:witherrose"
+  }
+}

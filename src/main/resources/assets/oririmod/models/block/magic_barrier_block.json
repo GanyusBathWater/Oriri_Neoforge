@@ -1,0 +1,9 @@
+{
+  "parent": "block/cube_bottom_top",
+  "render": "translucent",
+  "textures": {
+    "top": "oririmod:block/magic_barrier_block",
+    "bottom": "oririmod:block/magic_barrier_block",
+    "side": "oririmod:block/magic_barrier_block"
+  }
+}

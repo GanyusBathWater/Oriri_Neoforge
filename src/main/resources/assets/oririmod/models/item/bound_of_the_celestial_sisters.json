@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "oririmod:item/bound_of_the_celestial_sisters"
+  }
+}

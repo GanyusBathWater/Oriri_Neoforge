@@ -1,0 +1,7 @@
+{
+  "replaces": false,
+  "values": [
+    "oririmod:magic_barrier_block",
+    "oririmod:magic_barrier_core_block"
+  ]
+}

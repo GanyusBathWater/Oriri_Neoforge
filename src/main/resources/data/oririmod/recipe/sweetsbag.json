@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#A#",
+    "DSF",
+    "#G#"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:leather"
+    },
+    "A": {
+      "item": "minecraft:string"
+    },
+    "D": {
+      "item": "minecraft:cookie"
+    },
+    "S": {
+      "item": "minecraft:golden_apple"
+    },
+    "F": {
+      "item": "minecraft:melon_slice"
+    },
+    "G": {
+      "item": "minecraft:sweet_berries"
+    }
+  },
+  "result": {
+    "id": "oririmod:sweetsbag"
+  }
+}

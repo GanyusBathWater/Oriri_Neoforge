@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "oririmod:item/relic_of_the_past"
+  }
+}

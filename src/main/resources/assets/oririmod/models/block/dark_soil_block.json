@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_bottom_top",
+  "textures": {
+    "top": "oririmod:block/dark_soil_top",
+    "bottom": "oririmod:block/dark_soil_bottom",
+    "side": "oririmod:block/dark_soil_side"
+  }
+}

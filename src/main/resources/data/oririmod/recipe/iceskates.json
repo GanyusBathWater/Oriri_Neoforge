@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "S  ",
+    "ASD",
+    "DDD"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:leather"
+    },
+    "A": {
+      "item": "oririmod:damnedsoul"
+    },
+    "D": {
+      "item": "oririmod:ironstick"
+    }
+  },
+  "result": {
+    "id": "oririmod:iceskates"
+  }
+}

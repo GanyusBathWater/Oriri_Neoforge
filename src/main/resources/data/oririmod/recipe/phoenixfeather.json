@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "##D",
+    "#A#",
+    "S##"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:feather"
+    },
+    "S": {
+      "item": "oririmod:firecrystal"
+    },
+  "A": {
+    "item": "minecraft:blaze_powder"
+  },
+  "D": {
+    "item": "minecraft:magma_cream"
+  }
+},
+  "result": {
+    "id": "oririmod:phoenixfeather"
+  }
+}
