@@ -38,19 +38,20 @@ public class StunnedEffect extends MobEffect {
             mob.setNoAi(true);
         } else if (livingEntity instanceof Player player) {
             // Bewegung komplett unterbinden
-            player.getAbilities().setWalkingSpeed(0);
+            player.getAbilities().setWalkingSpeed(-0.1f);
             player.onUpdateAbilities();
         }
     }
 
     @Override
     public void onMobRemoved(LivingEntity livingEntity, int amplifier, Entity.RemovalReason reason) {
+        System.out.println("onMobRemoved");
         if (livingEntity instanceof Mob mob) {
             // AI wieder einschalten
             mob.setNoAi(false);
         } else if (livingEntity instanceof Player player) {
             // Bewegung wieder erlauben
-            player.getAbilities().setWalkingSpeed(0);
+            player.getAbilities().setWalkingSpeed(0.1f);
             player.onUpdateAbilities();
         }
     }

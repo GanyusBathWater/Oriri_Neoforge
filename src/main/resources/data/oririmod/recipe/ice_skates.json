@@ -10,13 +10,13 @@
       "item": "minecraft:leather"
     },
     "A": {
-      "item": "oririmod:damnedsoul"
+      "item": "oririmod:damned_soul"
     },
     "D": {
-      "item": "oririmod:ironstick"
+      "item": "oririmod:iron_stick"
     }
   },
   "result": {
-    "id": "oririmod:iceskates"
+    "id": "oririmod:ice_skates"
   }
 }

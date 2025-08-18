@@ -10,7 +10,7 @@
       "item": "minecraft:feather"
     },
     "S": {
-      "item": "oririmod:firecrystal"
+      "item": "oririmod:fire_crystal"
     },
   "A": {
     "item": "minecraft:blaze_powder"
@@ -20,6 +20,6 @@
   }
 },
   "result": {
-    "id": "oririmod:phoenixfeather"
+    "id": "oririmod:phoenix_feather"
   }
 }

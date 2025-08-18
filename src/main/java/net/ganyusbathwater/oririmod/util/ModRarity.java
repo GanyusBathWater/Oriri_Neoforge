@@ -18,23 +18,26 @@ public enum ModRarity {
     MAGICAL("Magical", "#8900DE");
 
     private final String displayName;
-    private final TextColor color;
+    private final String hexColor;
 
     ModRarity(String displayName, String hexColor) {
         this.displayName = displayName;
-        this.color = TextColor.fromRgb(0xFFFFFF);
+        this.hexColor = hexColor;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String displayName() { return displayName; }
+    public String hex() { return hexColor; }
+
+    public int rgb() {
+        String s = hexColor.startsWith("#") ? hexColor.substring(1) : hexColor;
+        return (int) Long.parseLong(s, 16) & 0xFFFFFF;
     }
 
-    public TextColor getColor() {
-        return color;
+    public TextColor textColor() {
+        return TextColor.fromRgb(rgb());
     }
 
-    public Component getTooltipText() {
-        return Component.literal(displayName)
-                .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color.getValue())));
+    public Component coloredDisplayName() {
+        return Component.literal(displayName).setStyle(Style.EMPTY.withColor(textColor()));
     }
 }

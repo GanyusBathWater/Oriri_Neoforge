@@ -18,6 +18,7 @@ import java.util.Map;
 
 public class ModArmorItem extends ArmorItem implements ModRarityCarrier {
     private final ModRarity rarity;
+
     //Für Fullset Armor Effekte
     private static final Map<Holder<ArmorMaterial>, List<MobEffectInstance>> MATERIAL_TO_EFFECT_MAP =
             (new ImmutableMap.Builder<Holder<ArmorMaterial>, List<MobEffectInstance>>())
@@ -29,23 +30,6 @@ public class ModArmorItem extends ArmorItem implements ModRarityCarrier {
     public ModArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties, ModRarity rarity) {
         super(material, type, properties);
         this.rarity = rarity;
-    }
-
-
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        Component displayName = stack.getHoverName()
-                .copy()
-                .setStyle(Style.EMPTY.withColor(rarity.getColor()));
-
-        tooltipComponents.add(displayName);
-    }
-
-    @Override
-    public Component getName(ItemStack stack) {
-        return super.getName(stack).copy()
-                .setStyle(Style.EMPTY.withColor(rarity.getColor()));
     }
 
     @Override

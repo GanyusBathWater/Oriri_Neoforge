@@ -1,5 +1,6 @@
 {
   "parent": "block/cube_bottom_top",
+  "render_type": "minecraft:cutout",
   "render": "translucent",
   "textures": {
     "top": "oririmod:block/magic_barrier_core_block",

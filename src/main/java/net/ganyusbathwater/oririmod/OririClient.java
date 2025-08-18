@@ -1,14 +1,33 @@
 package net.ganyusbathwater.oririmod;
 
+import com.mojang.datafixers.util.Either;
+import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
+import net.ganyusbathwater.oririmod.util.ModRarity;
+import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+
+import java.util.List;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = OririMod.MOD_ID, dist = Dist.CLIENT)
@@ -19,11 +38,53 @@ public class OririClient {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
         // Do not forget to add translations for your config options to the en_us.json file.
+
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         ModItemProperties.addCustomItemProperties();
+    }
+
+    @SubscribeEvent
+    public static void onItemTooltip(ItemTooltipEvent event) {
+        ItemStack stack = event.getItemStack();
+        if (!(stack.getItem() instanceof ModRarityCarrier holder)) return;
+
+        ModRarity rarity = holder.getModRarity();
+        Component line = Component.literal(rarity.displayName())
+                .setStyle(Style.EMPTY.withColor(rarity.textColor()));
+
+        event.getToolTip().add(line);
+    }
+
+    @SubscribeEvent
+    public static void onGatherTooltip(RenderTooltipEvent.GatherComponents event) {
+        ItemStack stack = event.getItemStack();
+        if (!(stack.getItem() instanceof ModRarityCarrier holder)) return;
+
+        ModRarity rarity = holder.getModRarity();
+        List<Either<FormattedText, TooltipComponent>> list = event.getTooltipElements();
+
+        if (!list.isEmpty() && list.get(0).left().isPresent()) {
+            FormattedText originalTitle = list.get(0).left().get();
+
+            // cast, da wir wissen, dass es ein Component ist
+            if (originalTitle instanceof Component component) {
+                Component colored = component.copy()
+                        .setStyle(Style.EMPTY.withColor(rarity.textColor()));
+
+                list.set(0, Either.left(colored));
+            }
+        }
+    }
+
+    private static int parseHex(String hex) {
+        String s = hex.startsWith("#") ? hex.substring(1) : hex;
+        // defensiv: nur 6-stelliges RRGGBB akzeptieren
+        if (s.length() != 6) return 0xFFFFFF;
+        try { return (int) Long.parseLong(s, 16) & 0xFFFFFF; }
+        catch (NumberFormatException e) { return 0xFFFFFF; }
     }
 }

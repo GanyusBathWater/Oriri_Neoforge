@@ -10,13 +10,13 @@
       "item": "minecraft:red_wool"
     },
     "A": {
-      "item": "oririmod:torturedsoul"
+      "item": "oririmod:tortured_soul"
     },
     "S": {
       "item": "minecraft:leather"
     }
   },
   "result": {
-    "id": "oririmod:critglove"
+    "id": "oririmod:crit_glove"
   }
 }

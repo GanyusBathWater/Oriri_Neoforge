@@ -10,10 +10,10 @@
       "item": "minecraft:golden_apple"
     },
     "S": {
-      "item": "oririmod:hollowsoul"
+      "item": "oririmod:hollow_soul"
     }
   },
   "result": {
-    "id": "oririmod:heartofthetank"
+    "id": "oririmod:heart_of_the_tank"
   }
 }
