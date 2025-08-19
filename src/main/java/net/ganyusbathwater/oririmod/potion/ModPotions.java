@@ -16,6 +16,12 @@ public class ModPotions {
 
     public static final Holder<Potion> STUNNED_POTION = POTIONS.register("stunned_potion", () -> new Potion(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 1200, 0)));
 
+    public static final Holder<Potion> BROKEN_POTION1 = POTIONS.register("broken_potion1", () -> new Potion(new MobEffectInstance(ModEffects.BROKEN_EFFECT, 1200, 0)));
+
+    public static final Holder<Potion> BROKEN_POTION2 = POTIONS.register("broken_potion2", () -> new Potion(new MobEffectInstance(ModEffects.BROKEN_EFFECT, 1200, 1)));
+
+    public static final Holder<Potion> BROKEN_POTION3 = POTIONS.register("broken_potion3", () -> new Potion(new MobEffectInstance(ModEffects.BROKEN_EFFECT, 1200, 2)));
+
     public static void registerPotions(IEventBus eventBus) {
         POTIONS.register(eventBus);
         OririMod.LOGGER.info("Registering Mod Potions for " + OririMod.MOD_ID);

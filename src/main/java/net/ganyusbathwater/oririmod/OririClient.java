@@ -2,6 +2,9 @@ package net.ganyusbathwater.oririmod;
 
 import com.mojang.datafixers.util.Either;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.effect.ModEffects;
+import net.ganyusbathwater.oririmod.item.ModItems;
+import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
@@ -14,8 +17,12 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.alchemy.Potions;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -25,9 +32,12 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 import java.util.List;
+import java.util.UUID;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = OririMod.MOD_ID, dist = Dist.CLIENT)
@@ -86,5 +96,42 @@ public class OririClient {
         if (s.length() != 6) return 0xFFFFFF;
         try { return (int) Long.parseLong(s, 16) & 0xFFFFFF; }
         catch (NumberFormatException e) { return 0xFFFFFF; }
+    }
+
+    @SubscribeEvent // on the game event bus
+    public static void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {
+        // Gets the builder to add recipes to
+        PotionBrewing.Builder builder = event.getBuilder();
+
+        // Will add brewing recipes for all container potions (e.g. potion, splash potion, lingering potion)
+        builder.addMix(
+                // The initial potion to apply to
+                Potions.AWKWARD,
+                // The brewing ingredient. This is the item at the top of the brewing stand.
+                ModItems.TORTURED_SOUL.asItem(),
+                // The resulting potion
+                ModPotions.BROKEN_POTION1
+        );
+        builder.addMix(ModPotions.BROKEN_POTION1, Items.GLOWSTONE_DUST, ModPotions.BROKEN_POTION2);
+        builder.addMix(ModPotions.BROKEN_POTION2, Items.GLOWSTONE_DUST, ModPotions.BROKEN_POTION3);
+        builder.addMix(Potions.AWKWARD, ModItems.DAMNED_SOUL.asItem(), ModPotions.STUNNED_POTION);
+    }
+
+    @SubscribeEvent
+    public static void onLivingDamagePre(LivingDamageEvent.Pre event) {
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
+
+        // Prüfen: hat Angreifer den Effekt "Charmed"?
+        if (attacker.hasEffect(ModEffects.CHARMED_EFFECT)) {
+            // UUID vom Caster aus PersistentData holen
+            if (attacker.getPersistentData().hasUUID("CharmCaster")) {
+                UUID casterId = attacker.getPersistentData().getUUID("CharmCaster");
+
+                // Prüfen: greift der Angreifer seinen eigenen Caster an?
+                if (event.getEntity().getUUID().equals(casterId)) {
+                    event.setNewDamage(0); // Schaden blockieren
+                }
+            }
+        }
     }
 }

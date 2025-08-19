@@ -32,10 +32,27 @@
   "item.oririmod.wither_rose": "Wither Rose",
 
   "effect.oririmod.stunned": "Stunned",
+  "effect.oririmod.broken": "Broken",
 
   "item.minecraft.potion.effect.stunned_potion": "Stunned Potion",
   "item.minecraft.splash_potion.effect.stunned_potion": "Stunned Splash Potion",
   "item.minecraft.lingering_potion.effect.stunned_potion": "Stunned Lingering Potion",
+  "item.minecraft.tipped_arrow.effect.stunned_potion": "Stunning Arrow",
+
+  "item.minecraft.potion.effect.broken_potion1": "Broken Potion I",
+  "item.minecraft.splash_potion.effect.broken_potion1": "Broken Splash Potion I",
+  "item.minecraft.lingering_potion.effect.broken_potion1": "Broken Lingering Potion I",
+  "item.minecraft.tipped_arrow.effect.broken_potion1": "Arrow of Broken Armor I",
+
+  "item.minecraft.potion.effect.broken_potion2": "Broken Potion II",
+  "item.minecraft.splash_potion.effect.broken_potion2": "Broken Splash Potion II",
+  "item.minecraft.lingering_potion.effect.broken_potion2": "Broken Lingering Potion II",
+  "item.minecraft.tipped_arrow.effect.broken_potion2": "Arrow of Broken Armor II",
+
+  "item.minecraft.potion.effect.broken_potion3": "Broken Potion III",
+  "item.minecraft.splash_potion.effect.broken_potion3": "Broken Splash Potion III",
+  "item.minecraft.lingering_potion.effect.broken_potion3": "Broken Lingering Potion III",
+  "item.minecraft.tipped_arrow.effect.broken_potion3": "Arrow of Broken Armor III",
 
   "item.oririmod.emerald_sword": "Emerald Sword",
   "item.oririmod.emerald_pickaxe": "Emerald Pickaxe",
