@@ -3,6 +3,7 @@ package net.ganyusbathwater.oririmod.effect;
 
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -21,6 +22,24 @@ public class StunnedEffect extends MobEffect {
             // Spielerbewegung stoppen
             player.setDeltaMovement(Vec3.ZERO);
             player.hasImpulse = true; // verhindert Gummiband-Effekte
+        }
+
+        for (MobEffectInstance instance : livingEntity.getActiveEffects()) {
+            // instance.getEffect() liefert ein Holder<MobEffect>; holder.value() ist das tatsächliche MobEffect
+            if (instance.getEffect().value() == this) {
+                // wenn nur noch <= 1 Tick übrig ist, Cleanup durchführen
+                if (instance.getDuration() <= 1) {
+                    // Cleanup - AI & Spielerbewegung zurücksetzen
+                    if (livingEntity instanceof Mob mob) {
+                        mob.setNoAi(false);
+                    } else if (livingEntity instanceof Player player) {
+                        // Standard-WalkingSpeed in Minecraft ist 0.1f (Server-seitig anpassen)
+                        player.getAbilities().setWalkingSpeed(0.1f);
+                        player.onUpdateAbilities();
+                    }
+                }
+                break; // gefunden — raus aus der Schleife
+            }
         }
         return true;
     }
