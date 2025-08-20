@@ -19,7 +19,7 @@ import java.util.Map;
 public class ModArmorItem extends ArmorItem implements ModRarityCarrier {
     private final ModRarity rarity;
 
-    //Für Fullset Armor Effekte
+    //For fullset armor effects
     private static final Map<Holder<ArmorMaterial>, List<MobEffectInstance>> MATERIAL_TO_EFFECT_MAP =
             (new ImmutableMap.Builder<Holder<ArmorMaterial>, List<MobEffectInstance>>())
                     .put(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL,

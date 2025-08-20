@@ -11,7 +11,6 @@ import java.util.List;
 public class CustomSwordItem extends SwordItem implements ModRarityCarrier {
     private final ModRarity rarity;
 
-    //Konstruktor Mathode
     public CustomSwordItem(Tier tier, Properties properties, ModRarity rarity) {
         super(tier, properties);
         this.rarity = rarity;

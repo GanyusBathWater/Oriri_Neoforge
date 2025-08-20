@@ -33,6 +33,7 @@
 
   "effect.oririmod.stunned": "Stunned",
   "effect.oririmod.broken": "Broken",
+  "effect.oririmod.charmed": "Charmed",
 
   "item.minecraft.potion.effect.stunned_potion": "Stunned Potion",
   "item.minecraft.splash_potion.effect.stunned_potion": "Stunned Splash Potion",
@@ -53,6 +54,8 @@
   "item.minecraft.splash_potion.effect.broken_potion3": "Broken Splash Potion III",
   "item.minecraft.lingering_potion.effect.broken_potion3": "Broken Lingering Potion III",
   "item.minecraft.tipped_arrow.effect.broken_potion3": "Arrow of Broken Armor III",
+
+  "enchantment.oririmod.sniper": "Sniper",
 
   "item.oririmod.emerald_sword": "Emerald Sword",
   "item.oririmod.emerald_pickaxe": "Emerald Pickaxe",
@@ -142,10 +145,10 @@
   "tooltip.oririmod.magic_book_1.tooltip.lore": "A book written by a man that doesn’t have the best spells",
 
   "tooltip.oririmod.magic_book_2.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
-  "tooltip.oririmod.magic_book_2.tooltip.lore": "A book that only contains wild scribblings but a few magic spells can be recognized",
+  "tooltip.oririmod.magic_book_2.tooltip.lore": "A book that only contains wild scribblings, only a few magic spells can be recognized",
 
   "tooltip.oririmod.magic_book_3.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
-  "tooltip.oririmod.magic_book_3.tooltip.lore": "A book written by a man who had evidently learned a great deal on his journey",
+  "tooltip.oririmod.magic_book_3.tooltip.lore": "A book written by a man who had learned a great deal on his journey",
 
   "tooltip.oririmod.magic_book_4.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_4.tooltip.lore": "A book truly written by a master",

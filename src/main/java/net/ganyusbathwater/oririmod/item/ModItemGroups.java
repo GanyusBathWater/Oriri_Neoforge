@@ -41,10 +41,10 @@ public class ModItemGroups {
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
 
-                        //-------------Essen-------------
+                        //-------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);
 
-                        //-----------Artefakte-----------
+                        //-----------Artifacts-----------
                         output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
                         output.accept(ModItems.CRIT_GLOVE);
                         output.accept(ModItems.DUELLANT_CORTEX);
@@ -67,7 +67,7 @@ public class ModItemGroups {
                         output.accept(ModItems.SWEETS_BAG);
                         output.accept(ModItems.WITHER_ROSE);
 
-                        //------------Ausrüstung------------
+                        //------------Weapons------------
                         output.accept(ModItems.PANDORAS_BLADE);
                         output.accept(ModItems.ORAPHIM_BOW);
                         output.accept(ModItems.PIRATE_SABER);
@@ -87,7 +87,7 @@ public class ModItemGroups {
                         output.accept(ModItems.EMERALD_HOE);
 
 
-                        //------------Rüstung---------------
+                        //------------Armor---------------
 
                         output.accept(ModItems.CRYSTAL_HELMET);
                         output.accept(ModItems.CRYSTAL_CHESTPLATE);

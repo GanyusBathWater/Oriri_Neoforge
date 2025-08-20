@@ -25,34 +25,32 @@ public class MagicBarrierCoreBlock extends Block {
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        // Nur Server-Logik ausführen
         if (level.isClientSide) {
             return ItemInteractionResult.sidedSuccess(true);
         }
 
-        // ---- Schlüssel-Item ----
         boolean hasKeyItem = stack.is(Items.AMETHYST_SHARD);
 
         if (!hasKeyItem) {
-            // NICHT richtiges Item -> Standard-Interaktion
+            // NOT correct item - > Default interaction
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        // Zerstöre Core selbst ohne Block zu droppen
+        // Destroy Core yourself without dropping block
         level.destroyBlock(pos, false);
 
-        // Danach alle verbundenen Barrier-Blöcke
+        // Then all connected barrier blocks
         breakConnectedBarriers(level, pos);
 
-        // Schlüssel wird verbraucht, wenn nicht dann folgende Zeile kommentieren
+        // Key is consumed
         stack.shrink(1);
 
         return ItemInteractionResult.sidedSuccess(false);
     }
 
     /**
-     * BFS über 6 Richtungen, entfernt alle direkt zusammenhängenden MagicBarrierBlocks.
-     * Start ist der ehemals besetzte Core-Blockplatz.
+     * BFS over 6 directions, removes all directly connected MagicBarrierBlocks.
+     * Start is the formerly occupied core block space.
      */
     private static void breakConnectedBarriers(Level level, BlockPos start) {
         Deque<BlockPos> queue = new ArrayDeque<>();
@@ -70,7 +68,6 @@ public class MagicBarrierCoreBlock extends Block {
 
                 BlockState st = level.getBlockState(next);
                 if (st.getBlock() instanceof MagicBarrierBlock) {
-                    // Zerstöre den Barrier-Block (ohne Drops; bei Bedarf true)
                     level.destroyBlock(next, false);
                     queue.addLast(next);
                 }

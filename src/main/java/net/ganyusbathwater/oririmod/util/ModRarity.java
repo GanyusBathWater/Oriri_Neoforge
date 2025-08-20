@@ -7,7 +7,7 @@ import net.minecraft.network.chat.TextColor;
 
 public enum ModRarity {
 
-    //Neue Raritäten
+    //New Raritys
     COMMON("Common", "#AAAAAA"),
     UNCOMMON("Uncommon", "#55FF55"),
     RARE("Rare", "#5555FF"),

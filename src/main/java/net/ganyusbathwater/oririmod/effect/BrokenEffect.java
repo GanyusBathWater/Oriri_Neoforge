@@ -11,13 +11,13 @@ import java.util.UUID;
 
 public class BrokenEffect extends MobEffect {
 
-    // Eindeutige ID für den Attributmodifier (beliebiger, aber stabiler Pfad)
+    // Unique ID for the attribute modifier (any but stable path)
     public static final ResourceLocation BROKEN_ARMOR_MODIFIER_ID =
             ResourceLocation.fromNamespaceAndPath("oririmod", "broken_armor");
 
     public BrokenEffect(MobEffectCategory category, int color) {
-        super(category, color); // Reduziert die *gesamte* Rüstung (inkl. Rüstungsteile) um:
-                // Stufe 1: -25%, Stufe 2: -50%, Stufe 3+: -75%
+        super(category, color); // Reduces *total* armor (including armor pieces) by:
+        // Level 1: -25%, Level 2: -50%, Level 3+: -75%
         this.addAttributeModifier(
                 Attributes.ARMOR,                           // Holder<Attribute>
                 BROKEN_ARMOR_MODIFIER_ID,                   // ResourceLocation

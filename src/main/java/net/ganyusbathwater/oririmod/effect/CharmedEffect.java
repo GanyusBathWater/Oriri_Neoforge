@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 public class CharmedEffect extends MobEffect {
 
     public CharmedEffect() {
-        super(MobEffectCategory.HARMFUL, 0xFF69B4); // Pink als Charm-Farbe
+        super(MobEffectCategory.HARMFUL, 0xFF69B4); // Pink as Charm-Color
     }
 
     @Override
@@ -22,13 +22,11 @@ public class CharmedEffect extends MobEffect {
 
     @Override
     public boolean applyEffectTick(LivingEntity living, int amplifier) {
-        // hier machen wir nichts aktiv – die eigentliche Blockade passiert über Events
         return true;
     }
 
     @Override
     public void onEffectAdded(LivingEntity living, int amplifier) {
-        // Optional: KI stoppen, Ziel zurücksetzen
         if (living instanceof Mob mob) {
             mob.setTarget(null);
         }

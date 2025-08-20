@@ -31,14 +31,12 @@ public class CustomHammerItem extends MaceItem implements ModRarityCarrier {
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        // Prüfen, ob der Angreifer ein Spieler ist
         if (attacker instanceof Player player) {
-            // Fallgeschwindigkeit prüfen (negative y-Bewegung)
             double fallSpeed = player.getDeltaMovement().y;
 
-                // Beispiel-Schwelle: schneller als -0.6 Blöcke/Tick nach unten
+                // threshold: faster than -0.6 blocks/tick down
                 if (fallSpeed < -0.6D) {
-                    // Stunned Effekt für 5 Sekunden (100 Ticks) hinzufügen
+                    // Add stunned effect for 5 seconds (100 ticks)
                     target.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 100, 0));
                 }
 

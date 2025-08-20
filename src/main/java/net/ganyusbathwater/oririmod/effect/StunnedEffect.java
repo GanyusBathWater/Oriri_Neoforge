@@ -19,26 +19,26 @@ public class StunnedEffect extends MobEffect {
     @Override
     public boolean applyEffectTick(LivingEntity livingEntity, int amplifier) {
         if (livingEntity instanceof Player player) {
-            // Spielerbewegung stoppen
+            // Stop player movement
             player.setDeltaMovement(Vec3.ZERO);
-            player.hasImpulse = true; // verhindert Gummiband-Effekte
+            player.hasImpulse = true; // prevents rubber band effects
         }
 
         for (MobEffectInstance instance : livingEntity.getActiveEffects()) {
-            // instance.getEffect() liefert ein Holder<MobEffect>; holder.value() ist das tatsächliche MobEffect
+            // instance.getEffect() returns a Holder<MobEffect>; holder.value() is the actual MobEffect
             if (instance.getEffect().value() == this) {
-                // wenn nur noch <= 1 Tick übrig ist, Cleanup durchführen
+                // if only <= 1 tick remains, perform cleanup
                 if (instance.getDuration() <= 1) {
-                    // Cleanup - AI & Spielerbewegung zurücksetzen
+                    // Cleanup - AI & Reset player movement
                     if (livingEntity instanceof Mob mob) {
                         mob.setNoAi(false);
                     } else if (livingEntity instanceof Player player) {
-                        // Standard-WalkingSpeed in Minecraft ist 0.1f (Server-seitig anpassen)
+                        // Default WalkingSpeed in Minecraft is 0.1f (adjust server side)
                         player.getAbilities().setWalkingSpeed(0.1f);
                         player.onUpdateAbilities();
                     }
                 }
-                break; // gefunden — raus aus der Schleife
+                break;
             }
         }
         return true;
@@ -46,17 +46,15 @@ public class StunnedEffect extends MobEffect {
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
-        // Effekt soll JEDE TICK angewendet werden
+        // EVERY TICK should be applied to the effect
         return true;
     }
 
     @Override
     public void onEffectAdded(LivingEntity livingEntity, int amplifier) {
         if (livingEntity instanceof Mob mob) {
-            // AI ausschalten
             mob.setNoAi(true);
         } else if (livingEntity instanceof Player player) {
-            // Bewegung komplett unterbinden
             player.getAbilities().setWalkingSpeed(-0.1f);
             player.onUpdateAbilities();
         }
@@ -66,10 +64,10 @@ public class StunnedEffect extends MobEffect {
     public void onMobRemoved(LivingEntity livingEntity, int amplifier, Entity.RemovalReason reason) {
         System.out.println("onMobRemoved");
         if (livingEntity instanceof Mob mob) {
-            // AI wieder einschalten
+            // AI turn back on
             mob.setNoAi(false);
         } else if (livingEntity instanceof Player player) {
-            // Bewegung wieder erlauben
+            // Allow movement again
             player.getAbilities().setWalkingSpeed(0.1f);
             player.onUpdateAbilities();
         }

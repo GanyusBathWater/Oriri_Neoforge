@@ -34,7 +34,7 @@ public class ModItems {
 
     public static final DeferredItem<Item> VOID_SOUL = ITEMS.register("void_soul", () -> new Item(new Item.Properties()));
 
-    //---------------------------------------Artefakte---------------------------------------------------------
+    //---------------------------------------Artifacts---------------------------------------------------------
 
     public static final DeferredItem<Item> BOUND_OF_THE_CELESTIAL_SISTERS = ITEMS.register("bound_of_the_celestial_sisters", () -> new Item(new Item.Properties()));
 
@@ -78,11 +78,11 @@ public class ModItems {
 
     public static final DeferredItem<Item> WITHER_ROSE = ITEMS.register("wither_rose", () -> new Item(new Item.Properties()));
 
-    //---------------------------------------Pflanzen/Essen---------------------------------------------------------
+    //---------------------------------------Plants/Foods---------------------------------------------------------
 
     public static final DeferredItem<Item> ELDERBERRY = ITEMS.register("elderberry", () -> new Item(new Item.Properties().food(ModFoods.ELDERBERRY)));
 
-    //---------------------------------------Waffen---------------------------------------------------------
+    //---------------------------------------Weapons---------------------------------------------------------
 
     public static final DeferredItem<SwordItem> PANDORAS_BLADE = ITEMS.register("pandoras_blade", () -> new CustomSwordItem(Tiers.DIAMOND, new Item.Properties(), ModRarity.MYTHIC));
 
@@ -118,7 +118,7 @@ public class ModItems {
 
     public static final DeferredItem<HoeItem> EMERALD_HOE = ITEMS.register("emerald_hoe", () -> new HoeItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
 
-    //------------------------------------------------------Rüstung---------------------------------------------------------
+    //------------------------------------------------------Armor---------------------------------------------------------
 
     public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet", () -> new ModArmorItem(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)), ModRarity.LEGENDARY));
 
@@ -168,7 +168,7 @@ public class ModItems {
 
     public static final DeferredItem<ArmorItem> PRISMARINE_BOOTS = ITEMS.register("prismarine_boots", () -> new ModArmorItem(ModArmorMaterials.PRISMARINE_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(19)),ModRarity.UNCOMMON));
 
-    //------------------------------------------------------Arkana-----------------------------------------------------------
+    //------------------------------------------------------Arcana-----------------------------------------------------------
 
     public static final DeferredItem<Item> THE_FOOL = ITEMS.register("the_fool", () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
 
