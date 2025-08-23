@@ -1,0 +1,209 @@
+package net.ganyusbathwater.oririmod.datagen;
+
+import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.item.ModItems;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.DeferredItem;
+
+import java.util.Objects;
+import java.util.function.Supplier;
+
+public class ModItemModelProvider extends ItemModelProvider {
+    public ModItemModelProvider(PackOutput output, String modid, ExistingFileHelper existingFileHelper) {
+        super(output, modid, existingFileHelper);
+    }
+
+    @Override
+    protected void registerModels() {
+        //-------------Items-------------
+        basicItem(ModItems.FIRE_CRYSTAL.get());
+        basicItem(ModItems.MANA_MANIFESTATION.get());
+        basicItem(ModItems.MOON_STONE.get());
+        basicItem(ModItems.DAMNED_SOUL.get());
+        basicItem(ModItems.HOLLOW_SOUL.get());
+        basicItem(ModItems.IRAS_SOUL.get());
+        basicItem(ModItems.IRON_STICK.get());
+        basicItem(ModItems.POWER_SOUL.get());
+        basicItem(ModItems.TORTURED_SOUL.get());
+        basicItem(ModItems.VOID_SOUL.get());
+
+        //-------------Blocks------------
+        simpleBlockItem(ModBlocks.DARK_SOIL.get());
+        simpleBlockItem(ModBlocks.ELDERBUSH_BLOCK.get());
+        simpleBlockItem(ModBlocks.MAGIC_BARRIER_BLOCK.get());
+        simpleBlockItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK.get());
+
+        //-------------Foods-------------
+        basicItem(ModItems.ELDERBERRY.get());
+
+        //-----------Artifacts-----------
+        basicItem(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS.get());
+        basicItem(ModItems.CRIT_GLOVE.get());
+        basicItem(ModItems.DUELLANT_CORTEX.get());
+        basicItem(ModItems.HEART_OF_THE_TANK.get());
+        basicItem(ModItems.HERMES_GIFT.get());
+        basicItem(ModItems.ICE_SKATES.get());
+        basicItem(ModItems.MANA_HEART.get());
+        basicItem(ModItems.PESTDOCTORS_MASK.get());
+        basicItem(ModItems.MIRROR_OF_THE_BLACK_SUN.get());
+        basicItem(ModItems.PHOENIX_FEATHER.get());
+        basicItem(ModItems.PLUSHIE_OF_THE_MINE.get());
+        basicItem(ModItems.PYRO_VISION.get());
+        basicItem(ModItems.RELIC_OF_THE_PAST.get());
+        basicItem(ModItems.SOLIS_BROOCH.get());
+        basicItem(ModItems.STIGMA_OF_THE_ARCHITECT.get());
+        basicItem(ModItems.SOUL_BIND.get());
+        basicItem(ModItems.SPRING.get());
+        basicItem(ModItems.STRIDERS_SCALE.get());
+        basicItem(ModItems.STRANGE_ENDER_EYE.get());
+        basicItem(ModItems.SWEETS_BAG.get());
+        basicItem(ModItems.WITHER_ROSE.get());
+
+        //------------Weapons------------
+        handheldItem(ModItems.PANDORAS_BLADE);
+        bowItem(ModItems.ORAPHIM_BOW);
+        handheldItem(ModItems.PIRATE_SABER);
+        handheldItem(ModItems.NEBULA_PICKAXE);
+        handheldItem(ModItems.ICE_SWORD);
+        handheldItem(ModItems.MOLTEN_PICKAXE);
+        handheldItem(ModItems.MJOELNIR);
+        handheldItem(ModItems.LAW_BREAKER);
+        handheldItem(ModItems.STELLA_PERDITOR);
+        handheldItem(ModItems.QILINS_WRATH);
+        handheldItem(ModItems.SOLS_EMBRACE);
+        crossbowItem(ModItems.ARBITER_CROSSBOW);
+        handheldItem(ModItems.EMERALD_SWORD);
+        handheldItem(ModItems.EMERALD_AXE);
+        handheldItem(ModItems.EMERALD_PICKAXE);
+        handheldItem(ModItems.EMERALD_SHOVEL);
+        handheldItem(ModItems.EMERALD_HOE);
+
+        //------------Armor---------------
+
+        basicItem(ModItems.CRYSTAL_HELMET.get());
+        basicItem(ModItems.CRYSTAL_CHESTPLATE.get());
+        basicItem(ModItems.CRYSTAL_LEGGINGS.get());
+        basicItem(ModItems.CRYSTAL_BOOTS.get());
+
+        basicItem(ModItems.ANCIENT_HELMET.get());
+        basicItem(ModItems.ANCIENT_CHESTPLATE.get());
+        basicItem(ModItems.ANCIENT_LEGGINGS.get());
+        basicItem(ModItems.ANCIENT_BOOTS.get());
+
+        basicItem(ModItems.GILDED_NETHERRITE_HELMET.get());
+        basicItem(ModItems.GILDED_NETHERRITE_CHESTPLATE.get());
+        basicItem(ModItems.GILDED_NETHERRITE_LEGGINGS.get());
+        basicItem(ModItems.GILDED_NETHERRITE_BOOTS.get());
+
+        basicItem(ModItems.BLUE_ICE_HELMET.get());
+        basicItem(ModItems.BLUE_ICE_CHESTPLATE.get());
+        basicItem(ModItems.BLUE_ICE_LEGGINGS.get());
+        basicItem(ModItems.BLUE_ICE_BOOTS.get());
+
+        basicItem(ModItems.MOLTEN_HELMET.get());
+        basicItem(ModItems.MOLTEN_CHESTPLATE.get());
+        basicItem(ModItems.MOLTEN_LEGGINGS.get());
+        basicItem(ModItems.MOLTEN_BOOTS.get());
+
+        basicItem(ModItems.PRISMARINE_HELMET.get());
+        basicItem(ModItems.PRISMARINE_CHESTPLATE.get());
+        basicItem(ModItems.PRISMARINE_LEGGINGS.get());
+        basicItem(ModItems.PRISMARINE_BOOTS.get());
+
+        //-------------Arkana-------------
+        basicItem(ModItems.THE_FOOL.get());
+        basicItem(ModItems.THE_MAGICIAN.get());
+        basicItem(ModItems.THE_HIGH_PRIESTESS.get());
+        basicItem(ModItems.THE_EMPRESS.get());
+        basicItem(ModItems.THE_EMPEROR.get());
+        basicItem(ModItems.THE_HIEROPHANT.get());
+        basicItem(ModItems.THE_LOVERS.get());
+        basicItem(ModItems.THE_CHARIOT.get());
+        basicItem(ModItems.STRENGTH.get());
+        basicItem(ModItems.THE_HERMIT.get());
+        basicItem(ModItems.WHEEL_OF_FORTUNE.get());
+        basicItem(ModItems.JUSTICE.get());
+        basicItem(ModItems.THE_HANGED_MAN.get());
+        basicItem(ModItems.DEATH.get());
+        basicItem(ModItems.TEMPERANCE.get());
+        basicItem(ModItems.THE_DEVIL.get());
+        basicItem(ModItems.THE_TOWER.get());
+        basicItem(ModItems.THE_STAR.get());
+        basicItem(ModItems.THE_MOON.get());
+        basicItem(ModItems.THE_SUN.get());
+        basicItem(ModItems.JUDGEMENT.get());
+        basicItem(ModItems.THE_WORLD.get());
+    }
+
+    private ItemModelBuilder handheldItem(DeferredItem<?> item) {
+        return withExistingParent(item.getId().getPath(),
+                ResourceLocation.parse("item/handheld")).texture("layer0",
+                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,"item/" + item.getId().getPath()));
+    }
+
+    private void bowItem(DeferredItem<?> deferredItem) {
+        String name = (deferredItem.getId().getPath()); // z.B. "sniper_bow"
+
+        withExistingParent(name, mcLoc("item/bow"))
+                .texture("layer0", modLoc("item/" + name).toString())
+                .override()
+                .predicate(mcLoc("pulling"), 1.0F)
+                .model(withExistingParent(name + "_pulling_0", mcLoc("item/bow"))
+                        .texture("layer0", modLoc("item/" + name + "_pulling_0").toString()))
+                .end()
+                .override()
+                .predicate(mcLoc("pulling"), 1.0F).predicate(mcLoc("pull"), 0.65F)
+                .model(withExistingParent(name + "_pulling_1", mcLoc("item/bow"))
+                        .texture("layer0", modLoc("item/" + name + "_pulling_1").toString()))
+                .end()
+                .override()
+                .predicate(mcLoc("pulling"), 1.0F).predicate(mcLoc("pull"), 0.9F)
+                .model(withExistingParent(name + "_pulling_2", mcLoc("item/bow"))
+                        .texture("layer0", modLoc("item/" + name + "_pulling_2").toString()))
+                .end();
+    }
+
+    private void crossbowItem(DeferredItem<?> deferredItem) {
+        String name = (deferredItem.getId().getPath()); // z.B. "sniper_crossbow"
+
+        ResourceLocation base = modLoc("item/" + name + "_standby");
+        ResourceLocation pulling0 = modLoc("item/" + name + "_pulling_0");
+        ResourceLocation pulling1 = modLoc("item/" + name + "_pulling_1");
+        ResourceLocation pulling2 = modLoc("item/" + name + "_pulling_2");
+        ResourceLocation arrow = modLoc("item/" + name + "_arrow");
+        ResourceLocation firework = modLoc("item/" + name + "_firework");
+
+        withExistingParent(name, mcLoc("item/crossbow"))
+                .texture("layer0", base.toString())
+                .override().predicate(mcLoc("pulling"), 1.0F).model(
+                        withExistingParent(name + "_pulling_0", mcLoc("item/crossbow"))
+                                .texture("layer0", pulling0.toString())
+                ).end()
+                .override().predicate(mcLoc("pulling"), 1.0F).predicate(mcLoc("pull"), 0.58F).model(
+                        withExistingParent(name + "_pulling_1", mcLoc("item/crossbow"))
+                                .texture("layer0", pulling1.toString())
+                ).end()
+                .override().predicate(mcLoc("pulling"), 1.0F).predicate(mcLoc("pull"), 1.0F).model(
+                        withExistingParent(name + "_pulling_2", mcLoc("item/crossbow"))
+                                .texture("layer0", pulling2.toString())
+                ).end()
+                .override().predicate(mcLoc("charged"), 1.0F).model(
+                        withExistingParent(name + "_arrow", mcLoc("item/crossbow"))
+                                .texture("layer0", arrow.toString())
+                ).end()
+                .override().predicate(mcLoc("charged"), 1.0F).predicate(mcLoc("firework"), 1.0F).model(
+                        withExistingParent(name + "_firework", mcLoc("item/crossbow"))
+                                .texture("layer0", firework.toString())
+                ).end();
+    }
+}

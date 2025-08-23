@@ -1,13 +1,20 @@
 package net.ganyusbathwater.oririmod.enchantment;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.enchantment.custom.SniperEnchantment;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.item.enchantment.effects.SetValue;
+import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModEnchantments {
@@ -33,6 +40,8 @@ public class ModEnchantments {
                 5,
                 //Self-explanatory
                 EquipmentSlotGroup.MAINHAND))
+
+
                 /*
                 ensures that the custom enchantment is incompatible with certain enchantments. In this case it would be incompatible with  Sharpness or Smite
                 .exclusiveWith(enchantments.getOrThrow(EnchantmentTags.DAMAGE_EXCLUSIVE))
@@ -43,6 +52,7 @@ public class ModEnchantments {
 
     private static void registerEnchantments(BootstrapContext<Enchantment> registry, ResourceKey<Enchantment> key,
                                  Enchantment.Builder builder) {
+
         registry.register(key, builder.build(key.location()));
     }
 }

@@ -25,9 +25,9 @@ public class ModBlocks {
 
     public static final DeferredBlock<Block> ELDERBUSH_BLOCK = registerBlock("elderbush_block",() -> new ElderBerryBush(BlockBehaviour.Properties.of().noOcclusion().isViewBlocking((s, g, p) -> false)));
 
-    public static final DeferredBlock<Block> MAGIC_BARRIER_BLOCK = registerBlock("magic_barrier_block",() -> new MagicBarrierBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.AMETHYST).isViewBlocking((s, g, p) -> false)));
+    public static final DeferredBlock<Block> MAGIC_BARRIER_BLOCK = registerBlock("magic_barrier_block",() -> new MagicBarrierBlock(BlockBehaviour.Properties.of().noLootTable().noOcclusion().sound(SoundType.AMETHYST).isViewBlocking((s, g, p) -> false)));
 
-    public static final DeferredBlock<Block> MAGIC_BARRIER_CORE_BLOCK = registerBlock("magic_barrier_core_block",() -> new MagicBarrierCoreBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.AMETHYST).isViewBlocking((s, g, p) -> false)));
+    public static final DeferredBlock<Block> MAGIC_BARRIER_CORE_BLOCK = registerBlock("magic_barrier_core_block",() -> new MagicBarrierCoreBlock(BlockBehaviour.Properties.of().noLootTable().noOcclusion().sound(SoundType.AMETHYST).isViewBlocking((s, g, p) -> false)));
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);

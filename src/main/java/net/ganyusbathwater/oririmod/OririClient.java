@@ -1,33 +1,21 @@
 package net.ganyusbathwater.oririmod;
 
 import com.mojang.datafixers.util.Either;
-import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
-import net.ganyusbathwater.oririmod.enchantment.ModEnchantments;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -38,7 +26,6 @@ import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
@@ -126,19 +113,6 @@ public class OririClient {
                 // Check: does the attacker attack his own caster?
                 if (event.getEntity().getUUID().equals(casterId)) {
                     event.setNewDamage(0); // Block damadge
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public void onArrowSpawn(EntityJoinLevelEvent event) {
-        if (event.getEntity() instanceof Arrow arrow) {
-            if (arrow.getOwner() instanceof LivingEntity shooter) {
-                ItemStack weapon = shooter.getMainHandItem();
-                if (weapon != null && EnchantmentHelper.getItemEnchantmentLevel((Holder<Enchantment>) ModEnchantments.SNIPER, weapon) > 0) {
-                    // Pfeil bekommt Schwerkraft = false
-                    arrow.setNoGravity(true);
                 }
             }
         }

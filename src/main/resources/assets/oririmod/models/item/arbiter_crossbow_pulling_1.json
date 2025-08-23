@@ -1,6 +1,0 @@
-{
-    "parent": "oririmod:item/arbiter_crossbow",
-    "textures": {
-        "layer0": "oririmod:item/arbiter_crossbow_pulling_1"
-    }
-}

@@ -1,6 +1,0 @@
-{
-  "parent": "oririmod:item/oraphim_bow",
-  "textures": {
-    "layer0": "oririmod:item/oraphim_bow_pulling_0"
-  }
-}
