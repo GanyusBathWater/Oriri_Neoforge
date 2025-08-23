@@ -1,12 +1,15 @@
 package net.ganyusbathwater.oririmod;
 
 import com.mojang.datafixers.util.Either;
+import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;

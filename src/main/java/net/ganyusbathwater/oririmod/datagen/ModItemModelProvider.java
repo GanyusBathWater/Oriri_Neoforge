@@ -76,7 +76,6 @@ public class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.NEBULA_PICKAXE);
         handheldItem(ModItems.ICE_SWORD);
         handheldItem(ModItems.MOLTEN_PICKAXE);
-        handheldItem(ModItems.MJOELNIR);
         handheldItem(ModItems.LAW_BREAKER);
         handheldItem(ModItems.STELLA_PERDITOR);
         handheldItem(ModItems.QILINS_WRATH);

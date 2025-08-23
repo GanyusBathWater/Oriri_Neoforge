@@ -123,7 +123,7 @@ public class ModItemGroups {
                     }).build());
                         public static final Supplier<CreativeModeTab> ORIRI_COLLECTIBLES_TAB = CREATIVE_MODE_TAB.register("creative.oriri_tab_misc",
                                 () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.THE_FOOL.get()))
-                                        .withTabsBefore(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "creative.oriri_tab"))
+                                        .withTabsBefore(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "oriri_tab"))
                                         .title(Component.translatable("creative.oriri_tab_misc"))
                                         .displayItems((itemDisplayParameters, output) -> {
 
