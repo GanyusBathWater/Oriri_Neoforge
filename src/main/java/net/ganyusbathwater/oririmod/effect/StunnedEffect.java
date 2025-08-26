@@ -25,6 +25,13 @@ public class StunnedEffect extends MobEffect {
         }
 
         for (MobEffectInstance instance : livingEntity.getActiveEffects()) {
+            if (livingEntity instanceof Mob mob) {
+                mob.setNoAi(true);
+            } else if (livingEntity instanceof Player player) {
+                player.getAbilities().setWalkingSpeed(-0.1f);
+                player.onUpdateAbilities();
+            }
+
             // instance.getEffect() returns a Holder<MobEffect>; holder.value() is the actual MobEffect
             if (instance.getEffect().value() == this) {
                 // if only <= 1 tick remains, perform cleanup
@@ -52,17 +59,10 @@ public class StunnedEffect extends MobEffect {
 
     @Override
     public void onEffectAdded(LivingEntity livingEntity, int amplifier) {
-        if (livingEntity instanceof Mob mob) {
-            mob.setNoAi(true);
-        } else if (livingEntity instanceof Player player) {
-            player.getAbilities().setWalkingSpeed(-0.1f);
-            player.onUpdateAbilities();
-        }
     }
 
     @Override
     public void onMobRemoved(LivingEntity livingEntity, int amplifier, Entity.RemovalReason reason) {
-        System.out.println("onMobRemoved");
         if (livingEntity instanceof Mob mob) {
             // AI turn back on
             mob.setNoAi(false);

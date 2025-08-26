@@ -56,6 +56,7 @@
   "item.minecraft.tipped_arrow.effect.broken_potion3": "Arrow of Broken Armor III",
 
   "enchantment.oririmod.sniper": "Sniper",
+  "enchantment.oririmod.sniper.desc": "Arrows will not spread or loose height. Only works with normal arrows",
 
   "item.oririmod.emerald_sword": "Emerald Sword",
   "item.oririmod.emerald_pickaxe": "Emerald Pickaxe",

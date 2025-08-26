@@ -47,7 +47,7 @@ public class ModArmorMaterials {
                 attribute.put(ArmorItem.Type.BODY, 4);
             }),20, 2f, 0.1f, () -> null);
 
-    public static final Holder<ArmorMaterial> GILDED_NETHERRITE_ARMOR_MATERIAL = registerArmorMaterial("gilded_netherrite_armor",
+    public static final Holder<ArmorMaterial> GILDED_NETHERRITE_ARMOR_MATERIAL = registerArmorMaterial("gilded_netherite_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
                 attribute.put(ArmorItem.Type.BOOTS, 2);
                 attribute.put(ArmorItem.Type.LEGGINGS, 4);

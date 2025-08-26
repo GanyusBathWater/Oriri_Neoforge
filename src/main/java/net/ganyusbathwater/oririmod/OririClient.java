@@ -8,6 +8,7 @@ import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.network.chat.Component;
@@ -119,5 +120,12 @@ public class OririClient {
                 }
             }
         }
+    }
+
+    private static void onEffectsCleared() {
+        Minecraft.getInstance().player.displayClientMessage(
+                net.minecraft.network.chat.Component.literal("Alle Effekte wurden entfernt! (/effect clear?)"),
+                true
+        );
     }
 }

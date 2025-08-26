@@ -30,7 +30,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        pillarBlockWithItem(ModBlocks.ELDERBUSH_BLOCK, 2);
+        pillarBlockWithItem(ModBlocks.ELDERBUSH_BLOCK, 3);
 
         blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
         blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);

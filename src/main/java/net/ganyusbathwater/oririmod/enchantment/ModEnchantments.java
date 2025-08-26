@@ -40,6 +40,11 @@ public class ModEnchantments {
                 5,
                 //Self-explanatory
                 EquipmentSlotGroup.MAINHAND))
+                        .withEffect(
+                        EnchantmentEffectComponents.PROJECTILE_SPREAD,
+                        new SetValue(LevelBasedValue.constant(0.0F)),
+                        MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.ARROW))
+                )
 
 
                 /*

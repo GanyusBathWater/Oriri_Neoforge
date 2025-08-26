@@ -75,4 +75,9 @@ public class MagicBarrierCoreBlock extends Block {
             }
         }
     }
+
+    @Override
+    public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side) {
+        return adjacentBlockState.is(this) || super.skipRendering(state, adjacentBlockState, side);
+    }
 }
