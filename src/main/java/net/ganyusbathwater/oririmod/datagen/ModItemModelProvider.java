@@ -30,7 +30,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.VOID_SOUL.get());
 
         //-------------Blocks------------
-        simpleBlockItem(ModBlocks.DARK_SOIL.get());
+        simpleBlockItem(ModBlocks.DARK_SOIL_BLOCK.get());
         simpleBlockItem(ModBlocks.ELDERBUSH_BLOCK.get());
         simpleBlockItem(ModBlocks.MAGIC_BARRIER_BLOCK.get());
         simpleBlockItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK.get());

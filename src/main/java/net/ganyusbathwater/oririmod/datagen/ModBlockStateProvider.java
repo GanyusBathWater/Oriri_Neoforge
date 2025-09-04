@@ -2,15 +2,21 @@ package net.ganyusbathwater.oririmod.datagen;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.registries.DeferredBlock;
 
 import javax.annotation.Nullable;
+import java.util.function.Function;
 
 public class ModBlockStateProvider extends BlockStateProvider {
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
@@ -35,8 +41,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
         blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
         blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);
 
-        grassBlockWithItem(ModBlocks.DARK_SOIL, 1);
+        grassBlockWithItem(ModBlocks.DARK_SOIL_BLOCK, 1);
 
+        blockWithItem(ModBlocks.MANA_CRYSTAL_BLOCK, 1);
+        clusterBlockWithItem(ModBlocks.MANA_CRYSTAL_CLUSTER, 2);
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock, int renderType) {
@@ -49,7 +57,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
             model.texture("particle", path);
             model.renderType(getRenderType(renderType));
         }
-
         simpleBlockWithItem(deferredBlock.get(), cubeAll(deferredBlock.get()));
     }
 
@@ -95,5 +102,60 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 deferredBlock.get(),
                 model
         );
+    }
+
+    private void clusterBlockWithItem(DeferredBlock<?> deferredBlock, int renderType) {
+        String name = deferredBlock.getId().getPath();
+        ResourceLocation texture = modLoc("block/" + name);
+
+        BlockModelBuilder model = models().cross(name, texture);
+
+        if (renderType > 1) {
+            model.texture("particle", texture);
+            model.renderType(getRenderType(renderType));
+        } else {
+            model.renderType("cutout");
+        }
+
+        // BlockStates for all FACING variants
+        getVariantBuilder(deferredBlock.get()).forAllStates(state -> {
+            Direction dir = state.getValue(BlockStateProperties.FACING);
+            int rotationX = 0;
+            int rotationY = 0;
+
+            switch (dir) {
+                case UP -> {
+                    rotationX = 0;      // stands on the ground (vertical)
+                    rotationY = 0;
+                }
+                case DOWN -> {
+                    rotationX = 180;    // hangs from the ceiling (vertical, inverted)
+                    rotationY = 0;
+                }
+                case NORTH -> {
+                    rotationX = 90;     // on the north wall
+                    rotationY = 0;
+                }
+                case SOUTH -> {
+                    rotationX = 90;     // on the south wall
+                    rotationY = 180;
+                }
+                case WEST -> {
+                    rotationX = 90;     // on the west wall
+                    rotationY = 270;
+                }
+                case EAST -> {
+                    rotationX = 90;     // on the east wall
+                    rotationY = 90;
+                }
+            }
+
+            return ConfiguredModel.builder()
+                    .modelFile(model)
+                    .rotationX(rotationX)
+                    .rotationY(rotationY)
+                    .build();
+        });
+        simpleBlockItem(deferredBlock.get(), model);
     }
 }

@@ -17,42 +17,71 @@ import net.minecraft.world.item.enchantment.effects.SetValue;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.List;
+
 public class ModEnchantments {
     public static final ResourceKey<Enchantment> SNIPER = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "sniper"));
+
+    public static final ResourceKey<Enchantment> INVINCIBLE = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "invincible"));
+
+    public static final ResourceKey<Enchantment> TEACHER = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "teacher"));
 
     public static void bootstrap(BootstrapContext<Enchantment> context) {
         var enchantments = context.lookup(Registries.ENCHANTMENT);
         var items = context.lookup(Registries.ITEM);
 
         registerEnchantments(context, SNIPER, Enchantment.enchantment(Enchantment.definition(
-                //supported Items
-                items.getOrThrow(ItemTags.CROSSBOW_ENCHANTABLE),
-                //primary item
-                items.getOrThrow(ItemTags.BOW_ENCHANTABLE),
-                //weighting (how often it occurs)
-                2,
-                //max Level
-                1,
-                //Level costs
-                Enchantment.dynamicCost(8,9),
-                Enchantment.dynamicCost(25, 8),
-                //Anvil costs
-                5,
-                //Self-explanatory
-                EquipmentSlotGroup.MAINHAND))
-                        .withEffect(
-                        EnchantmentEffectComponents.PROJECTILE_SPREAD,
-                        new SetValue(LevelBasedValue.constant(0.0F)),
-                        MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.ARROW))
-                )
-
-
-                /*
-                ensures that the custom enchantment is incompatible with certain enchantments. In this case it would be incompatible with  Sharpness or Smite
-                .exclusiveWith(enchantments.getOrThrow(EnchantmentTags.DAMAGE_EXCLUSIVE))
-                 */
+            //supported Items
+            items.getOrThrow(ItemTags.CROSSBOW_ENCHANTABLE),
+            //primary item
+            items.getOrThrow(ItemTags.BOW_ENCHANTABLE),
+            //weighting (how often it occurs)
+            2,
+            //max Level
+            1,
+            //Level costs
+            Enchantment.dynamicCost(8,9),
+            Enchantment.dynamicCost(25, 8),
+            //Anvil costs
+            5,
+            //Self-explanatory
+            EquipmentSlotGroup.MAINHAND))
+                    .withEffect(
+                            EnchantmentEffectComponents.PROJECTILE_SPREAD,
+                            new SetValue(LevelBasedValue.constant(0.0F))
+                    )
+            /*
+            ensures that the custom enchantment is incompatible with certain enchantments. In this case it would be incompatible with  Sharpness or Smite
+            .exclusiveWith(enchantments.getOrThrow(EnchantmentTags.DAMAGE_EXCLUSIVE))
+             */
         );
 
+        registerEnchantments(context, INVINCIBLE, Enchantment.enchantment(Enchantment.definition(
+            items.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE),
+            1,
+            1,
+            Enchantment.dynamicCost(15,20),
+            Enchantment.dynamicCost(40, 15),
+            20,
+            EquipmentSlotGroup.MAINHAND,
+            EquipmentSlotGroup.OFFHAND,
+            EquipmentSlotGroup.HEAD,
+            EquipmentSlotGroup.CHEST,
+            EquipmentSlotGroup.LEGS,
+            EquipmentSlotGroup.FEET
+            ))
+        );
+
+        registerEnchantments(context, TEACHER, Enchantment.enchantment(Enchantment.definition(
+            items.getOrThrow(ItemTags.HEAD_ARMOR_ENCHANTABLE),
+            4,
+            3,
+            Enchantment.dynamicCost(8,5),
+            Enchantment.dynamicCost(9, 8),
+            8,
+            EquipmentSlotGroup.HEAD
+            ))
+        );
     }
 
     private static void registerEnchantments(BootstrapContext<Enchantment> registry, ResourceKey<Enchantment> key,

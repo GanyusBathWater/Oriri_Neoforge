@@ -28,8 +28,10 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        add(ModBlocks.DARK_SOIL.get(), block -> createSilkTouchOnlyTable(ModBlocks.DARK_SOIL.get()));
+        add(ModBlocks.DARK_SOIL_BLOCK.get(), block -> createSilkTouchOnlyTable(ModBlocks.DARK_SOIL_BLOCK.get()));
         add(ModBlocks.ELDERBUSH_BLOCK.get(), item -> createSingleItemTable(ModItems.ELDERBERRY.get()));
+        add(ModBlocks.MANA_CRYSTAL_BLOCK.get(), block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_BLOCK.get()));
+        add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
     }
 
     protected LootTable.Builder createMultipleOreDrops(Block pBlock, Item item, float minDrops, float maxDrops) {

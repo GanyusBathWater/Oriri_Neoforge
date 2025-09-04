@@ -36,7 +36,9 @@ public class ModItemGroups {
                         output.accept(ModItems.VOID_SOUL);
 
                         //-------------Blocks------------
-                        output.accept(ModBlocks.DARK_SOIL);
+                        output.accept(ModBlocks.MANA_CRYSTAL_BLOCK);
+                        output.accept(ModBlocks.MANA_CRYSTAL_CLUSTER);
+                        output.accept(ModBlocks.DARK_SOIL_BLOCK);
                         output.accept(ModBlocks.ELDERBUSH_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
