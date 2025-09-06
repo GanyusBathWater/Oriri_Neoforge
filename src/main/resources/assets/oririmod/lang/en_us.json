@@ -56,7 +56,13 @@
   "item.minecraft.tipped_arrow.effect.broken_potion3": "Arrow of Broken Armor III",
 
   "enchantment.oririmod.sniper": "Sniper",
-  "enchantment.oririmod.sniper.desc": "Arrows will not spread or loose height. Only works with normal arrows",
+  "tooltip.oririmod.sniper": "Arrows will not spread or loose height. Only works with normal arrows",
+
+  "enchantment.oririmod.invincible": "Invincible",
+  "tooltip.oririmod.invincible": "The Item will no longer loose durability",
+
+  "enchantment.oririmod.teacher": "Teacher",
+  "tooltip.oririmod.teacher": "Increases the XP gained. Only works on Helmets",
 
   "item.oririmod.emerald_sword": "Emerald Sword",
   "item.oririmod.emerald_pickaxe": "Emerald Pickaxe",

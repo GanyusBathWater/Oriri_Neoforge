@@ -9,10 +9,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
+import net.minecraft.world.item.enchantment.effects.MultiplyValue;
 import net.minecraft.world.item.enchantment.effects.SetValue;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -56,32 +59,61 @@ public class ModEnchantments {
              */
         );
 
-        registerEnchantments(context, INVINCIBLE, Enchantment.enchantment(Enchantment.definition(
-            items.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE),
-            1,
-            1,
-            Enchantment.dynamicCost(15,20),
-            Enchantment.dynamicCost(40, 15),
-            20,
-            EquipmentSlotGroup.MAINHAND,
-            EquipmentSlotGroup.OFFHAND,
-            EquipmentSlotGroup.HEAD,
-            EquipmentSlotGroup.CHEST,
-            EquipmentSlotGroup.LEGS,
-            EquipmentSlotGroup.FEET
-            ))
+        Enchantment.EnchantmentDefinition invincibleDef = Enchantment.definition(
+                items.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE), // was verzauberbar ist
+                1, // minLevel
+                1, // maxLevel
+                Enchantment.dynamicCost(15, 20), // min cost
+                Enchantment.dynamicCost(40, 15), // max cost
+                20, // weight
+                EquipmentSlotGroup.MAINHAND,
+                EquipmentSlotGroup.OFFHAND,
+                EquipmentSlotGroup.HEAD,
+                EquipmentSlotGroup.CHEST,
+                EquipmentSlotGroup.LEGS,
+                EquipmentSlotGroup.FEET
         );
 
-        registerEnchantments(context, TEACHER, Enchantment.enchantment(Enchantment.definition(
-            items.getOrThrow(ItemTags.HEAD_ARMOR_ENCHANTABLE),
-            4,
-            3,
-            Enchantment.dynamicCost(8,5),
-            Enchantment.dynamicCost(9, 8),
-            8,
-            EquipmentSlotGroup.HEAD
-            ))
+        MultiplyValue noDamage = new MultiplyValue(LevelBasedValue.constant(0f));
+
+        // Builder erstellen, Effekt anhängen und registrieren
+        var invincibleBuilder = Enchantment.enchantment(invincibleDef)
+                .withEffect(EnchantmentEffectComponents.ITEM_DAMAGE, noDamage);
+
+        context.register(INVINCIBLE, invincibleBuilder.build(INVINCIBLE.location()));
+
+
+        Enchantment.EnchantmentDefinition teacherDef = Enchantment.definition(
+                items.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE), // oder ein anderes Tag / ItemSet wenn nötig
+                1, // min level
+                3, // max level = 3
+                Enchantment.dynamicCost(10, 5), // min cost (anpassen)
+                Enchantment.dynamicCost(40, 10), // max cost (anpassen)
+                10, // weight/rarity (anpassen)
+                EquipmentSlotGroup.MAINHAND, // auf welchen Slots erscheinen soll
+                EquipmentSlotGroup.OFFHAND,
+                EquipmentSlotGroup.HEAD,
+                EquipmentSlotGroup.CHEST,
+                EquipmentSlotGroup.LEGS,
+                EquipmentSlotGroup.FEET
         );
+
+        // LevelMapping: Level 1 -> 1.5, Level 2 -> 2.0, Level 3 -> 3.0
+        LevelBasedValue lookupFactor = LevelBasedValue.lookup(
+                List.of(2F, 3F, 4F),
+                LevelBasedValue.constant(4F) // fallback falls Level > 3; optional
+        );
+
+        // Multiply effect mit diesem factor
+        MultiplyValue xpMultiplierEffect = new MultiplyValue(lookupFactor);
+
+        // Builder erzeugen und the effects hinzufügen:
+        var techerBuilder = Enchantment.enchantment(teacherDef)
+                .withEffect(EnchantmentEffectComponents.MOB_EXPERIENCE, xpMultiplierEffect)
+                .withEffect(EnchantmentEffectComponents.BLOCK_EXPERIENCE, xpMultiplierEffect);
+
+        // registrieren (wichtig: build(location) verwenden)
+        context.register(TEACHER, techerBuilder.build(TEACHER.location()));
     }
 
     private static void registerEnchantments(BootstrapContext<Enchantment> registry, ResourceKey<Enchantment> key,
