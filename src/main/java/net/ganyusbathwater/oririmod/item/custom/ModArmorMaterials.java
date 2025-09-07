@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.EnumMap;
@@ -27,7 +28,7 @@ public class ModArmorMaterials {
                 attribute.put(ArmorItem.Type.CHESTPLATE, 6);
                 attribute.put(ArmorItem.Type.HELMET, 2);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }),20, 2f, 0.1f, () -> null);
+            }),20, 2f, 0.1f, () -> Items.AMETHYST_SHARD);
 
     public static final Holder<ArmorMaterial> ANCIENT_ARMOR_MATERIAL = registerArmorMaterial("ancient_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
@@ -36,7 +37,7 @@ public class ModArmorMaterials {
                 attribute.put(ArmorItem.Type.CHESTPLATE, 6);
                 attribute.put(ArmorItem.Type.HELMET, 2);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }),20, 2f, 0.1f, () -> null);
+            }),20, 2f, 0.1f, () -> Items.ECHO_SHARD);
 
     public static final Holder<ArmorMaterial> BLUE_ICE_ARMOR_MATERIAL = registerArmorMaterial("blue_ice_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
@@ -45,7 +46,7 @@ public class ModArmorMaterials {
                 attribute.put(ArmorItem.Type.CHESTPLATE, 6);
                 attribute.put(ArmorItem.Type.HELMET, 2);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }),20, 2f, 0.1f, () -> null);
+            }),20, 2f, 0.1f, () -> Items.BLUE_ICE);
 
     public static final Holder<ArmorMaterial> GILDED_NETHERRITE_ARMOR_MATERIAL = registerArmorMaterial("gilded_netherite_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
@@ -54,7 +55,7 @@ public class ModArmorMaterials {
                 attribute.put(ArmorItem.Type.CHESTPLATE, 6);
                 attribute.put(ArmorItem.Type.HELMET, 2);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }),20, 2f, 0.1f, () -> null);
+            }),20, 2f, 0.1f, () -> Items.GILDED_BLACKSTONE);
 
     public static final Holder<ArmorMaterial> MOLTEN_ARMOR_MATERIAL = registerArmorMaterial("molten_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
@@ -63,7 +64,7 @@ public class ModArmorMaterials {
                 attribute.put(ArmorItem.Type.CHESTPLATE, 6);
                 attribute.put(ArmorItem.Type.HELMET, 2);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }),20, 2f, 0.1f, () -> null);
+            }),20, 2f, 0.1f, () -> Items.IRON_BARS);
 
     public static final Holder<ArmorMaterial> PRISMARINE_ARMOR_MATERIAL = registerArmorMaterial("prismarine_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
@@ -72,7 +73,7 @@ public class ModArmorMaterials {
                 attribute.put(ArmorItem.Type.CHESTPLATE, 6);
                 attribute.put(ArmorItem.Type.HELMET, 2);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }),20, 2f, 0.1f, () -> null);
+            }),20, 2f, 0.1f, () -> Items.PRISMARINE_SHARD);
 
     private static Holder<ArmorMaterial> registerArmorMaterial(String name, EnumMap<ArmorItem.Type, Integer> typeProtection, int enchantability, float toughness, float knockbackResistance, Supplier<Item> ingredientItem) {
         ResourceLocation location = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, name);
