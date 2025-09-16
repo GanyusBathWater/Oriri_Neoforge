@@ -80,7 +80,7 @@ description='''${mod_description}'''
 [[dependencies.oririmod]]
 modId="curios"
 type="required"        # zwingend vorhanden
-versionRange="[9.5.0)"
+versionRange="9.5.1"
 ordering="NONE"
 side="BOTH"
 

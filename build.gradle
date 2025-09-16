@@ -18,12 +18,15 @@ version = mod_version
 group = mod_group_id
 
 repositories {
+    //local repos
+    flatDir { dirs 'libs' }
+
+    //official repos
     mavenLocal()
-
-    maven { url = uri("https://repo.modrinth.com/maven/") }
     mavenCentral()
-
-    maven { url = uri("https://maven.theillusivec4.top/") }
+    maven { url = uri("https://cursemaven.com") }
+    maven { url = uri("https://maven.blamejared.com") }
+    maven { url = uri("https://repo.modrinth.com/maven/") }
 }
 
 base {
@@ -121,13 +124,10 @@ configurations {
 dependencies {
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    compileOnly "mezz.jei:jei-${'1.21.1'}-common-api:${'19.21.1.308'}"
-    compileOnly "mezz.jei:jei-${'1.21.1'}-neoforge-api:${'19.21.1.308'}"
-    // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
-    localRuntime "mezz.jei:jei-${'1.21.1'}-neoforge:${'19.21.1.308'}"
-
-    compileOnly "top.theillusivec4.curios:curios-neoforge:${'9.5.0'}:api"
-    localRuntime "top.theillusivec4.curios:curios-neoforge:${'9.5.0'}"
+    compileOnly "mezz.jei:jei-1.21.1-common-api:19.21.1.308"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.21.1.308"
+    compileOnly files('libs/curios-neoforge-9.5.1.jar')
+    runtimeOnly files('libs/curios-neoforge-9.5.1.jar')
 
 
 

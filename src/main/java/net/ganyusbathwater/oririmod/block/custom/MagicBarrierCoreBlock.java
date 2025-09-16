@@ -48,10 +48,6 @@ public class MagicBarrierCoreBlock extends Block {
         return ItemInteractionResult.sidedSuccess(false);
     }
 
-    /**
-     * BFS over 6 directions, removes all directly connected MagicBarrierBlocks.
-     * Start is the formerly occupied core block space.
-     */
     private static void breakConnectedBarriers(Level level, BlockPos start) {
         Deque<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
