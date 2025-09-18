@@ -7,10 +7,7 @@ import net.ganyusbathwater.oririmod.block.custom.MagicBarrierCoreBlock;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.AmethystBlock;
-import net.minecraft.world.level.block.AmethystClusterBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -31,9 +28,9 @@ public class ModBlocks {
 
     public static final DeferredBlock<Block> MAGIC_BARRIER_CORE_BLOCK = registerBlock("magic_barrier_core_block",() -> new MagicBarrierCoreBlock(BlockBehaviour.Properties.of().noLootTable().noOcclusion().sound(SoundType.AMETHYST).isViewBlocking((s, g, p) -> false)));
 
-    public static final DeferredBlock<Block> MANA_CRYSTAL_CLUSTER = registerBlock("mana_crystal_cluster", () -> new AmethystClusterBlock(1, 1, BlockBehaviour.Properties.of()));
+    public static final DeferredBlock<Block> MANA_CRYSTAL_CLUSTER = registerBlock("mana_crystal_cluster", () -> new AmethystClusterBlock(7, 3, BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER)));
 
-    public static final DeferredBlock<Block> MANA_CRYSTAL_BLOCK = registerBlock("mana_crystal_block", () -> new AmethystBlock(BlockBehaviour.Properties.of()));
+    public static final DeferredBlock<Block> MANA_CRYSTAL_BLOCK = registerBlock("mana_crystal_block", () -> new AmethystBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)));
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);

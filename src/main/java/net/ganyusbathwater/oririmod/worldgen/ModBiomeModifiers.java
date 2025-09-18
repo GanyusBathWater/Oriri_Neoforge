@@ -25,7 +25,7 @@ public class ModBiomeModifiers {
         context.register(ADD_MANA_GEODE, new BiomeModifiers.AddFeaturesBiomeModifier(
                 biomes.getOrThrow(BiomeTags.IS_OVERWORLD),
                 HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.OVERWORLD_MANA_GEODE_PLACED_KEY)),
-                GenerationStep.Decoration.UNDERGROUND_ORES));
+                GenerationStep.Decoration.LOCAL_MODIFICATIONS));
     }
 
     private static ResourceKey<BiomeModifier> registerKey(String name) {

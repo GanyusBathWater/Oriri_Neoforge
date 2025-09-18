@@ -26,8 +26,7 @@ public class ModPlacedFeatures {
 
         Holder.Reference<ConfiguredFeature<?, ?>> configured = context.lookup(Registries.CONFIGURED_FEATURE).getOrThrow(ModConfiguredFeatures.OVERWORLD_MANA_GEODE_KEY);
         List modifiers = List.of(
-
-                RarityFilter.onAverageOnceEvery(24),                               // 1 in 24 chunks (like a normal geode)
+                RarityFilter.onAverageOnceEvery(48),                               // 1 in 24 chunks (like a normal geode)
                 InSquarePlacement.spread(),                                               // "in_square" (scatters the attempts within the chunk area)
                 HeightRangePlacement.uniform(aboveBottom(6), absolute(30))    // min and max heights where the geode will generate
         );

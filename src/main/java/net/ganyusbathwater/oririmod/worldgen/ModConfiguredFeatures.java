@@ -37,7 +37,7 @@ public class ModConfiguredFeatures {
 
                 BlockStateProvider.simple(Blocks.AIR.defaultBlockState()),
                 BlockStateProvider.simple(ModBlocks.MANA_CRYSTAL_BLOCK.get().defaultBlockState()),
-                BlockStateProvider.simple(Blocks.AIR.defaultBlockState()),
+                BlockStateProvider.simple(ModBlocks.MANA_CRYSTAL_BLOCK.get().defaultBlockState()),
                 BlockStateProvider.simple(Blocks.CALCITE.defaultBlockState()),
                 BlockStateProvider.simple(Blocks.SMOOTH_BASALT.defaultBlockState()),
 
@@ -58,7 +58,7 @@ public class ModConfiguredFeatures {
 
         GeodeCrackSettings crack = new GeodeCrackSettings(
                 0.95D, // Crack Chance
-                2.0D,                    // Crack Size
+                1.75D,                    // Crack Size
                 2                        // Crack Offset
         );
 
@@ -70,16 +70,16 @@ public class ModConfiguredFeatures {
                 layerConfig,
                 thickness,
                 crack,
-                0.5D,
+                0.1D,
                 0.083D,
                 false,
                 outerWallDistance,
                 distributionPoints,
                 pointOffset,
-                16, // maxDistributionPoints
-                1,              // minPointOffset
-                0.025D,         // noiseMultiplier
-                16              // maxGenOffset
+                -16, // minGenOffset
+                16,              // maxGenOffset
+                0.05D,          // noiseMultiplier
+                1              // invalidBlocksThreshold
         );
 
         register(context, OVERWORLD_MANA_GEODE_KEY, Feature.GEODE, geodeConfig);

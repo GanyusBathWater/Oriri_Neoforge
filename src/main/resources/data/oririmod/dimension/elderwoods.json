@@ -1,17 +1,11 @@
 {
   "type": "oririmod:elderwoods",
   "generator": {
-    "type": "minecraft:flat",
-    "settings": {
-      "biome": "minecraft:plains",
-      "features": false,
-      "lakes": true,
-      "layers": [
-        { "block": "minecraft:bedrock", "height": 1 },
-        { "block": "minecraft:dirt", "height": 2 },
-        { "block": "minecraft:grass_block", "height": 1 }
-      ],
-      "structure_overrides": []
+    "type": "minecraft:noise",
+    "settings": "oririmod:elderwoods",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "minecraft:dark_forest"
     }
   }
 }
