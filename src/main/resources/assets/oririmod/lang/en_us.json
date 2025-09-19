@@ -2,7 +2,7 @@
   "item.oririmod.fire_crystal": "Fire Crystal",
   "item.oririmod.moon_stone": "Moon Stone",
   "item.oririmod.mana_manifestation": "Mana Manifestation",
-  "item.oririmod.iron_tick": "Iron Stick",
+  "item.oririmod.iron_stick": "Iron Stick",
   "item.oririmod.bound_of_the_celestial_sisters": "Bound of the Celestial Sisters",
   "item.oririmod.crit_glove": "Crit Glove",
   "item.oririmod.damned_soul": "Damned Soul",
@@ -142,6 +142,8 @@
   "block.oririmod.elderbush_block": "Elderbush",
   "block.oririmod.magic_barrier_block": "Magic Barrier",
   "block.oririmod.magic_barrier_core_block": "Magic Barrier Core",
+  "block.oririmod.mana_crystal_block": "Mana Crystal Block",
+  "block.oririmod.mana_crystal_cluster": "Mana Crystal Cluster",
 
   "item.oririmod.magic_book_1": "Book of the Amateur",
   "item.oririmod.magic_book_2": "Book of the Apprentice",
