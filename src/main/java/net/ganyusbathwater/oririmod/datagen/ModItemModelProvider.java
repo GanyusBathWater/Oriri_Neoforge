@@ -152,7 +152,7 @@ public class ModItemModelProvider extends ItemModelProvider {
     }
 
     private void bowItem(DeferredItem<?> deferredItem) {
-        String name = (deferredItem.getId().getPath()); // z.B. "sniper_bow"
+        String name = (deferredItem.getId().getPath());
 
         withExistingParent(name, mcLoc("item/bow"))
                 .texture("layer0", modLoc("item/" + name).toString())
@@ -174,7 +174,7 @@ public class ModItemModelProvider extends ItemModelProvider {
     }
 
     private void crossbowItem(DeferredItem<?> deferredItem) {
-        String name = (deferredItem.getId().getPath()); // z.B. "sniper_crossbow"
+        String name = (deferredItem.getId().getPath());
 
         ResourceLocation base = modLoc("item/" + name + "_standby");
         ResourceLocation pulling0 = modLoc("item/" + name + "_pulling_0");
