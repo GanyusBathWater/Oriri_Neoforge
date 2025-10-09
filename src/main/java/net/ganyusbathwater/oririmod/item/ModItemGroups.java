@@ -42,6 +42,12 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDERBUSH_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
+                        output.accept(ModBlocks.ELDER_LOG_BLOCK);
+                        output.accept(ModBlocks.CRACKED_ELDER_LOG_BLOCK);
+                        output.accept(ModBlocks.STRIPPED_ELDER_LOG_BLOCK);
+                        output.accept(ModBlocks.ELDER_PLANKS);
+                        output.accept(ModBlocks.ELDER_LEAVES);
+                        output.accept(ModBlocks.ELDER_SAPLING);
 
                         //-------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);

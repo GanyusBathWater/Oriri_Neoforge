@@ -2,11 +2,16 @@ package net.ganyusbathwater.oririmod.worldgen;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.Structures;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Blocks;
@@ -18,7 +23,15 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FancyFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.ForkingTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 import java.util.List;
 
@@ -27,10 +40,23 @@ public class ModConfiguredFeatures {
 
     public static final ResourceKey<ConfiguredFeature<?, ?>> OVERWORLD_MANA_GEODE_KEY = registerKey("mana_geode");
 
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_KEY = registerKey("elder_tree");
+
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_SMALL_NORMAL_CONFIGURED_KEY = registerKey("elder_tree_small_normal_configured");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_SMALL_BLOOM_CONFIGURED_KEY = registerKey("elder_tree_small_bloom_configured");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_SMALL_SPECIAL_CONFIGURED_KEY = registerKey("elder_tree_small_special_configured");
+
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_MEDIUM_NORMAL_CONFIGURED_KEY = registerKey("elder_tree_medium_normal_configured");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_MEDIUM_BLOOM_CONFIGURED_KEY = registerKey("elder_tree_medium_bloom_configured");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_MEDIUM_SPECIAL_CONFIGURED_KEY = registerKey("elder_tree_medium_special_configured");
+
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_LARGE_NORMAL_CONFIGURED_KEY = registerKey("elder_tree_large_normal_configured");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_LARGE_BLOOM_CONFIGURED_KEY = registerKey("elder_tree_large_bloom_configured");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_LARGE_SPECIAL_CONFIGURED_KEY = registerKey("elder_tree_large_special_configured");
 
     //here will be the Features be defined and later turned into json files
     public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
-    //there need to exist rules for the feature for example which Blocks it may override to place itself
+    //there need to exist rules for the feature, for example which Blocks it may override to place itself
 
         //Layer (filling, inner, alternateInner, middle, outer, inner_placements, cannotReplaceTag, invalidBlocksTag)
         GeodeBlockSettings layerConfig = new GeodeBlockSettings(
@@ -81,6 +107,7 @@ public class ModConfiguredFeatures {
                 0.05D,          // noiseMultiplier
                 1              // invalidBlocksThreshold
         );
+        
 
         register(context, OVERWORLD_MANA_GEODE_KEY, Feature.GEODE, geodeConfig);
     }

@@ -32,6 +32,16 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.ELDERBUSH_BLOCK.get(), item -> createSingleItemTable(ModItems.ELDERBERRY.get()));
         add(ModBlocks.MANA_CRYSTAL_BLOCK.get(), block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_BLOCK.get()));
         add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
+
+        this.dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
+        this.dropSelf(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
+        this.dropSelf(ModBlocks.ELDER_PLANKS.get());
+        this.dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
+        this.dropSelf(ModBlocks.ELDER_SAPLING.get());
+
+        this.add(ModBlocks.ELDER_LEAVES.get(), block ->
+                createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+
     }
 
     protected LootTable.Builder createMultipleOreDrops(Block pBlock, Item item, float minDrops, float maxDrops) {

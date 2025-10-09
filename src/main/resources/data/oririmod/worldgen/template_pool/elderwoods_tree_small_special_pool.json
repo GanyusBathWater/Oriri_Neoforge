@@ -1,0 +1,15 @@
+{
+  "name": "oririmod:elderwoods_tree_small_special_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "oririmod:elderwoods_tree_small_special",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

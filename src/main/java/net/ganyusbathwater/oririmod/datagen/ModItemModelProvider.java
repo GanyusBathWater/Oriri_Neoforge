@@ -5,9 +5,11 @@ import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 public class ModItemModelProvider extends ItemModelProvider {
@@ -34,6 +36,13 @@ public class ModItemModelProvider extends ItemModelProvider {
         simpleBlockItem(ModBlocks.ELDERBUSH_BLOCK.get());
         simpleBlockItem(ModBlocks.MAGIC_BARRIER_BLOCK.get());
         simpleBlockItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK.get());
+        simpleBlockItem(ModBlocks.ELDER_LOG_BLOCK.get());
+        simpleBlockItem(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
+        simpleBlockItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
+        simpleBlockItem(ModBlocks.ELDER_PLANKS.get());
+        simpleBlockItem(ModBlocks.ELDER_LEAVES.get());
+        saplingItem(ModBlocks.ELDER_SAPLING);
+
 
         //-------------Foods-------------
         basicItem(ModItems.ELDERBERRY.get());
@@ -196,5 +205,11 @@ public class ModItemModelProvider extends ItemModelProvider {
                         withExistingParent(name + "_firework", mcLoc("item/crossbow"))
                                 .texture("layer0", firework.toString())
                 ).end();
+    }
+
+    private ItemModelBuilder saplingItem(DeferredBlock<Block> item) {
+        return withExistingParent(item.getId().getPath(),
+                ResourceLocation.parse("item/generated")).texture("layer0",
+                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,"block/" + item.getId().getPath()));
     }
 }

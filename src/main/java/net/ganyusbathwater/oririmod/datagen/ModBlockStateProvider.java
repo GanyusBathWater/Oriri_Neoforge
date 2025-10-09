@@ -3,9 +3,11 @@ package net.ganyusbathwater.oririmod.datagen;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
@@ -37,6 +39,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         pillarBlockWithItem(ModBlocks.ELDERBUSH_BLOCK, 3);
+        blockWithItem(ModBlocks.ELDER_LEAVES, 3);
 
         blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
         blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);
@@ -45,6 +48,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         blockWithItem(ModBlocks.MANA_CRYSTAL_BLOCK, 1);
         clusterBlockWithItem(ModBlocks.MANA_CRYSTAL_CLUSTER, 2);
+
+        pillarBlockWithItem(ModBlocks.ELDER_LOG_BLOCK, 1);
+        pillarBlockWithItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK, 1);
+        pillarBlockWithItem(ModBlocks.STRIPPED_ELDER_LOG_BLOCK, 1);
+        blockWithItem(ModBlocks.ELDER_PLANKS, 1);
+        
+        saplingBlock(ModBlocks.ELDER_SAPLING);
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock, int renderType) {
@@ -58,14 +68,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
             model.renderType(getRenderType(renderType));
         }
         simpleBlockWithItem(deferredBlock.get(), cubeAll(deferredBlock.get()));
-    }
-
-    private void blockItem(DeferredBlock<?> deferredBlock) {
-        simpleBlockItem(deferredBlock.get(), new ModelFile.UncheckedModelFile("oririmod:block/" + deferredBlock.getId().getPath()));
-    }
-
-    private void blockItem(DeferredBlock<?> deferredBlock, String appendix) {
-        simpleBlockItem(deferredBlock.get(), new ModelFile.UncheckedModelFile("oririmod:block/" + deferredBlock.getId().getPath() + appendix));
     }
 
     private void grassBlockWithItem(DeferredBlock<?> deferredBlock, int renderType){
@@ -157,5 +159,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
                     .build();
         });
         simpleBlockItem(deferredBlock.get(), model);
+    }
+
+    private void saplingBlock(DeferredBlock<Block> blockRegistryObject) {
+        simpleBlock(blockRegistryObject.get(),
+                models().cross(BuiltInRegistries.BLOCK.getKey(blockRegistryObject.get()).getPath(), blockTexture(blockRegistryObject.get())).renderType("cutout"));
     }
 }

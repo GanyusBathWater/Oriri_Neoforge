@@ -92,6 +92,10 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .pattern("A")
                     .define('A', Items.IRON_BARS)
                     .unlockedBy("has_iron_bars", has(Items.IRON_BARS)).save(recipeOutput);
+
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModBlocks.ELDER_PLANKS.get(), 4)
+                    .requires(ModBlocks.ELDER_LOG_BLOCK)
+                    .unlockedBy("has_elder_log_block", has(ModBlocks.ELDER_LOG_BLOCK)).save(recipeOutput);
         /*
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.BISMUTH.get(), 9)
                 .requires(ModBlocks.BISMUTH_BLOCK)

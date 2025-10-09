@@ -1,23 +1,15 @@
 package net.ganyusbathwater.oririmod;
 
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.logging.LogUtils;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.enchantment.ModEnchantmentEffects;
-import net.ganyusbathwater.oririmod.enchantment.ModEnchantments;
 import net.ganyusbathwater.oririmod.item.ModItemGroups;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -26,7 +18,6 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
@@ -49,12 +40,9 @@ public class OririMod {
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
-
         ModItemGroups.registerItemGroups(modEventBus);
-
         ModItems.registerModItems(modEventBus);
         ModBlocks.register(modEventBus);
-
         ModEffects.registerEffects(modEventBus);
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);

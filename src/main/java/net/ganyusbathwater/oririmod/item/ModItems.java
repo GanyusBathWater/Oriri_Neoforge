@@ -118,6 +118,8 @@ public class ModItems {
 
     public static final DeferredItem<HoeItem> EMERALD_HOE = ITEMS.register("emerald_hoe", () -> new HoeItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
 
+    public static final DeferredItem<MagicBoltItem> BOOK_OF_THE_WISE = ITEMS.register("book_of_the_wise", () -> new MagicBoltItem(new Item.Properties(), ModRarity.UNCOMMON));
+
     //------------------------------------------------------Armor---------------------------------------------------------
 
     public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet", () -> new ModArmorItem(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)), ModRarity.LEGENDARY));
