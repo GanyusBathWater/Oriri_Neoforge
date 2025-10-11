@@ -32,14 +32,23 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.ELDERBUSH_BLOCK.get(), item -> createSingleItemTable(ModItems.ELDERBERRY.get()));
         add(ModBlocks.MANA_CRYSTAL_BLOCK.get(), block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_BLOCK.get()));
         add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
+        add(ModBlocks.ELDER_LEAVES.get(), block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES.get()));
+        add(ModBlocks.ELDER_LEAVES_FLOWERING.get(), block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES_FLOWERING.get()));
 
         this.dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
         this.dropSelf(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
         this.dropSelf(ModBlocks.ELDER_PLANKS.get());
         this.dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
         this.dropSelf(ModBlocks.ELDER_SAPLING.get());
+        this.dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
+        this.dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
+        this.dropSelf(ModBlocks.ELDER_SPORE_BLOSSOM.get());
+
 
         this.add(ModBlocks.ELDER_LEAVES.get(), block ->
+                createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+
+        this.add(ModBlocks.ELDER_LEAVES_FLOWERING.get(), block ->
                 createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
 
     }

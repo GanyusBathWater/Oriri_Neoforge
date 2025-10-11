@@ -40,6 +40,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         pillarBlockWithItem(ModBlocks.ELDERBUSH_BLOCK, 3);
         blockWithItem(ModBlocks.ELDER_LEAVES, 3);
+        blockWithItem(ModBlocks.ELDER_LEAVES_FLOWERING, 3);
 
         blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
         blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);
@@ -53,6 +54,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         pillarBlockWithItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK, 1);
         pillarBlockWithItem(ModBlocks.STRIPPED_ELDER_LOG_BLOCK, 1);
         blockWithItem(ModBlocks.ELDER_PLANKS, 1);
+        blockWithItem(ModBlocks.ELDER_STEM_BLOCK, 1);
+        blockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK, 1);
         
         saplingBlock(ModBlocks.ELDER_SAPLING);
     }
@@ -165,4 +168,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlock(blockRegistryObject.get(),
                 models().cross(BuiltInRegistries.BLOCK.getKey(blockRegistryObject.get()).getPath(), blockTexture(blockRegistryObject.get())).renderType("cutout"));
     }
+
+
 }

@@ -2,7 +2,7 @@
   "type": "minecraft:jigsaw",
   "biomes": "oririmod:elderwoods",
   "step": "vegetal_decoration",
-  "terrain_adaptation": "beard_thin",
+  "terrain_adaptation": "none",
   "spawn_overrides": {},
   "start_pool": "oririmod:elderwoods_tree_medium_special_pool",
   "size": 1,

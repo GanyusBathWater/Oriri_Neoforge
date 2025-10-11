@@ -1,10 +1,7 @@
 package net.ganyusbathwater.oririmod.block;
 
 import net.ganyusbathwater.oririmod.OririMod;
-import net.ganyusbathwater.oririmod.block.custom.ElderBerryBush;
-import net.ganyusbathwater.oririmod.block.custom.MagicBarrierBlock;
-import net.ganyusbathwater.oririmod.block.custom.MagicBarrierCoreBlock;
-import net.ganyusbathwater.oririmod.block.custom.ModFlammableRotatedPillarBlock;
+import net.ganyusbathwater.oririmod.block.custom.*;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.worldgen.tree.ModTreeGrowers;
 import net.minecraft.world.item.BlockItem;
@@ -41,6 +38,14 @@ public class ModBlocks {
     public static final DeferredBlock<Block> ELDER_PLANKS = registerBlock("elder_planks", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)));
 
     public static final DeferredBlock<Block> STRIPPED_ELDER_LOG_BLOCK = registerBlock("stripped_elder_log_block", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG)));
+
+    public static final DeferredBlock<Block> ELDER_STEM_BLOCK = registerBlock("elder_stem_block", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD)));
+
+    public static final DeferredBlock<Block> STRIPPED_ELDER_STEM_BLOCK = registerBlock("stripped_elder_stem_block", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD)));
+
+    public static final DeferredBlock<Block> ELDER_LEAVES_FLOWERING = registerBlock("elder_leaves_flowering", () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA_LEAVES)));
+
+    public static final DeferredBlock<Block> ELDER_SPORE_BLOSSOM = registerBlock("elder_spore_blossom", () -> new SporeBlossomBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SPORE_BLOSSOM)));
 
     public static final DeferredBlock<Block> ELDER_LEAVES = registerBlock("elder_leaves", () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AZALEA_LEAVES)));
 

@@ -1,0 +1,41 @@
+[
+  {
+    "processor_type": "minecraft:nop"
+  },
+  {
+    "processor_type": "minecraft:block_ignore",
+    "blocks": [
+      {
+        "Name": "minecraft:air"
+      }
+    ]
+  },
+  {
+    "processor_type": "minecraft:protected_blocks",
+    "value": "#minecraft:wart_blocks"
+  },
+  {
+    "processor_type": "minecraft:protected_blocks",
+    "value": "#minecraft:logs"
+  },
+  {
+    "processor_type": "minecraft:protected_blocks",
+    "value": "#minecraft:wooden_fences"
+  },
+  {
+    "processor_type": "minecraft:protected_blocks",
+    "value": "#minecraft:anvil"
+  },
+  {
+    "processor_type": "minecraft:protected_blocks",
+    "value": "#minecraft:beds"
+  },
+  {
+    "processor_type": "minecraft:protected_blocks",
+    "value": "#minecraft:climbable"
+  },
+  {
+    "processor_type": "minecraft:protected_blocks",
+    "value": "#minecraft:leaves"
+  }
+]

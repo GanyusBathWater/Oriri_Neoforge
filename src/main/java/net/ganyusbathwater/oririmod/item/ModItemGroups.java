@@ -45,9 +45,13 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_LOG_BLOCK);
                         output.accept(ModBlocks.CRACKED_ELDER_LOG_BLOCK);
                         output.accept(ModBlocks.STRIPPED_ELDER_LOG_BLOCK);
+                        output.accept(ModBlocks.ELDER_STEM_BLOCK);
+                        output.accept(ModBlocks.STRIPPED_ELDER_STEM_BLOCK);
                         output.accept(ModBlocks.ELDER_PLANKS);
                         output.accept(ModBlocks.ELDER_LEAVES);
+                        output.accept(ModBlocks.ELDER_LEAVES_FLOWERING);
                         output.accept(ModBlocks.ELDER_SAPLING);
+                        output.accept(ModBlocks.ELDER_SPORE_BLOSSOM);
 
                         //-------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);

@@ -144,6 +144,17 @@
   "block.oririmod.magic_barrier_core_block": "Magic Barrier Core",
   "block.oririmod.mana_crystal_block": "Mana Crystal Block",
   "block.oririmod.mana_crystal_cluster": "Mana Crystal Cluster",
+  "block.oririmod.mana_crystal": "Mana Crystal",
+  "block.oririmod.elder_log_block": "Elder Log",
+  "block.oririmod.stripped_elder_log_block": "Stripped Elder Log",
+  "block.oririmod.cracked_elder_log_block": "Cracked Elder Log",
+  "block.oririmod.elder_stem_block": "Elder Stem",
+  "block.oririmod.stripped_elder_stem_block": "Stripped Elder Stem",
+  "block.oririmod.elder_leaves": "Elder Leaves",
+  "block.oririmod.elder_sapling": "Elder Sapling",
+  "block.oririmod.elder_planks": "Elder Planks",
+
+
 
   "item.oririmod.magic_book_1": "Book of the Amateur",
   "item.oririmod.magic_book_2": "Book of the Apprentice",

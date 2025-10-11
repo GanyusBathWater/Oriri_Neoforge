@@ -7,7 +7,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "oririmod:elderwoods_tree_large_normal",
-        "processors": "minecraft:empty",
+        "processors": "oririmod:only_place_in_air",
         "projection": "rigid"
       }
     }
