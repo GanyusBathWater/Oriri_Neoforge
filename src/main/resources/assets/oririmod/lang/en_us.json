@@ -84,6 +84,15 @@
   "item.oririmod.pandoras_blade": "Pandora's Blade",
   "item.oririmod.pirate_saber": "Pirate Saber",
   "item.oririmod.arbiter_crossbow": "Arbiter",
+  "item.oririmod.staff_of_wise": "Staff of the Wise",
+  "item.oririmod.staff_of_hell": "Staff of Hell",
+  "item.oririmod.staff_of_void": "Staff of the Void",
+  "item.oririmod.dodoco": "Dodoco",
+  "item.oririmod.one_thousand_screams": "One Thousand Screams",
+  "item.oririmod.book_of_amateur": "Book of the Amateur",
+  "item.oririmod.book_of_apprentice": "Book of the Apprentice",
+  "item.oririmod.book_of_journeyman": "Book of the Journeyman",
+  "item.oririmod.book_of_wise": "Book of the Wise",
 
   "item.oririmod.crystal_helmet": "Crystal Helmet",
   "item.oririmod.crystal_chestplate": "Crystal Chestplate",
@@ -153,13 +162,8 @@
   "block.oririmod.elder_leaves": "Elder Leaves",
   "block.oririmod.elder_sapling": "Elder Sapling",
   "block.oririmod.elder_planks": "Elder Planks",
-
-
-
-  "item.oririmod.magic_book_1": "Book of the Amateur",
-  "item.oririmod.magic_book_2": "Book of the Apprentice",
-  "item.oririmod.magic_book_3": "Book of the Journeyman",
-  "item.oririmod.magic_book_4": "Book of the Wise",
+  "block.oririmod.elder_spore_blossom": "Elder Spore Blossom",
+  "block.oririmod.elder_leaves_flowering": "Flowering Elder Leaves",
 
   "tooltip.oririmod.magic_book_1.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_1.tooltip.lore": "A book written by a man that doesn’t have the best spells",

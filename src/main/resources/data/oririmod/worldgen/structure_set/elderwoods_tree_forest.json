@@ -1,14 +1,14 @@
 {
   "structures": [
-    { "structure": "oririmod:elderwoods_tree_small_normal", "weight": 100 },
-    { "structure": "oririmod:elderwoods_tree_small_bloom", "weight": 100 },
-    { "structure": "oririmod:elderwoods_tree_small_special", "weight": 100 },
-    { "structure": "oririmod:elderwoods_tree_medium_normal", "weight": 100 },
-    { "structure": "oririmod:elderwoods_tree_medium_bloom", "weight": 100 },
-    { "structure": "oririmod:elderwoods_tree_medium_special", "weight": 100 },
+    { "structure": "oririmod:elderwoods_tree_small_normal", "weight": 150 },
+    { "structure": "oririmod:elderwoods_tree_small_bloom", "weight": 40 },
+    { "structure": "oririmod:elderwoods_tree_small_special", "weight": 1 },
+    { "structure": "oririmod:elderwoods_tree_medium_normal", "weight": 125 },
+    { "structure": "oririmod:elderwoods_tree_medium_bloom", "weight": 30 },
+    { "structure": "oririmod:elderwoods_tree_medium_special", "weight": 1 },
     { "structure": "oririmod:elderwoods_tree_large_normal", "weight": 100 },
-    { "structure": "oririmod:elderwoods_tree_large_bloom", "weight": 100 },
-    { "structure": "oririmod:elderwoods_tree_large_special", "weight": 100 }
+    { "structure": "oririmod:elderwoods_tree_large_bloom", "weight": 25 },
+    { "structure": "oririmod:elderwoods_tree_large_special", "weight": 1 }
   ],
   "placement": {
     "type": "minecraft:random_spread",

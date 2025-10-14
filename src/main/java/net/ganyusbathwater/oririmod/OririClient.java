@@ -1,16 +1,15 @@
 package net.ganyusbathwater.oririmod;
 
 import com.mojang.datafixers.util.Either;
-import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
+import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
@@ -20,12 +19,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -45,7 +49,8 @@ public class OririClient {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
         // Do not forget to add translations for your config options to the en_us.json file.
-
+        IEventBus modEventBus = container.getEventBus();
+        modEventBus.register(ColorHandler.class);
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
@@ -116,16 +121,54 @@ public class OririClient {
 
                 // Check: does the attacker attack his own caster?
                 if (event.getEntity().getUUID().equals(casterId)) {
-                    event.setNewDamage(0); // Block damadge
+                    event.setNewDamage(0); // Block damage
                 }
             }
         }
     }
 
-    private static void onEffectsCleared() {
-        Minecraft.getInstance().player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("Alle Effekte wurden entfernt! (/effect clear?)"),
-                true
-        );
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), ThrownItemRenderer::new);
+    }
+
+    public static class ColorHandler {
+        private static final int ELDERWOODS_COLOR = 0x40E0D0;
+
+        //Method to change the color of blocks based on biome
+        @SubscribeEvent
+        public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+            event.register((state, world, pos, tintIndex) -> {
+                if (tintIndex == 0) {
+                    Level level = Minecraft.getInstance().level;
+                    if (level != null && pos != null) {
+                        var biome = level.getBiome(pos);
+                        var biomeName = biome.unwrapKey().map(k -> k.location().toString()).orElse("unbekannt");
+                        if (biomeName.equals(OririMod.MOD_ID + ":elderwoods")) {
+                            return ELDERWOODS_COLOR;
+                        }
+                    }
+                }
+                return -1;
+            }, Blocks.OAK_LEAVES, Blocks.GRASS_BLOCK, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN, Blocks.SHORT_GRASS);
+        }
+
+        @SubscribeEvent
+        public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+            event.register((stack, tintIndex) -> {
+                if (tintIndex != 0) {
+                    return -1;
+                }
+
+                Level level = Minecraft.getInstance().level;
+                if (level == null) return -1;
+
+                String dimId = level.dimension().location().toString();
+                if (dimId.equals(OririMod.MOD_ID + ":elderwoods")) {
+                    return ELDERWOODS_COLOR;
+                }
+                return -1;
+            }, Blocks.OAK_LEAVES.asItem(), Blocks.GRASS_BLOCK.asItem(), Items.TALL_GRASS, Items.FERN, Items.LARGE_FERN, Items.SHORT_GRASS);
+        }
     }
 }

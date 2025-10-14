@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.enchantment.ModEnchantmentEffects;
+import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.item.ModItemGroups;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
@@ -46,7 +47,7 @@ public class OririMod {
         ModEffects.registerEffects(modEventBus);
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);
-
+        ModEntities.register(modEventBus);
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 

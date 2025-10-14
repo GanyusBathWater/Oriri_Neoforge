@@ -19,7 +19,7 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(OririMod.MOD_ID);
 
-    public static final DeferredBlock<Block> DARK_SOIL_BLOCK = registerBlock("dark_soil_block", () -> new Block(BlockBehaviour.Properties.of()));
+    public static final DeferredBlock<Block> DARK_SOIL_BLOCK = registerBlock("dark_soil_block", () -> new GrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
 
     public static final DeferredBlock<Block> ELDERBUSH_BLOCK = registerBlock("elderbush_block",() -> new ElderBerryBush(BlockBehaviour.Properties.of().noOcclusion().isViewBlocking((s, g, p) -> false)));
 
@@ -43,11 +43,11 @@ public class ModBlocks {
 
     public static final DeferredBlock<Block> STRIPPED_ELDER_STEM_BLOCK = registerBlock("stripped_elder_stem_block", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD)));
 
-    public static final DeferredBlock<Block> ELDER_LEAVES_FLOWERING = registerBlock("elder_leaves_flowering", () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA_LEAVES)));
+    public static final DeferredBlock<Block> ELDER_LEAVES_FLOWERING = registerBlock("elder_leaves_flowering", () -> new ElderLeavesFloweringBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA_LEAVES)));
 
     public static final DeferredBlock<Block> ELDER_SPORE_BLOSSOM = registerBlock("elder_spore_blossom", () -> new SporeBlossomBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SPORE_BLOSSOM)));
 
-    public static final DeferredBlock<Block> ELDER_LEAVES = registerBlock("elder_leaves", () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AZALEA_LEAVES)));
+    public static final DeferredBlock<Block> ELDER_LEAVES = registerBlock("elder_leaves", () -> new ElderLeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AZALEA_LEAVES)));
 
     public static final DeferredBlock<Block> ELDER_SAPLING = registerBlock("elder_sapling", () -> new SaplingBlock(ModTreeGrowers.ELDER_TREE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
 

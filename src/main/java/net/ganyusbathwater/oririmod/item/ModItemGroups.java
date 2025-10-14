@@ -97,7 +97,15 @@ public class ModItemGroups {
                         output.accept(ModItems.EMERALD_PICKAXE);
                         output.accept(ModItems.EMERALD_SHOVEL);
                         output.accept(ModItems.EMERALD_HOE);
-
+                        output.accept(ModItems.STAFF_OF_WISE);
+                        output.accept(ModItems.ONE_THOUSAND_SCREAMS);
+                        output.accept(ModItems.STAFF_OF_HELL);
+                        output.accept(ModItems.STAFF_OF_VOID);
+                        output.accept(ModItems.DODOCO);
+                        output.accept(ModItems.BOOK_OF_AMATEUR);
+                        output.accept(ModItems.BOOK_OF_APPRENTICE);
+                        output.accept(ModItems.BOOK_OF_JOURNEYMAN);
+                        output.accept(ModItems.BOOK_OF_WISE);
 
                         //------------Armor---------------
 

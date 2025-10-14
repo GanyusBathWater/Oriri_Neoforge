@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.item;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.item.custom.*;
+import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.minecraft.world.item.*;
 import net.neoforged.bus.api.IEventBus;
@@ -118,7 +119,23 @@ public class ModItems {
 
     public static final DeferredItem<HoeItem> EMERALD_HOE = ITEMS.register("emerald_hoe", () -> new HoeItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
 
-    public static final DeferredItem<MagicBoltItem> BOOK_OF_THE_WISE = ITEMS.register("book_of_the_wise", () -> new MagicBoltItem(new Item.Properties(), ModRarity.UNCOMMON));
+    public static final DeferredItem<MagicBoltItem> STAFF_OF_WISE = ITEMS.register("staff_of_wise", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.NORMAL, 2,ModRarity.UNCOMMON));
+
+    public static final DeferredItem<MagicBoltItem> ONE_THOUSAND_SCREAMS = ITEMS.register("one_thousand_screams", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.SONIC, 2,ModRarity.MYTHIC));
+
+    public static final DeferredItem<MagicBoltItem> STAFF_OF_HELL = ITEMS.register("staff_of_hell", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.BLAZE, 2,ModRarity.RARE));
+
+    public static final DeferredItem<MagicBoltItem> STAFF_OF_VOID = ITEMS.register("staff_of_void", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.ENDER, 2,ModRarity.RARE));
+
+    public static final DeferredItem<MagicBoltItem> DODOCO = ITEMS.register("dodoco", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.EXPLOSIVE, 2,ModRarity.RARE));
+
+    public static final DeferredItem<MagicBoltItem> BOOK_OF_AMATEUR = ITEMS.register("book_of_amateur", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.NORMAL, 2,ModRarity.COMMON));
+
+    public static final DeferredItem<MagicBoltItem> BOOK_OF_APPRENTICE = ITEMS.register("book_of_apprentice", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.NORMAL, 2,ModRarity.UNCOMMON));
+
+    public static final DeferredItem<MagicBoltItem> BOOK_OF_JOURNEYMAN = ITEMS.register("book_of_journeyman", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.NORMAL, 2,ModRarity.RARE));
+
+    public static final DeferredItem<MagicBoltItem> BOOK_OF_WISE = ITEMS.register("book_of_wise", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.NORMAL, 2,ModRarity.MYTHIC));
 
     //------------------------------------------------------Armor---------------------------------------------------------
 

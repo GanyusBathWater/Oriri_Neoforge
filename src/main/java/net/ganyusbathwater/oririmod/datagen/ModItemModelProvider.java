@@ -20,6 +20,7 @@ public class ModItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         //-------------Items-------------
+
         basicItem(ModItems.FIRE_CRYSTAL.get());
         basicItem(ModItems.MANA_MANIFESTATION.get());
         basicItem(ModItems.MOON_STONE.get());
@@ -32,6 +33,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.VOID_SOUL.get());
 
         //-------------Blocks------------
+
         simpleBlockItem(ModBlocks.DARK_SOIL_BLOCK.get());
         simpleBlockItem(ModBlocks.ELDERBUSH_BLOCK.get());
         simpleBlockItem(ModBlocks.MAGIC_BARRIER_BLOCK.get());
@@ -50,9 +52,11 @@ public class ModItemModelProvider extends ItemModelProvider {
         simpleBlockItem(ModBlocks.ELDER_SPORE_BLOSSOM.get());
 
         //-------------Foods-------------
+
         basicItem(ModItems.ELDERBERRY.get());
 
         //-----------Artifacts-----------
+
         basicItem(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS.get());
         basicItem(ModItems.CRIT_GLOVE.get());
         basicItem(ModItems.DUELLANT_CORTEX.get());
@@ -76,6 +80,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.WITHER_ROSE.get());
 
         //------------Weapons------------
+
         handheldItem(ModItems.PANDORAS_BLADE);
         bowItem(ModItems.ORAPHIM_BOW);
         handheldItem(ModItems.PIRATE_SABER);
@@ -92,6 +97,15 @@ public class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.EMERALD_PICKAXE);
         handheldItem(ModItems.EMERALD_SHOVEL);
         handheldItem(ModItems.EMERALD_HOE);
+        handheldItem(ModItems.STAFF_OF_WISE);
+        handheldItem(ModItems.STAFF_OF_HELL);
+        handheldItem(ModItems.STAFF_OF_VOID);
+        handheldItem(ModItems.DODOCO);
+        handheldItem(ModItems.ONE_THOUSAND_SCREAMS);
+        handheldItem(ModItems.BOOK_OF_AMATEUR);
+        handheldItem(ModItems.BOOK_OF_APPRENTICE);
+        handheldItem(ModItems.BOOK_OF_JOURNEYMAN);
+        handheldItem(ModItems.BOOK_OF_WISE);
 
         //------------Armor---------------
 
@@ -126,6 +140,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.PRISMARINE_BOOTS.get());
 
         //-------------Arkana-------------
+
         basicItem(ModItems.THE_FOOL.get());
         basicItem(ModItems.THE_MAGICIAN.get());
         basicItem(ModItems.THE_HIGH_PRIESTESS.get());
