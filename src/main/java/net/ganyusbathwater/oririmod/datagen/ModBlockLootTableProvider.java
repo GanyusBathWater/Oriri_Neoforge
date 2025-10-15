@@ -1,7 +1,6 @@
 package net.ganyusbathwater.oririmod.datagen;
 
 import net.ganyusbathwater.oririmod.block.ModBlocks;
-import net.ganyusbathwater.oririmod.item.ModFoods;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -12,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;

@@ -1,3 +1,5 @@
+// java
+// Datei: 'src/main/java/net/ganyusbathwater/oririmod/entity/MagicBoltEntity.java'
 package net.ganyusbathwater.oririmod.entity;
 
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
@@ -5,20 +7,25 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -27,14 +34,44 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
     private static final float BASE_DAMAGE = 6.0F;
     private static final EntityDataAccessor<Integer> ABILITY =
             SynchedEntityData.defineId(MagicBoltEntity.class, EntityDataSerializers.INT);
+    private int spawnGraceTicks = 0;
 
     public MagicBoltEntity(EntityType<? extends MagicBoltEntity> type, Level level) {
         super(type, level);
     }
 
+    private Vec3 computeSpawnMuzzle(LivingEntity shooter, double dist) {
+        Vec3 start = shooter.getEyePosition();
+        Vec3 dir = shooter.getViewVector(1.0F).normalize();
+        Vec3 end = start.add(dir.scale(dist));
+
+        BlockHitResult bhr = level().clip(new ClipContext(
+                start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter));
+
+        Vec3 hit = (bhr.getType() == HitResult.Type.MISS)
+                ? end
+                : bhr.getLocation().add(dir.scale(-0.05D));
+        return hit;
+    }
+
+    private void setVelocityAndRotation(Vec3 dir, float speed) {
+        Vec3 v = dir.normalize().scale(speed);
+        setDeltaMovement(v);
+
+        double h = Math.sqrt(v.x * v.x + v.z * v.z);
+        float yaw = (float)(Mth.atan2(v.x, v.z) * (180F / Math.PI));
+        float pitch = (float)(Mth.atan2(v.y, h) * (180F / Math.PI));
+        setYRot(yaw);
+        setXRot(pitch);
+        this.yRotO = yaw;
+        this.xRotO = pitch;
+    }
+
     public MagicBoltEntity(Level level, LivingEntity owner) {
         super(ModEntities.MAGIC_BOLT.get(), owner, level);
-        setPos(owner.getX(), owner.getEyeY() - 0.1D, owner.getZ());
+        Vec3 muzzle = computeSpawnMuzzle(owner, 1.2D);
+        setPos(muzzle.x, muzzle.y, muzzle.z);
+        this.spawnGraceTicks = 2;
     }
 
     @Override
@@ -62,7 +99,12 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
 
     @Override
     public void tick() {
+        if (spawnGraceTicks > 0) {
+            spawnGraceTicks--;
+        }
+
         super.tick();
+
         if (level().isClientSide) {
             switch (getAbility()) {
                 case BLAZE -> spawnTrail(ParticleTypes.SMALL_FLAME, 2);
@@ -72,6 +114,12 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
                 default -> {}
             }
         }
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        if (spawnGraceTicks > 0) return false;
+        return super.canHitEntity(entity);
     }
 
     private void spawnTrail(net.minecraft.core.particles.ParticleOptions type, int count) {
@@ -120,14 +168,28 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
     }
 
     public void launchStraight(LivingEntity shooter, float speed) {
-        Vec3 look = shooter.getLookAngle().normalize();
-        if (getAbility() == MagicBoltAbility.EXPLOSIVE) speed *= 0.85F;
-        setDeltaMovement(look.x * speed, look.y * speed, look.z * speed);
-        setYRot(shooter.getYRot());
-        setXRot(shooter.getXRot());
-        xo = getX();
-        yo = getY();
-        zo = getZ();
+        switch (getAbility()) {
+            case SONIC -> speed *= 1.0F;
+            case BLAZE -> speed *= 1.0F;
+            case ENDER -> speed *= 0.9F;
+            case NORMAL -> speed *= 1.0F;
+            case EXPLOSIVE -> speed *= 0.85F;
+        }
+
+        Vec3 view = shooter.getViewVector(1.0F).normalize();
+        Vec3 muzzle = computeSpawnMuzzle(shooter, 1.2D);
+        setPos(muzzle.x, muzzle.y, muzzle.z);
+
+        setVelocityAndRotation(view, speed);
+
+        this.hasImpulse = true;
+        updateGravityFlag();
+
+        this.xo = getX();
+        this.yo = getY();
+        this.zo = getZ();
+
+        this.spawnGraceTicks = Math.max(this.spawnGraceTicks, 2);
     }
 
     @Override
@@ -158,7 +220,7 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
 
         switch (ability) {
             case BLAZE -> {
-                hit.getEntity().setRemainingFireTicks(40); // 2 Sekunden brennen
+                hit.getEntity().setRemainingFireTicks(40);
                 level().playSound(null, getX(), getY(), getZ(),
                         SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.6F, 1.2F);
                 level().addParticle(ParticleTypes.FLAME, hit.getLocation().x, hit.getLocation().y,
@@ -177,6 +239,47 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
 
         if (ability != MagicBoltAbility.EXPLOSIVE) {
             discard();
+        }
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
+
+        double vx = packet.getXa() / 8000.0D;
+        double vy = packet.getYa() / 8000.0D;
+        double vz = packet.getZa() / 8000.0D;
+        setDeltaMovement(vx, vy, vz);
+
+        if ((vx * vx + vy * vy + vz * vz) > 1.0E-6D) {
+            setRotFromMotion(vx, vy, vz);
+        }
+
+        setOldPosAndRot();
+        updateGravityFlag();
+    }
+
+    // FIX: Signatur ohne 'boolean teleport' und Schritte kappen
+    @Override
+    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+        super.lerpTo(x, y, z, yRot, xRot, Math.min(1, steps));
+    }
+
+    private void setRotFromMotion(double vx, double vy, double vz) {
+        double h = Math.sqrt(vx * vx + vz * vz);
+        float yaw = (float)(Mth.atan2(vx, vz) * (180F / Math.PI));
+        float pitch = (float)(Mth.atan2(vy, h) * (180F / Math.PI));
+        setYRot(yaw);
+        setXRot(pitch);
+        this.yRotO = yaw;
+        this.xRotO = pitch;
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (key.equals(ABILITY)) {
+            updateGravityFlag();
         }
     }
 
