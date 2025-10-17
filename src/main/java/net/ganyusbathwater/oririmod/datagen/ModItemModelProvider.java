@@ -109,6 +109,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.BOOK_OF_APPRENTICE);
         handheldItem(ModItems.BOOK_OF_JOURNEYMAN);
         handheldItem(ModItems.BOOK_OF_WISE);
+        handheldItem(ModItems.STAFF_OF_ALMIGHTY);
 
         //------------Armor---------------
 

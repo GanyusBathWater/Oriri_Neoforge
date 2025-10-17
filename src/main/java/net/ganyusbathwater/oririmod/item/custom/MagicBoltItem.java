@@ -1,6 +1,7 @@
 // java
 package net.ganyusbathwater.oririmod.item.custom;
 
+import net.ganyusbathwater.oririmod.entity.MagicBoltEntity;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
@@ -188,8 +189,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             return;
         }
 
-        net.ganyusbathwater.oririmod.entity.MagicBoltEntity bolt =
-                new net.ganyusbathwater.oririmod.entity.MagicBoltEntity(level, living);
+        MagicBoltEntity bolt = new MagicBoltEntity(level, living);
         bolt.setAbility(this.ability);
 
         float speed = switch (this.ability) {

@@ -143,6 +143,8 @@ public class ModItems {
 
     public static final DeferredItem<MagicBoltItem> BOOK_OF_WISE = ITEMS.register("book_of_wise", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.NORMAL, 2,ModRarity.MYTHIC));
 
+    public static final DeferredItem<OmniMagicItem> STAFF_OF_ALMIGHTY = ITEMS.register("staff_of_almighty", () -> new OmniMagicItem(new Item.Properties(), ModRarity.GODLY, 2, 500, 1));
+
     //------------------------------------------------------Armor---------------------------------------------------------
 
     public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet", () -> new ModArmorItem(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)), ModRarity.LEGENDARY));

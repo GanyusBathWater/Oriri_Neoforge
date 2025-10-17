@@ -109,6 +109,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_APPRENTICE);
                         output.accept(ModItems.BOOK_OF_JOURNEYMAN);
                         output.accept(ModItems.BOOK_OF_WISE);
+                        output.accept(ModItems.STAFF_OF_ALMIGHTY);
 
                         //------------Armor---------------
 
