@@ -23,6 +23,15 @@ public final class ModEntities {
                             .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "magic_bolt").toString())
             );
 
+    public static final DeferredHolder<EntityType<?>, EntityType<MeteorEntity>> METEOR =
+            ENTITIES.register("meteor", () ->
+                    EntityType.Builder.<MeteorEntity>of(MeteorEntity::new, MobCategory.MISC)
+                            .sized(1.0F, 1.0F)
+                            .clientTrackingRange(64)
+                            .updateInterval(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "meteor").toString())
+            );
+
     public static void register(IEventBus modBus) {
         ENTITIES.register(modBus);
     }

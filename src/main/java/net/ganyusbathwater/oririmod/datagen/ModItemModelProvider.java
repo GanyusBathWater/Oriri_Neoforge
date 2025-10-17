@@ -98,6 +98,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.EMERALD_SHOVEL);
         handheldItem(ModItems.EMERALD_HOE);
         handheldItem(ModItems.STAFF_OF_WISE);
+        handheldItem(ModItems.STAFF_OF_EARTH);
+        handheldItem(ModItems.STAFF_OF_FOREST);
+        handheldItem(ModItems.STAFF_OF_COSMOS);
         handheldItem(ModItems.STAFF_OF_HELL);
         handheldItem(ModItems.STAFF_OF_VOID);
         handheldItem(ModItems.DODOCO);

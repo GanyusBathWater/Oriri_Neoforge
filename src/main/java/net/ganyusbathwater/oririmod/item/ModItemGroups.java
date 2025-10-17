@@ -98,8 +98,11 @@ public class ModItemGroups {
                         output.accept(ModItems.EMERALD_SHOVEL);
                         output.accept(ModItems.EMERALD_HOE);
                         output.accept(ModItems.STAFF_OF_WISE);
+                        output.accept(ModItems.STAFF_OF_EARTH);
+                        output.accept(ModItems.STAFF_OF_FOREST);
                         output.accept(ModItems.ONE_THOUSAND_SCREAMS);
                         output.accept(ModItems.STAFF_OF_HELL);
+                        output.accept(ModItems.STAFF_OF_COSMOS);
                         output.accept(ModItems.STAFF_OF_VOID);
                         output.accept(ModItems.DODOCO);
                         output.accept(ModItems.BOOK_OF_AMATEUR);

@@ -119,13 +119,19 @@ public class ModItems {
 
     public static final DeferredItem<HoeItem> EMERALD_HOE = ITEMS.register("emerald_hoe", () -> new HoeItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
 
-    public static final DeferredItem<MagicBoltItem> STAFF_OF_WISE = ITEMS.register("staff_of_wise", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.NORMAL, 2,ModRarity.UNCOMMON));
+    public static final DeferredItem<MagicStaffItem> STAFF_OF_WISE = ITEMS.register("staff_of_wise", () -> new MagicStaffItem(new Item.Properties(), MagicStaffItem.StaffAction.REGEN, 400, 0,500, ModRarity.MYTHIC));
+
+    public static final DeferredItem<MagicStaffItem> STAFF_OF_EARTH = ITEMS.register("staff_of_earth", () -> new MagicStaffItem(new Item.Properties(), MagicStaffItem.StaffAction.HASTE, 400, 1,600, ModRarity.RARE));
+
+    public static final DeferredItem<MagicStaffItem> STAFF_OF_FOREST = ITEMS.register("staff_of_forest", () -> new MagicStaffItem(new Item.Properties(), MagicStaffItem.StaffAction.GROW, 0, 0, 20, ModRarity.UNCOMMON));
 
     public static final DeferredItem<MagicBoltItem> ONE_THOUSAND_SCREAMS = ITEMS.register("one_thousand_screams", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.SONIC, 2,ModRarity.MYTHIC));
 
     public static final DeferredItem<MagicBoltItem> STAFF_OF_HELL = ITEMS.register("staff_of_hell", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.BLAZE, 2,ModRarity.RARE));
 
-    public static final DeferredItem<MagicBoltItem> STAFF_OF_VOID = ITEMS.register("staff_of_void", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.ENDER, 2,ModRarity.RARE));
+    public static final DeferredItem<MagicBoltItem> STAFF_OF_COSMOS = ITEMS.register("staff_of_cosmos", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.METEOR, 2,ModRarity.LEGENDARY));
+
+    public static final DeferredItem<MagicBoltItem> STAFF_OF_VOID = ITEMS.register("staff_of_void", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.ENDER, 2,ModRarity.MYTHIC));
 
     public static final DeferredItem<MagicBoltItem> DODOCO = ITEMS.register("dodoco", () -> new MagicBoltItem(new Item.Properties(), MagicBoltAbility.EXPLOSIVE, 2,ModRarity.RARE));
 

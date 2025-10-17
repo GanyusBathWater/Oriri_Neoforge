@@ -9,17 +9,24 @@ import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -49,8 +56,7 @@ public class OririClient {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
         // Do not forget to add translations for your config options to the en_us.json file.
-        IEventBus modEventBus = container.getEventBus();
-        modEventBus.register(ColorHandler.class);
+
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
@@ -130,45 +136,5 @@ public class OririClient {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), ThrownItemRenderer::new);
-    }
-
-    public static class ColorHandler {
-        private static final int ELDERWOODS_COLOR = 0x40E0D0;
-
-        //Method to change the color of blocks based on biome
-        @SubscribeEvent
-        public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
-            event.register((state, world, pos, tintIndex) -> {
-                if (tintIndex == 0) {
-                    Level level = Minecraft.getInstance().level;
-                    if (level != null && pos != null) {
-                        var biome = level.getBiome(pos);
-                        var biomeName = biome.unwrapKey().map(k -> k.location().toString()).orElse("unbekannt");
-                        if (biomeName.equals(OririMod.MOD_ID + ":elderwoods")) {
-                            return ELDERWOODS_COLOR;
-                        }
-                    }
-                }
-                return -1;
-            }, Blocks.OAK_LEAVES, Blocks.GRASS_BLOCK, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN, Blocks.SHORT_GRASS);
-        }
-
-        @SubscribeEvent
-        public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-            event.register((stack, tintIndex) -> {
-                if (tintIndex != 0) {
-                    return -1;
-                }
-
-                Level level = Minecraft.getInstance().level;
-                if (level == null) return -1;
-
-                String dimId = level.dimension().location().toString();
-                if (dimId.equals(OririMod.MOD_ID + ":elderwoods")) {
-                    return ELDERWOODS_COLOR;
-                }
-                return -1;
-            }, Blocks.OAK_LEAVES.asItem(), Blocks.GRASS_BLOCK.asItem(), Items.TALL_GRASS, Items.FERN, Items.LARGE_FERN, Items.SHORT_GRASS);
-        }
     }
 }
