@@ -47,7 +47,7 @@ public class ModItems {
 
     public static final DeferredItem<Item> HERMES_GIFT = ITEMS.register("hermes_gift", () -> new Item(new Item.Properties()));
 
-    public static final DeferredItem<Item> ICE_SKATES = ITEMS.register("ice_skates", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> SNOW_BOOTS = ITEMS.register("snow_boots", () -> new Item(new Item.Properties()));
 
     public static final DeferredItem<Item> MANA_HEART = ITEMS.register("mana_heart", () -> new Item(new Item.Properties()));
 
@@ -57,9 +57,10 @@ public class ModItems {
 
     public static final DeferredItem<Item> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new Item(new Item.Properties()));
 
-    public static final DeferredItem<Item> PLUSHIE_OF_THE_MINE = ITEMS.register("plushie_of_the_mine", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> MINERS_LANTERN = ITEMS.register("miners_lantern", () -> new Item(new Item.Properties()));
 
     public static final DeferredItem<Item> PYRO_VISION = ITEMS.register("pyro_vision", () -> new Item(new Item.Properties()));
+
 
     public static final DeferredItem<Item> RELIC_OF_THE_PAST = ITEMS.register("relic_of_the_past", () -> new Item(new Item.Properties()));
 

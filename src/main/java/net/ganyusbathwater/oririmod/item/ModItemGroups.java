@@ -62,12 +62,12 @@ public class ModItemGroups {
                         output.accept(ModItems.DUELLANT_CORTEX);
                         output.accept(ModItems.HEART_OF_THE_TANK);
                         output.accept(ModItems.HERMES_GIFT);
-                        output.accept(ModItems.ICE_SKATES);
+                        output.accept(ModItems.SNOW_BOOTS);
                         output.accept(ModItems.MANA_HEART);
                         output.accept(ModItems.PESTDOCTORS_MASK);
                         output.accept(ModItems.MIRROR_OF_THE_BLACK_SUN);
                         output.accept(ModItems.PHOENIX_FEATHER);
-                        output.accept(ModItems.PLUSHIE_OF_THE_MINE);
+                        output.accept(ModItems.MINERS_LANTERN);
                         output.accept(ModItems.PYRO_VISION);
                         output.accept(ModItems.RELIC_OF_THE_PAST);
                         output.accept(ModItems.SOLIS_BROOCH);

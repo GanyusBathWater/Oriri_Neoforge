@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public final class ColorHandler {
-    private static final int ELDERWOODS_GRASS_COLOR = 0x40E0D0;
+    private static final int ELDERWOODS_GRASS_COLOR = 0x2072fe;
     private static final int ELDERWOODS_FOLIAGE_COLOR = ELDERWOODS_GRASS_COLOR;
 
     // Erwartete Dimension als ResourceKey<Level>

@@ -7,6 +7,7 @@ import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.neoforged.neoforge.common.world.BiomeModifier;
 import net.neoforged.neoforge.common.world.BiomeModifiers;
@@ -17,6 +18,8 @@ public class ModBiomeModifiers {
 
     public static final ResourceKey<BiomeModifier> ADD_MANA_GEODE = registerKey("add_mana_geode");
 
+    public static final ResourceKey<BiomeModifier> ADD_ELDER_TREES = registerKey("add_elder_trees");
+
 
     //here will be the Features defined and later turned into json files
     public static void bootstrap(BootstrapContext<BiomeModifier> context) {
@@ -24,6 +27,21 @@ public class ModBiomeModifiers {
         var biomes = context.lookup(Registries.BIOME);
 
         context.register(ADD_MANA_GEODE, new BiomeModifiers.AddFeaturesBiomeModifier(biomes.getOrThrow(BiomeTags.IS_OVERWORLD), HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.OVERWORLD_MANA_GEODE_PLACED_KEY)), GenerationStep.Decoration.LOCAL_MODIFICATIONS));
+
+        var elderBiomesTag = TagKey.create(
+                Registries.BIOME,
+                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "has_elder_trees")
+        );
+        context.register(
+                ADD_ELDER_TREES,
+                new BiomeModifiers.AddFeaturesBiomeModifier(
+                        biomes.getOrThrow(elderBiomesTag),
+                        HolderSet.direct(
+                                placedFeatures.getOrThrow(ModPlacedFeatures.ELDER_TREE_PLACED_KEY)
+                        ),
+                        GenerationStep.Decoration.VEGETAL_DECORATION
+                )
+        );
     }
 
     private static ResourceKey<BiomeModifier> registerKey(String name) {

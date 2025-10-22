@@ -62,12 +62,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.DUELLANT_CORTEX.get());
         basicItem(ModItems.HEART_OF_THE_TANK.get());
         basicItem(ModItems.HERMES_GIFT.get());
-        basicItem(ModItems.ICE_SKATES.get());
+        basicItem(ModItems.SNOW_BOOTS.get());
         basicItem(ModItems.MANA_HEART.get());
         basicItem(ModItems.PESTDOCTORS_MASK.get());
         basicItem(ModItems.MIRROR_OF_THE_BLACK_SUN.get());
         basicItem(ModItems.PHOENIX_FEATHER.get());
-        basicItem(ModItems.PLUSHIE_OF_THE_MINE.get());
+        basicItem(ModItems.MINERS_LANTERN.get());
         basicItem(ModItems.PYRO_VISION.get());
         basicItem(ModItems.RELIC_OF_THE_PAST.get());
         basicItem(ModItems.SOLIS_BROOCH.get());

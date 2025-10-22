@@ -74,7 +74,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .define('A', ModItems.HOLLOW_SOUL)
                     .unlockedBy("has_hollowed_soul", has(ModItems.HOLLOW_SOUL)).save(recipeOutput);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.ICE_SKATES,1)
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.SNOW_BOOTS,1)
                     .pattern("B  ")
                     .pattern("ABS")
                     .pattern("SSS")

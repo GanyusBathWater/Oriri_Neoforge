@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.worldgen;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.worldgen.tree.ElderGiantTreeConfig;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
@@ -97,6 +98,18 @@ public class ModConfiguredFeatures {
         
 
         register(context, OVERWORLD_MANA_GEODE_KEY, Feature.GEODE, geodeConfig);
+
+        var elderCfg = new ElderGiantTreeConfig(
+                UniformInt.of(10, 35), // Stammhöhe
+                UniformInt.of(2, 5),   // Stammradius
+                UniformInt.of(6, 12),   // Kronenradius
+                UniformInt.of(1, 4),   // Astlänge
+                BlockStateProvider.simple(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()),
+                BlockStateProvider.simple(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LEAVES.get().defaultBlockState()),
+                BlockStateProvider.simple(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LEAVES_FLOWERING.get().defaultBlockState()),
+                0.25f
+        );
+        register(context, ELDER_TREE_KEY, ModFeatures.ELDER_GIANT_TREE.get(), elderCfg);
     }
 
     public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
