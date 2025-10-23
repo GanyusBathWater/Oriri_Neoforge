@@ -30,18 +30,6 @@ public class ModConfiguredFeatures {
 
     public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_KEY = registerKey("elder_tree");
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_SMALL_NORMAL_CONFIGURED_KEY = registerKey("elder_tree_small_normal_configured");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_SMALL_BLOOM_CONFIGURED_KEY = registerKey("elder_tree_small_bloom_configured");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_SMALL_SPECIAL_CONFIGURED_KEY = registerKey("elder_tree_small_special_configured");
-
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_MEDIUM_NORMAL_CONFIGURED_KEY = registerKey("elder_tree_medium_normal_configured");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_MEDIUM_BLOOM_CONFIGURED_KEY = registerKey("elder_tree_medium_bloom_configured");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_MEDIUM_SPECIAL_CONFIGURED_KEY = registerKey("elder_tree_medium_special_configured");
-
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_LARGE_NORMAL_CONFIGURED_KEY = registerKey("elder_tree_large_normal_configured");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_LARGE_BLOOM_CONFIGURED_KEY = registerKey("elder_tree_large_bloom_configured");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_LARGE_SPECIAL_CONFIGURED_KEY = registerKey("elder_tree_large_special_configured");
-
     //here will be the Features be defined and later turned into json files
     public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
     //there need to exist rules for the feature, for example which Blocks it may override to place itself
@@ -100,7 +88,7 @@ public class ModConfiguredFeatures {
         register(context, OVERWORLD_MANA_GEODE_KEY, Feature.GEODE, geodeConfig);
 
         var elderCfg = new ElderGiantTreeConfig(
-                UniformInt.of(10, 35), // Stammhöhe
+                UniformInt.of(15, 35), // Stammhöhe
                 UniformInt.of(2, 5),   // Stammradius
                 UniformInt.of(6, 12),   // Kronenradius
                 UniformInt.of(1, 4),   // Astlänge

@@ -20,7 +20,7 @@ public class ModPlacedFeatures {
 
     public static final ResourceKey<PlacedFeature> OVERWORLD_MANA_GEODE_PLACED_KEY = registerKey("mana_geode_placed");
 
-    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.levelgen.placement.PlacedFeature> ELDER_TREE_PLACED_KEY = registerKey("elder_tree_placed");
+    public static final ResourceKey<PlacedFeature> ELDER_TREE_PLACED_KEY = registerKey("elder_tree_placed");
 
     //here will be the Features be defined and later turned into json files
     public static void bootstrap(BootstrapContext<PlacedFeature> context) {
