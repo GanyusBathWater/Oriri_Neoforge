@@ -72,7 +72,16 @@
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
             "block": "minecraft:brown_glazed_terracotta" },
-          "output_state": { "Name": "minecraft:air" }
+          "output_state": { "Name": "minecraft:structure_void" }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:air" },
+          "output_state": { "Name": "minecraft:structure_void" }
         }
       ]
     }

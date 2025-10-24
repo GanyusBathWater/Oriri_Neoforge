@@ -53,6 +53,9 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         int canopyFromTrunk = clamp(trunkSize * 3, 3, 18);
         int canopyR = clamp((int) Math.round(rawCanopy * 0.4 + canopyFromHeight * 0.4 + canopyFromTrunk * 0.2), 3, 18);
 
+        if (containsStructureVoid(level, origin, height, trunkSize, canopyR)) return false;
+
+
         int branchLenBase = clamp((int) Math.round(rawBranch * (1.0 + trunkSize / 8.0)), 3, 12);
 
         trunkSize = Math.min(trunkSize, Math.max(1, Math.min(5, 1 + height / 12)));
@@ -113,6 +116,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
     }
 
     private boolean generateTree(WorldGenLevel level, ElderGiantTreeConfig cfg, BlockPos origin, RandomSource rnd, int height, int trunkSize, int canopyR, int branchLenBase, long baseSeed) {
+
+        if (containsStructureVoid(level, origin, height, trunkSize, canopyR)) return false;
         placedBranchLogs.get().clear();
         placedAllLogs.get().clear();
         plannedLeaves.get().clear();
@@ -690,6 +695,27 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             }
         }
         return 7;
+    }
+
+    private boolean containsStructureVoid(WorldGenLevel level, BlockPos origin, int height, int trunkSize, int canopyR) {
+        int radiusX = canopyR + trunkSize + 2;
+        int radiusZ = canopyR + trunkSize + 2;
+        int minY = origin.getY();
+        int maxY = origin.getY() + height + canopyR + 2;
+
+        for (int y = minY; y <= maxY; y++) {
+            for (int dx = -radiusX; dx <= radiusX; dx++) {
+                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
+                    BlockPos p = origin.offset(dx, y - origin.getY(), dz); // y - origin.getY() weil offset erwartet relative y
+                    if (!withinBuildHeight(level, p)) continue;
+                    try {
+                        BlockState s = level.getBlockState(p);
+                        if (s.is(Blocks.STRUCTURE_VOID)) return true;
+                    } catch (Exception ignored) { }
+                }
+            }
+        }
+        return false;
     }
 
     private int computeDistanceToLog(WorldGenLevel level, BlockPos start) {
