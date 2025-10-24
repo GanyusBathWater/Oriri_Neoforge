@@ -88,13 +88,13 @@ public class ModConfiguredFeatures {
         register(context, OVERWORLD_MANA_GEODE_KEY, Feature.GEODE, geodeConfig);
 
         var elderCfg = new ElderGiantTreeConfig(
-                UniformInt.of(15, 35), // Stammhöhe
+                UniformInt.of(17, 35), // Stammhöhe
                 UniformInt.of(2, 5),   // Stammradius
-                UniformInt.of(6, 12),   // Kronenradius
+                UniformInt.of(6, 10),   // Kronenradius
                 UniformInt.of(1, 4),   // Astlänge
-                BlockStateProvider.simple(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()),
-                BlockStateProvider.simple(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LEAVES.get().defaultBlockState()),
-                BlockStateProvider.simple(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LEAVES_FLOWERING.get().defaultBlockState()),
+                BlockStateProvider.simple(ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()),
+                BlockStateProvider.simple(ModBlocks.ELDER_LEAVES.get().defaultBlockState()),
+                BlockStateProvider.simple(ModBlocks.ELDER_LEAVES_FLOWERING.get().defaultBlockState()),
                 0.25f
         );
         register(context, ELDER_TREE_KEY, ModFeatures.ELDER_GIANT_TREE.get(), elderCfg);

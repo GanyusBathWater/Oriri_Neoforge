@@ -1,0 +1,13 @@
+{
+  "structures": [
+    { "structure": "oririmod:elderwoods_outpost_intact", "weight": 1 },
+    { "structure": "oririmod:elderwoods_outpost_ruin", "weight": 1 }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 9,
+    "separation": 8,
+    "salt": 1234567890
+  },
+  "biomes": "oririmod:elderwoods"
+}
