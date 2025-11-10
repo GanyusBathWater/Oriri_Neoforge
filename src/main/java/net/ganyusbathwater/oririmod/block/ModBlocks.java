@@ -8,6 +8,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -36,6 +37,14 @@ public class ModBlocks {
     public static final DeferredBlock<Block> CRACKED_ELDER_LOG_BLOCK = registerBlock("cracked_elder_log_block", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)));
 
     public static final DeferredBlock<Block> ELDER_PLANKS = registerBlock("elder_planks", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)));
+
+    public static final DeferredBlock<StairBlock> ELDER_STAIRS = registerBlock("elder_stairs", () -> new StairBlock(ModBlocks.ELDER_PLANKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS)));
+
+    public static final DeferredBlock<SlabBlock> ELDER_SLAB = registerBlock("elder_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB)));
+
+    public static final DeferredBlock<FenceBlock> ELDER_FENCE = registerBlock("elder_fence", () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE)));
+
+    public static final DeferredBlock<FenceGateBlock> ELDER_GATE = registerBlock("elder_gate", () -> new FenceGateBlock(WoodType.ACACIA, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
 
     public static final DeferredBlock<Block> STRIPPED_ELDER_LOG_BLOCK = registerBlock("stripped_elder_log_block", () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG)));
 

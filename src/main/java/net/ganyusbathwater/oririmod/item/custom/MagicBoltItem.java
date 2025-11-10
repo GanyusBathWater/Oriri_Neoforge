@@ -4,10 +4,8 @@ package net.ganyusbathwater.oririmod.item.custom;
 import net.ganyusbathwater.oririmod.entity.MagicBoltEntity;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
-import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
-import net.ganyusbathwater.oririmod.util.MagicIndicatorClientState;
-import net.ganyusbathwater.oririmod.util.ModRarity;
-import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.ganyusbathwater.oririmod.mana.ModManaUtil;
+import net.ganyusbathwater.oririmod.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -27,17 +25,19 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
     private final MagicBoltAbility ability;
     private final int cooldown;
     private final ModRarity rarity;
+    private final int manaCost;
 
     private static final float METEOR_OUTER_RADIUS_PLAYER = 1.2f;
     private static final float METEOR_OUTER_DISTANCE_PLAYER = 1.6f;
     private static final float METEOR_MID_RADIUS_GROUND = 7.0f;
     private static final float METEOR_INNER_RADIUS_GROUND = 5.0f;
 
-    public MagicBoltItem(Properties props, MagicBoltAbility ability, int cooldown, ModRarity rarity) {
+    public MagicBoltItem(Properties props, MagicBoltAbility ability, int cooldown, int manaCost, ModRarity rarity) {
         super(props);
         this.ability = ability;
         this.cooldown = cooldown;
         this.rarity = rarity;
+        this.manaCost = manaCost;
     }
 
     @Override
@@ -68,7 +68,6 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
                 return;
             }
 
-            // Boden korrekt bestimmen (Top des ersten soliden Blocks unterhalb)
             BlockPos ground = findGround(level, hit.getBlockPos().above(), 12);
             if (ground == null) {
                 MagicIndicatorClientState.stopFor(living);
@@ -130,7 +129,6 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
                         ResourceLocation TEX_MID   = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/effect/magic_circles/arcane_mid.png");
                         ResourceLocation TEX_INNER = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/effect/magic_circles/arcane_inner.png");
 
-                        // Startzeit für die persistente Anzeige zurücksetzen
                         MagicIndicatorClientState.stopFor(living);
 
                         MagicIndicatorClientState.Indicator.Builder b = MagicIndicatorClientState.Indicator.builder()
@@ -161,6 +159,11 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         int usedTicks = getUseDuration(stack, living) - timeLeft;
         int minCharge = 10;
         if (usedTicks < minCharge) return;
+
+        if (living instanceof Player p) {
+            // Spieler muss Mana besitzen
+            if (!ModManaUtil.tryConsumeMana(p, manaCost)) return;
+        }
 
         if (this.ability == MagicBoltAbility.METEOR) {
             BlockHitResult hit = raycastToGround(level, living, 96.0);

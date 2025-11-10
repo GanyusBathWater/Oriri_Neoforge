@@ -7,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
@@ -44,13 +45,22 @@ public class ModBlockStateProvider extends BlockStateProvider {
         blockWithItem(ModBlocks.MANA_CRYSTAL_BLOCK, 1);
         clusterBlockWithItem(ModBlocks.MANA_CRYSTAL_CLUSTER, 2);
 
-        pillarBlockWithItem(ModBlocks.ELDER_LOG_BLOCK, 1);
+
+        blockWithItem(ModBlocks.ELDER_STEM_BLOCK, 1);
+        //blockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK, 1);
+        //pillarBlockWithItem(ModBlocks.ELDER_LOG_BLOCK, 1);
         pillarBlockWithItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK, 1);
         pillarBlockWithItem(ModBlocks.STRIPPED_ELDER_LOG_BLOCK, 1);
         blockWithItem(ModBlocks.ELDER_PLANKS, 1);
-        blockWithItem(ModBlocks.ELDER_STEM_BLOCK, 1);
-        blockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK, 1);
-        
+        axisBlock(((RotatedPillarBlock) ModBlocks.ELDER_LOG_BLOCK.get()), ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/elder_log_block_side"), ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/elder_log_block_top_bottom"));
+        axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get()), ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/stripped_elder_log_block_side"), ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/elder_log_block_top_bottom"));
+
+
+        stairsBlock(ModBlocks.ELDER_STAIRS.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
+        slabBlock(ModBlocks.ELDER_SLAB.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()), blockTexture(ModBlocks.ELDER_PLANKS.get()));
+        fenceBlock(ModBlocks.ELDER_FENCE.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
+        fenceGateBlock(ModBlocks.ELDER_GATE.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
+
         saplingBlock(ModBlocks.ELDER_SAPLING);
     }
 

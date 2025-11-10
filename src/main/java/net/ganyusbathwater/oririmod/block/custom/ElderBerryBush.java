@@ -17,4 +17,9 @@ public class ElderBerryBush extends LeavesBlock {
     public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         return true;
     }
+
+    @Override
+    protected boolean decaying(BlockState state) {
+        return false;
+    }
 }

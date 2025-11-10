@@ -50,6 +50,10 @@ public class ModItemModelProvider extends ItemModelProvider {
         simpleBlockItem(ModBlocks.MANA_CRYSTAL_CLUSTER.get());
         simpleBlockItem(ModBlocks.ELDER_LEAVES_FLOWERING.get());
         simpleBlockItem(ModBlocks.ELDER_SPORE_BLOSSOM.get());
+        simpleBlockItem(ModBlocks.ELDER_STAIRS.get());
+        simpleBlockItem(ModBlocks.ELDER_SLAB.get());
+        simpleBlockItem(ModBlocks.ELDER_GATE.get());
+        fenceItem(ModBlocks.ELDER_FENCE, ModBlocks.ELDER_PLANKS);
 
         //-------------Foods-------------
 
@@ -229,6 +233,25 @@ public class ModItemModelProvider extends ItemModelProvider {
                         withExistingParent(name + "_firework", mcLoc("item/crossbow"))
                                 .texture("layer0", firework.toString())
                 ).end();
+    }
+
+    public void buttonItem(DeferredBlock<?> block, DeferredBlock<Block> baseBlock) {
+        this.withExistingParent(block.getId().getPath(), mcLoc("block/button"))
+                .texture("texture",  ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+                        "block/" + baseBlock.getId().getPath()));
+    }
+
+    public void fenceItem(DeferredBlock<?> block, DeferredBlock<Block> baseBlock) {
+        this.withExistingParent(block.getId().getPath(), mcLoc("block/fence_inventory"))
+                .texture("texture",  ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+                        "block/" + baseBlock.getId().getPath()));
+    }
+
+
+    public void wallItem(DeferredBlock<?> block, DeferredBlock<Block> baseBlock) {
+        this.withExistingParent(block.getId().getPath(), mcLoc("block/wall"))
+                .texture("wall",  ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+                        "block/" + baseBlock.getId().getPath()));
     }
 
     private ItemModelBuilder saplingItem(DeferredBlock<Block> item) {

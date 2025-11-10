@@ -1,12 +1,11 @@
 package net.ganyusbathwater.oririmod.item.custom;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.entity.MagicBoltEntity;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
-import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
-import net.ganyusbathwater.oririmod.util.MagicIndicatorClientState;
-import net.ganyusbathwater.oririmod.util.ModRarity;
-import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.ganyusbathwater.oririmod.mana.ModManaUtil;
+import net.ganyusbathwater.oririmod.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -61,6 +60,20 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 case STAFF_REGEN -> MagicStaffAction.REGEN;
                 case STAFF_HASTE -> MagicStaffAction.HASTE;
                 default -> null;
+            };
+        }
+
+        public int getManaCost() {
+            return switch (this) {
+                case BOLT_SONIC -> 12;
+                case BOLT_BLAZE -> 8;
+                case BOLT_ENDER -> 18;
+                case BOLT_EXPLOSIVE -> 20;
+                case BOLT_METEOR -> 40;
+                case BOLT_NORMAL -> 5;
+                case STAFF_GROW -> 6;
+                case STAFF_REGEN -> 20;
+                case STAFF_HASTE -> 12;
             };
         }
     }
@@ -134,21 +147,27 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 if (!level.isClientSide && hit.getType() == HitResult.Type.BLOCK) {
                     BlockPos pos = hit.getBlockPos();
                     boolean ok = tryBonemeal((ServerLevel) level, pos) || tryBonemeal((ServerLevel) level, pos.above());
-                    if (ok) player.getCooldowns().addCooldown(this, cooldown);
+                    if (ok && ModManaUtil.tryConsumeMana(player, ab.getManaCost())) {
+                        player.getCooldowns().addCooldown(this, cooldown);
+                    }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
             }
             case REGEN -> {
                 if (!level.isClientSide) {
-                    player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, effectDuration, effectAmplifier));
-                    player.getCooldowns().addCooldown(this, cooldown);
+                    if (ModManaUtil.tryConsumeMana(player, ab.getManaCost())) {
+                        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, effectDuration, effectAmplifier));
+                        player.getCooldowns().addCooldown(this, cooldown);
+                    }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
             }
             case HASTE -> {
                 if (!level.isClientSide) {
-                    player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, effectDuration, effectAmplifier));
-                    player.getCooldowns().addCooldown(this, cooldown);
+                    if (ModManaUtil.tryConsumeMana(player, ab.getManaCost())) {
+                        player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, effectDuration, effectAmplifier));
+                        player.getCooldowns().addCooldown(this, cooldown);
+                    }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
             }
@@ -272,6 +291,10 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
         if (ab.isBolt()) {
             if (usedTicks < minCharge) return;
 
+            if (living instanceof Player p) {
+                if (!ModManaUtil.tryConsumeMana(p, ab.getManaCost())) return;
+            }
+
             if (ab == OmniAbility.BOLT_METEOR) {
                 BlockHitResult hit = raycastToGround(level, living, 96.0);
                 if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
@@ -299,8 +322,7 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 return;
             }
 
-            net.ganyusbathwater.oririmod.entity.MagicBoltEntity bolt =
-                    new net.ganyusbathwater.oririmod.entity.MagicBoltEntity(level, living);
+            MagicBoltEntity bolt = new MagicBoltEntity(level, living);
             bolt.setAbility(ab.toBolt());
 
             float speed = switch (ab) {

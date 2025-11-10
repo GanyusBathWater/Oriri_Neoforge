@@ -41,6 +41,10 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         this.dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
         this.dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
         this.dropSelf(ModBlocks.ELDER_SPORE_BLOSSOM.get());
+        this.dropSelf(ModBlocks.ELDER_STAIRS.get());
+        this.dropSelf(ModBlocks.ELDER_SLAB.get());
+        this.dropSelf(ModBlocks.ELDER_FENCE.get());
+        this.dropSelf(ModBlocks.ELDER_GATE.get());
 
 
         this.add(ModBlocks.ELDER_LEAVES.get(), block ->

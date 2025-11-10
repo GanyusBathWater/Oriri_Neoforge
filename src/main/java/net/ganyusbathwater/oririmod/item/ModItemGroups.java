@@ -48,6 +48,10 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_STEM_BLOCK);
                         output.accept(ModBlocks.STRIPPED_ELDER_STEM_BLOCK);
                         output.accept(ModBlocks.ELDER_PLANKS);
+                        output.accept(ModBlocks.ELDER_STAIRS);
+                        output.accept(ModBlocks.ELDER_SLAB);
+                        output.accept(ModBlocks.ELDER_FENCE);
+                        output.accept(ModBlocks.ELDER_GATE);
                         output.accept(ModBlocks.ELDER_LEAVES);
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING);
                         output.accept(ModBlocks.ELDER_SAPLING);

@@ -1,5 +1,6 @@
 package net.ganyusbathwater.oririmod.item.custom;
 
+import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
 import net.minecraft.core.BlockPos;
@@ -30,14 +31,16 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
     private final int durationTicks;   // für Effekte
     private final int amplifier;       // für Effekte
     private final int cooldownTicks;
+    private final int manaCost;
 
-    public MagicStaffItem(Properties properties, StaffAction action, int durationTicks, int amplifier, int cooldownTicks, ModRarity rarity) {
+    public MagicStaffItem(Properties properties, StaffAction action, int durationTicks, int amplifier, int cooldownTicks, int manaCost, ModRarity rarity) {
         super(properties);
         this.action = action;
         this.durationTicks = durationTicks;
         this.amplifier = amplifier;
         this.cooldownTicks = cooldownTicks;
         this.rarity = rarity;
+        this.manaCost = manaCost;
     }
 
     @Override
@@ -56,31 +59,34 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
                     BlockPos pos = hit.getBlockPos();
                     boolean grown = false;
                     if (!level.isClientSide && level instanceof ServerLevel server) {
-                        // Versuche Block am Treffer zu düngen, sonst den angrenzenden Block in Blickrichtung
                         grown = tryBonemeal(server, pos) || tryBonemeal(server, pos.relative(hit.getDirection()));
                         if (grown) {
-                            // Partikelevent wie Knochenmehl
-                            server.levelEvent(1505, pos, 0);
+                            // nur wenn Mana verfügbar und erfolgreich verbraucht wird
+                            if (ModManaUtil.tryConsumeMana(player, manaCost)) {
+                                server.levelEvent(1505, pos, 0);
+                                player.getCooldowns().addCooldown(this, Math.max(5, cooldownTicks));
+                                return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+                            }
                         }
-                    }
-                    if (grown) {
-                        player.getCooldowns().addCooldown(this, Math.max(5, cooldownTicks));
-                        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
                     }
                 }
                 return InteractionResultHolder.pass(stack);
             }
             case REGEN -> {
                 if (!level.isClientSide) {
-                    player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, durationTicks, amplifier, false, true));
-                    player.getCooldowns().addCooldown(this, cooldownTicks);
+                    if (ModManaUtil.tryConsumeMana(player, manaCost)) {
+                        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, durationTicks, amplifier, false, true));
+                        player.getCooldowns().addCooldown(this, cooldownTicks);
+                    }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
             }
             case HASTE -> {
                 if (!level.isClientSide) {
-                    player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, durationTicks, amplifier, false, true));
-                    player.getCooldowns().addCooldown(this, cooldownTicks);
+                    if (ModManaUtil.tryConsumeMana(player, manaCost)) {
+                        player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, durationTicks, amplifier, false, true));
+                        player.getCooldowns().addCooldown(this, cooldownTicks);
+                    }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
             }

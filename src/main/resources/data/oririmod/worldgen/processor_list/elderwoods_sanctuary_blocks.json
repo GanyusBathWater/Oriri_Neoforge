@@ -1,14 +1,6 @@
 {
   "processors": [
     {
-      "processor_type": "minecraft:block_ignore",
-      "blocks": [
-        {
-          "Name": "minecraft:air"
-        }
-      ]
-    },
-    {
       "processor_type": "minecraft:rule",
       "rules": [
         {
@@ -17,8 +9,7 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:azalea_leaves"
-          },
+            "block": "minecraft:azalea_leaves" },
           "output_state": { "Name": "oririmod:elderbush_block" }
         },
         {
@@ -27,8 +18,7 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:dark_oak_leaves"
-          },
+            "block": "minecraft:dark_oak_leaves" },
           "output_state": { "Name": "oririmod:elder_leaves" }
         },
         {
@@ -37,8 +27,7 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:spore_blossom"
-          },
+            "block": "minecraft:spore_blossom" },
           "output_state": { "Name": "oririmod:elder_spore_blossom" }
         },
         {
@@ -47,8 +36,7 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:flowering_azalea_leaves"
-          },
+            "block": "minecraft:flowering_azalea_leaves" },
           "output_state": { "Name": "oririmod:elder_leaves_flowering" }
         },
         {
@@ -57,8 +45,7 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:green_glazed_terracotta"
-          },
+            "block": "minecraft:dark_oak_log" },
           "output_state": { "Name": "oririmod:elder_log_block" }
         },
         {
@@ -67,9 +54,35 @@
           },
           "input_predicate": {
             "predicate_type": "minecraft:block_match",
-            "block": "minecraft:brown_glazed_terracotta"
-          },
+            "block": "minecraft:dark_oak_wood" },
           "output_state": { "Name": "oririmod:elder_stem_block" }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:amethyst_block" },
+          "output_state": { "Name": "oririmod:mana_crystal_block" }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:amethyst_cluster" },
+          "output_state": { "Name": "oririmod:mana_crystal_cluster" }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:block_match",
+            "block": "minecraft:black_glazed_terracotta" },
+          "output_state": { "Name": "minecraft:air" }
         }
       ]
     }

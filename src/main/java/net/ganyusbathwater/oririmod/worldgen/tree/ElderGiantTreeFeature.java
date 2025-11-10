@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.worldgen.tree;
 
 import com.mojang.serialization.Codec;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.util.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -53,7 +54,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         int canopyFromTrunk = clamp(trunkSize * 3, 3, 18);
         int canopyR = clamp((int) Math.round(rawCanopy * 0.4 + canopyFromHeight * 0.4 + canopyFromTrunk * 0.2), 3, 18);
 
-        if (containsStructureVoid(level, origin, height, trunkSize, canopyR)) return false;
+        if (containsNonReplaceableBlocks(level, origin, height, trunkSize, canopyR)) return false;
 
 
         int branchLenBase = clamp((int) Math.round(rawBranch * (1.0 + trunkSize / 8.0)), 3, 12);
@@ -117,7 +118,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
     private boolean generateTree(WorldGenLevel level, ElderGiantTreeConfig cfg, BlockPos origin, RandomSource rnd, int height, int trunkSize, int canopyR, int branchLenBase, long baseSeed) {
 
-        if (containsStructureVoid(level, origin, height, trunkSize, canopyR)) return false;
+        if (containsNonReplaceableBlocks(level, origin, height, trunkSize, canopyR)) return false;
         placedBranchLogs.get().clear();
         placedAllLogs.get().clear();
         plannedLeaves.get().clear();
@@ -198,7 +199,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         if (state.hasProperty(RotatedPillarBlock.AXIS)) {
             state = state.setValue(RotatedPillarBlock.AXIS, axis);
         }
-        level.setBlock(pos, state, 2);
+        level.setBlock(pos, state, 3);
         placedAllLogs.get().add(pos.immutable());
         if (markBranch) {
             placedBranchLogs.get().add(pos.immutable());
@@ -222,8 +223,10 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         }
 
         int centerOffset = (trunkSize - 1) / 2;
+        // Basis-Dicke: wie vorher, aber Wurzellängen deutlich reduziert (nur kurze Ausläufer)
+        int baseThickness = trunkSize >= 3 ? 1 : 0;
         for (BlockPos start : starts) {
-            // if there is a drop, try to anchor downward
+            // gelegentlich verankern oder kleine vertikale Stummel
             if (measureGroundDistance(level, start, 6) > 0 && rnd.nextDouble() < 0.8) {
                 start = anchorRootToGround(level, start, 6, cfg, rnd);
             } else {
@@ -234,7 +237,10 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                 }
             }
 
-            int len = 1 + rnd.nextInt(Math.max(1, trunkSize));
+            // Entfernt: kein extra-Cluster direkt am Stamm mehr
+
+            // bewusst sehr kurz: nur 1 Schritt nach außen, damit Wurzeln nicht länger werden
+            int len = 1;
             int relX = start.getX() - origin.getX();
             int relZ = start.getZ() - origin.getZ();
             int dirX = Integer.signum(relX - centerOffset);
@@ -253,48 +259,77 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         double y = start.getY();
         double z = start.getZ();
         for (int i = 0; i < len; i++) {
-            x += dx * (0.6 + rnd.nextDouble() * 0.9);
-            z += dz * (0.6 + rnd.nextDouble() * 0.9);
+            // deutlich kleinere horizontale Schritte, damit Wurzeln kompakter bleiben
+            x += dx * (0.4 + rnd.nextDouble() * 0.4);
+            z += dz * (0.4 + rnd.nextDouble() * 0.4);
 
             BlockPos probe = new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z));
             int drop = measureGroundDistance(level, probe, 8);
+
             if (drop > 0) {
-                double downBias = 0.8 + rnd.nextDouble() * Math.min(1.6, drop * 0.5);
-                y -= downBias;
-                if (rnd.nextDouble() < Math.min(0.85, 0.25 + drop * 0.15)) {
-                    BlockPos anchored = anchorRootToGround(level, new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z)), Math.min(8, Math.max(3, drop + 1)), cfg, rnd);
+                // wenn Boden unter dem Pfad ist, mit hoher Wahrscheinlichkeit direkt verankern
+                if (rnd.nextDouble() < 0.9) {
+                    BlockPos anchored = anchorRootToGround(level, probe, Math.min(4, drop + 1), cfg, rnd);
+                    // setze Koordinaten auf verankerten Punkt und beende die Ausweitung (keine lange Verlängerung)
                     x = anchored.getX();
                     y = anchored.getY();
                     z = anchored.getZ();
-                    if (rnd.nextDouble() < 0.35) {
+                    // gelegentlich nur einen kurzen Seitenausläufer nach dem Verankern
+                    if (rnd.nextDouble() < 0.25) {
                         int sx = rnd.nextBoolean() ? 1 : -1;
                         int sz = rnd.nextBoolean() ? 1 : -1;
-                        genRootOutward(level, anchored, sx, sz, Math.max(1, len / 3), cfg, rnd);
+                        genRootOutward(level, anchored, sx, sz, 1, cfg, rnd);
                     }
-                    continue;
+                    // nach Verankerung nicht weiter horizontal fortsetzen
+                    break;
+                } else {
+                    // seltene moderate Abstufung, aber maximal 1 Block runter, um Sprünge zu vermeiden
+                    y -= 1.0;
                 }
             } else {
-                if (rnd.nextDouble() < 0.7) y -= 1;
+                // kleinere Wahrscheinlichkeit, 1 Block abzusinken, sonst gerade weiter
+                if (rnd.nextDouble() < 0.35) y -= 1;
             }
 
             BlockPos p = new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z));
             if (!withinBuildHeight(level, p)) break;
+
+            // Falls unter dem geplanten Punkt ein längerer Leerraum ist, verankere kurz, bevor du einen einzelnen Block setzt
+            int belowGap = measureGroundDistance(level, p, 4);
+            if (belowGap > 1) {
+                BlockPos anchored = anchorRootToGround(level, p, Math.min(4, belowGap + 1), cfg, rnd);
+                p = anchored;
+                x = p.getX();
+                y = p.getY();
+                z = p.getZ();
+            }
+
             if (canReplaceForLog(level, p)) {
                 Direction.Axis axis = Math.abs(dx) > Math.abs(dz) ? Direction.Axis.X : (Math.abs(dz) > Math.abs(dx) ? Direction.Axis.Z : Direction.Axis.Y);
                 placeLog(level, p, axis, cfg, rnd, false);
+
+                // reduzierte seitliche Logs, damit Wurzel schlank bleibt
+                for (Direction s : Direction.Plane.HORIZONTAL) {
+                    if (rnd.nextDouble() < 0.25) {
+                        BlockPos side = p.relative(s);
+                        if (withinBuildHeight(level, side) && canReplaceForLog(level, side)) {
+                            placeLog(level, side, Direction.Axis.Y, cfg, rnd, false);
+                        }
+                    }
+                }
+
+                // sehr selten kleine 3x3-Cluster, um lokale Dicke zu geben
+                if (rnd.nextDouble() < 0.08) {
+                    placeRootCluster(level, p, 1, cfg, rnd, false);
+                }
             }
 
-            if (rnd.nextDouble() < 0.18) {
+            // kleine Chance für einen kurzen Seitenausläufer, nicht rekursive Verlängerung
+            if (rnd.nextDouble() < 0.12) {
                 BlockPos side = p.relative(Direction.Plane.HORIZONTAL.getRandomDirection(rnd));
                 if (withinBuildHeight(level, side) && canReplaceForLog(level, side)) {
                     placeLog(level, side, Direction.Axis.Y, cfg, rnd, false);
                 }
-            }
-
-            if (i > 1 && rnd.nextDouble() < 0.12) {
-                int sx = rnd.nextBoolean() ? 1 : -1;
-                int sz = rnd.nextBoolean() ? 1 : -1;
-                genRootOutward(level, p, sx, sz, Math.max(1, len / 3), cfg, rnd);
             }
         }
     }
@@ -303,6 +338,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         BlockPos p = start.immutable();
         if (!withinBuildHeight(level, p)) return start;
         int placed = 0;
+        // immer durchgehend nach unten setzen, bis nicht mehr ersetzbar oder maxDepth erreicht
         for (int d = 0; d < maxDepth; d++) {
             if (!withinBuildHeight(level, p)) break;
             BlockPos below = p.below();
@@ -312,10 +348,12 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                 placed++;
             }
             if (!belowReplaceable) {
+                // wenn Boden erreicht, Rückgabe der obersten gesetzten Position (für Kontinuität)
                 return p;
             }
             p = p.below();
         }
+        // wenn wir etwas gesetzt haben, gib die oberste gesetzte Position zurück (so dass caller verbunden bleibt)
         if (placed > 0) return p.above();
         return start;
     }
@@ -360,7 +398,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             }
             if (i >= len - 2 && rnd.nextFloat() < 0.35f) placeLeafCross(level, p, cfg, rnd);
         }
-        genLeafBlob(level, new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z)), 2 + rnd.nextInt(2), cfg, rnd);
+        // deutlich kleineres End-Blob: 0..1
+        genLeafBlob(level, new BlockPos((int)Math.round(x), (int)Math.round(y), (int)Math.round(z)), rnd.nextInt(2), cfg, rnd);
     }
 
     private void genIrregularCrown(WorldGenLevel level, BlockPos center, int canopyRadius, ElderGiantTreeConfig cfg, long baseSeed) {
@@ -414,7 +453,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             }
         }
 
-        int branchCount = Math.max(20, canopyRadius * 4) + global.nextInt(Math.max(1, canopyRadius));
+        // deutlich mehr Kronen-Äste erzeugen
+        int branchCount = Math.max(60, canopyRadius * 10) + global.nextInt(Math.max(1, canopyRadius * 2 + 1));
         for (int i = 0; i < branchCount; i++) {
             double angle = global.nextDouble() * Math.PI * 2;
             int sy = -below + global.nextInt(Math.max(1, above + below + 1));
@@ -423,7 +463,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             BlockPos start = center.offset(sx, sy, sz);
 
             int len = Math.max(3, Math.min(canopyRadius, 2 + global.nextInt(canopyRadius)));
-            int leafBlobRadius = Math.max(3, Math.min(canopyRadius + 1, 4 + global.nextInt(3)));
+            // LeafBlob deutlich verkleinert: 0..1 (statt 2..4)
+            int leafBlobRadius = Math.max(0, Math.min(canopyRadius, 1 + global.nextInt(2)));
 
             genCrownBranch(level, start, angle, len, canopyRadius, leafBlobRadius, cfg, global, planned);
         }
@@ -498,7 +539,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                     if (canReplaceForLeaves(level, leafPos)) plannedLeaves.add(leafPos.immutable());
                 }
 
-                int r = Math.max(3, Math.min(leafBlobRadius, canopyRadius + 1));
+                // Erlaube r = 0 (sehr kleine Blobs)
+                int r = Math.max(0, Math.min(leafBlobRadius, canopyRadius));
                 int r2 = r * r;
                 for (int ox = -r; ox <= r; ox++) {
                     for (int oy = -r; oy <= r; oy++) {
@@ -520,11 +562,19 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                         if (canReplaceForLog(level, side)) placeLog(level, side, Direction.Axis.Y, cfg, rnd, true);
                     }
                 }
+
+                // zusätzliche gelegentliche Seitenausläufer (unverändert)
+                if (rnd.nextDouble() < 0.12) {
+                    double subAngle = angle + (rnd.nextBoolean() ? 0.9 : -0.9) + (rnd.nextDouble() - 0.5) * 0.8;
+                    // bei Sub-Branches ebenfalls kleinere Länge übergeben
+                    genCrownBranch(level, p, subAngle, Math.max(1, steps / 3), canopyRadius, Math.max(0, leafBlobRadius - 1), cfg, rnd, plannedLeaves);
+                }
             }
 
-            if (i > 1 && rnd.nextDouble() < 0.20) {
+            // erhöhte Wahrscheinlichkeit für rekursive Sub-Branches (Länge reduziert)
+            if (i > 1 && rnd.nextDouble() < 0.35) {
                 double subAngle = angle + (rnd.nextBoolean() ? 0.7 : -0.7) + (rnd.nextDouble() - 0.5) * 0.6;
-                genCrownBranch(level, p, subAngle, Math.max(2, steps / 3), canopyRadius, leafBlobRadius, cfg, rnd, plannedLeaves);
+                genCrownBranch(level, p, subAngle, Math.max(1, steps / 4), canopyRadius, Math.max(0, leafBlobRadius - 1), cfg, rnd, plannedLeaves);
             }
         }
     }
@@ -663,6 +713,18 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         }
     }
 
+    private void placeRootCluster(WorldGenLevel level, BlockPos center, int thickness, ElderGiantTreeConfig cfg, RandomSource rnd, boolean markBranch) {
+        for (int rx = -thickness; rx <= thickness; rx++) {
+            for (int rz = -thickness; rz <= thickness; rz++) {
+                BlockPos p = center.offset(rx, 0, rz);
+                if (!withinBuildHeight(level, p)) continue;
+                if (canReplaceForLog(level, p)) {
+                    placeLog(level, p, Direction.Axis.Y, cfg, rnd, markBranch);
+                }
+            }
+        }
+    }
+
     private int computeDistanceToLog(WorldGenLevel level, BlockPos start, Set<BlockPos> futureLeaves) {
         if (hasAdjacentLog(level, start)) return 1;
 
@@ -672,7 +734,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         visited.add(start);
 
         int depth = 0;
-        while (!queue.isEmpty() && depth < 6) {
+        // vorher depth < 6, jetzt depth < 7 um bis Distanz 7 zu suchen
+        while (!queue.isEmpty() && depth < 7) {
             int layerSize = queue.size();
             depth++;
             for (int i = 0; i < layerSize; i++) {
@@ -682,10 +745,14 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                     if (!withinBuildHeight(level, n) || visited.contains(n)) continue;
                     visited.add(n);
                     BlockState ns = level.getBlockState(n);
+                    // erkenne Logs auch über den BlockTag und placedBranchLogs
                     if (ns.getBlock() instanceof RotatedPillarBlock) {
                         return depth;
                     }
-                    if (placedAllLogs.get().contains(n)) {
+                    if (ns.is(BlockTags.LOGS)) {
+                        return depth;
+                    }
+                    if (placedAllLogs.get().contains(n) || placedBranchLogs.get().contains(n)) {
                         return depth;
                     }
                     if (ns.is(BlockTags.LEAVES) || (futureLeaves != null && futureLeaves.contains(n))) {
@@ -697,20 +764,24 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         return 7;
     }
 
-    private boolean containsStructureVoid(WorldGenLevel level, BlockPos origin, int height, int trunkSize, int canopyR) {
-        int radiusX = canopyR + trunkSize + 2;
-        int radiusZ = canopyR + trunkSize + 2;
-        int minY = origin.getY();
-        int maxY = origin.getY() + height + canopyR + 2;
+    private boolean containsNonReplaceableBlocks(WorldGenLevel level, BlockPos origin, int height, int trunkSize, int canopyR) {
+        int extra = 2; // prüfen um +2 Blöcke erweitern
+        int radiusX = canopyR + trunkSize + 2 + extra;
+        int radiusZ = canopyR + trunkSize + 2 + extra;
+        int minY = origin.getY() - extra;
+        int maxY = origin.getY() + height + canopyR + 2 + extra;
 
         for (int y = minY; y <= maxY; y++) {
             for (int dx = -radiusX; dx <= radiusX; dx++) {
                 for (int dz = -radiusZ; dz <= radiusZ; dz++) {
-                    BlockPos p = origin.offset(dx, y - origin.getY(), dz); // y - origin.getY() weil offset erwartet relative y
+                    BlockPos p = origin.offset(dx, y - origin.getY(), dz);
                     if (!withinBuildHeight(level, p)) continue;
                     try {
                         BlockState s = level.getBlockState(p);
-                        if (s.is(Blocks.STRUCTURE_VOID)) return true;
+                        // Wenn der Block den geschützten Tag hat -> Abbruch
+                        if (s.is(ModTags.Blocks.ELDERWOODS_PROTECTED_STRUCTURE_BLOCKS)) {
+                            return true;
+                        }
                     } catch (Exception ignored) { }
                 }
             }
@@ -734,7 +805,9 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
         if (state.hasProperty(LeavesBlock.DISTANCE)) {
             int dist = computeDistanceToLog(level, pos, futureLeaves);
-            dist = Math.max(1, Math.min(7, dist));
+            // vorher: Math.max(1, Math.min(7, dist));
+            // jetzt: begrenze auf 6, damit Blätter nie distance=7 bekommen und nicht verfallen
+            dist = Math.max(1, Math.min(6, dist));
             state = state.setValue(LeavesBlock.DISTANCE, dist);
         }
 
@@ -743,7 +816,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             state = state.setValue(LeavesBlock.PERSISTENT, persistent);
         }
 
-        level.setBlock(pos, state, 2);
+        level.setBlock(pos, state, 3);
     }
 
     private void placeLeaves(WorldGenLevel level, BlockPos pos, ElderGiantTreeConfig cfg, RandomSource rnd) {
@@ -755,7 +828,9 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             BlockPos n = pos.relative(d);
             if (!withinBuildHeight(level, n)) continue;
             BlockState ns = level.getBlockState(n);
+            // akzeptiere sowohl RotatedPillarBlock-Instanzen als auch Blocks mit dem logs-Tag
             if (ns.getBlock() instanceof RotatedPillarBlock) return true;
+            if (ns.is(BlockTags.LOGS)) return true;
             if (placedBranchLogs.get().contains(n)) return true;
             if (placedAllLogs.get().contains(n)) return true;
         }

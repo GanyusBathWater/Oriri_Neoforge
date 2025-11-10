@@ -1,0 +1,1 @@
+Die Strukturen ohne tall_grass einscannen, weil die Blockstates von tall_grass in der Struktur falsch generieren und dies zu Textur-Bugs führt.

@@ -1,0 +1,16 @@
+{
+  "name": "oririmod:elderwoods_sanctuary_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "oririmod:elderwoods_sanctuary",
+        "processors": "oririmod:elderwoods_sanctuary_blocks",
+        "projection": "rigid",
+        "override_liquid_settings": "ignore_waterlogging"
+      }
+    }
+  ]
+}

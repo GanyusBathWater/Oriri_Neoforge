@@ -2,11 +2,14 @@ package net.ganyusbathwater.oririmod;
 
 import com.mojang.logging.LogUtils;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.config.ManaConfig;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.enchantment.ModEnchantmentEffects;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.item.ModItemGroups;
 import net.ganyusbathwater.oririmod.item.ModItems;
+import net.ganyusbathwater.oririmod.menu.ModMenus;
+import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.worldgen.ModFeatures;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -42,19 +46,21 @@ public class OririMod {
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
+
+        modEventBus.addListener(NetworkHandler::register);
         ModItemGroups.registerItemGroups(modEventBus);
         ModItems.registerModItems(modEventBus);
         ModBlocks.register(modEventBus);
+        ModMenus.MENUS.register(modEventBus);
         ModEffects.registerEffects(modEventBus);
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);
         ModEntities.register(modEventBus);
-        // Register the item to a creative tab
+
         modEventBus.addListener(this::addCreative);
         ModFeatures.register(modEventBus);
 
-        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.COMMON, ManaConfig.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

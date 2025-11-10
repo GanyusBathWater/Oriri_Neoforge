@@ -6,6 +6,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 
 import java.util.concurrent.CompletableFuture;
@@ -89,9 +90,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .define('A', Items.IRON_BARS)
                     .unlockedBy("has_iron_bars", has(Items.IRON_BARS)).save(recipeOutput);
 
-            ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModBlocks.ELDER_PLANKS.get(), 4)
-                    .requires(ModBlocks.ELDER_LOG_BLOCK)
-                    .unlockedBy("has_elder_log_block", has(ModBlocks.ELDER_LOG_BLOCK)).save(recipeOutput);
+            stairBuilder(ModBlocks.ELDER_STAIRS.get(), Ingredient.of(ModBlocks.ELDER_PLANKS)).unlockedBy("has_elder_planks", has(ModBlocks.ELDER_PLANKS)).save(recipeOutput);
+            slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_SLAB.get(), ModBlocks.ELDER_PLANKS);
+            fenceBuilder(ModBlocks.ELDER_FENCE.get(), Ingredient.of(ModBlocks.ELDER_PLANKS)).unlockedBy("has_elder_planks", has(ModBlocks.ELDER_PLANKS)).save(recipeOutput);
+            fenceGateBuilder(ModBlocks.ELDER_GATE.get(), Ingredient.of(ModBlocks.ELDER_PLANKS)).unlockedBy("has_elder_planks", has(ModBlocks.ELDER_PLANKS)).save(recipeOutput);
+
+            woodFromLogs(recipeOutput, ModBlocks.ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_PLANKS.get());
+            woodFromLogs(recipeOutput, ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_PLANKS.get());
         /*
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.BISMUTH.get(), 9)
                 .requires(ModBlocks.BISMUTH_BLOCK)
