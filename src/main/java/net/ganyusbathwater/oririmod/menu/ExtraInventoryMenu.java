@@ -1,3 +1,4 @@
+// java
 package net.ganyusbathwater.oririmod.menu;
 
 import net.minecraft.core.HolderLookup;
@@ -13,7 +14,10 @@ import net.minecraft.world.item.ItemStack;
 
 public class ExtraInventoryMenu extends AbstractContainerMenu {
     public static final String NBT_KEY = "OririExtraInventory";
-    public static final int SIZE = 9;
+    public static final int SIZE = 4;
+
+    // Höhe wie Doppel‑Kiste (6 Reihen oben)
+    private static final int ROWS = 6;
 
     private final Player player;
     private final Inventory playerInv;
@@ -25,18 +29,24 @@ public class ExtraInventoryMenu extends AbstractContainerMenu {
         this.player = inv.player;
         this.extra = loadOrCreate(player);
 
-        int xStart = 8;
-        int yStart = 18;
+        int xStart = 8;   // linker Standard‑Offset (Vanilla)
+        int yStart = 18;  // oberer Standard‑Offset (Vanilla)
 
-        // Extra Slots
+        // Slots exakt auf Kistenfelder 12, 16, 39, 43 (1‑basiert) setzen
+        int[] CHEST_SLOTS_1_BASED = {12, 16, 39, 43};
         for (int i = 0; i < SIZE; i++) {
-            this.addSlot(new Slot(extra, i, xStart + i * 18, yStart));
+            int n0 = CHEST_SLOTS_1_BASED[i] - 1; // in 0‑basiert
+            int row = n0 / 9;
+            int col = n0 % 9;
+            int x = xStart + col * 18;
+            int y = yStart + row * 18;
+            this.addSlot(new Slot(extra, i, x, y));
         }
 
-        // Spieler-Inventar (3 Reihen)
-        addPlayerInventory(inv, 8, yStart + 32);
-        // Hotbar
-        addPlayerHotbar(inv, 8, yStart + 90);
+        // Spieler‑Inventar/Hotbar unterhalb der 6 Reihen (Vanilla‑Raster 18)
+        int playerInvY = yStart + ROWS * 18 + 14;
+        addPlayerInventory(inv, xStart, playerInvY);
+        addPlayerHotbar(inv, xStart, playerInvY + 58);
     }
 
     private void addPlayerInventory(Inventory inv, int x, int y) {
@@ -72,9 +82,9 @@ public class ExtraInventoryMenu extends AbstractContainerMenu {
             ItemStack in = slot.getItem();
             stack = in.copy();
 
-            int extraEnd = SIZE;
-            int invStart = SIZE;
-            int hotbarEnd = invStart + 27 + 9;
+            int extraEnd = SIZE;               // 0..3 (4 Slots)
+            int invStart = SIZE;               // 4
+            int hotbarEnd = invStart + 27 + 9; // 40
 
             if (index < extraEnd) {
                 if (!this.moveItemStackTo(in, invStart, hotbarEnd, true)) return ItemStack.EMPTY;

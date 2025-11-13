@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.menu.ExtraInventoryMenu;
 import net.ganyusbathwater.oririmod.menu.ModMenus;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,11 +19,12 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public class ExtraInventoryScreen extends AbstractContainerScreen<ExtraInventoryMenu> {
-    private static final ResourceLocation BG =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/generic_54.png");
-    private static final int ROWS = 1;
+    private static final int ROWS = 6; // Doppel‑Kiste
     private static final int IMAGE_WIDTH = 176;
-    private static final int IMAGE_HEIGHT = 114 + ROWS * 18;
+    private static final int IMAGE_HEIGHT = 114 + ROWS * 18; // 222 bei 6 Reihen
+
+    // Eigene Textur
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/gui/extra_container.png");
 
     public ExtraInventoryScreen(ExtraInventoryMenu menu, Inventory inv, Component title) {
         super(menu, inv, Component.translatable("screen.oririmod.extra_inventory"));
@@ -33,11 +35,12 @@ public class ExtraInventoryScreen extends AbstractContainerScreen<ExtraInventory
 
     @Override
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
-        RenderSystem.setShaderTexture(0, BG);
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-        g.blit(BG, x, y, 0, 0, this.imageWidth, 17 + ROWS * 18);
-        g.blit(BG, x, y + 17 + ROWS * 18, 0, 126, this.imageWidth, 96);
+
+        // Textur setzen und komplett als Hintergrund zeichnen
+        RenderSystem.setShaderTexture(0, BACKGROUND);
+        g.blit(BACKGROUND, x, y, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override

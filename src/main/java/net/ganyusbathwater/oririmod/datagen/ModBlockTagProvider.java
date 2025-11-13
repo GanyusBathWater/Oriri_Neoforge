@@ -54,5 +54,30 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
         tag(BlockTags.FENCE_GATES)
                 .add(ModBlocks.ELDER_GATE.get());
+
+        tag(ModTags.Blocks.ORES)
+                .add(Blocks.DIAMOND_ORE)
+                .add(Blocks.DEEPSLATE_DIAMOND_ORE)
+                .add(Blocks.EMERALD_ORE)
+                .add(Blocks.DEEPSLATE_EMERALD_ORE)
+                .add(Blocks.NETHER_QUARTZ_ORE)
+                .add(Blocks.COPPER_ORE)
+                .add(Blocks.DEEPSLATE_COPPER_ORE)
+                .add(Blocks.RAW_COPPER_BLOCK)
+                .add(Blocks.IRON_ORE)
+                .add(Blocks.DEEPSLATE_IRON_ORE)
+                .add(Blocks.RAW_IRON_BLOCK)
+                .add(Blocks.GOLD_ORE)
+                .add(Blocks.DEEPSLATE_GOLD_ORE)
+                .add(Blocks.RAW_GOLD_BLOCK)
+                .add(Blocks.REDSTONE_ORE)
+                .add(Blocks.DEEPSLATE_REDSTONE_ORE)
+                .add(Blocks.LAPIS_ORE)
+                .add(Blocks.DEEPSLATE_LAPIS_ORE)
+                .add(Blocks.COAL_ORE)
+                .add(Blocks.DEEPSLATE_COAL_ORE)
+                .add(Blocks.NETHER_GOLD_ORE)
+                .add(Blocks.ANCIENT_DEBRIS)
+                .add(Blocks.NETHER_QUARTZ_ORE);
     }
 }

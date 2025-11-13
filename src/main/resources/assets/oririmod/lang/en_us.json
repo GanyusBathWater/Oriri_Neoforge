@@ -10,13 +10,13 @@
   "item.oririmod.heart_of_the_tank": "Heart of the tank",
   "item.oririmod.hermes_gift": "Hermes gift",
   "item.oririmod.hollow_soul": "Hollow Soul",
-  "item.oririmod.ice_skates": "Ice Skates",
+  "item.oririmod.snow_boots": "Snow Boots",
   "item.oririmod.iras_soul": "Iras Soul",
   "item.oririmod.mana_heart": "Mana Heart",
   "item.oririmod.pestdoctors_mask": "Plague Doctors Mask",
   "item.oririmod.mirror_of_the_black_sun": "Mirror of the Black Sun",
   "item.oririmod.phoenix_feather": "Phoenix Feather",
-  "item.oririmod.plushie_of_the_mine": "Plushie of the Mine",
+  "item.oririmod.miners_lantern": "Miners Lantern",
   "item.oririmod.power_soul": "Power Soul",
   "item.oririmod.pyro_vision": "Pyro Vision",
   "item.oririmod.relic_of_the_past": "Relict of the Past",
@@ -87,6 +87,10 @@
   "item.oririmod.staff_of_wise": "Staff of the Wise",
   "item.oririmod.staff_of_hell": "Staff of Hell",
   "item.oririmod.staff_of_void": "Staff of the Void",
+  "item.oririmod.staff_of_forest": "Staff of the Forest",
+  "item.oririmod.staff_of_earth": "Staff of the Earth",
+  "item.oririmod.staff_of_cosmos": "Staff of the Cosmos",
+  "item.oririmod.staff_of_almighty": "Staff of the Almighty",
   "item.oririmod.dodoco": "Dodoco",
   "item.oririmod.one_thousand_screams": "One Thousand Screams",
   "item.oririmod.book_of_amateur": "Book of the Amateur",
@@ -162,6 +166,10 @@
   "block.oririmod.elder_leaves": "Elder Leaves",
   "block.oririmod.elder_sapling": "Elder Sapling",
   "block.oririmod.elder_planks": "Elder Planks",
+  "block.oririmod.elder_stairs": "Elder Stairs",
+  "block.oririmod.elder_slab": "Elder Slab",
+  "block.oririmod.elder_fence": "Elder Fence",
+  "block.oririmod.elder_gate": "Elder Gate",
   "block.oririmod.elder_spore_blossom": "Elder Spore Blossom",
   "block.oririmod.elder_leaves_flowering": "Flowering Elder Leaves",
 
@@ -179,6 +187,8 @@
 
   "creative.oriri_tab": "Oriri",
   "creative.oriri_tab_misc": "Oriri Collectibles",
+
+  "screen.oririmod.extra_inventory": "Vestiges",
 
   "itemgroup.oriri": "Oriri"
 }

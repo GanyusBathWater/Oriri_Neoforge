@@ -12,6 +12,7 @@ public class ModTags {
 
     public static class Blocks {
         public static final TagKey<Block> ELDERWOODS_PROTECTED_STRUCTURE_BLOCKS  = createTag("elderwoods_protected_structure_blocks");
+        public static final TagKey<Block> ORES  = createTag("ores");
 
 
         private static TagKey<Block> createTag(String name) {

@@ -60,7 +60,7 @@ public class ModItemGroups {
                         //-------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);
 
-                        //-----------Artifacts-----------
+                        //-----------Vestigess-----------
                         output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
                         output.accept(ModItems.CRIT_GLOVE);
                         output.accept(ModItems.DUELLANT_CORTEX);
