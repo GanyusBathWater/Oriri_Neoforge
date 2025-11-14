@@ -185,6 +185,18 @@
   "tooltip.oririmod.magic_book_4.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_4.tooltip.lore": "A book truly written by a master",
 
+  "tooltip.oririmod.vestige.strange_ender_eye.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.strange_ender_eye.level.1.description": "Level 1 grants Night Vision",
+  "tooltip.oririmod.vestige.strange_ender_eye.level.2.description": "Level 2 grants the ability to see Ores in a 16 Block Radius",
+  "tooltip.oririmod.vestige.strange_ender_eye.level.3.description": "Level 3 grants the ability to see Mobs in a 16 Block Radius",
+  "tooltip.oririmod.vestige.strange_ender_eye.lore": "Ripped from the corpse of an Enderman, it gives your eyes enhanced vision",
+
+  "tooltip.oririmod.vestige.heart_of_the_tank.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.heart_of_the_tank.level.1.description": "Level 1 increases your max health by 4 hearts",
+  "tooltip.oririmod.vestige.heart_of_the_tank.level.2.description": "Level 2 increases your max health by 6 hearts",
+  "tooltip.oririmod.vestige.heart_of_the_tank.level.3.description": "Level 3 increases your max health by 10 hearts",
+  "tooltip.oririmod.vestige.heart_of_the_tank.lore": "Wait, i think this comes from another world…",
+
   "creative.oriri_tab": "Oriri",
   "creative.oriri_tab_misc": "Oriri Collectibles",
 

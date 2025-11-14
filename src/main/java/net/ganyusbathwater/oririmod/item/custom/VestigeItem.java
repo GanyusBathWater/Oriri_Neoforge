@@ -1,7 +1,9 @@
+// language: java
 package net.ganyusbathwater.oririmod.item.custom;
 
 import net.ganyusbathwater.oririmod.effect.vestiges.VestigeEffect;
-import net.minecraft.ChatFormatting;
+import net.ganyusbathwater.oririmod.util.ModRarity;
+import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -10,29 +12,68 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class VestigeItem extends Item {
+public class VestigeItem extends Item implements ModRarityCarrier {
     public static final String NBT_UNLOCKED = "UnlockedLevel";
     public static final String NBT_DISABLED_MASK = "DisabledMask";
 
     private final List<List<VestigeEffect>> effectsPerLevel; // Index 0 -> Stufe 1
+    private final String translationKeyBase; // z.B. "tooltip.oririmod.vestige.fire_vestige"
+    private final ModRarity rarity;
 
+    // Beibehaltung bestehender Signaturen mit Default-Rarity
     public VestigeItem(Properties props, int maxLevel) {
+        this(props, maxLevel, "tooltip.oririmod.vestige", ModRarity.UNIQUE);
+    }
+
+    public VestigeItem(Properties props, int maxLevel, String translationKeyBase) {
+        this(props, maxLevel, translationKeyBase, ModRarity.UNIQUE);
+    }
+
+    public VestigeItem(Properties props, int maxLevel, String translationKeyBase, ModRarity rarity) {
         super(props);
         this.effectsPerLevel = new ArrayList<>(Math.max(1, maxLevel));
         for (int i = 0; i < Math.max(1, maxLevel); i++) this.effectsPerLevel.add(List.of());
+        this.translationKeyBase = translationKeyBase != null ? translationKeyBase : "tooltip.oririmod.vestige";
+        this.rarity = rarity != null ? rarity : ModRarity.UNIQUE;
     }
 
     public VestigeItem(Properties props, List<List<VestigeEffect>> perLevel) {
-        super(props);
-        this.effectsPerLevel = (perLevel == null || perLevel.isEmpty()) ? List.of(List.of()) : perLevel;
+        this(props, perLevel, "tooltip.oririmod.vestige", ModRarity.UNIQUE);
     }
 
+    public VestigeItem(Properties props, List<List<VestigeEffect>> perLevel, String translationKeyBase) {
+        this(props, perLevel, translationKeyBase, ModRarity.UNIQUE);
+    }
+
+    public VestigeItem(Properties props, List<List<VestigeEffect>> perLevel, String translationKeyBase, ModRarity rarity) {
+        super(props);
+        this.effectsPerLevel = (perLevel == null || perLevel.isEmpty()) ? List.of(List.of()) : perLevel;
+        this.translationKeyBase = translationKeyBase != null ? translationKeyBase : "tooltip.oririmod.vestige";
+        this.rarity = rarity != null ? rarity : ModRarity.UNIQUE;
+    }
+
+    // --- ModRarityCarrier ---
+    @Override
+    public ModRarity getModRarity() {
+        return this.rarity;
+    }
+
+    public String getTranslationKeyBase() {
+        return this.translationKeyBase;
+    }
+
+    // Delegation: keine Logik mehr hier, nur Weitergabe an ModRarityCarrier
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        ModRarityCarrier.super.appendHoverText(stack, context, tooltip, flag);
+    }
+
+    // --- Vestige-Logik ---
     public int getMaxLevel() {
         return effectsPerLevel.size();
     }
@@ -70,7 +111,6 @@ public class VestigeItem extends Item {
         return effectsPerLevel.get(level - 1);
     }
 
-    // Wird pro Tick aufgerufen
     public void applyTick(ServerPlayer player, ItemStack stack) {
         int unlocked = getUnlockedLevel(stack);
         for (int lvl = 1; lvl <= unlocked; lvl++) {
@@ -79,7 +119,6 @@ public class VestigeItem extends Item {
         }
     }
 
-    // Wird von Events genutzt
     public boolean grantsKeepInventory(ServerPlayer player, ItemStack stack) {
         int unlocked = getUnlockedLevel(stack);
         for (int lvl = 1; lvl <= unlocked; lvl++) {
@@ -91,7 +130,6 @@ public class VestigeItem extends Item {
         return false;
     }
 
-    // Summiert z.B. Step-Height-Bonus
     public float sumStepHeightBonus(ServerPlayer player, ItemStack stack) {
         float sum = 0F;
         int unlocked = getUnlockedLevel(stack);
@@ -102,37 +140,7 @@ public class VestigeItem extends Item {
         return sum;
     }
 
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        int max = getMaxLevel();
-        int unlocked = getUnlockedLevel(stack);
-        tooltip.add(Component.translatable("tooltip.oririmod.vestige.level", unlocked, max).withStyle(ChatFormatting.AQUA));
-
-        int mask = getInt(stack, NBT_DISABLED_MASK, 0);
-        for (int lvl = 1; lvl <= unlocked; lvl++) {
-            boolean enabled = (mask & (1 << (lvl - 1))) == 0;
-            tooltip.add(Component.translatable(
-                    enabled ? "tooltip.oririmod.vestige.level.enabled" : "tooltip.oririmod.vestige.level.disabled", lvl
-            ).withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY));
-        }
-    }
-
-    // Kleiner Builder für definierte Stufen
-    public static Builder builder() { return new Builder(); }
-
-    public static class Builder {
-        private final List<List<VestigeEffect>> levels = new ArrayList<>();
-        public Builder level(VestigeEffect... effects) {
-            levels.add(List.of(effects));
-            return this;
-        }
-        public VestigeItem build(Properties props) {
-            return new VestigeItem(props, levels.isEmpty() ? List.of(List.of()) : List.copyOf(levels));
-        }
-    }
-
     // --- Helpers für CustomData (Data Components) ---
-
     private static int getInt(ItemStack stack, String key, int def) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) return def;
@@ -146,5 +154,38 @@ public class VestigeItem extends Item {
             tag.putInt(key, value);
             return CustomData.of(tag);
         });
+    }
+
+    // Builder erweitert um Rarity
+    public static Builder builder() { return new Builder(); }
+
+    public static class Builder {
+        private final List<List<VestigeEffect>> levels = new ArrayList<>();
+        private String translationKeyBase = "tooltip.oririmod.vestige";
+        private ModRarity rarity = ModRarity.UNIQUE;
+
+        public Builder translationKeyBase(String base) {
+            this.translationKeyBase = base;
+            return this;
+        }
+
+        public Builder rarity(ModRarity rarity) {
+            this.rarity = rarity;
+            return this;
+        }
+
+        public Builder level(VestigeEffect... effects) {
+            levels.add(List.of(effects));
+            return this;
+        }
+
+        public VestigeItem build(Properties props) {
+            return new VestigeItem(
+                    props,
+                    levels.isEmpty() ? List.of(List.of()) : List.copyOf(levels),
+                    translationKeyBase,
+                    rarity
+            );
+        }
     }
 }

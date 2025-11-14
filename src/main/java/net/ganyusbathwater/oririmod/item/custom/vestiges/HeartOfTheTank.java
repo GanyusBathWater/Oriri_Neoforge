@@ -3,12 +3,15 @@ package net.ganyusbathwater.oririmod.item.custom.vestiges;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.effect.vestiges.VestigeEffect;
 import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -64,5 +67,16 @@ public class HeartOfTheTank extends VestigeItem {
                 }
             }
         };
+    }
+
+    @Override
+    public String getTranslationKeyBase() {
+        return "tooltip.oririmod.vestige.heart_of_the_tank";
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        // Delegiere an die Implementierung in VestigeItem (die bereits zur ModRarityCarrier-Defaultmethode weiterleitet)
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 }
