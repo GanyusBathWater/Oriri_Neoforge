@@ -1,8 +1,9 @@
 // java
-package net.ganyusbathwater.oririmod.util.vestiges;
+package net.ganyusbathwater.oririmod.events.vestiges;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.menu.ExtraInventoryMenu;
+import net.ganyusbathwater.oririmod.util.vestiges.VestigeManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;

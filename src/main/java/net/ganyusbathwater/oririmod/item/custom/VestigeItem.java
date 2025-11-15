@@ -2,16 +2,25 @@
 package net.ganyusbathwater.oririmod.item.custom;
 
 import net.ganyusbathwater.oririmod.effect.vestiges.VestigeEffect;
+import net.ganyusbathwater.oririmod.menu.ExtraInventoryMenu;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -130,6 +139,18 @@ public class VestigeItem extends Item implements ModRarityCarrier {
         return false;
     }
 
+    public double sumHealthBonus(ServerPlayer player, ItemStack stack) {
+        double sum = 0.0D;
+        int unlocked = getUnlockedLevel(stack);
+        for (int lvl = 1; lvl <= unlocked; lvl++) {
+            if (!isLevelEnabled(stack, lvl)) continue;
+            for (var eff : getEffectsForLevel(lvl)) {
+                sum += eff.healthBonus(player, stack, lvl);
+            }
+        }
+        return sum;
+    }
+
     public float sumStepHeightBonus(ServerPlayer player, ItemStack stack) {
         float sum = 0F;
         int unlocked = getUnlockedLevel(stack);
@@ -187,5 +208,92 @@ public class VestigeItem extends Item implements ModRarityCarrier {
                     rarity
             );
         }
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack inHand = player.getItemInHand(hand);
+        // Nur auf Server logik ausführen
+        if (!level.isClientSide) {
+            boolean moved = tryMoveToExtraInventory(player, inHand);
+            if (moved) {
+                // Wenn Stack komplett verschoben wurde, Handslot leeren
+                if (inHand.isEmpty()) {
+                    player.setItemInHand(hand, ItemStack.EMPTY);
+                }
+                return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide);
+            }
+        }
+        return super.use(level, player, hand);
+    }
+
+    /**
+     * Versucht, den gegebenen Stack in das Extra-Inventar zu verschieben.
+     * Gibt `true` zurück, wenn sich der Stack im Extra-Inventar verändert hat.
+     */
+    private boolean tryMoveToExtraInventory(Player player, ItemStack source) {
+        if (source.isEmpty()) return false;
+
+        // Extra-Container aus NBT laden
+        CompoundTag root = player.getPersistentData();
+        HolderLookup.Provider lookup = player.level().registryAccess();
+        NonNullList<ItemStack> list = NonNullList.withSize(ExtraInventoryMenu.SIZE, ItemStack.EMPTY);
+
+        if (root.contains(ExtraInventoryMenu.NBT_KEY)) {
+            ContainerHelper.loadAllItems(root.getCompound(ExtraInventoryMenu.NBT_KEY), list, lookup);
+        }
+
+        SimpleContainer extra = new SimpleContainer(ExtraInventoryMenu.SIZE);
+        for (int i = 0; i < ExtraInventoryMenu.SIZE; i++) {
+            extra.setItem(i, list.get(i));
+        }
+
+        boolean changed = false;
+        ItemStack toMove = source.copy();
+
+        // 1) Zuerst in vorhandene Stacks einlagern
+        for (int i = 0; i < extra.getContainerSize() && !toMove.isEmpty(); i++) {
+            ItemStack slotStack = extra.getItem(i);
+            if (slotStack.isEmpty()) continue;
+            if (!ItemStack.isSameItemSameComponents(slotStack, toMove)) continue;
+
+            int maxStack = Math.min(slotStack.getMaxStackSize(), extra.getMaxStackSize());
+            int canMove = Math.min(maxStack - slotStack.getCount(), toMove.getCount());
+            if (canMove <= 0) continue;
+
+            slotStack.grow(canMove);
+            toMove.shrink(canMove);
+            extra.setItem(i, slotStack);
+            changed = true;
+        }
+
+        // 2) Dann in leere Slots legen
+        for (int i = 0; i < extra.getContainerSize() && !toMove.isEmpty(); i++) {
+            ItemStack slotStack = extra.getItem(i);
+            if (!slotStack.isEmpty()) continue;
+
+            int maxStack = Math.min(toMove.getMaxStackSize(), extra.getMaxStackSize());
+            ItemStack placed = toMove.split(maxStack);
+            extra.setItem(i, placed);
+            changed = true;
+        }
+
+        if (!changed) return false;
+
+        // Extra-Container zurück in NBT speichern
+        NonNullList<ItemStack> saveList = NonNullList.withSize(ExtraInventoryMenu.SIZE, ItemStack.EMPTY);
+        for (int i = 0; i < ExtraInventoryMenu.SIZE; i++) {
+            saveList.set(i, extra.getItem(i));
+        }
+        CompoundTag invTag = new CompoundTag();
+        ContainerHelper.saveAllItems(invTag, saveList, lookup);
+        root.put(ExtraInventoryMenu.NBT_KEY, invTag);
+
+        // Ursprünglichen Stack anpassen
+        source.setCount(toMove.getCount());
+        if (source.getCount() <= 0) {
+            source.setCount(0);
+        }
+        return true;
     }
 }

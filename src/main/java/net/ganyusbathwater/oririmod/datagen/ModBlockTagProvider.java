@@ -79,5 +79,15 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 .add(Blocks.NETHER_GOLD_ORE)
                 .add(Blocks.ANCIENT_DEBRIS)
                 .add(Blocks.NETHER_QUARTZ_ORE);
+
+        tag(ModTags.Blocks.SNOW_BOOTS_VALID_BLOCKS)
+                .add(Blocks.SNOW_BLOCK)
+                .add(Blocks.POWDER_SNOW)
+                .add(Blocks.ICE)
+                .add(Blocks.BLUE_ICE)
+                .add(Blocks.SNOW)
+                .add(Blocks.FROSTED_ICE)
+                .add(Blocks.PACKED_ICE);
+
     }
 }

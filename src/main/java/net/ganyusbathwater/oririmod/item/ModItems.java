@@ -2,8 +2,7 @@ package net.ganyusbathwater.oririmod.item;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.item.custom.*;
-import net.ganyusbathwater.oririmod.item.custom.vestiges.HeartOfTheTank;
-import net.ganyusbathwater.oririmod.item.custom.vestiges.StrangeEnderEye;
+import net.ganyusbathwater.oririmod.item.custom.vestiges.*;
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.minecraft.world.item.*;
@@ -31,15 +30,15 @@ public class ModItems {
     //---------------------------------------Vestiges---------------------------------------------------------
 
     public static final DeferredItem<VestigeItem> BOUND_OF_THE_CELESTIAL_SISTERS = ITEMS.register("bound_of_the_celestial_sisters", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> CRIT_GLOVE = ITEMS.register("crit_glove", () -> new VestigeItem(new Item.Properties(), 3));
+    public static final DeferredItem<VestigeItem> CRIT_GLOVE = ITEMS.register("crit_glove", () -> new CritGlove(new Item.Properties()));
     public static final DeferredItem<VestigeItem> DUELLANT_CORTEX = ITEMS.register("duellant_cortex", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> HEART_OF_THE_TANK = ITEMS.register("heart_of_the_tank", () -> new HeartOfTheTank(new Item.Properties()));
     public static final DeferredItem<VestigeItem> HERMES_GIFT = ITEMS.register("hermes_gift", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> SNOW_BOOTS = ITEMS.register("snow_boots", () -> new VestigeItem(new Item.Properties(), 3));
+    public static final DeferredItem<VestigeItem> SNOW_BOOTS = ITEMS.register("snow_boots", () -> new SnowBoots(new Item.Properties()));
     public static final DeferredItem<VestigeItem> MANA_HEART = ITEMS.register("mana_heart", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> PESTDOCTORS_MASK = ITEMS.register("pestdoctors_mask", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> MIRROR_OF_THE_BLACK_SUN = ITEMS.register("mirror_of_the_black_sun", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new VestigeItem(new Item.Properties(), 3));
+    public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new PhoenixFeather(new Item.Properties()));
     public static final DeferredItem<VestigeItem> MINERS_LANTERN = ITEMS.register("miners_lantern", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> PYRO_VISION = ITEMS.register("pyro_vision", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> RELIC_OF_THE_PAST = ITEMS.register("relic_of_the_past", () -> new VestigeItem(new Item.Properties(), 3));

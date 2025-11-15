@@ -193,9 +193,21 @@
 
   "tooltip.oririmod.vestige.heart_of_the_tank.level": "Current Level: %s",
   "tooltip.oririmod.vestige.heart_of_the_tank.level.1.description": "Level 1 increases your max health by 4 hearts",
-  "tooltip.oririmod.vestige.heart_of_the_tank.level.2.description": "Level 2 increases your max health by 6 hearts",
-  "tooltip.oririmod.vestige.heart_of_the_tank.level.3.description": "Level 3 increases your max health by 10 hearts",
+  "tooltip.oririmod.vestige.heart_of_the_tank.level.2.description": "Level 2 increases your max health by 2 additional hearts to a total of 6 hearts",
+  "tooltip.oririmod.vestige.heart_of_the_tank.level.3.description": "Level 3 increases your max health by 4 additional hearts to a total of 10 hearts",
   "tooltip.oririmod.vestige.heart_of_the_tank.lore": "Wait, i think this comes from another world…",
+
+  "tooltip.oririmod.vestige.snow_boots.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.snow_boots.level.1.description": "Level 1 grants Speed Boost I on Snow and Ice Blocks",
+  "tooltip.oririmod.vestige.snow_boots.level.2.description": "Level 2 grants the ability to walk on Powdered Snow",
+  "tooltip.oririmod.vestige.snow_boots.level.3.description": "Level 3 grants Knockpack Immunity on Ice and Snow Blocks",
+  "tooltip.oririmod.vestige.snow_boots.lore": "Shall we go ice skating?",
+
+  "tooltip.oririmod.vestige.phoenix_feather.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.phoenix_feather.level.1.description": "Level 1 grants the ability to withstand fatal damage with a 20% chance",
+  "tooltip.oririmod.vestige.phoenix_feather.level.2.description": "Level 2 increases the chance to 35%",
+  "tooltip.oririmod.vestige.phoenix_feather.level.3.description": "Level 3 increases the chance to 50%",
+  "tooltip.oririmod.vestige.phoenix_feather.lore": "Majestic beings, these phoenixes right Harry?",
 
   "creative.oriri_tab": "Oriri",
   "creative.oriri_tab_misc": "Oriri Collectibles",
