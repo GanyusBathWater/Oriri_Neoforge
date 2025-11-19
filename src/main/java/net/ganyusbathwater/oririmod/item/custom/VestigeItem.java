@@ -296,4 +296,8 @@ public class VestigeItem extends Item implements ModRarityCarrier {
         }
         return true;
     }
+
+    public List<VestigeEffect> getEffectsForLevelPublic(int level) {
+        return getEffectsForLevel(level);
+    }
 }

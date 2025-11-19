@@ -3,7 +3,6 @@ package net.ganyusbathwater.oririmod.item.custom.vestiges;
 
 import net.ganyusbathwater.oririmod.effect.vestiges.VestigeEffects;
 import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
-import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -19,8 +18,8 @@ public class StrangeEnderEye extends VestigeItem {
     public StrangeEnderEye(Properties props) {
         super(props, List.of(
                 List.of(VestigeEffects.mobEffect(MobEffects.NIGHT_VISION, 0, 260)),
-                List.of(VestigeEffects.oreSense(16)),
-                List.of(VestigeEffects.mobSense(16))
+                List.of(VestigeEffects.mobSense(16)),
+                List.of(VestigeEffects.mobSense(32))
         ));
     }
 

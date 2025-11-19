@@ -22,7 +22,7 @@
   "item.oririmod.relic_of_the_past": "Relict of the Past",
   "item.oririmod.solis_brooch": "Solis Brooch",
   "item.oririmod.stigma_of_the_architect": "Stigma of the Architect",
-  "item.oririmod.soul_bind": "Soulbinder",
+  "item.oririmod.soul_stone": "Soulstone",
   "item.oririmod.spring": "Spring",
   "item.oririmod.strange_ender_eye": "Strange Ender Eye",
   "item.oririmod.striders_scale": "Strider's Scale",
@@ -208,6 +208,27 @@
   "tooltip.oririmod.vestige.phoenix_feather.level.2.description": "Level 2 increases the chance to 35%",
   "tooltip.oririmod.vestige.phoenix_feather.level.3.description": "Level 3 increases the chance to 50%",
   "tooltip.oririmod.vestige.phoenix_feather.lore": "Majestic beings, these phoenixes right Harry?",
+
+  "tooltip.oririmod.vestige.crit_glove.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.crit_glove.level.1.description": "Level 1 recharges your Crit Meter 25% faster",
+  "tooltip.oririmod.vestige.crit_glove.level.2.description": "Level 2 increases the percentage to 50%",
+  "tooltip.oririmod.vestige.crit_glove.level.3.description": "Level 3 increases the percentage to 75%",
+  "tooltip.oririmod.vestige.crit_glove.lore": "Gloves of a Strong Assassin, every hit will be devastating",
+
+  "tooltip.oririmod.vestige.soulstone.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.soulstone.level.1.description": "Level 1 saves your Hotbar items and your Vestiges on death",
+  "tooltip.oririmod.vestige.soulstone.level.2.description": "Level 2 additionally saves your Armor on death",
+  "tooltip.oririmod.vestige.soulstone.level.3.description": "Level 3 saves your entire Inventory on death",
+  "tooltip.oririmod.vestige.soulstone.lore": "A stone that reflects your soul",
+
+  "tooltip.oririmod.element.fire": "Fire Weapon",
+  "tooltip.oririmod.element.water": "Water Weapon",
+  "tooltip.oririmod.element.earth": "Earth Weapon",
+  "tooltip.oririmod.element.nature": "Nature Weapon",
+  "tooltip.oririmod.element.light": "Light Weapon",
+  "tooltip.oririmod.element.darkness": "Darkness Weapon",
+  "tooltip.oririmod.element.physical": "Physical Weapon",
+
 
   "creative.oriri_tab": "Oriri",
   "creative.oriri_tab_misc": "Oriri Collectibles",

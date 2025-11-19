@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Level 2: 35 % Wiederbelebungschance
  * Level 3: 50 % Wiederbelebungschance
  */
+
 public class PhoenixFeather extends VestigeItem {
 
     public PhoenixFeather(Properties props) {

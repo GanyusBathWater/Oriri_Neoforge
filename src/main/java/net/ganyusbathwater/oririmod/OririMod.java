@@ -2,6 +2,9 @@ package net.ganyusbathwater.oririmod;
 
 import com.mojang.logging.LogUtils;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.combat.ElementInit;
+import net.ganyusbathwater.oririmod.combat.ElementTooltipHandler;
+import net.ganyusbathwater.oririmod.combat.ElementalDamageHandler;
 import net.ganyusbathwater.oririmod.config.ManaConfig;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.enchantment.ModEnchantmentEffects;
@@ -56,7 +59,6 @@ public class OririMod {
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);
         ModEntities.register(modEventBus);
-
         modEventBus.addListener(this::addCreative);
         ModFeatures.register(modEventBus);
 
@@ -64,6 +66,11 @@ public class OririMod {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            ElementInit.init();
+            ElementalDamageHandler.register();
+            ElementTooltipHandler.register();
+        });
 
     }
 

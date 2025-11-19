@@ -1,5 +1,5 @@
 // java
-package net.ganyusbathwater.oririmod.item.custom;
+package net.ganyusbathwater.oririmod.item.custom.magic;
 
 import net.ganyusbathwater.oririmod.entity.MagicBoltEntity;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;

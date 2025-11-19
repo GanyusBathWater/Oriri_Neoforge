@@ -2,8 +2,10 @@ package net.ganyusbathwater.oririmod.item.custom;
 
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
-import net.minecraft.world.item.PickaxeItem;
-import net.minecraft.world.item.Tier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.*;
+
+import java.util.List;
 
 public class CustomPickaxeItem extends PickaxeItem implements ModRarityCarrier {
     private final ModRarity rarity;

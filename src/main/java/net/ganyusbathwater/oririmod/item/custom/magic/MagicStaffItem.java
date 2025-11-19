@@ -1,4 +1,4 @@
-package net.ganyusbathwater.oririmod.item.custom;
+package net.ganyusbathwater.oririmod.item.custom.magic;
 
 import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.ganyusbathwater.oririmod.util.ModRarity;

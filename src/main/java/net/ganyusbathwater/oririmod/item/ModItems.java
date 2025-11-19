@@ -2,6 +2,9 @@ package net.ganyusbathwater.oririmod.item;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.item.custom.*;
+import net.ganyusbathwater.oririmod.item.custom.magic.MagicBoltItem;
+import net.ganyusbathwater.oririmod.item.custom.magic.MagicStaffItem;
+import net.ganyusbathwater.oririmod.item.custom.magic.OmniMagicItem;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.*;
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
 import net.ganyusbathwater.oririmod.util.ModRarity;
@@ -33,50 +36,45 @@ public class ModItems {
     public static final DeferredItem<VestigeItem> CRIT_GLOVE = ITEMS.register("crit_glove", () -> new CritGlove(new Item.Properties()));
     public static final DeferredItem<VestigeItem> DUELLANT_CORTEX = ITEMS.register("duellant_cortex", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> HEART_OF_THE_TANK = ITEMS.register("heart_of_the_tank", () -> new HeartOfTheTank(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> HERMES_GIFT = ITEMS.register("hermes_gift", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> SNOW_BOOTS = ITEMS.register("snow_boots", () -> new SnowBoots(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> MANA_HEART = ITEMS.register("mana_heart", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> PESTDOCTORS_MASK = ITEMS.register("pestdoctors_mask", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> MIRROR_OF_THE_BLACK_SUN = ITEMS.register("mirror_of_the_black_sun", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new PhoenixFeather(new Item.Properties()));
     public static final DeferredItem<VestigeItem> MINERS_LANTERN = ITEMS.register("miners_lantern", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> PYRO_VISION = ITEMS.register("pyro_vision", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> RELIC_OF_THE_PAST = ITEMS.register("relic_of_the_past", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> SOLIS_BROOCH = ITEMS.register("solis_brooch", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> STIGMA_OF_THE_ARCHITECT = ITEMS.register("stigma_of_the_architect", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> SOUL_BIND = ITEMS.register("soul_bind", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> SPRING = ITEMS.register("spring", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> STRIDERS_SCALE = ITEMS.register("striders_scale", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> STRANGE_ENDER_EYE = ITEMS.register("strange_ender_eye", () -> new StrangeEnderEye(new Item.Properties()));
     public static final DeferredItem<VestigeItem> SWEETS_BAG = ITEMS.register("sweets_bag", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> WITHER_ROSE = ITEMS.register("wither_rose", () -> new VestigeItem(new Item.Properties(), 3));
 
-    //---------------------------------------Plants/Foods---------------------------------------------------------
+    //---------------------------------------Foods---------------------------------------------------------
 
     public static final DeferredItem<Item> ELDERBERRY = ITEMS.register("elderberry", () -> new Item(new Item.Properties().food(ModFoods.ELDERBERRY)));
 
     //---------------------------------------Weapons---------------------------------------------------------
 
-    public static final DeferredItem<SwordItem> PANDORAS_BLADE = ITEMS.register("pandoras_blade", () -> new CustomSwordItem(Tiers.DIAMOND, new Item.Properties(), ModRarity.MYTHIC));
-    public static final DeferredItem<SwordItem> PIRATE_SABER = ITEMS.register("pirate_saber", () -> new CustomSwordItem(Tiers.IRON, new Item.Properties(), ModRarity.UNCOMMON));
-    public static final DeferredItem<SwordItem> ICE_SWORD = ITEMS.register("ice_sword", () -> new CustomSwordItem(Tiers.DIAMOND, new Item.Properties(), ModRarity.RARE));
-    public static final DeferredItem<MaceItem> LAW_BREAKER = ITEMS.register("law_breaker", () -> new CustomHammerItem(new Item.Properties(), ModRarity.GODLY));
-    public static final DeferredItem<SwordItem> STELLA_PERDITOR = ITEMS.register("stella_perditor", () -> new CustomSwordItem(Tiers.NETHERITE, new Item.Properties(), ModRarity.UNIQUE));
-    public static final DeferredItem<SwordItem> QILINS_WRATH = ITEMS.register("qilins_wrath", () -> new CustomSwordItem(Tiers.NETHERITE, new Item.Properties(),ModRarity.GODLY));
-    public static final DeferredItem<SwordItem> SOLS_EMBRACE = ITEMS.register("sols_embrace", () -> new CustomSwordItem(Tiers.DIAMOND, new Item.Properties(), ModRarity.LEGENDARY));
+    public static final DeferredItem<SwordItem> PANDORAS_BLADE = ITEMS.register("pandoras_blade", () -> new CustomSwordItem(Tiers.DIAMOND, new Item.Properties().fireResistant().attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F)), ModRarity.MYTHIC));
+    public static final DeferredItem<SwordItem> PIRATE_SABER = ITEMS.register("pirate_saber", () -> new CustomSwordItem(Tiers.IRON, new Item.Properties().attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -1F)), ModRarity.UNCOMMON));
+    public static final DeferredItem<SwordItem> ICE_SWORD = ITEMS.register("ice_sword", () -> new CustomSwordItem(Tiers.DIAMOND, new Item.Properties().attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F)), ModRarity.RARE));
+    public static final DeferredItem<MaceItem> LAW_BREAKER = ITEMS.register("law_breaker", () -> new CustomHammerItem(new Item.Properties().fireResistant().attributes(MaceItem.createAttributes()), ModRarity.GODLY));
+    public static final DeferredItem<SwordItem> STELLA_PERDITOR = ITEMS.register("stella_perditor", () -> new CustomSwordItem(Tiers.NETHERITE, new Item.Properties().fireResistant().attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6,-1.4F)), ModRarity.UNIQUE));
+    public static final DeferredItem<SwordItem> QILINS_WRATH = ITEMS.register("qilins_wrath", () -> new CustomSwordItem(Tiers.NETHERITE, new Item.Properties().fireResistant().attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6, -1.4F)),ModRarity.GODLY));
+    public static final DeferredItem<SwordItem> SOLS_EMBRACE = ITEMS.register("sols_embrace", () -> new CustomSwordItem(Tiers.DIAMOND, new Item.Properties().fireResistant().attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F)), ModRarity.LEGENDARY));
 
-    public static final DeferredItem<PickaxeItem> NEBULA_PICKAXE = ITEMS.register("nebula_pickaxe", () -> new CustomPickaxeItem(Tiers.NETHERITE, new Item.Properties(), ModRarity.LEGENDARY));
-    public static final DeferredItem<PickaxeItem> MOLTEN_PICKAXE = ITEMS.register("molten_pickaxe", () -> new CustomPickaxeItem(Tiers.DIAMOND, new Item.Properties(), ModRarity.RARE));
-    public static final DeferredItem<MaceItem> MJOELNIR = ITEMS.register("mjoelnir", () -> new CustomHammerItem(new Item.Properties(), ModRarity.MYTHIC));
+    public static final DeferredItem<PickaxeItem> NEBULA_PICKAXE = ITEMS.register("nebula_pickaxe", () -> new CustomPickaxeItem(Tiers.NETHERITE, new Item.Properties().attributes(PickaxeItem.createAttributes(Tiers.NETHERITE, 1, -2.8F)), ModRarity.LEGENDARY));
+    public static final DeferredItem<PickaxeItem> MOLTEN_PICKAXE = ITEMS.register("molten_pickaxe", () -> new CustomPickaxeItem(Tiers.DIAMOND, new Item.Properties().attributes(PickaxeItem.createAttributes(Tiers.DIAMOND, 1, -2.8F)), ModRarity.RARE));
+    public static final DeferredItem<MaceItem> MJOELNIR = ITEMS.register("mjoelnir", () -> new CustomHammerItem(new Item.Properties().attributes(MaceItem.createAttributes()), ModRarity.MYTHIC));
 
     public static final DeferredItem<CrossbowItem> ARBITER_CROSSBOW = ITEMS.register("arbiter_crossbow", () -> new CustomCrossbowItem(new Item.Properties(), ModRarity.LEGENDARY));
     public static final DeferredItem<BowItem> ORAPHIM_BOW = ITEMS.register("oraphim_bow", () -> new CustomBowItemClass(new Item.Properties(), ModRarity.LEGENDARY));
 
-    public static final DeferredItem<SwordItem> EMERALD_SWORD = ITEMS.register("emerald_sword", () -> new SwordItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
-    public static final DeferredItem<AxeItem> EMERALD_AXE = ITEMS.register("emerald_axe", () -> new AxeItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
-    public static final DeferredItem<PickaxeItem> EMERALD_PICKAXE = ITEMS.register("emerald_pickaxe", () -> new PickaxeItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
-    public static final DeferredItem<ShovelItem> EMERALD_SHOVEL = ITEMS.register("emerald_shovel", () -> new ShovelItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
-    public static final DeferredItem<HoeItem> EMERALD_HOE = ITEMS.register("emerald_hoe", () -> new HoeItem(Tiers.DIAMOND, new Item.Properties().fireResistant()));
+    public static final DeferredItem<SwordItem> EMERALD_SWORD = ITEMS.register("emerald_sword", () -> new SwordItem(Tiers.DIAMOND, new Item.Properties().fireResistant().attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F))));
+    public static final DeferredItem<AxeItem> EMERALD_AXE = ITEMS.register("emerald_axe", () -> new AxeItem(Tiers.DIAMOND, new Item.Properties().fireResistant().attributes(AxeItem.createAttributes(Tiers.DIAMOND, 5.0F, -3.0F))));
+    public static final DeferredItem<PickaxeItem> EMERALD_PICKAXE = ITEMS.register("emerald_pickaxe", () -> new PickaxeItem(Tiers.DIAMOND, new Item.Properties().fireResistant().attributes(PickaxeItem.createAttributes(Tiers.DIAMOND, 1.0F, -2.8F))));
+    public static final DeferredItem<ShovelItem> EMERALD_SHOVEL = ITEMS.register("emerald_shovel", () -> new ShovelItem(Tiers.DIAMOND, new Item.Properties().fireResistant().attributes(ShovelItem.createAttributes(Tiers.DIAMOND, 1.5F, -3.0F))));
+    public static final DeferredItem<HoeItem> EMERALD_HOE = ITEMS.register("emerald_hoe", () -> new HoeItem(Tiers.DIAMOND, new Item.Properties().fireResistant().attributes(HoeItem.createAttributes(Tiers.DIAMOND, -3.0F, 0.0F))));
 
     public static final DeferredItem<MagicStaffItem> STAFF_OF_WISE = ITEMS.register("staff_of_wise", () -> new MagicStaffItem(new Item.Properties(), MagicStaffItem.StaffAction.REGEN, 400, 0,500, 20, ModRarity.MYTHIC));
     public static final DeferredItem<MagicStaffItem> STAFF_OF_EARTH = ITEMS.register("staff_of_earth", () -> new MagicStaffItem(new Item.Properties(), MagicStaffItem.StaffAction.HASTE, 400, 1,600, 12, ModRarity.RARE));

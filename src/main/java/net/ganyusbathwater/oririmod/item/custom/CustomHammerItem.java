@@ -3,11 +3,16 @@ package net.ganyusbathwater.oririmod.item.custom;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.TooltipFlag;
+
+import java.util.List;
 
 public class CustomHammerItem extends MaceItem implements ModRarityCarrier {
     private final ModRarity rarity;
@@ -15,11 +20,6 @@ public class CustomHammerItem extends MaceItem implements ModRarityCarrier {
     public CustomHammerItem(Properties properties, ModRarity rarity) {
         super(properties);
         this.rarity = rarity;
-    }
-
-    @Override
-    public ModRarity getModRarity() {
-        return rarity;
     }
 
     @Override
@@ -36,5 +36,10 @@ public class CustomHammerItem extends MaceItem implements ModRarityCarrier {
 
         }
         return super.hurtEnemy(stack, target, attacker);
+    }
+
+    @Override
+    public ModRarity getModRarity() {
+        return rarity;
     }
 }

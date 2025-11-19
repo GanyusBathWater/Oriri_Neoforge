@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;
-import net.ganyusbathwater.oririmod.item.custom.MagicBoltItem;
+import net.ganyusbathwater.oririmod.item.custom.magic.MagicBoltItem;
 import net.ganyusbathwater.oririmod.util.MagicIndicatorClientState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
