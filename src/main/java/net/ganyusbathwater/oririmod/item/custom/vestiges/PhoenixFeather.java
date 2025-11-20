@@ -109,10 +109,4 @@ public class PhoenixFeather extends VestigeItem {
     public String getTranslationKeyBase() {
         return "tooltip.oririmod.vestige.phoenix_feather";
     }
-
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        // Delegation an ModRarityCarrier über VestigeItem
-        super.appendHoverText(stack, context, tooltip, flag);
-    }
 }

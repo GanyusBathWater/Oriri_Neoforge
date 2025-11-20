@@ -1,9 +1,9 @@
 package net.ganyusbathwater.oririmod.util.vestiges;
 
-public record VestigeBonusSnapshot(double healthBonus, float stepHeightBonus) {
+public record VestigeBonusSnapshot(double healthBonus, float stepHeightBonus, float luckBonus) {
 
     public static VestigeBonusSnapshot empty() {
-        return new VestigeBonusSnapshot(0.0D, 0.0F);
+        return new VestigeBonusSnapshot(0.0D, 0.0F, 0.0F);
     }
 
     public boolean hasHealthBonus() {
@@ -12,5 +12,9 @@ public record VestigeBonusSnapshot(double healthBonus, float stepHeightBonus) {
 
     public boolean hasStepBonus() {
         return stepHeightBonus > 0.0F;
+    }
+
+    public boolean hasLuckBonus() {
+        return luckBonus > 0.0F;
     }
 }

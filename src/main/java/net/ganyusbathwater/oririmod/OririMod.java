@@ -3,7 +3,6 @@ package net.ganyusbathwater.oririmod;
 import com.mojang.logging.LogUtils;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.combat.ElementInit;
-import net.ganyusbathwater.oririmod.combat.ElementTooltipHandler;
 import net.ganyusbathwater.oririmod.combat.ElementalDamageHandler;
 import net.ganyusbathwater.oririmod.config.ManaConfig;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
@@ -14,6 +13,7 @@ import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.menu.ModMenus;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
+import net.ganyusbathwater.oririmod.util.TooltipHandler;
 import net.ganyusbathwater.oririmod.worldgen.ModFeatures;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -21,7 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -69,7 +68,7 @@ public class OririMod {
         event.enqueueWork(() -> {
             ElementInit.init();
             ElementalDamageHandler.register();
-            ElementTooltipHandler.register();
+            TooltipHandler.register();
         });
 
     }

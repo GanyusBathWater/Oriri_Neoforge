@@ -43,10 +43,4 @@ public class StrangeEnderEye extends VestigeItem {
     public String getTranslationKeyBase() {
         return "tooltip.oririmod.vestige.strange_ender_eye";
     }
-
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        // Delegiere an die Implementierung in VestigeItem (die bereits zur ModRarityCarrier-Defaultmethode weiterleitet)
-        super.appendHoverText(stack, context, tooltip, flag);
-    }
 }

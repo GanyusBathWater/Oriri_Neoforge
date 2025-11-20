@@ -75,7 +75,7 @@ public class ModItemGroups {
                         output.accept(ModItems.SPRING);
                         output.accept(ModItems.STRIDERS_SCALE);
                         output.accept(ModItems.STRANGE_ENDER_EYE);
-                        output.accept(ModItems.SWEETS_BAG);
+                        output.accept(ModItems.CANDY_BAG);
                         output.accept(ModItems.WITHER_ROSE);
 
                         //------------Weapons------------

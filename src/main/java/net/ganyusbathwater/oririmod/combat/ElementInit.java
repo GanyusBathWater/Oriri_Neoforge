@@ -9,23 +9,17 @@ public final class ElementInit {
     private ElementInit() {}
 
     public static void init() {
-        // \= \= \= Entities (Mobs, Projektile) \= \= \=
+        // Mobs
         EntityElementRegistry.setElement(EntityType.BLAZE, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.ZOMBIE, Element.NATURE);
 
-        // Projektile
+        // Projectiles
         EntityElementRegistry.setElement(EntityType.SMALL_FIREBALL, Element.FIRE);
-        // Beispiel: Pfeile
-        // EntityElementRegistry.setElement(EntityType.ARROW, Element.LIGHT);
 
-        // \= \= \= Items (Vanilla + Mod\-Items) \= \= \=
-        // Vanilla\-Beispiele
-        ItemElementRegistry.setElement(Items.DIAMOND_SWORD, Element.FIRE);
+        // Items/Weapons
+        ItemElementRegistry.setElement(Items.DIAMOND_SWORD, Element.PHYSICAL);
         ItemElementRegistry.setElement(Items.IRON_SWORD, Element.EARTH);
-        ItemElementRegistry.setElement(Items.BOW, Element.LIGHT);
         ItemElementRegistry.setElement(Items.TRIDENT, Element.WATER);
         ItemElementRegistry.setElement(ModItems.STELLA_PERDITOR.get(), Element.DARKNESS);
-
-        // Hier kannst du auch deine eigenen Mod\-Items registrieren, z\.B.:
-        // ItemElementRegistry.setElement(ModItems.PANDORAS_BLADE.get(), Element.FIRE);
     }
 }

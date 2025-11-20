@@ -76,12 +76,6 @@ public class VestigeItem extends Item implements ModRarityCarrier {
         return this.translationKeyBase;
     }
 
-    // Delegation: keine Logik mehr hier, nur Weitergabe an ModRarityCarrier
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        ModRarityCarrier.super.appendHoverText(stack, context, tooltip, flag);
-    }
-
     // --- Vestige-Logik ---
     public int getMaxLevel() {
         return effectsPerLevel.size();
@@ -156,7 +150,21 @@ public class VestigeItem extends Item implements ModRarityCarrier {
         int unlocked = getUnlockedLevel(stack);
         for (int lvl = 1; lvl <= unlocked; lvl++) {
             if (!isLevelEnabled(stack, lvl)) continue;
-            for (var eff : getEffectsForLevel(lvl)) sum += eff.stepHeightBonus(player, stack, lvl);
+            for (var eff : getEffectsForLevel(lvl)) {
+                sum += eff.stepHeightBonus(player, stack, lvl);
+            }
+        }
+        return sum;
+    }
+
+    public float sumLuckBonus(ServerPlayer player, ItemStack stack) {
+        float sum = 0F;
+        int unlocked = getUnlockedLevel(stack);
+        for (int lvl = 1; lvl <= unlocked; lvl++) {
+            if (!isLevelEnabled(stack, lvl)) continue;
+            for (var eff : getEffectsForLevel(lvl)) {
+                sum += eff.LuckBonus(player, stack, lvl);
+            }
         }
         return sum;
     }

@@ -39,15 +39,15 @@ public class ModItems {
     public static final DeferredItem<VestigeItem> SNOW_BOOTS = ITEMS.register("snow_boots", () -> new SnowBoots(new Item.Properties()));
     public static final DeferredItem<VestigeItem> MIRROR_OF_THE_BLACK_SUN = ITEMS.register("mirror_of_the_black_sun", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new PhoenixFeather(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> MINERS_LANTERN = ITEMS.register("miners_lantern", () -> new VestigeItem(new Item.Properties(), 3));
+    public static final DeferredItem<VestigeItem> MINERS_LANTERN = ITEMS.register("miners_lantern", () -> new MinersLantern(new Item.Properties()));
     public static final DeferredItem<VestigeItem> RELIC_OF_THE_PAST = ITEMS.register("relic_of_the_past", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> SOLIS_BROOCH = ITEMS.register("solis_brooch", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> STIGMA_OF_THE_ARCHITECT = ITEMS.register("stigma_of_the_architect", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> SPRING = ITEMS.register("spring", () -> new VestigeItem(new Item.Properties(), 3));
+    public static final DeferredItem<VestigeItem> SPRING = ITEMS.register("spring", () -> new Spring(new Item.Properties()));
     public static final DeferredItem<VestigeItem> STRIDERS_SCALE = ITEMS.register("striders_scale", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> STRANGE_ENDER_EYE = ITEMS.register("strange_ender_eye", () -> new StrangeEnderEye(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> SWEETS_BAG = ITEMS.register("sweets_bag", () -> new VestigeItem(new Item.Properties(), 3));
-    public static final DeferredItem<VestigeItem> WITHER_ROSE = ITEMS.register("wither_rose", () -> new VestigeItem(new Item.Properties(), 3));
+    public static final DeferredItem<VestigeItem> CANDY_BAG = ITEMS.register("candy_bag", () -> new CandyBag(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> WITHER_ROSE = ITEMS.register("wither_rose", () -> new Witherrose(new Item.Properties()));
 
     //---------------------------------------Foods---------------------------------------------------------
 

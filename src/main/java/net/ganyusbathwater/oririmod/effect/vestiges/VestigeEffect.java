@@ -19,4 +19,8 @@ public interface VestigeEffect {
     default double healthBonus(ServerPlayer player, ItemStack stack, int level) {
         return 0.0D;
     }
+
+    default float LuckBonus(ServerPlayer player, ItemStack stack, int level) {
+        return 0.0F;
+    }
 }

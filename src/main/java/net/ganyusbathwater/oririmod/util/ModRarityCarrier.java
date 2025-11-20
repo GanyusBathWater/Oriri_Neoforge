@@ -17,20 +17,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public interface ModRarityCarrier {
     ModRarity getModRarity();
 
-    // Zusatz-Tooltip für Rarity, Vestige und Attribute
-    default void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        // Rarity
-        tooltip.add(getModRarity().coloredDisplayName());
-
-
+    default List<Component> buildModTooltip(ItemStack stack, Item.TooltipContext context, TooltipFlag flag) {
+        List<Component> list = new ArrayList<>();
 
         // Vestige-Infos
         if (this instanceof VestigeItem v) {
@@ -41,7 +34,7 @@ public interface ModRarityCarrier {
                     ? v.getTranslationKeyBase()
                     : "tooltip.oririmod.vestige";
 
-            tooltip.add(Component.translatable(base + ".level", unlocked, max)
+            list.add(Component.translatable(base + ".level", unlocked, max)
                     .withStyle(ChatFormatting.AQUA));
 
             int mask = getInt(stack, VestigeItem.NBT_DISABLED_MASK, 0);
@@ -49,16 +42,23 @@ public interface ModRarityCarrier {
             for (int lvl = 1; lvl <= unlocked; lvl++) {
                 boolean enabled = (mask & (1 << (lvl - 1))) == 0;
                 String descKey = String.format("%s.level.%d.description", base, lvl);
-                tooltip.add(Component.translatable(descKey)
+                list.add(Component.translatable(descKey)
                         .withStyle(enabled ? ChatFormatting.WHITE : ChatFormatting.DARK_GRAY));
             }
 
-            tooltip.add(Component.translatable(base + ".lore")
+            list.add(Component.translatable(base + ".lore")
                     .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         }
+
+        return list;
     }
 
-    // NBT-Helfer
+    // Legacy: falls du irgendwo noch direkt aufrufst
+    default void appendHoverText(ItemStack stack, Item.TooltipContext context,
+                                 List<Component> tooltip, TooltipFlag flag) {
+        tooltip.addAll(buildModTooltip(stack, context, flag));
+    }
+
     private static int getInt(ItemStack stack, String key, int def) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) return def;

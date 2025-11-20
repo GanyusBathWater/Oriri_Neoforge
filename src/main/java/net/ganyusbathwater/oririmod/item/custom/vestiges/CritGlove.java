@@ -88,9 +88,4 @@ public class CritGlove extends VestigeItem {
     public String getTranslationKeyBase() {
         return "tooltip.oririmod.vestige.crit_glove";
     }
-
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
-    }
 }

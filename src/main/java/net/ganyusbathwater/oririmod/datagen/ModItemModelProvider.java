@@ -75,7 +75,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.SPRING.get());
         basicItem(ModItems.STRIDERS_SCALE.get());
         basicItem(ModItems.STRANGE_ENDER_EYE.get());
-        basicItem(ModItems.SWEETS_BAG.get());
+        basicItem(ModItems.CANDY_BAG.get());
         basicItem(ModItems.WITHER_ROSE.get());
 
         //------------Weapons------------

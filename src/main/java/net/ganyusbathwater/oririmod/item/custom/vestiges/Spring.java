@@ -1,24 +1,30 @@
-// java
 package net.ganyusbathwater.oririmod.item.custom.vestiges;
 
 import net.ganyusbathwater.oririmod.effect.vestiges.VestigeEffect;
+import net.ganyusbathwater.oririmod.effect.vestiges.VestigeEffects;
 import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.core.Holder;
 
 import java.util.List;
 
-public class HeartOfTheTank extends VestigeItem {
+public class Spring extends VestigeItem {
 
-    public HeartOfTheTank(Properties props) {
+    public Spring(Item.Properties props) {
         super(props, List.of(
-                List.of(totalHealthBonus()),
-                List.of(totalHealthBonus()),
-                List.of(totalHealthBonus())
+                List.of(jumpBoostEffect()),
+                List.of(stepHeightEffect()),
+                List.of(noFallDamageEffect())
         ));
     }
 
@@ -38,26 +44,27 @@ public class HeartOfTheTank extends VestigeItem {
         }
     }
 
-    private static VestigeEffect totalHealthBonus() {
+    private static VestigeEffect jumpBoostEffect() {
+        return VestigeEffects.mobEffect(MobEffects.JUMP, 0, 200);
+    }
+
+    private static VestigeEffect stepHeightEffect() {
+        return VestigeEffects.stepHeight(1.0F);
+    }
+
+    private static VestigeEffect noFallDamageEffect() {
         return new VestigeEffect() {
-            // Kein Tick mehr nötig – Health-Bonus wird zentral im VestigeManager gesetzt
             @Override
-            public double healthBonus(net.minecraft.server.level.ServerPlayer player,
-                                      ItemStack stack,
-                                      int lvl) {
-                // lvl entspricht hier der freigeschalteten Stufe (1..3)
-                return switch (lvl) {
-                    case 1 -> 4.0D;  // 4 Herzen
-                    case 2 -> 6.0D; // 6 Herzen
-                    case 3 -> 10.0D; // 10 Herzen
-                    default -> 0.0D;
-                };
+            public void tick(ServerPlayer player, ItemStack stack, int lvl) {
+                if (player.fallDistance > 0.0F) {
+                    player.fallDistance = 0.0F;
+                }
             }
         };
     }
 
     @Override
     public String getTranslationKeyBase() {
-        return "tooltip.oririmod.vestige.heart_of_the_tank";
+        return "tooltip.oririmod.vestige.spring";
     }
 }

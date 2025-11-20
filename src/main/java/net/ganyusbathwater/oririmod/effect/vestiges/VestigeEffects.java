@@ -63,6 +63,15 @@ public final class VestigeEffects {
         };
     }
 
+    public static VestigeEffect Luck(float bonus) {
+        return new VestigeEffect() {
+            @Override
+            public float LuckBonus(ServerPlayer player, ItemStack stack, int level) {
+                return bonus;
+            }
+        };
+    }
+
     // MobSense: Effekt robust setzen (alle 10 Ticks, 200 Ticks Dauer)
     public static VestigeEffect mobSense(int radius) {
         return new VestigeEffect() {

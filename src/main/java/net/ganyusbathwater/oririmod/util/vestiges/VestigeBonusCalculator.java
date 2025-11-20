@@ -11,6 +11,7 @@ public final class VestigeBonusCalculator {
     public static VestigeBonusSnapshot calculate(ServerPlayer player) {
         double healthBonus = 0.0D;
         float stepBonus = 0.0F;
+        float LuckBonus = 0.0F;
 
         for (ItemStack stack : ExtraInventoryUtil.readExtraInventory(player)) {
             if (stack.isEmpty()) continue;
@@ -22,11 +23,12 @@ public final class VestigeBonusCalculator {
             // Boni summieren
             healthBonus += vestige.sumHealthBonus(player, stack);
             stepBonus += vestige.sumStepHeightBonus(player, stack);
+            LuckBonus += vestige.sumLuckBonus(player, stack);
         }
 
-        if (healthBonus == 0.0D && stepBonus == 0.0F) {
+        if (healthBonus == 0.0D && stepBonus == 0.0F && LuckBonus == 0.0F) {
             return VestigeBonusSnapshot.empty();
         }
-        return new VestigeBonusSnapshot(healthBonus, stepBonus);
+        return new VestigeBonusSnapshot(healthBonus, stepBonus, LuckBonus);
     }
 }
