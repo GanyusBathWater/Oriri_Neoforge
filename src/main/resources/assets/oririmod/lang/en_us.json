@@ -239,6 +239,12 @@
   "tooltip.oririmod.vestige.miners_lantern.level.3.description": "Level 3 increases Luck by 5",
   "tooltip.oririmod.vestige.miners_lantern.lore": "Normally, you can’t grow the drought, but in this case...",
 
+  "tooltip.oririmod.vestige.bound_of_the_celestial_sisters.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.bound_of_the_celestial_sisters.level.1.description": "Level 1 grants 25% Elemental Resistance based on time of the Day, on daytime gain Darkness Resistance, on nighttime gain Light Resistance",
+  "tooltip.oririmod.vestige.bound_of_the_celestial_sisters.level.2.description": "Level 2 on Daytime gain 50 Max Mana, on Nighttime gain double Mana Regeneration",
+  "tooltip.oririmod.vestige.bound_of_the_celestial_sisters.level.3.description": "Level 3 on Daytime gain 25% increased Defense, on Nighttime gain 25% increased Damage",
+  "tooltip.oririmod.vestige.bound_of_the_celestial_sisters.lore": "Both are bound in endless fight, the dying day, the hungering night.",
+
   "tooltip.oririmod.element.fire": "Fire Weapon",
   "tooltip.oririmod.element.water": "Water Weapon",
   "tooltip.oririmod.element.earth": "Earth Weapon",

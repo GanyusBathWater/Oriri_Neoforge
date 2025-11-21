@@ -1,6 +1,8 @@
 package net.ganyusbathwater.oririmod.combat;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.effect.vestiges.BoundCelestialEffects;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -46,6 +48,13 @@ public final class ElementalDamageHandler {
         float baseDamage = event.getAmount();
         double multiplier = ElementEffectiveness.getMultiplier(attackerElement, defenderElement);
         float newDamage = (float) (baseDamage * multiplier);
+
+        if (target instanceof ServerPlayer sp) {
+            double resist = BoundCelestialEffects.getElementResistance(sp, attackerElement);
+            if (resist > 0.0D) {
+                newDamage *= (1.0D - resist);
+            }
+        }
         event.setAmount(newDamage);
 
         OririMod.LOGGER.debug("Element damage: {} -> {} ({} vs {})",

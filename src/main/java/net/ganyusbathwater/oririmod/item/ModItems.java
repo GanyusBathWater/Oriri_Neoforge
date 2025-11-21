@@ -32,7 +32,7 @@ public class ModItems {
 
     //---------------------------------------Vestiges---------------------------------------------------------
 
-    public static final DeferredItem<VestigeItem> BOUND_OF_THE_CELESTIAL_SISTERS = ITEMS.register("bound_of_the_celestial_sisters", () -> new VestigeItem(new Item.Properties(), 3));
+    public static final DeferredItem<VestigeItem> BOUND_OF_THE_CELESTIAL_SISTERS = ITEMS.register("bound_of_the_celestial_sisters", () -> new BoundOfTheCelestialSisters(new Item.Properties()));
     public static final DeferredItem<VestigeItem> CRIT_GLOVE = ITEMS.register("crit_glove", () -> new CritGlove(new Item.Properties()));
     public static final DeferredItem<VestigeItem> DUELLANT_CORTEX = ITEMS.register("duellant_cortex", () -> new VestigeItem(new Item.Properties(), 3));
     public static final DeferredItem<VestigeItem> HEART_OF_THE_TANK = ITEMS.register("heart_of_the_tank", () -> new HeartOfTheTank(new Item.Properties()));

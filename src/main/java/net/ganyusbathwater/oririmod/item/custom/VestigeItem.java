@@ -218,6 +218,17 @@ public class VestigeItem extends Item implements ModRarityCarrier {
         }
     }
 
+    public void applyRemovedFromExtraInventory(ServerPlayer player, ItemStack stack) {
+        int unlocked = getUnlockedLevel(stack);
+        for (int lvl = 1; lvl <= unlocked; lvl++) {
+            if (!isLevelEnabled(stack, lvl)) continue;
+            List<VestigeEffect> effects = getEffectsForLevel(lvl);
+            for (VestigeEffect eff : effects) {
+                eff.onRemovedFromExtraInventory(player, stack, lvl);
+            }
+        }
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack inHand = player.getItemInHand(hand);

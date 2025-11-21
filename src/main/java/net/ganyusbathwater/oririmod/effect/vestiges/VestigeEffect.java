@@ -23,4 +23,8 @@ public interface VestigeEffect {
     default float LuckBonus(ServerPlayer player, ItemStack stack, int level) {
         return 0.0F;
     }
+
+    default void onRemovedFromExtraInventory(ServerPlayer player, ItemStack stack, int level) {
+
+    }
 }

@@ -56,24 +56,26 @@ public class CandyBag extends VestigeItem {
         return new VestigeEffect() {
             @Override
             public void tick(ServerPlayer player, ItemStack stack, int lvl) {
-                // Nur auf dem Server zählen
                 if (player.level().isClientSide) return;
 
-                // Timer im Spieler-NBT statt im ItemStack ablegen
                 CompoundTag data = player.getPersistentData();
-
                 int ticks = data.contains(TAG_SATURATION_TICKS)
                         ? data.getInt(TAG_SATURATION_TICKS)
                         : 0;
                 ticks++;
 
-                // 20 Ticks * 60 Sekunden = 1200 Ticks pro Minute
                 if (ticks >= 1200) {
                     ticks = 0;
                     giveSaturation(player, saturationPerMinute);
                 }
 
                 data.putInt(TAG_SATURATION_TICKS, ticks);
+            }
+
+            @Override
+            public void onRemovedFromExtraInventory(ServerPlayer player, ItemStack stack, int lvl) {
+                CompoundTag data = player.getPersistentData();
+                data.remove(TAG_SATURATION_TICKS);
             }
 
             private void giveSaturation(ServerPlayer player, int amount) {

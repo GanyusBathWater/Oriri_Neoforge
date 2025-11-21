@@ -61,13 +61,12 @@ public class CritGlove extends VestigeItem {
                 if (inst == null) return;
 
                 double bonus = switch (unlocked) {
-                    case 1 -> 0.25D; // +25% AttackSpeed
-                    case 2 -> 0.50D; // +50%
-                    case 3 -> 0.75D; // +75%
+                    case 1 -> 0.25D;
+                    case 2 -> 0.50D;
+                    case 3 -> 0.75D;
                     default -> 0.0D;
                 };
 
-                // Bisherigen Modifier entfernen
                 var existing = inst.getModifier(CRIT_BONUS_ID);
                 if (existing != null) {
                     inst.removeModifier(CRIT_BONUS_ID);
@@ -79,6 +78,17 @@ public class CritGlove extends VestigeItem {
                             bonus,
                             AttributeModifier.Operation.ADD_MULTIPLIED_BASE
                     ));
+                }
+            }
+
+            @Override
+            public void onRemovedFromExtraInventory(ServerPlayer player, ItemStack stack, int lvl) {
+                var inst = player.getAttribute(Attributes.ATTACK_SPEED);
+                if (inst == null) return;
+
+                var existing = inst.getModifier(CRIT_BONUS_ID);
+                if (existing != null) {
+                    inst.removeModifier(CRIT_BONUS_ID);
                 }
             }
         };
