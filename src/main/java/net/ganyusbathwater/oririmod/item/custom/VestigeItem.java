@@ -185,6 +185,16 @@ public class VestigeItem extends Item implements ModRarityCarrier {
         });
     }
 
+    public void onDamaged(ServerPlayer player, ItemStack stack, float amount) {
+        int unlocked = getUnlockedLevel(stack);
+        for (int lvl = 1; lvl <= unlocked; lvl++) {
+            if (!isLevelEnabled(stack, lvl)) continue;
+            for (VestigeEffect eff : getEffectsForLevel(lvl)) {
+                eff.onDamaged(player, stack, lvl, amount);
+            }
+        }
+    }
+
     // Builder erweitert um Rarity
     public static Builder builder() { return new Builder(); }
 

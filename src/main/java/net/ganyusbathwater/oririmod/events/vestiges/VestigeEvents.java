@@ -1,8 +1,12 @@
 package net.ganyusbathwater.oririmod.events.vestiges;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.effect.vestiges.BlackMirrorEffect;
+import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
+import net.ganyusbathwater.oririmod.item.custom.vestiges.MirrorOfTheBlackSun;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.Witherrose;
 import net.ganyusbathwater.oririmod.menu.ExtraInventoryMenu;
+import net.ganyusbathwater.oririmod.util.vestiges.ExtraInventoryUtil;
 import net.ganyusbathwater.oririmod.util.vestiges.VestigeManager;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,18 +77,72 @@ public class VestigeEvents {
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (sp.level().isClientSide) return;
+        float amount = event.getAmount();
 
+        // --- MirrorOfTheBlackSun: Schaden ggf. komplett negieren ---
+        NonNullList<ItemStack> extra = VestigeManager.getExtraInventory(sp);
+        ItemStack mirror = ItemStack.EMPTY;
+        for (ItemStack stack : extra) {
+            if (!stack.isEmpty() && stack.getItem() instanceof MirrorOfTheBlackSun) {
+                mirror = stack;
+                break;
+            }
+        }
+        if (!mirror.isEmpty() && mirror.getItem() instanceof MirrorOfTheBlackSun mirrorItem) {
+            int unlocked = mirrorItem.getUnlockedLevel(mirror);
+
+            // höchstes aktiviertes Level finden
+            int bestLevel = 0;
+            for (int lvl = 1; lvl <= unlocked; lvl++) {
+                if (mirrorItem.isLevelEnabled(mirror, lvl)) {
+                    bestLevel = lvl;
+                }
+            }
+
+            if (bestLevel > 0 && BlackMirrorEffect.shouldNegateDamage(sp, bestLevel, amount)) {
+                // Effekt ist jetzt VERBRAUCHT (Cooldown gesetzt)
+                BlackMirrorEffect.applyMirrorInvuln(sp);
+                event.setCanceled(true); // gesamten Schaden unterdrücken
+                return;
+            }
+        }
+
+        // --- Bestehende Weitergabe an Vestige-Items ---
+        for (ItemStack stack : ExtraInventoryUtil.readExtraInventory(sp)) {
+            if (stack.isEmpty()) continue;
+            if (stack.getItem() instanceof VestigeItem vestige) {
+                vestige.onDamaged(sp, stack, amount);
+            }
+        }
+        // --- Bestehende Witherrose-Logik (unverändert) ---
         var srcEntity = event.getSource().getEntity();
         if (!(srcEntity instanceof WitherSkeleton || srcEntity instanceof WitherBoss)) return;
 
-        // Nur aktiv, wenn Witherrose im Extra-Inventar liegt
         ItemStack witherrose = findWitherroseInExtra(sp);
         if (witherrose.isEmpty()) return;
 
         if (getUnlockedLevel(witherrose) < 2 || !isLevelEnabled(witherrose, 2)) return;
 
-        float amount = event.getAmount();
-        event.setAmount(amount * 0.5F); // 50 % weniger eingehender Schaden
+        event.setAmount(amount * 0.5F);
+    }
+
+    // Hilfsmethode zum Finden des Mirrors im Extra-Inventar
+    private static ItemStack findMirrorInExtra(ServerPlayer player) {
+        var root = player.getPersistentData();
+        if (!root.contains(ExtraInventoryMenu.NBT_KEY)) {
+            return ItemStack.EMPTY;
+        }
+
+        var lookup = player.level().registryAccess();
+        NonNullList<ItemStack> list = NonNullList.withSize(ExtraInventoryMenu.SIZE, ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(root.getCompound(ExtraInventoryMenu.NBT_KEY), list, lookup);
+
+        for (ItemStack stack : list) {
+            if (!stack.isEmpty() && stack.getItem() instanceof MirrorOfTheBlackSun) {
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     @SubscribeEvent

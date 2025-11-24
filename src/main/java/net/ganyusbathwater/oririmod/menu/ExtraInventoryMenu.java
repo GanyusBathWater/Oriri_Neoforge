@@ -1,9 +1,11 @@
 // java
 package net.ganyusbathwater.oririmod.menu;
 
+import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,7 +18,6 @@ public class ExtraInventoryMenu extends AbstractContainerMenu {
     public static final String NBT_KEY = "OririExtraInventory";
     public static final int SIZE = 4;
 
-    // Höhe wie Doppel‑Kiste (6 Reihen oben)
     private static final int ROWS = 6;
 
     private final Player player;
@@ -29,13 +30,12 @@ public class ExtraInventoryMenu extends AbstractContainerMenu {
         this.player = inv.player;
         this.extra = loadOrCreate(player);
 
-        int xStart = 8;   // linker Standard‑Offset (Vanilla)
-        int yStart = 18;  // oberer Standard‑Offset (Vanilla)
+        int xStart = 8;
+        int yStart = 18;
 
-        // Slots exakt auf Kistenfelder 12, 16, 39, 43 (1‑basiert) setzen
         int[] CHEST_SLOTS_1_BASED = {12, 16, 39, 43};
         for (int i = 0; i < SIZE; i++) {
-            int n0 = CHEST_SLOTS_1_BASED[i] - 1; // in 0‑basiert
+            int n0 = CHEST_SLOTS_1_BASED[i] - 1;
             int row = n0 / 9;
             int col = n0 % 9;
             int x = xStart + col * 18;
@@ -43,7 +43,6 @@ public class ExtraInventoryMenu extends AbstractContainerMenu {
             this.addSlot(new Slot(extra, i, x, y));
         }
 
-        // Spieler‑Inventar/Hotbar unterhalb der 6 Reihen (Vanilla‑Raster 18)
         int playerInvY = yStart + ROWS * 18 + 14;
         addPlayerInventory(inv, xStart, playerInvY);
         addPlayerHotbar(inv, xStart, playerInvY + 58);
@@ -82,9 +81,9 @@ public class ExtraInventoryMenu extends AbstractContainerMenu {
             ItemStack in = slot.getItem();
             stack = in.copy();
 
-            int extraEnd = SIZE;               // 0..3 (4 Slots)
-            int invStart = SIZE;               // 4
-            int hotbarEnd = invStart + 27 + 9; // 40
+            int extraEnd = SIZE;
+            int invStart = SIZE;
+            int hotbarEnd = invStart + 27 + 9;
 
             if (index < extraEnd) {
                 if (!this.moveItemStackTo(in, invStart, hotbarEnd, true)) return ItemStack.EMPTY;
@@ -121,10 +120,17 @@ public class ExtraInventoryMenu extends AbstractContainerMenu {
 
     private static void saveBack(Player player, SimpleContainer cont) {
         NonNullList<ItemStack> list = NonNullList.withSize(SIZE, ItemStack.EMPTY);
-        for (int i = 0; i < SIZE; i++) list.set(i, cont.getItem(i));
+        for (int i = 0; i < SIZE; i++) {
+            list.set(i, cont.getItem(i));
+        }
+
         CompoundTag invTag = new CompoundTag();
         HolderLookup.Provider lookup = player.level().registryAccess();
         ContainerHelper.saveAllItems(invTag, list, lookup);
         player.getPersistentData().put(NBT_KEY, invTag);
+
+        if (player instanceof ServerPlayer sp) {
+            NetworkHandler.sendExtraInventoryTo(sp, list);
+        }
     }
 }

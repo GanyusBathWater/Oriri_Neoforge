@@ -165,7 +165,7 @@ public final class MagicIndicatorRender {
         }
     }
 
-    private static boolean textureExists(ResourceLocation tex) {
+    public static boolean textureExists(ResourceLocation tex) {
         if (tex == null) return false;
         return Minecraft.getInstance().getResourceManager().getResource(tex).isPresent();
     }

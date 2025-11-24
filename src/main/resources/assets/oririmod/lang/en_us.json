@@ -245,6 +245,27 @@
   "tooltip.oririmod.vestige.bound_of_the_celestial_sisters.level.3.description": "Level 3 on Daytime gain 25% increased Defense, on Nighttime gain 25% increased Damage",
   "tooltip.oririmod.vestige.bound_of_the_celestial_sisters.lore": "Both are bound in endless fight, the dying day, the hungering night.",
 
+  "tooltip.oririmod.vestige.relic_of_the_past.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.relic_of_the_past.level.1.description": "Level 1 grants Absorption I for 5 seconds upon taking damage with a 10 second cooldown",
+  "tooltip.oririmod.vestige.relic_of_the_past.level.2.description": "Level 2 additionally grants Strength I",
+  "tooltip.oririmod.vestige.relic_of_the_past.level.3.description": "Level 3 additionally grants Regeneration I",
+  "tooltip.oririmod.vestige.relic_of_the_past.lore": "A ring that looks very old the crystal gives you its energy when yours is about to dwindle",
+
+  "tooltip.oririmod.vestige.mirror_of_the_black_sun.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.mirror_of_the_black_sun.level.1.description": "Level 1 negates damage once every 90 seconds but only if its not more than your max health",
+  "tooltip.oririmod.vestige.mirror_of_the_black_sun.level.2.description": "Level 2 decreases the cooldown to 60 seconds",
+  "tooltip.oririmod.vestige.mirror_of_the_black_sun.level.3.description": "Level 3 decreases the cooldown to 45 seconds",
+  "tooltip.oririmod.vestige.mirror_of_the_black_sun.lore": "Normally, you can’t grow the drought, but in this case...",
+
+  "tooltip.oririmod.vestige.duellant_cortex.level": "Current Level: %s",
+  "tooltip.oririmod.vestige.duellant_cortex.level.1.description": "Level 1 increases defense by 10% per Enemy in a 12 Block Radius",
+  "tooltip.oririmod.vestige.duellant_cortex.level.2.description": "Level 2 additionally increases damage by 5% per Enemy",
+  "tooltip.oririmod.vestige.duellant_cortex.level.3.description": "Level 3 increases percentage to 15% Defense and 7.5% Damage per Enemy",
+  "tooltip.oririmod.vestige.duellant_cortex.lore": "Normally, you can’t grow the drought, but in this case...",
+
+  "tooltip.oririmod.black_mirror.ready": "§aActive§r",
+  "hud.oririmod.black_mirror.cooldown": "Cooldown: %ss",
+
   "tooltip.oririmod.element.fire": "Fire Weapon",
   "tooltip.oririmod.element.water": "Water Weapon",
   "tooltip.oririmod.element.earth": "Earth Weapon",
