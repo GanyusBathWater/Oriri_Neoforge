@@ -27,9 +27,35 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
     private final ThreadLocal<Set<BlockPos>> placedAllLogs = ThreadLocal.withInitial(HashSet::new);
     private final ThreadLocal<Set<BlockPos>> plannedLeaves = ThreadLocal.withInitial(HashSet::new);
     private final ThreadLocal<Set<BlockPos>> branchEndpoints = ThreadLocal.withInitial(HashSet::new);
+    private final ThreadLocal<Integer> canopyCenterYLocal = ThreadLocal.withInitial(() -> 0);
+    private final ThreadLocal<Integer> canopyRadiusLocal = ThreadLocal.withInitial(() -> 0);
+    private final ThreadLocal<BlockPos> trunkOrigin = ThreadLocal.withInitial(() -> BlockPos.ZERO);
+    private final ThreadLocal<Integer> trunkSizeLocal = ThreadLocal.withInitial(() -> 1);
 
     public ElderGiantTreeFeature(Codec<ElderGiantTreeConfig> codec) {
         super(codec);
+    }
+
+    private static final Direction[] CARDINAL_DIRECTIONS = {
+            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
+    };
+
+    private static final BlockPos[] DIAGONAL_DIRECTIONS = {
+            new BlockPos(1, 0, 1),   // SOUTH_EAST
+            new BlockPos(1, 0, -1),  // NORTH_EAST
+            new BlockPos(-1, 0, 1),  // SOUTH_WEST
+            new BlockPos(-1, 0, -1)  // NORTH_WEST
+    };
+
+    private BlockPos randomEightDir(RandomSource rnd) {
+        // 0..3: Kardinal, 4..7: diagonal
+        int idx = rnd.nextInt(8);
+        if (idx < 4) {
+            Direction d = CARDINAL_DIRECTIONS[idx];
+            return new BlockPos(d.getStepX(), 0, d.getStepZ());
+        } else {
+            return DIAGONAL_DIRECTIONS[idx - 4];
+        }
     }
 
     @Override
@@ -124,6 +150,9 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         plannedLeaves.get().clear();
         branchEndpoints.get().clear();
 
+        trunkOrigin.set(origin.immutable());
+        trunkSizeLocal.set(trunkSize);
+
         if (origin.getY() + height + canopyR + 2 >= level.getMaxBuildHeight()) return false;
         if (origin.getY() <= level.getMinBuildHeight() + 1) return false;
 
@@ -144,10 +173,39 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         int canopyCenterY = origin.getY() + height;
         for (int i = 0; i < branches; i++) {
             int by = branchStartMin + rnd.nextInt(Math.max(1, branchStartMax - branchStartMin));
-            Direction dir = randomHorizontal(rnd);
+            BlockPos dirVec = randomEightDir(rnd);
+
+            // kleine Sicherheit: falls die erste Position sofort mit anderem Ast kollidiert, wähle neue Richtung
+            int tries = 0;
+            while (tries < 6) {
+                BlockPos firstStep = origin
+                        .offset(rnd.nextInt(trunkSize), by, rnd.nextInt(trunkSize))
+                        .offset(dirVec);
+                boolean conflict = false;
+                for (Direction d : Direction.Plane.HORIZONTAL) {
+                    if (placedBranchLogs.get().contains(firstStep)
+                            || placedBranchLogs.get().contains(firstStep.relative(d))) {
+                        conflict = true;
+                        break;
+                    }
+                }
+                if (!conflict) break;
+                dirVec = randomEightDir(rnd);
+                tries++;
+            }
+
             int len = branchLenBase + rnd.nextInt(3) + trunkSize / 2;
+
+            int stepX = dirVec.getX();
+            int stepZ = dirVec.getZ();
+            if (stepX != 0 && stepZ != 0) {
+                // 0.6–0.8 der normalen Länge
+                double factor = 0.6 + rnd.nextDouble() * 0.2;
+                len = Math.max(2, (int)Math.round(len * factor));
+            }
+
             BlockPos start = origin.offset(rnd.nextInt(trunkSize), by, rnd.nextInt(trunkSize));
-            genBranch(level, start, dir, len, cfg, rnd, canopyCenterY, canopyR);
+            genBranch(level, start, dirVec, len, cfg, rnd, canopyCenterY, canopyR);
         }
 
         if (canopyR >= 6) {
@@ -165,6 +223,18 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
         BlockPos top = origin.offset((trunkSize - 1) / 2, height, (trunkSize - 1) / 2);
 
+        // Werte für Spore Blossoms merken
+        canopyCenterYLocal.set(top.getY());
+        canopyRadiusLocal.set(canopyR);
+
+        // geordnete Kronenäste vom Stammpunkt nach außen
+        int crownBranchCount = Math.min(8, 3 + canopyR / 3);
+        List<BlockPos> crownDirs = computeNonAdjacentCrownDirs(rnd, crownBranchCount);
+        for (BlockPos dir : crownDirs) {
+            int len = 2 + rnd.nextInt(Math.max(2, canopyR / 2));
+            genCrownBranchFromVector(level, top, dir, len, canopyR, cfg, rnd);
+        }
+
         int finalCanopyR = canopyR;
         if (!areChunksLoaded(level, top, canopyR)) {
             finalCanopyR = clampRadiusToLoadedChunks(level, top, canopyR);
@@ -180,11 +250,14 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         genIrregularCrown(level, top, finalCanopyR, cfg, baseSeed);
         ensureLeavesAroundBranchLogs(level, cfg, top.getY(), finalCanopyR);
         finalizePlannedLeaves(level, cfg, baseSeed);
+        randomizeFloweringLeaves(level, cfg, baseSeed);
 
         placedBranchLogs.get().clear();
         placedAllLogs.get().clear();
         plannedLeaves.get().clear();
         branchEndpoints.get().clear();
+        trunkOrigin.remove();
+        trunkSizeLocal.remove();
         return true;
     }
 
@@ -579,22 +652,135 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         }
     }
 
-    private void genLeafBlob(WorldGenLevel level, BlockPos center, int radius, ElderGiantTreeConfig cfg, RandomSource rnd) {
+    private void genCrownBranchFromVector(WorldGenLevel level, BlockPos start, BlockPos dirVec, int len, int canopyRadius, ElderGiantTreeConfig cfg, RandomSource rnd) {
+        int stepX = dirVec.getX();
+        int stepZ = dirVec.getZ();
+
+        Direction.Axis axis;
+        if (Math.abs(stepX) > Math.abs(stepZ)) axis = Direction.Axis.X;
+        else if (Math.abs(stepZ) > Math.abs(stepX)) axis = Direction.Axis.Z;
+        else axis = Direction.Axis.Y;
+
+        BlockPos pos = start;
+        int liftEvery = 2 + rnd.nextInt(2);
+
+        for (int i = 0; i < len; i++) {
+            pos = pos.offset(stepX, 0, stepZ);
+            if (i % liftEvery == 0) pos = pos.above();
+            if (!withinBuildHeight(level, pos)) break;
+
+            // Kollisionsregel wie bei genBranch()
+            boolean conflict = false;
+            if (placedBranchLogs.get().contains(pos)) conflict = true;
+            else {
+                for (Direction d : Direction.Plane.HORIZONTAL) {
+                    if (placedBranchLogs.get().contains(pos.relative(d))) {
+                        conflict = true;
+                        break;
+                    }
+                }
+            }
+            if (conflict) break;
+
+            if (canReplaceForLog(level, pos)) {
+                placeLog(level, pos, axis, cfg, rnd, true);
+            } else {
+                break;
+            }
+
+            // kleine Blattwolke um den Ast
+            if (rnd.nextFloat() < 0.45f) {
+                int r = 1 + rnd.nextInt(2);
+                genLeafBlob(level, pos, r, cfg, rnd);
+            }
+        }
+        branchEndpoints.get().add(pos.immutable());
+    }
+
+    private List<BlockPos> computeNonAdjacentCrownDirs(RandomSource rnd, int maxBranches) {
+        List<BlockPos> all = new ArrayList<>();
+        // 8 Hauptrichtungen: 4 kardinal, 4 diagonal
+        all.add(new BlockPos(1, 0, 0));
+        all.add(new BlockPos(-1, 0, 0));
+        all.add(new BlockPos(0, 0, 1));
+        all.add(new BlockPos(0, 0, -1));
+        all.add(new BlockPos(1, 0, 1));
+        all.add(new BlockPos(1, 0, -1));
+        all.add(new BlockPos(-1, 0, 1));
+        all.add(new BlockPos(-1, 0, -1));
+
+        // mischen
+        java.util.Collections.shuffle(all, new java.util.Random(rnd.nextLong()));
+
+        List<BlockPos> result = new ArrayList<>();
+        outer:
+        for (BlockPos dir : all) {
+            // nicht Nachbar zu bereits gewählten Richtungen
+            for (BlockPos used : result) {
+                int dx = dir.getX() - used.getX();
+                int dz = dir.getZ() - used.getZ();
+                if (Math.abs(dx) <= 1 && Math.abs(dz) <= 1) {
+                    continue outer;
+                }
+            }
+            result.add(dir);
+            if (result.size() >= maxBranches) break;
+        }
+        return result;
+    }
+
+    private void genLeafBlob(WorldGenLevel level, BlockPos center, int radius,
+                             ElderGiantTreeConfig cfg, RandomSource rnd,
+                             boolean forbidNearTrunk) {
         int r2 = radius * radius;
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dy = -radius; dy <= radius; dy++) {
                 for (int dz = -radius; dz <= radius; dz++) {
                     int d2 = dx * dx + dy * dy + dz * dz;
-                    if (d2 <= r2 + rnd.nextInt(2)) {
-                        BlockPos p = center.offset(dx, dy, dz);
-                        if (!withinBuildHeight(level, p)) continue;
-                        if (canReplaceForLeaves(level, p)) {
-                            plannedLeaves.get().add(p.immutable());
-                        }
+                    if (d2 > r2 + rnd.nextInt(2)) continue;
+
+                    BlockPos p = center.offset(dx, dy, dz);
+                    if (!withinBuildHeight(level, p)) continue;
+
+                    if (forbidNearTrunk) {
+                        // hier Puffer > 0 verwenden, z.B. 1 oder 2
+                        if (isNearTrunk(p, 1)) continue;
+                    }
+
+                    if (canReplaceForLeaves(level, p)) {
+                        plannedLeaves.get().add(p.immutable());
                     }
                 }
             }
         }
+    }
+
+    private void genLeafBlob(WorldGenLevel level, BlockPos center, int radius, ElderGiantTreeConfig cfg, RandomSource rnd) {
+        genLeafBlob(level, center, radius, cfg, rnd, false);
+    }
+
+    private boolean isNearTrunk(BlockPos pos, int padding) {
+        BlockPos o = trunkOrigin.get();
+        int size = trunkSizeLocal.get();
+
+        int minX = o.getX();
+        int maxX = o.getX() + size - 1;
+        int minZ = o.getZ();
+        int maxZ = o.getZ() + size - 1;
+
+        minX -= padding;
+        maxX += padding;
+        minZ -= padding;
+        maxZ += padding;
+
+        int x = pos.getX();
+        int z = pos.getZ();
+        return x >= minX && x <= maxX && z >= minZ && z <= maxZ;
+    }
+
+    // alte Variante weiterverwenden, ruft padding=0 auf
+    private boolean isNearTrunk(BlockPos pos) {
+        return isNearTrunk(pos, 0);
     }
 
     private void genCentralSupports(WorldGenLevel level, BlockPos origin, int trunkSize, int height, int canopyR, ElderGiantTreeConfig cfg, RandomSource rnd) {
@@ -615,51 +801,102 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         }
     }
 
-    private void genBranch(WorldGenLevel level, BlockPos start, Direction dir, int len, ElderGiantTreeConfig cfg, RandomSource rnd, int canopyCenterY, int canopyRadius) {
-        BlockPos pos = start;
-        Direction.Axis axis = dir.getAxis();
-        int liftEvery = 3 + rnd.nextInt(3);
+    private void genBranch(WorldGenLevel level, BlockPos start, BlockPos dirVec, int len, ElderGiantTreeConfig cfg, RandomSource rnd, int canopyCenterY, int canopyRadius) {
 
+        BlockPos pos = start;
+        int stepX = dirVec.getX();
+        int stepZ = dirVec.getZ();
+        Direction.Axis axis;
+        if (Math.abs(stepX) > Math.abs(stepZ)) axis = Direction.Axis.X;
+        else if (Math.abs(stepZ) > Math.abs(stepX)) axis = Direction.Axis.Z;
+        else axis = Direction.Axis.Y;
+
+        int liftEvery = 3 + rnd.nextInt(3);
         boolean inCrown = start.getY() >= canopyCenterY - Math.max(1, canopyRadius / 2);
 
         for (int i = 0; i < len; i++) {
-            pos = pos.relative(dir);
+            pos = pos.offset(stepX, 0, stepZ);
             if (i % liftEvery == 0) pos = pos.above();
             if (!withinBuildHeight(level, pos)) break;
+
+            // \*\*Kollisions\-Regel:\*\* keine Logs direkt auf/nebeneinander zu bestehenden Ast\-Logs
+            boolean conflict = false;
+            if (placedBranchLogs.get().contains(pos)) conflict = true;
+            else {
+                for (Direction d : Direction.Plane.HORIZONTAL) {
+                    if (placedBranchLogs.get().contains(pos.relative(d))) {
+                        conflict = true;
+                        break;
+                    }
+                }
+            }
+            if (conflict) break; // Ast hier hart abbrechen
+
             if (canReplaceForLog(level, pos)) {
                 placeLog(level, pos, axis, cfg, rnd, true);
+            } else {
+                break;
             }
+
+            // Seitenast: ebenfalls Kollisionsprüfung
             if (i > 1 && i < len - 1 && rnd.nextFloat() < 0.25f) {
-                BlockPos side = pos.relative(dir.getClockWise());
-                if (canReplaceForLog(level, side)) {
+                Direction sideDir = (Math.abs(stepX) >= Math.abs(stepZ))
+                        ? (stepZ >= 0 ? Direction.SOUTH : Direction.NORTH)
+                        : (stepX >= 0 ? Direction.EAST : Direction.WEST);
+                BlockPos side = pos.relative(sideDir);
+
+                boolean sideConflict = placedBranchLogs.get().contains(side);
+                if (!sideConflict) {
+                    for (Direction d : Direction.Plane.HORIZONTAL) {
+                        if (placedBranchLogs.get().contains(side.relative(d))) {
+                            sideConflict = true;
+                            break;
+                        }
+                    }
+                }
+                if (!sideConflict && canReplaceForLog(level, side)) {
                     placeLog(level, side, axis, cfg, rnd, true);
                 }
             }
 
             if (i >= len - 2) {
-                if (inCrown) {
-                    if (rnd.nextFloat() < 0.25f) {
-                        placeLeafCross(level, pos, cfg, rnd);
-                    }
-                } else {
-                    if (rnd.nextFloat() < 0.08f) {
-                        placeLeafCross(level, pos, cfg, rnd);
-                    }
+                float chance = inCrown ? 0.25f : 0.08f;
+                if (rnd.nextFloat() < chance) {
+                    placeLeafCross(level, pos, cfg, rnd);
                 }
             }
         }
+
         int endBlob = inCrown ? 2 + rnd.nextInt(2) : 1 + rnd.nextInt(2);
-        genLeafBlob(level, pos, endBlob, cfg, rnd);
+
+        if (!inCrown && isNearTrunk(pos, 1)) {
+            branchEndpoints.get().add(pos.immutable());
+            return;
+        }
+
+        boolean forbidNearTrunk = !inCrown;
+        genLeafBlob(level, pos, endBlob, cfg, rnd, forbidNearTrunk);
         branchEndpoints.get().add(pos.immutable());
     }
 
     private void placeLeafCross(WorldGenLevel level, BlockPos p, ElderGiantTreeConfig cfg, RandomSource rnd) {
+        int padding = 1; // oder 2, wenn du noch konservativer sein willst
+
         for (Direction d : Direction.Plane.HORIZONTAL) {
             BlockPos q = p.relative(d);
-            if (canReplaceForLeaves(level, q)) plannedLeaves.get().add(q.immutable());
+            if (isNearTrunk(q, padding)) continue;
+            if (canReplaceForLeaves(level, q)) {
+                plannedLeaves.get().add(q.immutable());
+            }
         }
-        if (canReplaceForLeaves(level, p.above())) plannedLeaves.get().add(p.above().immutable());
-        if (canReplaceForLeaves(level, p.below())) plannedLeaves.get().add(p.below().immutable());
+        BlockPos up = p.above();
+        if (!isNearTrunk(up, padding) && canReplaceForLeaves(level, up)) {
+            plannedLeaves.get().add(up.immutable());
+        }
+        BlockPos down = p.below();
+        if (!isNearTrunk(down, padding) && canReplaceForLeaves(level, down)) {
+            plannedLeaves.get().add(down.immutable());
+        }
     }
 
     private void finalizePlannedLeaves(WorldGenLevel level, ElderGiantTreeConfig cfg, long baseSeed) {
@@ -672,6 +909,58 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             placeLeaves(level, p, cfg, r, snapshot);
         }
         planned.clear();
+    }
+
+    private void randomizeFloweringLeaves(WorldGenLevel level, ElderGiantTreeConfig cfg, long baseSeed) {
+        float floweringChance = cfg.floweringChance();
+        if (floweringChance <= 0.0f) return;
+
+        Set<BlockPos> candidates = new HashSet<>();
+
+        // Blätter in der Nähe ALLER Logs sammeln
+        for (BlockPos log : placedAllLogs.get()) {
+            int r = 6;
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dy = -r; dy <= r; dy++) {
+                    for (int dz = -r; dz <= r; dz++) {
+                        BlockPos p = log.offset(dx, dy, dz);
+                        if (!withinBuildHeight(level, p)) continue;
+                        BlockState s = level.getBlockState(p);
+                        if (s.is(BlockTags.LEAVES)) {
+                            candidates.add(p.immutable());
+                        }
+                    }
+                }
+            }
+        }
+
+        if (candidates.isEmpty()) return;
+
+        // globale Zufallsquelle statt positionsbasiertem Seed
+        RandomSource rnd = RandomSource.create(baseSeed ^ 0x9E3779B97F4A7C15L);
+
+        // Kandidaten mischen, damit die Auswahl möglichst „rauschig“ wird
+        java.util.List<BlockPos> shuffled = new java.util.ArrayList<>(candidates);
+        java.util.Collections.shuffle(shuffled, new java.util.Random(baseSeed));
+
+        for (BlockPos p : shuffled) {
+            if (!isChunkLoaded(level, p)) continue;
+            if (rnd.nextFloat() >= floweringChance) continue;
+
+            BlockState current = level.getBlockState(p);
+            if (!current.is(BlockTags.LEAVES)) continue;
+
+            BlockState flowering = cfg.floweringLeavesProvider().getState(rnd, p);
+
+            if (current.hasProperty(LeavesBlock.DISTANCE) && flowering.hasProperty(LeavesBlock.DISTANCE)) {
+                flowering = flowering.setValue(LeavesBlock.DISTANCE, current.getValue(LeavesBlock.DISTANCE));
+            }
+            if (current.hasProperty(LeavesBlock.PERSISTENT) && flowering.hasProperty(LeavesBlock.PERSISTENT)) {
+                flowering = flowering.setValue(LeavesBlock.PERSISTENT, current.getValue(LeavesBlock.PERSISTENT));
+            }
+
+            level.setBlock(p, flowering, 3);
+        }
     }
 
     private void ensureLeavesAroundBranchLogs(WorldGenLevel level, ElderGiantTreeConfig cfg, int canopyCenterY, int canopyRadius) {
@@ -799,14 +1088,11 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         BlockState existing = level.getBlockState(pos);
         if (existing.getBlock() instanceof RotatedPillarBlock) return;
 
-        BlockState state = rnd.nextFloat() < cfg.floweringChance()
-                ? cfg.floweringLeavesProvider().getState(rnd, pos)
-                : cfg.leavesProvider().getState(rnd, pos);
+        // immer zuerst normale Blätter setzen
+        BlockState state = cfg.leavesProvider().getState(rnd, pos);
 
         if (state.hasProperty(LeavesBlock.DISTANCE)) {
             int dist = computeDistanceToLog(level, pos, futureLeaves);
-            // vorher: Math.max(1, Math.min(7, dist));
-            // jetzt: begrenze auf 6, damit Blätter nie distance=7 bekommen und nicht verfallen
             dist = Math.max(1, Math.min(6, dist));
             state = state.setValue(LeavesBlock.DISTANCE, dist);
         }
@@ -838,6 +1124,14 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
     }
 
     private void tryPlaceSporeBlossomUnderBranch(WorldGenLevel level, BlockPos branchPos, ElderGiantTreeConfig cfg, RandomSource rnd) {
+        int canopyCenterY = canopyCenterYLocal.get();
+        int canopyRadius = canopyRadiusLocal.get();
+
+        // Nur unterhalb der Baumkrone Spore Blossoms zulassen
+        if (branchPos.getY() >= canopyCenterY - Math.max(1, canopyRadius / 2)) {
+            return;
+        }
+
         if (rnd.nextDouble() >= 0.008) return;
         if (!isChunkLoaded(level, branchPos)) return;
 
