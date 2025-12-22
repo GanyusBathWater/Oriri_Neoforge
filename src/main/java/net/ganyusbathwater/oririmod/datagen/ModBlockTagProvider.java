@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
@@ -88,6 +89,5 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 .add(Blocks.SNOW)
                 .add(Blocks.FROSTED_ICE)
                 .add(Blocks.PACKED_ICE);
-
     }
 }

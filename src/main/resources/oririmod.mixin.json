@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.ganyusbathwater.oririmod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "LiquidBlockMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

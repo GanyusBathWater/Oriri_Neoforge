@@ -3,11 +3,13 @@ package net.ganyusbathwater.oririmod.item;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.fluid.ModFluids;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -34,6 +36,7 @@ public class ModItemGroups {
                         output.accept(ModItems.POWER_SOUL);
                         output.accept(ModItems.TORTURED_SOUL);
                         output.accept(ModItems.VOID_SOUL);
+                        output.accept(ModFluids.AETHER_BUCKET.get());
 
                         //-------------Blocks------------
                         output.accept(ModBlocks.MANA_CRYSTAL_BLOCK);
@@ -56,6 +59,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING);
                         output.accept(ModBlocks.ELDER_SAPLING);
                         output.accept(ModBlocks.ELDER_SPORE_BLOSSOM);
+                        output.accept(ModBlocks.STAR_HERB);
 
                         //-------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);

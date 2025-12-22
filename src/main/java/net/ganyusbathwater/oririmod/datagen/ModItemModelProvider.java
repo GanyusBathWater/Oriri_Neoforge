@@ -44,6 +44,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         simpleBlockItem(ModBlocks.ELDER_PLANKS.get());
         simpleBlockItem(ModBlocks.ELDER_LEAVES.get());
         saplingItem(ModBlocks.ELDER_SAPLING);
+        saplingItem(ModBlocks.STAR_HERB);
         simpleBlockItem(ModBlocks.ELDER_STEM_BLOCK.get());
         simpleBlockItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
         simpleBlockItem(ModBlocks.MANA_CRYSTAL_BLOCK.get());

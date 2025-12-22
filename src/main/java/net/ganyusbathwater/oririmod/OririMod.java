@@ -8,6 +8,8 @@ import net.ganyusbathwater.oririmod.config.ManaConfig;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.enchantment.ModEnchantmentEffects;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
+import net.ganyusbathwater.oririmod.fluid.ModFluidTypes;
+import net.ganyusbathwater.oririmod.fluid.ModFluids;
 import net.ganyusbathwater.oririmod.item.ModItemGroups;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.menu.ModMenus;
@@ -60,7 +62,8 @@ public class OririMod {
         ModEntities.register(modEventBus);
         modEventBus.addListener(this::addCreative);
         ModFeatures.register(modEventBus);
-
+        ModFluids.register(modEventBus);
+        ModFluidTypes.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, ManaConfig.SPEC);
     }
 

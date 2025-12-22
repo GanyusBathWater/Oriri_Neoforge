@@ -173,6 +173,9 @@
   "block.oririmod.elder_spore_blossom": "Elder Spore Blossom",
   "block.oririmod.elder_leaves_flowering": "Flowering Elder Leaves",
 
+  "fluid.oririmod.aether": "Aether",
+    "item.oririmod.aether_bucket": "Aether Bucket",
+
   "tooltip.oririmod.magic_book_1.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_1.tooltip.lore": "A book written by a man that doesn’t have the best spells",
 

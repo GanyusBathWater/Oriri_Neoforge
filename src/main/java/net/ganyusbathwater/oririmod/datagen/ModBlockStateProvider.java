@@ -62,6 +62,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         fenceGateBlock(ModBlocks.ELDER_GATE.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
 
         saplingBlock(ModBlocks.ELDER_SAPLING);
+        saplingBlock(ModBlocks.STAR_HERB);
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock, int renderType) {
