@@ -122,7 +122,7 @@ public final class AetherLiquidBlock extends LiquidBlock {
         entity.hurt(level.damageSources().generic(), damage);
 
         LAST_HIT_TICK.put(entity, now);
-        NEXT_DAMAGE.put(entity, damage * 2.0F);
+        NEXT_DAMAGE.put(entity, damage * 1.15F);
     }
 
     @Override
