@@ -64,23 +64,11 @@ public class ModItemGroups {
                         //-------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);
 
-                        //-----------Vestigess-----------
-                        output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
-                        output.accept(ModItems.CRIT_GLOVE);
-                        output.accept(ModItems.DUELLANT_CORTEX);
-                        output.accept(ModItems.HEART_OF_THE_TANK);
-                        output.accept(ModItems.SNOW_BOOTS);
-                        output.accept(ModItems.MIRROR_OF_THE_BLACK_SUN);
-                        output.accept(ModItems.PHOENIX_FEATHER);
-                        output.accept(ModItems.MINERS_LANTERN);
-                        output.accept(ModItems.RELIC_OF_THE_PAST);
-                        output.accept(ModItems.SOLIS_BROOCH);
-                        output.accept(ModItems.STIGMA_OF_THE_ARCHITECT);
-                        output.accept(ModItems.SPRING);
-                        output.accept(ModItems.STRIDERS_SCALE);
+                        //-----------Vestiges-----------
+
                         output.accept(ModItems.STRANGE_ENDER_EYE);
-                        output.accept(ModItems.CANDY_BAG);
-                        output.accept(ModItems.WITHER_ROSE);
+                        output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
+                        output.accept(ModItems.HEART_OF_THE_TANK);
 
                         //------------Weapons------------
                         output.accept(ModItems.PANDORAS_BLADE);

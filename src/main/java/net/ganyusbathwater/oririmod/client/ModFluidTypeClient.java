@@ -16,7 +16,7 @@ public final class ModFluidTypeClient {
     private static final ResourceLocation AETHER_FLOW =
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/aether_flow");
     private static final ResourceLocation AETHER_OVERLAY =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/aether_overlay");
+            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/aether_flow");
 
     private ModFluidTypeClient() {}
 

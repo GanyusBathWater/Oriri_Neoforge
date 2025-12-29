@@ -79,7 +79,7 @@ public class ModManaUtil {
     }
 
     public static void setMaxMana(Player player, int maxMana) {
-        int clampedMax = clamp(maxMana, 1, 100000);
+        int clampedMax = clamp(maxMana, 100, 100000);
         CompoundTag data = player.getPersistentData();
         data.putInt(NBT_MAX_KEY, clampedMax);
         int cur = getMana(player);
@@ -153,7 +153,7 @@ public class ModManaUtil {
             setMaxMana(player, maxMana);
             return;
         }
-        int clampedMax = clamp(maxMana, 1, 100000);
+        int clampedMax = clamp(maxMana, 100, 100000);
         CompoundTag data = player.getPersistentData();
         data.putInt(NBT_MAX_KEY, clampedMax);
         int cur = data.getInt(NBT_KEY);

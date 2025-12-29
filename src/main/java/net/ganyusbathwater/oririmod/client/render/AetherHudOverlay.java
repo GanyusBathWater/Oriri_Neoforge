@@ -20,33 +20,32 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 public final class AetherHudOverlay {
     // Nutzt dieselbe Overlay-Textur wie beim Fluid-Overlay, aber als HUD.
     private static final ResourceLocation AETHER_HUD =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/block/aether_overlay.png");
+            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/aether_gui");
 
     private AetherHudOverlay() {}
 
     @SubscribeEvent
-    public static void onRenderGuiPost(RenderGuiEvent.Post event) {
+    public static void onRenderGuiPre(RenderGuiEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
-        // Beispielbedingung: nur wenn der Spieler "in Aether" ist (anpassen!)
-        // if (!isInAether(mc)) return;
+
+        if (!isInAether(mc)) return;
 
         GuiGraphics gg = event.getGuiGraphics();
         int w = gg.guiWidth();
         int h = gg.guiHeight();
 
-        // Größe/Position wie beim "Feuer unten" (anpassbar)
         int quadW = w / 2;
-        int quadH = h / 2;
+        int quadH = (int) (h * 0.7f); // etwas niedriger als 50%
         int y = h - quadH;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
         // Linke/rechte Hälfte mit zwei Sprites überlagern (wie Vanilla Fire-Overlay)
-        drawSprite(gg, AETHER_HUD, 0, y, quadW, quadH);
-        drawSprite(gg, AETHER_HUD, w - quadW, y, quadW, quadH);
+        drawSprite(gg, AETHER_HUD, 0, y + 20, quadW +20, quadH);
+        drawSprite(gg, AETHER_HUD, w - quadW, y + 20, quadW, quadH);
 
         RenderSystem.disableBlend();
     }
@@ -59,5 +58,19 @@ public final class AetherHudOverlay {
         // Atlas binden, dann das Sprite blitten (Sprite liefert u/v und ist animiert)
         RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
         gg.blit(x, y, 0, w, h, sprite);
+    }
+
+    private static boolean isInAether(Minecraft mc) {
+        Player player = mc.player;
+        if (player == null || mc.level == null) return false;
+
+        FluidState state = mc.level.getFluidState(player.blockPosition());
+        // Annahme: ModFluids.AETHER ist ein RegistryObject/Supplier; .get() liefert das registrierte Fluid.
+        try {
+            return state.is(ModFluids.AETHER_SOURCE.get()) || state.is(ModFluids.AETHER_FLOWING.get());
+        } catch (Exception e) {
+            // Fallback: falls ModFluids anders definiert ist oder .get() nicht vorhanden ist, sicherer Rückfall
+            return false;
+        }
     }
 }

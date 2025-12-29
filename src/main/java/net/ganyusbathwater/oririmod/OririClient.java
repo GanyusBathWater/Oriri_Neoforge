@@ -63,6 +63,9 @@ public class OririClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         ModItemProperties.addCustomItemProperties();
+
+
+
     }
 
     @SubscribeEvent

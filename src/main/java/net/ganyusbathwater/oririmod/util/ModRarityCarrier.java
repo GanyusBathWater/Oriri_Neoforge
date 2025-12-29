@@ -24,31 +24,7 @@ public interface ModRarityCarrier {
 
     default List<Component> buildModTooltip(ItemStack stack, Item.TooltipContext context, TooltipFlag flag) {
         List<Component> list = new ArrayList<>();
-
-        // Vestige-Infos
-        if (this instanceof VestigeItem v) {
-            int max = v.getMaxLevel();
-            int unlocked = v.getUnlockedLevel(stack);
-
-            String base = v.getTranslationKeyBase() != null
-                    ? v.getTranslationKeyBase()
-                    : "tooltip.oririmod.vestige";
-
-            list.add(Component.translatable(base + ".level", unlocked, max)
-                    .withStyle(ChatFormatting.AQUA));
-
-            int mask = getInt(stack, VestigeItem.NBT_DISABLED_MASK, 0);
-
-            for (int lvl = 1; lvl <= unlocked; lvl++) {
-                boolean enabled = (mask & (1 << (lvl - 1))) == 0;
-                String descKey = String.format("%s.level.%d.description", base, lvl);
-                list.add(Component.translatable(descKey)
-                        .withStyle(enabled ? ChatFormatting.WHITE : ChatFormatting.DARK_GRAY));
-            }
-
-            list.add(Component.translatable(base + ".lore")
-                    .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        }
+        
 
         return list;
     }

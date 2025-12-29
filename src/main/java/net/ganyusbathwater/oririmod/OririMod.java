@@ -12,7 +12,6 @@ import net.ganyusbathwater.oririmod.fluid.ModFluidTypes;
 import net.ganyusbathwater.oririmod.fluid.ModFluids;
 import net.ganyusbathwater.oririmod.item.ModItemGroups;
 import net.ganyusbathwater.oririmod.item.ModItems;
-import net.ganyusbathwater.oririmod.menu.ModMenus;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.TooltipHandler;
@@ -55,7 +54,6 @@ public class OririMod {
         ModItemGroups.registerItemGroups(modEventBus);
         ModItems.registerModItems(modEventBus);
         ModBlocks.register(modEventBus);
-        ModMenus.MENUS.register(modEventBus);
         ModEffects.registerEffects(modEventBus);
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);

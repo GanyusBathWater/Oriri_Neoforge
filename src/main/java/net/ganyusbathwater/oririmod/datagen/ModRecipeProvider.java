@@ -18,7 +18,8 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
 
         @Override
         protected void buildRecipes(RecipeOutput recipeOutput) {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.CRIT_GLOVE,1)
+        /*
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.CRIT_GLOVE,1)
                 .pattern("BAB")
                 .pattern("AXA")
                 .pattern("BAB")
@@ -27,6 +28,8 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('A', Items.RED_WOOL)
                 .unlockedBy("has_tortured_soul", has(ModItems.TORTURED_SOUL)).save(recipeOutput);
 
+
+         */
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.EMERALD_SWORD,1)
                     .pattern("B")
                     .pattern("B")
@@ -66,7 +69,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .define('B', Items.EMERALD)
                     .define('A', Items.STICK)
                     .unlockedBy("has_emerald", has(Items.EMERALD)).save(recipeOutput);
-
+/*
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.HEART_OF_THE_TANK,1)
                     .pattern("BBB")
                     .pattern("BAB")
@@ -74,6 +77,8 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .define('B', Items.GOLDEN_APPLE)
                     .define('A', ModItems.HOLLOW_SOUL)
                     .unlockedBy("has_hollowed_soul", has(ModItems.HOLLOW_SOUL)).save(recipeOutput);
+
+
 
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.SNOW_BOOTS,1)
                     .pattern("B  ")
@@ -84,6 +89,8 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .define('S', ModItems.IRON_STICK)
                     .unlockedBy("has_damned_soul", has(ModItems.DAMNED_SOUL)).save(recipeOutput);
 
+
+ */
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.IRON_STICK,4)
                     .pattern("A")
                     .pattern("A")

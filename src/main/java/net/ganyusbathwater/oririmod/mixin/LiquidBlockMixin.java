@@ -12,6 +12,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -32,6 +33,7 @@ public abstract class LiquidBlockMixin {
         oririmod$tryAetherMixingConvertTarget(serverLevel, neighborPos);
     }
 
+    @Unique
     private static void oririmod$tryAetherMixingConvertTarget(ServerLevel level, BlockPos pos) {
         FluidState fsHere = level.getFluidState(pos);
         Fluid here = fsHere.getType();

@@ -26,7 +26,10 @@ repositories {
     mavenCentral()
     maven { url = uri("https://cursemaven.com") }
     maven { url = uri("https://maven.blamejared.com") }
-    maven { url = uri("https://repo.modrinth.com/maven/") }
+    maven {
+        name = "Illusive Soulworks maven"
+        url = "https://maven.theillusivec4.top/"
+    }
 }
 
 base {
@@ -124,10 +127,10 @@ configurations {
 dependencies {
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    compileOnly "mezz.jei:jei-1.21.1-common-api:19.21.1.308"
-    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.21.1.308"
-    compileOnly files('libs/curios-neoforge-9.5.1.jar')
-    runtimeOnly files('libs/curios-neoforge-9.5.1.jar')
+    // Compile against only the API artifact
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+    // Use the full Curios API jar at runtime
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
 
 

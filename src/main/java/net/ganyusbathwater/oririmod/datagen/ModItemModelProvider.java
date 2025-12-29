@@ -62,22 +62,9 @@ public class ModItemModelProvider extends ItemModelProvider {
 
         //-----------Artifacts-----------
 
-        basicItem(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS.get());
-        basicItem(ModItems.CRIT_GLOVE.get());
-        basicItem(ModItems.DUELLANT_CORTEX.get());
-        basicItem(ModItems.HEART_OF_THE_TANK.get());
-        basicItem(ModItems.SNOW_BOOTS.get());
-        basicItem(ModItems.MIRROR_OF_THE_BLACK_SUN.get());
-        basicItem(ModItems.PHOENIX_FEATHER.get());
-        basicItem(ModItems.MINERS_LANTERN.get());
-        basicItem(ModItems.RELIC_OF_THE_PAST.get());
-        basicItem(ModItems.SOLIS_BROOCH.get());
-        basicItem(ModItems.STIGMA_OF_THE_ARCHITECT.get());
-        basicItem(ModItems.SPRING.get());
-        basicItem(ModItems.STRIDERS_SCALE.get());
         basicItem(ModItems.STRANGE_ENDER_EYE.get());
-        basicItem(ModItems.CANDY_BAG.get());
-        basicItem(ModItems.WITHER_ROSE.get());
+        basicItem(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS.get());
+        basicItem(ModItems.HEART_OF_THE_TANK.get());
 
         //------------Weapons------------
 
