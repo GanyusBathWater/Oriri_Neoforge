@@ -35,7 +35,17 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        // Lore
+        int unlockedLevel = Math.max(0, getUnlockedLevel(stack));
+
+        // Aktuelles Level (Key: item.oririmod.\<id\>.level -> "Current Level: %s")
+        tooltip.add(Component.translatable(this.getDescriptionId() + ".level", unlockedLevel));
+
+        // Level\-Beschreibungen bis zum aktuellen Level
+        for (int i = 1; i <= unlockedLevel; i++) {
+            tooltip.add(Component.translatable(this.getDescriptionId() + ".level." + i + ".description"));
+        }
+
+        // Lore (Key: item.oririmod.\<id\>.lore)
         tooltip.add(Component.translatable(this.getDescriptionId() + ".lore"));
 
         // Rarität am Schluss (kommt aus ModRarityCarrier)
@@ -139,7 +149,7 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
         }
     }
 
-    private int getUnlockedLevel(ItemStack stack) {
+    public static int getUnlockedLevel(ItemStack stack) {
         return 3;
     }
 }

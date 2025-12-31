@@ -1,4 +1,4 @@
-package net.ganyusbathwater.oririmod.client.render;
+package net.ganyusbathwater.oririmod.client.render.fluids;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.ganyusbathwater.oririmod.OririMod;
@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;

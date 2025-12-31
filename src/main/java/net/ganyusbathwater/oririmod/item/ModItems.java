@@ -35,6 +35,9 @@ public class ModItems {
     public static final DeferredItem<VestigeItem> STRANGE_ENDER_EYE = ITEMS.register("strange_ender_eye", () -> new StrangeEnderEye(new Item.Properties()));
     public static final DeferredItem<VestigeItem> BOUND_OF_THE_CELESTIAL_SISTERS = ITEMS.register("bound_of_the_celestial_sisters", () -> new BoundOfTheCelestialSisters(new Item.Properties()));
     public static final DeferredItem<VestigeItem> HEART_OF_THE_TANK = ITEMS.register("heart_of_the_tank", () -> new HeartOfTheTank(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> DUELLANT_CORTEX = ITEMS.register("duellant_cortex", () -> new DuellantCortex(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> CRIT_GLOVE = ITEMS.register("crit_glove", () -> new CritGlove(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new PhoenixFeather(new Item.Properties()));
 
 
     //---------------------------------------Foods-----------------------------------------------------------

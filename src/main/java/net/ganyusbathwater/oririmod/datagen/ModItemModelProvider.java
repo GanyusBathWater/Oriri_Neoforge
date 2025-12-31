@@ -65,6 +65,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.STRANGE_ENDER_EYE.get());
         basicItem(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS.get());
         basicItem(ModItems.HEART_OF_THE_TANK.get());
+        basicItem(ModItems.DUELLANT_CORTEX.get());
+        basicItem(ModItems.CRIT_GLOVE.get());
+        basicItem(ModItems.PHOENIX_FEATHER.get());
 
         //------------Weapons------------
 

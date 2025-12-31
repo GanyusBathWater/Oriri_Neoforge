@@ -1,4 +1,4 @@
-package net.ganyusbathwater.oririmod.client;
+package net.ganyusbathwater.oririmod.client.render.fluids;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.fluid.ModFluidTypes;

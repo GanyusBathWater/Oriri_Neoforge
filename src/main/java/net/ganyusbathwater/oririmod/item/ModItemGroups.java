@@ -69,6 +69,9 @@ public class ModItemGroups {
                         output.accept(ModItems.STRANGE_ENDER_EYE);
                         output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
                         output.accept(ModItems.HEART_OF_THE_TANK);
+                        output.accept(ModItems.DUELLANT_CORTEX);
+                        output.accept(ModItems.CRIT_GLOVE);
+                        output.accept(ModItems.PHOENIX_FEATHER);
 
                         //------------Weapons------------
                         output.accept(ModItems.PANDORAS_BLADE);
