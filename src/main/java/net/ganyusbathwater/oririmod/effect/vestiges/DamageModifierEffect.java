@@ -6,6 +6,7 @@ import net.ganyusbathwater.oririmod.events.vestiges.VestigeDayNightEvents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
+
 public final class DamageModifierEffect implements VestigeEffect {
 
     private static final int COOLDOWN_TICKS = 20;
@@ -74,6 +75,8 @@ public final class DamageModifierEffect implements VestigeEffect {
 
         root.remove(NBT_KEY);
     }
+
+    //---------------------------Methoden für BoundOfTheCelestialSisters-----------------------------------------
 
     private static void applyDay(Player player) {
         // Tag: +15% Defense => eingehender Schaden * 0.85
