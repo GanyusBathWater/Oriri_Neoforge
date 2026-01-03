@@ -38,6 +38,9 @@ public class ModItems {
     public static final DeferredItem<VestigeItem> DUELLANT_CORTEX = ITEMS.register("duellant_cortex", () -> new DuellantCortex(new Item.Properties()));
     public static final DeferredItem<VestigeItem> CRIT_GLOVE = ITEMS.register("crit_glove", () -> new CritGlove(new Item.Properties()));
     public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new PhoenixFeather(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> STIGMA_OF_DARKNESS = ITEMS.register("stigma_of_darkness", () -> new StigmaOfDarkness(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> MINERS_LANTERN = ITEMS.register("miners_lantern", () -> new MinersLantern(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> MIRROR_OF_THE_VOID = ITEMS.register("mirror_of_the_void", () -> new MirrorOfTheVoid(new Item.Properties()));
 
 
     //---------------------------------------Foods-----------------------------------------------------------

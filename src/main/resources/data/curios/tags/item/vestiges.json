@@ -1,11 +1,14 @@
 {
   "replace": false,
   "values": [
-    "oririmod:strange_ender_eye",
     "oririmod:bound_of_the_celestial_sisters",
-    "oririmod:heart_of_the_tank",
-    "oririmod:duellant_cortex",
     "oririmod:crit_glove",
-    "oririmod:phoenix_feather"
+    "oririmod:duellant_cortex",
+    "oririmod:heart_of_the_tank",
+    "oririmod:miners_lantern",
+    "oririmod:mirror_of_the_void",
+    "oririmod:phoenix_feather",
+    "oririmod:stigma_of_darkness",
+    "oririmod:strange_ender_eye"
   ]
 }

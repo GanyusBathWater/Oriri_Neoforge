@@ -1,35 +1,32 @@
 {
   "item.oririmod.fire_crystal": "Fire Crystal",
   "item.oririmod.moon_stone": "Moon Stone",
-  "item.oririmod.mana_manifestation": "Mana Manifestation",
   "item.oririmod.iron_stick": "Iron Stick",
-  "item.oririmod.bound_of_the_celestial_sisters": "Bound of the Celestial Sisters",
-  "item.oririmod.crit_glove": "Crit Glove",
   "item.oririmod.damned_soul": "Damned Soul",
-  "item.oririmod.duellant_cortex": "Duellant Corrtex",
-  "item.oririmod.heart_of_the_tank": "Heart of the tank",
-  "item.oririmod.hermes_gift": "Hermes gift",
   "item.oririmod.hollow_soul": "Hollow Soul",
-  "item.oririmod.snow_boots": "Snow Boots",
   "item.oririmod.iras_soul": "Iras Soul",
-  "item.oririmod.mana_heart": "Mana Heart",
-  "item.oririmod.pestdoctors_mask": "Plague Doctors Mask",
-  "item.oririmod.mirror_of_the_black_sun": "Mirror of the Black Sun",
-  "item.oririmod.phoenix_feather": "Phoenix Feather",
-  "item.oririmod.miners_lantern": "Miners Lantern",
   "item.oririmod.power_soul": "Power Soul",
-  "item.oririmod.pyro_vision": "Pyro Vision",
-  "item.oririmod.relic_of_the_past": "Relict of the Past",
-  "item.oririmod.solis_brooch": "Solis Brooch",
-  "item.oririmod.stigma_of_the_architect": "Stigma of the Architect",
-  "item.oririmod.soul_stone": "Soulstone",
-  "item.oririmod.spring": "Spring",
-  "item.oririmod.strange_ender_eye": "Strange Ender Eye",
-  "item.oririmod.striders_scale": "Strider's Scale",
-  "item.oririmod.candy_bag": "Candy Bag",
   "item.oririmod.tortured_soul": "Tortured Soul",
   "item.oririmod.void_soul": "Void Soul",
+
+
+  "item.oririmod.bound_of_the_celestial_sisters": "Bound of the Celestial Sisters",
+  "item.oririmod.crit_glove": "Crit Glove",
+  "item.oririmod.duellant_cortex": "Duellant Cortex",
+  "item.oririmod.heart_of_the_tank": "Heart of the tank",
+  "item.oririmod.snow_boots": "Snow Boots",
+  "item.oririmod.mirror_of_the_void": "Mirror of the Void",
+  "item.oririmod.phoenix_feather": "Phoenix Feather",
+  "item.oririmod.miners_lantern": "Miners Lantern",
+  "item.oririmod.relic_of_the_past": "Relict of the Past",
+  "item.oririmod.solis_brooch": "Solis Brooch",
+  "item.oririmod.stigma_of_darkness": "Stigma of Darkness",
+  "item.oririmod.spring": "Spring",
+  "item.oririmod.strange_ender_eye": "Strange Ender Eye",
+  "item.oririmod.strider_scale": "Strider Scale",
+  "item.oririmod.candy_bag": "Candy Bag",
   "item.oririmod.wither_rose": "Wither Rose",
+
 
   "effect.oririmod.stunned": "Stunned",
   "effect.oririmod.broken": "Broken",
@@ -55,6 +52,7 @@
   "item.minecraft.lingering_potion.effect.broken_potion3": "Broken Lingering Potion III",
   "item.minecraft.tipped_arrow.effect.broken_potion3": "Arrow of Broken Armor III",
 
+
   "enchantment.oririmod.sniper": "Sniper",
   "tooltip.oririmod.sniper": "Arrows will not spread or loose height. Only works with normal arrows",
 
@@ -64,13 +62,16 @@
   "enchantment.oririmod.teacher": "Teacher",
   "tooltip.oririmod.teacher": "Increases the XP gained. Only works on Helmets",
 
+
   "item.oririmod.emerald_sword": "Emerald Sword",
   "item.oririmod.emerald_pickaxe": "Emerald Pickaxe",
   "item.oririmod.emerald_axe": "Emerald Axe",
   "item.oririmod.emerald_shovel": "Emerald Shovel",
   "item.oririmod.emerald_hoe": "Emerald Hoe",
 
+
   "item.oririmod.elderberry": "Elderberry",
+
 
   "item.oririmod.stella_perditor": "Stella Perditor",
   "item.oririmod.oraphim_bow": "Oraphim Bow",
@@ -97,6 +98,7 @@
   "item.oririmod.book_of_apprentice": "Book of the Apprentice",
   "item.oririmod.book_of_journeyman": "Book of the Journeyman",
   "item.oririmod.book_of_wise": "Book of the Wise",
+
 
   "item.oririmod.crystal_helmet": "Crystal Helmet",
   "item.oririmod.crystal_chestplate": "Crystal Chestplate",
@@ -128,6 +130,7 @@
   "item.oririmod.prismarine_leggings": "Prismarine Leggings",
   "item.oririmod.prismarine_boots": "Prismarine Boots",
 
+
   "item.oririmod.the_fool": "The Fool",
   "item.oririmod.the_magician": "The Magician",
   "item.oririmod.the_high_priestess": "The High Priestess",
@@ -150,6 +153,7 @@
   "item.oririmod.the_sun": "The Sun",
   "item.oririmod.judgement": "Judgement",
   "item.oririmod.the_world": "The World",
+
 
   "block.oririmod.dark_soil_block": "Dark Soil",
   "block.oririmod.elderbush_block": "Elderbush",
@@ -174,7 +178,7 @@
   "block.oririmod.elder_leaves_flowering": "Flowering Elder Leaves",
 
   "fluid.oririmod.aether": "Aether",
-    "item.oririmod.aether_bucket": "Aether Bucket",
+  "item.oririmod.aether_bucket": "Aether Bucket",
 
   "tooltip.oririmod.magic_book_1.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_1.tooltip.lore": "A book written by a man that doesn’t have the best spells",
@@ -188,29 +192,18 @@
   "tooltip.oririmod.magic_book_4.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_4.tooltip.lore": "A book truly written by a master",
 
-  "item.oririmod.strange_ender_eye.level": "Current Level: %s",
-  "item.oririmod.strange_ender_eye.level.1.description": "Level 1 grants Night Vision",
-  "item.oririmod.strange_ender_eye.level.2.description": "Level 2 grants the ability to see Mobs in a 12 Block Radius",
-  "item.oririmod.strange_ender_eye.level.3.description": "Level 3 increases the Vision Radius to 24 Blocks",
-  "item.oririmod.strange_ender_eye.lore": "A modified Ender Eye, it gives you enhanced vision",
 
-  "item.oririmod.heart_of_the_tank.level": "Current Level: %s",
-  "item.oririmod.heart_of_the_tank.level.1.description": "Level 1 increases max health by 4 hearts",
-  "item.oririmod.heart_of_the_tank.level.2.description": "Level 2 increases max health by 2 additional hearts to a total of 6 hearts",
-  "item.oririmod.heart_of_the_tank.level.3.description": "Level 3 increases max health by 4 additional hearts to a total of 10 hearts",
-  "item.oririmod.heart_of_the_tank.lore": "Wait, i think this comes from another world…",
+  "item.oririmod.bound_of_the_celestial_sisters.level": "Current Level: %s",
+  "item.oririmod.bound_of_the_celestial_sisters.level.1.description": "Level 1 grants 25% Elemental Resistance based on time of the Day, on daytime gain Darkness Resistance, on nighttime gain Light Resistance",
+  "item.oririmod.bound_of_the_celestial_sisters.level.2.description": "Level 2 on Daytime gain 50 Max Mana, on Nighttime gain doubled Mana Regeneration",
+  "item.oririmod.bound_of_the_celestial_sisters.level.3.description": "Level 3 on Daytime gain 25% increased Defense, on Nighttime gain 25% increased Damage",
+  "item.oririmod.bound_of_the_celestial_sisters.lore": "Both are bound in endless fight, the hungering day, the undying night.",
 
-  "item.oririmod.snow_boots.level": "Current Level: %s",
-  "item.oririmod.snow_boots.level.1.description": "Level 1 grants Speed Boost I on Snow and Ice Blocks",
-  "item.oririmod.snow_boots.level.2.description": "Level 2 grants the ability to walk on Powdered Snow",
-  "item.oririmod.snow_boots.level.3.description": "Level 3 grants Knockpack Immunity on Ice and Snow Blocks",
-  "item.oririmod.snow_boots.lore": "Perfect for snowy adventures",
-
-  "item.oririmod.phoenix_feather.level": "Current Level: %s",
-  "item.oririmod.phoenix_feather.level.1.description": "Level 1 grants the ability to withstand fatal damage with a 10% chance",
-  "item.oririmod.phoenix_feather.level.2.description": "Level 2 increases the chance to 20%",
-  "item.oririmod.phoenix_feather.level.3.description": "Level 3 increases the chance to 33%",
-  "item.oririmod.phoenix_feather.lore": "Majestic beings, these phoenixes right Harry?",
+  "item.oririmod.candy_bag.level": "Current Level: %s",
+  "item.oririmod.candy_bag.level.1.description": "Level 1 grants immunity to the Hunger Effect",
+  "item.oririmod.candy_bag.level.2.description": "Level 2 regenerates 1 saturation point every Minute",
+  "item.oririmod.candy_bag.level.3.description": "Level 3 regenerates 1 saturation point every 30 Seconds",
+  "item.oririmod.candy_bag.lore": "If you are hungry, take two!",
 
   "item.oririmod.crit_glove.level": "Current Level: %s",
   "item.oririmod.crit_glove.level.1.description": "Level 1 increases Attack Speed by 25%",
@@ -218,23 +211,17 @@
   "item.oririmod.crit_glove.level.3.description": "Level 3 increases the percentage to 75%",
   "item.oririmod.crit_glove.lore": "Gloves of a Strong Assassin where every hit is devastating",
 
-  "item.oririmod.spring.level": "Current Level: %s",
-  "item.oririmod.spring.level.1.description": "Level 1 grants Jumpboost I",
-  "item.oririmod.spring.level.2.description": "Level 2 increases Step Height by 1 block",
-  "item.oririmod.spring.level.3.description": "Level 3 negates all fall damage",
-  "item.oririmod.spring.lore": "That should only work in cartoons, right?",
+  "item.oririmod.duellant_cortex.level": "Current Level: %s",
+  "item.oririmod.duellant_cortex.level.1.description": "Level 1 increases defense by 5% per Enemy in a 12 Block Radius",
+  "item.oririmod.duellant_cortex.level.2.description": "Level 2 additionally increases damage by 2.5% per Enemy",
+  "item.oririmod.duellant_cortex.level.3.description": "Level 3 increases percentage to 7.5% Defense and 5% Damage per Enemy",
+  "item.oririmod.duellant_cortex.lore": "En Garde",
 
-  "item.oririmod.candy_bag.level": "Current Level: %s",
-  "item.oririmod.candy_bag.level.1.description": "Level 1 grants immunity to the Hunger Effect",
-  "item.oririmod.candy_bag.level.2.description": "Level 2 regenerates 1 saturation point every Minute",
-  "item.oririmod.candy_bag.level.3.description": "Level 3 regenerates 1 saturation point every 30 Seconds",
-  "item.oririmod.candy_bag.lore": "if you are hungry, take two!",
-
-  "item.oririmod.wither_rose.level": "Current Level: %s",
-  "item.oririmod.wither_rose.level.1.description": "Level 1 grants immunity to the Wither Effect",
-  "item.oririmod.wither_rose.level.2.description": "Level 2 decreases the damage taken from Wither Skeletons and the Wither by 50%",
-  "item.oririmod.wither_rose.level.3.description": "Level 3 increases the damage dealt to Wither Skeletons and the Wither by 50%",
-  "item.oririmod.wither_rose.lore": "Normally, you can’t grow the drought, but in this case...",
+  "item.oririmod.heart_of_the_tank.level": "Current Level: %s",
+  "item.oririmod.heart_of_the_tank.level.1.description": "Level 1 increases max health by 4 hearts",
+  "item.oririmod.heart_of_the_tank.level.2.description": "Level 2 increases max health by 2 additional hearts to a total of 6 hearts",
+  "item.oririmod.heart_of_the_tank.level.3.description": "Level 3 increases max health by 4 additional hearts to a total of 10 hearts",
+  "item.oririmod.heart_of_the_tank.lore": "Wait, i think this comes from another world…",
 
   "item.oririmod.miners_lantern.level": "Current Level: %s",
   "item.oririmod.miners_lantern.level.1.description": "Level 1 grants Haste I",
@@ -242,11 +229,17 @@
   "item.oririmod.miners_lantern.level.3.description": "Level 3 increases Luck by 5",
   "item.oririmod.miners_lantern.lore": "The guiding Light in dark times",
 
-  "item.oririmod.bound_of_the_celestial_sisters.level": "Current Level: %s",
-  "item.oririmod.bound_of_the_celestial_sisters.level.1.description": "Level 1 grants 25% Elemental Resistance based on time of the Day, on daytime gain Darkness Resistance, on nighttime gain Light Resistance",
-  "item.oririmod.bound_of_the_celestial_sisters.level.2.description": "Level 2 on Daytime gain 50 Max Mana, on Nighttime gain double Mana Regeneration",
-  "item.oririmod.bound_of_the_celestial_sisters.level.3.description": "Level 3 on Daytime gain 25% increased Defense, on Nighttime gain 25% increased Damage",
-  "item.oririmod.bound_of_the_celestial_sisters.lore": "Both are bound in endless fight, the dying day, the hungering night.",
+  "item.oririmod.mirror_of_the_void.level": "Current Level: %s",
+  "item.oririmod.mirror_of_the_void.level.1.description": "Level 1 negates damage once every 60 seconds but only if its not more than your Base max health",
+  "item.oririmod.mirror_of_the_void.level.2.description": "Level 2 decreases the cooldown to 45 seconds",
+  "item.oririmod.mirror_of_the_void.level.3.description": "Level 3 decreases the cooldown to 30 seconds",
+  "item.oririmod.mirror_of_the_void.lore": "Dark, Darker, Yet Darker",
+
+  "item.oririmod.phoenix_feather.level": "Current Level: %s",
+  "item.oririmod.phoenix_feather.level.1.description": "Level 1 grants the ability to withstand fatal damage with a 10% chance",
+  "item.oririmod.phoenix_feather.level.2.description": "Level 2 increases the chance to 20%",
+  "item.oririmod.phoenix_feather.level.3.description": "Level 3 increases the chance to 33%",
+  "item.oririmod.phoenix_feather.lore": "Majestic beings, these phoenixes right Harry?",
 
   "item.oririmod.relic_of_the_past.level": "Current Level: %s",
   "item.oririmod.relic_of_the_past.level.1.description": "Level 1 grants Absorption I for 5 seconds upon taking damage with a 10 second cooldown",
@@ -254,20 +247,52 @@
   "item.oririmod.relic_of_the_past.level.3.description": "Level 3 additionally grants Regeneration I",
   "item.oririmod.relic_of_the_past.lore": "The ring gives its energy when yours is dwindling",
 
-  "item.oririmod.mirror_of_the_black_sun.level": "Current Level: %s",
-  "item.oririmod.mirror_of_the_black_sun.level.1.description": "Level 1 negates damage once every 90 seconds but only if its not more than your max health",
-  "item.oririmod.mirror_of_the_black_sun.level.2.description": "Level 2 decreases the cooldown to 60 seconds",
-  "item.oririmod.mirror_of_the_black_sun.level.3.description": "Level 3 decreases the cooldown to 45 seconds",
-  "item.oririmod.mirror_of_the_black_sun.lore": "Dark, Darker, Yet Darker",
+  "item.oririmod.snow_boots.level": "Current Level: %s",
+  "item.oririmod.snow_boots.level.1.description": "Level 1 grants Speed Boost I on Snow and Ice Blocks",
+  "item.oririmod.snow_boots.level.2.description": "Level 2 grants the ability to walk on Powdered Snow",
+  "item.oririmod.snow_boots.level.3.description": "Level 3 grants Knockpack Immunity on Ice and Snow Blocks",
+  "item.oririmod.snow_boots.lore": "Perfect for snowy adventures",
 
-  "item.oririmod.duellant_cortex.level": "Current Level: %s",
-  "item.oririmod.duellant_cortex.level.1.description": "Level 1 increases defense by 5% per Enemy in a 12 Block Radius",
-  "item.oririmod.duellant_cortex.level.2.description": "Level 2 additionally increases damage by 2.5% per Enemy",
-  "item.oririmod.duellant_cortex.level.3.description": "Level 3 increases percentage to 7.5% Defense and 5% Damage per Enemy",
-  "item.oririmod.duellant_cortex.lore": "En Garde",
+  "item.oririmod.solis_brooch.level": "Current Level: %s",
+  "item.oririmod.solis_brooch.level.1.description": "Level 1 increases your Mana Capacity by 50",
+  "item.oririmod.solis_brooch.level.2.description": "Level 2 increases your Mana Capacity by additional 50",
+  "item.oririmod.solis_brooch.level.3.description": "Level 3 doubles your Mana Regeneration",
+  "item.oririmod.solis_brooch.lore": "The crystal inside the brooch enhances your Magical Abilities",
+
+  "item.oririmod.spring.level": "Current Level: %s",
+  "item.oririmod.spring.level.1.description": "Level 1 grants Jump boost I",
+  "item.oririmod.spring.level.2.description": "Level 2 increases Step Height by 1 block",
+  "item.oririmod.spring.level.3.description": "Level 3 negates all fall damage",
+  "item.oririmod.spring.lore": "That should only work in cartoons, right?",
+
+  "item.oririmod.stigma_of_darkness.level": "Current Level: %s",
+  "item.oririmod.stigma_of_darkness.level.1.description": "Level 1 gives you immunity to Broken",
+  "item.oririmod.stigma_of_darkness.level.2.description": "Level 2 gives you immunity to Charmed",
+  "item.oririmod.stigma_of_darkness.level.3.description": "Level 3 gives you immunity to Rooted and Stunned",
+  "item.oririmod.stigma_of_darkness.lore": "The mark of darkness shrouds you from negative influences",
+
+  "item.oririmod.strange_ender_eye.level": "Current Level: %s",
+  "item.oririmod.strange_ender_eye.level.1.description": "Level 1 grants Night Vision",
+  "item.oririmod.strange_ender_eye.level.2.description": "Level 2 grants the ability to see Mobs in a 12 Block Radius",
+  "item.oririmod.strange_ender_eye.level.3.description": "Level 3 increases the Vision Radius to 24 Blocks",
+  "item.oririmod.strange_ender_eye.lore": "A modified Ender Eye, it gives you enhanced vision",
+
+  "item.oririmod.strider_scale.level": "Current Level: %s",
+  "item.oririmod.strider_scale.level.1.description": "Level 1 increases your defense by 5 when your are in the Nether",
+  "item.oririmod.strider_scale.level.2.description": "Level 2 grants you Strength II when burning",
+  "item.oririmod.strider_scale.level.3.description": "Level 3 grants you Fire Resistance",
+  "item.oririmod.strider_scale.lore": "A Scale lost from a Strider has some very unique Resistance Properties",
+
+  "item.oririmod.wither_rose.level": "Current Level: %s",
+  "item.oririmod.wither_rose.level.1.description": "Level 1 grants immunity to the Wither Effect",
+  "item.oririmod.wither_rose.level.2.description": "Level 2 decreases the damage taken from Wither Skeletons and the Wither by 50%",
+  "item.oririmod.wither_rose.level.3.description": "Level 3 increases the damage dealt to Wither Skeletons and the Wither by 50%",
+  "item.oririmod.wither_rose.lore": "Normally, you can’t grow the drought, but in this case...",
+
 
   "tooltip.oririmod.black_mirror.ready": "§aActive§r",
   "hud.oririmod.black_mirror.cooldown": "Cooldown: %ss",
+
 
   "tooltip.oririmod.element.fire": "Fire Weapon",
   "tooltip.oririmod.element.water": "Water Weapon",
@@ -279,9 +304,5 @@
 
 
   "creative.oriri_tab": "Oriri",
-  "creative.oriri_tab_misc": "Oriri Collectibles",
-
-  "screen.oririmod.extra_inventory": "Vestiges",
-
-  "itemgroup.oriri": "Oriri"
+  "creative.oriri_tab_misc": "Oriri Collectibles"
 }

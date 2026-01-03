@@ -72,6 +72,9 @@ public class ModItemGroups {
                         output.accept(ModItems.DUELLANT_CORTEX);
                         output.accept(ModItems.CRIT_GLOVE);
                         output.accept(ModItems.PHOENIX_FEATHER);
+                        output.accept(ModItems.STIGMA_OF_DARKNESS);
+                        output.accept(ModItems.MINERS_LANTERN);
+                        output.accept(ModItems.MIRROR_OF_THE_VOID);
 
                         //------------Weapons------------
                         output.accept(ModItems.PANDORAS_BLADE);

@@ -1,14 +1,17 @@
-// java
+// file: `src/main/java/net/ganyusbathwater/oririmod/client/render/vestige/VestigeHudRenderer.java`
 package net.ganyusbathwater.oririmod.client.render.vestige;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ganyusbathwater.oririmod.OririMod;
-import net.ganyusbathwater.oririmod.effect.vestiges.*;
+import net.ganyusbathwater.oririmod.effect.vestiges.DuellantCortextEffect;
+import net.ganyusbathwater.oririmod.effect.vestiges.MirrorOfTheVoidEffect;
 import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.DuellantCortex;
+import net.ganyusbathwater.oririmod.item.custom.vestiges.MirrorOfTheVoid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
@@ -64,21 +67,12 @@ public final class VestigeHudRenderer {
         drawBackground(gg, x, y);
         drawItemCentered(gg, stack, x, y);
 
-        VestigeEffect effect = getEffectFromStack(stack);
-
-
         int textX = x + BG_WIDTH + 4;
         int textY = y + (BG_HEIGHT / 2) - 4;
 
-        String statusText = getStatusText(player, effect, stack);
-        String dynamicText = getDynamicNumberText(player, effect, stack);
-
+        String statusText = getStatusText(player, stack);
         if (!statusText.isEmpty()) {
             gg.drawString(Minecraft.getInstance().font, statusText, textX, textY, 0xFFFFFF, true);
-            textY += 10;
-        }
-        if (!dynamicText.isEmpty()) {
-            gg.drawString(Minecraft.getInstance().font, dynamicText, textX, textY, 0xAAAAAA, true);
             textY += 10;
         }
 
@@ -100,6 +94,7 @@ public final class VestigeHudRenderer {
                     ItemStack stack = stacks.getStackInSlot(i);
                     if (stack.isEmpty()) continue;
                     if (!(stack.getItem() instanceof VestigeItem)) continue;
+                    if (VestigeItem.getUnlockedLevel(stack) <= 0) continue;
                     result.add(stack);
                 }
             });
@@ -123,62 +118,27 @@ public final class VestigeHudRenderer {
         gg.renderItemDecorations(mc.font, stack, itemX, itemY);
     }
 
-    private static String getStatusText(LocalPlayer player, VestigeEffect effect, ItemStack stack) {
-        if (effect == null) return "";
-
-        int remaining = getRemainingCooldownTicks(player, stack);
-        if (remaining > 0) {
-            return "CD: " + (remaining / 20) + "s";
+    private static String getStatusText(LocalPlayer player, ItemStack stack) {
+        int remainingSeconds = getRemainingCooldownSeconds(player, stack);
+        if (remainingSeconds > 0) {
+            return Component.translatable("hud.oririmod.black_mirror.cooldown", remainingSeconds).getString();
         }
-        return "Ready";
+        return Component.translatable("tooltip.oririmod.black_mirror.ready").getString();
     }
 
-    private static String getDynamicNumberText(LocalPlayer player, VestigeEffect effect, ItemStack stack) {
-        if (effect == null) return "";
+    private static int getRemainingCooldownSeconds(LocalPlayer player, ItemStack stack) {
+        if (player == null || stack == null || stack.isEmpty()) return 0;
 
-        int cdTicks = getRemainingCooldownTicks(player, stack);
-        if (cdTicks > 0) {
-            return "";
+        if (stack.getItem() instanceof MirrorOfTheVoid) {
+            return MirrorOfTheVoidEffect.getActiveCooldownSecondsForHud(player);
         }
-        return "";
-    }
-
-    private static VestigeEffect getEffectFromStack(ItemStack stack) {
-        if (!(stack.getItem() instanceof VestigeItem vestigeItem)) return null;
-        int unlocked = VestigeItem.getUnlockedLevel(stack);
-        return null;
-    }
-
-
-    private static int getRemainingCooldownTicks(LocalPlayer player, ItemStack stack) {
-        if (player == null) return 0;
-
-        ResourceLocation key = null;
-/*
-        if (stack.getItem() instanceof MirrorOfTheBlackSun) {
-            key = BlackMirrorEffect.KEY_MIRROR;
-        } else if (stack.getItem() instanceof RelicOfThePast) {
-            key = VestigeEffects.KEY_RELIC;
-        }
-
-
- */
-        if (key == null) return 0;
 
         return 0;
     }
 
-
-
-
-
     private static String getEnemyCountText(LocalPlayer player, ItemStack stack) {
-        if (!(stack.getItem() instanceof DuellantCortex)) {
-            return "";
-        }
-
+        if (!(stack.getItem() instanceof DuellantCortex)) return "";
         int hostiles = DuellantCortextEffect.countMonsters(player);
-
         return "Enemies: " + hostiles;
     }
 }

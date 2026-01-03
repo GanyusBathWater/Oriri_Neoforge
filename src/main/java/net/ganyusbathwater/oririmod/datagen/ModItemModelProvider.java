@@ -68,6 +68,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.DUELLANT_CORTEX.get());
         basicItem(ModItems.CRIT_GLOVE.get());
         basicItem(ModItems.PHOENIX_FEATHER.get());
+        basicItem(ModItems.STIGMA_OF_DARKNESS.get());
+        basicItem(ModItems.MINERS_LANTERN.get());
+        basicItem(ModItems.MIRROR_OF_THE_VOID.get());
 
         //------------Weapons------------
 
