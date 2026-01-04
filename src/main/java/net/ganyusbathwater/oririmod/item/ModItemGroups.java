@@ -66,15 +66,22 @@ public class ModItemGroups {
 
                         //-----------Vestiges-----------
 
-                        output.accept(ModItems.STRANGE_ENDER_EYE);
                         output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
-                        output.accept(ModItems.HEART_OF_THE_TANK);
-                        output.accept(ModItems.DUELLANT_CORTEX);
+                        output.accept(ModItems.CANDY_BAG);
                         output.accept(ModItems.CRIT_GLOVE);
-                        output.accept(ModItems.PHOENIX_FEATHER);
-                        output.accept(ModItems.STIGMA_OF_DARKNESS);
+                        output.accept(ModItems.DUELLANT_CORTEX);
+                        output.accept(ModItems.HEART_OF_THE_TANK);
                         output.accept(ModItems.MINERS_LANTERN);
                         output.accept(ModItems.MIRROR_OF_THE_VOID);
+                        output.accept(ModItems.PHOENIX_FEATHER);
+                        output.accept(ModItems.RELIC_OF_THE_PAST);
+                        output.accept(ModItems.SNOW_BOOTS);
+                        output.accept(ModItems.SOLIS_BROOCH);
+                        output.accept(ModItems.SPRING);
+                        output.accept(ModItems.STIGMA_OF_DARKNESS);
+                        output.accept(ModItems.STRANGE_ENDER_EYE);
+                        output.accept(ModItems.STRIDER_SCALE);
+                        output.accept(ModItems.WITHER_ROSE);
 
                         //------------Weapons------------
                         output.accept(ModItems.PANDORAS_BLADE);

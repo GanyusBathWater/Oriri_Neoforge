@@ -14,13 +14,8 @@ public final class BoundOfTheCelestialSisters extends VestigeItem {
 
     public BoundOfTheCelestialSisters(Properties props) {
         super(props, List.of(
-                // 1) Elementare Resistenz
                 List.of(BoundOfTheCelestialSistersEffect.elementalResistance()),
-
-                // 2) Mana Modifikation
                 List.of(ManaModifierEffect.boundCelestialSistersMana()),
-
-                // 3) Schaden- und Verteidigungsmodifikation
                 List.of(DamageModifierEffect.boundCelestialSistersCombat())
         ), ModRarity.LEGENDARY);
     }

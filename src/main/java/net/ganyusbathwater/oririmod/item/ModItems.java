@@ -32,16 +32,22 @@ public class ModItems {
 
     //---------------------------------------Vestiges---------------------------------------------------------
 
-    public static final DeferredItem<VestigeItem> STRANGE_ENDER_EYE = ITEMS.register("strange_ender_eye", () -> new StrangeEnderEye(new Item.Properties()));
     public static final DeferredItem<VestigeItem> BOUND_OF_THE_CELESTIAL_SISTERS = ITEMS.register("bound_of_the_celestial_sisters", () -> new BoundOfTheCelestialSisters(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> HEART_OF_THE_TANK = ITEMS.register("heart_of_the_tank", () -> new HeartOfTheTank(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> DUELLANT_CORTEX = ITEMS.register("duellant_cortex", () -> new DuellantCortex(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> CANDY_BAG = ITEMS.register("candy_bag", () -> new CandyBag(new Item.Properties()));
     public static final DeferredItem<VestigeItem> CRIT_GLOVE = ITEMS.register("crit_glove", () -> new CritGlove(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new PhoenixFeather(new Item.Properties()));
-    public static final DeferredItem<VestigeItem> STIGMA_OF_DARKNESS = ITEMS.register("stigma_of_darkness", () -> new StigmaOfDarkness(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> DUELLANT_CORTEX = ITEMS.register("duellant_cortex", () -> new DuellantCortex(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> HEART_OF_THE_TANK = ITEMS.register("heart_of_the_tank", () -> new HeartOfTheTank(new Item.Properties()));
     public static final DeferredItem<VestigeItem> MINERS_LANTERN = ITEMS.register("miners_lantern", () -> new MinersLantern(new Item.Properties()));
     public static final DeferredItem<VestigeItem> MIRROR_OF_THE_VOID = ITEMS.register("mirror_of_the_void", () -> new MirrorOfTheVoid(new Item.Properties()));
-
+    public static final DeferredItem<VestigeItem> PHOENIX_FEATHER = ITEMS.register("phoenix_feather", () -> new PhoenixFeather(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> RELIC_OF_THE_PAST = ITEMS.register("relic_of_the_past", () -> new RelicOfThePast(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> SNOW_BOOTS = ITEMS.register("snow_boots", () -> new SnowBoots(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> SOLIS_BROOCH = ITEMS.register("solis_brooch", () -> new SolisBrooch(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> SPRING = ITEMS.register("spring", () -> new Spring(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> STIGMA_OF_DARKNESS = ITEMS.register("stigma_of_darkness", () -> new StigmaOfDarkness(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> STRANGE_ENDER_EYE = ITEMS.register("strange_ender_eye", () -> new StrangeEnderEye(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> STRIDER_SCALE = ITEMS.register("strider_scale", () -> new StriderScale(new Item.Properties()));
+    public static final DeferredItem<VestigeItem> WITHER_ROSE = ITEMS.register("wither_rose", () -> new WitherRose(new Item.Properties()));
 
     //---------------------------------------Foods-----------------------------------------------------------
 

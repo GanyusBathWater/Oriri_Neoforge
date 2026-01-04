@@ -1,6 +1,5 @@
 package net.ganyusbathwater.oririmod.item.custom.vestiges;
 
-import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.effect.vestiges.AttributeVestigeEffect;
 import net.ganyusbathwater.oririmod.effect.vestiges.ImmunityEffect;
 import net.ganyusbathwater.oririmod.effect.vestiges.PotionVestigeEffect;
@@ -18,7 +17,7 @@ public class MinersLantern extends VestigeItem {
                 List.of(new PotionVestigeEffect(MobEffects.DIG_SPEED, 0)),
                 List.of(new ImmunityEffect(MobEffects.BLINDNESS)),
                 List.of(new AttributeVestigeEffect(Attributes.LUCK, 5))
-        ), ModRarity.RARE);
+        ), ModRarity.UNCOMMON);
     }
 }
 

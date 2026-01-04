@@ -1,0 +1,230 @@
+// file: `src/main/java/net/ganyusbathwater/oririmod/effect/vestiges/RelicOfThePastEffect.java`
+package net.ganyusbathwater.oririmod.effect.vestiges;
+
+import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
+import net.ganyusbathwater.oririmod.item.custom.vestiges.RelicOfThePast;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class RelicOfThePastEffect implements VestigeEffect {
+
+    private static final String NBT_RELIC_KEY = "Oriri_RelicOfThePast";
+    private static final String NBT_ENABLED = "Enabled";
+    private static final String NBT_BASE_COOLDOWN_SECONDS = "BaseCooldownSeconds";
+
+    private static final String NBT_ACTIVE_KEY = "Oriri_RelicOfThePast_Proc";
+    private static final String NBT_ACTIVE_COOLDOWN_SECONDS = "CooldownSeconds";
+    private static final String NBT_ACTIVE_NEXT_DECREMENT_TICK = "NextDecrementTick";
+
+    public static final int COOLDOWN_SECONDS = 10;
+    public static final int EFFECT_DURATION_TICKS = 5 * 20;
+
+    @OnlyIn(Dist.CLIENT)
+    private static final Map<UUID, Integer> CLIENT_COOLDOWN_SECONDS = new ConcurrentHashMap<>();
+
+    public RelicOfThePastEffect(int ignoredCooldownTime) {}
+
+    @Override
+    public void tick(VestigeContext ctx) {
+        if (ctx == null || ctx.isClient()) return;
+
+        Player player = ctx.player();
+        if (player == null) return;
+
+        ItemStack stack = ctx.stack();
+        if (stack == null || stack.isEmpty() || !(stack.getItem() instanceof RelicOfThePast)) return;
+
+        int level = Math.max(0, VestigeItem.getUnlockedLevel(stack));
+        boolean enabled = level > 0;
+
+        setEnabled(player, enabled);
+        tickActiveCooldown(player, enabled);
+
+        if (!enabled) return;
+
+        setBaseCooldownSecondsIfChanged(player, COOLDOWN_SECONDS);
+    }
+
+    @Override
+    public void onEquip(VestigeContext ctx) {
+        if (ctx == null || ctx.isClient()) return;
+        tick(ctx);
+    }
+
+    @Override
+    public void onUnequip(VestigeContext ctx) {
+        if (ctx == null || ctx.isClient()) return;
+
+        Player player = ctx.player();
+        if (player == null) return;
+
+        setEnabled(player, false);
+
+        CompoundTag root = player.getPersistentData();
+
+        CompoundTag tag = root.getCompound(NBT_RELIC_KEY);
+        tag.remove(NBT_BASE_COOLDOWN_SECONDS);
+        root.put(NBT_RELIC_KEY, tag);
+
+        CompoundTag active = root.getCompound(NBT_ACTIVE_KEY);
+        active.putInt(NBT_ACTIVE_COOLDOWN_SECONDS, 0);
+        active.remove(NBT_ACTIVE_NEXT_DECREMENT_TICK);
+        root.put(NBT_ACTIVE_KEY, active);
+
+        syncCooldownToClientCache(player, 0);
+    }
+
+    private static void tickActiveCooldown(Player player, boolean enabled) {
+        if (player == null || player.level().isClientSide) return;
+
+        long now = player.level().getGameTime();
+
+        CompoundTag root = player.getPersistentData();
+        CompoundTag tag = root.getCompound(NBT_ACTIVE_KEY);
+
+        int cd = tag.getInt(NBT_ACTIVE_COOLDOWN_SECONDS);
+
+        if (!enabled) {
+            if (cd != 0) {
+                tag.putInt(NBT_ACTIVE_COOLDOWN_SECONDS, 0);
+                root.put(NBT_ACTIVE_KEY, tag);
+                syncCooldownToClientCache(player, 0);
+            }
+            tag.remove(NBT_ACTIVE_NEXT_DECREMENT_TICK);
+            root.put(NBT_ACTIVE_KEY, tag);
+            return;
+        }
+
+        if (cd <= 0) {
+            tag.remove(NBT_ACTIVE_NEXT_DECREMENT_TICK);
+            root.put(NBT_ACTIVE_KEY, tag);
+            if (cd != 0) syncCooldownToClientCache(player, 0);
+            return;
+        }
+
+        long next = tag.getLong(NBT_ACTIVE_NEXT_DECREMENT_TICK);
+
+        if (next <= 0L) {
+            tag.putLong(NBT_ACTIVE_NEXT_DECREMENT_TICK, now + 20L);
+            root.put(NBT_ACTIVE_KEY, tag);
+            syncCooldownToClientCache(player, cd);
+            return;
+        }
+
+        if (now < next) {
+            syncCooldownToClientCache(player, cd);
+            return;
+        }
+
+        int newCd = cd - 1;
+        tag.putInt(NBT_ACTIVE_COOLDOWN_SECONDS, newCd);
+        tag.putLong(NBT_ACTIVE_NEXT_DECREMENT_TICK, now + 20L);
+        root.put(NBT_ACTIVE_KEY, tag);
+
+        syncCooldownToClientCache(player, newCd);
+    }
+
+    public static boolean isEnabled(Player player) {
+        if (player == null) return false;
+        CompoundTag root = player.getPersistentData();
+        CompoundTag tag = root.getCompound(NBT_RELIC_KEY);
+        return tag.getBoolean(NBT_ENABLED);
+    }
+
+    public static void setEnabled(Player player, boolean enabled) {
+        if (player == null || player.level().isClientSide) return;
+
+        CompoundTag root = player.getPersistentData();
+        CompoundTag tag = root.getCompound(NBT_RELIC_KEY);
+
+        boolean before = tag.getBoolean(NBT_ENABLED);
+        if (before == enabled) return;
+
+        tag.putBoolean(NBT_ENABLED, enabled);
+        root.put(NBT_RELIC_KEY, tag);
+    }
+
+    public static int getBaseCooldownSeconds(Player player) {
+        if (player == null) return 0;
+        CompoundTag root = player.getPersistentData();
+        CompoundTag tag = root.getCompound(NBT_RELIC_KEY);
+        return Math.max(0, tag.getInt(NBT_BASE_COOLDOWN_SECONDS));
+    }
+
+    private static void setBaseCooldownSecondsIfChanged(Player player, int seconds) {
+        if (player == null || player.level().isClientSide) return;
+
+        int clamped = Math.max(0, seconds);
+
+        CompoundTag root = player.getPersistentData();
+        CompoundTag tag = root.getCompound(NBT_RELIC_KEY);
+
+        int before = tag.getInt(NBT_BASE_COOLDOWN_SECONDS);
+        if (before == clamped) return;
+
+        tag.putInt(NBT_BASE_COOLDOWN_SECONDS, clamped);
+        root.put(NBT_RELIC_KEY, tag);
+    }
+
+    public static int getActiveCooldownSecondsForHud(Player player) {
+        if (player == null) return 0;
+        if (!player.level().isClientSide) {
+            CompoundTag root = player.getPersistentData();
+            CompoundTag tag = root.getCompound(NBT_ACTIVE_KEY);
+            return Math.max(0, tag.getInt(NBT_ACTIVE_COOLDOWN_SECONDS));
+        }
+        return Math.max(0, getClientCooldownSeconds(player.getUUID()));
+    }
+
+    public static int getActiveCooldownSecondsRaw(Player player) {
+        if (player == null) return 0;
+        CompoundTag root = player.getPersistentData();
+        CompoundTag tag = root.getCompound(NBT_ACTIVE_KEY);
+        return tag.getInt(NBT_ACTIVE_COOLDOWN_SECONDS);
+    }
+
+    public static void setNewProcCooldown(Player player) {
+        if (player == null) return;
+        if (player.level().isClientSide) return;
+
+        int baseCd = getBaseCooldownSeconds(player);
+        if (baseCd < 0) baseCd = 0;
+
+        CompoundTag root = player.getPersistentData();
+        CompoundTag tag = root.getCompound(NBT_ACTIVE_KEY);
+        tag.putInt(NBT_ACTIVE_COOLDOWN_SECONDS, baseCd);
+        tag.putLong(NBT_ACTIVE_NEXT_DECREMENT_TICK, player.level().getGameTime() + 20L);
+        root.put(NBT_ACTIVE_KEY, tag);
+
+        syncCooldownToClientCache(player, baseCd);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private static int getClientCooldownSeconds(UUID playerId) {
+        return CLIENT_COOLDOWN_SECONDS.getOrDefault(playerId, 0);
+    }
+
+    private static void syncCooldownToClientCache(Player player, int seconds) {
+        if (player == null) return;
+        if (player.level().isClientSide) return;
+        player.getServer().execute(() -> {
+            player.getServer().getPlayerList().getPlayers().forEach(p -> {
+                if (p.getUUID().equals(player.getUUID())) {
+                    RelicOfThePastEffect.setClientCooldownSeconds(p.getUUID(), seconds);
+                }
+            });
+        });
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void setClientCooldownSeconds(UUID playerId, int seconds) {
+        CLIENT_COOLDOWN_SECONDS.put(playerId, Math.max(0, seconds));
+    }
+}

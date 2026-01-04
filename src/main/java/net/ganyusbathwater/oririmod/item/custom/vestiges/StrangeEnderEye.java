@@ -1,4 +1,3 @@
-// java
 package net.ganyusbathwater.oririmod.item.custom.vestiges;
 
 import net.ganyusbathwater.oririmod.effect.vestiges.MobSenseEffect;

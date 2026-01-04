@@ -2,13 +2,20 @@
   "replace": false,
   "values": [
     "oririmod:bound_of_the_celestial_sisters",
+    "oririmod:candy_bag",
     "oririmod:crit_glove",
     "oririmod:duellant_cortex",
     "oririmod:heart_of_the_tank",
     "oririmod:miners_lantern",
     "oririmod:mirror_of_the_void",
     "oririmod:phoenix_feather",
+    "oririmod:relic_of_the_past",
+    "oririmod:snow_boots",
+    "oririmod:solis_brooch",
+    "oririmod:spring",
     "oririmod:stigma_of_darkness",
-    "oririmod:strange_ender_eye"
+    "oririmod:strange_ender_eye",
+    "oririmod:strider_scale",
+    "oririmod:wither_rose"
   ]
 }

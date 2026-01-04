@@ -14,6 +14,6 @@ public class DuellantCortex extends VestigeItem {
                 // Bei einem höheren Level muss die Modifikation des vorherigen Levels gleich sein oder höher sonst wird der Wert verringert, weil nur das aktuelle Level mit den darin bestehenden Werten als "aktiv" genommen wird.
                 List.of(new DuellantCortextEffect(0.005f, 0.025f)),
                 List.of(new DuellantCortextEffect(0.075f, 0.05f))
-        ), ModRarity.RARE);
+        ), ModRarity.MYTHIC);
     }
 }

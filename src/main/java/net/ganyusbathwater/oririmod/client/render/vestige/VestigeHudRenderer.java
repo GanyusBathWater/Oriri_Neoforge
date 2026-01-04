@@ -5,9 +5,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.effect.vestiges.DuellantCortextEffect;
 import net.ganyusbathwater.oririmod.effect.vestiges.MirrorOfTheVoidEffect;
+import net.ganyusbathwater.oririmod.effect.vestiges.RelicOfThePastEffect;
 import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.DuellantCortex;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.MirrorOfTheVoid;
+import net.ganyusbathwater.oririmod.item.custom.vestiges.RelicOfThePast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
@@ -121,7 +123,14 @@ public final class VestigeHudRenderer {
     private static String getStatusText(LocalPlayer player, ItemStack stack) {
         int remainingSeconds = getRemainingCooldownSeconds(player, stack);
         if (remainingSeconds > 0) {
+            if (stack.getItem() instanceof RelicOfThePast) {
+                return Component.translatable("hud.oririmod.relic_of_the_past.cooldown", remainingSeconds).getString();
+            }
             return Component.translatable("hud.oririmod.black_mirror.cooldown", remainingSeconds).getString();
+        }
+
+        if (stack.getItem() instanceof RelicOfThePast) {
+            return Component.translatable("tooltip.oririmod.relic_of_the_past.ready").getString();
         }
         return Component.translatable("tooltip.oririmod.black_mirror.ready").getString();
     }
@@ -131,6 +140,9 @@ public final class VestigeHudRenderer {
 
         if (stack.getItem() instanceof MirrorOfTheVoid) {
             return MirrorOfTheVoidEffect.getActiveCooldownSecondsForHud(player);
+        }
+        if (stack.getItem() instanceof RelicOfThePast) {
+            return RelicOfThePastEffect.getActiveCooldownSecondsForHud(player);
         }
 
         return 0;

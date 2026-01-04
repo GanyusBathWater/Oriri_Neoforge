@@ -1,8 +1,6 @@
 package net.ganyusbathwater.oririmod.item.custom.vestiges;
 
 import net.ganyusbathwater.oririmod.effect.vestiges.AttributeVestigeEffect;
-import net.ganyusbathwater.oririmod.effect.vestiges.DuellantCortextEffect;
-import net.ganyusbathwater.oririmod.effect.vestiges.VestigeEffect;
 import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.minecraft.world.entity.ai.attributes.Attributes;

@@ -248,9 +248,9 @@
   "item.oririmod.relic_of_the_past.lore": "The ring gives its energy when yours is dwindling",
 
   "item.oririmod.snow_boots.level": "Current Level: %s",
-  "item.oririmod.snow_boots.level.1.description": "Level 1 grants Speed Boost I on Snow and Ice Blocks",
+  "item.oririmod.snow_boots.level.1.description": "Level 1 grants Speed Boost I in Cold Biomes",
   "item.oririmod.snow_boots.level.2.description": "Level 2 grants the ability to walk on Powdered Snow",
-  "item.oririmod.snow_boots.level.3.description": "Level 3 grants Knockpack Immunity on Ice and Snow Blocks",
+  "item.oririmod.snow_boots.level.3.description": "Level 3 grants Knockpack Immunity in Cold Biomes",
   "item.oririmod.snow_boots.lore": "Perfect for snowy adventures",
 
   "item.oririmod.solis_brooch.level": "Current Level: %s",
@@ -279,7 +279,7 @@
 
   "item.oririmod.strider_scale.level": "Current Level: %s",
   "item.oririmod.strider_scale.level.1.description": "Level 1 increases your defense by 5 when your are in the Nether",
-  "item.oririmod.strider_scale.level.2.description": "Level 2 grants you Strength II when burning",
+  "item.oririmod.strider_scale.level.2.description": "Level 2 grants you +2 Attack Damage when you are in the Nether",
   "item.oririmod.strider_scale.level.3.description": "Level 3 grants you Fire Resistance",
   "item.oririmod.strider_scale.lore": "A Scale lost from a Strider has some very unique Resistance Properties",
 
@@ -292,6 +292,9 @@
 
   "tooltip.oririmod.black_mirror.ready": "§aActive§r",
   "hud.oririmod.black_mirror.cooldown": "Cooldown: %ss",
+
+  "tooltip.oririmod.relic_of_the_past.ready": "§aActive§r",
+  "hud.oririmod.relic_of_the_past.cooldown": "Cooldown: %ss",
 
 
   "tooltip.oririmod.element.fire": "Fire Weapon",
