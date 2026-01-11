@@ -116,6 +116,8 @@ public class OririClient {
         builder.addMix(ModPotions.BROKEN_POTION1, Items.GLOWSTONE_DUST, ModPotions.BROKEN_POTION2);
         builder.addMix(ModPotions.BROKEN_POTION2, Items.GLOWSTONE_DUST, ModPotions.BROKEN_POTION3);
         builder.addMix(Potions.AWKWARD, ModItems.DAMNED_SOUL.asItem(), ModPotions.STUNNED_POTION);
+        builder.addMix(Potions.NIGHT_VISION, ModItems.ELDERBERRY.asItem(), ModPotions.MOB_SENSE_POTION1);
+        builder.addMix(ModPotions.MOB_SENSE_POTION1, Items.GLOWSTONE_DUST, ModPotions.MOB_SENSE_POTION2);
     }
 
     @SubscribeEvent

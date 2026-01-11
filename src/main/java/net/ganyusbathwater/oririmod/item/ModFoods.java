@@ -1,6 +1,5 @@
 package net.ganyusbathwater.oririmod.item;
 
-
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
@@ -9,4 +8,21 @@ public class ModFoods
 {
     public static final FoodProperties ELDERBERRY = new FoodProperties.Builder().nutrition(1).alwaysEdible().effect(()-> new MobEffectInstance(MobEffects.GLOWING), 1).build();
 
+    public static final FoodProperties DRAGON_FRUIT = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties THE_FIRST_APPLE = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties BLOOD_LOTUS = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties IRON_ROOTS = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties MAGIC_MUSHROOM = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties FOUR_LEAF_CLOVER = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties MIRACLE_SEAWEED = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties CALCIUM_CURRANT = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+
+    public static final FoodProperties DEVIL_FRUIT = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
 }

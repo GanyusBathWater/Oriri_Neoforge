@@ -59,6 +59,15 @@ public class ModItemModelProvider extends ItemModelProvider {
         //-------------Foods-------------
 
         basicItem(ModItems.ELDERBERRY.get());
+        basicItem(ModItems.IRON_ROOTS.get());
+        basicItem(ModItems.DRAGON_FRUIT.get());
+        basicItem(ModItems.THE_FIRST_APPLE.get());
+        basicItem(ModItems.BLOOD_LOTUS.get());
+        basicItem(ModItems.MAGIC_MUSHROOM.get());
+        basicItem(ModItems.FOUR_LEAF_CLOVER.get());
+        basicItem(ModItems.MIRACLE_SEAWEED.get());
+        basicItem(ModItems.CALCIUM_CURRANT.get());
+        basicItem(ModItems.DEVIL_FRUIT.get());
 
         //-----------Artifacts-----------
 

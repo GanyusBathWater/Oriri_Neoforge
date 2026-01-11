@@ -79,17 +79,17 @@ config="oririmod.mixin.json"
 
 [[dependencies.oririmod]]
 modId="curios"
-type="required"        # zwingend vorhanden
+type="required"
 versionRange="9.5.1"
 ordering="NONE"
 side="BOTH"
 
 # Here's another dependency
 [[dependencies.${mod_id}]]
-    modId="minecraft"
+    modId="yungsapi"
     type="required"
     # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange="${minecraft_version_range}"
+versionRange="[1.21.1,)"
     ordering="NONE"
     side="BOTH"
 

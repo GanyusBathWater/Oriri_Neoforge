@@ -1,6 +1,5 @@
 package net.ganyusbathwater.oririmod.item;
 
-
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.fluid.ModFluids;
@@ -63,9 +62,17 @@ public class ModItemGroups {
 
                         //-------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);
+                        output.accept(ModItems.DRAGON_FRUIT);
+                        output.accept(ModItems.IRON_ROOTS);
+                        output.accept(ModItems.DEVIL_FRUIT);
+                        output.accept(ModItems.THE_FIRST_APPLE);
+                        output.accept(ModItems.BLOOD_LOTUS);
+                        output.accept(ModItems.MAGIC_MUSHROOM);
+                        output.accept(ModItems.FOUR_LEAF_CLOVER);
+                        output.accept(ModItems.MIRACLE_SEAWEED);
+                        output.accept(ModItems.CALCIUM_CURRANT);
 
                         //-----------Vestiges-----------
-
                         output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
                         output.accept(ModItems.CANDY_BAG);
                         output.accept(ModItems.CRIT_GLOVE);
@@ -116,7 +123,6 @@ public class ModItemGroups {
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
 
                         //------------Armor---------------
-
                         output.accept(ModItems.CRYSTAL_HELMET);
                         output.accept(ModItems.CRYSTAL_CHESTPLATE);
                         output.accept(ModItems.CRYSTAL_LEGGINGS);
@@ -147,13 +153,13 @@ public class ModItemGroups {
                         output.accept(ModItems.PRISMARINE_LEGGINGS);
                         output.accept(ModItems.PRISMARINE_BOOTS);
 
-
                     }).build());
-                        public static final Supplier<CreativeModeTab> ORIRI_COLLECTIBLES_TAB = CREATIVE_MODE_TAB.register("creative.oriri_tab_misc",
-                                () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.THE_FOOL.get()))
-                                        .withTabsBefore(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "oriri_tab"))
-                                        .title(Component.translatable("creative.oriri_tab_misc"))
-                                        .displayItems((itemDisplayParameters, output) -> {
+
+                    public static final Supplier<CreativeModeTab> ORIRI_COLLECTIBLES_TAB = CREATIVE_MODE_TAB.register("creative.oriri_tab_misc",
+                            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.THE_FOOL.get()))
+                                    .withTabsBefore(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "oriri_tab"))
+                                    .title(Component.translatable("creative.oriri_tab_misc"))
+                                    .displayItems((itemDisplayParameters, output) -> {
 
                         //-------------Arkana-------------
                         output.accept(ModItems.THE_FOOL);
@@ -178,7 +184,8 @@ public class ModItemGroups {
                         output.accept(ModItems.THE_SUN);
                         output.accept(ModItems.JUDGEMENT);
                         output.accept(ModItems.THE_WORLD);
-                                        }).build());
+
+                    }).build());
 
 
 
