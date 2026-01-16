@@ -1,23 +1,21 @@
 package net.ganyusbathwater.oririmod;
 
 import com.mojang.datafixers.util.Either;
+import net.ganyusbathwater.oririmod.client.render.world.CustomDimensionSpecialEffects;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.item.ModItems;
+import net.ganyusbathwater.oririmod.particle.ModParticles;
+import net.ganyusbathwater.oririmod.particle.custom.ShiningParticle;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.renderer.BiomeColors;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -25,18 +23,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.level.*;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -61,11 +57,18 @@ public class OririClient {
     }
 
     @SubscribeEvent
-    static void onClientSetup(FMLClientSetupEvent event) {
+    public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(ModParticles.SHINING_PARTICLES.get(), ShiningParticle.Provider::new);
+    }
+
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
         ModItemProperties.addCustomItemProperties();
+    }
 
-
-
+    @SubscribeEvent
+    public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
+        event.register(Level.OVERWORLD.location(), new CustomDimensionSpecialEffects());
     }
 
     @SubscribeEvent

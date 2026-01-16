@@ -1,10 +1,9 @@
-package net.ganyusbathwater.oririmod.client.render;
+package net.ganyusbathwater.oririmod.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.ganyusbathwater.oririmod.OririMod;
-import net.ganyusbathwater.oririmod.client.model.MeteorModel;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;

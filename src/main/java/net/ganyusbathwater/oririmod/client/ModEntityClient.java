@@ -2,7 +2,7 @@ package net.ganyusbathwater.oririmod.client;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.client.model.MeteorModel;
-import net.ganyusbathwater.oririmod.client.render.MeteorRenderer;
+import net.ganyusbathwater.oririmod.client.model.MeteorRenderer;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.neoforged.fml.common.EventBusSubscriber;
 

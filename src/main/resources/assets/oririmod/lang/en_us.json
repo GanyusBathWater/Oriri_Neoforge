@@ -96,28 +96,28 @@
   "tooltip.oririmod.dragon_fruit.lore": "A Mythical Fruit named after the mightiest of creatures, it grants power of wielding strong magical items",
   "tooltip.oririmod.dragon_fruit.uneaten": "When eaten: §9+1 Vestige Slot",
 
-  "tooltip.oririmod.the_first_apple.lore": "aaaaaaaa",
+  "tooltip.oririmod.the_first_apple.lore": "The very first apple ever created, eaten by a man and a woman, it gives knowledge and power to wield strong magical items",
   "tooltip.oririmod.the_first_apple.uneaten": "When eaten: §9+1 Vestige Slot",
 
-  "tooltip.oririmod.blood_lotus.lore": "aaaaaaaaaaaaaa",
-  "tooltip.oririmod.blood_lotus.uneaten": "When eaten: §9+1 Hearts",
+  "tooltip.oririmod.blood_lotus.lore": "A Lotus soaked in Lifeblood, it grants the consumer increased vitality",
+  "tooltip.oririmod.blood_lotus.uneaten": "When eaten: §9+2 Hearts",
 
-  "tooltip.oririmod.iron_roots.lore": "aaaaaaaaaaaaaa",
+  "tooltip.oririmod.iron_roots.lore": "Sturdy roots infused with iron, it grants the consumer increased defense",
   "tooltip.oririmod.iron_roots.uneaten": "When eaten: §9+2 Defense",
 
-  "tooltip.oririmod.magic_mushroom.lore": "aaaaaaaaaaaaaa",
+  "tooltip.oririmod.magic_mushroom.lore": "Mushrooms infused with pure magical energy, it grants the consumer increased mana capacity",
   "tooltip.oririmod.magic_mushroom.uneaten": "When eaten: §9+25 Max Mana",
 
-  "tooltip.oririmod.four_leaf_clover.lore": "aaaaaaaaaaaaaa",
+  "tooltip.oririmod.four_leaf_clover.lore": "A rare four leaf clover, it is said to bring good luck to those who find it",
   "tooltip.oririmod.four_leaf_clover.uneaten": "When eaten: §9+5 Luck",
 
-  "tooltip.oririmod.miracle_seaweed.lore": "aaaaaaaaaaaaaa",
+  "tooltip.oririmod.miracle_seaweed.lore": "Seaweed that has been blessed by the mermaid queen, it grants the consumer increased oxygen capacity",
   "tooltip.oririmod.miracle_seaweed.uneaten": "When eaten: §9+2 extra Oxygen Points",
 
-  "tooltip.oririmod.calcium_currant.lore": "aaaaaaaaaaaaaa",
+  "tooltip.oririmod.calcium_currant.lore": "Small currants packed with calcium, it grants the consumer strong bones capable of withstanding great falls",
   "tooltip.oririmod.calcium_currant.uneaten": "When eaten: §9+3 Safe Fall Distance",
 
-  "tooltip.oririmod.devil_fruit.lore": "aaaaaaaaaaaaaa",
+  "tooltip.oririmod.devil_fruit.lore": "A devil fruit that was shipped across a grand blue sea, it grants the consumer increased interaction range with entities and blocks",
   "tooltip.oririmod.devil_fruit.uneaten": "When eaten: §9+1 Entity- & Block Interaction Range",
 
 

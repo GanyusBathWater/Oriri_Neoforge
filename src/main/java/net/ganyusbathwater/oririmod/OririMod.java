@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.combat.ElementInit;
 import net.ganyusbathwater.oririmod.combat.ElementalDamageHandler;
-import net.ganyusbathwater.oririmod.config.ManaConfig;
+import net.ganyusbathwater.oririmod.config.ModConfig;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.enchantment.ModEnchantmentEffects;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
@@ -13,6 +13,7 @@ import net.ganyusbathwater.oririmod.fluid.ModFluids;
 import net.ganyusbathwater.oririmod.item.ModItemGroups;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
+import net.ganyusbathwater.oririmod.particle.ModParticles;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.TooltipHandler;
 import net.ganyusbathwater.oririmod.worldgen.ModFeatures;
@@ -23,7 +24,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -62,7 +62,8 @@ public class OririMod {
         ModFeatures.register(modEventBus);
         ModFluids.register(modEventBus);
         ModFluidTypes.register(modEventBus);
-        modContainer.registerConfig(ModConfig.Type.COMMON, ManaConfig.SPEC);
+        ModParticles.register(modEventBus);
+        ModConfig.register(modContainer);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

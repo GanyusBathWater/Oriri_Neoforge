@@ -4,10 +4,8 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.item.ModFoods;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,18 +28,18 @@ public class IronRoots extends Item {
         super(settings.food(ModFoods.IRON_ROOTS));
     }
 
+    private boolean hasEaten(Player player) {
+        return player.getPersistentData().getBoolean("eaten_iron_roots");
+    }
+
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity user) {
-        if (!level.isClientSide() && user instanceof ServerPlayer player) {
-            CompoundTag persistentData = player.getPersistentData();
-            if (!persistentData.getBoolean("eaten_iron_roots")) {
-                persistentData.putBoolean("eaten_iron_roots", true);
+        if (!level.isClientSide() && user instanceof Player player) {
+            if (!hasEaten(player)) {
+                player.getPersistentData().putBoolean("eaten_iron_roots", true);
 
                 AttributeInstance armorAttribute = player.getAttribute(Attributes.ARMOR);
                 if (armorAttribute != null) {
-                    // Entfernen, falls bereits vorhanden, um Duplikate zu vermeiden
-                    armorAttribute.removeModifier(ARMOR_MODIFIER_ID);
-
                     AttributeModifier armorModifier = new AttributeModifier(
                             ARMOR_MODIFIER_ID,
                             2.0, // 2 Verteidigungspunkte
@@ -57,10 +55,9 @@ public class IronRoots extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        CompoundTag persistentData = player.getPersistentData();
 
-        if (persistentData.getBoolean("eaten_iron_roots")) {
-            return InteractionResultHolder.pass(itemStack);
+        if (!level.isClientSide() && hasEaten(player)) {
+            return InteractionResultHolder.fail(itemStack);
         }
 
         if (player.canEat(false)) {
@@ -72,21 +69,27 @@ public class IronRoots extends Item {
     }
 
     @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        Level level = Minecraft.getInstance().level;
-        if (level != null && level.isClientSide()) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.iron_roots.lore"));
+
+        if (context.level() != null && context.level().isClientSide()) {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
-                CompoundTag persistentData = player.getPersistentData();
-                if (persistentData.getBoolean("eaten_iron_roots")) {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.iron_roots.lore"));
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten"));
+                AttributeInstance armorAttribute = player.getAttribute(Attributes.ARMOR);
+                boolean hasModifier = armorAttribute != null && armorAttribute.getModifier(ARMOR_MODIFIER_ID) != null;
+
+                if (hasModifier) {
+                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten").withStyle(ChatFormatting.RED));
                 } else {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.iron_roots.lore"));
                     tooltipComponents.add(Component.translatable("tooltip.oririmod.iron_roots.uneaten").withStyle(ChatFormatting.GRAY));
                 }
             }
         }
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }

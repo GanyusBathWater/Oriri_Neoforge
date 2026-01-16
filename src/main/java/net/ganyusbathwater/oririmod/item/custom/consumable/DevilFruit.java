@@ -4,10 +4,8 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.item.ModFoods;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,17 +29,19 @@ public class DevilFruit extends Item {
         super(settings.food(ModFoods.DEVIL_FRUIT));
     }
 
+    private boolean hasEaten(Player player) {
+        return player.getPersistentData().getBoolean("eaten_devil_fruit");
+    }
+
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity user) {
-        if (!level.isClientSide() && user instanceof ServerPlayer player) {
-            CompoundTag persistentData = player.getPersistentData();
-            if (!persistentData.getBoolean("eaten_devil_fruit")) {
-                persistentData.putBoolean("eaten_devil_fruit", true);
+        if (!level.isClientSide() && user instanceof Player player) {
+            if (!hasEaten(player)) {
+                player.getPersistentData().putBoolean("eaten_devil_fruit", true);
 
                 // Entity Interaction Range
                 AttributeInstance entityRangeAttribute = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
                 if (entityRangeAttribute != null) {
-                    entityRangeAttribute.removeModifier(ENTITY_RANGE_MODIFIER_ID);
                     AttributeModifier entityRangeModifier = new AttributeModifier(
                             ENTITY_RANGE_MODIFIER_ID,
                             1.0,
@@ -53,7 +53,6 @@ public class DevilFruit extends Item {
                 // Block Interaction Range
                 AttributeInstance blockRangeAttribute = player.getAttribute(Attributes.BLOCK_INTERACTION_RANGE);
                 if (blockRangeAttribute != null) {
-                    blockRangeAttribute.removeModifier(BLOCK_RANGE_MODIFIER_ID);
                     AttributeModifier blockRangeModifier = new AttributeModifier(
                             BLOCK_RANGE_MODIFIER_ID,
                             1.0,
@@ -69,10 +68,9 @@ public class DevilFruit extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        CompoundTag persistentData = player.getPersistentData();
 
-        if (persistentData.getBoolean("eaten_devil_fruit")) {
-            return InteractionResultHolder.pass(itemStack);
+        if (!level.isClientSide() && hasEaten(player)) {
+            return InteractionResultHolder.fail(itemStack);
         }
 
         if (player.canEat(false)) {
@@ -84,21 +82,29 @@ public class DevilFruit extends Item {
     }
 
     @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        Level level = Minecraft.getInstance().level;
-        if (level != null && level.isClientSide()) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.devil_fruit.lore"));
+
+        if (context.level() != null && context.level().isClientSide()) {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
-                CompoundTag persistentData = player.getPersistentData();
-                if (persistentData.getBoolean("eaten_devil_fruit")) {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.devil_fruit.lore"));
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten"));
+                AttributeInstance entityRangeAttribute = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
+                AttributeInstance blockRangeAttribute = player.getAttribute(Attributes.BLOCK_INTERACTION_RANGE);
+                boolean hasModifier = (entityRangeAttribute != null && entityRangeAttribute.getModifier(ENTITY_RANGE_MODIFIER_ID) != null) ||
+                        (blockRangeAttribute != null && blockRangeAttribute.getModifier(BLOCK_RANGE_MODIFIER_ID) != null);
+
+                if (hasModifier) {
+                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten").withStyle(ChatFormatting.RED));
                 } else {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.devil_fruit.lore"));
                     tooltipComponents.add(Component.translatable("tooltip.oririmod.devil_fruit.uneaten").withStyle(ChatFormatting.GRAY));
                 }
             }
         }
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }

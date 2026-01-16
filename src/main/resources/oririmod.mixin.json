@@ -3,9 +3,16 @@
   "package": "net.ganyusbathwater.oririmod.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "LiquidBlockMixin"
+    "ItemEntityMixin",
+    "LiquidBlockMixin",
+    "LuckyLootTableMixin",
+    "MonsterSpawnMixin",
+    "SpawnPlacementsMixin"
   ],
-  "client": [],
+  "client": [
+    "ClientLevelMixin",
+    "LevelRendererMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

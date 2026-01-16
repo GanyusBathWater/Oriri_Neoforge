@@ -1,4 +1,4 @@
-package net.ganyusbathwater.oririmod.client;
+package net.ganyusbathwater.oririmod.client.render.world;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.minecraft.client.Minecraft;

@@ -4,10 +4,8 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.item.ModFoods;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,21 +21,26 @@ import java.util.List;
 
 public class TheFirstApple extends Item {
 
+    private static final ResourceLocation VESTIGES_UNLOCK_ID = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vestiges_unlock_apple");
+
     public TheFirstApple(Properties settings) {
         super(settings.food(ModFoods.THE_FIRST_APPLE));
     }
 
+    private boolean hasEaten(Player player) {
+        return player.getPersistentData().getBoolean("eaten_the_first_apple");
+    }
+
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity user) {
-        if (!level.isClientSide() && user instanceof ServerPlayer player) {
-            CompoundTag persistentData = player.getPersistentData();
-            if (!persistentData.getBoolean("eaten_the_first_apple")) {
-                persistentData.putBoolean("eaten_the_first_apple", true);
+        if (!level.isClientSide() && user instanceof Player player) {
+            if (!hasEaten(player)) {
+                player.getPersistentData().putBoolean("eaten_the_first_apple", true);
 
                 CuriosApi.getCuriosInventory(player).ifPresent(inventory -> {
                     inventory.addPermanentSlotModifier(
                             "vestiges",
-                            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vestiges_unlock_apple"),
+                            VESTIGES_UNLOCK_ID,
                             1,
                             AttributeModifier.Operation.ADD_VALUE
                     );
@@ -50,10 +53,9 @@ public class TheFirstApple extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        CompoundTag persistentData = player.getPersistentData();
 
-        if (persistentData.getBoolean("eaten_the_first_apple")) {
-            return InteractionResultHolder.pass(itemStack);
+        if (!level.isClientSide() && hasEaten(player)) {
+            return InteractionResultHolder.fail(itemStack);
         }
 
         if (player.canEat(false)) {
@@ -65,21 +67,24 @@ public class TheFirstApple extends Item {
     }
 
     @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        Level level = Minecraft.getInstance().level;
-        if (level != null && level.isClientSide()) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.the_first_apple.lore"));
+
+        if (context.level() != null && context.level().isClientSide()) {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
-                CompoundTag persistentData = player.getPersistentData();
-                if (persistentData.getBoolean("eaten_the_first_apple")) {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.the_first_apple.lore"));
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten"));
+                if (hasEaten(player)) {
+                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten").withStyle(ChatFormatting.RED));
                 } else {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.the_first_apple.lore"));
                     tooltipComponents.add(Component.translatable("tooltip.oririmod.the_first_apple.uneaten").withStyle(ChatFormatting.GRAY));
                 }
             }
         }
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }

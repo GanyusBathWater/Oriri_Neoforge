@@ -4,10 +4,8 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.item.ModFoods;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,18 +28,18 @@ public class FourLeafClover extends Item {
         super(settings.food(ModFoods.FOUR_LEAF_CLOVER));
     }
 
+    private boolean hasEaten(Player player) {
+        return player.getPersistentData().getBoolean("eaten_four_leaf_clover");
+    }
+
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity user) {
-        if (!level.isClientSide() && user instanceof ServerPlayer player) {
-            CompoundTag persistentData = player.getPersistentData();
-            if (!persistentData.getBoolean("eaten_four_leaf_clover")) {
-                persistentData.putBoolean("eaten_four_leaf_clover", true);
+        if (!level.isClientSide() && user instanceof Player player) {
+            if (!hasEaten(player)) {
+                player.getPersistentData().putBoolean("eaten_four_leaf_clover", true);
 
                 AttributeInstance luckAttribute = player.getAttribute(Attributes.LUCK);
                 if (luckAttribute != null) {
-                    // Entfernen, falls bereits vorhanden, um Duplikate zu vermeiden
-                    luckAttribute.removeModifier(LUCK_MODIFIER_ID);
-
                     AttributeModifier luckModifier = new AttributeModifier(
                             LUCK_MODIFIER_ID,
                             5.0, // 5 Glückspunkte
@@ -57,10 +55,9 @@ public class FourLeafClover extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        CompoundTag persistentData = player.getPersistentData();
 
-        if (persistentData.getBoolean("eaten_four_leaf_clover")) {
-            return InteractionResultHolder.pass(itemStack);
+        if (!level.isClientSide() && hasEaten(player)) {
+            return InteractionResultHolder.fail(itemStack);
         }
 
         if (player.canEat(false)) {
@@ -72,21 +69,27 @@ public class FourLeafClover extends Item {
     }
 
     @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        Level level = Minecraft.getInstance().level;
-        if (level != null && level.isClientSide()) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.four_leaf_clover.lore"));
+
+        if (context.level() != null && context.level().isClientSide()) {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
-                CompoundTag persistentData = player.getPersistentData();
-                if (persistentData.getBoolean("eaten_four_leaf_clover")) {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.four_leaf_clover.lore"));
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten"));
+                AttributeInstance luckAttribute = player.getAttribute(Attributes.LUCK);
+                boolean hasModifier = luckAttribute != null && luckAttribute.getModifier(LUCK_MODIFIER_ID) != null;
+
+                if (hasModifier) {
+                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten").withStyle(ChatFormatting.RED));
                 } else {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.four_leaf_clover.lore"));
                     tooltipComponents.add(Component.translatable("tooltip.oririmod.four_leaf_clover.uneaten").withStyle(ChatFormatting.GRAY));
                 }
             }
         }
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }
