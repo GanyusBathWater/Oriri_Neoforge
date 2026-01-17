@@ -10,8 +10,6 @@ import java.util.List;
 
 public final class BoundOfTheCelestialSisters extends VestigeItem {
 
-    private ModRarity rarity;
-
     public BoundOfTheCelestialSisters(Properties props) {
         super(props, List.of(
                 List.of(BoundOfTheCelestialSistersEffect.elementalResistance()),

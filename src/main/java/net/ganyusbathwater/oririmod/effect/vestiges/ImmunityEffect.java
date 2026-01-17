@@ -9,10 +9,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Entfernt bestimmte Effekte vom Spieler, damit sie nicht aktiv bleiben können.
- * Kann sowohl Vanilla- als auch Mod-Effects (z.B. aus ModEffects) verhindern.
- */
 public class ImmunityEffect implements VestigeEffect {
 
     // optional: nicht jeden Tick prüfen (Performance); 1s = 20 Ticks

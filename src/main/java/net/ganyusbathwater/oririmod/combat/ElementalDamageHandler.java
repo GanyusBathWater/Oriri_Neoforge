@@ -1,4 +1,3 @@
-// file: src/main/java/net/ganyusbathwater/oririmod/combat/ElementalDamageHandler.java
 package net.ganyusbathwater.oririmod.combat;
 
 import net.minecraft.nbt.CompoundTag;

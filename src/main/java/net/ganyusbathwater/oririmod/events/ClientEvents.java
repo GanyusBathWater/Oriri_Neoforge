@@ -2,7 +2,6 @@ package net.ganyusbathwater.oririmod.events;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.ganyusbathwater.oririmod.OririMod;
-import net.ganyusbathwater.oririmod.config.ManaConfig;
 import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

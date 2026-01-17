@@ -1,7 +1,5 @@
-// file: `src/main/java/net/ganyusbathwater/oririmod/events/vestiges/SnowBootsDetectionEvents.java`
 package net.ganyusbathwater.oririmod.events.vestiges;
 
-import net.ganyusbathwater.oririmod.effect.vestiges.SnowBootsEffect;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.SnowBoots;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;

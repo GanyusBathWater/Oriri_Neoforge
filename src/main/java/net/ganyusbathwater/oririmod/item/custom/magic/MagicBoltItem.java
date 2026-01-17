@@ -1,4 +1,3 @@
-// java
 package net.ganyusbathwater.oririmod.item.custom.magic;
 
 import net.ganyusbathwater.oririmod.entity.MagicBoltEntity;

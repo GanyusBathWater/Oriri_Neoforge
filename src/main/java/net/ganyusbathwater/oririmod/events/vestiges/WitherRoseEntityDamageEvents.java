@@ -1,4 +1,3 @@
-// file: src/main/java/net/ganyusbathwater/oririmod/events/vestiges/WitherRoseEntityDamageEvents.java
 package net.ganyusbathwater.oririmod.events.vestiges;
 
 import net.ganyusbathwater.oririmod.OririMod;

@@ -3,7 +3,6 @@ package net.ganyusbathwater.oririmod.mixin;
 import net.ganyusbathwater.oririmod.events.world.WorldEventManager;
 import net.ganyusbathwater.oririmod.events.world.WorldEventType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.ServerLevelAccessor;

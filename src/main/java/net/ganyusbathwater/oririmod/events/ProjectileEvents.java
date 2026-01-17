@@ -1,6 +1,5 @@
 package net.ganyusbathwater.oririmod.events;
 
-
 import net.ganyusbathwater.oririmod.enchantment.ModEnchantments;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;

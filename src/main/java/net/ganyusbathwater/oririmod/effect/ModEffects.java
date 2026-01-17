@@ -1,7 +1,6 @@
 package net.ganyusbathwater.oririmod.effect;
 
 import net.ganyusbathwater.oririmod.OririMod;
-import net.ganyusbathwater.oririmod.effect.MobSenseEffect;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;

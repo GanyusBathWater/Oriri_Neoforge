@@ -1,13 +1,11 @@
 package net.ganyusbathwater.oririmod.util;
 
-
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 
 public enum ModRarity {
 
-    //New Raritys
     COMMON("Common", "#AAAAAA"),
     UNCOMMON("Uncommon", "#55FF55"),
     RARE("Rare", "#5555FF"),

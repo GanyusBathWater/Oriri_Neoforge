@@ -1,6 +1,5 @@
 package net.ganyusbathwater.oririmod.item.custom.vestiges;
 
-import net.ganyusbathwater.oririmod.effect.MobSenseEffect;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.effect.vestiges.PotionVestigeEffect;
 import net.ganyusbathwater.oririmod.item.custom.VestigeItem;

@@ -1,11 +1,9 @@
 package net.ganyusbathwater.oririmod.network.packet;
 
-import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 
 public class ManaSyncPayload implements CustomPacketPayload {
     public static final Type<ManaSyncPayload> TYPE = new Type<>(NetworkHandler.MANA_SYNC);

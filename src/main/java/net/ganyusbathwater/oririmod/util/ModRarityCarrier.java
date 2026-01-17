@@ -1,23 +1,15 @@
 package net.ganyusbathwater.oririmod.util;
 
-import net.ganyusbathwater.oririmod.combat.Element;
-import net.ganyusbathwater.oririmod.combat.ItemElementRegistry;
-import net.ganyusbathwater.oririmod.item.custom.CustomSwordItem;
-import net.ganyusbathwater.oririmod.item.custom.VestigeItem;
-import net.ganyusbathwater.oririmod.util.ModRarity;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EquipmentSlotGroup;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public interface ModRarityCarrier {
     ModRarity getModRarity();

@@ -1,5 +1,3 @@
-// java
-// file: `CandyBagSaturationEffect.java`
 package net.ganyusbathwater.oririmod.effect.vestiges;
 
 import net.minecraft.world.entity.player.Player;

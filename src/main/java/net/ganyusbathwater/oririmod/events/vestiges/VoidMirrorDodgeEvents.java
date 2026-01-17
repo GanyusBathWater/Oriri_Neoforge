@@ -1,4 +1,3 @@
-// file: `src/main/java/net/ganyusbathwater/oririmod/events/vestiges/VoidMirrorDodgeEvents.java`
 package net.ganyusbathwater.oririmod.events.vestiges;
 
 import net.ganyusbathwater.oririmod.effect.vestiges.MirrorOfTheVoidEffect;

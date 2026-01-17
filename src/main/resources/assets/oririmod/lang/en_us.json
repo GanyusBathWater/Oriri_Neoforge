@@ -18,7 +18,7 @@
   "item.oririmod.mirror_of_the_void": "Mirror of the Void",
   "item.oririmod.phoenix_feather": "Phoenix Feather",
   "item.oririmod.miners_lantern": "Miners Lantern",
-  "item.oririmod.relic_of_the_past": "Relict of the Past",
+  "item.oririmod.relic_of_the_past": "Relic of the Past",
   "item.oririmod.solis_brooch": "Solis Brooch",
   "item.oririmod.stigma_of_darkness": "Stigma of Darkness",
   "item.oririmod.spring": "Spring",
@@ -242,7 +242,7 @@
 
 
   "item.oririmod.bound_of_the_celestial_sisters.level": "Current Level: %s",
-  "item.oririmod.bound_of_the_celestial_sisters.level.1.description": "Level 1: on daytime§r §9+25%§r Darkness Resistance§r, on nighttime §9+25% Light Resistance§r",
+  "item.oririmod.bound_of_the_celestial_sisters.level.1.description": "Level 1: on daytime§r §9+25% Darkness Resistance§r, on nighttime §9+25% Light Resistance§r",
   "item.oririmod.bound_of_the_celestial_sisters.level.2.description": "Level 2: on daytime §9+50 Max Mana§r, on nighttime §9+100% Mana Regeneration§r",
   "item.oririmod.bound_of_the_celestial_sisters.level.3.description": "Level 3: on daytime §9+25% Defense§r, on nighttime§r §9+25% Damage§r",
   "item.oririmod.bound_of_the_celestial_sisters.lore": "§8§oBoth are bound in endless fight, the hungering day, the undying night.",
@@ -298,7 +298,7 @@
   "item.oririmod.snow_boots.level": "Current Level: %s",
   "item.oririmod.snow_boots.level.1.description": "Level 1: grants §9Speed Boost I§r in Cold Biomes",
   "item.oririmod.snow_boots.level.2.description": "Level 2: grants the ability to walk on Powdered Snow",
-  "item.oririmod.snow_boots.level.3.description": "Level 3: grants Knockpack Immunity din Cold Biomes",
+  "item.oririmod.snow_boots.level.3.description": "Level 3: grants §9Knockpack Immunity§r in Cold Biomes",
   "item.oririmod.snow_boots.lore": "§8§oPerfect for snowy adventures",
 
   "item.oririmod.solis_brooch.level": "Current Level: %s",

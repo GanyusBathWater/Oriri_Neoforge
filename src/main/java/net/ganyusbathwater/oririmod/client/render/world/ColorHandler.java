@@ -27,12 +27,6 @@ public final class ColorHandler {
     private static final int ELDERWOODS_GRASS_COLOR = 0x2072fe;
     private static final int ELDERWOODS_FOLIAGE_COLOR = ELDERWOODS_GRASS_COLOR;
 
-    // Erwartete Dimension als ResourceKey<Level>
-    private static final ResourceKey<Level> ELDERWOODS_DIM =
-            ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods"));
-
-    private static boolean DIM_LOGGED = false; // einmaliges Debug-Logging
-
     // ---------- Block Colors ----------
     @SubscribeEvent
     public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
@@ -91,7 +85,6 @@ public final class ColorHandler {
         return FoliageColor.getDefaultColor();
     }
 
-    // Robust: vergleicht die echte Level-ID; fällt bei Render-Kontext auf Client-Level zurück
     private static boolean isElderwoods(@Nullable BlockAndTintGetter ctx) {
         Level lvl = (ctx instanceof Level l) ? l : Minecraft.getInstance().level;
         return lvl != null && isElderwoods(lvl);
@@ -99,11 +92,6 @@ public final class ColorHandler {
 
     private static boolean isElderwoods(Level level) {
         ResourceLocation id = level.dimension().location();
-        if (!DIM_LOGGED) {
-            System.out.println("[OririMod] Aktive Dimension (Client): " + id);
-            DIM_LOGGED = true;
-        }
-        // Direkter Vergleich der Location statt ResourceKey\<Level\>.equals(...)
         return OririMod.MOD_ID.equals(id.getNamespace()) && "elderwoods".equals(id.getPath());
     }
 

@@ -1,10 +1,6 @@
 package net.ganyusbathwater.oririmod.network.packet;
 
-import net.ganyusbathwater.oririmod.mana.ModManaUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-
-import java.util.function.Supplier;
 
 public class ManaSyncPacket {
     private final int mana;

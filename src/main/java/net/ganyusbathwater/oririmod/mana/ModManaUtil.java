@@ -2,7 +2,6 @@ package net.ganyusbathwater.oririmod.mana;
 
 import net.ganyusbathwater.oririmod.config.ManaConfig;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
-import net.ganyusbathwater.oririmod.network.packet.ManaSyncPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;

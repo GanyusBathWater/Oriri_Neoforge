@@ -1,4 +1,3 @@
-// Datei: `src/main/java/net/ganyusbathwater/oririmod/effect/vestiges/StriderScaleEffect.java`
 package net.ganyusbathwater.oririmod.effect.vestiges;
 
 import net.ganyusbathwater.oririmod.OririMod;

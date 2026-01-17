@@ -1,4 +1,3 @@
-// file: `src/main/java/net/ganyusbathwater/oririmod/effect/vestiges/BoundOfTheCelestialSistersEffect.java`
 package net.ganyusbathwater.oririmod.effect.vestiges;
 
 import net.ganyusbathwater.oririmod.combat.Element;

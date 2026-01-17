@@ -2,7 +2,6 @@ package net.ganyusbathwater.oririmod.util;
 
 import net.ganyusbathwater.oririmod.combat.Element;
 import net.ganyusbathwater.oririmod.combat.ItemElementRegistry;
-import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;

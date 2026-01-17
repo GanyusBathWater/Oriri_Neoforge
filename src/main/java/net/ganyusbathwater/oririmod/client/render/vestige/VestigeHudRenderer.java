@@ -1,4 +1,3 @@
-// file: `src/main/java/net/ganyusbathwater/oririmod/client/render/vestige/VestigeHudRenderer.java`
 package net.ganyusbathwater.oririmod.client.render.vestige;
 
 import com.mojang.blaze3d.vertex.PoseStack;

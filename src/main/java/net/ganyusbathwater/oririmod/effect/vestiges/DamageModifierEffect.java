@@ -1,9 +1,7 @@
-// file: `src/main/java/net/ganyusbathwater/oririmod/effect/vestiges/DamageModifierEffect.java`
 package net.ganyusbathwater.oririmod.effect.vestiges;
 
 import net.ganyusbathwater.oririmod.combat.ElementalDamageHandler;
 import net.ganyusbathwater.oririmod.events.vestiges.VestigeDayNightEvents;
-import net.ganyusbathwater.oririmod.events.vestiges.VoidMirrorDodgeEvents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 

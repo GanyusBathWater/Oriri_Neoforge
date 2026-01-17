@@ -1,4 +1,3 @@
-// file: `java/net/ganyusbathwater/oririmod/effect/vestiges/PhoenixFeatherEffect.java`
 package net.ganyusbathwater.oririmod.effect.vestiges;
 
 import net.ganyusbathwater.oririmod.item.ModItems;

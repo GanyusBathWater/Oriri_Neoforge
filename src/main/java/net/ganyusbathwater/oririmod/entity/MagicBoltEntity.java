@@ -1,5 +1,3 @@
-// java
-// Datei: 'src/main/java/net/ganyusbathwater/oririmod/entity/MagicBoltEntity.java'
 package net.ganyusbathwater.oririmod.entity;
 
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
