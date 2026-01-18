@@ -22,47 +22,48 @@ public final class ManaCommands {
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("mana")
+        return Commands.literal("oriri")
                 .requires(src -> src.hasPermission(2))
-                .then(Commands.literal("set")
-                        .then(Commands.argument("value", IntegerArgumentType.integer(0, 100000))
-                                .executes(ctx -> {
-                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
-                                    ModManaUtil.setMana(p, IntegerArgumentType.getInteger(ctx, "value"));
-                                    ctx.getSource().sendSuccess(() -> Component.literal("Mana gesetzt auf " + ModManaUtil.getMana(p)), true);
-                                    return 1;
-                                }))
+                .then(Commands.literal("mana")
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("value", IntegerArgumentType.integer(0, 100000))
+                                        .executes(ctx -> {
+                                            ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                            ModManaUtil.setMana(p, IntegerArgumentType.getInteger(ctx, "value"));
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Mana gesetzt auf " + ModManaUtil.getMana(p)), true);
+                                            return 1;
+                                        })))
                         .then(Commands.literal("reset")
                                 .executes(ctx -> {
                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
                                     ModManaUtil.resetMana(p);
                                     ctx.getSource().sendSuccess(() -> Component.literal("Mana zurückgesetzt auf " + ModManaUtil.getMana(p)), true);
                                     return 1;
-                                })))
-                .then(Commands.literal("setmax")
-                        .then(Commands.argument("value", IntegerArgumentType.integer(1, 100000))
-                                .executes(ctx -> {
-                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
-                                    ModManaUtil.setMaxMana(p, IntegerArgumentType.getInteger(ctx, "value"));
-                                    ctx.getSource().sendSuccess(() -> Component.literal("MaxMana gesetzt auf " + ModManaUtil.getMaxMana(p)), true);
-                                    return 1;
                                 }))
-                        .then(Commands.literal("reset")
+                        .then(Commands.literal("setmax")
+                                .then(Commands.argument("value", IntegerArgumentType.integer(1, 100000))
+                                        .executes(ctx -> {
+                                            ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                            ModManaUtil.setMaxMana(p, IntegerArgumentType.getInteger(ctx, "value"));
+                                            ctx.getSource().sendSuccess(() -> Component.literal("MaxMana gesetzt auf " + ModManaUtil.getMaxMana(p)), true);
+                                            return 1;
+                                        })))
+                        .then(Commands.literal("resetmax")
                                 .executes(ctx -> {
                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
                                     ModManaUtil.resetMaxMana(p);
                                     ctx.getSource().sendSuccess(() -> Component.literal("MaxMana zurückgesetzt auf " + ModManaUtil.getMaxMana(p) + " (Config)"), true);
                                     return 1;
-                                })))
-                .then(Commands.literal("setregen")
-                        .then(Commands.argument("seconds", IntegerArgumentType.integer(1, 600))
-                                .executes(ctx -> {
-                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
-                                    ModManaUtil.setRegenIntervalSeconds(p, IntegerArgumentType.getInteger(ctx, "seconds"));
-                                    ctx.getSource().sendSuccess(() -> Component.literal("Regen-Intervall gesetzt auf " + ModManaUtil.getRegenIntervalSeconds(p) + "s"), true);
-                                    return 1;
                                 }))
-                        .then(Commands.literal("reset")
+                        .then(Commands.literal("setregen")
+                                .then(Commands.argument("seconds", IntegerArgumentType.integer(1, 600))
+                                        .executes(ctx -> {
+                                            ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                            ModManaUtil.setRegenIntervalSeconds(p, IntegerArgumentType.getInteger(ctx, "seconds"));
+                                            ctx.getSource().sendSuccess(() -> Component.literal("Regen-Intervall gesetzt auf " + ModManaUtil.getRegenIntervalSeconds(p) + "s"), true);
+                                            return 1;
+                                        })))
+                        .then(Commands.literal("resetregen")
                                 .executes(ctx -> {
                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
                                     ModManaUtil.resetRegenIntervalSeconds(p);

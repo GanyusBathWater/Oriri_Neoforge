@@ -12,6 +12,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -31,35 +32,47 @@ public final class WorldEventCommand {
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("worldevent")
+        return Commands.literal("oriri")
                 .requires(src -> src.hasPermission(2))
-                .then(Commands.literal("start")
-                        .then(Commands.argument("event", StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        // Suggest all event types except NONE
-                                        Arrays.stream(WorldEventType.values())
-                                                .filter(type -> type != WorldEventType.NONE)
-                                                .map(Enum::name)
-                                                .map(String::toLowerCase),
-                                        builder))
-                                .executes(WorldEventCommand::startEvent)))
-                .then(Commands.literal("stop")
-                        .executes(WorldEventCommand::stopEvent));
+                .then(Commands.literal("worldevent")
+                        .then(Commands.literal("start")
+                                .then(Commands.argument("event", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                Arrays.stream(WorldEventType.values())
+                                                        .filter(type -> type != WorldEventType.NONE)
+                                                        .map(Enum::name)
+                                                        .map(String::toLowerCase),
+                                                builder))
+                                        .executes(WorldEventCommand::startEvent)))
+                        .then(Commands.literal("stop")
+                                .executes(WorldEventCommand::stopEvent)));
     }
 
     private static int startEvent(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerLevel level = context.getSource().getLevel();
+
+        // Dimension check: events only allowed in Overworld
+        if (level.dimension() != Level.OVERWORLD) {
+            context.getSource().sendFailure(Component.literal("Events can only be started in the Overworld — you are likely in a different dimension."));
+            return 0;
+        }
+
         WorldEventManager manager = WorldEventManager.get(level);
         String eventName = StringArgumentType.getString(context, "event").toUpperCase();
 
         try {
             WorldEventType eventType = WorldEventType.valueOf(eventName);
             if (eventType == WorldEventType.NONE) {
-                context.getSource().sendFailure(Component.literal("The event 'NONE' cannot be started manually."));
+                context.getSource().sendFailure(Component.literal("The 'NONE' event cannot be started manually."));
                 return 0;
             }
 
-            manager.startEvent(eventType, DEFAULT_DURATION_TICKS, level);
+            boolean started = manager.startEvent(eventType, DEFAULT_DURATION_TICKS, level);
+            if (!started) {
+                context.getSource().sendFailure(Component.literal("Event cannot be started right now (wrong time or another event is active)."));
+                return 0;
+            }
+
             context.getSource().sendSuccess(() -> Component.literal("Event '" + eventName.toLowerCase() + "' started."), true);
             return 1;
         } catch (IllegalArgumentException e) {
@@ -70,14 +83,21 @@ public final class WorldEventCommand {
 
     private static int stopEvent(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerLevel level = context.getSource().getLevel();
-        WorldEventManager manager = WorldEventManager.get(level);
 
-        if (manager.getActiveEvent() == WorldEventType.NONE) {
-            context.getSource().sendFailure(Component.literal("There is no active event to stop."));
+        // If player is not in Overworld but an event is active, inform them
+        if (level.dimension() != Level.OVERWORLD && WorldEventManager.isAnyEventActive()) {
+            context.getSource().sendFailure(Component.literal("An event is running in the Overworld; you are in a different dimension."));
             return 0;
         }
 
-        String eventName = manager.getActiveEvent().name().toLowerCase();
+        WorldEventManager manager = WorldEventManager.get(level);
+
+        if (WorldEventManager.getActiveEvent() == WorldEventType.NONE) {
+            context.getSource().sendFailure(Component.literal("No active event to stop."));
+            return 0;
+        }
+
+        String eventName = WorldEventManager.getActiveEvent().name().toLowerCase();
         manager.stopEvent(level);
         context.getSource().sendSuccess(() -> Component.literal("Event '" + eventName + "' has been stopped."), true);
         return 1;

@@ -53,7 +53,9 @@ public abstract class ItemEntityMixin extends Entity {
     @Inject(method = "tick", at = @At("HEAD"))
     private void preventDespawnAndVoidDamage(CallbackInfo ci) {
         if (hasInvincibleEnchantment(this.getItem())) {
-            this.age = 0;
+            if (age >= 3000) {
+                this.age = 0;
+            }
 
             if (this.getY() < (double)(this.level().getMinBuildHeight() - 64)) {
                 this.setPos(this.getX(), this.level().getMinBuildHeight(), this.getZ());

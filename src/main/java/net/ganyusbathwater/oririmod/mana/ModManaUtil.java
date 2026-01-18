@@ -1,6 +1,6 @@
 package net.ganyusbathwater.oririmod.mana;
 
-import net.ganyusbathwater.oririmod.config.ManaConfig;
+import net.ganyusbathwater.oririmod.config.OririConfig;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -69,7 +69,7 @@ public class ModManaUtil {
         CompoundTag data = player.getPersistentData();
         return data.contains(NBT_MAX_KEY)
                 ? data.getInt(NBT_MAX_KEY)
-                : ManaConfig.COMMON.maxMana.get();
+                : OririConfig.COMMON.mana.maxMana.get();
     }
 
     public static Integer getMaxManaIfPresent(Player player) {
@@ -122,7 +122,7 @@ public class ModManaUtil {
         int tick = data.getInt(NBT_TICK_KEY) + 1;
         if (tick >= intervalTicks) {
             tick = 0;
-            int regen = ManaConfig.COMMON.regenAmount.get();
+            int regen = OririConfig.COMMON.mana.regenAmount.get();
             int before = getMana(player);
             if (before < getMaxMana(player)) {
                 setMana(player, before + regen);
@@ -140,7 +140,7 @@ public class ModManaUtil {
         CompoundTag data = player.getPersistentData();
         return data.contains(NBT_REGEN_INTERVAL_KEY)
                 ? data.getInt(NBT_REGEN_INTERVAL_KEY)
-                : ManaConfig.COMMON.regenIntervalSeconds.get();
+                : OririConfig.COMMON.mana.regenIntervalSeconds.get();
     }
 
     public static void resetRegenIntervalSeconds(Player player) {

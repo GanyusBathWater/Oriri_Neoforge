@@ -355,5 +355,15 @@
 
 
   "creative.oriri_tab": "Oriri",
-  "creative.oriri_tab_misc": "Oriri Collectibles"
+  "creative.oriri_tab_misc": "Oriri Collectibles",
+  "oririmod.configuration.mana": "Mana Settings",
+  "oririmod.configuration.maxMana": "Maximum Mana",
+  "oririmod.configuration.regenIntervalSeconds": "Mana Regeneration Interval (Seconds)",
+  "oririmod.configuration.regenAmount": "Mana Regeneration Amount",
+
+  "oririmod.configuration.world_events": "World Events",
+  "oririmod.configuration.nightEventChance": "Night Event Chance",
+  "oririmod.configuration.eclipseChance": "Day Event Chance",
+  "oririmod.configuration.nightEventDuration": "Night Event Duration (Seconds)",
+  "oririmod.configuration.eclipseDuration": "Day Event Duration (Seconds)"
 }
