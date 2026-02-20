@@ -1,0 +1,43 @@
+{
+    "precipitation": "rain",
+    "has_precipitation": true,
+    "effects": {
+        "sky_color": 8545856,
+        "fog_color": 10044474,
+        "water_color": 6250335,
+        "water_fog_color": 4337963,
+        "grass_color": 10044474,
+        "foliage_color": 10044474
+    },
+    "temperature": 0.8,
+    "downfall": 0.4,
+    "category": "plains",
+    "depth": 0.125,
+    "scale": 0.05,
+    "carvers": {
+        "air": [
+            "oririmod:scarlet_cave_entrance"
+        ]
+    },
+    "features": [
+        [],
+        [
+            "oririmod:scarlet_pond_plains_placed"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+            "oririmod:scarlet_boulder_placed",
+            "oririmod:scarlet_grass_patch_placed",
+            "oririmod:scarlet_tooth_leaves_patch_placed",
+            "oririmod:scarlet_lily_patch_placed"
+        ]
+    ],
+    "spawn_costs": {},
+    "spawners": {}
+}

@@ -27,6 +27,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
+import net.ganyusbathwater.oririmod.effect.ModEffects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,20 +39,19 @@ public class ServerEvents {
     private static final int NIGHT_START = 13000;
     private static final int DAY_START = 23500; // Kurz vor Tag 0
 
-
     // Erlaubte Monster, die während einer Sonnenfinsternis spawnen dürfen.
     private static final List<EntityType<? extends Monster>> ECLIPSE_MOBS = List.of(
             EntityType.ZOMBIE,
             EntityType.SKELETON,
             EntityType.SPIDER,
             EntityType.CREEPER,
-            EntityType.ENDERMAN
-    );
+            EntityType.ENDERMAN);
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
-        if (player.level().isClientSide()) return;
+        if (player.level().isClientSide())
+            return;
 
         int intervalSeconds = ModManaUtil.getRegenIntervalSeconds(player);
         int regenAmount = OririConfig.COMMON.mana.regenAmount.get();
@@ -76,7 +77,8 @@ public class ServerEvents {
         if (event.getEntity() instanceof ServerPlayer sp) {
             ModManaUtil.syncToClient(sp);
             // Send current world event state to the player who just logged in
-            NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(), WorldEventManager.getTicksRemaining(), WorldEventManager.getEventDuration());
+            NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
+                    WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
         }
     }
 
@@ -93,13 +95,15 @@ public class ServerEvents {
             ModManaUtil.syncToClient(sp);
         }
     }
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         ServerLevel level = event.getServer().overworld();
-        if (level == null) return;
+        if (level == null)
+            return;
 
         WorldEventManager manager = WorldEventManager.get(level);
-        WorldEventManager.tick();
+        WorldEventManager.tick(level);
 
         long timeOfDay = level.getDayTime() % 24000;
 
@@ -122,18 +126,20 @@ public class ServerEvents {
                 manager.startEvent(WorldEventType.ECLIPSE, duration, level);
             }
         }
-        if (WorldEventManager.isEventActive(WorldEventType.ECLIPSE)) {
+        if (WorldEventManager.isEventActive(level, WorldEventType.ECLIPSE)) {
             // alle 20 Ticks prüfen, geringe Chance pro Spieler
             if (level.getGameTime() % 20L == 0L) {
                 for (ServerPlayer sp : level.players()) {
                     // Chance pro Spieler, anpassen nach Bedarf / Config
                     if (level.random.nextFloat() < 0.02F) {
-                        EntityType<? extends Monster> chosen = ECLIPSE_MOBS.get(level.random.nextInt(ECLIPSE_MOBS.size()));
+                        EntityType<? extends Monster> chosen = ECLIPSE_MOBS
+                                .get(level.random.nextInt(ECLIPSE_MOBS.size()));
                         Monster mob = (Monster) chosen.create(level);
                         if (mob != null) {
                             double px = sp.getX() + (level.random.nextDouble() - 0.5) * 16.0;
                             double pz = sp.getZ() + (level.random.nextDouble() - 0.5) * 16.0;
-                            int py = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(px), (int) Math.floor(pz));
+                            int py = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(px),
+                                    (int) Math.floor(pz));
                             mob.moveTo(px, py, pz, level.random.nextFloat() * 360.0F, 0.0F);
                             level.addFreshEntity(mob);
                         }
@@ -148,8 +154,9 @@ public class ServerEvents {
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         Level level = event.getLevel().getLevel();
         if (level instanceof ServerLevel serverLevel && event.getEntity() instanceof Monster monster) {
-            if (WorldEventManager.isEventActive(WorldEventType.BLOOD_MOON)) {
-                // Verdoppelt die Chance, indem ein zweites Monster mit 50% Wahrscheinlichkeit gespawnt wird
+            if (WorldEventManager.isEventActive(level, WorldEventType.BLOOD_MOON)) {
+                // Verdoppelt die Chance, indem ein zweites Monster mit 50% Wahrscheinlichkeit
+                // gespawnt wird
                 if (serverLevel.random.nextFloat() < 0.5F) {
                     Monster extraMonster = (Monster) monster.getType().create(serverLevel);
                     if (extraMonster != null) {
@@ -166,7 +173,7 @@ public class ServerEvents {
     public static void onLivingDamage(LivingDamageEvent.Pre event) {
         Entity sourceEntity = event.getSource().getEntity();
         if (sourceEntity instanceof Monster && sourceEntity.level() instanceof ServerLevel serverLevel) {
-            if (WorldEventManager.isEventActive(WorldEventType.ECLIPSE)) {
+            if (WorldEventManager.isEventActive(serverLevel, WorldEventType.ECLIPSE)) {
                 event.setNewDamage(event.getOriginalDamage() * 1.25F);
             }
         }
@@ -174,9 +181,12 @@ public class ServerEvents {
 
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Pre event) {
-        if (!(event.getEntity() instanceof Monster monster)) return;
-        if (!(monster.level() instanceof ServerLevel)) return;
-        if (!WorldEventManager.isEventActive(WorldEventType.ECLIPSE)) return;
+        if (!(event.getEntity() instanceof Monster monster))
+            return;
+        if (!(monster.level() instanceof ServerLevel))
+            return;
+        if (!WorldEventManager.isEventActive(monster.level(), WorldEventType.ECLIPSE))
+            return;
 
         // Sonnenbrand verhindern
         if (monster.isOnFire()) {
@@ -184,15 +194,34 @@ public class ServerEvents {
         }
     }
 
+    /**
+     * Blocks all healing when the entity has the Anti-Heal effect.
+     * Works for both players and mobs.
+     */
+    @SubscribeEvent
+    public static void onLivingHeal(LivingHealEvent event) {
+        LivingEntity entity = event.getEntity();
+
+        // Check if the entity has the Anti-Heal effect
+        if (entity.hasEffect(ModEffects.ANTI_HEAL_EFFECT)) {
+            // Cancel the healing event completely
+            event.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityDrops(LivingDropsEvent event) {
         LivingEntity entity = event.getEntity();
-        ServerLevel level = (ServerLevel)entity.level();
+        ServerLevel level = (ServerLevel) entity.level();
 
-        if (entity == null) return;
-        if (entity.level().isClientSide()) return;
-        if (!(entity.level() instanceof ServerLevel)) return;
-        if (!WorldEventManager.isEventActive(WorldEventType.GREEN_MOON)) return;
+        if (entity == null)
+            return;
+        if (entity.level().isClientSide())
+            return;
+        if (!(entity.level() instanceof ServerLevel))
+            return;
+        if (!WorldEventManager.isEventActive(entity.level(), WorldEventType.GREEN_MOON))
+            return;
 
         // 33 % Chance, Loot zu verdoppeln
         if (level.random.nextFloat() < 0.5f) {
@@ -204,6 +233,71 @@ public class ServerEvents {
                 stack.setCount(stack.getCount());
                 ItemEntity extra = new ItemEntity(level, drop.getX(), drop.getY(), drop.getZ(), stack);
                 event.getDrops().add(extra);
+            }
+        }
+    }
+
+    /**
+     * Process newly generated chunks in Elderwoods dimension:
+     * - Swap mineshaft wood blocks to elder wood
+     * - Remove water blocks from caves
+     */
+    @SubscribeEvent
+    public static void onChunkLoad(net.neoforged.neoforge.event.level.ChunkEvent.Load event) {
+        if (event.getLevel().isClientSide())
+            return;
+        if (!(event.getLevel() instanceof ServerLevel serverLevel))
+            return;
+
+        // Only process Elderwoods dimension
+        if (!serverLevel.dimension().location().toString().equals("oririmod:elderwoods"))
+            return;
+
+        // Only process newly generated chunks (not loaded from disk)
+        if (!event.isNewChunk())
+            return;
+
+        net.minecraft.world.level.chunk.ChunkAccess chunk = event.getChunk();
+        net.minecraft.core.BlockPos.MutableBlockPos pos = new net.minecraft.core.BlockPos.MutableBlockPos();
+
+        int startX = chunk.getPos().getMinBlockX();
+        int startZ = chunk.getPos().getMinBlockZ();
+
+        for (int localX = 0; localX < 16; localX++) {
+            for (int localZ = 0; localZ < 16; localZ++) {
+                int worldX = startX + localX;
+                int worldZ = startZ + localZ;
+
+                // Process from min to max height
+                for (int y = serverLevel.getMinBuildHeight(); y < serverLevel.getMaxBuildHeight(); y++) {
+                    pos.set(worldX, y, worldZ);
+                    net.minecraft.world.level.block.state.BlockState currentBlock = chunk.getBlockState(pos);
+
+                    // Swap mineshaft wood blocks to elder wood
+                    if (currentBlock.is(net.minecraft.world.level.block.Blocks.OAK_PLANKS) ||
+                            currentBlock.is(net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS) ||
+                            currentBlock.is(net.minecraft.world.level.block.Blocks.SPRUCE_PLANKS)) {
+                        chunk.setBlockState(pos,
+                                net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_PLANKS.get().defaultBlockState(),
+                                false);
+                    } else if (currentBlock.is(net.minecraft.world.level.block.Blocks.OAK_FENCE) ||
+                            currentBlock.is(net.minecraft.world.level.block.Blocks.DARK_OAK_FENCE) ||
+                            currentBlock.is(net.minecraft.world.level.block.Blocks.SPRUCE_FENCE)) {
+                        chunk.setBlockState(pos,
+                                net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_FENCE.get().defaultBlockState(),
+                                false);
+                    } else if (currentBlock.is(net.minecraft.world.level.block.Blocks.OAK_LOG) ||
+                            currentBlock.is(net.minecraft.world.level.block.Blocks.DARK_OAK_LOG) ||
+                            currentBlock.is(net.minecraft.world.level.block.Blocks.SPRUCE_LOG)) {
+                        chunk.setBlockState(pos,
+                                net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState(),
+                                false);
+                    }
+                    // Remove water blocks
+                    else if (currentBlock.is(net.minecraft.world.level.block.Blocks.WATER)) {
+                        chunk.setBlockState(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), false);
+                    }
+                }
             }
         }
     }

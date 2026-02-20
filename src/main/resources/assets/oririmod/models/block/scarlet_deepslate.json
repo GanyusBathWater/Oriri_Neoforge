@@ -1,0 +1,7 @@
+{
+    "parent": "minecraft:block/cube_column",
+    "textures": {
+        "end": "oririmod:block/scarlet_deepslate_top",
+        "side": "oririmod:block/scarlet_deepslate"
+    }
+}

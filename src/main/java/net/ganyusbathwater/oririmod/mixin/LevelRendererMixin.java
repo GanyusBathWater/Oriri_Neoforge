@@ -21,37 +21,49 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    @Shadow @Final @Mutable
+    @Shadow
+    @Final
+    @Mutable
     private static ResourceLocation SUN_LOCATION;
 
-    @Shadow @Final @Mutable
+    @Shadow
+    @Final
+    @Mutable
     private static ResourceLocation MOON_LOCATION;
 
     @Unique
-    private static final ResourceLocation oririmod$VANILLA_SUN_TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/environment/sun.png");
+    private static final ResourceLocation oririmod$VANILLA_SUN_TEXTURE = ResourceLocation
+            .fromNamespaceAndPath("minecraft", "textures/environment/sun.png");
     @Unique
-    private static final ResourceLocation oririmod$VANILLA_MOON_TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/environment/moon_phases.png");
+    private static final ResourceLocation oririmod$VANILLA_MOON_TEXTURE = ResourceLocation
+            .fromNamespaceAndPath("minecraft", "textures/environment/moon_phases.png");
 
     @Unique
-    private static final ResourceLocation oririmod$BLOOD_MOON_TEXTURE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/environment/bloodmoon_phases.png");
+    private static final ResourceLocation oririmod$BLOOD_MOON_TEXTURE = ResourceLocation
+            .fromNamespaceAndPath(OririMod.MOD_ID, "textures/environment/bloodmoon_phases.png");
     @Unique
-    private static final ResourceLocation oririmod$GREEN_MOON_TEXTURE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/environment/greenmoon_phases.png");
+    private static final ResourceLocation oririmod$GREEN_MOON_TEXTURE = ResourceLocation
+            .fromNamespaceAndPath(OririMod.MOD_ID, "textures/environment/greenmoon_phases.png");
     @Unique
-    private static final ResourceLocation oririmod$ECLIPSE_SUN_TEXTURE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/environment/eclipse_sun.png");
+    private static final ResourceLocation oririmod$ECLIPSE_SUN_TEXTURE = ResourceLocation
+            .fromNamespaceAndPath(OririMod.MOD_ID, "textures/environment/eclipse_sun.png");
 
     @Unique
     private final CustomDimensionSpecialEffects oririmod$effects = new CustomDimensionSpecialEffects();
 
-
     @Inject(method = "renderLevel", at = @At("HEAD"))
     private void oriri_onRenderLevel(CallbackInfo ci) {
-        if (WorldEventManager.isEventActive(WorldEventType.ECLIPSE)) {
+        net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+        if (level == null)
+            return;
+
+        if (WorldEventManager.isEventActive(level, WorldEventType.ECLIPSE)) {
             SUN_LOCATION = oririmod$ECLIPSE_SUN_TEXTURE;
         } else {
             SUN_LOCATION = oririmod$VANILLA_SUN_TEXTURE;
         }
 
-        WorldEventType activeEvent = WorldEventManager.getActiveEvent();
+        WorldEventType activeEvent = WorldEventManager.getActiveEvent(level);
         if (activeEvent == WorldEventType.BLOOD_MOON) {
             MOON_LOCATION = oririmod$BLOOD_MOON_TEXTURE;
         } else if (activeEvent == WorldEventType.GREEN_MOON) {
@@ -68,7 +80,8 @@ public abstract class LevelRendererMixin {
 
     @ModifyVariable(method = "renderSky", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getSkyColor(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;"), name = "vec3")
     private Vec3 oriri_modifySkyColor(Vec3 skyColor) {
-        if (WorldEventManager.isEventActive(WorldEventType.ECLIPSE)) {
+        net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+        if (level != null && WorldEventManager.isEventActive(level, WorldEventType.ECLIPSE)) {
             return new Vec3(0.1, 0.1, 0.15);
         }
         return skyColor;
@@ -76,7 +89,8 @@ public abstract class LevelRendererMixin {
 
     @ModifyVariable(method = "renderSky", at = @At(value = "STORE"), name = "vec32", ordinal = 0)
     private Vec3 oriri_modifySkyColorVector(Vec3 skyColor) {
-        if (WorldEventManager.isEventActive(WorldEventType.ECLIPSE)) {
+        net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+        if (level != null && WorldEventManager.isEventActive(level, WorldEventType.ECLIPSE)) {
             return new Vec3(0.1, 0.1, 0.15);
         }
         return skyColor;
@@ -86,9 +100,11 @@ public abstract class LevelRendererMixin {
     private Vec3 oriri_modifyCloudColor(Vec3 originalCloudColor) {
         float transitionProgress = oririmod$effects.getTransitionProgress();
         if (transitionProgress > 0) {
-            WorldEventType activeEvent = WorldEventManager.getActiveEvent();
+            net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+            WorldEventType activeEvent = level != null ? WorldEventManager.getActiveEvent(level) : WorldEventType.NONE;
             Vector3f eventColor = oririmod$effects.getEventSkyColor(activeEvent);
-            Vector3f originalColorVec = new Vector3f((float)originalCloudColor.x, (float)originalCloudColor.y, (float)originalCloudColor.z);
+            Vector3f originalColorVec = new Vector3f((float) originalCloudColor.x, (float) originalCloudColor.y,
+                    (float) originalCloudColor.z);
 
             originalColorVec.lerp(eventColor, transitionProgress);
             return new Vec3(originalColorVec.x, originalColorVec.y, originalColorVec.z);

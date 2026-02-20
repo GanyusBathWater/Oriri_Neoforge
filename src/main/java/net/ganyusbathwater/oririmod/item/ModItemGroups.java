@@ -13,17 +13,16 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
-
 public class ModItemGroups {
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, OririMod.MOD_ID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister
+            .create(Registries.CREATIVE_MODE_TAB, OririMod.MOD_ID);
 
     public static final Supplier<CreativeModeTab> Oriri_TAB = CREATIVE_MODE_TAB.register("oriri_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.QILINS_WRATH.get()))
                     .title(Component.translatable("creative.oriri_tab"))
                     .displayItems((itemDisplayParameters, output) -> {
 
-                        //-------------Items-------------
+                        // -------------Items-------------
                         output.accept(ModItems.FIRE_CRYSTAL);
                         output.accept(ModItems.MANA_MANIFESTATION);
                         output.accept(ModItems.MOON_STONE);
@@ -35,10 +34,13 @@ public class ModItemGroups {
                         output.accept(ModItems.TORTURED_SOUL);
                         output.accept(ModItems.VOID_SOUL);
                         output.accept(ModFluids.AETHER_BUCKET.get());
+                        output.accept(ModFluids.BLOOD_WATER_BUCKET.get());
 
-                        //-------------Blocks------------
+                        // -------------Blocks------------
                         output.accept(ModBlocks.MANA_CRYSTAL_BLOCK);
                         output.accept(ModBlocks.MANA_CRYSTAL_CLUSTER);
+                        output.accept(ModBlocks.FLUORITE_BLOCK);
+                        output.accept(ModBlocks.FLUORITE_CLUSTER);
                         output.accept(ModBlocks.DARK_SOIL_BLOCK);
                         output.accept(ModBlocks.ELDERBUSH_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
@@ -57,9 +59,50 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING);
                         output.accept(ModBlocks.ELDER_SAPLING);
                         output.accept(ModBlocks.ELDER_SPORE_BLOSSOM);
+                        output.accept(ModBlocks.ELDER_LEAVES); // Added missing leaves if they were missed
+                        output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
+
+                        // Scarlet Block Group
+                        output.accept(ModBlocks.SCARLET_GRASS_BLOCK);
+                        output.accept(ModBlocks.SCARLET_STONE);
+                        output.accept(ModBlocks.COBBLED_SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.SMOOTH_SCARLET_STONE);
+                        output.accept(ModBlocks.SMOOTH_SCARLET_STONE_SLAB);
+                        output.accept(ModBlocks.SCARLET_STONE_BRICKS);
+                        output.accept(ModBlocks.CHISELED_SCARLET_STONE_BRICKS);
+                        output.accept(ModBlocks.CRACKED_SCARLET_STONE_BRICKS);
+                        output.accept(ModBlocks.MOSSY_SCARLET_STONE_BRICKS);
+
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.POLISHED_SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.CHISELED_SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_BRICKS);
+                        output.accept(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_TILES);
+                        output.accept(ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES);
+
+                        output.accept(ModBlocks.SCARLET_LOG);
+                        output.accept(ModBlocks.STRIPPED_SCARLET_LOG);
+                        output.accept(ModBlocks.SCARLET_STEM);
+                        output.accept(ModBlocks.STRIPPED_SCARLET_STEM);
+                        output.accept(ModBlocks.SCARLET_PLANKS);
+                        output.accept(ModBlocks.SCARLET_STAIRS);
+                        output.accept(ModBlocks.SCARLET_SLAB);
+                        output.accept(ModBlocks.SCARLET_FENCE);
+                        output.accept(ModBlocks.SCARLET_GATE);
+                        output.accept(ModBlocks.SCARLET_SAPLING);
+                        output.accept(ModBlocks.SCARLET_LEAVES);
+                        output.accept(ModBlocks.SCARLET_TOOTH_LEAVES);
+                        output.accept(ModBlocks.SCARLET_GRASS);
+                        output.accept(ModBlocks.SCARLET_MOSS);
+                        output.accept(ModBlocks.SCARLET_VINE);
+                        output.accept(ModBlocks.SCARLET_LILY);
+                        output.accept(ModBlocks.SCARLET_DRIPSTONE_BLOCK);
+                        output.accept(ModBlocks.POINTED_SCARLET_DRIPSTONE);
+
                         output.accept(ModBlocks.STAR_HERB);
 
-                        //-------------Foods-------------
+                        // -------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);
                         output.accept(ModItems.DRAGON_FRUIT);
                         output.accept(ModItems.IRON_ROOTS);
@@ -71,7 +114,7 @@ public class ModItemGroups {
                         output.accept(ModItems.MIRACLE_SEAWEED);
                         output.accept(ModItems.CALCIUM_CURRANT);
 
-                        //-----------Vestiges-----------
+                        // -----------Vestiges-----------
                         output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
                         output.accept(ModItems.CANDY_BAG);
                         output.accept(ModItems.CRIT_GLOVE);
@@ -89,7 +132,7 @@ public class ModItemGroups {
                         output.accept(ModItems.STRIDER_SCALE);
                         output.accept(ModItems.WITHER_ROSE);
 
-                        //------------Weapons------------
+                        // ------------Weapons------------
                         output.accept(ModItems.PANDORAS_BLADE);
                         output.accept(ModItems.ORAPHIM_BOW);
                         output.accept(ModItems.PIRATE_SABER);
@@ -121,7 +164,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_WISE);
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
 
-                        //------------Armor---------------
+                        // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);
                         output.accept(ModItems.CRYSTAL_CHESTPLATE);
                         output.accept(ModItems.CRYSTAL_LEGGINGS);
@@ -154,13 +197,14 @@ public class ModItemGroups {
 
                     }).build());
 
-                    public static final Supplier<CreativeModeTab> ORIRI_COLLECTIBLES_TAB = CREATIVE_MODE_TAB.register("creative.oriri_tab_misc",
-                            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.THE_FOOL.get()))
-                                    .withTabsBefore(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "oriri_tab"))
-                                    .title(Component.translatable("creative.oriri_tab_misc"))
-                                    .displayItems((itemDisplayParameters, output) -> {
+    public static final Supplier<CreativeModeTab> ORIRI_COLLECTIBLES_TAB = CREATIVE_MODE_TAB.register(
+            "creative.oriri_tab_misc",
+            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.THE_FOOL.get()))
+                    .withTabsBefore(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "oriri_tab"))
+                    .title(Component.translatable("creative.oriri_tab_misc"))
+                    .displayItems((itemDisplayParameters, output) -> {
 
-                        //-------------Arkana-------------
+                        // -------------Arkana-------------
                         output.accept(ModItems.THE_FOOL);
                         output.accept(ModItems.THE_MAGICIAN);
                         output.accept(ModItems.THE_HIGH_PRIESTESS);
@@ -185,8 +229,6 @@ public class ModItemGroups {
                         output.accept(ModItems.THE_WORLD);
 
                     }).build());
-
-
 
     public static void registerItemGroups(IEventBus eventBus) {
         CREATIVE_MODE_TAB.register(eventBus);

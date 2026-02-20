@@ -18,8 +18,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 public class MeteorEntity extends Projectile {
-    private static final EntityDataAccessor<Integer> OWNER_ID =
-            SynchedEntityData.defineId(MeteorEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> OWNER_ID = SynchedEntityData.defineId(MeteorEntity.class,
+            EntityDataSerializers.INT);
 
     private BlockPos impactPos = BlockPos.ZERO;
     private float explosionPower = 4.0f;
@@ -74,9 +74,11 @@ public class MeteorEntity extends Projectile {
     @Override
     public void tick() {
         super.tick();
-        if (!level().isClientSide && this.tickCount > maxLife) {
-            discard();
-            return;
+        if (!level().isClientSide) {
+            if (this.tickCount > maxLife || !level().hasChunkAt(blockPosition())) {
+                discard();
+                return;
+            }
         }
 
         Vec3 vel = getDeltaMovement();
@@ -94,8 +96,7 @@ public class MeteorEntity extends Projectile {
                         SoundEvents.FIREWORK_ROCKET_BLAST,
                         SoundSource.AMBIENT,
                         0.6f,
-                        0.6f + server.random.nextFloat() * 0.2f
-                );
+                        0.6f + server.random.nextFloat() * 0.2f);
             }
         }
 
@@ -120,8 +121,7 @@ public class MeteorEntity extends Projectile {
                 SoundEvents.GENERIC_EXPLODE,
                 SoundSource.BLOCKS,
                 4.0f,
-                0.9f + server.random.nextFloat() * 0.2f
-        );
+                0.9f + server.random.nextFloat() * 0.2f);
         server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
         server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX(), getY(), getZ(), 30, 1.8, 0.3, 1.8, 0.02);
 
@@ -135,10 +135,12 @@ public class MeteorEntity extends Projectile {
         int r = Math.max(0, radius);
         for (int dx = -r; dx <= r; dx++) {
             for (int dz = -r; dz <= r; dz++) {
-                if (dx * dx + dz * dz > r * r) continue;
+                if (dx * dx + dz * dz > r * r)
+                    continue;
                 BlockPos p = center.offset(dx, 0, dz);
                 BlockPos ground = findGround(server, p, 6);
-                if (ground == null) continue;
+                if (ground == null)
+                    continue;
                 BlockPos firePos = ground.above();
                 if (server.isEmptyBlock(firePos)) {
                     server.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
@@ -150,7 +152,8 @@ public class MeteorEntity extends Projectile {
     private BlockPos findGround(ServerLevel server, BlockPos start, int maxDrop) {
         BlockPos p = start;
         for (int i = 0; i < maxDrop; i++) {
-            if (!server.isEmptyBlock(p)) return p;
+            if (!server.isEmptyBlock(p))
+                return p;
             p = p.below();
         }
         return null;

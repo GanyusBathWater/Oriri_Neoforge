@@ -18,54 +18,118 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.Set;
+import net.minecraft.world.level.block.Blocks;
 
 public class ModBlockLootTableProvider extends BlockLootSubProvider {
-    protected ModBlockLootTableProvider(HolderLookup.Provider registries) {
-        super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
-    }
+        protected ModBlockLootTableProvider(HolderLookup.Provider registries) {
+                super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
+        }
 
-    @Override
-    protected void generate() {
-        add(ModBlocks.DARK_SOIL_BLOCK.get(), block -> createSilkTouchOnlyTable(ModBlocks.DARK_SOIL_BLOCK.get()));
-        add(ModBlocks.ELDERBUSH_BLOCK.get(), item -> createSingleItemTable(ModItems.ELDERBERRY.get()));
-        add(ModBlocks.MANA_CRYSTAL_BLOCK.get(), block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_BLOCK.get()));
-        add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
-        add(ModBlocks.ELDER_LEAVES.get(), block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES.get()));
-        add(ModBlocks.ELDER_LEAVES_FLOWERING.get(), block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES_FLOWERING.get()));
+        @Override
+        protected void generate() {
+                add(ModBlocks.DARK_SOIL_BLOCK.get(),
+                                block -> createSilkTouchOnlyTable(ModBlocks.DARK_SOIL_BLOCK.get()));
+                add(ModBlocks.ELDERBUSH_BLOCK.get(), item -> createSingleItemTable(ModItems.ELDERBERRY.get()));
+                add(ModBlocks.MANA_CRYSTAL_BLOCK.get(),
+                                block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_BLOCK.get()));
+                add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(),
+                                item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
+                add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(),
+                                item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
 
-        this.dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
-        this.dropSelf(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
-        this.dropSelf(ModBlocks.ELDER_PLANKS.get());
-        this.dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
-        this.dropSelf(ModBlocks.ELDER_SAPLING.get());
-        this.dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
-        this.dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
-        this.dropSelf(ModBlocks.ELDER_SPORE_BLOSSOM.get());
-        this.dropSelf(ModBlocks.ELDER_STAIRS.get());
-        this.dropSelf(ModBlocks.ELDER_SLAB.get());
-        this.dropSelf(ModBlocks.ELDER_FENCE.get());
-        this.dropSelf(ModBlocks.ELDER_GATE.get());
-        this.dropSelf(ModBlocks.STAR_HERB.get());
+                add(ModBlocks.FLUORITE_BLOCK.get(),
+                                block -> createSilkTouchOnlyTable(ModBlocks.FLUORITE_BLOCK.get()));
+                add(ModBlocks.FLUORITE_CLUSTER.get(),
+                                item -> createSingleItemTable(ModBlocks.FLUORITE_CLUSTER.get()));
 
+                add(ModBlocks.ELDER_LEAVES.get(), block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES.get()));
+                add(ModBlocks.ELDER_LEAVES_FLOWERING.get(),
+                                block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES_FLOWERING.get()));
 
-        this.add(ModBlocks.ELDER_LEAVES.get(), block ->
-                createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+                this.dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
+                this.dropSelf(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
+                this.dropSelf(ModBlocks.ELDER_PLANKS.get());
+                this.dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
+                this.dropSelf(ModBlocks.ELDER_SAPLING.get());
+                this.dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
+                this.dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
+                this.dropSelf(ModBlocks.ELDER_SPORE_BLOSSOM.get());
+                this.dropSelf(ModBlocks.ELDER_STAIRS.get());
+                this.dropSelf(ModBlocks.ELDER_SLAB.get());
+                this.dropSelf(ModBlocks.ELDER_FENCE.get());
+                this.dropSelf(ModBlocks.ELDER_GATE.get());
+                this.dropSelf(ModBlocks.STAR_HERB.get());
 
-        this.add(ModBlocks.ELDER_LEAVES_FLOWERING.get(), block ->
-                createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+                this.add(ModBlocks.ELDER_LEAVES.get(),
+                                block -> createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(),
+                                                NORMAL_LEAVES_SAPLING_CHANCES));
 
-    }
+                this.add(ModBlocks.ELDER_LEAVES_FLOWERING.get(),
+                                block -> createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(),
+                                                NORMAL_LEAVES_SAPLING_CHANCES));
 
-    protected LootTable.Builder createMultipleOreDrops(Block pBlock, Item item, float minDrops, float maxDrops) {
-        HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
-        return this.createSilkTouchDispatchTable(pBlock,
-                this.applyExplosionDecay(pBlock, LootItem.lootTableItem(item)
-                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minDrops, maxDrops)))
-                        .apply(ApplyBonusCount.addOreBonusCount(registrylookup.getOrThrow(Enchantments.FORTUNE)))));
-    }
+                // ===== SCARLET STONE VARIANTS =====
+                this.dropSelf(ModBlocks.SCARLET_STONE.get());
+                this.dropSelf(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
+                this.dropSelf(ModBlocks.SMOOTH_SCARLET_STONE.get());
+                this.add(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get(), this::createSlabItemTable);
+                this.dropSelf(ModBlocks.SCARLET_STONE_BRICKS.get());
+                this.dropSelf(ModBlocks.CHISELED_SCARLET_STONE_BRICKS.get());
+                this.dropSelf(ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get());
+                this.dropSelf(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get());
 
-    @Override
-    protected Iterable<Block> getKnownBlocks() {
-        return ModBlocks.BLOCKS.getEntries().stream().map(Holder::value)::iterator;
-    }
+                // ===== SCARLET DEEPSLATE VARIANTS =====
+                this.dropSelf(ModBlocks.SCARLET_DEEPSLATE.get());
+                this.dropSelf(ModBlocks.POLISHED_SCARLET_DEEPSLATE.get());
+                this.dropSelf(ModBlocks.CHISELED_SCARLET_DEEPSLATE.get());
+                this.dropSelf(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get());
+                this.dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get());
+                this.dropSelf(ModBlocks.SCARLET_DEEPSLATE_TILES.get());
+                this.dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES.get());
+
+                // ===== SCARLET WOOD TYPES =====
+                this.dropSelf(ModBlocks.SCARLET_LOG.get());
+                this.dropSelf(ModBlocks.STRIPPED_SCARLET_LOG.get());
+                this.dropSelf(ModBlocks.SCARLET_PLANKS.get());
+                this.dropSelf(ModBlocks.SCARLET_STAIRS.get());
+                this.add(ModBlocks.SCARLET_SLAB.get(), this::createSlabItemTable);
+                this.dropSelf(ModBlocks.SCARLET_FENCE.get());
+                this.dropSelf(ModBlocks.SCARLET_GATE.get());
+                this.dropSelf(ModBlocks.SCARLET_SAPLING.get());
+
+                // ===== SCARLET VEGETATION =====
+                this.add(ModBlocks.SCARLET_LEAVES.get(),
+                                block -> createLeavesDrops(block, ModBlocks.SCARLET_SAPLING.get(),
+                                                NORMAL_LEAVES_SAPLING_CHANCES));
+                this.dropSelf(ModBlocks.SCARLET_MOSS.get());
+                this.add(ModBlocks.SCARLET_VINE.get(), block -> createShearsOnlyDrop(ModBlocks.SCARLET_VINE.get()));
+
+                // ===== NEW SCARLET BLOCKS =====
+                this.add(ModBlocks.SCARLET_GRASS_BLOCK.get(),
+                                block -> createSingleItemTableWithSilkTouch(block, Blocks.DIRT));
+                this.dropSelf(ModBlocks.SCARLET_STEM.get());
+                this.dropSelf(ModBlocks.STRIPPED_SCARLET_STEM.get());
+                this.add(ModBlocks.SCARLET_GRASS.get(), block -> createShearsOnlyDrop(block));
+                this.dropSelf(ModBlocks.SCARLET_TOOTH_LEAVES.get()); // Instabreak, so drops self
+                this.dropSelf(ModBlocks.SCARLET_LILY.get());
+                this.dropSelf(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get());
+                this.dropSelf(ModBlocks.POINTED_SCARLET_DRIPSTONE.get());
+
+        }
+
+        protected LootTable.Builder createMultipleOreDrops(Block pBlock, Item item, float minDrops, float maxDrops) {
+                HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries
+                                .lookupOrThrow(Registries.ENCHANTMENT);
+                return this.createSilkTouchDispatchTable(pBlock,
+                                this.applyExplosionDecay(pBlock, LootItem.lootTableItem(item)
+                                                .apply(SetItemCountFunction
+                                                                .setCount(UniformGenerator.between(minDrops, maxDrops)))
+                                                .apply(ApplyBonusCount.addOreBonusCount(
+                                                                registrylookup.getOrThrow(Enchantments.FORTUNE)))));
+        }
+
+        @Override
+        protected Iterable<Block> getKnownBlocks() {
+                return ModBlocks.BLOCKS.getEntries().stream().map(Holder::value)::iterator;
+        }
 }

@@ -1,0 +1,41 @@
+{
+    "type": "oririmod:scarlet_cave_entrance",
+    "config": {
+        "probability": 0.15,
+        "y": {
+            "type": "minecraft:uniform",
+            "min_inclusive": {
+                "absolute": -64
+            },
+            "max_inclusive": {
+                "absolute": 128
+            }
+        },
+        "yScale": {
+            "type": "minecraft:constant",
+            "value": 1.0
+        },
+        "lava_level": {
+            "above_bottom": 8
+        },
+        "debug_settings": {
+            "debug_mode": false,
+            "barrier_state": {
+                "Name": "minecraft:air"
+            }
+        },
+        "replaceable": "#minecraft:overworld_carver_replaceables",
+        "floor_level": {
+            "type": "minecraft:constant",
+            "value": -1.0
+        },
+        "horizontal_radius_multiplier": {
+            "type": "minecraft:constant",
+            "value": 1.0
+        },
+        "vertical_radius_multiplier": {
+            "type": "minecraft:constant",
+            "value": 1.0
+        }
+    }
+}

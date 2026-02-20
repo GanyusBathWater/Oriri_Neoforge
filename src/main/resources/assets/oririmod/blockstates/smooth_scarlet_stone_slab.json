@@ -1,0 +1,13 @@
+{
+    "variants": {
+        "type=bottom": {
+            "model": "oririmod:block/smooth_scarlet_stone_slab"
+        },
+        "type=top": {
+            "model": "oririmod:block/smooth_scarlet_stone_slab_top"
+        },
+        "type=double": {
+            "model": "oririmod:block/smooth_scarlet_stone"
+        }
+    }
+}

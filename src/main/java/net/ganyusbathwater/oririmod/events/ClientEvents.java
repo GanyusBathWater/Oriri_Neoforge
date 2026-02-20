@@ -16,18 +16,27 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents {
 
-    private static final ResourceLocation TEX_0 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/gui/mana_0.png");
-    private static final ResourceLocation TEX_25 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/gui/mana_25.png");
-    private static final ResourceLocation TEX_50 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/gui/mana_50.png");
-    private static final ResourceLocation TEX_75 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/gui/mana_75.png");
-    private static final ResourceLocation TEX_100 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/gui/mana_100.png");
+    private static final ResourceLocation TEX_0 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/mana_0.png");
+    private static final ResourceLocation TEX_25 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/mana_25.png");
+    private static final ResourceLocation TEX_50 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/mana_50.png");
+    private static final ResourceLocation TEX_75 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/mana_75.png");
+    private static final ResourceLocation TEX_100 = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/mana_100.png");
 
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Pre event) {
         GuiGraphics gui = event.getGuiGraphics();
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
-        if (player == null) return;
+        if (player == null)
+            return;
+
+        if (mc.options.hideGui)
+            return;
 
         Integer manaOpt = ModManaUtil.getManaIfPresent(player);
         Integer maxOpt = ModManaUtil.getMaxManaIfPresent(player);
@@ -59,10 +68,14 @@ public class ClientEvents {
     }
 
     private static ResourceLocation selectTextureByPercent(int percent) {
-        if (percent <= 0) return TEX_0;
-        if (percent <= 25) return TEX_25;
-        if (percent <= 50) return TEX_50;
-        if (percent <= 75) return TEX_75;
+        if (percent <= 0)
+            return TEX_0;
+        if (percent <= 25)
+            return TEX_25;
+        if (percent <= 50)
+            return TEX_50;
+        if (percent <= 75)
+            return TEX_75;
         return TEX_100;
     }
 }

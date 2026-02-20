@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.FluidState;
@@ -18,18 +19,24 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public final class AetherHudOverlay {
     // Nutzt dieselbe Overlay-Textur wie beim Fluid-Overlay, aber als HUD.
-    private static final ResourceLocation AETHER_HUD =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/aether_gui");
+    private static final ResourceLocation AETHER_HUD = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "block/aether_gui");
 
-    private AetherHudOverlay() {}
+    private AetherHudOverlay() {
+    }
 
     @SubscribeEvent
     public static void onRenderGuiPre(RenderGuiEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
+        if (mc.player == null)
+            return;
 
+        // Don't render if GUI is hidden (F1)
+        if (mc.options.hideGui)
+            return;
 
-        if (!isInAether(mc)) return;
+        if (!isInAether(mc))
+            return;
 
         GuiGraphics gg = event.getGuiGraphics();
         int w = gg.guiWidth();
@@ -43,7 +50,7 @@ public final class AetherHudOverlay {
         RenderSystem.defaultBlendFunc();
 
         // Linke/rechte Hälfte mit zwei Sprites überlagern (wie Vanilla Fire-Overlay)
-        drawSprite(gg, AETHER_HUD, 0, y + 20, quadW +20, quadH);
+        drawSprite(gg, AETHER_HUD, 0, y + 20, quadW + 20, quadH);
         drawSprite(gg, AETHER_HUD, w - quadW, y + 20, quadW, quadH);
 
         RenderSystem.disableBlend();
@@ -60,15 +67,22 @@ public final class AetherHudOverlay {
     }
 
     private static boolean isInAether(Minecraft mc) {
-        Player player = mc.player;
-        if (player == null || mc.level == null) return false;
+        // Don't render if GUI is hidden (F1)
+        if (mc.options.hideGui)
+            return false;
+
+        LocalPlayer player = mc.player;
+        if (player == null || mc.level == null)
+            return false;
 
         FluidState state = mc.level.getFluidState(player.blockPosition());
-        // Annahme: ModFluids.AETHER ist ein RegistryObject/Supplier; .get() liefert das registrierte Fluid.
+        // Annahme: ModFluids.AETHER ist ein RegistryObject/Supplier; .get() liefert das
+        // registrierte Fluid.
         try {
             return state.is(ModFluids.AETHER_SOURCE.get()) || state.is(ModFluids.AETHER_FLOWING.get());
         } catch (Exception e) {
-            // Fallback: falls ModFluids anders definiert ist oder .get() nicht vorhanden ist, sicherer Rückfall
+            // Fallback: falls ModFluids anders definiert ist oder .get() nicht vorhanden
+            // ist, sicherer Rückfall
             return false;
         }
     }

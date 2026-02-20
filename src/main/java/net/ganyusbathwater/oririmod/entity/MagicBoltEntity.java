@@ -30,9 +30,16 @@ import net.minecraft.world.phys.Vec3;
 
 public class MagicBoltEntity extends ThrowableItemProjectile {
     private static final float BASE_DAMAGE = 6.0F;
-    private static final EntityDataAccessor<Integer> ABILITY =
-            SynchedEntityData.defineId(MagicBoltEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ABILITY = SynchedEntityData.defineId(MagicBoltEntity.class,
+            EntityDataSerializers.INT);
     private int spawnGraceTicks = 0;
+
+    private static final EntityDataAccessor<Float> SPEED = SynchedEntityData.defineId(MagicBoltEntity.class,
+            EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> LOCKED_YAW = SynchedEntityData.defineId(MagicBoltEntity.class,
+            EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> LOCKED_PITCH = SynchedEntityData.defineId(MagicBoltEntity.class,
+            EntityDataSerializers.FLOAT);
 
     public MagicBoltEntity(EntityType<? extends MagicBoltEntity> type, Level level) {
         super(type, level);
@@ -57,8 +64,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         setDeltaMovement(v);
 
         double h = Math.sqrt(v.x * v.x + v.z * v.z);
-        float yaw = (float)(Mth.atan2(v.x, v.z) * (180F / Math.PI));
-        float pitch = (float)(Mth.atan2(v.y, h) * (180F / Math.PI));
+        float yaw = (float) (Mth.atan2(v.x, v.z) * (180F / Math.PI));
+        float pitch = (float) (Mth.atan2(v.y, h) * (180F / Math.PI));
         setYRot(yaw);
         setXRot(pitch);
         this.yRotO = yaw;
@@ -76,6 +83,9 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(ABILITY, MagicBoltAbility.NORMAL.ordinal());
+        builder.define(SPEED, 0.0F);
+        builder.define(LOCKED_YAW, 0.0F);
+        builder.define(LOCKED_PITCH, 0.0F);
     }
 
     public void setAbility(MagicBoltAbility ability) {
@@ -95,6 +105,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         return Items.AMETHYST_SHARD;
     }
 
+    private int lifeTime = 0;
+
     @Override
     public void tick() {
         if (spawnGraceTicks > 0) {
@@ -103,26 +115,62 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
 
         super.tick();
 
+        if (!level().isClientSide) {
+            lifeTime++;
+            if (lifeTime > 300) { // 15 seconds
+                discard();
+                return;
+            }
+
+            if (!level().hasChunkAt(blockPosition())) {
+                discard();
+                return;
+            }
+        }
+
+        float speed = entityData.get(SPEED);
+        if (this.isNoGravity() && speed > 0) {
+            float yaw = entityData.get(LOCKED_YAW);
+            float pitch = entityData.get(LOCKED_PITCH);
+
+            // Force rotation to match locked values
+            setYRot(yaw);
+            setXRot(pitch);
+            this.yRotO = yaw;
+            this.xRotO = pitch;
+
+            // Force velocity to match locked angle and speed
+            Vec3 lockedVec = Vec3.directionFromRotation(pitch, yaw).scale(speed);
+            this.setDeltaMovement(lockedVec);
+        }
+
         if (level().isClientSide) {
             switch (getAbility()) {
                 case BLAZE -> spawnTrail(ParticleTypes.SMALL_FLAME, 2);
                 case EXPLOSIVE -> spawnTrail(ParticleTypes.CRIT, 1);
                 case ENDER -> spawnTrail(ParticleTypes.PORTAL, 3);
-                case SONIC -> spawnTrail(ParticleTypes.SONIC_BOOM, 1);
-                default -> {}
+                case SONIC -> spawnTrail(ParticleTypes.SONIC_BOOM, 1, true);
+                default -> {
+                }
             }
         }
     }
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        if (spawnGraceTicks > 0) return false;
+        if (spawnGraceTicks > 0)
+            return false;
         return super.canHitEntity(entity);
     }
 
     private void spawnTrail(net.minecraft.core.particles.ParticleOptions type, int count) {
+        spawnTrail(type, count, false);
+    }
+
+    private void spawnTrail(net.minecraft.core.particles.ParticleOptions type, int count, boolean useVelocity) {
+        Vec3 v = useVelocity ? getDeltaMovement().normalize() : Vec3.ZERO;
         for (int i = 0; i < count; i++) {
-            level().addParticle(type, getX(), getY(), getZ(), 0, 0, 0);
+            level().addParticle(type, getX(), getY(), getZ(), v.x, v.y, v.z);
         }
     }
 
@@ -134,7 +182,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
     @Override
     protected void onHit(HitResult hit) {
         super.onHit(hit);
-        if (level().isClientSide) return;
+        if (level().isClientSide)
+            return;
 
         MagicBoltAbility ability = getAbility();
         Vec3 loc = hit.getLocation();
@@ -160,7 +209,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
                         SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.0F, 1.0F);
                 level().addParticle(ParticleTypes.SONIC_BOOM, loc.x, loc.y, loc.z, 0, 0, 0);
             }
-            default -> {}
+            default -> {
+            }
         }
         discard();
     }
@@ -179,6 +229,10 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         setPos(muzzle.x, muzzle.y, muzzle.z);
 
         setVelocityAndRotation(view, speed);
+        entityData.set(SPEED, speed);
+        // Fix: Use shooter's rotation directly to avoid math errors/mirroring
+        entityData.set(LOCKED_YAW, shooter.getYHeadRot());
+        entityData.set(LOCKED_PITCH, shooter.getXRot());
 
         this.hasImpulse = true;
         updateGravityFlag();
@@ -193,7 +247,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
     @Override
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
-        if (level().isClientSide) return;
+        if (level().isClientSide)
+            return;
 
         LivingEntity owner = getOwner() instanceof LivingEntity le ? le : null;
         LivingEntity target = hit.getEntity() instanceof LivingEntity le ? le : null;
@@ -233,7 +288,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
                 level().addParticle(ParticleTypes.SONIC_BOOM, hit.getLocation().x, hit.getLocation().y,
                         hit.getLocation().z, 0, 0, 0);
             }
-            default -> {}
+            default -> {
+            }
         }
 
         if (ability != MagicBoltAbility.EXPLOSIVE) {
@@ -250,9 +306,14 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         double vz = packet.getZa() / 8000.0D;
         setDeltaMovement(vx, vy, vz);
 
+        // Standard packet handling is fine now because we override everything in tick()
+        // using SynchedEntityData (SPEED, LOCKED_YAW, LOCKED_PITCH).
         if ((vx * vx + vy * vy + vz * vz) > 1.0E-6D) {
+            // Optional: still useful for initial render frame before first tick
             setRotFromMotion(vx, vy, vz);
         }
+
+        // No manual storedSpeed calculation needed, handled by SynchedEntityData
 
         setOldPosAndRot();
         updateGravityFlag();
@@ -266,8 +327,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
 
     private void setRotFromMotion(double vx, double vy, double vz) {
         double h = Math.sqrt(vx * vx + vz * vz);
-        float yaw = (float)(Mth.atan2(vx, vz) * (180F / Math.PI));
-        float pitch = (float)(Mth.atan2(vy, h) * (180F / Math.PI));
+        float yaw = (float) (Mth.atan2(vx, vz) * (180F / Math.PI));
+        float pitch = (float) (Mth.atan2(vy, h) * (180F / Math.PI));
         setYRot(yaw);
         setXRot(pitch);
         this.yRotO = yaw;
@@ -286,11 +347,19 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("Ability", getAbility().ordinal());
+        tag.putFloat("StoredSpeed", entityData.get(SPEED));
+        tag.putInt("LifeTime", lifeTime);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        if (tag.contains("StoredSpeed")) {
+            entityData.set(SPEED, tag.getFloat("StoredSpeed"));
+        }
+        if (tag.contains("LifeTime")) {
+            lifeTime = tag.getInt("LifeTime");
+        }
         if (tag.contains("Ability")) {
             setAbility(MagicBoltAbility.fromId(tag.getInt("Ability")));
         }

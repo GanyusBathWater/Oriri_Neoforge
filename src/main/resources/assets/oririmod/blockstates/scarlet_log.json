@@ -1,0 +1,16 @@
+{
+    "variants": {
+        "axis=y": {
+            "model": "oririmod:block/scarlet_log"
+        },
+        "axis=x": {
+            "model": "oririmod:block/scarlet_log_horizontal",
+            "x": 90,
+            "y": 90
+        },
+        "axis=z": {
+            "model": "oririmod:block/scarlet_log_horizontal",
+            "x": 90
+        }
+    }
+}

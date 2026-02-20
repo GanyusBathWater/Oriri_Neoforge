@@ -24,7 +24,8 @@ public final class WorldEventCommand {
 
     private static final int DEFAULT_DURATION_TICKS = 12000; // approx. 10 minutes
 
-    private WorldEventCommand() {}
+    private WorldEventCommand() {
+    }
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
@@ -53,7 +54,8 @@ public final class WorldEventCommand {
 
         // Dimension check: events only allowed in Overworld
         if (level.dimension() != Level.OVERWORLD) {
-            context.getSource().sendFailure(Component.literal("Events can only be started in the Overworld — you are likely in a different dimension."));
+            context.getSource().sendFailure(Component
+                    .literal("Events can only be started in the Overworld — you are likely in a different dimension."));
             return 0;
         }
 
@@ -69,11 +71,13 @@ public final class WorldEventCommand {
 
             boolean started = manager.startEvent(eventType, DEFAULT_DURATION_TICKS, level);
             if (!started) {
-                context.getSource().sendFailure(Component.literal("Event cannot be started right now (wrong time or another event is active)."));
+                context.getSource().sendFailure(Component
+                        .literal("Event cannot be started right now (wrong time or another event is active)."));
                 return 0;
             }
 
-            context.getSource().sendSuccess(() -> Component.literal("Event '" + eventName.toLowerCase() + "' started."), true);
+            context.getSource().sendSuccess(() -> Component.literal("Event '" + eventName.toLowerCase() + "' started."),
+                    true);
             return 1;
         } catch (IllegalArgumentException e) {
             context.getSource().sendFailure(Component.literal("Unknown event: " + eventName.toLowerCase()));
@@ -85,19 +89,20 @@ public final class WorldEventCommand {
         ServerLevel level = context.getSource().getLevel();
 
         // If player is not in Overworld but an event is active, inform them
-        if (level.dimension() != Level.OVERWORLD && WorldEventManager.isAnyEventActive()) {
-            context.getSource().sendFailure(Component.literal("An event is running in the Overworld; you are in a different dimension."));
+        if (level.dimension() != Level.OVERWORLD && WorldEventManager.isAnyEventActive(level)) {
+            context.getSource().sendFailure(
+                    Component.literal("An event is running in the Overworld; you are in a different dimension."));
             return 0;
         }
 
         WorldEventManager manager = WorldEventManager.get(level);
 
-        if (WorldEventManager.getActiveEvent() == WorldEventType.NONE) {
+        if (WorldEventManager.getActiveEvent(level) == WorldEventType.NONE) {
             context.getSource().sendFailure(Component.literal("No active event to stop."));
             return 0;
         }
 
-        String eventName = WorldEventManager.getActiveEvent().name().toLowerCase();
+        String eventName = WorldEventManager.getActiveEvent(level).name().toLowerCase();
         manager.stopEvent(level);
         context.getSource().sendSuccess(() -> Component.literal("Event '" + eventName + "' has been stopped."), true);
         return 1;

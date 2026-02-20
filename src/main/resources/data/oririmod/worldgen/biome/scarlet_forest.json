@@ -1,0 +1,43 @@
+{
+    "precipitation": "rain",
+    "has_precipitation": true,
+    "effects": {
+        "sky_color": 7291702,
+        "fog_color": 8998730,
+        "water_color": 6250335,
+        "water_fog_color": 4337963,
+        "grass_color": 9402450,
+        "foliage_color": 9402450
+    },
+    "temperature": 0.7,
+    "downfall": 0.8,
+    "category": "forest",
+    "depth": 0.1,
+    "scale": 0.2,
+    "carvers": {
+        "air": [
+            "oririmod:scarlet_cave_entrance"
+        ]
+    },
+    "features": [
+        [],
+        [
+            "oririmod:scarlet_pond_forest_placed"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+            "oririmod:scarlet_tree_placed",
+            "oririmod:scarlet_grass_patch_placed",
+            "oririmod:scarlet_tooth_leaves_patch_placed",
+            "oririmod:scarlet_lily_patch_placed"
+        ]
+    ],
+    "spawn_costs": {},
+    "spawners": {}
+}

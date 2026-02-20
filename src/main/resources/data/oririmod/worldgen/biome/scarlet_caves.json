@@ -1,0 +1,44 @@
+{
+    "precipitation": "none",
+    "has_precipitation": false,
+    "effects": {
+        "sky_color": 5265476,
+        "fog_color": 6710886,
+        "water_color": 4159204,
+        "water_fog_color": 329011,
+        "particle": {
+            "options": {
+                "type": "oririmod:scarlet_cave_particle"
+            },
+            "probability": 0.007
+        }
+    },
+    "temperature": 0.9,
+    "downfall": 0.0,
+    "category": "underground",
+    "depth": -0.5,
+    "scale": 0.1,
+    "carvers": {},
+    "features": [
+        [],
+        [],
+        [
+            "minecraft:spring_water",
+            "minecraft:spring_lava"
+        ],
+        [
+            "minecraft:glow_lichen"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+            "oririmod:scarlet_dripstone_cluster_placed"
+        ]
+    ],
+    "spawn_costs": {},
+    "spawners": {}
+}

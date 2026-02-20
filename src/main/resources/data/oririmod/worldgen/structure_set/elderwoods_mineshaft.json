@@ -1,0 +1,14 @@
+{
+    "placement": {
+        "type": "minecraft:random_spread",
+        "spacing": 8,
+        "separation": 4,
+        "salt": 165745296
+    },
+    "structures": [
+        {
+            "structure": "oririmod:elderwoods_mineshaft",
+            "weight": 1
+        }
+    ]
+}

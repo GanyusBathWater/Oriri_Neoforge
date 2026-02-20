@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "values": [
+        "oririmod:scarlet_grass_block",
+        "oririmod:scarlet_stone",
+        "oririmod:scarlet_deepslate",
+        "oririmod:scarlet_stone_bricks",
+        "oririmod:scarlet_deepslate_bricks"
+    ]
+}

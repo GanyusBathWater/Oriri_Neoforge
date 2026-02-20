@@ -29,8 +29,8 @@ import static net.ganyusbathwater.oririmod.client.render.MagicIndicatorRender.te
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public final class VestigeHudRenderer {
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/gui/vestige_background.png");
+    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/vestige_background.png");
 
     private static final int BG_WIDTH = 24;
     private static final int BG_HEIGHT = 24;
@@ -40,11 +40,17 @@ public final class VestigeHudRenderer {
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
+        // Don't render if GUI is hidden (F1)
+        if (mc.options.hideGui)
+            return;
+
         LocalPlayer player = mc.player;
-        if (player == null || mc.level == null) return;
+        if (player == null || mc.level == null)
+            return;
 
         List<ItemStack> vestigeStacks = getActiveVestigesForHud(player);
-        if (vestigeStacks.isEmpty()) return;
+        if (vestigeStacks.isEmpty())
+            return;
 
         GuiGraphics gg = event.getGuiGraphics();
         PoseStack pose = gg.pose();
@@ -93,9 +99,12 @@ public final class VestigeHudRenderer {
 
                 for (int i = 0; i < slots; i++) {
                     ItemStack stack = stacks.getStackInSlot(i);
-                    if (stack.isEmpty()) continue;
-                    if (!(stack.getItem() instanceof VestigeItem)) continue;
-                    if (VestigeItem.getUnlockedLevel(stack) <= 0) continue;
+                    if (stack.isEmpty())
+                        continue;
+                    if (!(stack.getItem() instanceof VestigeItem))
+                        continue;
+                    if (VestigeItem.getUnlockedLevel(stack) <= 0)
+                        continue;
                     result.add(stack);
                 }
             });
@@ -105,12 +114,14 @@ public final class VestigeHudRenderer {
     }
 
     private static void drawBackground(GuiGraphics gg, int x, int y) {
-        if (!textureExists(BG_TEXTURE)) return;
+        if (!textureExists(BG_TEXTURE))
+            return;
         gg.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
     }
 
     private static void drawItemCentered(GuiGraphics gg, ItemStack stack, int x, int y) {
-        if (stack.isEmpty()) return;
+        if (stack.isEmpty())
+            return;
         Minecraft mc = Minecraft.getInstance();
         int iconSize = 16;
         int itemX = x + (BG_WIDTH - iconSize) / 2;
@@ -135,7 +146,8 @@ public final class VestigeHudRenderer {
     }
 
     private static int getRemainingCooldownSeconds(LocalPlayer player, ItemStack stack) {
-        if (player == null || stack == null || stack.isEmpty()) return 0;
+        if (player == null || stack == null || stack.isEmpty())
+            return 0;
 
         if (stack.getItem() instanceof MirrorOfTheVoid) {
             return MirrorOfTheVoidEffect.getActiveCooldownSecondsForHud(player);
@@ -148,7 +160,8 @@ public final class VestigeHudRenderer {
     }
 
     private static String getEnemyCountText(LocalPlayer player, ItemStack stack) {
-        if (!(stack.getItem() instanceof DuellantCortex)) return "";
+        if (!(stack.getItem() instanceof DuellantCortex))
+            return "";
         int hostiles = DuellantCortextEffect.countMonsters(player);
         return "Enemies: " + hostiles;
     }

@@ -8,8 +8,6 @@
   "item.oririmod.power_soul": "Power Soul",
   "item.oririmod.tortured_soul": "Tortured Soul",
   "item.oririmod.void_soul": "Void Soul",
-
-
   "item.oririmod.bound_of_the_celestial_sisters": "Bound of the Celestial Sisters",
   "item.oririmod.crit_glove": "Crit Glove",
   "item.oririmod.duellant_cortex": "Duellant Cortex",
@@ -26,61 +24,54 @@
   "item.oririmod.strider_scale": "Strider Scale",
   "item.oririmod.candy_bag": "Candy Bag",
   "item.oririmod.wither_rose": "Wither Rose",
-
-
   "effect.oririmod.stunned": "Stunned",
   "effect.oririmod.broken": "Broken",
   "effect.oririmod.charmed": "Charmed",
   "effect.oririmod.mob_sense": "Mob Sense",
-
+  "effect.oririmod.anti_heal": "Anti-Heal",
   "item.minecraft.potion.effect.stunned_potion": "Stunned Potion",
   "item.minecraft.splash_potion.effect.stunned_potion": "Stunned Splash Potion",
   "item.minecraft.lingering_potion.effect.stunned_potion": "Stunned Lingering Potion",
   "item.minecraft.tipped_arrow.effect.stunned_potion": "Stunning Arrow",
-
   "item.minecraft.potion.effect.broken_potion1": "Broken Potion I",
   "item.minecraft.splash_potion.effect.broken_potion1": "Broken Splash Potion I",
   "item.minecraft.lingering_potion.effect.broken_potion1": "Broken Lingering Potion I",
   "item.minecraft.tipped_arrow.effect.broken_potion1": "Arrow of Broken Armor I",
-
   "item.minecraft.potion.effect.broken_potion2": "Broken Potion II",
   "item.minecraft.splash_potion.effect.broken_potion2": "Broken Splash Potion II",
   "item.minecraft.lingering_potion.effect.broken_potion2": "Broken Lingering Potion II",
   "item.minecraft.tipped_arrow.effect.broken_potion2": "Arrow of Broken Armor II",
-
   "item.minecraft.potion.effect.broken_potion3": "Broken Potion III",
   "item.minecraft.splash_potion.effect.broken_potion3": "Broken Splash Potion III",
   "item.minecraft.lingering_potion.effect.broken_potion3": "Broken Lingering Potion III",
   "item.minecraft.tipped_arrow.effect.broken_potion3": "Arrow of Broken Armor III",
-
   "item.minecraft.potion.effect.mob_sense_potion1": "Mob Sense Potion I",
   "item.minecraft.splash_potion.effect.mob_sense_potion1": "Mob Sense Splash Potion I",
   "item.minecraft.lingering_potion.effect.mob_sense_potion1": "Mob Sense Lingering Potion I",
   "item.minecraft.tipped_arrow.effect.mob_sense_potion1": "Arrow of Mob Sense I",
-
   "item.minecraft.potion.effect.mob_sense_potion2": "Mob Sense Potion II",
   "item.minecraft.splash_potion.effect.mob_sense_potion2": "Mob Sense Splash Potion II",
   "item.minecraft.lingering_potion.effect.mob_sense_potion2": "Mob Sense Lingering Potion II",
   "item.minecraft.tipped_arrow.effect.mob_sense_potion2": "Arrow of Mob Sense II",
-
-
+  "item.minecraft.potion.effect.anti_heal_potion1": "Anti-Heal Potion I",
+  "item.minecraft.splash_potion.effect.anti_heal_potion1": "Anti-Heal Splash Potion I",
+  "item.minecraft.lingering_potion.effect.anti_heal_potion1": "Anti-Heal Lingering Potion I",
+  "item.minecraft.tipped_arrow.effect.anti_heal_potion1": "Arrow of Anti-Heal I",
+  "item.minecraft.potion.effect.anti_heal_potion2": "Anti-Heal Potion II",
+  "item.minecraft.splash_potion.effect.anti_heal_potion2": "Anti-Heal Splash Potion II",
+  "item.minecraft.lingering_potion.effect.anti_heal_potion2": "Anti-Heal Lingering Potion II",
+  "item.minecraft.tipped_arrow.effect.anti_heal_potion2": "Arrow of Anti-Heal II",
   "enchantment.oririmod.sniper": "Sniper",
   "tooltip.oririmod.sniper": "Arrows will not spread or loose height. Only works with normal arrows",
-
   "enchantment.oririmod.invincible": "Invincible",
   "tooltip.oririmod.invincible": "The Item will no longer loose durability",
-
   "enchantment.oririmod.teacher": "Teacher",
   "tooltip.oririmod.teacher": "Increases the XP gained. Only works on Helmets",
-
-
   "item.oririmod.emerald_sword": "Emerald Sword",
   "item.oririmod.emerald_pickaxe": "Emerald Pickaxe",
   "item.oririmod.emerald_axe": "Emerald Axe",
   "item.oririmod.emerald_shovel": "Emerald Shovel",
   "item.oririmod.emerald_hoe": "Emerald Hoe",
-
-
   "item.oririmod.elderberry": "Elderberry",
   "item.oririmod.dragon_fruit": "Dragon Fruit",
   "item.oririmod.the_first_apple": "The First Apple",
@@ -92,35 +83,24 @@
   "item.oririmod.calcium_currant": "Calcium Currant",
   "item.oririmod.devil_fruit": "Devil Fruit",
   "tooltip.oririmod.consumable.eaten": "Cant be eaten again",
-
   "tooltip.oririmod.dragon_fruit.lore": "A Mythical Fruit named after the mightiest of creatures, it grants power of wielding strong magical items",
   "tooltip.oririmod.dragon_fruit.uneaten": "When eaten: §9+1 Vestige Slot",
-
   "tooltip.oririmod.the_first_apple.lore": "The very first apple ever created, eaten by a man and a woman, it gives knowledge and power to wield strong magical items",
   "tooltip.oririmod.the_first_apple.uneaten": "When eaten: §9+1 Vestige Slot",
-
   "tooltip.oririmod.blood_lotus.lore": "A Lotus soaked in Lifeblood, it grants the consumer increased vitality",
   "tooltip.oririmod.blood_lotus.uneaten": "When eaten: §9+2 Hearts",
-
   "tooltip.oririmod.iron_roots.lore": "Sturdy roots infused with iron, it grants the consumer increased defense",
   "tooltip.oririmod.iron_roots.uneaten": "When eaten: §9+2 Defense",
-
   "tooltip.oririmod.magic_mushroom.lore": "Mushrooms infused with pure magical energy, it grants the consumer increased mana capacity",
   "tooltip.oririmod.magic_mushroom.uneaten": "When eaten: §9+25 Max Mana",
-
   "tooltip.oririmod.four_leaf_clover.lore": "A rare four leaf clover, it is said to bring good luck to those who find it",
   "tooltip.oririmod.four_leaf_clover.uneaten": "When eaten: §9+5 Luck",
-
   "tooltip.oririmod.miracle_seaweed.lore": "Seaweed that has been blessed by the mermaid queen, it grants the consumer increased oxygen capacity",
   "tooltip.oririmod.miracle_seaweed.uneaten": "When eaten: §9+2 extra Oxygen Points",
-
   "tooltip.oririmod.calcium_currant.lore": "Small currants packed with calcium, it grants the consumer strong bones capable of withstanding great falls",
   "tooltip.oririmod.calcium_currant.uneaten": "When eaten: §9+3 Safe Fall Distance",
-
   "tooltip.oririmod.devil_fruit.lore": "A devil fruit that was shipped across a grand blue sea, it grants the consumer increased interaction range with entities and blocks",
   "tooltip.oririmod.devil_fruit.uneaten": "When eaten: §9+1 Entity- & Block Interaction Range",
-
-
   "item.oririmod.stella_perditor": "Stella Perditor",
   "item.oririmod.oraphim_bow": "Oraphim Bow",
   "item.oririmod.qilins_wrath": "Qilin's Wrath",
@@ -146,39 +126,30 @@
   "item.oririmod.book_of_apprentice": "Book of the Apprentice",
   "item.oririmod.book_of_journeyman": "Book of the Journeyman",
   "item.oririmod.book_of_wise": "Book of the Wise",
-
-
   "item.oririmod.crystal_helmet": "Crystal Helmet",
   "item.oririmod.crystal_chestplate": "Crystal Chestplate",
   "item.oririmod.crystal_leggings": "Crystal Leggings",
   "item.oririmod.crystal_boots": "Crystal Boots",
-
   "item.oririmod.ancient_helmet": "Ancient Helmet",
   "item.oririmod.ancient_chestplate": "Ancient Chestplate",
   "item.oririmod.ancient_leggings": "Ancient Leggings",
   "item.oririmod.ancient_boots": "Ancient Boots",
-
   "item.oririmod.molten_helmet": "Molten Helmet",
   "item.oririmod.molten_chestplate": "Molten Chestplate",
   "item.oririmod.molten_leggings": "Molten Leggings",
   "item.oririmod.molten_boots": "Molten Boots",
-
   "item.oririmod.gilded_netherrite_helmet": "Gilded Netherrite Helmet",
   "item.oririmod.gilded_netherrite_chestplate": "Gilded Netherrite Chestplate",
   "item.oririmod.gilded_netherrite_leggings": "Gilded Netherrite Leggings",
   "item.oririmod.gilded_netherrite_boots": "Gilded Netherrite Boots",
-
   "item.oririmod.blue_ice_helmet": "Blue Ice Helmet",
   "item.oririmod.blue_ice_chestplate": "Blue Ice Chestplate",
   "item.oririmod.blue_ice_leggings": "Blue Ice Leggings",
   "item.oririmod.blue_ice_boots": "Blue Ice Boots",
-
   "item.oririmod.prismarine_helmet": "Prismarine Helmet",
   "item.oririmod.prismarine_chestplate": "Prismarine Chestplate",
   "item.oririmod.prismarine_leggings": "Prismarine Leggings",
   "item.oririmod.prismarine_boots": "Prismarine Boots",
-
-
   "item.oririmod.the_fool": "The Fool",
   "item.oririmod.the_magician": "The Magician",
   "item.oririmod.the_high_priestess": "The High Priestess",
@@ -201,8 +172,6 @@
   "item.oririmod.the_sun": "The Sun",
   "item.oririmod.judgement": "Judgement",
   "item.oririmod.the_world": "The World",
-
-
   "block.oririmod.dark_soil_block": "Dark Soil",
   "block.oririmod.elderbush_block": "Elderbush",
   "block.oririmod.magic_barrier_block": "Magic Barrier",
@@ -224,127 +193,100 @@
   "block.oririmod.elder_gate": "Elder Gate",
   "block.oririmod.elder_spore_blossom": "Elder Spore Blossom",
   "block.oririmod.elder_leaves_flowering": "Flowering Elder Leaves",
-
   "fluid.oririmod.aether": "Aether",
   "item.oririmod.aether_bucket": "Aether Bucket",
-
   "tooltip.oririmod.magic_book_1.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_1.tooltip.lore": "A book written by a man that doesn’t have the best spells",
-
   "tooltip.oririmod.magic_book_2.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_2.tooltip.lore": "A book that only contains wild scribblings, only a few magic spells can be recognized",
-
   "tooltip.oririmod.magic_book_3.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_3.tooltip.lore": "A book written by a man who had learned a great deal on his journey",
-
   "tooltip.oririmod.magic_book_4.tooltip.text": "Uses 25 Mana to shoot a magic bolt",
   "tooltip.oririmod.magic_book_4.tooltip.lore": "A book truly written by a master",
-
-
   "item.oririmod.bound_of_the_celestial_sisters.level": "Current Level: %s",
   "item.oririmod.bound_of_the_celestial_sisters.level.1.description": "Level 1: on daytime§r §9+25% Darkness Resistance§r, on nighttime §9+25% Light Resistance§r",
   "item.oririmod.bound_of_the_celestial_sisters.level.2.description": "Level 2: on daytime §9+50 Max Mana§r, on nighttime §9+100% Mana Regeneration§r",
   "item.oririmod.bound_of_the_celestial_sisters.level.3.description": "Level 3: on daytime §9+25% Defense§r, on nighttime§r §9+25% Damage§r",
   "item.oririmod.bound_of_the_celestial_sisters.lore": "§8§oBoth are bound in endless fight, the hungering day, the undying night.",
-
   "item.oririmod.candy_bag.level": "Current Level: %s",
   "item.oririmod.candy_bag.level.1.description": "Level 1: grants Immunity to §9Hunger§r",
   "item.oririmod.candy_bag.level.2.description": "Level 2: grants §9+1 saturation§r every Minute",
   "item.oririmod.candy_bag.level.3.description": "Level 3: grants §9+1 saturation§r every 30 Seconds",
   "item.oririmod.candy_bag.lore": "§8§oIf you are hungry, take two!",
-
   "item.oririmod.crit_glove.level": "Current Level: %s",
   "item.oririmod.crit_glove.level.1.description": "Level 1: grants §9+25% Attack Speed§r",
   "item.oririmod.crit_glove.level.2.description": "Level 2: percentage increased to §950%§r",
   "item.oririmod.crit_glove.level.3.description": "Level 3: percentage increased to §975%§r",
   "item.oririmod.crit_glove.lore": "§8§oGloves of a Strong Assassin where every hit is devastating",
-
   "item.oririmod.duellant_cortex.level": "Current Level: %s",
   "item.oririmod.duellant_cortex.level.1.description": "Level 1: grants §9+5% Defense§r for every Enemy in a 12 Block Radius",
   "item.oririmod.duellant_cortex.level.2.description": "Level 2: grants §9+2.5% Damage§r for every Enemy§r",
   "item.oririmod.duellant_cortex.level.3.description": "Level 3: percentage increased to §9+7.5% Defense§r and §9+5% Damage§r",
   "item.oririmod.duellant_cortex.lore": "§8§oEn Garde",
-
   "item.oririmod.heart_of_the_tank.level": "Current Level: %s",
   "item.oririmod.heart_of_the_tank.level.1.description": "Level 1: grants §9+4 Hearts§r",
   "item.oririmod.heart_of_the_tank.level.2.description": "Level 2: grants additional §9+2 Hearts§r",
   "item.oririmod.heart_of_the_tank.level.3.description": "Level 3: grants additional §9+4 Hearts§r",
   "item.oririmod.heart_of_the_tank.lore": "§8§oWait, i think this comes from another world…",
-
   "item.oririmod.miners_lantern.level": "Current Level: %s",
   "item.oririmod.miners_lantern.level.1.description": "Level 1: grants §9Haste I§r",
   "item.oririmod.miners_lantern.level.2.description": "Level 2: grants Immunity to §9Blindness§r",
   "item.oririmod.miners_lantern.level.3.description": "Level 3: grants §9+5 Luck§r",
   "item.oririmod.miners_lantern.lore": "§8§oThe guiding Light in dark times",
-
   "item.oririmod.mirror_of_the_void.level": "Current Level: %s",
   "item.oririmod.mirror_of_the_void.level.1.description": "Level 1: negates Damage once every 60 seconds, only if it is not more than your Base Max Health",
   "item.oririmod.mirror_of_the_void.level.2.description": "Level 2: time decreased to 45 seconds",
   "item.oririmod.mirror_of_the_void.level.3.description": "Level 3: time decreased to 30 seconds",
   "item.oririmod.mirror_of_the_void.lore": "§8§oDark, Darker, Yet Darker",
-
   "item.oririmod.phoenix_feather.level": "Current Level: %s",
   "item.oririmod.phoenix_feather.level.1.description": "Level 1: grants the ability to withstand fatal damage with a 10% chance",
   "item.oririmod.phoenix_feather.level.2.description": "Level 2: increases the chance to 20%",
   "item.oririmod.phoenix_feather.level.3.description": "Level 3: increases the chance to 33%",
   "item.oririmod.phoenix_feather.lore": "§8§oMajestic beings, these phoenixes, right Harry?",
-
   "item.oririmod.relic_of_the_past.level": "Current Level: %s",
   "item.oririmod.relic_of_the_past.level.1.description": "Level 1: grants §9Absorption I (00:05)§r upon taking Damage with a 10 second Cooldown",
   "item.oririmod.relic_of_the_past.level.2.description": "Level 2: additionally grants §9Strength I§r",
   "item.oririmod.relic_of_the_past.level.3.description": "Level 3: additionally grants §9Regeneration I§r",
   "item.oririmod.relic_of_the_past.lore": "§8§oThe ring gives its energy when yours is dwindling",
-
   "item.oririmod.snow_boots.level": "Current Level: %s",
   "item.oririmod.snow_boots.level.1.description": "Level 1: grants §9Speed Boost I§r in Cold Biomes",
   "item.oririmod.snow_boots.level.2.description": "Level 2: grants the ability to walk on Powdered Snow",
   "item.oririmod.snow_boots.level.3.description": "Level 3: grants §9Knockpack Immunity§r in Cold Biomes",
   "item.oririmod.snow_boots.lore": "§8§oPerfect for snowy adventures",
-
   "item.oririmod.solis_brooch.level": "Current Level: %s",
   "item.oririmod.solis_brooch.level.1.description": "Level 1: grants §9+50 Max Mana§r",
   "item.oririmod.solis_brooch.level.2.description": "Level 2: grants additional §9+50 Max Mana§r",
   "item.oririmod.solis_brooch.level.3.description": "Level 3: grants §9+100% Mana Regeneration§r",
   "item.oririmod.solis_brooch.lore": "§8§oThe crystal inside the brooch enhances your Magical Abilities",
-
   "item.oririmod.spring.level": "Current Level: %s",
   "item.oririmod.spring.level.1.description": "Level 1: grants §9Jump boost I§r",
   "item.oririmod.spring.level.2.description": "Level 2: grants §9+1 Step Height§r",
   "item.oririmod.spring.level.3.description": "Level 3: negates all Fall Damage",
   "item.oririmod.spring.lore": "§8§oThat should only work in cartoons, right?",
-
   "item.oririmod.stigma_of_darkness.level": "Current Level: %s",
   "item.oririmod.stigma_of_darkness.level.1.description": "Level 1: grants Immunity to §9Broken§r",
   "item.oririmod.stigma_of_darkness.level.2.description": "Level 2: grants Immunity to §9Charmed§r",
   "item.oririmod.stigma_of_darkness.level.3.description": "Level 3: grants Immunity to §9Rooted§r and §9Stunned§r",
   "item.oririmod.stigma_of_darkness.lore": "§8§oThe mark of darkness shrouds you from negative influences",
-
   "item.oririmod.strange_ender_eye.level": "Current Level: %s",
   "item.oririmod.strange_ender_eye.level.1.description": "Level 1: grants §9Night Vision§r",
   "item.oririmod.strange_ender_eye.level.2.description": "Level 2: grants §9Mob Sense I§r",
   "item.oririmod.strange_ender_eye.level.3.description": "Level 3: grants §9Mob Sense II§r",
   "item.oririmod.strange_ender_eye.lore": "§8§oA modified Ender Eye, it gives you enhanced vision",
-
   "item.oririmod.strider_scale.level": "Current Level: %s",
   "item.oririmod.strider_scale.level.1.description": "Level 1: grants §9+5 Defense§r when in Nether",
   "item.oririmod.strider_scale.level.2.description": "Level 2: grants §9+2 Attack Damage§r when in Nether",
   "item.oririmod.strider_scale.level.3.description": "Level 3: grants §9Fire Resistance§r",
   "item.oririmod.strider_scale.lore": "§8§oA Scale lost from a Strider has some very unique Resistance Properties",
-
   "item.oririmod.wither_rose.level": "Current Level: %s",
   "item.oririmod.wither_rose.level.1.description": "Level 1: grants Immunity to §9Wither§r",
   "item.oririmod.wither_rose.level.2.description": "Level 2: grants §9-50% Damage§r taken from Wither Skeletons and Wither§r",
   "item.oririmod.wither_rose.level.3.description": "Level 3: grants §9+50% Damage§r dealt to Wither Skeletons and Wither§r",
   "item.oririmod.wither_rose.lore": "§8§oNormally, you can’t grow the drought, but in this case...",
-
-
   "tooltip.oririmod.black_mirror.ready": "§aActive§r",
   "hud.oririmod.black_mirror.cooldown": "Cooldown: %ss",
-
   "tooltip.oririmod.relic_of_the_past.ready": "§aActive§r",
   "hud.oririmod.relic_of_the_past.cooldown": "Cooldown: %ss",
-
-
   "tooltip.oririmod.element.fire": "Fire Weapon",
   "tooltip.oririmod.element.water": "Water Weapon",
   "tooltip.oririmod.element.earth": "Earth Weapon",
@@ -352,18 +294,54 @@
   "tooltip.oririmod.element.light": "Light Weapon",
   "tooltip.oririmod.element.darkness": "Darkness Weapon",
   "tooltip.oririmod.element.physical": "Physical Weapon",
-
-
   "creative.oriri_tab": "Oriri",
   "creative.oriri_tab_misc": "Oriri Collectibles",
   "oririmod.configuration.mana": "Mana Settings",
   "oririmod.configuration.maxMana": "Maximum Mana",
   "oririmod.configuration.regenIntervalSeconds": "Mana Regeneration Interval (Seconds)",
   "oririmod.configuration.regenAmount": "Mana Regeneration Amount",
-
   "oririmod.configuration.world_events": "World Events",
   "oririmod.configuration.nightEventChance": "Night Event Chance",
   "oririmod.configuration.eclipseChance": "Day Event Chance",
   "oririmod.configuration.nightEventDuration": "Night Event Duration (Seconds)",
-  "oririmod.configuration.eclipseDuration": "Day Event Duration (Seconds)"
+  "oririmod.configuration.eclipseDuration": "Day Event Duration (Seconds)",
+  "block.oririmod.scarlet_stone": "Scarlet Stone",
+  "block.oririmod.cobbled_scarlet_deepslate": "Cobbled Scarlet Deepslate",
+  "block.oririmod.smooth_scarlet_stone": "Smooth Scarlet Stone",
+  "block.oririmod.smooth_scarlet_stone_slab": "Smooth Scarlet Stone Slab",
+  "block.oririmod.scarlet_stone_bricks": "Scarlet Stone Bricks",
+  "block.oririmod.chiseled_scarlet_stone_bricks": "Chiseled Scarlet Stone Bricks",
+  "block.oririmod.cracked_scarlet_stone_bricks": "Cracked Scarlet Stone Bricks",
+  "block.oririmod.mossy_scarlet_stone_bricks": "Mossy Scarlet Stone Bricks",
+  "block.oririmod.scarlet_deepslate": "Scarlet Deepslate",
+  "block.oririmod.polished_scarlet_deepslate": "Polished Scarlet Deepslate",
+  "block.oririmod.chiseled_scarlet_deepslate": "Chiseled Scarlet Deepslate",
+  "block.oririmod.scarlet_deepslate_bricks": "Scarlet Deepslate Bricks",
+  "block.oririmod.cracked_scarlet_deepslate_bricks": "Cracked Scarlet Deepslate Bricks",
+  "block.oririmod.scarlet_deepslate_tiles": "Scarlet Deepslate Tiles",
+  "block.oririmod.cracked_scarlet_deepslate_tiles": "Cracked Scarlet Deepslate Tiles",
+  "block.oririmod.scarlet_log": "Scarlet Log",
+  "block.oririmod.stripped_scarlet_log": "Stripped Scarlet Log",
+  "block.oririmod.scarlet_planks": "Scarlet Planks",
+  "block.oririmod.scarlet_sapling": "Scarlet Sapling",
+  "block.oririmod.scarlet_leaves": "Scarlet Leaves",
+  "block.oririmod.scarlet_moss": "Scarlet Moss",
+  "block.oririmod.scarlet_vine": "Scarlet Vine",
+  "block.oririmod.scarlet_grass_block": "Scarlet Grass Block",
+  "block.oririmod.scarlet_stem": "Scarlet Stem",
+  "block.oririmod.stripped_scarlet_stem": "Stripped Scarlet Stem",
+  "block.oririmod.scarlet_grass": "Scarlet Grass",
+  "block.oririmod.scarlet_tooth_leaves": "Scarlet Tooth Leaves",
+  "block.oririmod.scarlet_lily": "Scarlet Lily",
+  "block.oririmod.blood_water_block": "Bloody Water",
+  "fluid.oririmod.blood_water": "Bloody Water",
+  "item.oririmod.blood_water_bucket": "Bloody Water Bucket",
+  "block.oririmod.scarlet_dripstone_block": "Scarlet Dripstone Block",
+  "block.oririmod.pointed_scarlet_dripstone": "Pointed Scarlet Dripstone",
+  "block.oririmod.scarlet_fence": "Scarlet Fence",
+  "block.oririmod.scarlet_fence_gate": "Scarlet Fence Gate",
+  "block.oririmod.scarlet_slab": "Scarlet Slab",
+  "block.oririmod.scarlet_stairs": "Scarlet Stairs",
+  "block.oririmod.fluorite_block": "Fluorite Block",
+  "block.oririmod.fluorite_cluster": "Fluorite Cluster"
 }

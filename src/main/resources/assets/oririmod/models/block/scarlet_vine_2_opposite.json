@@ -1,0 +1,88 @@
+{ "render_type": "minecraft:cutout",  "ambientocclusion": false,
+    "textures": {  
+    
+        "particle": "oririmod:block/scarlet_vine",
+        "vine": "oririmod:block/scarlet_vine"
+    },
+    "elements": [
+        {  
+    
+            "from": [
+                0,
+                0,
+                15.2
+            ],
+            "to": [
+                16,
+                16,
+                15.2
+            ],
+            "shade": false,
+            "faces": {  
+    
+                "north": {  
+    
+                    "uv": [
+                        0,
+                        0,
+                        16,
+                        16
+                    ],
+                    "texture": "#vine"
+                },
+                "south": {  
+    
+                    "uv": [
+                        0,
+                        0,
+                        16,
+                        16
+                    ],
+                    "texture": "#vine"
+                }
+            }
+        },
+        {  
+    
+            "from": [
+                0,
+                0,
+                0.8
+            ],
+            "to": [
+                16,
+                16,
+                0.8
+            ],
+            "shade": false,
+            "faces": {  
+    
+                "north": {  
+    
+                    "uv": [
+                        0,
+                        0,
+                        16,
+                        16
+                    ],
+                    "texture": "#vine"
+                },
+                "south": {  
+    
+                    "uv": [
+                        0,
+                        0,
+                        16,
+                        16
+                    ],
+                    "texture": "#vine"
+                }
+            }
+        }
+    ]
+}
+
+
+
+
+

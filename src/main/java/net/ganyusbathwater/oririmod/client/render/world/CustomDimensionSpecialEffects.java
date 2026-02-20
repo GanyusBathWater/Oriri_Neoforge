@@ -19,10 +19,12 @@ public class CustomDimensionSpecialEffects extends DimensionSpecialEffects {
     public Vec3 getBrightnessDependentFogColor(Vec3 fogColor, float brightness) {
         updateTransitionProgress();
         if (transitionProgress > 0) {
-            WorldEventType activeEvent = WorldEventManager.getActiveEvent();
-            WorldEventType targetEventType = WorldEventManager.isAnyEventActive() ? activeEvent : WorldEventType.NONE;
+            net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+            WorldEventType activeEvent = level != null ? WorldEventManager.getActiveEvent(level) : WorldEventType.NONE;
+            WorldEventType targetEventType = level != null && WorldEventManager.isAnyEventActive(level) ? activeEvent
+                    : WorldEventType.NONE;
             Vector3f eventColor = getEventSkyColor(targetEventType);
-            Vector3f originalColor = new Vector3f((float)fogColor.x, (float)fogColor.y, (float)fogColor.z);
+            Vector3f originalColor = new Vector3f((float) fogColor.x, (float) fogColor.y, (float) fogColor.z);
             originalColor.lerp(eventColor, transitionProgress);
             return new Vec3(originalColor.x, originalColor.y, originalColor.z);
         }
@@ -34,10 +36,14 @@ public class CustomDimensionSpecialEffects extends DimensionSpecialEffects {
     }
 
     public void updateTransitionProgress() {
-        int ticksRemaining = WorldEventManager.getTicksRemaining();
-        int totalDuration = WorldEventManager.getEventDuration();
+        net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+        if (level == null)
+            return;
 
-        if (WorldEventManager.isAnyEventActive() && totalDuration > 0) {
+        int ticksRemaining = WorldEventManager.getTicksRemaining(level);
+        int totalDuration = WorldEventManager.getEventDuration(level);
+
+        if (WorldEventManager.isAnyEventActive(level) && totalDuration > 0) {
             boolean isFadingIn = (totalDuration - ticksRemaining) < TRANSITION_DURATION;
             boolean isFadingOut = ticksRemaining < TRANSITION_DURATION;
 

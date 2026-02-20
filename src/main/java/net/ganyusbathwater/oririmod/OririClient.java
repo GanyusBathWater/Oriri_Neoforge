@@ -7,6 +7,8 @@ import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.particle.ModParticles;
 import net.ganyusbathwater.oririmod.particle.custom.ShiningParticle;
+import net.ganyusbathwater.oririmod.particle.custom.ElderwoodsCaveParticle;
+import net.ganyusbathwater.oririmod.particle.custom.ScarletCaveParticle;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
@@ -42,21 +44,16 @@ import java.util.List;
 import java.util.UUID;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
-@Mod(value = OririMod.MOD_ID, dist = Dist.CLIENT)
-// You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-@EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
+// You can use EventBusSubscriber to automatically register all static methods
+// in the class annotated with @SubscribeEvent
+@EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class OririClient {
-    public OririClient(ModContainer container) {
-        // Allows NeoForge to create a config screen for this mod's configs.
-        // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
-        // Do not forget to add translations for your config options to the en_us.json file.
-
-        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-    }
 
     @SubscribeEvent
     public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.SHINING_PARTICLES.get(), ShiningParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.ELDERWOODS_CAVE_PARTICLE.get(), ElderwoodsCaveParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.SCARLET_CAVE_PARTICLE.get(), ScarletCaveParticle.Provider::new);
     }
 
     @SubscribeEvent
@@ -72,7 +69,8 @@ public class OririClient {
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
-        if (!(stack.getItem() instanceof ModRarityCarrier holder)) return;
+        if (!(stack.getItem() instanceof ModRarityCarrier holder))
+            return;
 
         ModRarity rarity = holder.getModRarity();
         Component line = Component.literal(rarity.displayName())
@@ -84,7 +82,8 @@ public class OririClient {
     @SubscribeEvent
     public static void onGatherTooltip(RenderTooltipEvent.GatherComponents event) {
         ItemStack stack = event.getItemStack();
-        if (!(stack.getItem() instanceof ModRarityCarrier holder)) return;
+        if (!(stack.getItem() instanceof ModRarityCarrier holder))
+            return;
 
         ModRarity rarity = holder.getModRarity();
         List<Either<FormattedText, TooltipComponent>> list = event.getTooltipElements();
@@ -105,15 +104,15 @@ public class OririClient {
         // Gets the builder to add recipes to
         PotionBrewing.Builder builder = event.getBuilder();
 
-        // Will add brewing recipes for all container potions (e.g. potion, splash potion, lingering potion)
+        // Will add brewing recipes for all container potions (e.g. potion, splash
+        // potion, lingering potion)
         builder.addMix(
                 // The initial potion to apply to
                 Potions.AWKWARD,
                 // The brewing ingredient. This is the item at the top of the brewing stand.
                 ModItems.TORTURED_SOUL.asItem(),
                 // The resulting potion
-                ModPotions.BROKEN_POTION1
-        );
+                ModPotions.BROKEN_POTION1);
         builder.addMix(ModPotions.BROKEN_POTION1, Items.GLOWSTONE_DUST, ModPotions.BROKEN_POTION2);
         builder.addMix(ModPotions.BROKEN_POTION2, Items.GLOWSTONE_DUST, ModPotions.BROKEN_POTION3);
         builder.addMix(Potions.AWKWARD, ModItems.DAMNED_SOUL.asItem(), ModPotions.STUNNED_POTION);
@@ -123,9 +122,10 @@ public class OririClient {
 
     @SubscribeEvent
     public static void onLivingDamagePre(LivingDamageEvent.Pre event) {
-        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker))
+            return;
 
-        //  Check: does attacker have the effect "Charmed"?
+        // Check: does attacker have the effect "Charmed"?
         if (attacker.hasEffect(ModEffects.CHARMED_EFFECT)) {
             // UUID from Caster out of PersistentData
             if (attacker.getPersistentData().hasUUID("CharmCaster")) {

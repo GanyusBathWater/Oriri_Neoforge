@@ -15,12 +15,13 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class NetworkHandler {
     public static final String VERSION = "1";
-    public static final ResourceLocation MANA_SYNC =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "mana_sync");
-    public static final ResourceLocation SYNC_WORLD_EVENT =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "sync_world_event");
+    public static final ResourceLocation MANA_SYNC = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "mana_sync");
+    public static final ResourceLocation SYNC_WORLD_EVENT = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "sync_world_event");
 
-    private NetworkHandler() {}
+    private NetworkHandler() {
+    }
 
     public static void register(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(OririMod.MOD_ID).versioned(VERSION);
@@ -33,20 +34,20 @@ public final class NetworkHandler {
                     if (player != null) {
                         var pkt = payload.getPacket();
                         int max = pkt.getMaxMana();
-                        if (max >= 0) ModManaUtil.setMaxManaClient(player, max);
+                        if (max >= 0)
+                            ModManaUtil.setMaxManaClient(player, max);
                         ModManaUtil.setManaClient(player, pkt.getMana());
                     }
-                })
-        );
+                }));
 
         registrar.playToClient(
                 SyncWorldEventPayload.TYPE,
                 SyncWorldEventPayload.STREAM_CODEC,
                 (payload, ctx) -> ctx.enqueueWork(() -> {
                     // Direkt auf die Payload-Felder zugreifen
-                    WorldEventManager.updateEvent(payload.eventType(), payload.ticksRemaining(), payload.eventDuration());
-                })
-        );
+                    WorldEventManager.updateClientEvent(payload.eventType(), payload.ticksRemaining(),
+                            payload.eventDuration());
+                }));
     }
 
     public static void sendManaToPlayer(ServerPlayer player, int mana, int maxMana) {
@@ -58,7 +59,14 @@ public final class NetworkHandler {
         PacketDistributor.sendToAllPlayers(new SyncWorldEventPayload(eventType, ticksRemaining, eventDuration));
     }
 
-    public static void sendWorldEventToPlayer(ServerPlayer player, WorldEventType eventType, int ticksRemaining, int eventDuration) {
+    public static void sendWorldEventToDimension(net.minecraft.server.level.ServerLevel level, WorldEventType eventType,
+            int ticksRemaining, int eventDuration) {
+        PacketDistributor.sendToPlayersInDimension(level,
+                new SyncWorldEventPayload(eventType, ticksRemaining, eventDuration));
+    }
+
+    public static void sendWorldEventToPlayer(ServerPlayer player, WorldEventType eventType, int ticksRemaining,
+            int eventDuration) {
         // Die vereinfachte Payload direkt erstellen
         PacketDistributor.sendToPlayer(player, new SyncWorldEventPayload(eventType, ticksRemaining, eventDuration));
     }
