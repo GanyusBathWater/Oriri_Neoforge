@@ -13,21 +13,25 @@ public class ModItemProperties {
     public static void addCustomItemProperties() {
         makeCustomBow(ModItems.ORAPHIM_BOW.get());
         makeCustomCrossbow(ModItems.ARBITER_CROSSBOW.get());
+        makeCustomShield(ModItems.JADE_SHIELD.get());
     }
 
     private static void makeCustomBow(Item item) {
-        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("pull"), (p_344163_, p_344164_, p_344165_, p_344166_) -> {
-            if (p_344165_ == null) {
-                return 0.0F;
-            } else {
-                return p_344165_.getUseItem() != p_344163_ ? 0.0F : (float)(p_344163_.getUseDuration(p_344165_) - p_344165_.getUseItemRemainingTicks()) / 20.0F;
-            }
-        });
+        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("pull"),
+                (p_344163_, p_344164_, p_344165_, p_344166_) -> {
+                    if (p_344165_ == null) {
+                        return 0.0F;
+                    } else {
+                        return p_344165_.getUseItem() != p_344163_ ? 0.0F
+                                : (float) (p_344163_.getUseDuration(p_344165_) - p_344165_.getUseItemRemainingTicks())
+                                        / 20.0F;
+                    }
+                });
         ItemProperties.register(
                 item,
                 ResourceLocation.withDefaultNamespace("pulling"),
-                (p_174630_, p_174631_, p_174632_, p_174633_) -> p_174632_ != null && p_174632_.isUsingItem() && p_174632_.getUseItem() == p_174630_ ? 1.0F : 0.0F
-        );
+                (p_174630_, p_174631_, p_174632_, p_174633_) -> p_174632_ != null && p_174632_.isUsingItem()
+                        && p_174632_.getUseItem() == p_174630_ ? 1.0F : 0.0F);
     }
 
     private static void makeCustomCrossbow(Item item) {
@@ -40,11 +44,10 @@ public class ModItemProperties {
                     } else {
                         return CrossbowItem.isCharged(p_351682_)
                                 ? 0.0F
-                                : (float)(p_351682_.getUseDuration(p_351684_) - p_351684_.getUseItemRemainingTicks())
-                                / (float)CrossbowItem.getChargeDuration(p_351682_, p_351684_);
+                                : (float) (p_351682_.getUseDuration(p_351684_) - p_351684_.getUseItemRemainingTicks())
+                                        / (float) CrossbowItem.getChargeDuration(p_351682_, p_351684_);
                     }
-                }
-        );
+                });
         ItemProperties.register(
                 item,
                 ResourceLocation.withDefaultNamespace("pulling"),
@@ -52,18 +55,25 @@ public class ModItemProperties {
                         && p_174607_.isUsingItem()
                         && p_174607_.getUseItem() == p_174605_
                         && !CrossbowItem.isCharged(p_174605_)
-                        ? 1.0F
-                        : 0.0F
-        );
+                                ? 1.0F
+                                : 0.0F);
         ItemProperties.register(
                 item,
                 ResourceLocation.withDefaultNamespace("charged"),
-                (p_275891_, p_275892_, p_275893_, p_275894_) -> CrossbowItem.isCharged(p_275891_) ? 1.0F : 0.0F
-        );
-        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("firework"), (p_329796_, p_329797_, p_329798_, p_329799_) -> {
-            ChargedProjectiles chargedprojectiles = p_329796_.get(DataComponents.CHARGED_PROJECTILES);
-            return chargedprojectiles != null && chargedprojectiles.contains(Items.FIREWORK_ROCKET) ? 1.0F : 0.0F;
-        });
+                (p_275891_, p_275892_, p_275893_, p_275894_) -> CrossbowItem.isCharged(p_275891_) ? 1.0F : 0.0F);
+        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("firework"),
+                (p_329796_, p_329797_, p_329798_, p_329799_) -> {
+                    ChargedProjectiles chargedprojectiles = p_329796_.get(DataComponents.CHARGED_PROJECTILES);
+                    return chargedprojectiles != null && chargedprojectiles.contains(Items.FIREWORK_ROCKET) ? 1.0F
+                            : 0.0F;
+                });
+    }
+
+    private static void makeCustomShield(Item item) {
+        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("blocking"),
+                (p_174590_, p_174591_, p_174592_, p_174593_) -> {
+                    return p_174592_ != null && p_174592_.isUsingItem() && p_174592_.getUseItem() == p_174590_ ? 1.0F
+                            : 0.0F;
+                });
     }
 }
-

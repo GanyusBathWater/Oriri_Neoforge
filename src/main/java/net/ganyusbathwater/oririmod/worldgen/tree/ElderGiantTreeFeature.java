@@ -15,6 +15,8 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.ganyusbathwater.oririmod.block.custom.UpgradedSaplingBlock;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -94,9 +96,11 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
         BlockPos below = origin.below();
         BlockState ground = level.getBlockState(below);
-        if (!ground.is(Blocks.GRASS_BLOCK) && !ground.is(ModBlocks.SCARLET_MOSS.get())
-                && !ground.is(ModBlocks.SCARLET_GRASS_BLOCK.get())) {
-            return false;
+        if (!UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
+            if (!ground.is(Blocks.GRASS_BLOCK) && !ground.is(ModBlocks.SCARLET_MOSS.get())
+                    && !ground.is(ModBlocks.SCARLET_GRASS_BLOCK.get())) {
+                return false;
+            }
         }
 
         for (int y = 0; y <= height; y++) {
@@ -114,8 +118,10 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
         int localX = Math.floorMod(origin.getX(), 16);
         int localZ = Math.floorMod(origin.getZ(), 16);
-        if (localX == 0 || localX == 15 || localZ == 0 || localZ == 15) {
-            return false;
+        if (!UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
+            if (localX == 0 || localX == 15 || localZ == 0 || localZ == 15) {
+                return false;
+            }
         }
 
         if (!areChunksLoaded(level, top, canopyR)) {
@@ -323,16 +329,34 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
     private void placeLog(WorldGenLevel level, BlockPos pos, Direction.Axis axis, ElderGiantTreeConfig cfg,
             RandomSource rnd, boolean markBranch) {
+        placeLog(level, pos, axis, cfg, rnd, markBranch, cfg.logProvider());
+    }
+
+    private void placeLog(WorldGenLevel level, BlockPos pos, Direction.Axis axis, ElderGiantTreeConfig cfg,
+            RandomSource rnd, boolean markBranch, BlockStateProvider provider) {
         if (!isChunkLoaded(level, pos)) {
             return;
         }
 
-        // Use the log provider from config instead of hardcoded Elder blocks
-        BlockState state = cfg.logProvider().getState(rnd, pos);
+        BlockState state = provider.getState(rnd, pos);
         if (state.hasProperty(RotatedPillarBlock.AXIS)) {
             state = state.setValue(RotatedPillarBlock.AXIS, axis);
         }
-        level.setBlock(pos, state, 3);
+
+        boolean placeInWorld = true;
+        if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
+            BlockState current = level.getBlockState(pos);
+            boolean replaceable = current.isAir() || current.is(BlockTags.LEAVES) || current.canBeReplaced()
+                    || current.is(Blocks.GRASS_BLOCK) || current.is(Blocks.TALL_GRASS);
+            if (!replaceable) {
+                placeInWorld = false;
+            }
+        }
+
+        if (placeInWorld) {
+            level.setBlock(pos, state, 3);
+        }
+
         placedAllLogs.get().add(pos.immutable());
         if (markBranch) {
             placedBranchLogs.get().add(pos.immutable());
@@ -370,7 +394,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                     if (!withinBuildHeight(level, p))
                         break;
                     if (canReplaceForLog(level, p))
-                        placeLog(level, p, Direction.Axis.Y, cfg, rnd, false);
+                        placeLog(level, p, Direction.Axis.Y, cfg, rnd, false, cfg.rootProvider());
                 }
             }
 
@@ -452,14 +476,14 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             if (canReplaceForLog(level, p)) {
                 Direction.Axis axis = Math.abs(dx) > Math.abs(dz) ? Direction.Axis.X
                         : (Math.abs(dz) > Math.abs(dx) ? Direction.Axis.Z : Direction.Axis.Y);
-                placeLog(level, p, axis, cfg, rnd, false);
+                placeLog(level, p, axis, cfg, rnd, false, cfg.rootProvider());
 
                 // reduzierte seitliche Logs, damit Wurzel schlank bleibt
                 for (Direction s : Direction.Plane.HORIZONTAL) {
                     if (rnd.nextDouble() < 0.25) {
                         BlockPos side = p.relative(s);
                         if (withinBuildHeight(level, side) && canReplaceForLog(level, side)) {
-                            placeLog(level, side, Direction.Axis.Y, cfg, rnd, false);
+                            placeLog(level, side, Direction.Axis.Y, cfg, rnd, false, cfg.rootProvider());
                         }
                     }
                 }
@@ -474,7 +498,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             if (rnd.nextDouble() < 0.12) {
                 BlockPos side = p.relative(Direction.Plane.HORIZONTAL.getRandomDirection(rnd));
                 if (withinBuildHeight(level, side) && canReplaceForLog(level, side)) {
-                    placeLog(level, side, Direction.Axis.Y, cfg, rnd, false);
+                    placeLog(level, side, Direction.Axis.Y, cfg, rnd, false, cfg.rootProvider());
                 }
             }
         }
@@ -496,7 +520,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                     && (level.getBlockState(below).isAir() || level.getBlockState(below).is(BlockTags.REPLACEABLE)
                             || level.getBlockState(below).is(BlockTags.LEAVES));
             if (canReplaceForLog(level, p)) {
-                placeLog(level, p, Direction.Axis.Y, cfg, rnd, false);
+                placeLog(level, p, Direction.Axis.Y, cfg, rnd, false, cfg.rootProvider());
                 placed++;
             }
             if (!belowReplaceable) {
@@ -1203,7 +1227,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                 if (!withinBuildHeight(level, p))
                     continue;
                 if (canReplaceForLog(level, p)) {
-                    placeLog(level, p, Direction.Axis.Y, cfg, rnd, markBranch);
+                    placeLog(level, p, Direction.Axis.Y, cfg, rnd, markBranch, cfg.rootProvider());
                 }
             }
         }
@@ -1252,6 +1276,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
     private boolean containsNonReplaceableBlocks(WorldGenLevel level, BlockPos origin, int height, int trunkSize,
             int canopyR) {
+        if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get())
+            return false;
         int extra = 2; // prüfen um +2 Blöcke erweitern
         int radiusX = canopyR + trunkSize + 2 + extra;
         int radiusZ = canopyR + trunkSize + 2 + extra;
@@ -1305,7 +1331,18 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             state = state.setValue(LeavesBlock.PERSISTENT, persistent);
         }
 
-        level.setBlock(pos, state, 3);
+        boolean placeInWorld = true;
+        if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
+            boolean replaceable = existing.isAir() || existing.is(BlockTags.LEAVES) || existing.canBeReplaced()
+                    || existing.is(Blocks.GRASS_BLOCK) || existing.is(Blocks.TALL_GRASS);
+            if (!replaceable) {
+                placeInWorld = false;
+            }
+        }
+
+        if (placeInWorld) {
+            level.setBlock(pos, state, 3);
+        }
     }
 
     private void placeLeaves(WorldGenLevel level, BlockPos pos, ElderGiantTreeConfig cfg, RandomSource rnd) {
@@ -1417,6 +1454,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
     }
 
     private boolean canReplaceForLog(WorldGenLevel level, BlockPos pos) {
+        if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get())
+            return true;
         BlockState s = level.getBlockState(pos);
         if (!s.getFluidState().isEmpty())
             return false;
@@ -1425,6 +1464,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
     }
 
     private boolean canReplaceForLeaves(WorldGenLevel level, BlockPos pos) {
+        if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get())
+            return true;
         BlockState s = level.getBlockState(pos);
         if (s.getBlock() instanceof RotatedPillarBlock)
             return false;

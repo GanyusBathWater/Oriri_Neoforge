@@ -8,8 +8,18 @@ import net.minecraft.data.recipes.*;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.conditions.IConditionBuilder;
+import net.minecraft.tags.ItemTags;
 
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.item.Item;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 
 public class ModRecipeProvider extends RecipeProvider implements IConditionBuilder {
         public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
@@ -99,6 +109,40 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .define('A', Items.IRON_BARS)
                                 .unlockedBy("has_iron_bars", has(Items.IRON_BARS)).save(recipeOutput);
 
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.FLUORITE_BLOCK, 1)
+                                .pattern("AAA")
+                                .pattern("AAA")
+                                .pattern("AAA")
+                                .define('A', ModItems.FLUORITE_CRYSTAL)
+                                .unlockedBy("has_fluorite_crystal", has(ModItems.FLUORITE_CRYSTAL)).save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.JADE_BLOCK, 1)
+                                .pattern("AAA")
+                                .pattern("AAA")
+                                .pattern("AAA")
+                                .define('A', ModItems.JADE)
+                                .unlockedBy("has_jade", has(ModItems.JADE)).save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.JADE_SHIELD, 1)
+                                .pattern("WJW")
+                                .pattern("WWW")
+                                .pattern(" W ")
+                                .define('W', net.minecraft.tags.ItemTags.PLANKS)
+                                .define('J', ModBlocks.JADE_BLOCK)
+                                .unlockedBy("has_jade_block", has(ModBlocks.JADE_BLOCK)).save(recipeOutput);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.JADE, 9)
+                                .requires(ModBlocks.JADE_BLOCK)
+                                .unlockedBy("has_jade_block", has(ModBlocks.JADE_BLOCK)).save(recipeOutput);
+
+                stairBuilder(ModBlocks.JADE_STAIRS.get(), Ingredient.of(ModBlocks.JADE_BLOCK))
+                                .unlockedBy("has_jade_block", has(ModBlocks.JADE_BLOCK)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.JADE_SLAB.get(),
+                                ModBlocks.JADE_BLOCK.get());
+                wallBuilder(RecipeCategory.BUILDING_BLOCKS, ModBlocks.JADE_WALL.get(),
+                                Ingredient.of(ModBlocks.JADE_BLOCK))
+                                .unlockedBy("has_jade_block", has(ModBlocks.JADE_BLOCK)).save(recipeOutput);
+
                 stairBuilder(ModBlocks.ELDER_STAIRS.get(), Ingredient.of(ModBlocks.ELDER_PLANKS))
                                 .unlockedBy("has_elder_planks", has(ModBlocks.ELDER_PLANKS)).save(recipeOutput);
                 slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_SLAB.get(), ModBlocks.ELDER_PLANKS);
@@ -116,8 +160,105 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 fenceGateBuilder(ModBlocks.SCARLET_GATE.get(), Ingredient.of(ModBlocks.SCARLET_PLANKS))
                                 .unlockedBy("has_scarlet_planks", has(ModBlocks.SCARLET_PLANKS)).save(recipeOutput);
 
+                // --- Wood from Logs ---
                 woodFromLogs(recipeOutput, ModBlocks.ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_PLANKS.get());
                 woodFromLogs(recipeOutput, ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_PLANKS.get());
+
+                woodFromLogs(recipeOutput, ModBlocks.SCARLET_LOG.get(), ModBlocks.SCARLET_PLANKS.get());
+                woodFromLogs(recipeOutput, ModBlocks.STRIPPED_SCARLET_LOG.get(), ModBlocks.SCARLET_PLANKS.get());
+                woodFromLogs(recipeOutput, ModBlocks.SCARLET_STEM.get(), ModBlocks.SCARLET_PLANKS.get());
+                woodFromLogs(recipeOutput, ModBlocks.STRIPPED_SCARLET_STEM.get(), ModBlocks.SCARLET_PLANKS.get());
+
+                // --- Scarlet Stone Recipes ---
+                // Scarlet Stone Bricks
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_STONE_BRICKS, 4)
+                                .pattern("BB")
+                                .pattern("BB")
+                                .define('B', ModBlocks.SCARLET_STONE)
+                                .unlockedBy("has_scarlet_stone", has(ModBlocks.SCARLET_STONE)).save(recipeOutput);
+
+                // Chiseled Scarlet Stone Bricks
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_SCARLET_STONE_BRICKS, 1)
+                                .pattern("B")
+                                .pattern("B")
+                                .define('B', ModBlocks.SCARLET_STONE_BRICKS)
+                                .unlockedBy("has_scarlet_stone_bricks", has(ModBlocks.SCARLET_STONE_BRICKS))
+                                .save(recipeOutput);
+
+                // Cracked Scarlet Stone Bricks
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.SCARLET_STONE_BRICKS), RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get(), 0.1f, 200)
+                                .unlockedBy("has_scarlet_stone_bricks", has(ModBlocks.SCARLET_STONE_BRICKS))
+                                .save(recipeOutput, "oririmod:cracked_scarlet_stone_bricks_from_smelting");
+
+                // Mossy Scarlet Stone Bricks
+                ShapelessRecipeBuilder
+                                .shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.MOSSY_SCARLET_STONE_BRICKS, 1)
+                                .requires(ModBlocks.SCARLET_STONE_BRICKS)
+                                .requires(ModBlocks.SCARLET_VINE)
+                                .unlockedBy("has_scarlet_vine", has(ModBlocks.SCARLET_VINE)).save(recipeOutput);
+
+                // Smooth Scarlet Stone
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.SCARLET_STONE), RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.SMOOTH_SCARLET_STONE.get(), 0.1f, 200)
+                                .unlockedBy("has_scarlet_stone", has(ModBlocks.SCARLET_STONE))
+                                .save(recipeOutput, "oririmod:smooth_scarlet_stone_from_smelting");
+
+                // Smooth Scarlet Stone Slab
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get(),
+                                ModBlocks.SMOOTH_SCARLET_STONE.get());
+
+                // --- Scarlet Deepslate Recipes ---
+                // Cobbled Scarlet Deepslate -> Polished Scarlet Deepslate
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_SCARLET_DEEPSLATE, 4)
+                                .pattern("BB")
+                                .pattern("BB")
+                                .define('B', ModBlocks.COBBLED_SCARLET_DEEPSLATE)
+                                .unlockedBy("has_cobbled_scarlet_deepslate", has(ModBlocks.COBBLED_SCARLET_DEEPSLATE))
+                                .save(recipeOutput);
+
+                // Polished Scarlet Deepslate -> Scarlet Deepslate Bricks
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_DEEPSLATE_BRICKS, 4)
+                                .pattern("BB")
+                                .pattern("BB")
+                                .define('B', ModBlocks.POLISHED_SCARLET_DEEPSLATE)
+                                .unlockedBy("has_polished_scarlet_deepslate", has(ModBlocks.POLISHED_SCARLET_DEEPSLATE))
+                                .save(recipeOutput);
+
+                // Scarlet Deepslate Bricks -> Scarlet Deepslate Tiles
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_DEEPSLATE_TILES, 4)
+                                .pattern("BB")
+                                .pattern("BB")
+                                .define('B', ModBlocks.SCARLET_DEEPSLATE_BRICKS)
+                                .unlockedBy("has_scarlet_deepslate_bricks", has(ModBlocks.SCARLET_DEEPSLATE_BRICKS))
+                                .save(recipeOutput);
+
+                // Chiseled Scarlet Deepslate
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_SCARLET_DEEPSLATE, 1)
+                                .pattern("B")
+                                .pattern("B")
+                                .define('B', ModBlocks.POLISHED_SCARLET_DEEPSLATE)
+                                .unlockedBy("has_polished_scarlet_deepslate", has(ModBlocks.POLISHED_SCARLET_DEEPSLATE))
+                                .save(recipeOutput);
+
+                // Cracked Scarlet Deepslate Bricks
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.SCARLET_DEEPSLATE_BRICKS),
+                                                RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get(), 0.1f, 200)
+                                .unlockedBy("has_scarlet_deepslate_bricks", has(ModBlocks.SCARLET_DEEPSLATE_BRICKS))
+                                .save(recipeOutput, "oririmod:cracked_scarlet_deepslate_bricks_from_smelting");
+
+                // Cracked Scarlet Deepslate Tiles
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.SCARLET_DEEPSLATE_TILES),
+                                                RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES.get(), 0.1f, 200)
+                                .unlockedBy("has_scarlet_deepslate_tiles", has(ModBlocks.SCARLET_DEEPSLATE_TILES))
+                                .save(recipeOutput, "oririmod:cracked_scarlet_deepslate_tiles_from_smelting");
+
                 /*
                  * ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.BISMUTH.get(),
                  * 9)

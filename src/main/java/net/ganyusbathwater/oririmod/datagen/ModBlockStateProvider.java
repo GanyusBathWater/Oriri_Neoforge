@@ -102,6 +102,33 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockWithItem(ModBlocks.SCARLET_SAPLING.get(),
                 models().cross("scarlet_sapling", modLoc("block/scarlet_sapling")).renderType("cutout"));
 
+        simpleBlockWithItem(ModBlocks.UPGRADED_SCARLET_SAPLING.get(),
+                models().cross("upgraded_scarlet_sapling", modLoc("block/scarlet_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_ELDER_SAPLING.get(),
+                models().cross("upgraded_elder_sapling", modLoc("block/elder_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_OAK_SAPLING.get(),
+                models().cross("upgraded_oak_sapling", mcLoc("block/oak_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_SPRUCE_SAPLING.get(),
+                models().cross("upgraded_spruce_sapling", mcLoc("block/spruce_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_BIRCH_SAPLING.get(),
+                models().cross("upgraded_birch_sapling", mcLoc("block/birch_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_JUNGLE_SAPLING.get(),
+                models().cross("upgraded_jungle_sapling", mcLoc("block/jungle_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_ACACIA_SAPLING.get(),
+                models().cross("upgraded_acacia_sapling", mcLoc("block/acacia_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get(),
+                models().cross("upgraded_dark_oak_sapling", mcLoc("block/dark_oak_sapling")).renderType("cutout"));
+
+        simpleBlockWithItem(ModBlocks.UPGRADED_CHERRY_SAPLING.get(),
+                models().cross("upgraded_cherry_sapling", mcLoc("block/cherry_sapling")).renderType("cutout"));
+
         // Vegetation
         simpleBlockWithItem(ModBlocks.SCARLET_GRASS.get(),
                 models().cross("scarlet_grass", modLoc("block/scarlet_grass")).renderType("cutout"));
@@ -113,6 +140,15 @@ public class ModBlockStateProvider extends BlockStateProvider {
         // Lily - flat model facing up
         simpleBlockWithItem(ModBlocks.SCARLET_LILY.get(),
                 models().getExistingFile(modLoc("block/scarlet_lily")));
+
+        // ===== JADE BLOCKS =====
+        blockWithItem(ModBlocks.JADE_BLOCK, 1);
+        blockWithItem(ModBlocks.JADE_ORE, 1);
+        blockWithItem(ModBlocks.DEEPSLATE_JADE_ORE, 1);
+        stairsBlock(ModBlocks.JADE_STAIRS.get(), blockTexture(ModBlocks.JADE_BLOCK.get()));
+        slabBlock(ModBlocks.JADE_SLAB.get(), blockTexture(ModBlocks.JADE_BLOCK.get()),
+                blockTexture(ModBlocks.JADE_BLOCK.get()));
+        wallBlock(ModBlocks.JADE_WALL.get(), blockTexture(ModBlocks.JADE_BLOCK.get()));
 
         // ===== SCARLET DRIPSTONE =====
         // Scarlet Dripstone Block — simple cube using scarlet_stone texture
@@ -247,9 +283,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void fluoriteClusterState(DeferredBlock<?> deferredBlock) {
-        // Use existing model file (manual OBJ loader json)
-        net.neoforged.neoforge.client.model.generators.ModelFile model = models()
-                .getExistingFile(modLoc("block/" + deferredBlock.getId().getPath()));
+        String name = deferredBlock.getId().getPath();
+        ResourceLocation texture = modLoc("block/fluorite_crystal_cluster");
+        net.neoforged.neoforge.client.model.generators.BlockModelBuilder model = models()
+                .cross(name, texture).renderType("cutout");
 
         getVariantBuilder(deferredBlock.get()).forAllStates(state -> {
             Direction dir = state.getValue(BlockStateProperties.FACING);
@@ -289,6 +326,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                     .rotationY(rotationY)
                     .build();
         });
+        simpleBlockItem(deferredBlock.get(), model);
     }
 
 }

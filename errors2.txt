@@ -1,0 +1,98 @@
+Reusing configuration cache.
+> Task :createMinecraftArtifacts UP-TO-DATE
+
+> Task :compileJava FAILED
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\worldgen\tree\ElderGiantTreeFeature.java:335: Fehler: Symbol nicht gefunden
+            RandomSource rnd, boolean markBranch, BlockStateProvider provider) {
+                                                  ^
+  Symbol: Klasse BlockStateProvider
+  Ort: Klasse ElderGiantTreeFeature
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\events\ServerEvents.java:217: Fehler: Symbol nicht gefunden
+                hurting.xPower = dir.x * 0.1;
+                       ^
+  Symbol: Variable xPower
+  Ort: Variable hurting von Typ AbstractHurtingProjectile
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\events\ServerEvents.java:218: Fehler: Symbol nicht gefunden
+                hurting.yPower = dir.y * 0.1;
+                       ^
+  Symbol: Variable yPower
+  Ort: Variable hurting von Typ AbstractHurtingProjectile
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\events\ServerEvents.java:219: Fehler: Symbol nicht gefunden
+                hurting.zPower = dir.z * 0.1;
+                       ^
+  Symbol: Variable zPower
+  Ort: Variable hurting von Typ AbstractHurtingProjectile
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\item\custom\JadeShieldItem.java:35: Fehler: Symbol nicht gefunden
+        List<Component> list = super.buildModTooltip(stack, context, flag);
+                                    ^
+  Symbol: Methode buildModTooltip(ItemStack,TooltipContext,TooltipFlag)
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\item\custom\JadeShieldItem.java:37: Fehler: Symbol nicht gefunden
+                .withStyle(net.minecraft.network.chat.ChatFormatting.GREEN));
+                                                     ^
+  Symbol: Klasse ChatFormatting
+  Ort: Package net.minecraft.network.chat
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\OririClient.java:49: Warnung: [removal] bus() in EventBusSubscriber ist veraltet und wurde zum Entfernen markiert
+@EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+                                                                  ^
+C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\OririClient.java:49: Warnung: [removal] Bus in EventBusSubscriber ist veraltet und wurde zum Entfernen markiert
+@EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+                                                                                          ^
+Hinweis: C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\worldgen\ModPlacedFeatures.java verwendet nicht geprüfte oder unsichere Vorgänge.
+Hinweis: Wiederholen Sie die Kompilierung mit -Xlint:unchecked, um Details zu erhalten.
+6 Fehler
+2 Warnungen
+
+[Incubating] Problems report is available at: file:///C:/Users/denni/IdeaProjects/Oriri_Neoforge/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\item\custom\JadeShieldItem.java:35: Fehler: Symbol nicht gefunden
+          List<Component> list = super.buildModTooltip(stack, context, flag);
+                                      ^
+    Symbol: Methode buildModTooltip(ItemStack,TooltipContext,TooltipFlag)
+  Hinweis: C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\worldgen\ModPlacedFeatures.java verwendet nicht geprüfte oder unsichere Vorgänge.
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\worldgen\tree\ElderGiantTreeFeature.java:335: Fehler: Symbol nicht gefunden
+              RandomSource rnd, boolean markBranch, BlockStateProvider provider) {
+                                                    ^
+    Symbol: Klasse BlockStateProvider
+    Ort: Klasse ElderGiantTreeFeature
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\events\ServerEvents.java:217: Fehler: Symbol nicht gefunden
+                  hurting.xPower = dir.x * 0.1;
+                         ^
+    Symbol: Variable xPower
+    Ort: Variable hurting von Typ AbstractHurtingProjectile
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\events\ServerEvents.java:218: Fehler: Symbol nicht gefunden
+                  hurting.yPower = dir.y * 0.1;
+                         ^
+    Symbol: Variable yPower
+    Ort: Variable hurting von Typ AbstractHurtingProjectile
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\events\ServerEvents.java:219: Fehler: Symbol nicht gefunden
+                  hurting.zPower = dir.z * 0.1;
+                         ^
+    Symbol: Variable zPower
+    Ort: Variable hurting von Typ AbstractHurtingProjectile
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\item\custom\JadeShieldItem.java:37: Fehler: Symbol nicht gefunden
+                  .withStyle(net.minecraft.network.chat.ChatFormatting.GREEN));
+                                                       ^
+    Symbol: Klasse ChatFormatting
+    Ort: Package net.minecraft.network.chat
+  Hinweis: Wiederholen Sie die Kompilierung mit -Xlint:unchecked, um Details zu erhalten.
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\OririClient.java:49: Warnung: [removal] bus() in EventBusSubscriber ist veraltet und wurde zum Entfernen markiert
+  @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+                                                                    ^
+  C:\Users\denni\IdeaProjects\Oriri_Neoforge\src\main\java\net\ganyusbathwater\oririmod\OririClient.java:49: Warnung: [removal] Bus in EventBusSubscriber ist veraltet und wurde zum Entfernen markiert
+  @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+                                                                                            ^
+  6 Fehler
+  2 Warnungen
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 1s
+2 actionable tasks: 1 executed, 1 up-to-date
+Configuration cache entry reused.

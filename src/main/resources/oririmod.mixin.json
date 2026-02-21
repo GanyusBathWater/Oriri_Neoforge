@@ -5,7 +5,8 @@
   "mixins": [
     "ItemEntityMixin",
     "LiquidBlockMixin",
-    "AbstractArrowMixin"
+    "AbstractArrowMixin",
+    "TreeFeatureMixin"
   ],
   "client": [
     "ClientLevelMixin",

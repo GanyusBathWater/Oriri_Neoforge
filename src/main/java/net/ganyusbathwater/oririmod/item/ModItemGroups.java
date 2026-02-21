@@ -25,6 +25,8 @@ public class ModItemGroups {
                         // -------------Items-------------
                         output.accept(ModItems.FIRE_CRYSTAL);
                         output.accept(ModItems.MANA_MANIFESTATION);
+                        output.accept(ModItems.FLUORITE_CRYSTAL);
+                        output.accept(ModItems.JADE);
                         output.accept(ModItems.MOON_STONE);
                         output.accept(ModItems.DAMNED_SOUL);
                         output.accept(ModItems.HOLLOW_SOUL);
@@ -41,6 +43,12 @@ public class ModItemGroups {
                         output.accept(ModBlocks.MANA_CRYSTAL_CLUSTER);
                         output.accept(ModBlocks.FLUORITE_BLOCK);
                         output.accept(ModBlocks.FLUORITE_CLUSTER);
+                        output.accept(ModBlocks.JADE_BLOCK);
+                        output.accept(ModBlocks.JADE_ORE);
+                        output.accept(ModBlocks.DEEPSLATE_JADE_ORE);
+                        output.accept(ModBlocks.JADE_STAIRS);
+                        output.accept(ModBlocks.JADE_SLAB);
+                        output.accept(ModBlocks.JADE_WALL);
                         output.accept(ModBlocks.DARK_SOIL_BLOCK);
                         output.accept(ModBlocks.ELDERBUSH_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
@@ -58,6 +66,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_LEAVES);
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING);
                         output.accept(ModBlocks.ELDER_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_ELDER_SAPLING);
                         output.accept(ModBlocks.ELDER_SPORE_BLOSSOM);
                         output.accept(ModBlocks.ELDER_LEAVES); // Added missing leaves if they were missed
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
@@ -91,6 +100,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SCARLET_FENCE);
                         output.accept(ModBlocks.SCARLET_GATE);
                         output.accept(ModBlocks.SCARLET_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_SCARLET_SAPLING);
                         output.accept(ModBlocks.SCARLET_LEAVES);
                         output.accept(ModBlocks.SCARLET_TOOTH_LEAVES);
                         output.accept(ModBlocks.SCARLET_GRASS);
@@ -99,6 +109,14 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SCARLET_LILY);
                         output.accept(ModBlocks.SCARLET_DRIPSTONE_BLOCK);
                         output.accept(ModBlocks.POINTED_SCARLET_DRIPSTONE);
+
+                        output.accept(ModBlocks.UPGRADED_OAK_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_SPRUCE_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_BIRCH_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_JUNGLE_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_ACACIA_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_DARK_OAK_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_CHERRY_SAPLING);
 
                         output.accept(ModBlocks.STAR_HERB);
 
@@ -133,6 +151,7 @@ public class ModItemGroups {
                         output.accept(ModItems.WITHER_ROSE);
 
                         // ------------Weapons------------
+                        output.accept(ModItems.JADE_SHIELD);
                         output.accept(ModItems.PANDORAS_BLADE);
                         output.accept(ModItems.ORAPHIM_BOW);
                         output.accept(ModItems.PIRATE_SABER);

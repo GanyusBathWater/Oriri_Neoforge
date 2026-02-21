@@ -78,4 +78,20 @@ public class ClientEvents {
             return TEX_75;
         return TEX_100;
     }
+
+    @SubscribeEvent
+    public static void onRegisterIClientItemExtensions(
+            net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
+        event.registerItem(new net.neoforged.neoforge.client.extensions.common.IClientItemExtensions() {
+            private net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer renderer;
+
+            @Override
+            public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                if (this.renderer == null) {
+                    this.renderer = new net.ganyusbathwater.oririmod.client.render.item.JadeShieldRenderer();
+                }
+                return this.renderer;
+            }
+        }, net.ganyusbathwater.oririmod.item.ModItems.JADE_SHIELD.get());
+    }
 }

@@ -119,11 +119,8 @@ public class ModConfiguredFeatures {
                                 UniformInt.of(3, 5),
                                 UniformInt.of(2, 4),
                                 BlockStateProvider.simple(ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()),
-                                BlockStateProvider.simple(ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()), // Use
-                                                                                                                // log
-                                                                                                                // as
-                                                                                                                // stem
-                                                                                                                // fallback
+                                BlockStateProvider.simple(ModBlocks.ELDER_STEM_BLOCK.get().defaultBlockState()),
+                                BlockStateProvider.simple(ModBlocks.ELDER_STEM_BLOCK.get().defaultBlockState()),
                                 BlockStateProvider.simple(ModBlocks.ELDER_LEAVES.get().defaultBlockState()),
                                 BlockStateProvider.simple(ModBlocks.ELDER_LEAVES_FLOWERING.get().defaultBlockState()),
                                 0.2f,
@@ -139,11 +136,8 @@ public class ModConfiguredFeatures {
                                 UniformInt.of(2, 4), // Smaller canopy radius (was 3-5)
                                 UniformInt.of(2, 4), // Longer branches
                                 BlockStateProvider.simple(ModBlocks.SCARLET_LOG.get().defaultBlockState()),
-                                BlockStateProvider.simple(ModBlocks.SCARLET_STEM.get().defaultBlockState()), // Stem
-                                                                                                             // provider
-                                                                                                             // for
-                                                                                                             // exposed
-                                                                                                             // ends
+                                BlockStateProvider.simple(ModBlocks.SCARLET_STEM.get().defaultBlockState()),
+                                BlockStateProvider.simple(ModBlocks.SCARLET_STEM.get().defaultBlockState()),
                                 BlockStateProvider.simple(ModBlocks.SCARLET_LEAVES.get().defaultBlockState()),
                                 BlockStateProvider.simple(ModBlocks.SCARLET_LEAVES.get().defaultBlockState()), // No
                                                                                                                // flowering

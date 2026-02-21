@@ -55,7 +55,12 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ELDER_GATE.get())
                                 .add(ModBlocks.SCARLET_GATE.get());
 
+                tag(BlockTags.WALLS)
+                                .add(ModBlocks.JADE_WALL.get());
+
                 tag(ModTags.Blocks.ORES)
+                                .add(ModBlocks.JADE_ORE.get())
+                                .add(ModBlocks.DEEPSLATE_JADE_ORE.get())
                                 .add(Blocks.DIAMOND_ORE)
                                 .add(Blocks.DEEPSLATE_DIAMOND_ORE)
                                 .add(Blocks.EMERALD_ORE)
@@ -111,6 +116,12 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_GATE.get());
 
                 tag(BlockTags.MINEABLE_WITH_PICKAXE)
+                                .add(ModBlocks.JADE_BLOCK.get())
+                                .add(ModBlocks.JADE_ORE.get())
+                                .add(ModBlocks.DEEPSLATE_JADE_ORE.get())
+                                .add(ModBlocks.JADE_STAIRS.get())
+                                .add(ModBlocks.JADE_SLAB.get())
+                                .add(ModBlocks.JADE_WALL.get())
                                 .add(ModBlocks.SCARLET_STONE.get())
                                 .add(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get())
                                 .add(ModBlocks.SMOOTH_SCARLET_STONE.get())

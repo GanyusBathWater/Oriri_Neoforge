@@ -40,7 +40,15 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 add(ModBlocks.FLUORITE_BLOCK.get(),
                                 block -> createSilkTouchOnlyTable(ModBlocks.FLUORITE_BLOCK.get()));
                 add(ModBlocks.FLUORITE_CLUSTER.get(),
-                                item -> createSingleItemTable(ModBlocks.FLUORITE_CLUSTER.get()));
+                                block -> createSilkTouchDispatchTable(block,
+                                                LootItem.lootTableItem(ModItems.FLUORITE_CRYSTAL.get())
+                                                                .apply(SetItemCountFunction
+                                                                                .setCount(UniformGenerator.between(1.0F,
+                                                                                                4.0F)))
+                                                                .apply(ApplyBonusCount.addOreBonusCount(
+                                                                                this.registries.lookupOrThrow(
+                                                                                                Registries.ENCHANTMENT)
+                                                                                                .getOrThrow(Enchantments.FORTUNE)))));
 
                 add(ModBlocks.ELDER_LEAVES.get(), block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES.get()));
                 add(ModBlocks.ELDER_LEAVES_FLOWERING.get(),
@@ -104,6 +112,16 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 this.dropSelf(ModBlocks.SCARLET_MOSS.get());
                 this.add(ModBlocks.SCARLET_VINE.get(), block -> createShearsOnlyDrop(ModBlocks.SCARLET_VINE.get()));
 
+                // ===== JADE BLOCKS =====
+                this.dropSelf(ModBlocks.JADE_BLOCK.get());
+                this.add(ModBlocks.JADE_ORE.get(),
+                                block -> createMultipleOreDrops(block, ModItems.JADE.get(), 2.0F, 5.0F));
+                this.add(ModBlocks.DEEPSLATE_JADE_ORE.get(),
+                                block -> createMultipleOreDrops(block, ModItems.JADE.get(), 2.0F, 5.0F));
+                this.dropSelf(ModBlocks.JADE_STAIRS.get());
+                this.add(ModBlocks.JADE_SLAB.get(), this::createSlabItemTable);
+                this.dropSelf(ModBlocks.JADE_WALL.get());
+
                 // ===== NEW SCARLET BLOCKS =====
                 this.add(ModBlocks.SCARLET_GRASS_BLOCK.get(),
                                 block -> createSingleItemTableWithSilkTouch(block, Blocks.DIRT));
@@ -114,6 +132,17 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 this.dropSelf(ModBlocks.SCARLET_LILY.get());
                 this.dropSelf(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get());
                 this.dropSelf(ModBlocks.POINTED_SCARLET_DRIPSTONE.get());
+
+                // Upgraded Saplings
+                this.dropSelf(ModBlocks.UPGRADED_SCARLET_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_ELDER_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_OAK_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_SPRUCE_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_BIRCH_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_JUNGLE_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_ACACIA_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get());
+                this.dropSelf(ModBlocks.UPGRADED_CHERRY_SAPLING.get());
 
         }
 

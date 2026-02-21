@@ -105,8 +105,10 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 return findBiome(SCARLET_CAVES_KEY);
             } else if (caveNoise < -0.3) {
                 return findBiome(ELDERWOODS_CAVE_KEY);
-            } else {
+            } else if (caveNoise < -0.15 && caveNoise > -0.2) {
                 return findBiome(CRYSTAL_CAVES_KEY);
+            } else {
+                return findBiome(ELDERWOODS_CAVE_KEY);
             }
         } else {
             // Surface biomes

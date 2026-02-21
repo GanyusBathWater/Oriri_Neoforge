@@ -1,9 +1,0 @@
-{
-  "loader": "neoforge:obj",
-  "model": "oririmod:models/block/fluorite_crystal.obj",
-  "render_type": "translucent",
-  "textures": {
-    "particle": "oririmod:block/fluorite_block",
-    "fluorite_main": "oririmod:block/fluorite_block"
-  }
-}

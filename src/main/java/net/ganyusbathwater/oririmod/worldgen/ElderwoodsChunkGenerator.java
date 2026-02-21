@@ -559,20 +559,38 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         }
 
         // Fluorite Generation (Crystal Caves Only)
-        // Iterate interior of chunk
+        // Iterate interior of chunk with a slightly expanded range to allow patterns to
+        // flow naturally
         // Create a deterministic random source for Fluorite generation
         RandomSource fluoriteRandom = RandomSource.create(seed ^ chunk.getPos().toLong());
+        // Use a different seed offset for fluorite noise so it doesn't align with caves
+        double fluoriteNoiseOffset = seedOffsetCave + 12345.0;
 
-        for (int localX = 2; localX <= 13; localX++) {
-            for (int localZ = 2; localZ <= 13; localZ++) {
+        for (int localX = 0; localX < 16; localX++) {
+            for (int localZ = 0; localZ < 16; localZ++) {
                 int worldX = startX + localX;
                 int worldZ = startZ + localZ;
                 int surfaceY = getSurfaceHeight(worldX, worldZ);
 
+                // Fluorite cluster patch noise - lower frequency for larger natural patches
+                // Using 0.02 frequency creates patches ~50 blocks wide
+                double patchNoise = Math.sin((worldX + fluoriteNoiseOffset) * 0.02)
+                        * Math.cos((worldZ + fluoriteNoiseOffset) * 0.02);
+                // Secondary noise to break it up and make the edges irregular
+                double detailNoise = Math.sin((worldX - fluoriteNoiseOffset) * 0.07)
+                        * Math.cos((worldZ - fluoriteNoiseOffset) * 0.07);
+
+                // Combine noises: main patch shape + irregular details
+                double combinedNoise = patchNoise * 0.7 + detailNoise * 0.3;
+
+                // Threshold for patch: > 0.3 means we are inside a patch
+                if (combinedNoise < 0.3)
+                    continue;
+
                 for (int y = MIN_Y + 6; y <= surfaceY - 5; y++) {
                     clusterPos.set(worldX, y, worldZ);
 
-                    // 1. Ceiling Check (Fluorite Cluster hanging + Fluorite Block embedded)
+                    // 1. Ceiling Check (Fluorite Cluster hanging)
                     // Condition: Air here, Solid above
                     if (chunk.getBlockState(clusterPos).isAir()) {
                         adjacentPos.set(worldX, y + 1, worldZ);
@@ -580,46 +598,23 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         if (aboveState.isSolid() && !aboveState.is(Blocks.BEDROCK)) {
                             // Check Biome at this specific position
                             if (isCrystalCaveBiome(getComputedBiome(level, worldX, y, worldZ))) {
-                                // Chance for Ceiling Fluorite, modulated by 2D noise for patchiness
-                                // Use a simple noise function based on world coordinates to create patches
-                                double noise = Math.sin(worldX * 0.1) * Math.cos(worldZ * 0.1) * 0.5 + 0.5; // 0.0 to
-                                                                                                            // 1.0
 
-                                // Base chance 10%, increased by noise
-                                float chance = 0.05f + (float) noise * 0.25f; // 5% to 30% chance
+                                // Base chance inside a patch, higher towards the center of the patch
+                                float patchIntensity = (float) ((combinedNoise - 0.3) / 0.7); // 0.0 at edge, 1.0 at
+                                                                                              // center
+                                float chance = 0.05f + (patchIntensity * 0.25f); // 5% to 30% chance based on patch
+                                                                                 // density
 
                                 if (fluoriteRandom.nextFloat() < chance) {
-                                    // Embed Fluorite Block (replace stone/deepslate)
-                                    chunk.setBlockState(adjacentPos, ModBlocks.FLUORITE_BLOCK.get().defaultBlockState(),
+                                    // Tip: Fluorite Cluster directly attached to the ceiling
+                                    chunk.setBlockState(clusterPos,
+                                            ModBlocks.FLUORITE_CLUSTER.get().defaultBlockState()
+                                                    .setValue(BlockStateProperties.FACING, Direction.DOWN),
                                             false);
-
-                                    // Variable length hanging crystals (1-3 blocks)
-                                    int length = 1 + fluoriteRandom.nextInt(3); // 1, 2, or 3
-
-                                    for (int k = 0; k < length; k++) {
-                                        BlockPos hangPos = clusterPos.offset(0, -k, 0);
-                                        if (chunk.getBlockState(hangPos).isAir()) {
-                                            if (k < length - 1) {
-                                                // Stem: Fluorite Block
-                                                chunk.setBlockState(hangPos,
-                                                        ModBlocks.FLUORITE_BLOCK.get().defaultBlockState(), false);
-                                            } else {
-                                                // Tip: Fluorite Cluster
-                                                chunk.setBlockState(hangPos,
-                                                        ModBlocks.FLUORITE_CLUSTER.get().defaultBlockState()
-                                                                .setValue(BlockStateProperties.FACING, Direction.DOWN),
-                                                        false);
-                                            }
-                                        } else {
-                                            // Hit ground or obstruction, stop growing
-                                            break;
-                                        }
-                                    }
                                 }
                             }
                         }
                     }
-
                 }
             }
         }

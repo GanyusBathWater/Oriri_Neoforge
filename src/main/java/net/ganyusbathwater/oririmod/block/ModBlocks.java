@@ -14,6 +14,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import net.minecraft.world.level.block.grower.TreeGrower;
 import java.util.function.Supplier;
 
 public class ModBlocks {
@@ -91,6 +92,10 @@ public class ModBlocks {
 
         public static final DeferredBlock<Block> ELDER_SAPLING = registerBlock("elder_sapling",
                         () -> new SaplingBlock(ModTreeGrowers.ELDER_TREE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+
+        public static final DeferredBlock<Block> UPGRADED_ELDER_SAPLING = registerBlock("upgraded_elder_sapling",
+                        () -> new UpgradedSaplingBlock(ModTreeGrowers.ELDER_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
 
         // ===== SCARLET STONE VARIANTS =====
@@ -177,6 +182,10 @@ public class ModBlocks {
                         () -> new SaplingBlock(ModTreeGrowers.SCARLET_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
 
+        public static final DeferredBlock<Block> UPGRADED_SCARLET_SAPLING = registerBlock("upgraded_scarlet_sapling",
+                        () -> new UpgradedSaplingBlock(ModTreeGrowers.SCARLET_TREE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+
         // ===== SCARLET VEGETATION =====
         public static final DeferredBlock<Block> SCARLET_LEAVES = registerBlock("scarlet_leaves",
                         () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)));
@@ -231,6 +240,55 @@ public class ModBlocks {
                         () -> new ScarletPointedDripstoneBlock(
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.POINTED_DRIPSTONE)));
 
+        // ===== JADE BLOCKS =====
+        public static final DeferredBlock<Block> JADE_BLOCK = registerBlock("jade_block",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_BLOCK)));
+
+        public static final DeferredBlock<Block> JADE_ORE = registerBlock("jade_ore",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_ORE)));
+
+        public static final DeferredBlock<Block> DEEPSLATE_JADE_ORE = registerBlock("deepslate_jade_ore",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_EMERALD_ORE)));
+
+        public static final DeferredBlock<StairBlock> JADE_STAIRS = registerBlock("jade_stairs",
+                        () -> new StairBlock(ModBlocks.JADE_BLOCK.get().defaultBlockState(),
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_BLOCK)));
+
+        public static final DeferredBlock<SlabBlock> JADE_SLAB = registerBlock("jade_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_BLOCK)));
+
+        public static final DeferredBlock<WallBlock> JADE_WALL = registerBlock("jade_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_BLOCK)));
+
+        // ===== UPGRADED VANILLA SAPLINGS =====
+        public static final DeferredBlock<Block> UPGRADED_OAK_SAPLING = registerBlock("upgraded_oak_sapling",
+                        () -> new UpgradedSaplingBlock(TreeGrower.OAK,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+
+        public static final DeferredBlock<Block> UPGRADED_SPRUCE_SAPLING = registerBlock("upgraded_spruce_sapling",
+                        () -> new UpgradedSaplingBlock(TreeGrower.SPRUCE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.SPRUCE_SAPLING)));
+
+        public static final DeferredBlock<Block> UPGRADED_BIRCH_SAPLING = registerBlock("upgraded_birch_sapling",
+                        () -> new UpgradedSaplingBlock(TreeGrower.BIRCH,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.BIRCH_SAPLING)));
+
+        public static final DeferredBlock<Block> UPGRADED_JUNGLE_SAPLING = registerBlock("upgraded_jungle_sapling",
+                        () -> new UpgradedSaplingBlock(TreeGrower.JUNGLE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.JUNGLE_SAPLING)));
+
+        public static final DeferredBlock<Block> UPGRADED_ACACIA_SAPLING = registerBlock("upgraded_acacia_sapling",
+                        () -> new UpgradedSaplingBlock(TreeGrower.ACACIA,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.ACACIA_SAPLING)));
+
+        public static final DeferredBlock<Block> UPGRADED_DARK_OAK_SAPLING = registerBlock("upgraded_dark_oak_sapling",
+                        () -> new UpgradedSaplingBlock(TreeGrower.DARK_OAK,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.DARK_OAK_SAPLING)));
+
+        public static final DeferredBlock<Block> UPGRADED_CHERRY_SAPLING = registerBlock("upgraded_cherry_sapling",
+                        () -> new UpgradedSaplingBlock(TreeGrower.CHERRY,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_SAPLING)));
+
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);
                 registerBlockItem(name, toReturn);
@@ -242,6 +300,10 @@ public class ModBlocks {
                         ModItems.ITEMS.register(name,
                                         () -> new net.minecraft.world.item.PlaceOnWaterBlockItem(block.get(),
                                                         new Item.Properties()));
+                } else if (name.startsWith("upgraded_")) {
+                        ModItems.ITEMS.register(name,
+                                        () -> new net.ganyusbathwater.oririmod.item.custom.UpgradedSaplingItem(
+                                                        block.get(), new Item.Properties()));
                 } else {
                         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
                 }

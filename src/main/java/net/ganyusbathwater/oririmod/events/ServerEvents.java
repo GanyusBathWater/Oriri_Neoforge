@@ -32,6 +32,13 @@ import net.ganyusbathwater.oririmod.effect.ModEffects;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 
 @EventBusSubscriber(modid = OririMod.MOD_ID)
 public class ServerEvents {
@@ -180,6 +187,64 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public static void onProjectileImpact(ProjectileImpactEvent event) {
+        if (event.getRayTraceResult() instanceof EntityHitResult entityHit) {
+            Entity hitEntity = entityHit.getEntity();
+
+            if (hitEntity instanceof LivingEntity blocker && blocker.isBlocking()) {
+                ItemStack useItem = blocker.getUseItem();
+                if (useItem.is(net.ganyusbathwater.oririmod.item.ModItems.JADE_SHIELD.get())) {
+                    OririMod.LOGGER.debug("Jade Shield blocked projectile: {}", event.getProjectile());
+
+                    if (blocker.level().isClientSide())
+                        return;
+
+                    Projectile projectile = event.getProjectile();
+                    Vec3 currentVelocity = projectile.getDeltaMovement();
+                    double speed = Math.max(currentVelocity.length(), 1.0) * 1.5;
+
+                    Entity shooter = projectile.getOwner();
+                    Vec3 dir;
+
+                    if (shooter != null) {
+                        dir = shooter.position().add(0, shooter.getEyeHeight() / 2.0, 0)
+                                .subtract(projectile.position()).normalize();
+                        OririMod.LOGGER.debug("Shield reflecting back to shooter: {}", shooter);
+                    } else {
+                        dir = blocker.getLookAngle();
+                        OririMod.LOGGER.debug("Shield reflecting forward (no shooter found)");
+                    }
+
+                    projectile.shoot(dir.x, dir.y, dir.z, (float) speed, 0.1f);
+                    projectile.setDeltaMovement(dir.scale(speed));
+                    projectile.hasImpulse = true;
+
+                    if (projectile instanceof AbstractHurtingProjectile hurting) {
+                        try {
+                            java.lang.reflect.Method m = AbstractHurtingProjectile.class
+                                    .getDeclaredMethod("assignDirectionalMovement", Vec3.class, double.class);
+                            m.setAccessible(true);
+                            m.invoke(hurting, dir.scale(0.1), Math.min(speed, 5.0));
+                            OririMod.LOGGER.debug("Updated fireball directional movement via reflection");
+                        } catch (Exception e) {
+                            OririMod.LOGGER.error("Failed to update fireball directional movement", e);
+                        }
+                    }
+
+                    projectile.setOwner(blocker);
+
+                    blocker.level().playSound(null, blocker.blockPosition(), SoundEvents.ANVIL_PLACE,
+                            SoundSource.PLAYERS, 0.5f, 2.0f);
+
+                    event.setCanceled(true);
+                    OririMod.LOGGER.debug("ProjectileImpactEvent canceled for reflection");
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+
     public static void onEntityTick(EntityTickEvent.Pre event) {
         if (!(event.getEntity() instanceof Monster monster))
             return;

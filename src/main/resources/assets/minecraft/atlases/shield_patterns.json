@@ -1,0 +1,12 @@
+{
+    "sources": [
+        {
+            "type": "single",
+            "resource": "oririmod:entity/jade_shield_base"
+        },
+        {
+            "type": "single",
+            "resource": "oririmod:entity/jade_shield_base_nopattern"
+        }
+    ]
+}

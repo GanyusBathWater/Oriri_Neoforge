@@ -13,6 +13,7 @@ public record ElderGiantTreeConfig(
                 IntProvider branchLength,
                 BlockStateProvider logProvider,
                 BlockStateProvider stemProvider,
+                BlockStateProvider rootProvider,
                 BlockStateProvider leavesProvider,
                 BlockStateProvider floweringLeavesProvider,
                 float floweringChance,
@@ -25,6 +26,7 @@ public record ElderGiantTreeConfig(
                         IntProvider.CODEC.fieldOf("branch_length").forGetter(ElderGiantTreeConfig::branchLength),
                         BlockStateProvider.CODEC.fieldOf("log_provider").forGetter(ElderGiantTreeConfig::logProvider),
                         BlockStateProvider.CODEC.fieldOf("stem_provider").forGetter(ElderGiantTreeConfig::stemProvider),
+                        BlockStateProvider.CODEC.fieldOf("root_provider").forGetter(ElderGiantTreeConfig::rootProvider),
                         BlockStateProvider.CODEC.fieldOf("leaves_provider")
                                         .forGetter(ElderGiantTreeConfig::leavesProvider),
                         BlockStateProvider.CODEC.fieldOf("flowering_leaves_provider")

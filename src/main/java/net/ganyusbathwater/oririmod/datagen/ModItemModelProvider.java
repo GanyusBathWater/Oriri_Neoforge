@@ -32,6 +32,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.POWER_SOUL.get());
                 basicItem(ModItems.TORTURED_SOUL.get());
                 basicItem(ModItems.VOID_SOUL.get());
+                basicItem(ModItems.FLUORITE_CRYSTAL.get());
+                basicItem(ModItems.JADE.get());
 
                 // -------------Blocks------------
 
@@ -52,6 +54,12 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.MANA_CRYSTAL_CLUSTER.get());
                 simpleBlockItem(ModBlocks.FLUORITE_BLOCK.get());
                 simpleBlockItem(ModBlocks.FLUORITE_CLUSTER.get());
+                simpleBlockItem(ModBlocks.JADE_BLOCK.get());
+                simpleBlockItem(ModBlocks.JADE_ORE.get());
+                simpleBlockItem(ModBlocks.DEEPSLATE_JADE_ORE.get());
+                simpleBlockItem(ModBlocks.JADE_STAIRS.get());
+                simpleBlockItem(ModBlocks.JADE_SLAB.get());
+                wallItem(ModBlocks.JADE_WALL, ModBlocks.JADE_BLOCK);
                 simpleBlockItem(ModBlocks.ELDER_LEAVES_FLOWERING.get());
                 simpleBlockItem(ModBlocks.ELDER_SPORE_BLOSSOM.get());
                 simpleBlockItem(ModBlocks.ELDER_STAIRS.get());
@@ -152,6 +160,8 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 // ------------Weapons------------
 
+                shieldItem(ModItems.JADE_SHIELD);
+
                 handheldItem(ModItems.PANDORAS_BLADE);
                 bowItem(ModItems.ORAPHIM_BOW);
                 handheldItem(ModItems.PIRATE_SABER);
@@ -242,6 +252,34 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.THE_WORLD.get());
         }
 
+        private void shieldItem(DeferredItem<?> item) {
+                System.out.println("=== DUMPING AbstractHurtingProjectile ===");
+                try {
+                        for (java.lang.reflect.Method m : net.minecraft.world.entity.projectile.AbstractHurtingProjectile.class
+                                        .getDeclaredMethods()) {
+                                System.out.println("METHOD: " + m.getName() + " "
+                                                + java.util.Arrays.toString(m.getParameterTypes()));
+                        }
+                        for (java.lang.reflect.Field f : net.minecraft.world.entity.projectile.AbstractHurtingProjectile.class
+                                        .getDeclaredFields()) {
+                                System.out.println("FIELD: " + f.getName() + " " + f.getType().getSimpleName());
+                        }
+                } catch (Exception e) {
+                }
+
+                String name = item.getId().getPath();
+                getBuilder(name).parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(
+                                "minecraft:item/shield"))
+                                .texture("particle", modLoc("block/jade_block"))
+                                .override()
+                                .predicate(mcLoc("blocking"), 1)
+                                .model(getBuilder(name + "_blocking")
+                                                .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(
+                                                                "minecraft:item/shield_blocking"))
+                                                .texture("particle", modLoc("block/jade_block")))
+                                .end();
+        }
+
         private ItemModelBuilder handheldItem(DeferredItem<?> item) {
                 return withExistingParent(item.getId().getPath(),
                                 ResourceLocation.parse("item/handheld")).texture("layer0",
@@ -318,7 +356,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         }
 
         public void wallItem(DeferredBlock<?> block, DeferredBlock<Block> baseBlock) {
-                this.withExistingParent(block.getId().getPath(), mcLoc("block/wall"))
+                this.withExistingParent(block.getId().getPath(), mcLoc("block/wall_inventory"))
                                 .texture("wall", ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                 "block/" + baseBlock.getId().getPath()));
         }

@@ -1,4 +1,5 @@
 {
+  "tooltip.oririmod.upgraded_sapling.lore": "Can be placed and grows on most blocks. Will force grow the tree, only replacing air blocks. Perfectly for tight spaces!",
   "item.oririmod.fire_crystal": "Fire Crystal",
   "item.oririmod.moon_stone": "Moon Stone",
   "item.oririmod.iron_stick": "Iron Stick",
@@ -343,5 +344,26 @@
   "block.oririmod.scarlet_slab": "Scarlet Slab",
   "block.oririmod.scarlet_stairs": "Scarlet Stairs",
   "block.oririmod.fluorite_block": "Fluorite Block",
-  "block.oririmod.fluorite_cluster": "Fluorite Cluster"
+  "block.oririmod.fluorite_cluster": "Fluorite Cluster",
+  "item.oririmod.mana_manifestation": "Mana Manifestation",
+  "item.oririmod.fluorite_crystal": "Fluorite Crystal",
+  "item.oririmod.jade": "Jade",
+  "block.oririmod.star_herb": "Star Herb",
+  "block.oririmod.jade_block": "Jade Block",
+  "block.oririmod.jade_ore": "Jade Ore",
+  "block.oririmod.deepslate_jade_ore": "Deepslate Jade Ore",
+  "item.oririmod.jade_shield": "Jade Shield",
+  "item.oririmod.jade_shield.tooltip": "Reflects Projectiles",
+  "block.oririmod.jade_stairs": "Jade Stairs",
+  "block.oririmod.jade_slab": "Jade Slab",
+  "block.oririmod.jade_wall": "Jade Wall",
+  "block.oririmod.upgraded_scarlet_sapling": "Upgraded Scarlet Sapling",
+  "block.oririmod.upgraded_elder_sapling": "Upgraded Elder Sapling",
+  "block.oririmod.upgraded_oak_sapling": "Upgraded Oak Sapling",
+  "block.oririmod.upgraded_spruce_sapling": "Upgraded Spruce Sapling",
+  "block.oririmod.upgraded_birch_sapling": "Upgraded Birch Sapling",
+  "block.oririmod.upgraded_jungle_sapling": "Upgraded Jungle Sapling",
+  "block.oririmod.upgraded_acacia_sapling": "Upgraded Acacia Sapling",
+  "block.oririmod.upgraded_dark_oak_sapling": "Upgraded Dark Oak Sapling",
+  "block.oririmod.upgraded_cherry_sapling": "Upgraded Cherry Sapling"
 }
