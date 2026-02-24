@@ -16,7 +16,8 @@ import java.util.Locale;
 
 public final class TooltipHandler {
 
-    private TooltipHandler() {}
+    private TooltipHandler() {
+    }
 
     public static void register() {
         NeoForge.EVENT_BUS.register(TooltipHandler.class);
@@ -33,8 +34,7 @@ public final class TooltipHandler {
         // 1) Rarity / Vestige von ModRarityCarrier einsammeln
         if (item instanceof ModRarityCarrier carrier) {
             extraLines.addAll(
-                    carrier.buildModTooltip(stack, event.getContext(), event.getFlags())
-            );
+                    carrier.buildModTooltip(stack, event.getContext(), event.getFlags()));
         }
 
         // 2) Element-Zeile hinzufügen
@@ -47,10 +47,24 @@ public final class TooltipHandler {
                 case NATURE -> ChatFormatting.GREEN;
                 case LIGHT -> ChatFormatting.WHITE;
                 case DARKNESS -> ChatFormatting.DARK_PURPLE;
+                case TRUE_DAMAGE -> ChatFormatting.WHITE;
                 default -> ChatFormatting.GRAY;
             };
             String key = "tooltip.oririmod.element." + element.name().toLowerCase(Locale.ROOT);
-            extraLines.add(Component.translatable(key).withStyle(color));
+            net.minecraft.network.chat.MutableComponent text = Component.translatable(key);
+
+            if (element == Element.TRUE_DAMAGE) {
+                // Determine a pulsing white to gray color using system time
+                long time = System.currentTimeMillis() % 2000L;
+                float ratio = (float) Math.abs((time / 1000.0) - 1.0); // 0.0 to 1.0 back and forth
+                int grayValue = 150 + (int) (105 * ratio); // 150 to 255
+                int colorInt = (grayValue << 16) | (grayValue << 8) | grayValue;
+                text = text.withStyle(net.minecraft.network.chat.Style.EMPTY
+                        .withColor(net.minecraft.network.chat.TextColor.fromRgb(colorInt)));
+            } else {
+                text = text.withStyle(color);
+            }
+            extraLines.add(text);
         }
 
         if (extraLines.isEmpty()) {
@@ -58,7 +72,8 @@ public final class TooltipHandler {
         }
 
         // \=\=\= HIER bestimmst du die Position \=\=\=
-        // Beispiel: direkt NACH der ersten Zeile (Itemname-Zeile wird von MC selbst gerendert)
+        // Beispiel: direkt NACH der ersten Zeile (Itemname-Zeile wird von MC selbst
+        // gerendert)
         int insertIndex = 1;
         if (insertIndex > tooltip.size()) {
             insertIndex = tooltip.size();

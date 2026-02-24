@@ -145,11 +145,20 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get())
                                 .add(ModBlocks.POINTED_SCARLET_DRIPSTONE.get())
                                 .add(ModBlocks.FLUORITE_BLOCK.get())
-                                .add(ModBlocks.FLUORITE_CLUSTER.get());
+                                .add(ModBlocks.FLUORITE_CLUSTER.get())
+                                .add(ModBlocks.SOL_SANDSTONE.get())
+                                .add(ModBlocks.CUT_SOL_SANDSTONE.get())
+                                .add(ModBlocks.CHISELED_SOL_SANDSTONE.get())
+                                .add(ModBlocks.BROKEN_SWORD_BLOCK.get())
+                                .add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
 
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
                                 .add(ModBlocks.DARK_SOIL_BLOCK.get())
-                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get());
+                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
+                                .add(ModBlocks.SOL_SAND.get());
+
+                tag(BlockTags.SAND)
+                                .add(ModBlocks.SOL_SAND.get());
 
                 tag(BlockTags.LOGS_THAT_BURN)
                                 .add(ModBlocks.SCARLET_LOG.get())

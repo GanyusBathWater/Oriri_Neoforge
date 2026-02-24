@@ -1,5 +1,6 @@
 package net.ganyusbathwater.oririmod.item.custom.magic;
 
+import net.ganyusbathwater.oririmod.entity.FireballProjectileEntity;
 import net.ganyusbathwater.oririmod.entity.MagicBoltEntity;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
@@ -58,7 +59,8 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
     @Override
     public void onUseTick(Level level, LivingEntity living, ItemStack stack, int remainingUseDuration) {
-        if (!level.isClientSide) return;
+        if (!level.isClientSide)
+            return;
 
         if (this.ability == MagicBoltAbility.METEOR) {
             BlockHitResult hit = raycastToGround(level, living, 96.0);
@@ -75,9 +77,12 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             double topY = getTopSurfaceY(level, ground);
             Vec3 groundCenter = new Vec3(ground.getX() + 0.5, topY, ground.getZ() + 0.5);
 
-            ResourceLocation TEX_OUTER = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/effect/magic_circles/arcane_outer.png");
-            ResourceLocation TEX_MID   = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/effect/magic_circles/arcane_mid.png");
-            ResourceLocation TEX_INNER = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/effect/magic_circles/arcane_inner.png");
+            ResourceLocation TEX_OUTER = ResourceLocation.fromNamespaceAndPath("oririmod",
+                    "textures/effect/magic_circles/arcane_outer.png");
+            ResourceLocation TEX_MID = ResourceLocation.fromNamespaceAndPath("oririmod",
+                    "textures/effect/magic_circles/arcane_mid.png");
+            ResourceLocation TEX_INNER = ResourceLocation.fromNamespaceAndPath("oririmod",
+                    "textures/effect/magic_circles/arcane_inner.png");
 
             MagicIndicatorClientState.Indicator.Builder b = MagicIndicatorClientState.Indicator.builder()
                     .duration(0)
@@ -87,16 +92,13 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
             MagicIndicatorClientState.Indicator.Layer outer = new MagicIndicatorClientState.Indicator.Layer(
                     TEX_OUTER, METEOR_OUTER_RADIUS_PLAYER, 10f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.PLAYER
-            );
+                    MagicIndicatorClientState.Anchor.PLAYER);
             MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
                     TEX_MID, METEOR_MID_RADIUS_GROUND, -6f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.WORLD
-            );
+                    MagicIndicatorClientState.Anchor.WORLD);
             MagicIndicatorClientState.Indicator.Layer inner = new MagicIndicatorClientState.Indicator.Layer(
                     TEX_INNER, METEOR_INNER_RADIUS_GROUND, 6f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.WORLD
-            );
+                    MagicIndicatorClientState.Anchor.WORLD);
 
             MagicIndicatorClientState.startFor(living, b.addLayer(outer).addLayer(mid).addLayer(inner).build());
         } else {
@@ -107,8 +109,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
             MagicIndicatorClientState.Indicator.Layer layer = new MagicIndicatorClientState.Indicator.Layer(
                     null, 1.2f, 0f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.PLAYER
-            );
+                    MagicIndicatorClientState.Anchor.PLAYER);
 
             MagicIndicatorClientState.startFor(living, b.addLayer(layer).build());
         }
@@ -125,8 +126,10 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
                         double topY = getTopSurfaceY(level, ground);
                         Vec3 groundCenter = new Vec3(ground.getX() + 0.5, topY, ground.getZ() + 0.5);
 
-                        ResourceLocation TEX_MID   = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/effect/magic_circles/arcane_mid.png");
-                        ResourceLocation TEX_INNER = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/effect/magic_circles/arcane_inner.png");
+                        ResourceLocation TEX_MID = ResourceLocation.fromNamespaceAndPath("oririmod",
+                                "textures/effect/magic_circles/arcane_mid.png");
+                        ResourceLocation TEX_INNER = ResourceLocation.fromNamespaceAndPath("oririmod",
+                                "textures/effect/magic_circles/arcane_inner.png");
 
                         MagicIndicatorClientState.stopFor(living);
 
@@ -138,12 +141,10 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
                         MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
                                 TEX_MID, METEOR_MID_RADIUS_GROUND, -6f, 0xFFFFFFFF, 0f,
-                                MagicIndicatorClientState.Anchor.WORLD
-                        );
+                                MagicIndicatorClientState.Anchor.WORLD);
                         MagicIndicatorClientState.Indicator.Layer inner = new MagicIndicatorClientState.Indicator.Layer(
                                 TEX_INNER, METEOR_INNER_RADIUS_GROUND, 6f, 0xFFFFFFFF, 0f,
-                                MagicIndicatorClientState.Anchor.WORLD
-                        );
+                                MagicIndicatorClientState.Anchor.WORLD);
 
                         MagicIndicatorClientState.startFor(living, b.addLayer(mid).addLayer(inner).build());
                     }
@@ -157,22 +158,27 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
         int usedTicks = getUseDuration(stack, living) - timeLeft;
         int minCharge = 10;
-        if (usedTicks < minCharge) return;
+        if (usedTicks < minCharge)
+            return;
 
         if (living instanceof Player p) {
             // Spieler muss Mana besitzen
-            if (!ModManaUtil.tryConsumeMana(p, manaCost)) return;
+            if (!ModManaUtil.tryConsumeMana(p, manaCost))
+                return;
         }
 
         if (this.ability == MagicBoltAbility.METEOR) {
             BlockHitResult hit = raycastToGround(level, living, 96.0);
-            if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
+            if (hit == null || hit.getType() != HitResult.Type.BLOCK)
+                return;
 
             BlockPos ground = findGround(level, hit.getBlockPos().above(), 12);
-            if (ground == null) return;
+            if (ground == null)
+                return;
 
             MeteorEntity meteor = (MeteorEntity) ModEntities.METEOR.get().create(level);
-            if (meteor == null) return;
+            if (meteor == null)
+                return;
 
             meteor.configure(ground.immutable(), 12.0f, 7);
             meteor.setOwnerId(living.getId());
@@ -191,6 +197,22 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             return;
         }
 
+        if (this.ability == MagicBoltAbility.AMATEUR_FIREBALL ||
+                this.ability == MagicBoltAbility.APPRENTICE_FIREBALL ||
+                this.ability == MagicBoltAbility.JOURNEYMAN_FIREBALL ||
+                this.ability == MagicBoltAbility.WISE_FIREBALL) {
+
+            FireballProjectileEntity fireball = new FireballProjectileEntity(level, living);
+            fireball.configureForGrade(this.ability);
+            fireball.launchStraight(living, 1.6F); // Base speed
+            level.addFreshEntity(fireball);
+
+            if (living instanceof Player p) {
+                p.getCooldowns().addCooldown(this, cooldown);
+            }
+            return;
+        }
+
         MagicBoltEntity bolt = new MagicBoltEntity(level, living);
         bolt.setAbility(this.ability);
 
@@ -201,6 +223,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             case NORMAL -> 1.6F;
             case EXPLOSIVE -> 2.0F;
             case METEOR -> 1.0F;
+            default -> 1.6F; // Should not be reached for fireballs due to check above
         };
 
         bolt.launchStraight(living, speed);
@@ -224,8 +247,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
                 eye, end,
                 ClipContext.Block.COLLIDER,
                 ClipContext.Fluid.ANY,
-                living
-        ));
+                living));
     }
 
     private static BlockPos findGround(Level level, BlockPos start, int maxDrop) {
@@ -243,7 +265,8 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
     private static double getTopSurfaceY(Level level, BlockPos pos) {
         var state = level.getBlockState(pos);
         var shape = state.getCollisionShape(level, pos);
-        if (shape.isEmpty()) return pos.getY() + 1.0; // Fallback: Blockoberseite
+        if (shape.isEmpty())
+            return pos.getY() + 1.0; // Fallback: Blockoberseite
         return pos.getY() + shape.max(net.minecraft.core.Direction.Axis.Y);
     }
 }

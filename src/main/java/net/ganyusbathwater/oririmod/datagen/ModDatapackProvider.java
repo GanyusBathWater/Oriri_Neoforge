@@ -22,7 +22,8 @@ public class ModDatapackProvider extends DatapackBuiltinEntriesProvider {
 
             .add(Registries.CONFIGURED_FEATURE, ModConfiguredFeatures::bootstrap)
             .add(Registries.PLACED_FEATURE, ModPlacedFeatures::bootstrap)
-            .add(NeoForgeRegistries.Keys.BIOME_MODIFIERS, ModBiomeModifiers::bootstrap);
+            .add(NeoForgeRegistries.Keys.BIOME_MODIFIERS, ModBiomeModifiers::bootstrap)
+            .add(Registries.DAMAGE_TYPE, net.ganyusbathwater.oririmod.damage.ModDamageTypes::bootstrap);
 
     public ModDatapackProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries, BUILDER, Set.of(OririMod.MOD_ID));

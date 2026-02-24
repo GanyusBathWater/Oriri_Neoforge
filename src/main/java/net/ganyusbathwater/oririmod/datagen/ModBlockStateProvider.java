@@ -157,6 +157,27 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         // Pointed Scarlet Dripstone — direction × thickness variants
         pointedDripstoneBlock();
+
+        // ===== SOL SAND BLOCKS =====
+        blockWithItem(ModBlocks.SOL_SAND, 1);
+
+        simpleBlockWithItem(ModBlocks.SOL_SANDSTONE.get(),
+                models().cubeBottomTop("sol_sandstone", modLoc("block/sol_sandstone"),
+                        modLoc("block/sol_sandstone_bottom"), modLoc("block/sol_sandstone_top")));
+
+        simpleBlockWithItem(ModBlocks.CUT_SOL_SANDSTONE.get(),
+                models().cubeBottomTop("cut_sol_sandstone", modLoc("block/cut_sol_sandstone"),
+                        modLoc("block/sol_sandstone_top"), modLoc("block/sol_sandstone_top")));
+
+        simpleBlockWithItem(ModBlocks.CHISELED_SOL_SANDSTONE.get(),
+                models().cubeBottomTop("chiseled_sol_sandstone", modLoc("block/chiseled_sol_sandstone"),
+                        modLoc("block/sol_sandstone_top"), modLoc("block/sol_sandstone_top")));
+
+        // ===== SWORD BLOCKS =====
+        horizontalBlock(ModBlocks.BROKEN_SWORD_BLOCK.get(),
+                models().getExistingFile(modLoc("block/broken_sword_block")));
+        horizontalBlock(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get(),
+                models().getExistingFile(modLoc("block/tilted_broken_sword_block")));
     }
 
     private void pointedDripstoneBlock() {

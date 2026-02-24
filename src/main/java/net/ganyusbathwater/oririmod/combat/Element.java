@@ -7,5 +7,6 @@ public enum Element {
     EARTH,
     WATER,
     LIGHT,
-    DARKNESS
+    DARKNESS,
+    TRUE_DAMAGE
 }

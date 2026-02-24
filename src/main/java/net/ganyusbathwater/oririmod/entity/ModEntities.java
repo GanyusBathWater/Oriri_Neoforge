@@ -23,6 +23,20 @@ public final class ModEntities {
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "magic_bolt")
                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<FireballProjectileEntity>> FIREBALL_PROJECTILE = ENTITIES
+                        .register(
+                                        "fireball_projectile",
+                                        () -> EntityType.Builder
+                                                        .<FireballProjectileEntity>of(FireballProjectileEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(0.25F, 0.25F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "fireball_projectile")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<MeteorEntity>> METEOR = ENTITIES.register("meteor",
                         () -> EntityType.Builder.<MeteorEntity>of(MeteorEntity::new, MobCategory.MISC)
                                         .sized(1.0F, 1.0F)

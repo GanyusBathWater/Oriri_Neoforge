@@ -262,6 +262,10 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
             case ENDER -> 0.0F;
             case EXPLOSIVE -> 0.0F;
             case METEOR -> 0.0F;
+            case AMATEUR_FIREBALL -> 0.0F;
+            case APPRENTICE_FIREBALL -> 0.0F;
+            case JOURNEYMAN_FIREBALL -> 0.0F;
+            case WISE_FIREBALL -> 0.0F;
         };
 
         if (damage > 0 && hit.getEntity().isAlive()) {

@@ -42,16 +42,4 @@ public abstract class TreeFeatureMixin extends Feature<TreeConfiguration> {
         }
     }
 
-    @Inject(method = "setBlockKnownShape", at = @At("HEAD"), cancellable = true)
-    private static void onSetBlock(LevelWriter level, BlockPos pos, BlockState state, CallbackInfo ci) {
-        if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
-            if (level instanceof LevelAccessor accessor) {
-                BlockState current = accessor.getBlockState(pos);
-                boolean replaceable = current.isAir() || current.is(BlockTags.LEAVES) || current.canBeReplaced();
-                if (!replaceable) {
-                    ci.cancel(); // Cancel placement if hitting solid stone/wall
-                }
-            }
-        }
-    }
 }

@@ -10,12 +10,16 @@ import net.neoforged.fml.common.EventBusSubscriber;
 public class ModEntityClient {
 
     @net.neoforged.bus.api.SubscribeEvent
-    public static void registerLayers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions event) {
+    public static void registerLayers(
+            net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(MeteorModel.LAYER_LOCATION, MeteorModel::createBodyLayer);
     }
 
     @net.neoforged.bus.api.SubscribeEvent
-    public static void registerRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+    public static void registerRenderers(
+            net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.METEOR.get(), MeteorRenderer::new);
+        event.registerEntityRenderer(ModEntities.FIREBALL_PROJECTILE.get(),
+                net.ganyusbathwater.oririmod.client.render.FireballProjectileRenderer::new);
     }
 }

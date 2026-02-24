@@ -6,7 +6,8 @@ import net.minecraft.world.item.Items;
 
 public final class ElementInit {
 
-    private ElementInit() {}
+    private ElementInit() {
+    }
 
     public static void init() {
         // Mobs
@@ -21,5 +22,6 @@ public final class ElementInit {
         ItemElementRegistry.setElement(Items.IRON_SWORD, Element.EARTH);
         ItemElementRegistry.setElement(Items.TRIDENT, Element.WATER);
         ItemElementRegistry.setElement(ModItems.STELLA_PERDITOR.get(), Element.DARKNESS);
+        ItemElementRegistry.setElement(ModItems.QILINS_WRATH.get(), Element.TRUE_DAMAGE);
     }
 }

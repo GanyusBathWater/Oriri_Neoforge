@@ -11,12 +11,13 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 public final class ElementalDamageHandler {
 
-    private ElementalDamageHandler() {}
+    private ElementalDamageHandler() {
+    }
 
     private static final String NBT_ROOT = "OririCombat";
     private static final String NBT_RESISTS = "ElementResists"; // map: elementName -> float
-    private static final String NBT_IN_MULT = "IncomingMult";   // float
-    private static final String NBT_OUT_MULT = "OutgoingMult";  // float
+    private static final String NBT_IN_MULT = "IncomingMult"; // float
+    private static final String NBT_OUT_MULT = "OutgoingMult"; // float
 
     public static void register() {
         NeoForge.EVENT_BUS.register(ElementalDamageHandler.class);
@@ -45,6 +46,18 @@ public final class ElementalDamageHandler {
             }
         }
 
+        // --- TRUE DAMAGE OVERRIDE ---
+        if (attackerElement == Element.TRUE_DAMAGE) {
+            // Check if the source is already TRUE_DAMAGE to prevent infinite recurrsion
+            if (!event.getSource().is(net.ganyusbathwater.oririmod.damage.ModDamageTypes.TRUE_DAMAGE)) {
+                event.setCanceled(true);
+                // Re-apply damage using the custom True Damage type
+                target.hurt(net.ganyusbathwater.oririmod.damage.ModDamageTypes.getTrueDamage(target.level(),
+                        owner != null ? owner : direct), event.getAmount());
+                return;
+            }
+        }
+
         float baseDamage = event.getAmount();
 
         // 1) Element\-Multiplier
@@ -65,12 +78,14 @@ public final class ElementalDamageHandler {
             damage = damage * getPlayerOutgoingMultiplier(playerAttacker);
         }
 
-        if (damage < 0.0f) damage = 0.0f;
+        if (damage < 0.0f)
+            damage = 0.0f;
         event.setAmount(damage);
     }
 
     public static void setPlayerResistance(Player player, Element element, float resistFraction) {
-        if (player == null || element == null) return;
+        if (player == null || element == null)
+            return;
         CompoundTag root = getOrCreateRoot(player);
         CompoundTag res = root.getCompound(NBT_RESISTS);
         res.putFloat(element.name(), clamp01(resistFraction));
@@ -79,35 +94,40 @@ public final class ElementalDamageHandler {
     }
 
     public static float getPlayerResistance(Player player, Element element) {
-        if (player == null || element == null) return 0.0f;
+        if (player == null || element == null)
+            return 0.0f;
         CompoundTag root = player.getPersistentData().getCompound(NBT_ROOT);
         CompoundTag res = root.getCompound(NBT_RESISTS);
         return clamp01(res.getFloat(element.name()));
     }
 
     public static void setPlayerIncomingMultiplier(Player player, float multiplier) {
-        if (player == null) return;
+        if (player == null)
+            return;
         CompoundTag root = getOrCreateRoot(player);
         root.putFloat(NBT_IN_MULT, Math.max(0.0f, multiplier));
         player.getPersistentData().put(NBT_ROOT, root);
     }
 
     public static float getPlayerIncomingMultiplier(Player player) {
-        if (player == null) return 1.0f;
+        if (player == null)
+            return 1.0f;
         CompoundTag root = player.getPersistentData().getCompound(NBT_ROOT);
         float v = root.contains(NBT_IN_MULT) ? root.getFloat(NBT_IN_MULT) : 1.0f;
         return Math.max(0.0f, v);
     }
 
     public static void setPlayerOutgoingMultiplier(Player player, float multiplier) {
-        if (player == null) return;
+        if (player == null)
+            return;
         CompoundTag root = getOrCreateRoot(player);
         root.putFloat(NBT_OUT_MULT, Math.max(0.0f, multiplier));
         player.getPersistentData().put(NBT_ROOT, root);
     }
 
     public static float getPlayerOutgoingMultiplier(Player player) {
-        if (player == null) return 1.0f;
+        if (player == null)
+            return 1.0f;
         CompoundTag root = player.getPersistentData().getCompound(NBT_ROOT);
         float v = root.contains(NBT_OUT_MULT) ? root.getFloat(NBT_OUT_MULT) : 1.0f;
         return Math.max(0.0f, v);

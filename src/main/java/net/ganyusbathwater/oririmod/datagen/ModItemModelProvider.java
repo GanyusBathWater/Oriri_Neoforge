@@ -110,6 +110,16 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 simpleBlockItem(ModBlocks.SCARLET_MOSS.get());
 
+                // Sol Sand Blocks
+                simpleBlockItem(ModBlocks.SOL_SAND.get());
+                simpleBlockItem(ModBlocks.SOL_SANDSTONE.get());
+                simpleBlockItem(ModBlocks.CUT_SOL_SANDSTONE.get());
+                simpleBlockItem(ModBlocks.CHISELED_SOL_SANDSTONE.get());
+
+                // Sword Blocks
+                simpleBlockItem(ModBlocks.BROKEN_SWORD_BLOCK.get());
+                simpleBlockItem(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
+
                 // Flat items (Generated)
                 saplingItem(ModBlocks.SCARLET_SAPLING);
                 saplingItem(ModBlocks.SCARLET_GRASS);
@@ -165,19 +175,15 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.PANDORAS_BLADE);
                 bowItem(ModItems.ORAPHIM_BOW);
                 handheldItem(ModItems.PIRATE_SABER);
-                handheldItem(ModItems.NEBULA_PICKAXE);
+
                 handheldItem(ModItems.ICE_SWORD);
-                handheldItem(ModItems.MOLTEN_PICKAXE);
+
                 handheldItem(ModItems.LAW_BREAKER);
                 handheldItem(ModItems.STELLA_PERDITOR);
                 handheldItem(ModItems.QILINS_WRATH);
                 handheldItem(ModItems.SOLS_EMBRACE);
                 crossbowItem(ModItems.ARBITER_CROSSBOW);
-                handheldItem(ModItems.EMERALD_SWORD);
-                handheldItem(ModItems.EMERALD_AXE);
-                handheldItem(ModItems.EMERALD_PICKAXE);
-                handheldItem(ModItems.EMERALD_SHOVEL);
-                handheldItem(ModItems.EMERALD_HOE);
+
                 handheldItem(ModItems.STAFF_OF_WISE);
                 handheldItem(ModItems.STAFF_OF_EARTH);
                 handheldItem(ModItems.STAFF_OF_FOREST);
@@ -191,6 +197,12 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.BOOK_OF_JOURNEYMAN);
                 handheldItem(ModItems.BOOK_OF_WISE);
                 handheldItem(ModItems.STAFF_OF_ALMIGHTY);
+                handheldItem(ModItems.ZOMBIE_ENCYCLOPEDIA);
+                handheldItem(ModItems.SKELETON_ENCYCLOPEDIA);
+                handheldItem(ModItems.IRON_GOLEM_MANUAL);
+                handheldItem(ModItems.BLAZING_PYROMANIAC_GUIDE);
+                handheldItem(ModItems.MAGMA_COOKING_BOOK);
+                handheldItem(ModItems.SLIMY_COOKING_BOOK);
 
                 // ------------Armor---------------
 

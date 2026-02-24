@@ -41,45 +41,6 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                  * 
                  * 
                  */
-                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.EMERALD_SWORD, 1)
-                                .pattern("B")
-                                .pattern("B")
-                                .pattern("A")
-                                .define('B', Items.EMERALD)
-                                .define('A', Items.STICK)
-                                .unlockedBy("has_emerald", has(Items.EMERALD)).save(recipeOutput);
-
-                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.EMERALD_AXE, 1)
-                                .pattern("BB")
-                                .pattern("BA")
-                                .pattern(" A")
-                                .define('B', Items.EMERALD)
-                                .define('A', Items.STICK)
-                                .unlockedBy("has_emerald", has(Items.EMERALD)).save(recipeOutput);
-
-                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.EMERALD_PICKAXE, 1)
-                                .pattern("BBB")
-                                .pattern(" A ")
-                                .pattern(" A ")
-                                .define('B', Items.EMERALD)
-                                .define('A', Items.STICK)
-                                .unlockedBy("has_emerald", has(Items.EMERALD)).save(recipeOutput);
-
-                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.EMERALD_SHOVEL, 1)
-                                .pattern("B")
-                                .pattern("A")
-                                .pattern("A")
-                                .define('B', Items.EMERALD)
-                                .define('A', Items.STICK)
-                                .unlockedBy("has_emerald", has(Items.EMERALD)).save(recipeOutput);
-
-                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.EMERALD_HOE, 1)
-                                .pattern("BB")
-                                .pattern(" A")
-                                .pattern(" A")
-                                .define('B', Items.EMERALD)
-                                .define('A', Items.STICK)
-                                .unlockedBy("has_emerald", has(Items.EMERALD)).save(recipeOutput);
                 /*
                  * ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.HEART_OF_THE_TANK,1)
                  * .pattern("BBB")
@@ -258,6 +219,36 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                                 ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES.get(), 0.1f, 200)
                                 .unlockedBy("has_scarlet_deepslate_tiles", has(ModBlocks.SCARLET_DEEPSLATE_TILES))
                                 .save(recipeOutput, "oririmod:cracked_scarlet_deepslate_tiles_from_smelting");
+
+                // --- Sol Sand Recipes ---
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE, 1)
+                                .pattern("BB")
+                                .pattern("BB")
+                                .define('B', ModBlocks.SOL_SAND)
+                                .unlockedBy("has_sol_sand", has(ModBlocks.SOL_SAND)).save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CUT_SOL_SANDSTONE, 4)
+                                .pattern("BB")
+                                .pattern("BB")
+                                .define('B', ModBlocks.SOL_SANDSTONE)
+                                .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE)).save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_SOL_SANDSTONE, 1)
+                                .pattern("B")
+                                .pattern("B")
+                                .define('B', ModBlocks.SOL_SANDSTONE)
+                                .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE)).save(recipeOutput);
+
+                // --- Sword Conversions ---
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModBlocks.TILTED_BROKEN_SWORD_BLOCK, 1)
+                                .requires(ModBlocks.BROKEN_SWORD_BLOCK)
+                                .unlockedBy("has_broken_sword_block", has(ModBlocks.BROKEN_SWORD_BLOCK))
+                                .save(recipeOutput);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModBlocks.BROKEN_SWORD_BLOCK, 1)
+                                .requires(ModBlocks.TILTED_BROKEN_SWORD_BLOCK)
+                                .unlockedBy("has_tilted_broken_sword_block", has(ModBlocks.TILTED_BROKEN_SWORD_BLOCK))
+                                .save(recipeOutput, "oririmod:broken_sword_block_from_tilted");
 
                 /*
                  * ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.BISMUTH.get(),

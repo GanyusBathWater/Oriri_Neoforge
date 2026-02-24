@@ -1,0 +1,37 @@
+Calculating task graph as configuration cache cannot be reused because file 'build.gradle' has changed.
+
+[Incubating] Problems report is available at: file:///C:/Users/denni/IdeaProjects/Oriri_Neoforge/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Configuration cache state could not be cached: field `classpath` of task `:compileJava` of type `org.gradle.api.tasks.compile.JavaCompile`: error writing value of type 'org.gradle.api.internal.artifacts.configurations.DefaultLegacyConfiguration'
+> Could not resolve all files for configuration ':compileClasspath'.
+   > Could not find maven.modrinth:jade:15.1.5.
+     Searched in the following locations:
+       - https://maven.neoforged.net/releases/maven/modrinth/jade/15.1.5/jade-15.1.5.pom
+       - file:/C:/Users/denni/IdeaProjects/Oriri_Neoforge/libs/jade-15.1.5.jar
+       - file:/C:/Users/denni/IdeaProjects/Oriri_Neoforge/libs/jade.jar
+       - file:/C:/Users/denni/.m2/repository/maven/modrinth/jade/15.1.5/jade-15.1.5.pom
+       - https://repo.maven.apache.org/maven2/maven/modrinth/jade/15.1.5/jade-15.1.5.pom
+       - https://cursemaven.com/maven/modrinth/jade/15.1.5/jade-15.1.5.pom
+       - https://maven.blamejared.com/maven/modrinth/jade/15.1.5/jade-15.1.5.pom
+       - https://maven.theillusivec4.top/maven/modrinth/jade/15.1.5/jade-15.1.5.pom
+       - https://api.modrinth.com/maven/maven/modrinth/jade/15.1.5/jade-15.1.5.pom
+     Required by:
+         root project :
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1s
+Configuration cache entry discarded due to serialization error.

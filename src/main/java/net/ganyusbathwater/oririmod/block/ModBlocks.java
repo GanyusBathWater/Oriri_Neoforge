@@ -240,6 +240,29 @@ public class ModBlocks {
                         () -> new ScarletPointedDripstoneBlock(
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.POINTED_DRIPSTONE)));
 
+        // ===== SOL SAND & SANDSTONES =====
+        public static final DeferredBlock<Block> SOL_SAND = registerBlock("sol_sand",
+                        () -> new ColoredFallingBlock(new net.minecraft.util.ColorRGBA(0xFFDED6A3),
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.SAND)));
+
+        public static final DeferredBlock<Block> SOL_SANDSTONE = registerBlock("sol_sandstone",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.SANDSTONE)));
+
+        public static final DeferredBlock<Block> CUT_SOL_SANDSTONE = registerBlock("cut_sol_sandstone",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CUT_SANDSTONE)));
+
+        public static final DeferredBlock<Block> CHISELED_SOL_SANDSTONE = registerBlock("chiseled_sol_sandstone",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CHISELED_SANDSTONE)));
+
+        // ===== BROKEN SWORDS =====
+        public static final DeferredBlock<Block> BROKEN_SWORD_BLOCK = registerBlock("broken_sword_block",
+                        () -> new BrokenSwordBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()
+                                        .strength(3.0f, 3.0f)));
+
+        public static final DeferredBlock<Block> TILTED_BROKEN_SWORD_BLOCK = registerBlock("tilted_broken_sword_block",
+                        () -> new TiltedBrokenSwordBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                                        .noOcclusion().strength(3.0f, 3.0f)));
+
         // ===== JADE BLOCKS =====
         public static final DeferredBlock<Block> JADE_BLOCK = registerBlock("jade_block",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_BLOCK)));

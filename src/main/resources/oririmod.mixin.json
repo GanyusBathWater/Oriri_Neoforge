@@ -6,7 +6,8 @@
     "ItemEntityMixin",
     "LiquidBlockMixin",
     "AbstractArrowMixin",
-    "TreeFeatureMixin"
+    "TreeFeatureMixin",
+    "LevelMixin"
   ],
   "client": [
     "ClientLevelMixin",

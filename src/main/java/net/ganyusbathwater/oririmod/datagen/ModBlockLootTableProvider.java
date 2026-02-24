@@ -19,6 +19,7 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.Set;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.Items;
 
 public class ModBlockLootTableProvider extends BlockLootSubProvider {
         protected ModBlockLootTableProvider(HolderLookup.Provider registries) {
@@ -144,6 +145,37 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 this.dropSelf(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get());
                 this.dropSelf(ModBlocks.UPGRADED_CHERRY_SAPLING.get());
 
+                // Sol Sand Blocks
+                this.dropSelf(ModBlocks.SOL_SAND.get());
+                this.dropSelf(ModBlocks.SOL_SANDSTONE.get());
+                this.dropSelf(ModBlocks.CUT_SOL_SANDSTONE.get());
+                this.dropSelf(ModBlocks.CHISELED_SOL_SANDSTONE.get());
+
+                // Sword Blocks
+                this.add(ModBlocks.BROKEN_SWORD_BLOCK.get(), block -> createSwordDrops(block));
+                this.add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get(), block -> createSwordDrops(block));
+        }
+
+        protected LootTable.Builder createSwordDrops(Block pBlock) {
+                return LootTable.lootTable()
+                                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                                                .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue
+                                                                .exactly(1.0F))
+                                                .add(LootItem.lootTableItem(pBlock).when(this.hasSilkTouch())))
+                                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                                                .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue
+                                                                .exactly(1.0F))
+                                                .add(LootItem.lootTableItem(Items.STICK)
+                                                                .apply(SetItemCountFunction.setCount(
+                                                                                UniformGenerator.between(0.0F, 1.0F))))
+                                                .when(this.hasSilkTouch().invert()))
+                                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                                                .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue
+                                                                .exactly(1.0F))
+                                                .add(LootItem.lootTableItem(Items.IRON_BARS)
+                                                                .apply(SetItemCountFunction.setCount(
+                                                                                UniformGenerator.between(0.0F, 2.0F))))
+                                                .when(this.hasSilkTouch().invert()));
         }
 
         protected LootTable.Builder createMultipleOreDrops(Block pBlock, Item item, float minDrops, float maxDrops) {

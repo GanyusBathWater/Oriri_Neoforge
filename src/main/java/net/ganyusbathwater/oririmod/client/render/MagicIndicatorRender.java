@@ -29,10 +29,12 @@ public final class MagicIndicatorRender {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES)
+            return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return;
+        if (mc.level == null)
+            return;
 
         long gameTime = mc.level.getGameTime();
         float pt = event.getPartialTick().getGameTimeDeltaPartialTick(mc.isPaused());
@@ -40,8 +42,8 @@ public final class MagicIndicatorRender {
         Vec3 camPos = event.getCamera().getPosition();
         MultiBufferSource buffers = mc.renderBuffers().bufferSource();
 
-        Iterator<Map.Entry<Integer, MagicIndicatorClientState.Indicator>> it =
-                MagicIndicatorClientState.INSTANCE.getActive().entrySet().iterator();
+        Iterator<Map.Entry<Integer, MagicIndicatorClientState.Indicator>> it = MagicIndicatorClientState.INSTANCE
+                .getActive().entrySet().iterator();
 
         while (it.hasNext()) {
             Map.Entry<Integer, MagicIndicatorClientState.Indicator> e = it.next();
@@ -58,14 +60,16 @@ public final class MagicIndicatorRender {
             if (!ind.persistentUntilMeteorImpact()) {
                 boolean usingMagicBolt = living.isUsingItem()
                         && !living.getUseItem().isEmpty()
-                        && (living.getUseItem().getItem() instanceof MagicBoltItem);
+                        && (living.getUseItem().getItem() instanceof MagicBoltItem || living.getUseItem()
+                                .getItem() instanceof net.ganyusbathwater.oririmod.item.custom.magic.SummonerWeaponItem);
                 if (!usingMagicBolt) {
                     it.remove();
                     continue;
                 }
             }
 
-            // Persistenz bis Meteor-Impact: entfernen, wenn kein Meteor des Spielers mehr existiert
+            // Persistenz bis Meteor-Impact: entfernen, wenn kein Meteor des Spielers mehr
+            // existiert
             if (ind.persistentUntilMeteorImpact()) {
                 boolean hasMeteor = false;
                 for (Entity x : mc.level.entitiesForRendering()) {
@@ -96,35 +100,36 @@ public final class MagicIndicatorRender {
             Vec3 eye = living.getEyePosition(pt);
             Vec3 forwardPlayer = living.getViewVector(pt).normalize();
 
-            Vec3 worldUpRef = Math.abs(forwardPlayer.dot(new Vec3(0, 1, 0))) > 0.99 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+            Vec3 worldUpRef = Math.abs(forwardPlayer.dot(new Vec3(0, 1, 0))) > 0.99 ? new Vec3(1, 0, 0)
+                    : new Vec3(0, 1, 0);
             Vec3 rightPlayer = forwardPlayer.cross(worldUpRef).normalize();
             Vec3 upPlayer = rightPlayer.cross(forwardPlayer).normalize();
 
             pose.pushPose();
             pose.translate(-camPos.x, -camPos.y, -camPos.z);
 
-            List<MagicIndicatorClientState.Indicator.Layer> layers =
-                    (ind.layers() != null && !ind.layers().isEmpty())
-                            ? ind.layers()
-                            : List.of(new MagicIndicatorClientState.Indicator.Layer(
+            List<MagicIndicatorClientState.Indicator.Layer> layers = (ind.layers() != null && !ind.layers().isEmpty())
+                    ? ind.layers()
+                    : List.of(new MagicIndicatorClientState.Indicator.Layer(
                             ind.texture(), ind.radius(), ind.spinDegPerTick(), ind.argbColor(), 0f,
-                            MagicIndicatorClientState.Anchor.PLAYER
-                    ));
+                            MagicIndicatorClientState.Anchor.PLAYER));
 
             for (MagicIndicatorClientState.Indicator.Layer layer : layers) {
                 ResourceLocation tex = layer.texture() != null
                         ? layer.texture()
                         : (ind.texture() != null ? ind.texture() : MagicIndicatorClientState.DEFAULT_TEX);
 
-                if (!textureExists(tex)) continue;
+                if (!textureExists(tex))
+                    continue;
 
                 float spinPerTick = layer.spinDegPerTick() != 0f ? layer.spinDegPerTick() : ind.spinDegPerTick();
                 float baseRadius = layer.radius() > 0f ? layer.radius() : ind.radius();
                 int lc = layer.argbColor() != 0 ? layer.argbColor() : ind.argbColor();
 
                 float alpha = baseAlpha * (((lc >>> 24) & 0xFF) / 255f);
-                if (alpha <= 0f) continue;
-                int a = (int)(Math.max(0f, Math.min(1f, alpha)) * 255f) & 0xFF;
+                if (alpha <= 0f)
+                    continue;
+                int a = (int) (Math.max(0f, Math.min(1f, alpha)) * 255f) & 0xFF;
                 int r = (lc >>> 16) & 0xFF;
                 int g = (lc >>> 8) & 0xFF;
                 int b = lc & 0xFF;
@@ -145,15 +150,16 @@ public final class MagicIndicatorRender {
                 float angleRad = (float) Math.toRadians(spinPerTick * (gameTime + pt - ind.startGameTime()));
                 double sin = Math.sin(angleRad);
                 double cos = Math.cos(angleRad);
-                Vec3 rightR = new Vec3(right.x * cos + up.x * -sin, right.y * cos + up.y * -sin, right.z * cos + up.z * -sin);
+                Vec3 rightR = new Vec3(right.x * cos + up.x * -sin, right.y * cos + up.y * -sin,
+                        right.z * cos + up.z * -sin);
                 Vec3 upR = new Vec3(right.x * sin + up.x * cos, right.y * sin + up.y * cos, right.z * sin + up.z * cos);
 
                 float rads = Math.max(0.01f, baseRadius);
 
                 Vec3 c0 = center.add(rightR.scale(-rads)).add(upR.scale(-rads));
-                Vec3 c1 = center.add(rightR.scale(-rads)).add(upR.scale( rads));
-                Vec3 c2 = center.add(rightR.scale( rads)).add(upR.scale( rads));
-                Vec3 c3 = center.add(rightR.scale( rads)).add(upR.scale(-rads));
+                Vec3 c1 = center.add(rightR.scale(-rads)).add(upR.scale(rads));
+                Vec3 c2 = center.add(rightR.scale(rads)).add(upR.scale(rads));
+                Vec3 c3 = center.add(rightR.scale(rads)).add(upR.scale(-rads));
 
                 Vec3 u = c2.subtract(c0);
                 Vec3 v = c1.subtract(c0);
@@ -166,14 +172,15 @@ public final class MagicIndicatorRender {
     }
 
     public static boolean textureExists(ResourceLocation tex) {
-        if (tex == null) return false;
+        if (tex == null)
+            return false;
         return Minecraft.getInstance().getResourceManager().getResource(tex).isPresent();
     }
 
     private static void drawQuad(PoseStack pose, MultiBufferSource buffers, ResourceLocation tex,
-                                 int r, int g, int b, int a,
-                                 Vec3 c0, Vec3 c1, Vec3 c2, Vec3 c3,
-                                 float nx, float ny, float nz) {
+            int r, int g, int b, int a,
+            Vec3 c0, Vec3 c1, Vec3 c2, Vec3 c3,
+            float nx, float ny, float nz) {
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucent(tex));
         PoseStack.Pose last = pose.last();
         var poseMat = last.pose();

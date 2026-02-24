@@ -53,32 +53,36 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
 
     @Override
     public void curioTick(SlotContext ctx, ItemStack stack) {
-        if (ctx == null) return;
+        if (ctx == null)
+            return;
 
         Entity entity = ctx.entity();
-        if (!(entity instanceof Player player)) return;
+        if (!(entity instanceof Player player))
+            return;
 
         boolean client = player.level().isClientSide;
         int unlockedLevel = Math.max(0, this.getUnlockedLevel(stack));
         int maxDefinedLevels = effectsByLevel.size();
         int levelsToApply = Math.min(unlockedLevel, maxDefinedLevels);
 
-        if (levelsToApply <= 0) return;
+        if (levelsToApply <= 0)
+            return;
 
         VestigeContext vctx = new VestigeContext(
                 player,
                 player.level(),
                 stack,
                 unlockedLevel,
-                client
-        );
+                client);
 
         for (int i = 0; i < levelsToApply; i++) {
             List<VestigeEffect> effects = effectsByLevel.get(i);
-            if (effects == null || effects.isEmpty()) continue;
+            if (effects == null || effects.isEmpty())
+                continue;
 
             for (VestigeEffect effect : effects) {
-                if (effect == null) continue;
+                if (effect == null)
+                    continue;
                 effect.tick(vctx);
             }
         }
@@ -86,31 +90,35 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
 
     @Override
     public void onEquip(SlotContext ctx, ItemStack prevStack, ItemStack stack) {
-        if (ctx == null) return;
+        if (ctx == null)
+            return;
 
         Entity entity = ctx.entity();
-        if (!(entity instanceof Player player)) return;
+        if (!(entity instanceof Player player))
+            return;
 
         boolean client = player.level().isClientSide;
         int unlockedLevel = Math.max(0, this.getUnlockedLevel(stack));
         int maxDefinedLevels = effectsByLevel.size();
         int levelsToApply = Math.min(unlockedLevel, maxDefinedLevels);
-        if (levelsToApply <= 0) return;
+        if (levelsToApply <= 0)
+            return;
 
         VestigeContext vctx = new VestigeContext(
                 player,
                 player.level(),
                 stack,
                 unlockedLevel,
-                client
-        );
+                client);
 
         for (int i = 0; i < levelsToApply; i++) {
             List<VestigeEffect> effects = effectsByLevel.get(i);
-            if (effects == null || effects.isEmpty()) continue;
+            if (effects == null || effects.isEmpty())
+                continue;
 
             for (VestigeEffect effect : effects) {
-                if (effect == null) continue;
+                if (effect == null)
+                    continue;
                 effect.onEquip(vctx);
             }
         }
@@ -118,37 +126,48 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
 
     @Override
     public void onUnequip(SlotContext ctx, ItemStack newStack, ItemStack stack) {
-        if (ctx == null) return;
+        if (ctx == null)
+            return;
 
         Entity entity = ctx.entity();
-        if (!(entity instanceof Player player)) return;
+        if (!(entity instanceof Player player))
+            return;
 
         boolean client = player.level().isClientSide;
         int unlockedLevel = Math.max(0, this.getUnlockedLevel(stack));
         int maxDefinedLevels = effectsByLevel.size();
         int levelsToApply = Math.min(unlockedLevel, maxDefinedLevels);
-        if (levelsToApply <= 0) return;
+        if (levelsToApply <= 0)
+            return;
 
         VestigeContext vctx = new VestigeContext(
                 player,
                 player.level(),
                 stack,
                 unlockedLevel,
-                client
-        );
+                client);
 
         for (int i = 0; i < levelsToApply; i++) {
             List<VestigeEffect> effects = effectsByLevel.get(i);
-            if (effects == null || effects.isEmpty()) continue;
+            if (effects == null || effects.isEmpty())
+                continue;
 
             for (VestigeEffect effect : effects) {
-                if (effect == null) continue;
+                if (effect == null)
+                    continue;
                 effect.onUnequip(vctx);
             }
         }
     }
 
     public static int getUnlockedLevel(ItemStack stack) {
-        return 3;
+        if (stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
+            net.minecraft.nbt.CompoundTag customData = stack
+                    .get(net.minecraft.core.component.DataComponents.CUSTOM_DATA).copyTag();
+            if (customData.contains("oriri_level")) {
+                return customData.getInt("oriri_level");
+            }
+        }
+        return 1;
     }
 }

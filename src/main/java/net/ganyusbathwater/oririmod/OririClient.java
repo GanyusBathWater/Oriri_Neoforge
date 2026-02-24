@@ -46,7 +46,7 @@ import java.util.UUID;
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 // You can use EventBusSubscriber to automatically register all static methods
 // in the class annotated with @SubscribeEvent
-@EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public class OririClient {
 
     @SubscribeEvent

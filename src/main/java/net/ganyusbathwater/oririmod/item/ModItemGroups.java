@@ -110,6 +110,16 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SCARLET_DRIPSTONE_BLOCK);
                         output.accept(ModBlocks.POINTED_SCARLET_DRIPSTONE);
 
+                        // Sol Sand Blocks
+                        output.accept(ModBlocks.SOL_SAND);
+                        output.accept(ModBlocks.SOL_SANDSTONE);
+                        output.accept(ModBlocks.CUT_SOL_SANDSTONE);
+                        output.accept(ModBlocks.CHISELED_SOL_SANDSTONE);
+
+                        // Sword Blocks
+                        output.accept(ModBlocks.BROKEN_SWORD_BLOCK);
+                        output.accept(ModBlocks.TILTED_BROKEN_SWORD_BLOCK);
+
                         output.accept(ModBlocks.UPGRADED_OAK_SAPLING);
                         output.accept(ModBlocks.UPGRADED_SPRUCE_SAPLING);
                         output.accept(ModBlocks.UPGRADED_BIRCH_SAPLING);
@@ -133,42 +143,38 @@ public class ModItemGroups {
                         output.accept(ModItems.CALCIUM_CURRANT);
 
                         // -----------Vestiges-----------
-                        output.accept(ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
-                        output.accept(ModItems.CANDY_BAG);
-                        output.accept(ModItems.CRIT_GLOVE);
-                        output.accept(ModItems.DUELLANT_CORTEX);
-                        output.accept(ModItems.HEART_OF_THE_TANK);
-                        output.accept(ModItems.MINERS_LANTERN);
-                        output.accept(ModItems.MIRROR_OF_THE_VOID);
-                        output.accept(ModItems.PHOENIX_FEATHER);
-                        output.accept(ModItems.RELIC_OF_THE_PAST);
-                        output.accept(ModItems.SNOW_BOOTS);
-                        output.accept(ModItems.SOLIS_BROOCH);
-                        output.accept(ModItems.SPRING);
-                        output.accept(ModItems.STIGMA_OF_DARKNESS);
-                        output.accept(ModItems.STRANGE_ENDER_EYE);
-                        output.accept(ModItems.STRIDER_SCALE);
-                        output.accept(ModItems.WITHER_ROSE);
+                        acceptAllLevels(output, ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
+                        acceptAllLevels(output, ModItems.CANDY_BAG);
+                        acceptAllLevels(output, ModItems.CRIT_GLOVE);
+                        acceptAllLevels(output, ModItems.DUELLANT_CORTEX);
+                        acceptAllLevels(output, ModItems.HEART_OF_THE_TANK);
+                        acceptAllLevels(output, ModItems.MINERS_LANTERN);
+                        acceptAllLevels(output, ModItems.MIRROR_OF_THE_VOID);
+                        acceptAllLevels(output, ModItems.PHOENIX_FEATHER);
+                        acceptAllLevels(output, ModItems.RELIC_OF_THE_PAST);
+                        acceptAllLevels(output, ModItems.SNOW_BOOTS);
+                        acceptAllLevels(output, ModItems.SOLIS_BROOCH);
+                        acceptAllLevels(output, ModItems.SPRING);
+                        acceptAllLevels(output, ModItems.STIGMA_OF_DARKNESS);
+                        acceptAllLevels(output, ModItems.STRANGE_ENDER_EYE);
+                        acceptAllLevels(output, ModItems.STRIDER_SCALE);
+                        acceptAllLevels(output, ModItems.WITHER_ROSE);
 
                         // ------------Weapons------------
                         output.accept(ModItems.JADE_SHIELD);
                         output.accept(ModItems.PANDORAS_BLADE);
                         output.accept(ModItems.ORAPHIM_BOW);
                         output.accept(ModItems.PIRATE_SABER);
-                        output.accept(ModItems.NEBULA_PICKAXE);
+
                         output.accept(ModItems.ICE_SWORD);
-                        output.accept(ModItems.MOLTEN_PICKAXE);
+
                         output.accept(ModItems.MJOELNIR);
                         output.accept(ModItems.LAW_BREAKER);
                         output.accept(ModItems.STELLA_PERDITOR);
                         output.accept(ModItems.QILINS_WRATH);
                         output.accept(ModItems.SOLS_EMBRACE);
                         output.accept(ModItems.ARBITER_CROSSBOW);
-                        output.accept(ModItems.EMERALD_SWORD);
-                        output.accept(ModItems.EMERALD_AXE);
-                        output.accept(ModItems.EMERALD_PICKAXE);
-                        output.accept(ModItems.EMERALD_SHOVEL);
-                        output.accept(ModItems.EMERALD_HOE);
+
                         output.accept(ModItems.STAFF_OF_WISE);
                         output.accept(ModItems.STAFF_OF_EARTH);
                         output.accept(ModItems.STAFF_OF_FOREST);
@@ -182,6 +188,12 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_JOURNEYMAN);
                         output.accept(ModItems.BOOK_OF_WISE);
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
+                        acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
+                        acceptAllLevels(output, ModItems.SKELETON_ENCYCLOPEDIA);
+                        acceptAllLevels(output, ModItems.IRON_GOLEM_MANUAL);
+                        acceptAllLevels(output, ModItems.BLAZING_PYROMANIAC_GUIDE);
+                        acceptAllLevels(output, ModItems.MAGMA_COOKING_BOOK);
+                        acceptAllLevels(output, ModItems.SLIMY_COOKING_BOOK);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);
@@ -248,6 +260,18 @@ public class ModItemGroups {
                         output.accept(ModItems.THE_WORLD);
 
                     }).build());
+
+    private static void acceptAllLevels(CreativeModeTab.Output output,
+            Supplier<? extends net.minecraft.world.item.Item> itemSupplier) {
+        for (int i = 1; i <= 3; i++) {
+            ItemStack stack = new ItemStack(itemSupplier.get());
+            net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+            tag.putInt("oriri_level", i);
+            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                    net.minecraft.world.item.component.CustomData.of(tag));
+            output.accept(stack);
+        }
+    }
 
     public static void registerItemGroups(IEventBus eventBus) {
         CREATIVE_MODE_TAB.register(eventBus);

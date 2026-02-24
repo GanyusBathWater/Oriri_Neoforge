@@ -6,9 +6,11 @@ import net.ganyusbathwater.oririmod.item.custom.consumable.*;
 import net.ganyusbathwater.oririmod.item.custom.magic.MagicBoltItem;
 import net.ganyusbathwater.oririmod.item.custom.magic.MagicStaffItem;
 import net.ganyusbathwater.oririmod.item.custom.magic.OmniMagicItem;
+import net.ganyusbathwater.oririmod.item.custom.magic.SummonerWeaponItem;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.*;
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
 import net.ganyusbathwater.oririmod.util.ModRarity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -154,19 +156,6 @@ public class ModItems {
                                                         .stacksTo(1),
                                         ModRarity.LEGENDARY));
 
-        public static final DeferredItem<PickaxeItem> NEBULA_PICKAXE = ITEMS.register("nebula_pickaxe",
-                        () -> new CustomPickaxeItem(
-                                        Tiers.NETHERITE, new Item.Properties()
-                                                        .attributes(PickaxeItem.createAttributes(Tiers.NETHERITE, 1,
-                                                                        -2.8F))
-                                                        .stacksTo(1),
-                                        ModRarity.LEGENDARY));
-        public static final DeferredItem<PickaxeItem> MOLTEN_PICKAXE = ITEMS.register("molten_pickaxe",
-                        () -> new CustomPickaxeItem(Tiers.DIAMOND,
-                                        new Item.Properties().attributes(
-                                                        PickaxeItem.createAttributes(Tiers.DIAMOND, 1, -2.8F))
-                                                        .stacksTo(1),
-                                        ModRarity.RARE));
         public static final DeferredItem<MaceItem> MJOELNIR = ITEMS.register("mjoelnir",
                         () -> new CustomHammerItem(
                                         new Item.Properties().attributes(MaceItem.createAttributes()).stacksTo(1),
@@ -176,22 +165,6 @@ public class ModItems {
                         () -> new CustomCrossbowItem(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
         public static final DeferredItem<BowItem> ORAPHIM_BOW = ITEMS.register("oraphim_bow",
                         () -> new CustomBowItemClass(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
-
-        public static final DeferredItem<SwordItem> EMERALD_SWORD = ITEMS.register("emerald_sword",
-                        () -> new SwordItem(Tiers.DIAMOND, new Item.Properties().stacksTo(1).fireResistant()
-                                        .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F))));
-        public static final DeferredItem<AxeItem> EMERALD_AXE = ITEMS.register("emerald_axe",
-                        () -> new AxeItem(Tiers.DIAMOND, new Item.Properties().stacksTo(1).fireResistant()
-                                        .attributes(AxeItem.createAttributes(Tiers.DIAMOND, 5.0F, -3.0F))));
-        public static final DeferredItem<PickaxeItem> EMERALD_PICKAXE = ITEMS.register("emerald_pickaxe",
-                        () -> new PickaxeItem(Tiers.DIAMOND, new Item.Properties().stacksTo(1).fireResistant()
-                                        .attributes(PickaxeItem.createAttributes(Tiers.DIAMOND, 1.0F, -2.8F))));
-        public static final DeferredItem<ShovelItem> EMERALD_SHOVEL = ITEMS.register("emerald_shovel",
-                        () -> new ShovelItem(Tiers.DIAMOND, new Item.Properties().stacksTo(1).fireResistant()
-                                        .attributes(ShovelItem.createAttributes(Tiers.DIAMOND, 1.5F, -3.0F))));
-        public static final DeferredItem<HoeItem> EMERALD_HOE = ITEMS.register("emerald_hoe",
-                        () -> new HoeItem(Tiers.DIAMOND, new Item.Properties().stacksTo(1).fireResistant()
-                                        .attributes(HoeItem.createAttributes(Tiers.DIAMOND, -3.0F, 0.0F))));
 
         public static final DeferredItem<MagicStaffItem> STAFF_OF_WISE = ITEMS.register("staff_of_wise",
                         () -> new MagicStaffItem(new Item.Properties().stacksTo(1), MagicStaffItem.StaffAction.REGEN,
@@ -222,19 +195,44 @@ public class ModItems {
                         () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.EXPLOSIVE, 2, 20,
                                         ModRarity.RARE));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_AMATEUR = ITEMS.register("book_of_amateur",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.NORMAL, 2, 4,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.AMATEUR_FIREBALL, 2,
+                                        4,
                                         ModRarity.COMMON));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_APPRENTICE = ITEMS.register("book_of_apprentice",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.NORMAL, 2, 6,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.APPRENTICE_FIREBALL,
+                                        2, 6,
                                         ModRarity.UNCOMMON));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_JOURNEYMAN = ITEMS.register("book_of_journeyman",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.NORMAL, 2, 10,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.JOURNEYMAN_FIREBALL,
+                                        2, 10,
                                         ModRarity.RARE));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_WISE = ITEMS.register("book_of_wise",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.NORMAL, 2, 16,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.WISE_FIREBALL, 2,
+                                        16,
                                         ModRarity.MYTHIC));
         public static final DeferredItem<OmniMagicItem> STAFF_OF_ALMIGHTY = ITEMS.register("staff_of_almighty",
                         () -> new OmniMagicItem(new Item.Properties().stacksTo(1), ModRarity.GODLY, 2, 500, 1));
+
+        public static final DeferredItem<SummonerWeaponItem> ZOMBIE_ENCYCLOPEDIA = ITEMS.register("zombie_encyclopedia",
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                                        EntityType.ZOMBIE, ModRarity.RARE, 30, 20, 600, 20));
+        public static final DeferredItem<SummonerWeaponItem> SKELETON_ENCYCLOPEDIA = ITEMS.register(
+                        "skeleton_encyclopedia",
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                                        EntityType.SKELETON, ModRarity.RARE, 30, 20, 600, 20));
+        public static final DeferredItem<SummonerWeaponItem> IRON_GOLEM_MANUAL = ITEMS.register("iron_golem_manual",
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                                        EntityType.IRON_GOLEM, ModRarity.RARE, 30, 20, 600, 20));
+        public static final DeferredItem<SummonerWeaponItem> BLAZING_PYROMANIAC_GUIDE = ITEMS.register(
+                        "blazing_pyromaniac_guide",
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                                        EntityType.BLAZE, ModRarity.RARE, 30, 20, 600, 20));
+        public static final DeferredItem<SummonerWeaponItem> MAGMA_COOKING_BOOK = ITEMS.register("magma_cooking_book",
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                                        EntityType.MAGMA_CUBE, ModRarity.RARE, 30, 20, 600, 20));
+        public static final DeferredItem<SummonerWeaponItem> SLIMY_COOKING_BOOK = ITEMS.register("slimy_cooking_book",
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                                        EntityType.SLIME, ModRarity.RARE, 30, 20, 600, 20));
 
         // ------------------------------------------------------Armor---------------------------------------------------------
 
