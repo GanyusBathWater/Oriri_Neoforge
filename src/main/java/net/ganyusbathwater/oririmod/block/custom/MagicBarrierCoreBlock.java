@@ -18,13 +18,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MagicBarrierCoreBlock extends Block {
-    public MagicBarrierCoreBlock(Properties properties)
-    {
+    public MagicBarrierCoreBlock(Properties properties) {
         super(properties);
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+            Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) {
             return ItemInteractionResult.sidedSuccess(true);
         }
@@ -60,7 +60,8 @@ public class MagicBarrierCoreBlock extends Block {
 
             for (Direction dir : Direction.values()) {
                 BlockPos next = current.relative(dir);
-                if (visited.contains(next)) continue;
+                if (visited.contains(next))
+                    continue;
 
                 BlockState st = level.getBlockState(next);
                 if (st.getBlock() instanceof MagicBarrierBlock) {
@@ -74,6 +75,8 @@ public class MagicBarrierCoreBlock extends Block {
 
     @Override
     public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side) {
-        return adjacentBlockState.is(this) || super.skipRendering(state, adjacentBlockState, side);
+        return adjacentBlockState.getBlock() instanceof MagicBarrierCoreBlock
+                || adjacentBlockState.getBlock() instanceof MagicBarrierBlock
+                || super.skipRendering(state, adjacentBlockState, side);
     }
 }

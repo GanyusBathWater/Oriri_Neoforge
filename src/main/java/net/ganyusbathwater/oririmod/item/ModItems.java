@@ -80,6 +80,11 @@ public class ModItems {
         public static final DeferredItem<VestigeItem> WITHER_ROSE = ITEMS.register("wither_rose",
                         () -> new WitherRose(new Item.Properties().stacksTo(1)));
 
+        // Test item for AoE block indicator
+        public static final DeferredItem<Item> AOE_TEST_ITEM = ITEMS.register("aoe_test_item",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.magic.AoETestItem(
+                                        new Item.Properties().stacksTo(1)));
+
         // ---------------------------------------Foods-----------------------------------------------------------
 
         public static final DeferredItem<Item> ELDERBERRY = ITEMS.register("elderberry",
@@ -191,6 +196,9 @@ public class ModItems {
         public static final DeferredItem<MagicBoltItem> STAFF_OF_VOID = ITEMS.register("staff_of_void",
                         () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.ENDER, 2, 18,
                                         ModRarity.MYTHIC));
+        public static final DeferredItem<MagicBoltItem> STAFF_OF_ETERNAL_ICE = ITEMS.register("staff_of_eternal_ice",
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.ETERNAL_ICE, 0, 80,
+                                        ModRarity.LEGENDARY));
         public static final DeferredItem<MagicBoltItem> DODOCO = ITEMS.register("dodoco",
                         () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.EXPLOSIVE, 2, 20,
                                         ModRarity.RARE));

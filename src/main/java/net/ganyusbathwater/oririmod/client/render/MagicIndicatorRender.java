@@ -71,15 +71,20 @@ public final class MagicIndicatorRender {
             // Persistenz bis Meteor-Impact: entfernen, wenn kein Meteor des Spielers mehr
             // existiert
             if (ind.persistentUntilMeteorImpact()) {
-                boolean hasMeteor = false;
+                boolean hasProjectile = false;
                 for (Entity x : mc.level.entitiesForRendering()) {
                     if (x instanceof MeteorEntity m && m.isAlive() && m.getOwnerId() == living.getId()) {
-                        hasMeteor = true;
+                        hasProjectile = true;
+                        break;
+                    }
+                    if (x instanceof net.ganyusbathwater.oririmod.entity.IcicleEntity ic && ic.isAlive()
+                            && ic.getOwnerId() == living.getId()) {
+                        hasProjectile = true;
                         break;
                     }
                 }
                 long age = gameTime - ind.startGameTime();
-                if (!hasMeteor && age > 40) {
+                if (!hasProjectile && age > 40) {
                     it.remove();
                     continue;
                 }

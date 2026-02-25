@@ -10,7 +10,8 @@ public enum MagicBoltAbility {
     AMATEUR_FIREBALL,
     APPRENTICE_FIREBALL,
     JOURNEYMAN_FIREBALL,
-    WISE_FIREBALL;
+    WISE_FIREBALL,
+    ETERNAL_ICE;
 
     public static MagicBoltAbility fromId(int id) {
         MagicBoltAbility[] vals = values();

@@ -1,6 +1,5 @@
 package net.ganyusbathwater.oririmod.block.custom;
 
-
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,7 +12,9 @@ public class MagicBarrierBlock extends Block {
 
     @Override
     public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side) {
-        return adjacentBlockState.is(this) || super.skipRendering(state, adjacentBlockState, side);
+        return adjacentBlockState.getBlock() instanceof MagicBarrierBlock
+                || adjacentBlockState.getBlock() instanceof MagicBarrierCoreBlock
+                || super.skipRendering(state, adjacentBlockState, side);
     }
 
 }

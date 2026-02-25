@@ -6,7 +6,9 @@ import net.ganyusbathwater.oririmod.events.world.WorldEventType;
 import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.ganyusbathwater.oririmod.network.packet.ManaSyncPacket;
 import net.ganyusbathwater.oririmod.network.packet.ManaSyncPayload;
+import net.ganyusbathwater.oririmod.network.packet.SpawnAoEIndicatorPayload;
 import net.ganyusbathwater.oririmod.network.packet.SyncWorldEventPayload;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -19,6 +21,8 @@ public final class NetworkHandler {
             "mana_sync");
     public static final ResourceLocation SYNC_WORLD_EVENT = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "sync_world_event");
+    public static final ResourceLocation SPAWN_AOE_INDICATOR = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "spawn_aoe_indicator");
 
     private NetworkHandler() {
     }
@@ -48,6 +52,15 @@ public final class NetworkHandler {
                     WorldEventManager.updateClientEvent(payload.eventType(), payload.ticksRemaining(),
                             payload.eventDuration());
                 }));
+
+        registrar.playToClient(
+                SpawnAoEIndicatorPayload.TYPE,
+                SpawnAoEIndicatorPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var pkt = payload.getPacket();
+                    net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addIndicator(
+                            pkt.getCenter(), pkt.getRadius(), pkt.getDurationTicks(), pkt.getArgbColor());
+                }));
     }
 
     public static void sendManaToPlayer(ServerPlayer player, int mana, int maxMana) {
@@ -69,5 +82,14 @@ public final class NetworkHandler {
             int eventDuration) {
         // Die vereinfachte Payload direkt erstellen
         PacketDistributor.sendToPlayer(player, new SyncWorldEventPayload(eventType, ticksRemaining, eventDuration));
+    }
+
+    public static void sendAoEIndicatorToPlayersAround(net.minecraft.server.level.ServerLevel level, BlockPos center,
+            float radius, int durationTicks, int argbColor) {
+        net.ganyusbathwater.oririmod.network.packet.SpawnAoEIndicatorPacket pkt = new net.ganyusbathwater.oririmod.network.packet.SpawnAoEIndicatorPacket(
+                center, radius, durationTicks, argbColor);
+        PacketDistributor.sendToPlayersNear(
+                level, null, center.getX(), center.getY(), center.getZ(), 128.0D,
+                new SpawnAoEIndicatorPayload(pkt));
     }
 }

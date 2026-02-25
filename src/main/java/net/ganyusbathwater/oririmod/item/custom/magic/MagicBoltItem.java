@@ -5,9 +5,11 @@ import net.ganyusbathwater.oririmod.entity.MagicBoltEntity;
 import net.ganyusbathwater.oririmod.entity.MeteorEntity;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.mana.ModManaUtil;
+import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.ganyusbathwater.oririmod.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,6 +33,13 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
     private static final float METEOR_OUTER_DISTANCE_PLAYER = 1.6f;
     private static final float METEOR_MID_RADIUS_GROUND = 7.0f;
     private static final float METEOR_INNER_RADIUS_GROUND = 5.0f;
+
+    // Ice staff constants (ice-blue tint)
+    private static final int ICE_COLOR = 0xCC88DDFF;
+    private static final float ICE_OUTER_RADIUS_PLAYER = 1.2f;
+    private static final float ICE_OUTER_DISTANCE_PLAYER = 1.6f;
+    private static final float ICE_MID_RADIUS_GROUND = 5.0f;
+    private static final float ICE_INNER_RADIUS_GROUND = 3.5f;
 
     public MagicBoltItem(Properties props, MagicBoltAbility ability, int cooldown, int manaCost, ModRarity rarity) {
         super(props);
@@ -62,7 +71,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         if (!level.isClientSide)
             return;
 
-        if (this.ability == MagicBoltAbility.METEOR) {
+        if (this.ability == MagicBoltAbility.METEOR || this.ability == MagicBoltAbility.ETERNAL_ICE) {
             BlockHitResult hit = raycastToGround(level, living, 96.0);
             if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
                 MagicIndicatorClientState.stopFor(living);
@@ -84,20 +93,27 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             ResourceLocation TEX_INNER = ResourceLocation.fromNamespaceAndPath("oririmod",
                     "textures/effect/magic_circles/arcane_inner.png");
 
+            boolean isIce = this.ability == MagicBoltAbility.ETERNAL_ICE;
+            int color = isIce ? ICE_COLOR : 0xFFFFFFFF;
+            float outerR = isIce ? ICE_OUTER_RADIUS_PLAYER : METEOR_OUTER_RADIUS_PLAYER;
+            float outerD = isIce ? ICE_OUTER_DISTANCE_PLAYER : METEOR_OUTER_DISTANCE_PLAYER;
+            float midR = isIce ? ICE_MID_RADIUS_GROUND : METEOR_MID_RADIUS_GROUND;
+            float innerR = isIce ? ICE_INNER_RADIUS_GROUND : METEOR_INNER_RADIUS_GROUND;
+
             MagicIndicatorClientState.Indicator.Builder b = MagicIndicatorClientState.Indicator.builder()
                     .duration(0)
-                    .distance(METEOR_OUTER_DISTANCE_PLAYER)
+                    .distance(outerD)
                     .spin(4.0f)
                     .worldAnchor(groundCenter);
 
             MagicIndicatorClientState.Indicator.Layer outer = new MagicIndicatorClientState.Indicator.Layer(
-                    TEX_OUTER, METEOR_OUTER_RADIUS_PLAYER, 10f, 0xFFFFFFFF, 0f,
+                    TEX_OUTER, outerR, 10f, color, 0f,
                     MagicIndicatorClientState.Anchor.PLAYER);
             MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
-                    TEX_MID, METEOR_MID_RADIUS_GROUND, -6f, 0xFFFFFFFF, 0f,
+                    TEX_MID, midR, -6f, color, 0f,
                     MagicIndicatorClientState.Anchor.WORLD);
             MagicIndicatorClientState.Indicator.Layer inner = new MagicIndicatorClientState.Indicator.Layer(
-                    TEX_INNER, METEOR_INNER_RADIUS_GROUND, 6f, 0xFFFFFFFF, 0f,
+                    TEX_INNER, innerR, 6f, color, 0f,
                     MagicIndicatorClientState.Anchor.WORLD);
 
             MagicIndicatorClientState.startFor(living, b.addLayer(outer).addLayer(mid).addLayer(inner).build());
@@ -118,7 +134,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
     @Override
     public void releaseUsing(ItemStack stack, Level level, LivingEntity living, int timeLeft) {
         if (level.isClientSide) {
-            if (this.ability == MagicBoltAbility.METEOR) {
+            if (this.ability == MagicBoltAbility.METEOR || this.ability == MagicBoltAbility.ETERNAL_ICE) {
                 BlockHitResult hit = raycastToGround(level, living, 96.0);
                 if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
                     BlockPos ground = findGround(level, hit.getBlockPos().above(), 12);
@@ -133,6 +149,11 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
                         MagicIndicatorClientState.stopFor(living);
 
+                        boolean isIce = this.ability == MagicBoltAbility.ETERNAL_ICE;
+                        int color = isIce ? ICE_COLOR : 0xFFFFFFFF;
+                        float midR = isIce ? ICE_MID_RADIUS_GROUND : METEOR_MID_RADIUS_GROUND;
+                        float innerR = isIce ? ICE_INNER_RADIUS_GROUND : METEOR_INNER_RADIUS_GROUND;
+
                         MagicIndicatorClientState.Indicator.Builder b = MagicIndicatorClientState.Indicator.builder()
                                 .duration(0)
                                 .spin(6f)
@@ -140,10 +161,10 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
                                 .persistentUntilMeteorImpact(true);
 
                         MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
-                                TEX_MID, METEOR_MID_RADIUS_GROUND, -6f, 0xFFFFFFFF, 0f,
+                                TEX_MID, midR, -6f, color, 0f,
                                 MagicIndicatorClientState.Anchor.WORLD);
                         MagicIndicatorClientState.Indicator.Layer inner = new MagicIndicatorClientState.Indicator.Layer(
-                                TEX_INNER, METEOR_INNER_RADIUS_GROUND, 6f, 0xFFFFFFFF, 0f,
+                                TEX_INNER, innerR, 6f, color, 0f,
                                 MagicIndicatorClientState.Anchor.WORLD);
 
                         MagicIndicatorClientState.startFor(living, b.addLayer(mid).addLayer(inner).build());
@@ -167,6 +188,25 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
                 return;
         }
 
+        if (this.ability == MagicBoltAbility.ETERNAL_ICE) {
+            BlockHitResult hit = raycastToGround(level, living, 96.0);
+            if (hit == null || hit.getType() != HitResult.Type.BLOCK)
+                return;
+
+            BlockPos ground = findGround(level, hit.getBlockPos().above(), 12);
+            if (ground == null)
+                return;
+
+            IcicleStormUtil.unleash((ServerLevel) level, ground.immutable(), living);
+            NetworkHandler.sendAoEIndicatorToPlayersAround((ServerLevel) level, ground.immutable(), 12.0f, 100,
+                    0x8888DDFF);
+
+            if (living instanceof Player p && cooldown > 0) {
+                p.getCooldowns().addCooldown(this, cooldown);
+            }
+            return;
+        }
+
         if (this.ability == MagicBoltAbility.METEOR) {
             BlockHitResult hit = raycastToGround(level, living, 96.0);
             if (hit == null || hit.getType() != HitResult.Type.BLOCK)
@@ -182,6 +222,8 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
             meteor.configure(ground.immutable(), 12.0f, 7);
             meteor.setOwnerId(living.getId());
+            NetworkHandler.sendAoEIndicatorToPlayersAround((ServerLevel) level, ground.immutable(), 13.0f, 40,
+                    0x88FF6600);
 
             double spawnX = ground.getX() + 0.5;
             double spawnZ = ground.getZ() + 0.5;
@@ -206,6 +248,15 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             fireball.configureForGrade(this.ability);
             fireball.launchStraight(living, 1.6F); // Base speed
             level.addFreshEntity(fireball);
+
+            BlockHitResult hit = raycastToGround(level, living, 96.0);
+            if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
+                BlockPos ground = findGround(level, hit.getBlockPos().above(), 12);
+                if (ground != null) {
+                    NetworkHandler.sendAoEIndicatorToPlayersAround((ServerLevel) level, ground.immutable(),
+                            fireball.getExplosionRadius() + 6.0f, 30, 0x88FF3300);
+                }
+            }
 
             if (living instanceof Player p) {
                 p.getCooldowns().addCooldown(this, cooldown);

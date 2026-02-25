@@ -45,6 +45,14 @@ public final class ModEntities {
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "meteor")
                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<IcicleEntity>> ICICLE = ENTITIES.register("icicle",
+                        () -> EntityType.Builder.<IcicleEntity>of(IcicleEntity::new, MobCategory.MISC)
+                                        .sized(0.5F, 1.0F)
+                                        .clientTrackingRange(64)
+                                        .updateInterval(1)
+                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "icicle")
+                                                        .toString()));
+
         public static void register(IEventBus modBus) {
                 ENTITIES.register(modBus);
         }

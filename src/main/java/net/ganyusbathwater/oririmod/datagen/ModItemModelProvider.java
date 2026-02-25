@@ -190,6 +190,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.STAFF_OF_COSMOS);
                 handheldItem(ModItems.STAFF_OF_HELL);
                 handheldItem(ModItems.STAFF_OF_VOID);
+                handheldItem(ModItems.STAFF_OF_ETERNAL_ICE);
                 handheldItem(ModItems.DODOCO);
                 handheldItem(ModItems.ONE_THOUSAND_SCREAMS);
                 handheldItem(ModItems.BOOK_OF_AMATEUR);

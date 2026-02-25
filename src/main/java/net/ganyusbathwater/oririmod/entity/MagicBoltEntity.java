@@ -222,6 +222,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
             case ENDER -> speed *= 0.9F;
             case NORMAL -> speed *= 1.0F;
             case EXPLOSIVE -> speed *= 0.85F;
+            default -> {
+            }
         }
 
         Vec3 view = shooter.getViewVector(1.0F).normalize();
@@ -266,6 +268,7 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
             case APPRENTICE_FIREBALL -> 0.0F;
             case JOURNEYMAN_FIREBALL -> 0.0F;
             case WISE_FIREBALL -> 0.0F;
+            case ETERNAL_ICE -> 0.0F;
         };
 
         if (damage > 0 && hit.getEntity().isAlive()) {
