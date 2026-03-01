@@ -60,8 +60,7 @@ public final class MagicIndicatorRender {
             if (!ind.persistentUntilMeteorImpact()) {
                 boolean usingMagicBolt = living.isUsingItem()
                         && !living.getUseItem().isEmpty()
-                        && (living.getUseItem().getItem() instanceof MagicBoltItem || living.getUseItem()
-                                .getItem() instanceof net.ganyusbathwater.oririmod.item.custom.magic.SummonerWeaponItem);
+                        && living.getUseItem().getItem().getClass().getName().contains("oririmod");
                 if (!usingMagicBolt) {
                     it.remove();
                     continue;

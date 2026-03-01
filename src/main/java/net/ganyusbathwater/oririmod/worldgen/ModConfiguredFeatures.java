@@ -20,8 +20,11 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 
 import java.util.List;
 
@@ -56,6 +59,7 @@ public class ModConfiguredFeatures {
                         "elderwoods_dripstone_cluster");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_DRIPSTONE_CLUSTER_KEY = registerKey(
                         "scarlet_dripstone_cluster");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> JADE_ORE_KEY = registerKey("jade_ore");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
@@ -201,6 +205,14 @@ public class ModConfiguredFeatures {
                                                 12, // floor-to-ceiling search range
                                                 true // use scarlet dripstone
                                 ));
+
+                List<OreConfiguration.TargetBlockState> jadeOreTargets = List.of(
+                                OreConfiguration.target(new BlockMatchTest(Blocks.STONE),
+                                                ModBlocks.JADE_ORE.get().defaultBlockState()),
+                                OreConfiguration.target(new BlockMatchTest(Blocks.DEEPSLATE),
+                                                ModBlocks.DEEPSLATE_JADE_ORE.get().defaultBlockState()));
+
+                register(context, JADE_ORE_KEY, Feature.ORE, new OreConfiguration(jadeOreTargets, 12));
 
         }
 

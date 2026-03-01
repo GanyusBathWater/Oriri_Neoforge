@@ -23,6 +23,8 @@ import java.util.List;
 public class IcicleEntity extends Projectile {
     private static final EntityDataAccessor<Integer> OWNER_ID = SynchedEntityData.defineId(IcicleEntity.class,
             EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> FLOATING_TICKS = SynchedEntityData.defineId(IcicleEntity.class,
+            EntityDataSerializers.INT);
 
     private BlockPos impactPos = BlockPos.ZERO;
     private int maxLife = 20 * 10; // 10s failsafe
@@ -47,9 +49,18 @@ public class IcicleEntity extends Projectile {
         return this.entityData.get(OWNER_ID);
     }
 
+    public void setFloatingTicks(int ticks) {
+        this.entityData.set(FLOATING_TICKS, ticks);
+    }
+
+    public int getFloatingTicks() {
+        return this.entityData.get(FLOATING_TICKS);
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(OWNER_ID, 0);
+        builder.define(FLOATING_TICKS, 30);
     }
 
     @Override
@@ -59,6 +70,9 @@ public class IcicleEntity extends Projectile {
         if (tag.contains("OwnerId")) {
             this.setOwnerId(tag.getInt("OwnerId"));
         }
+        if (tag.contains("FloatingTicks")) {
+            this.setFloatingTicks(tag.getInt("FloatingTicks"));
+        }
     }
 
     @Override
@@ -66,29 +80,59 @@ public class IcicleEntity extends Projectile {
         tag.putLong("ImpactPos", this.impactPos.asLong());
         tag.putInt("MaxLife", this.maxLife);
         tag.putInt("OwnerId", this.getOwnerId());
+        tag.putInt("FloatingTicks", this.getFloatingTicks());
     }
 
     @Override
     public void tick() {
         super.tick();
+        int floatTicks = this.getFloatingTicks();
+
         if (!level().isClientSide) {
-            if (this.tickCount > maxLife || !level().hasChunkAt(blockPosition())) {
+            // Extend max life by the floating duration so it doesn't despawn early
+            if (this.tickCount > maxLife + floatTicks || !level().hasChunkAt(blockPosition())) {
                 discard();
                 return;
             }
         }
 
         Vec3 vel = getDeltaMovement();
-        // Accelerate downward (gravity)
-        vel = new Vec3(vel.x * 0.99, vel.y - 0.03, vel.z * 0.99);
-        setDeltaMovement(vel);
+
+        if (this.tickCount < floatTicks) {
+            // Floating phase: no gravity
+            vel = Vec3.ZERO;
+            setDeltaMovement(vel);
+        } else if (this.tickCount == floatTicks) {
+            // Start falling with an initial velocity
+            vel = new Vec3(0, -0.2, 0);
+            setDeltaMovement(vel);
+        } else {
+            // Accelerate downward (gravity)
+            vel = new Vec3(vel.x * 0.99, vel.y - 0.03, vel.z * 0.99);
+            setDeltaMovement(vel);
+        }
+
         move(MoverType.SELF, vel);
 
-        // Spawn ice particles while falling
-        if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY(), getZ(), 2, 0.1, 0.2, 0.1, 0.01);
-            if (tickCount % 5 == 0) {
-                server.sendParticles(ParticleTypes.ITEM_SNOWBALL, getX(), getY(), getZ(), 1, 0.05, 0.1, 0.05, 0.0);
+        // Spawn ice particles (Client-Side)
+        if (level().isClientSide) {
+            // Snowflakes all the time
+            for (int i = 0; i < 2; i++) {
+                level().addParticle(ParticleTypes.SNOWFLAKE,
+                        this.getX() + (level().random.nextDouble() - 0.5) * 0.2,
+                        this.getY() + level().random.nextDouble() * 0.4,
+                        this.getZ() + (level().random.nextDouble() - 0.5) * 0.2,
+                        (level().random.nextDouble() - 0.5) * 0.02,
+                        -0.01,
+                        (level().random.nextDouble() - 0.5) * 0.02);
+            }
+            // Snowballs only while falling
+            if (this.tickCount % 5 == 0 && this.tickCount >= floatTicks) {
+                level().addParticle(ParticleTypes.ITEM_SNOWBALL,
+                        this.getX() + (level().random.nextDouble() - 0.5) * 0.1,
+                        this.getY() + level().random.nextDouble() * 0.2,
+                        this.getZ() + (level().random.nextDouble() - 0.5) * 0.1,
+                        0.0, 0.0, 0.0);
             }
         }
 

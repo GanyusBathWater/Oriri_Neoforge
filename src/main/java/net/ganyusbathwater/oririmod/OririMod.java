@@ -15,6 +15,7 @@ import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.ganyusbathwater.oririmod.particle.ModParticles;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
+import net.ganyusbathwater.oririmod.sound.ModSounds;
 import net.ganyusbathwater.oririmod.util.TooltipHandler;
 import net.ganyusbathwater.oririmod.worldgen.ModFeatures;
 import net.ganyusbathwater.oririmod.worldgen.ModCarvers;
@@ -69,6 +70,7 @@ public class OririMod {
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);
         ModEntities.register(modEventBus);
+        ModSounds.register(modEventBus);
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 

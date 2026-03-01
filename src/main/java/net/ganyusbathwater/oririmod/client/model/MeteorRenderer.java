@@ -14,10 +14,9 @@ import net.minecraft.resources.ResourceLocation;
 
 public class MeteorRenderer extends EntityRenderer<MeteorEntity> {
 
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/meteor.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/entity/meteor.png");
     private static final int WHITE = 0xFFFFFFFF;
-    private static final float SCALE = 5.5f;
 
     private final MeteorModel model;
 
@@ -29,11 +28,11 @@ public class MeteorRenderer extends EntityRenderer<MeteorEntity> {
 
     @Override
     public void render(MeteorEntity entity, float entityYaw, float partialTicks, PoseStack poseStack,
-                       MultiBufferSource buffer, int packedLight) {
+            MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
 
-
-        poseStack.scale(SCALE, SCALE, SCALE);
+        float scale = entity.getMeteorScale();
+        poseStack.scale(scale, scale, scale);
 
         float spin = (entity.tickCount + partialTicks) * 6.0f;
         poseStack.mulPose(Axis.YP.rotationDegrees(spin));

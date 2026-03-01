@@ -1,0 +1,20 @@
+{
+    "doom_clock_tick": {
+        "category": "hostile",
+        "sounds": [
+            {
+                "name": "oririmod:doom_clock/clock_ticking",
+                "stream": false
+            }
+        ]
+    },
+    "doom_clock_gong": {
+        "category": "hostile",
+        "sounds": [
+            {
+                "name": "oririmod:doom_clock/clock_gong",
+                "stream": false
+            }
+        ]
+    }
+}

@@ -14,6 +14,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -74,53 +75,44 @@ public class AoEIndicatorRenderer {
             if (a <= 0.05f)
                 continue;
 
-            BlockPos center = ind.center;
-            int rad = (int) Math.ceil(ind.radius);
-            int radSq = rad * rad;
+            // Pass 1: Draw all solid filled quads
+            VertexConsumer filledBuffer = buffers.getBuffer(RenderType.debugFilledBox());
+            PoseStack.Pose last = poseStack.last();
+            var mat = last.pose();
 
-            // Scan blocks in radius
-            for (int x = -rad; x <= rad; x++) {
-                for (int z = -rad; z <= rad; z++) {
-                    if (x * x + z * z > radSq)
-                        continue;
+            boolean firstQuad = true;
+            float lastX = 0, lastY = 0, lastZ = 0;
 
-                    BlockPos colPos = center.offset(x, 0, z);
+            for (AABB aabb : ind.cachedAabbs) {
+                float y = (float) (aabb.maxY + 0.02); // slight offset to prevent Z-fighting
 
-                    // Find highest solid block surface within +/- 4 blocks Y
-                    BlockPos surfacePos = null;
-                    VoxelShape surfaceShape = null;
+                float swX = (float) aabb.minX;
+                float swZ = (float) aabb.maxZ;
+                float seX = (float) aabb.maxX;
+                float seZ = (float) aabb.maxZ;
+                float nwX = (float) aabb.minX;
+                float nwZ = (float) aabb.minZ;
+                float neX = (float) aabb.maxX;
+                float neZ = (float) aabb.minZ;
 
-                    for (int y = 4; y >= -4; y--) {
-                        BlockPos checkPos = colPos.offset(0, y, 0);
-                        BlockState state = level.getBlockState(checkPos);
-                        VoxelShape shape = state.getShape(level, checkPos);
-                        if (!shape.isEmpty()) {
-                            surfacePos = checkPos;
-                            surfaceShape = shape;
-                            break;
-                        }
-                    }
-
-                    if (surfacePos != null && surfaceShape != null) {
-                        // Render a colored quad exactly on top of the shape
-                        AABB aabb = surfaceShape.bounds().move(surfacePos);
-
-                        // We will just draw a flat quad slightly above the AABB max Y
-                        double quadY = aabb.maxY + 0.02; // slight offset to prevent Z-fighting
-
-                        PoseStack.Pose last = poseStack.last();
-                        var mat = last.pose();
-
-                        drawQuad(mat, buffers, r, g, b, a,
-                                aabb.minX, quadY, aabb.minZ,
-                                aabb.maxX, aabb.maxZ);
-
-                        // Also draw a box perimeter outline for better visibility
-                        LevelRenderer.renderLineBox(poseStack, buffers.getBuffer(RenderType.lines()),
-                                aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ,
-                                r, g, b, Math.min(1.0f, a * 2.0f));
-                    }
+                if (!firstQuad) {
+                    // Insert degenerate triangles connecting the last quad to this one.
+                    // Duplicate the last vertex of the previous quad, and the first vertex of this
+                    // one.
+                    filledBuffer.addVertex(mat, lastX, lastY, lastZ).setColor(r, g, b, a);
+                    filledBuffer.addVertex(mat, swX, y, swZ).setColor(r, g, b, a);
                 }
+
+                // Quad drawn via TRIANGLE_STRIP (SW -> SE -> NW -> NE)
+                filledBuffer.addVertex(mat, swX, y, swZ).setColor(r, g, b, a);
+                filledBuffer.addVertex(mat, seX, y, seZ).setColor(r, g, b, a);
+                filledBuffer.addVertex(mat, nwX, y, nwZ).setColor(r, g, b, a);
+                filledBuffer.addVertex(mat, neX, y, neZ).setColor(r, g, b, a);
+
+                lastX = neX;
+                lastY = y;
+                lastZ = neZ;
+                firstQuad = false;
             }
         }
 
@@ -130,9 +122,9 @@ public class AoEIndicatorRenderer {
     private static void drawQuad(org.joml.Matrix4f mat, MultiBufferSource buffers, float r, float g, float b, float a,
             double minX, double y, double minZ, double maxX, double maxZ) {
         VertexConsumer vc = buffers.getBuffer(RenderType.debugFilledBox());
-        vc.addVertex(mat, (float) minX, (float) y, (float) minZ).setColor(r, g, b, a);
-        vc.addVertex(mat, (float) minX, (float) y, (float) maxZ).setColor(r, g, b, a);
-        vc.addVertex(mat, (float) maxX, (float) y, (float) maxZ).setColor(r, g, b, a);
-        vc.addVertex(mat, (float) maxX, (float) y, (float) minZ).setColor(r, g, b, a);
+        vc.addVertex(mat, (float) minX, (float) y, (float) maxZ).setColor(r, g, b, a); // SW
+        vc.addVertex(mat, (float) maxX, (float) y, (float) maxZ).setColor(r, g, b, a); // SE
+        vc.addVertex(mat, (float) minX, (float) y, (float) minZ).setColor(r, g, b, a); // NW
+        vc.addVertex(mat, (float) maxX, (float) y, (float) minZ).setColor(r, g, b, a); // NE
     }
 }

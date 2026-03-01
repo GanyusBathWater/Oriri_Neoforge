@@ -190,6 +190,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_JOURNEYMAN);
                         output.accept(ModItems.BOOK_OF_WISE);
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
+                        output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.SKELETON_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.IRON_GOLEM_MANUAL);

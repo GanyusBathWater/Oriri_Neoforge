@@ -20,6 +20,10 @@ public class ModItems {
 
         public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(OririMod.MOD_ID);
 
+        public static final DeferredItem<Item> BOSS_ATTACK_DEBUG_WAND = ITEMS.register("boss_attack_debug_wand",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.magic.BossAttackDebugWandItem(
+                                        new Item.Properties().stacksTo(1)));
+
         // -------------------------------------Crafting
         // Items---------------------------------------------------------
 
@@ -111,6 +115,9 @@ public class ModItems {
                         () -> new CalciumCurrant(new Item.Properties().food(ModFoods.CALCIUM_CURRANT)));
         public static final DeferredItem<Item> DEVIL_FRUIT = ITEMS.register("devil_fruit",
                         () -> new DevilFruit(new Item.Properties().food(ModFoods.DEVIL_FRUIT)));
+
+        public static final DeferredItem<Item> ELDERWOODS_IGNITER = ITEMS.register("elderwoods_igniter",
+                        () -> new ElderwoodsIgniterItem(new Item.Properties().stacksTo(1).durability(64)));
 
         // ---------------------------------------Weapons---------------------------------------------------------
 

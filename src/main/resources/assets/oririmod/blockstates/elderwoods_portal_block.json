@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "axis=x": {
+            "model": "oririmod:block/elderwoods_portal_block_ns"
+        },
+        "axis=z": {
+            "model": "oririmod:block/elderwoods_portal_block_ew"
+        }
+    }
+}

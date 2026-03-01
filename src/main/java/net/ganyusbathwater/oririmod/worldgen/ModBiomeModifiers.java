@@ -14,37 +14,48 @@ import net.neoforged.neoforge.common.world.BiomeModifiers;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class ModBiomeModifiers {
-    //Which Biome should it spawn in or in which "stage" it should generate
+        // Which Biome should it spawn in or in which "stage" it should generate
 
-    public static final ResourceKey<BiomeModifier> ADD_MANA_GEODE = registerKey("add_mana_geode");
+        public static final ResourceKey<BiomeModifier> ADD_MANA_GEODE = registerKey("add_mana_geode");
 
-    public static final ResourceKey<BiomeModifier> ADD_ELDER_TREES = registerKey("add_elder_trees");
+        public static final ResourceKey<BiomeModifier> ADD_ELDER_TREES = registerKey("add_elder_trees");
+        public static final ResourceKey<BiomeModifier> ADD_JADE_ORE = registerKey("add_jade_ore");
 
+        // here will be the Features defined and later turned into json files
+        public static void bootstrap(BootstrapContext<BiomeModifier> context) {
+                var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
+                var biomes = context.lookup(Registries.BIOME);
 
-    //here will be the Features defined and later turned into json files
-    public static void bootstrap(BootstrapContext<BiomeModifier> context) {
-        var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
-        var biomes = context.lookup(Registries.BIOME);
+                context.register(ADD_MANA_GEODE,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(biomes.getOrThrow(BiomeTags.IS_OVERWORLD),
+                                                HolderSet.direct(placedFeatures.getOrThrow(
+                                                                ModPlacedFeatures.OVERWORLD_MANA_GEODE_PLACED_KEY)),
+                                                GenerationStep.Decoration.LOCAL_MODIFICATIONS));
 
-        context.register(ADD_MANA_GEODE, new BiomeModifiers.AddFeaturesBiomeModifier(biomes.getOrThrow(BiomeTags.IS_OVERWORLD), HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.OVERWORLD_MANA_GEODE_PLACED_KEY)), GenerationStep.Decoration.LOCAL_MODIFICATIONS));
+                var elderBiomesTag = TagKey.create(
+                                Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "has_elder_trees"));
+                context.register(
+                                ADD_ELDER_TREES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                biomes.getOrThrow(elderBiomesTag),
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(
+                                                                                ModPlacedFeatures.ELDER_TREE_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
 
-        var elderBiomesTag = TagKey.create(
-                Registries.BIOME,
-                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "has_elder_trees")
-        );
-        context.register(
-                ADD_ELDER_TREES,
-                new BiomeModifiers.AddFeaturesBiomeModifier(
-                        biomes.getOrThrow(elderBiomesTag),
-                        HolderSet.direct(
-                                placedFeatures.getOrThrow(ModPlacedFeatures.ELDER_TREE_PLACED_KEY)
-                        ),
-                        GenerationStep.Decoration.VEGETAL_DECORATION
-                )
-        );
-    }
+                context.register(
+                                ADD_JADE_ORE,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                biomes.getOrThrow(BiomeTags.IS_JUNGLE),
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(
+                                                                                ModPlacedFeatures.JADE_ORE_PLACED_KEY)),
+                                                GenerationStep.Decoration.UNDERGROUND_ORES));
+        }
 
-    private static ResourceKey<BiomeModifier> registerKey(String name) {
-        return ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, name));
-    }
+        private static ResourceKey<BiomeModifier> registerKey(String name) {
+                return ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, name));
+        }
 }

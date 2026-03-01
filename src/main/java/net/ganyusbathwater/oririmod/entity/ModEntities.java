@@ -45,6 +45,18 @@ public final class ModEntities {
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "meteor")
                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.RootVisualEntity>> ROOT_VISUAL = ENTITIES
+                        .register("root_visual",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.RootVisualEntity>of(
+                                                        net.ganyusbathwater.oririmod.entity.RootVisualEntity::new,
+                                                        MobCategory.MISC)
+                                                        .sized(1f, 1f)
+                                                        .clientTrackingRange(10)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "root_visual")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<IcicleEntity>> ICICLE = ENTITIES.register("icicle",
                         () -> EntityType.Builder.<IcicleEntity>of(IcicleEntity::new, MobCategory.MISC)
                                         .sized(0.5F, 1.0F)
@@ -52,6 +64,31 @@ public final class ModEntities {
                                         .updateInterval(1)
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "icicle")
                                                         .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<SwordProjectileEntity>> SWORD_PROJECTILE = ENTITIES
+                        .register("sword_projectile",
+                                        () -> EntityType.Builder
+                                                        .<SwordProjectileEntity>of(SwordProjectileEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "sword_projectile")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<DoomClockEntity>> DOOM_CLOCK = ENTITIES
+                        .register("doom_clock",
+                                        () -> EntityType.Builder
+                                                        .<DoomClockEntity>of(DoomClockEntity::new, MobCategory.MISC)
+                                                        .sized(2.0f, 2.0f)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "doom_clock")
+                                                                        .toString()));
 
         public static void register(IEventBus modBus) {
                 ENTITIES.register(modBus);

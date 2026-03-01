@@ -43,6 +43,7 @@ public class ModPlacedFeatures {
                         "elderwoods_dripstone_cluster_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_DRIPSTONE_CLUSTER_PLACED_KEY = registerKey(
                         "scarlet_dripstone_cluster_placed");
+        public static final ResourceKey<PlacedFeature> JADE_ORE_PLACED_KEY = registerKey("jade_ore_placed");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<PlacedFeature> context) {
@@ -161,6 +162,13 @@ public class ModPlacedFeatures {
                                 CountPlacement.of(4), // Reduced from 20 (rarer)
                                 InSquarePlacement.spread(),
                                 HeightRangePlacement.uniform(aboveBottom(12), absolute(60)),
+                                BiomeFilter.biome()));
+
+                var configuredJadeOre = configuredFeatures.getOrThrow(ModConfiguredFeatures.JADE_ORE_KEY);
+                register(context, JADE_ORE_PLACED_KEY, configuredJadeOre, List.of(
+                                CountPlacement.of(16),
+                                InSquarePlacement.spread(),
+                                HeightRangePlacement.triangle(aboveBottom(-16), absolute(112)),
                                 BiomeFilter.biome()));
 
         }

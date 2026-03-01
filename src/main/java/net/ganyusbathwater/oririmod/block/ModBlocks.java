@@ -283,6 +283,11 @@ public class ModBlocks {
         public static final DeferredBlock<WallBlock> JADE_WALL = registerBlock("jade_wall",
                         () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_BLOCK)));
 
+        public static final DeferredBlock<Block> ELDERWOODS_PORTAL_BLOCK = registerBlock("elderwoods_portal_block",
+                        () -> new ElderwoodsPortalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.NETHER_PORTAL)
+                                        .noCollission().noLootTable()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
         // ===== UPGRADED VANILLA SAPLINGS =====
         public static final DeferredBlock<Block> UPGRADED_OAK_SAPLING = registerBlock("upgraded_oak_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.OAK,

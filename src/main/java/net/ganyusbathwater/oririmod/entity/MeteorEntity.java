@@ -20,11 +20,16 @@ import net.minecraft.world.phys.Vec3;
 public class MeteorEntity extends Projectile {
     private static final EntityDataAccessor<Integer> OWNER_ID = SynchedEntityData.defineId(MeteorEntity.class,
             EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> METEOR_SCALE = SynchedEntityData.defineId(MeteorEntity.class,
+            EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> METEOR_GRAVITY = SynchedEntityData.defineId(MeteorEntity.class,
+            EntityDataSerializers.FLOAT);
 
     private BlockPos impactPos = BlockPos.ZERO;
     private float explosionPower = 4.0f;
     private int fireRadius = 3;
     private int maxLife = 20 * 10; // 10s Failsafe
+    private boolean destroysBlocks = true;
 
     public MeteorEntity(EntityType<? extends MeteorEntity> type, Level level) {
         super(type, level);
@@ -45,10 +50,36 @@ public class MeteorEntity extends Projectile {
         return this.entityData.get(OWNER_ID);
     }
 
+    public void setMeteorScale(float scale) {
+        this.entityData.set(METEOR_SCALE, scale);
+    }
+
+    public float getMeteorScale() {
+        return this.entityData.get(METEOR_SCALE);
+    }
+
+    public void setDestroysBlocks(boolean destroysBlocks) {
+        this.destroysBlocks = destroysBlocks;
+    }
+
+    public boolean destroysBlocks() {
+        return this.destroysBlocks;
+    }
+
+    public void setMeteorGravity(float gravity) {
+        this.entityData.set(METEOR_GRAVITY, gravity);
+    }
+
+    public float getMeteorGravity() {
+        return this.entityData.get(METEOR_GRAVITY);
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         // 1.21+: Synched‑Daten über den Builder registrieren
         builder.define(OWNER_ID, 0);
+        builder.define(METEOR_SCALE, 5.5f);
+        builder.define(METEOR_GRAVITY, 0.12f);
     }
 
     @Override
@@ -60,6 +91,15 @@ public class MeteorEntity extends Projectile {
         if (tag.contains("OwnerId")) {
             this.setOwnerId(tag.getInt("OwnerId"));
         }
+        if (tag.contains("MeteorScale")) {
+            this.setMeteorScale(tag.getFloat("MeteorScale"));
+        }
+        if (tag.contains("DestroysBlocks")) {
+            this.destroysBlocks = tag.getBoolean("DestroysBlocks");
+        }
+        if (tag.contains("MeteorGravity")) {
+            this.setMeteorGravity(tag.getFloat("MeteorGravity"));
+        }
     }
 
     @Override
@@ -69,6 +109,9 @@ public class MeteorEntity extends Projectile {
         tag.putInt("FireRadius", this.fireRadius);
         tag.putInt("MaxLife", this.maxLife);
         tag.putInt("OwnerId", this.getOwnerId());
+        tag.putFloat("MeteorScale", this.getMeteorScale());
+        tag.putBoolean("DestroysBlocks", this.destroysBlocks);
+        tag.putFloat("MeteorGravity", this.getMeteorGravity());
     }
 
     @Override
@@ -82,7 +125,7 @@ public class MeteorEntity extends Projectile {
         }
 
         Vec3 vel = getDeltaMovement();
-        vel = new Vec3(vel.x * 0.99, vel.y - 0.12, vel.z * 0.99);
+        vel = new Vec3(vel.x * 0.99, vel.y - this.getMeteorGravity(), vel.z * 0.99);
         setDeltaMovement(vel);
         move(MoverType.SELF, vel);
 
@@ -125,13 +168,16 @@ public class MeteorEntity extends Projectile {
         server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
         server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX(), getY(), getZ(), 30, 1.8, 0.3, 1.8, 0.02);
 
-        server.explode(null, getX(), getY(), getZ(), explosionPower, ExplosionInteraction.TNT);
+        ExplosionInteraction interaction = this.destroysBlocks ? ExplosionInteraction.TNT : ExplosionInteraction.NONE;
+        server.explode(null, getX(), getY(), getZ(), explosionPower, interaction);
         igniteAround(server, this.blockPosition(), fireRadius);
 
         discard();
     }
 
     private void igniteAround(ServerLevel server, BlockPos center, int radius) {
+        if (radius <= 0)
+            return;
         int r = Math.max(0, radius);
         for (int dx = -r; dx <= r; dx++) {
             for (int dz = -r; dz <= r; dz++) {

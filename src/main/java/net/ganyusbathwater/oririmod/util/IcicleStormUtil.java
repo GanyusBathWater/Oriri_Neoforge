@@ -6,9 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -21,7 +18,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * entities.
  * Usage: {@code IcicleStormUtil.unleash(serverLevel, targetPos, ownerEntity);}
  */
-@EventBusSubscriber
 public final class IcicleStormUtil {
 
     private static final int SPAWN_HEIGHT = 10; // blocks above target
@@ -55,32 +51,7 @@ public final class IcicleStormUtil {
         int ownerId = owner != null ? owner.getId() : 0;
 
         for (int wave = 0; wave < WAVE_COUNT; wave++) {
-            int delay = wave * DELAY_BETWEEN_WAVES;
-            int w = wave; // effectively final for lambda
-
-            if (delay == 0) {
-                spawnWave(level, target, w, ownerId);
-            } else {
-                int executeTick = level.getServer().getTickCount() + delay;
-                PENDING_WAVES.add(new PendingWave(level, target, w, ownerId, executeTick));
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
-        if (PENDING_WAVES.isEmpty())
-            return;
-
-        int currentTick = event.getServer().getTickCount();
-        Iterator<PendingWave> iterator = PENDING_WAVES.iterator();
-
-        while (iterator.hasNext()) {
-            PendingWave pd = iterator.next();
-            if (currentTick >= pd.executeTick()) {
-                spawnWave(pd.level(), pd.target(), pd.wave(), pd.ownerId());
-                iterator.remove();
-            }
+            spawnWave(level, target, wave, ownerId);
         }
     }
 
@@ -90,28 +61,32 @@ public final class IcicleStormUtil {
 
         if (wave == 0) {
             // Center icicle
-            spawnIcicle(level, target, target.getX() + 0.5, target.getZ() + 0.5, ownerId);
+            spawnIcicle(level, target, target.getX() + 0.5, target.getZ() + 0.5, ownerId, wave);
         } else {
             // Ring of icicles
             for (int i = 0; i < count; i++) {
                 double angle = (2.0 * Math.PI * i) / count;
                 double x = target.getX() + 0.5 + Math.cos(angle) * radius;
                 double z = target.getZ() + 0.5 + Math.sin(angle) * radius;
-                spawnIcicle(level, target, x, z, ownerId);
+                spawnIcicle(level, target, x, z, ownerId, wave);
             }
         }
     }
 
-    private static void spawnIcicle(ServerLevel level, BlockPos target, double x, double z, int ownerId) {
+    private static void spawnIcicle(ServerLevel level, BlockPos target, double x, double z, int ownerId, int wave) {
         IcicleEntity icicle = ModEntities.ICICLE.get().create(level);
         if (icicle == null)
             return;
 
         double spawnY = target.getY() + SPAWN_HEIGHT;
         icicle.moveTo(x, spawnY, z, 0f, 0f);
-        icicle.setDeltaMovement(new Vec3(0, FALL_SPEED, 0));
+        icicle.setDeltaMovement(Vec3.ZERO); // Gravity handled after floating phase
         icicle.configure(target);
         icicle.setOwnerId(ownerId);
+
+        // Base float is 30 ticks, each subsequent wave floats 20 ticks longer
+        int floatTicks = 30 + (wave * DELAY_BETWEEN_WAVES);
+        icicle.setFloatingTicks(floatTicks);
 
         level.addFreshEntity(icicle);
     }

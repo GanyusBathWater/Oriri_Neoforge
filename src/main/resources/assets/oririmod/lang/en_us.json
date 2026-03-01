@@ -115,6 +115,7 @@
   "item.oririmod.staff_of_cosmos": "Staff of the Cosmos",
   "item.oririmod.staff_of_eternal_ice": "Staff of the Eternal Ice",
   "item.oririmod.staff_of_almighty": "Staff of the Almighty",
+  "item.oririmod.boss_attack_debug_wand": "Boss Attack Debug Wand",
   "item.oririmod.dodoco": "Dodoco",
   "item.oririmod.one_thousand_screams": "One Thousand Screams",
   "item.oririmod.book_of_amateur": "Book of the Amateur",
@@ -172,8 +173,12 @@
   "block.oririmod.magic_barrier_block": "Magic Barrier",
   "block.oririmod.magic_barrier_core_block": "Magic Barrier Core",
   "block.oririmod.mana_crystal_block": "Mana Crystal Block",
+  "item.oririmod.mana_crystal_block": "Mana Crystal Block",
   "block.oririmod.mana_crystal_cluster": "Mana Crystal Cluster",
   "block.oririmod.mana_crystal": "Mana Crystal",
+  "block.oririmod.elderwoods_portal_block": "Elderwoods Portal",
+  "item.oririmod.elderwoods_portal_block": "Elderwoods Portal",
+  "item.oririmod.elderwoods_igniter": "Elderwoods Igniter",
   "block.oririmod.elder_log_block": "Elder Log",
   "block.oririmod.stripped_elder_log_block": "Stripped Elder Log",
   "block.oririmod.cracked_elder_log_block": "Cracked Elder Log",
@@ -404,5 +409,11 @@
   "item.oririmod.slimy_cooking_book.level.3.description": "Level 3: Grants the Large Slime increased Health",
   "item.oririmod.slimy_cooking_book.lore": "§8§oSquishy.",
   "oririmod.configuration.summoner": "Summoner Settings",
-  "oririmod.configuration.targetMode": "Summon Target Mode"
+  "oririmod.configuration.targetMode": "Summon Target Mode",
+  "entity.oririmod.magic_bolt": "Magic Bolt",
+  "entity.oririmod.fireball_projectile": "Fireball",
+  "entity.oririmod.meteor": "Meteor",
+  "entity.oririmod.root_visual": "Root",
+  "entity.oririmod.icicle": "Icicle",
+  "entity.oririmod.sword_projectile": "Sword Projectile"
 }

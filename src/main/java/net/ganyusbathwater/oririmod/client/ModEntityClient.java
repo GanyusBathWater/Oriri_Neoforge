@@ -6,24 +6,32 @@ import net.ganyusbathwater.oririmod.client.model.IcicleRenderer;
 import net.ganyusbathwater.oririmod.client.model.MeteorModel;
 import net.ganyusbathwater.oririmod.client.model.MeteorRenderer;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
+import net.ganyusbathwater.oririmod.entity.SwordProjectileEntity;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = net.neoforged.api.distmarker.Dist.CLIENT)
 public class ModEntityClient {
 
-    @net.neoforged.bus.api.SubscribeEvent
-    public static void registerLayers(
-            net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(MeteorModel.LAYER_LOCATION, MeteorModel::createBodyLayer);
-        event.registerLayerDefinition(IcicleModel.LAYER_LOCATION, IcicleModel::createBodyLayer);
-    }
+        @net.neoforged.bus.api.SubscribeEvent
+        public static void registerLayers(
+                        net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions event) {
+                event.registerLayerDefinition(MeteorModel.LAYER_LOCATION, MeteorModel::createBodyLayer);
+                event.registerLayerDefinition(IcicleModel.LAYER_LOCATION, IcicleModel::createBodyLayer);
+        }
 
-    @net.neoforged.bus.api.SubscribeEvent
-    public static void registerRenderers(
-            net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.METEOR.get(), MeteorRenderer::new);
-        event.registerEntityRenderer(ModEntities.FIREBALL_PROJECTILE.get(),
-                net.ganyusbathwater.oririmod.client.render.FireballProjectileRenderer::new);
-        event.registerEntityRenderer(ModEntities.ICICLE.get(), IcicleRenderer::new);
-    }
+        @net.neoforged.bus.api.SubscribeEvent
+        public static void registerRenderers(
+                        net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+                event.registerEntityRenderer(ModEntities.METEOR.get(), MeteorRenderer::new);
+                event.registerEntityRenderer(ModEntities.FIREBALL_PROJECTILE.get(),
+                                net.ganyusbathwater.oririmod.client.render.FireballProjectileRenderer::new);
+                event.registerEntityRenderer(ModEntities.ICICLE.get(), IcicleRenderer::new);
+                event.registerEntityRenderer(ModEntities.SWORD_PROJECTILE.get(),
+                                net.ganyusbathwater.oririmod.client.render.SwordProjectileRenderer::new);
+                event.registerEntityRenderer(ModEntities.ROOT_VISUAL.get(),
+                                net.ganyusbathwater.oririmod.client.render.RootVisualRenderer::new);
+                event.registerEntityRenderer(ModEntities.DOOM_CLOCK.get(),
+                                net.ganyusbathwater.oririmod.client.render.DoomClockRenderer::new);
+        }
 }

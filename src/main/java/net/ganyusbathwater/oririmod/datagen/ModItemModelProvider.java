@@ -198,6 +198,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.BOOK_OF_JOURNEYMAN);
                 handheldItem(ModItems.BOOK_OF_WISE);
                 handheldItem(ModItems.STAFF_OF_ALMIGHTY);
+                withExistingParent(ModItems.BOSS_ATTACK_DEBUG_WAND.getId().getPath(), mcLoc("item/handheld"))
+                                .texture("layer0", mcLoc("item/stick"));
                 handheldItem(ModItems.ZOMBIE_ENCYCLOPEDIA);
                 handheldItem(ModItems.SKELETON_ENCYCLOPEDIA);
                 handheldItem(ModItems.IRON_GOLEM_MANUAL);
