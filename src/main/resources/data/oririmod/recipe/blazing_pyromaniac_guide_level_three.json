@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:blaze_rod"
+    },
+    "center": {
+        "item": "oririmod:blazing_pyromaniac_guide"
+    },
+    "right": {
+        "item": "minecraft:blaze_rod"
+    },
+    "bottom": {
+        "item": "oririmod:fire_crystal"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:blazing_pyromaniac_guide",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 2
+}

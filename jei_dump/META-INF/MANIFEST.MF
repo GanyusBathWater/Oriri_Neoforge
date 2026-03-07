@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Specification-Title: Just Enough Items
+Specification-Vendor: mezz
+Specification-Version: 19.21.0
+Implementation-Title: jar
+Implementation-Version: 19.21.0.245
+Implementation-Vendor: mezz
+

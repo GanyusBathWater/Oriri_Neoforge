@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:rabbit_hide"
+    },
+    "center": {
+        "item": "oririmod:snow_boots"
+    },
+    "right": {
+        "item": "minecraft:rabbit_hide"
+    },
+    "bottom": {
+        "item": "oririmod:iron_stick"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:snow_boots",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 2
+}

@@ -40,9 +40,7 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
         tooltip.add(Component.translatable(this.getDescriptionId() + ".level", unlockedLevel));
 
         // Level\-Beschreibungen bis zum aktuellen Level
-        for (int i = 1; i <= unlockedLevel; i++) {
-            tooltip.add(Component.translatable(this.getDescriptionId() + ".level." + i + ".description"));
-        }
+        tooltip.add(Component.translatable(this.getDescriptionId() + ".level." + unlockedLevel + ".description"));
 
         // Lore (Key: item.oririmod.\<id\>.lore)
         tooltip.add(Component.translatable(this.getDescriptionId() + ".lore"));

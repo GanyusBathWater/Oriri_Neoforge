@@ -317,6 +317,11 @@ public class ModBlocks {
                         () -> new UpgradedSaplingBlock(TreeGrower.CHERRY,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_SAPLING)));
 
+        // ===== EQUINOX TABLE =====
+        public static final DeferredBlock<Block> EQUINOX_TABLE = registerBlock("equinox_table",
+                        () -> new EquinoxTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE)
+                                        .strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
+
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);
                 registerBlockItem(name, toReturn);

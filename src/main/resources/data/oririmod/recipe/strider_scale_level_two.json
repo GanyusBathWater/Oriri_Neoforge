@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:tortured_soul"
+    },
+    "left": {
+        "item": "minecraft:magma_cream"
+    },
+    "center": {
+        "item": "oririmod:strider_scale"
+    },
+    "right": {
+        "item": "minecraft:magma_cream"
+    },
+    "bottom": {
+        "item": "minecraft:obsidian"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:strider_scale",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

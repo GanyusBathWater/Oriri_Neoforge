@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:golden_apple"
+    },
+    "center": {
+        "item": "oririmod:heart_of_the_tank"
+    },
+    "right": {
+        "item": "minecraft:golden_apple"
+    },
+    "bottom": {
+        "item": "minecraft:enchanted_golden_apple"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:heart_of_the_tank",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 2
+}

@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:slime_block"
+    },
+    "center": {
+        "item": "oririmod:slimy_cooking_book"
+    },
+    "right": {
+        "item": "minecraft:slime_block"
+    },
+    "bottom": {
+        "item": "oririmod:slime_block"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:slimy_cooking_book",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 2
+}

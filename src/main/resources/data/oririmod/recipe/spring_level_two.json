@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:hollow_soul"
+    },
+    "left": {
+        "item": "oririmod:iron_stick"
+    },
+    "center": {
+        "item": "oririmod:spring"
+    },
+    "right": {
+        "item": "oririmod:iron_stick"
+    },
+    "bottom": {
+        "item": "oririmod:iron_stick"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:spring",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:damned_soul"
+    },
+    "left": {
+        "item": "oririmod:elderberry"
+    },
+    "center": {
+        "item": "oririmod:strange_ender_eye"
+    },
+    "right": {
+        "item": "oririmod:elderberry"
+    },
+    "bottom": {
+        "item": "minecraft:ender_eye"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:strange_ender_eye",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

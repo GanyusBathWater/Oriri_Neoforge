@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:damned_soul"
+    },
+    "left": {
+        "item": "minecraft:lantern"
+    },
+    "center": {
+        "item": "oririmod:miners_lantern"
+    },
+    "right": {
+        "item": "minecraft:lantern"
+    },
+    "bottom": {
+        "item": "minecraft:crying_obsidian"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:miners_lantern",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

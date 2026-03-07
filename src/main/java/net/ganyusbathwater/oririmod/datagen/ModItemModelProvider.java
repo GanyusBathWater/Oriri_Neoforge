@@ -27,11 +27,18 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.MOON_STONE.get());
                 basicItem(ModItems.DAMNED_SOUL.get());
                 basicItem(ModItems.HOLLOW_SOUL.get());
-                basicItem(ModItems.IRAS_SOUL.get());
+                basicItem(ModItems.IRAS_SOUL_FRAGMENT.get());
                 basicItem(ModItems.IRON_STICK.get());
                 basicItem(ModItems.POWER_SOUL.get());
                 basicItem(ModItems.TORTURED_SOUL.get());
                 basicItem(ModItems.VOID_SOUL.get());
+                basicItem(ModItems.PRISMARINE_IRON_INGOT.get());
+                basicItem(ModItems.MOLTEN_INGOT.get());
+                basicItem(ModItems.BLUE_ICE_INGOT.get());
+                basicItem(ModItems.GILDED_NETHERRITE_INGOT.get());
+                basicItem(ModItems.ANCIENT_INGOT.get());
+                basicItem(ModItems.CRYSTAL_INGOT.get());
+                basicItem(ModItems.MAGIC_UPGRADE_TEMPLATE.get());
                 basicItem(ModItems.FLUORITE_CRYSTAL.get());
                 basicItem(ModItems.JADE.get());
 

@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "oririmod:scarlet_tooth_leaves"
+    },
+    "center": {
+        "item": "oririmod:wither_rose"
+    },
+    "right": {
+        "item": "oririmod:scarlet_tooth_leaves"
+    },
+    "bottom": {
+        "item": "minecraft:chorus_flower"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:wither_rose",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 2
+}

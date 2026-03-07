@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:hollow_soul"
+    },
+    "left": {
+        "item": "minecraft:golden_apple"
+    },
+    "center": {
+        "item": "oririmod:phoenix_feather"
+    },
+    "right": {
+        "item": "minecraft:golden_apple"
+    },
+    "bottom": {
+        "item": "minecraft:totem_of_undying"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:phoenix_feather",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 1
+}

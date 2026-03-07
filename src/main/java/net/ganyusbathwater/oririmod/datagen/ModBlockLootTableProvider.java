@@ -191,6 +191,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
         @Override
         protected Iterable<Block> getKnownBlocks() {
-                return ModBlocks.BLOCKS.getEntries().stream().map(Holder::value)::iterator;
+                return ModBlocks.BLOCKS.getEntries().stream()
+                                .map(Holder::value)
+                                .filter(block -> block != ModBlocks.EQUINOX_TABLE.get())::iterator;
         }
 }

@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:iron_block"
+    },
+    "center": {
+        "item": "oririmod:iron_golem_manual"
+    },
+    "right": {
+        "item": "minecraft:iron_block"
+    },
+    "bottom": {
+        "item": "minecraft:iron_block"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:iron_golem_manual",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 2
+}

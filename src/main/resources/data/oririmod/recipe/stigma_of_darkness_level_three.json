@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:iras_soul_fragment"
+    },
+    "left": {
+        "item": "oririmod:damned_soul"
+    },
+    "center": {
+        "item": "oririmod:stigma_of_darkness"
+    },
+    "right": {
+        "item": "oririmod:tortured_soul"
+    },
+    "bottom": {
+        "item": "oririmod:power_soul"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:stigma_of_darkness",
+        "count": 1
+    },
+    "mana_cost": 200,
+    "required_level": 2
+}

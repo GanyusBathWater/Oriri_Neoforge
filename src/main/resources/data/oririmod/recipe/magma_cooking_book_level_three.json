@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:tortured_soul"
+    },
+    "left": {
+        "item": "minecraft:magma_cream"
+    },
+    "center": {
+        "item": "oririmod:magma_cooking_book"
+    },
+    "right": {
+        "item": "minecraft:magma_cream"
+    },
+    "bottom": {
+        "item": "oririmod:magma_block"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:magma_cooking_book",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 1
+}

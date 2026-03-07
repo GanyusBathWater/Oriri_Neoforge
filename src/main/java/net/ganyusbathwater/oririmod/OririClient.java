@@ -143,4 +143,11 @@ public class OririClient {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), ThrownItemRenderer::new);
     }
+
+    @SubscribeEvent
+    public static void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
+        event.register(
+                net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.EQUINOX_TABLE_MENU.get(),
+                net.ganyusbathwater.oririmod.client.screen.EquinoxTableScreen::new);
+    }
 }

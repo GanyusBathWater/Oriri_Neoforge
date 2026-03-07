@@ -37,7 +37,7 @@ public class ModItems {
                         () -> new Item(new Item.Properties()));
         public static final DeferredItem<Item> HOLLOW_SOUL = ITEMS.register("hollow_soul",
                         () -> new Item(new Item.Properties()));
-        public static final DeferredItem<Item> IRAS_SOUL = ITEMS.register("iras_soul",
+        public static final DeferredItem<Item> IRAS_SOUL_FRAGMENT = ITEMS.register("iras_soul_fragment",
                         () -> new Item(new Item.Properties()));
         public static final DeferredItem<Item> IRON_STICK = ITEMS.register("iron_stick",
                         () -> new Item(new Item.Properties()));
@@ -46,6 +46,22 @@ public class ModItems {
         public static final DeferredItem<Item> TORTURED_SOUL = ITEMS.register("tortured_soul",
                         () -> new Item(new Item.Properties()));
         public static final DeferredItem<Item> VOID_SOUL = ITEMS.register("void_soul",
+                        () -> new Item(new Item.Properties()));
+
+        public static final DeferredItem<Item> PRISMARINE_IRON_INGOT = ITEMS.register("prismarine_iron_ingot",
+                        () -> new Item(new Item.Properties()));
+        public static final DeferredItem<Item> MOLTEN_INGOT = ITEMS.register("molten_ingot",
+                        () -> new Item(new Item.Properties()));
+        public static final DeferredItem<Item> BLUE_ICE_INGOT = ITEMS.register("blue_ice_ingot",
+                        () -> new Item(new Item.Properties()));
+        public static final DeferredItem<Item> GILDED_NETHERRITE_INGOT = ITEMS.register("gilded_netherrite_ingot",
+                        () -> new Item(new Item.Properties()));
+        public static final DeferredItem<Item> ANCIENT_INGOT = ITEMS.register("ancient_ingot",
+                        () -> new Item(new Item.Properties()));
+        public static final DeferredItem<Item> CRYSTAL_INGOT = ITEMS.register("crystal_ingot",
+                        () -> new Item(new Item.Properties()));
+
+        public static final DeferredItem<Item> MAGIC_UPGRADE_TEMPLATE = ITEMS.register("magic_upgrade_template",
                         () -> new Item(new Item.Properties()));
 
         // ---------------------------------------Vestiges---------------------------------------------------------

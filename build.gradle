@@ -37,6 +37,21 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    // JEI fallback
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    // JEI Main
+    maven {
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    // EMI
+    maven {
+        name = "TerraformersMC"
+        url = "https://maven.terraformersmc.com/"
+    }
 }
 
 base {
@@ -147,6 +162,26 @@ dependencies {
     // Jade (optional for testing/debugging)
     compileOnly "maven.modrinth:jade:15.10.5+neoforge"
     localRuntime "maven.modrinth:jade:15.10.5+neoforge"
+
+    // JEI API & Local Runtime (Optional drop-in for testing)
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
+    localRuntime "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+
+    // Kotlin for Forge (Required by Fzzy Config)
+    compileOnly "maven.modrinth:kotlin-for-forge:5.11.0"
+    localRuntime "maven.modrinth:kotlin-for-forge:5.11.0"
+
+    // Fzzy Config (Required by EMI Loot)
+    compileOnly "maven.modrinth:fzzy-config:0.7.6+1.21+neoforge"
+    localRuntime "maven.modrinth:fzzy-config:0.7.6+1.21+neoforge"
+
+    // EMI API & Local Runtime (Optional drop-in for testing)
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+    localRuntime "dev.emi:emi-neoforge:${emi_version}"
+    
+    // EMI Loot (Addon for viewing structure / mob loot tables)
+    compileOnly "maven.modrinth:emi-loot:0.7.9+1.21+neoforge"
+    localRuntime "maven.modrinth:emi-loot:0.7.9+1.21+neoforge"
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar

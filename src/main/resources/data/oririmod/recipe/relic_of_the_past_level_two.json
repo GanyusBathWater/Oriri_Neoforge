@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:hollow_soul"
+    },
+    "left": {
+        "item": "minecraft:gold_ingot"
+    },
+    "center": {
+        "item": "oririmod:relic_of_the_past"
+    },
+    "right": {
+        "item": "minecraft:gold_ingot"
+    },
+    "bottom": {
+        "item": "minecraft:emerald"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:relic_of_the_past",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

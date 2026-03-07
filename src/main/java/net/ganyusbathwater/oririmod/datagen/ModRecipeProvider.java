@@ -20,6 +20,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.data.recipes.RecipeOutput;
 
 public class ModRecipeProvider extends RecipeProvider implements IConditionBuilder {
         public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
@@ -84,13 +85,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .define('A', ModItems.JADE)
                                 .unlockedBy("has_jade", has(ModItems.JADE)).save(recipeOutput);
 
-                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.JADE_SHIELD, 1)
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.JADE_SHIELD.get(), 1)
                                 .pattern("WJW")
                                 .pattern("WWW")
                                 .pattern(" W ")
-                                .define('W', net.minecraft.tags.ItemTags.PLANKS)
-                                .define('J', ModBlocks.JADE_BLOCK)
-                                .unlockedBy("has_jade_block", has(ModBlocks.JADE_BLOCK)).save(recipeOutput);
+                                .define('W', ModItems.GILDED_NETHERRITE_INGOT.get())
+                                .define('J', ModBlocks.JADE_BLOCK.get())
+                                .unlockedBy("has_jade_block", has(ModBlocks.JADE_BLOCK.get())).save(recipeOutput);
 
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.JADE, 9)
                                 .requires(ModBlocks.JADE_BLOCK)
@@ -121,14 +122,42 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 fenceGateBuilder(ModBlocks.SCARLET_GATE.get(), Ingredient.of(ModBlocks.SCARLET_PLANKS))
                                 .unlockedBy("has_scarlet_planks", has(ModBlocks.SCARLET_PLANKS)).save(recipeOutput);
 
-                // --- Wood from Logs ---
-                woodFromLogs(recipeOutput, ModBlocks.ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_PLANKS.get());
-                woodFromLogs(recipeOutput, ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_PLANKS.get());
+                // --- Planks from Logs/Stems ---
+                // Elder
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PLANKS.get(), 4)
+                                .requires(ModBlocks.ELDER_LOG_BLOCK.get())
+                                .unlockedBy("has_elder_log", has(ModBlocks.ELDER_LOG_BLOCK.get()))
+                                .save(recipeOutput, "oririmod:elder_planks_from_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get())
+                                .unlockedBy("has_stripped_elder_log", has(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get()))
+                                .save(recipeOutput, "oririmod:elder_planks_from_stripped_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PLANKS.get(), 4)
+                                .requires(ModBlocks.ELDER_STEM_BLOCK.get())
+                                .unlockedBy("has_elder_stem", has(ModBlocks.ELDER_STEM_BLOCK.get()))
+                                .save(recipeOutput, "oririmod:elder_planks_from_stem");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get())
+                                .unlockedBy("has_stripped_elder_stem", has(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get()))
+                                .save(recipeOutput, "oririmod:elder_planks_from_stripped_stem");
 
-                woodFromLogs(recipeOutput, ModBlocks.SCARLET_LOG.get(), ModBlocks.SCARLET_PLANKS.get());
-                woodFromLogs(recipeOutput, ModBlocks.STRIPPED_SCARLET_LOG.get(), ModBlocks.SCARLET_PLANKS.get());
-                woodFromLogs(recipeOutput, ModBlocks.SCARLET_STEM.get(), ModBlocks.SCARLET_PLANKS.get());
-                woodFromLogs(recipeOutput, ModBlocks.STRIPPED_SCARLET_STEM.get(), ModBlocks.SCARLET_PLANKS.get());
+                // Scarlet
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_PLANKS.get(), 4)
+                                .requires(ModBlocks.SCARLET_LOG.get())
+                                .unlockedBy("has_scarlet_log", has(ModBlocks.SCARLET_LOG.get()))
+                                .save(recipeOutput, "oririmod:scarlet_planks_from_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_SCARLET_LOG.get())
+                                .unlockedBy("has_stripped_scarlet_log", has(ModBlocks.STRIPPED_SCARLET_LOG.get()))
+                                .save(recipeOutput, "oririmod:scarlet_planks_from_stripped_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_PLANKS.get(), 4)
+                                .requires(ModBlocks.SCARLET_STEM.get())
+                                .unlockedBy("has_scarlet_stem", has(ModBlocks.SCARLET_STEM.get()))
+                                .save(recipeOutput, "oririmod:scarlet_planks_from_stem");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_SCARLET_STEM.get())
+                                .unlockedBy("has_stripped_scarlet_stem", has(ModBlocks.STRIPPED_SCARLET_STEM.get()))
+                                .save(recipeOutput, "oririmod:scarlet_planks_from_stripped_stem");
 
                 // --- Scarlet Stone Recipes ---
                 // Scarlet Stone Bricks
@@ -264,5 +293,83 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                  * .save(recipeOutput, "oririmod:bismuth_from_magic_block");
                  * 
                  */
+                makeArmorRecipes(recipeOutput, ModItems.PRISMARINE_IRON_INGOT.get(), ModItems.PRISMARINE_HELMET.get(),
+                                ModItems.PRISMARINE_CHESTPLATE.get(), ModItems.PRISMARINE_LEGGINGS.get(),
+                                ModItems.PRISMARINE_BOOTS.get());
+                makeArmorRecipes(recipeOutput, ModItems.MOLTEN_INGOT.get(), ModItems.MOLTEN_HELMET.get(),
+                                ModItems.MOLTEN_CHESTPLATE.get(), ModItems.MOLTEN_LEGGINGS.get(),
+                                ModItems.MOLTEN_BOOTS.get());
+                makeArmorRecipes(recipeOutput, ModItems.BLUE_ICE_INGOT.get(), ModItems.BLUE_ICE_HELMET.get(),
+                                ModItems.BLUE_ICE_CHESTPLATE.get(), ModItems.BLUE_ICE_LEGGINGS.get(),
+                                ModItems.BLUE_ICE_BOOTS.get());
+                makeArmorRecipes(recipeOutput, ModItems.GILDED_NETHERRITE_INGOT.get(),
+                                ModItems.GILDED_NETHERRITE_HELMET.get(), ModItems.GILDED_NETHERRITE_CHESTPLATE.get(),
+                                ModItems.GILDED_NETHERRITE_LEGGINGS.get(), ModItems.GILDED_NETHERRITE_BOOTS.get());
+                makeArmorRecipes(recipeOutput, ModItems.ANCIENT_INGOT.get(), ModItems.ANCIENT_HELMET.get(),
+                                ModItems.ANCIENT_CHESTPLATE.get(), ModItems.ANCIENT_LEGGINGS.get(),
+                                ModItems.ANCIENT_BOOTS.get());
+                makeArmorRecipes(recipeOutput, ModItems.CRYSTAL_INGOT.get(), ModItems.CRYSTAL_HELMET.get(),
+                                ModItems.CRYSTAL_CHESTPLATE.get(), ModItems.CRYSTAL_LEGGINGS.get(),
+                                ModItems.CRYSTAL_BOOTS.get());
+
+                makeSwordRecipe(recipeOutput, ModItems.PRISMARINE_IRON_INGOT.get(), ModItems.PIRATE_SABER.get());
+                makeSwordRecipe(recipeOutput, ModItems.MOLTEN_INGOT.get(), ModItems.SOLS_EMBRACE.get());
+                makeSwordRecipe(recipeOutput, ModItems.BLUE_ICE_INGOT.get(), ModItems.ICE_SWORD.get());
+                makeSwordRecipe(recipeOutput, ModItems.ANCIENT_INGOT.get(), ModItems.PANDORAS_BLADE.get());
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.ORAPHIM_BOW.get(), 1)
+                                .pattern(" IS")
+                                .pattern("I S")
+                                .pattern(" IS")
+                                .define('I', ModItems.CRYSTAL_INGOT.get())
+                                .define('S', Items.STRING)
+                                .unlockedBy("has_crystal_ingot", has(ModItems.CRYSTAL_INGOT.get())).save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.MAGIC_UPGRADE_TEMPLATE.get(), 2)
+                                .pattern("ITI")
+                                .pattern("ISI")
+                                .pattern("III")
+                                .define('I', ModBlocks.SCARLET_STONE.get())
+                                .define('S', ModItems.MANA_MANIFESTATION.get())
+                                .define('T', ModItems.MAGIC_UPGRADE_TEMPLATE.get())
+                                .unlockedBy("has_magic_upgrade_template", has(ModItems.MAGIC_UPGRADE_TEMPLATE.get()))
+                                .save(recipeOutput);
+
+        }
+
+        private void makeArmorRecipes(RecipeOutput recipeOutput, Item ingot, Item helmet, Item chestplate,
+                        Item leggings, Item boots) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, helmet, 1)
+                                .pattern("III")
+                                .pattern("I I")
+                                .define('I', ingot)
+                                .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, chestplate, 1)
+                                .pattern("I I")
+                                .pattern("III")
+                                .pattern("III")
+                                .define('I', ingot)
+                                .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, leggings, 1)
+                                .pattern("III")
+                                .pattern("I I")
+                                .pattern("I I")
+                                .define('I', ingot)
+                                .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, boots, 1)
+                                .pattern("I I")
+                                .pattern("I I")
+                                .define('I', ingot)
+                                .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);
+        }
+
+        private void makeSwordRecipe(RecipeOutput recipeOutput, Item ingot, Item sword) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, sword, 1)
+                                .pattern("I")
+                                .pattern("I")
+                                .pattern("S")
+                                .define('I', ingot)
+                                .define('S', Items.STICK)
+                                .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);
         }
 }

@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:pumpkin_pie"
+    },
+    "center": {
+        "item": "oririmod:candy_bag"
+    },
+    "right": {
+        "item": "minecraft:cake"
+    },
+    "bottom": {
+        "item": "minecraft:enchanted_golden_apple"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:candy_bag",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 2
+}

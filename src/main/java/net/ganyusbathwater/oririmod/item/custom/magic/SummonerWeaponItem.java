@@ -99,9 +99,8 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
 
         tooltip.add(Component.translatable(this.getDescriptionId() + ".level", unlockedLevel));
 
-        for (int i = 1; i <= Math.min(3, unlockedLevel); i++) {
-            tooltip.add(Component.translatable(this.getDescriptionId() + ".level." + i + ".description"));
-        }
+        tooltip.add(Component
+                .translatable(this.getDescriptionId() + ".level." + Math.min(3, unlockedLevel) + ".description"));
 
         tooltip.add(Component.translatable(this.getDescriptionId() + ".lore"));
         tooltip.addAll(buildModTooltip(stack, context, flag));

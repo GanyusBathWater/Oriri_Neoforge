@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:golden_carrot"
+    },
+    "center": {
+        "item": "oririmod:strange_ender_eye"
+    },
+    "right": {
+        "item": "minecraft:digolden_carrotamond"
+    },
+    "bottom": {
+        "item": "minecraft:ender_eye"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:strange_ender_eye",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 2
+}

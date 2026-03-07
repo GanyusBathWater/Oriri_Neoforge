@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:ender_pearl"
+    },
+    "center": {
+        "item": "oririmod:mirror_of_the_void"
+    },
+    "right": {
+        "item": "minecraft:ender_pearl"
+    },
+    "bottom": {
+        "item": "minecraft:dragon_breath"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:mirror_of_the_void",
+        "count": 1
+    },
+    "mana_cost": 200,
+    "required_level": 2
+}

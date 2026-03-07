@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:hollow_soul"
+    },
+    "left": {
+        "item": "oririmod:scarlet_lily"
+    },
+    "center": {
+        "item": "oririmod:heart_of_the_tank"
+    },
+    "right": {
+        "item": "oririmod:scarlet_lily"
+    },
+    "bottom": {
+        "item": "minecraft:golden_apple"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:heart_of_the_tank",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

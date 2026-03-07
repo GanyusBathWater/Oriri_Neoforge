@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:void_soul"
+    },
+    "left": {
+        "item": "oririmod:moonstone"
+    },
+    "center": {
+        "item": "oririmod:bound_of_the_celestial_sisters"
+    },
+    "right": {
+        "item": "oririmod:moonstone"
+    },
+    "bottom": {
+        "item": "minecraft:nether_star"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:bound_of_the_celestial_sisters",
+        "count": 1
+    },
+    "mana_cost": 200,
+    "required_level": 2
+}

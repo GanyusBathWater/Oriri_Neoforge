@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:obsidian"
+    },
+    "center": {
+        "item": "oririmod:strider_scale"
+    },
+    "right": {
+        "item": "minecraft:obsidian"
+    },
+    "bottom": {
+        "item": "minecraft:crying_obsidian"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:strider_scale",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 2
+}

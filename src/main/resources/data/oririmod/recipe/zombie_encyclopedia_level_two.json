@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:damned_soul"
+    },
+    "left": {
+        "item": "minecraft:rotten_flesh"
+    },
+    "center": {
+        "item": "oririmod:zombie_encyclopedia"
+    },
+    "right": {
+        "item": "minecraft:rotten_flesh"
+    },
+    "bottom": {
+        "item": "minecraft:iron_sword"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:zombie_encyclopedia",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

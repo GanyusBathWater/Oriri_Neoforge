@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:tortured_soul"
+    },
+    "left": {
+        "item": "minecraft:obsidian"
+    },
+    "center": {
+        "item": "oririmod:solis_brooch"
+    },
+    "right": {
+        "item": "minecraft:obsidian"
+    },
+    "bottom": {
+        "item": "minecraft:netherite_ingot"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:solis_brooch",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}

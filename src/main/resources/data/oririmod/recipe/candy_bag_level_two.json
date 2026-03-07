@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:hollow_soul"
+    },
+    "left": {
+        "item": "minecraft:glistering_melon_slice"
+    },
+    "center": {
+        "item": "oririmod:candy_bag"
+    },
+    "right": {
+        "item": "minecraft:golden_carrot"
+    },
+    "bottom": {
+        "item": "minecraft:golden_apple"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:candy_bag",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 1
+}

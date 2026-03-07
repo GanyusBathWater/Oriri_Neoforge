@@ -66,6 +66,10 @@ public class OririMod {
         ModItemGroups.registerItemGroups(modEventBus);
         ModItems.registerModItems(modEventBus);
         ModBlocks.register(modEventBus);
+        net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.register(modEventBus);
+        net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.register(modEventBus);
+        net.ganyusbathwater.oririmod.recipe.ModRecipeTypes.register(modEventBus);
+        net.ganyusbathwater.oririmod.recipe.ModRecipeSerializers.register(modEventBus);
         ModEffects.registerEffects(modEventBus);
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);

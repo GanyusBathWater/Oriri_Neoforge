@@ -30,11 +30,18 @@ public class ModItemGroups {
                         output.accept(ModItems.MOON_STONE);
                         output.accept(ModItems.DAMNED_SOUL);
                         output.accept(ModItems.HOLLOW_SOUL);
-                        output.accept(ModItems.IRAS_SOUL);
-                        output.accept(ModItems.IRON_STICK);
                         output.accept(ModItems.POWER_SOUL);
                         output.accept(ModItems.TORTURED_SOUL);
                         output.accept(ModItems.VOID_SOUL);
+                        output.accept(ModItems.IRAS_SOUL_FRAGMENT);
+                        output.accept(ModItems.IRON_STICK);
+                        output.accept(ModItems.PRISMARINE_IRON_INGOT);
+                        output.accept(ModItems.MOLTEN_INGOT);
+                        output.accept(ModItems.BLUE_ICE_INGOT);
+                        output.accept(ModItems.GILDED_NETHERRITE_INGOT);
+                        output.accept(ModItems.ANCIENT_INGOT);
+                        output.accept(ModItems.CRYSTAL_INGOT);
+                        output.accept(ModItems.MAGIC_UPGRADE_TEMPLATE);
                         output.accept(ModFluids.AETHER_BUCKET.get());
                         output.accept(ModFluids.BLOOD_WATER_BUCKET.get());
 
@@ -109,6 +116,8 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SCARLET_LILY);
                         output.accept(ModBlocks.SCARLET_DRIPSTONE_BLOCK);
                         output.accept(ModBlocks.POINTED_SCARLET_DRIPSTONE);
+
+                        output.accept(ModBlocks.EQUINOX_TABLE);
 
                         // Sol Sand Blocks
                         output.accept(ModBlocks.SOL_SAND);

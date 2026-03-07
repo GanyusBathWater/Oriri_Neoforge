@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:tortured_soul"
+    },
+    "left": {
+        "item": "minecraft:trident"
+    },
+    "center": {
+        "item": "oririmod:duellant_cortex"
+    },
+    "right": {
+        "item": "minecraft:netherite_sword"
+    },
+    "bottom": {
+        "item": "minecraft:crossbow"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:duellant_cortex",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 2
+}

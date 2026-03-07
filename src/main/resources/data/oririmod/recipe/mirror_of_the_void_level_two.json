@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:void_soul"
+    },
+    "left": {
+        "item": "minecraft:echo_shard"
+    },
+    "center": {
+        "item": "oririmod:mirror_of_the_void"
+    },
+    "right": {
+        "item": "minecraft:echo_shard"
+    },
+    "bottom": {
+        "item": "minecraft:blue_ice"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:mirror_of_the_void",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 1
+}

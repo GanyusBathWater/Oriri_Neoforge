@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "minecraft:soul_lantern"
+    },
+    "center": {
+        "item": "oririmod:miners_lantern"
+    },
+    "right": {
+        "item": "minecraft:soul_lantern"
+    },
+    "bottom": {
+        "item": "minecraft:glow_ink_sac"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:miners_lantern",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 2
+}

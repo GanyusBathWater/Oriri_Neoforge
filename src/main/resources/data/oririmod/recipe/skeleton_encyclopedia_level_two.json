@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:damned_soul"
+    },
+    "left": {
+        "item": "minecraft:bone"
+    },
+    "center": {
+        "item": "oririmod:skeleton_encyclopedia"
+    },
+    "right": {
+        "item": "minecraft:bone"
+    },
+    "bottom": {
+        "item": "minecraft:bow"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:skeleton_encyclopedia",
+        "count": 1
+    },
+    "mana_cost": 125,
+    "required_level": 1
+}
