@@ -20,6 +20,7 @@ public class ModBiomeModifiers {
 
         public static final ResourceKey<BiomeModifier> ADD_ELDER_TREES = registerKey("add_elder_trees");
         public static final ResourceKey<BiomeModifier> ADD_JADE_ORE = registerKey("add_jade_ore");
+        public static final ResourceKey<BiomeModifier> ADD_DRAGON_IRON_ORE = registerKey("add_dragon_iron_ore");
 
         // here will be the Features defined and later turned into json files
         public static void bootstrap(BootstrapContext<BiomeModifier> context) {
@@ -51,6 +52,19 @@ public class ModBiomeModifiers {
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(
                                                                                 ModPlacedFeatures.JADE_ORE_PLACED_KEY)),
+                                                GenerationStep.Decoration.UNDERGROUND_ORES));
+
+                var dragonIronBiomes = HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods_cave"))));
+
+                context.register(ADD_DRAGON_IRON_ORE,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                dragonIronBiomes,
+                                                HolderSet.direct(placedFeatures.getOrThrow(
+                                                                ModPlacedFeatures.DRAGON_IRON_ORE_PLACED_KEY)),
                                                 GenerationStep.Decoration.UNDERGROUND_ORES));
         }
 

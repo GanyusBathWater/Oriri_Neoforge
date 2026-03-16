@@ -181,7 +181,7 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
             return;
         }
 
-        if (!ModManaUtil.tryConsumeMana(player, manaCost)) {
+        if (!ModManaUtil.tryConsumeMana(player, manaCost, stack)) {
             return;
         }
 

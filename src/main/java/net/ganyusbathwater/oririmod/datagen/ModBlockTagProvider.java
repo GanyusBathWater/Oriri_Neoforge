@@ -155,7 +155,8 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
                                 .add(ModBlocks.DARK_SOIL_BLOCK.get())
                                 .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
-                                .add(ModBlocks.SOL_SAND.get());
+                                .add(ModBlocks.SOL_SAND.get())
+                                .add(ModBlocks.BLOOD_SLUDGE.get());
 
                 tag(BlockTags.SAND)
                                 .add(ModBlocks.SOL_SAND.get());

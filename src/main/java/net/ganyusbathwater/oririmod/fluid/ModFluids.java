@@ -87,8 +87,8 @@ public final class ModFluids {
                                 .block(BLOOD_WATER_BLOCK)
                                 .bucket(BLOOD_WATER_BUCKET)
                                 .tickRate(30) // Slower tick (lava-like)
-                                .levelDecreasePerBlock(2) // Flows 4 blocks like water
-                                .slopeFindDistance(4);
+                                .levelDecreasePerBlock(2) // Flows less distance
+                                .slopeFindDistance(2);
         }
 
         public static void register(IEventBus bus) {

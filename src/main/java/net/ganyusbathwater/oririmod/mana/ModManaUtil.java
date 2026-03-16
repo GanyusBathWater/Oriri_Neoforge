@@ -5,6 +5,9 @@ import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.ganyusbathwater.oririmod.enchantment.ModEnchantments;
 
 public class ModManaUtil {
     private static final String NBT_KEY = "OririMana";
@@ -13,7 +16,8 @@ public class ModManaUtil {
     private static final String NBT_REGEN_INTERVAL_KEY = "OririRegenIntervalSeconds";
     private static final int DEFAULT_MANA = 100;
 
-    private ModManaUtil() {}
+    private ModManaUtil() {
+    }
 
     private static int clamp(int value, int min, int max) {
         return value < min ? min : (value > max ? max : value);
@@ -41,35 +45,84 @@ public class ModManaUtil {
     public static void setMana(Player player, int mana) {
         int clamped = clamp(mana, 0, getMaxMana(player));
         player.getPersistentData().putInt(NBT_KEY, clamped);
-        if (player instanceof ServerPlayer sp) syncToClient(sp);
+        if (player instanceof ServerPlayer sp)
+            syncToClient(sp);
     }
 
     public static void resetMana(Player player) {
         int base = Math.min(DEFAULT_MANA, getMaxMana(player));
         player.getPersistentData().putInt(NBT_KEY, base);
-        if (player instanceof ServerPlayer sp) syncToClient(sp);
+        if (player instanceof ServerPlayer sp)
+            syncToClient(sp);
     }
 
     public static boolean tryConsumeMana(Player player, int amount) {
-        if (amount <= 0) return true;
+        if (amount <= 0)
+            return true;
         // Creative-Modus: kein Verbrauch
-        if (player.isCreative()) return true;
+        if (player.isCreative())
+            return true;
         int current = getMana(player);
-        if (current < amount) return false;
+        if (current < amount)
+            return false;
+        setMana(player, current - amount);
+        return true;
+    }
+
+    public static boolean tryConsumeMana(Player player, int amount, ItemStack weaponStack) {
+        if (amount <= 0)
+            return true;
+        if (player.isCreative())
+            return true;
+
+        var registryAccess = player.level().registryAccess();
+        var manaSavingsOpt = registryAccess.lookup(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .flatMap(reg -> reg.get(ModEnchantments.MANA_SAVINGS));
+
+        if (manaSavingsOpt.isPresent()) {
+            int level = EnchantmentHelper.getItemEnchantmentLevel(manaSavingsOpt.get(), weaponStack);
+            if (level > 0) {
+                // Reduces cost by 10% per level. Max 50% at level 5.
+                float discount = 1.0f - (0.10f * level);
+                amount = Math.max(1, Math.round(amount * discount)); // Always costs at least 1 mana unless it's 0 to
+                                                                     // begin with
+            }
+        }
+
+        int current = getMana(player);
+        if (current < amount)
+            return false;
         setMana(player, current - amount);
         return true;
     }
 
     public static void addMana(Player player, int amount) {
-        if (amount <= 0) return;
+        if (amount <= 0)
+            return;
         setMana(player, getMana(player) + amount);
     }
 
     public static int getMaxMana(Player player) {
         CompoundTag data = player.getPersistentData();
-        return data.contains(NBT_MAX_KEY)
+        int baseMax = data.contains(NBT_MAX_KEY)
                 ? data.getInt(NBT_MAX_KEY)
                 : OririConfig.COMMON.mana.maxMana.get();
+
+        var registryAccess = player.level().registryAccess();
+        var capacityEnchantOpt = registryAccess.lookup(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .flatMap(reg -> reg.get(ModEnchantments.MANA_CAPACITY));
+
+        int bonus = 0;
+        if (capacityEnchantOpt.isPresent()) {
+            var capacityEnchant = capacityEnchantOpt.get();
+            for (ItemStack armor : player.getArmorSlots()) {
+                if (!armor.isEmpty() && EnchantmentHelper.getItemEnchantmentLevel(capacityEnchant, armor) > 0) {
+                    bonus += 25;
+                }
+            }
+        }
+
+        return baseMax + bonus;
     }
 
     public static Integer getMaxManaIfPresent(Player player) {
@@ -85,7 +138,8 @@ public class ModManaUtil {
         if (cur > clampedMax) {
             data.putInt(NBT_KEY, clampedMax);
         }
-        if (player instanceof ServerPlayer sp) syncToClient(sp);
+        if (player instanceof ServerPlayer sp)
+            syncToClient(sp);
     }
 
     public static void resetMaxMana(Player player) {
@@ -96,7 +150,8 @@ public class ModManaUtil {
         if (mana > max) {
             data.putInt(NBT_KEY, max);
         }
-        if (player instanceof ServerPlayer sp) syncToClient(sp);
+        if (player instanceof ServerPlayer sp)
+            syncToClient(sp);
     }
 
     public static void incTickCounter(Player player) {
@@ -114,11 +169,12 @@ public class ModManaUtil {
     }
 
     public static void tick(Player player) {
-        if (player.level().isClientSide) return;
+        if (player.level().isClientSide)
+            return;
         CompoundTag data = player.getPersistentData();
-        int intervalSec = getRegenIntervalSeconds(player);
-        if (intervalSec <= 0) return;
-        int intervalTicks = intervalSec * 20;
+        int intervalTicks = getRegenIntervalTicks(player);
+        if (intervalTicks <= 0)
+            return;
         int tick = data.getInt(NBT_TICK_KEY) + 1;
         if (tick >= intervalTicks) {
             tick = 0;
@@ -137,10 +193,38 @@ public class ModManaUtil {
     }
 
     public static int getRegenIntervalSeconds(Player player) {
+        return getRegenIntervalTicks(player) / 20;
+    }
+
+    public static int getRegenIntervalTicks(Player player) {
         CompoundTag data = player.getPersistentData();
-        return data.contains(NBT_REGEN_INTERVAL_KEY)
+        int baseInterval = data.contains(NBT_REGEN_INTERVAL_KEY)
                 ? data.getInt(NBT_REGEN_INTERVAL_KEY)
                 : OririConfig.COMMON.mana.regenIntervalSeconds.get();
+
+        int baseTicks = baseInterval * 20;
+
+        var registryAccess = player.level().registryAccess();
+        var regenEnchantOpt = registryAccess.lookup(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .flatMap(reg -> reg.get(ModEnchantments.MANA_REGENERATION));
+
+        int enchantCount = 0;
+        if (regenEnchantOpt.isPresent()) {
+            var regenEnchant = regenEnchantOpt.get();
+            for (ItemStack armor : player.getArmorSlots()) {
+                if (!armor.isEmpty() && EnchantmentHelper.getItemEnchantmentLevel(regenEnchant, armor) > 0) {
+                    enchantCount++;
+                }
+            }
+        }
+
+        if (enchantCount > 0) {
+            // Speed up regen by 10% per armor piece with the enchantment:
+            float speedMultiplier = Math.max(0.1f, 1.0f - (0.10f * enchantCount));
+            return Math.max(1, Math.round(baseTicks * speedMultiplier));
+        }
+
+        return baseTicks;
     }
 
     public static void resetRegenIntervalSeconds(Player player) {

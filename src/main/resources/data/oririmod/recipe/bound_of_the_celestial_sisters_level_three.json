@@ -13,7 +13,7 @@
         "item": "minecraft:echo_shard"
     },
     "bottom": {
-        "item": "oririmod:moonstone"
+        "item": "oririmod:moon_stone"
     },
     "template": {
         "item": "oririmod:magic_upgrade_template"

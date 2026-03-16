@@ -4,13 +4,13 @@
         "item": "oririmod:void_soul"
     },
     "left": {
-        "item": "oririmod:moonstone"
+        "item": "oririmod:moon_stone"
     },
     "center": {
         "item": "oririmod:bound_of_the_celestial_sisters"
     },
     "right": {
-        "item": "oririmod:moonstone"
+        "item": "oririmod:moon_stone"
     },
     "bottom": {
         "item": "minecraft:nether_star"

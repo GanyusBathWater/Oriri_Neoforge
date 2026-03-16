@@ -29,19 +29,24 @@ import net.minecraft.world.phys.Vec3;
 
 public class OmniMagicItem extends Item implements ModRarityCarrier {
 
-    private static final ResourceLocation TEX_ARCANE_OUTER =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/effect/magic_circles/blood_outer.png");
-    private static final ResourceLocation TEX_ARCANE_MID =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/effect/magic_circles/blood_mid.png");
-    private static final ResourceLocation TEX_ARCANE_INNER =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/effect/magic_circles/blood_inner.png");
+    private static final ResourceLocation TEX_ARCANE_OUTER = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/effect/magic_circles/blood_outer.png");
+    private static final ResourceLocation TEX_ARCANE_MID = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/effect/magic_circles/blood_mid.png");
+    private static final ResourceLocation TEX_ARCANE_INNER = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/effect/magic_circles/blood_inner.png");
 
     public enum OmniAbility {
         BOLT_NORMAL, BOLT_SONIC, BOLT_BLAZE, BOLT_ENDER, BOLT_EXPLOSIVE, BOLT_METEOR,
         STAFF_GROW, STAFF_REGEN, STAFF_HASTE;
 
-        public boolean isBolt() { return this.name().startsWith("BOLT_"); }
-        public boolean isStaff() { return this.name().startsWith("STAFF_"); }
+        public boolean isBolt() {
+            return this.name().startsWith("BOLT_");
+        }
+
+        public boolean isStaff() {
+            return this.name().startsWith("STAFF_");
+        }
 
         public MagicBoltAbility toBolt() {
             return switch (this) {
@@ -78,7 +83,9 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
         }
     }
 
-    public enum MagicStaffAction { GROW, REGEN, HASTE }
+    public enum MagicStaffAction {
+        GROW, REGEN, HASTE
+    }
 
     private static final String NBT_SELECTED = "OmniAbility";
 
@@ -139,7 +146,8 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
 
         // Staff-Fähigkeiten wirken sofort
         MagicStaffAction sa = ab.toStaff();
-        if (sa == null) return InteractionResultHolder.pass(stack);
+        if (sa == null)
+            return InteractionResultHolder.pass(stack);
 
         switch (sa) {
             case GROW -> {
@@ -147,7 +155,7 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 if (!level.isClientSide && hit.getType() == HitResult.Type.BLOCK) {
                     BlockPos pos = hit.getBlockPos();
                     boolean ok = tryBonemeal((ServerLevel) level, pos) || tryBonemeal((ServerLevel) level, pos.above());
-                    if (ok && ModManaUtil.tryConsumeMana(player, ab.getManaCost())) {
+                    if (ok && ModManaUtil.tryConsumeMana(player, ab.getManaCost(), stack)) {
                         player.getCooldowns().addCooldown(this, cooldown);
                     }
                 }
@@ -155,8 +163,9 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
             }
             case REGEN -> {
                 if (!level.isClientSide) {
-                    if (ModManaUtil.tryConsumeMana(player, ab.getManaCost())) {
-                        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, effectDuration, effectAmplifier));
+                    if (ModManaUtil.tryConsumeMana(player, ab.getManaCost(), stack)) {
+                        player.addEffect(
+                                new MobEffectInstance(MobEffects.REGENERATION, effectDuration, effectAmplifier));
                         player.getCooldowns().addCooldown(this, cooldown);
                     }
                 }
@@ -164,7 +173,7 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
             }
             case HASTE -> {
                 if (!level.isClientSide) {
-                    if (ModManaUtil.tryConsumeMana(player, ab.getManaCost())) {
+                    if (ModManaUtil.tryConsumeMana(player, ab.getManaCost(), stack)) {
                         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, effectDuration, effectAmplifier));
                         player.getCooldowns().addCooldown(this, cooldown);
                     }
@@ -180,9 +189,11 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
     @Override
     public void onUseTick(Level level, LivingEntity living, ItemStack stack, int remainingUseDuration) {
         OmniAbility ab = getSelected(stack);
-        if (!level.isClientSide || !ab.isBolt()) return;
+        if (!level.isClientSide || !ab.isBolt())
+            return;
 
-        // Nur alle ~30 Ticks Reset, damit der Renderer persistenten Indikator nicht nach 40 Ticks entfernt.
+        // Nur alle ~30 Ticks Reset, damit der Renderer persistenten Indikator nicht
+        // nach 40 Ticks entfernt.
         var prev = MagicIndicatorClientState.INSTANCE.getActive().get(living.getId());
         if (prev != null) {
             long age = level.getGameTime() - prev.startGameTime();
@@ -215,16 +226,13 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
 
             MagicIndicatorClientState.Indicator.Layer outer = new MagicIndicatorClientState.Indicator.Layer(
                     TEX_ARCANE_OUTER, METEOR_OUTER_RADIUS_PLAYER, 10f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.PLAYER
-            );
+                    MagicIndicatorClientState.Anchor.PLAYER);
             MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
                     TEX_ARCANE_MID, METEOR_MID_RADIUS_GROUND, -6f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.WORLD
-            );
+                    MagicIndicatorClientState.Anchor.WORLD);
             MagicIndicatorClientState.Indicator.Layer inner = new MagicIndicatorClientState.Indicator.Layer(
                     TEX_ARCANE_INNER, METEOR_INNER_RADIUS_GROUND, 6f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.WORLD
-            );
+                    MagicIndicatorClientState.Anchor.WORLD);
 
             MagicIndicatorClientState.startFor(living, b.addLayer(outer).addLayer(mid).addLayer(inner).build());
         } else {
@@ -236,8 +244,7 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
 
             MagicIndicatorClientState.Indicator.Layer layer = new MagicIndicatorClientState.Indicator.Layer(
                     null, 1.2f, 0f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.PLAYER
-            );
+                    MagicIndicatorClientState.Anchor.PLAYER);
 
             MagicIndicatorClientState.startFor(living, b.addLayer(layer).build());
         }
@@ -267,12 +274,10 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
 
                         MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
                                 TEX_ARCANE_MID, METEOR_MID_RADIUS_GROUND, -6f, 0xFFFFFFFF, 0f,
-                                MagicIndicatorClientState.Anchor.WORLD
-                        );
+                                MagicIndicatorClientState.Anchor.WORLD);
                         MagicIndicatorClientState.Indicator.Layer inner = new MagicIndicatorClientState.Indicator.Layer(
                                 TEX_ARCANE_INNER, METEOR_INNER_RADIUS_GROUND, 6f, 0xFFFFFFFF, 0f,
-                                MagicIndicatorClientState.Anchor.WORLD
-                        );
+                                MagicIndicatorClientState.Anchor.WORLD);
 
                         MagicIndicatorClientState.startFor(living, b.addLayer(mid).addLayer(inner).build());
                     }
@@ -289,21 +294,26 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
         int minCharge = 10;
 
         if (ab.isBolt()) {
-            if (usedTicks < minCharge) return;
+            if (usedTicks < minCharge)
+                return;
 
             if (living instanceof Player p) {
-                if (!ModManaUtil.tryConsumeMana(p, ab.getManaCost())) return;
+                if (!ModManaUtil.tryConsumeMana(p, ab.getManaCost(), stack))
+                    return;
             }
 
             if (ab == OmniAbility.BOLT_METEOR) {
                 BlockHitResult hit = raycastToGround(level, living, 96.0);
-                if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
+                if (hit == null || hit.getType() != HitResult.Type.BLOCK)
+                    return;
 
                 BlockPos ground = findGround(level, hit.getBlockPos().above(), 12);
-                if (ground == null) return;
+                if (ground == null)
+                    return;
 
                 MeteorEntity meteor = (MeteorEntity) ModEntities.METEOR.get().create(level);
-                if (meteor == null) return;
+                if (meteor == null)
+                    return;
 
                 meteor.configure(ground.immutable(), 12.0f, 7);
                 meteor.setOwnerId(living.getId());
@@ -347,8 +357,8 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
     // ---------- Data Components: Auswahl speichern ----------
 
     private static OmniAbility getSelected(ItemStack stack) {
-        net.minecraft.world.item.component.CustomData data =
-                stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        net.minecraft.world.item.component.CustomData data = stack
+                .get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 
         String name = "";
         if (data != null) {
@@ -364,11 +374,10 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
     }
 
     private static void setSelected(ItemStack stack, OmniAbility ab) {
-        net.minecraft.world.item.component.CustomData data =
-                stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        net.minecraft.world.item.component.CustomData data = stack
+                .get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 
-        net.minecraft.nbt.CompoundTag tag =
-                (data != null) ? data.copyTag() : new net.minecraft.nbt.CompoundTag();
+        net.minecraft.nbt.CompoundTag tag = (data != null) ? data.copyTag() : new net.minecraft.nbt.CompoundTag();
 
         tag.putString(NBT_SELECTED, ab.name());
         stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
@@ -405,8 +414,7 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 eye, end,
                 ClipContext.Block.COLLIDER,
                 ClipContext.Fluid.ANY,
-                living
-        ));
+                living));
     }
 
     private static BlockPos findGround(Level level, BlockPos start, int maxDrop) {
@@ -423,7 +431,8 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
     private static double getTopSurfaceY(Level level, BlockPos pos) {
         var state = level.getBlockState(pos);
         var shape = state.getCollisionShape(level, pos);
-        if (shape.isEmpty()) return pos.getY() + 1.0;
+        if (shape.isEmpty())
+            return pos.getY() + 1.0;
         return pos.getY() + shape.max(net.minecraft.core.Direction.Axis.Y);
     }
 

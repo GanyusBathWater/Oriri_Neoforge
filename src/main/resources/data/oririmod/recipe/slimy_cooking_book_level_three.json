@@ -13,7 +13,7 @@
         "item": "minecraft:slime_block"
     },
     "bottom": {
-        "item": "oririmod:slime_block"
+        "item": "minecraft:slime_block"
     },
     "template": {
         "item": "oririmod:magic_upgrade_template"

@@ -10,6 +10,8 @@ import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.block.TransparentBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -23,6 +25,9 @@ public class ModBlocks {
 
         public static final DeferredBlock<Block> DARK_SOIL_BLOCK = registerBlock("dark_soil_block",
                         () -> new GrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
+
+        public static final DeferredBlock<Block> BLOOD_SLUDGE = registerBlock("blood_sludge",
+                        () -> new SlimeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SLIME_BLOCK)));
 
         public static final DeferredBlock<Block> ELDERBUSH_BLOCK = registerBlock("elderbush_block",
                         () -> new ElderBerryBush(BlockBehaviour.Properties.of().noOcclusion()
@@ -263,6 +268,15 @@ public class ModBlocks {
                         () -> new TiltedBrokenSwordBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                                         .noOcclusion().strength(3.0f, 3.0f)));
 
+        // ===== GLASS & PANES =====
+        public static final DeferredBlock<Block> SOL_GLASS = registerBlock("sol_glass",
+                        () -> new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
+                                        .lightLevel((state) -> 5)));
+
+        public static final DeferredBlock<Block> SOL_GLASS_PANE = registerBlock("sol_glass_pane",
+                        () -> new IronBarsBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS_PANE)
+                                        .lightLevel((state) -> 5)));
+
         // ===== JADE BLOCKS =====
         public static final DeferredBlock<Block> JADE_BLOCK = registerBlock("jade_block",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.EMERALD_BLOCK)));
@@ -272,6 +286,12 @@ public class ModBlocks {
 
         public static final DeferredBlock<Block> DEEPSLATE_JADE_ORE = registerBlock("deepslate_jade_ore",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_EMERALD_ORE)));
+
+        public static final DeferredBlock<Block> DRAGON_IRON_ORE = registerBlock("dragon_iron_ore",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DIAMOND_ORE)));
+
+        public static final DeferredBlock<Block> DEEPSLATE_DRAGON_IRON_ORE = registerBlock("deepslate_dragon_iron_ore",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_DIAMOND_ORE)));
 
         public static final DeferredBlock<StairBlock> JADE_STAIRS = registerBlock("jade_stairs",
                         () -> new StairBlock(ModBlocks.JADE_BLOCK.get().defaultBlockState(),

@@ -42,7 +42,75 @@ public final class ElementalDamageHandler {
             attackerElement = ItemElementRegistry.getElement(mainHand);
 
             if (attackerElement == Element.PHYSICAL) {
-                attackerElement = EntityElementRegistry.getElement(attacker);
+                // --- ELEMENTAL ENCHANTMENT OVERRIDE ---
+                if (!mainHand.isEmpty()) {
+                    net.minecraft.core.RegistryAccess registryAccess = attacker.level().registryAccess();
+                    net.minecraft.core.HolderLookup.RegistryLookup<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = registryAccess
+                            .lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+
+                    if (net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
+                            enchantmentRegistry
+                                    .getOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_FIRE),
+                            mainHand) > 0) {
+                        attackerElement = Element.FIRE;
+                    } else if (net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
+                            enchantmentRegistry
+                                    .getOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_WATER),
+                            mainHand) > 0) {
+                        attackerElement = Element.WATER;
+                    } else if (net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
+                            enchantmentRegistry.getOrThrow(
+                                    net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_NATURE),
+                            mainHand) > 0) {
+                        attackerElement = Element.NATURE;
+                    } else if (net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
+                            enchantmentRegistry
+                                    .getOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_EARTH),
+                            mainHand) > 0) {
+                        attackerElement = Element.EARTH;
+                    } else if (net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
+                            enchantmentRegistry
+                                    .getOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_LIGHT),
+                            mainHand) > 0) {
+                        attackerElement = Element.LIGHT;
+                    } else if (net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
+                            enchantmentRegistry.getOrThrow(
+                                    net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_DARKNESS),
+                            mainHand) > 0) {
+                        attackerElement = Element.DARKNESS;
+                    }
+                }
+
+                if (attackerElement == Element.PHYSICAL) {
+                    attackerElement = EntityElementRegistry.getElement(attacker);
+                }
+            }
+        }
+
+        // --- CUSTOM DAMAGE SOURCE OVERRIDE FOR ELEMENTS ---
+        if (attackerElement != Element.PHYSICAL && attackerElement != Element.TRUE_DAMAGE) {
+            net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> typeToUse = null;
+            if (attackerElement == Element.FIRE)
+                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_FIRE;
+            else if (attackerElement == Element.WATER)
+                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_WATER;
+            else if (attackerElement == Element.NATURE)
+                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_NATURE;
+            else if (attackerElement == Element.EARTH)
+                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_EARTH;
+            else if (attackerElement == Element.LIGHT)
+                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_LIGHT;
+            else if (attackerElement == Element.DARKNESS)
+                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_DARKNESS;
+
+            if (typeToUse != null && !event.getSource().is(typeToUse)) {
+                // To apply the actual damage source type into the event, we basically can't
+                // change the Event's source directly
+                // but we CAN cancel it and fire hurt with new source
+                event.setCanceled(true);
+                target.hurt(net.ganyusbathwater.oririmod.damage.ModDamageTypes.getElementalDamage(target.level(),
+                        owner != null ? owner : direct, typeToUse), event.getAmount());
+                return;
             }
         }
 

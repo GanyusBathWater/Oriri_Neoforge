@@ -77,6 +77,18 @@ public class FireballProjectileEntity extends AbstractHurtingProjectile implemen
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
         if (!this.level().isClientSide) {
+            net.minecraft.world.entity.Entity target = result.getEntity();
+            net.minecraft.world.entity.Entity owner = this.getOwner();
+
+            // Fix: Minecraft's explosion damage is distance-based. A tiny explosion radius
+            // (e.g., 0.67 or 1.0)
+            // will fail to reach the entity's actual center coordinate, resolving to 0
+            // structural damage.
+            // We forcefully apply the theoretical maximum damage equivalent (Radius * 7 +
+            // 1) upon direct impact!
+            float directHitDamage = this.getExplosionRadius() * 7.0F + 1.0F;
+            target.hurt(this.damageSources().thrown(this, owner), directHitDamage);
+
             this.explode();
             this.discard();
         }
@@ -139,19 +151,20 @@ public class FireballProjectileEntity extends AbstractHurtingProjectile implemen
         switch (ability) {
             case AMATEUR_FIREBALL -> {
                 this.setScale(0.5F);
-                this.setExplosionRadius(2.0F);
+                this.setExplosionRadius(0.67F); // Reset to 0.67F originally requested since direct damage is now
+                                                // working
             }
             case APPRENTICE_FIREBALL -> {
                 this.setScale(0.75F);
-                this.setExplosionRadius(5.0F);
+                this.setExplosionRadius(1.67F); // Original: 5.0F
             }
             case JOURNEYMAN_FIREBALL -> {
                 this.setScale(1.0F);
-                this.setExplosionRadius(8.0F);
+                this.setExplosionRadius(2.67F); // Original: 8.0F
             }
             case WISE_FIREBALL -> {
                 this.setScale(1.25F);
-                this.setExplosionRadius(11.0F);
+                this.setExplosionRadius(3.67F); // Original: 11.0F
             }
         }
     }

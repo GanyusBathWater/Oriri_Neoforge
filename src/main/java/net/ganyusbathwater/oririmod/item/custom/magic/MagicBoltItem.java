@@ -184,7 +184,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
         if (living instanceof Player p) {
             // Spieler muss Mana besitzen
-            if (!ModManaUtil.tryConsumeMana(p, manaCost))
+            if (!ModManaUtil.tryConsumeMana(p, manaCost, stack))
                 return;
         }
 

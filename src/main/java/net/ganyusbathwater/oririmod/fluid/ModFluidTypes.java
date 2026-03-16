@@ -31,12 +31,12 @@ public final class ModFluidTypes {
                         () -> new FluidType(FluidType.Properties.create()
                                         .lightLevel(0)
                                         .viscosity(6000) // Lava-like viscosity (slow flow)
-                                        .density(1000) // Water-like density
+                                        .density(3000) // Lava-like density
                                         .canExtinguish(true)
                                         .supportsBoating(true)
                                         .canDrown(true) // Can drown in it
                                         .canSwim(true) // Can swim in it
-                                        .canPushEntity(true)
+                                        .canPushEntity(false) // No longer pushes the player aggressively
                                         .canHydrate(false)
                                         .pathType(null)));
 

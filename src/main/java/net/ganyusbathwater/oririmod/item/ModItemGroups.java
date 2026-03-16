@@ -27,6 +27,8 @@ public class ModItemGroups {
                         output.accept(ModItems.MANA_MANIFESTATION);
                         output.accept(ModItems.FLUORITE_CRYSTAL);
                         output.accept(ModItems.JADE);
+                        output.accept(ModItems.RAW_DRAGON_IRON);
+                        output.accept(ModItems.DRAGON_IRON_INGOT);
                         output.accept(ModItems.MOON_STONE);
                         output.accept(ModItems.DAMNED_SOUL);
                         output.accept(ModItems.HOLLOW_SOUL);
@@ -41,9 +43,9 @@ public class ModItemGroups {
                         output.accept(ModItems.GILDED_NETHERRITE_INGOT);
                         output.accept(ModItems.ANCIENT_INGOT);
                         output.accept(ModItems.CRYSTAL_INGOT);
-                        output.accept(ModItems.MAGIC_UPGRADE_TEMPLATE);
                         output.accept(ModFluids.AETHER_BUCKET.get());
                         output.accept(ModFluids.BLOOD_WATER_BUCKET.get());
+                        output.accept(ModBlocks.BLOOD_SLUDGE.get());
 
                         // -------------Blocks------------
                         output.accept(ModBlocks.MANA_CRYSTAL_BLOCK);
@@ -53,6 +55,8 @@ public class ModItemGroups {
                         output.accept(ModBlocks.JADE_BLOCK);
                         output.accept(ModBlocks.JADE_ORE);
                         output.accept(ModBlocks.DEEPSLATE_JADE_ORE);
+                        output.accept(ModBlocks.DRAGON_IRON_ORE);
+                        output.accept(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE);
                         output.accept(ModBlocks.JADE_STAIRS);
                         output.accept(ModBlocks.JADE_SLAB);
                         output.accept(ModBlocks.JADE_WALL);
@@ -124,6 +128,8 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SOL_SANDSTONE);
                         output.accept(ModBlocks.CUT_SOL_SANDSTONE);
                         output.accept(ModBlocks.CHISELED_SOL_SANDSTONE);
+                        output.accept(ModBlocks.SOL_GLASS);
+                        output.accept(ModBlocks.SOL_GLASS_PANE);
 
                         // Sword Blocks
                         output.accept(ModBlocks.BROKEN_SWORD_BLOCK);

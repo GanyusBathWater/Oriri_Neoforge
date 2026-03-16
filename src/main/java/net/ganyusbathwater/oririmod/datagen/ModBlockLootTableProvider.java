@@ -119,6 +119,10 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                                 block -> createMultipleOreDrops(block, ModItems.JADE.get(), 2.0F, 5.0F));
                 this.add(ModBlocks.DEEPSLATE_JADE_ORE.get(),
                                 block -> createMultipleOreDrops(block, ModItems.JADE.get(), 2.0F, 5.0F));
+                this.add(ModBlocks.DRAGON_IRON_ORE.get(),
+                                block -> createMultipleOreDrops(block, ModItems.RAW_DRAGON_IRON.get(), 1.0F, 1.0F));
+                this.add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(),
+                                block -> createMultipleOreDrops(block, ModItems.RAW_DRAGON_IRON.get(), 1.0F, 1.0F));
                 this.dropSelf(ModBlocks.JADE_STAIRS.get());
                 this.add(ModBlocks.JADE_SLAB.get(), this::createSlabItemTable);
                 this.dropSelf(ModBlocks.JADE_WALL.get());
@@ -154,6 +158,13 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 // Sword Blocks
                 this.add(ModBlocks.BROKEN_SWORD_BLOCK.get(), block -> createSwordDrops(block));
                 this.add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get(), block -> createSwordDrops(block));
+
+                // Blood Sludge
+                this.dropSelf(ModBlocks.BLOOD_SLUDGE.get());
+
+                // Sol Glass
+                this.add(ModBlocks.SOL_GLASS.get(), block -> createSilkTouchOnlyTable(block));
+                this.add(ModBlocks.SOL_GLASS_PANE.get(), block -> createSilkTouchOnlyTable(block));
         }
 
         protected LootTable.Builder createSwordDrops(Block pBlock) {

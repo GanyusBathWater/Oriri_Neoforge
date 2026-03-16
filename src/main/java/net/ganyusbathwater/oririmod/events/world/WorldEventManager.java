@@ -83,6 +83,9 @@ public class WorldEventManager extends SavedData {
      * Prüft, ob ein bestimmtes Event aktiv ist (Level-abhängig).
      */
     public static boolean isEventActive(Level level, WorldEventType eventType) {
+        if (!isOverworld(level)) {
+            return false;
+        }
         if (level.isClientSide()) {
             return ClientWorldEventData.activeEvent == eventType && ClientWorldEventData.ticksRemaining > 0;
         }
@@ -97,6 +100,9 @@ public class WorldEventManager extends SavedData {
      * Prüft, ob irgendein Event aktiv ist.
      */
     public static boolean isAnyEventActive(Level level) {
+        if (!isOverworld(level)) {
+            return false;
+        }
         if (level.isClientSide()) {
             return ClientWorldEventData.activeEvent != WorldEventType.NONE && ClientWorldEventData.ticksRemaining > 0;
         }
@@ -108,6 +114,9 @@ public class WorldEventManager extends SavedData {
     }
 
     public static WorldEventType getActiveEvent(Level level) {
+        if (!isOverworld(level)) {
+            return WorldEventType.NONE;
+        }
         if (level.isClientSide()) {
             return ClientWorldEventData.activeEvent;
         }
@@ -118,6 +127,9 @@ public class WorldEventManager extends SavedData {
     }
 
     public static int getTicksRemaining(Level level) {
+        if (!isOverworld(level)) {
+            return 0;
+        }
         if (level.isClientSide()) {
             return ClientWorldEventData.ticksRemaining;
         }
@@ -128,6 +140,9 @@ public class WorldEventManager extends SavedData {
     }
 
     public static int getEventDuration(Level level) {
+        if (!isOverworld(level)) {
+            return 0;
+        }
         if (level.isClientSide()) {
             return ClientWorldEventData.eventDuration;
         }
@@ -219,7 +234,7 @@ public class WorldEventManager extends SavedData {
     /**
      * Prüft, ob das angegebene Level die Overworld ist.
      */
-    private static boolean isOverworld(ServerLevel level) {
+    public static boolean isOverworld(Level level) {
         // level.dimension() gibt den ResourceKey<Level> zurück
         return level != null && level.dimension() == Level.OVERWORLD;
     }

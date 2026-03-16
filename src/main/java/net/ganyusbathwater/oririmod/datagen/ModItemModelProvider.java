@@ -41,6 +41,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.MAGIC_UPGRADE_TEMPLATE.get());
                 basicItem(ModItems.FLUORITE_CRYSTAL.get());
                 basicItem(ModItems.JADE.get());
+                basicItem(ModItems.RAW_DRAGON_IRON.get());
+                basicItem(ModItems.DRAGON_IRON_INGOT.get());
 
                 // -------------Blocks------------
 
@@ -64,6 +66,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.JADE_BLOCK.get());
                 simpleBlockItem(ModBlocks.JADE_ORE.get());
                 simpleBlockItem(ModBlocks.DEEPSLATE_JADE_ORE.get());
+                simpleBlockItem(ModBlocks.DRAGON_IRON_ORE.get());
+                simpleBlockItem(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get());
                 simpleBlockItem(ModBlocks.JADE_STAIRS.get());
                 simpleBlockItem(ModBlocks.JADE_SLAB.get());
                 wallItem(ModBlocks.JADE_WALL, ModBlocks.JADE_BLOCK);
@@ -122,6 +126,13 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.SOL_SANDSTONE.get());
                 simpleBlockItem(ModBlocks.CUT_SOL_SANDSTONE.get());
                 simpleBlockItem(ModBlocks.CHISELED_SOL_SANDSTONE.get());
+
+                // Blood Sludge
+                simpleBlockItem(ModBlocks.BLOOD_SLUDGE.get());
+
+                // Glass & Panes
+                simpleBlockItem(ModBlocks.SOL_GLASS.get());
+                paneItem(ModBlocks.SOL_GLASS_PANE, ModBlocks.SOL_GLASS);
 
                 // Sword Blocks
                 simpleBlockItem(ModBlocks.BROKEN_SWORD_BLOCK.get());
@@ -380,6 +391,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         public void wallItem(DeferredBlock<?> block, DeferredBlock<Block> baseBlock) {
                 this.withExistingParent(block.getId().getPath(), mcLoc("block/wall_inventory"))
                                 .texture("wall", ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+                                                "block/" + baseBlock.getId().getPath()));
+        }
+
+        public void paneItem(DeferredBlock<Block> block, DeferredBlock<Block> baseBlock) {
+                this.withExistingParent(block.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                 "block/" + baseBlock.getId().getPath()));
         }
 

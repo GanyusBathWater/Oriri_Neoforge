@@ -60,23 +60,12 @@ public class ServerEvents {
         if (player.level().isClientSide())
             return;
 
-        int intervalSeconds = ModManaUtil.getRegenIntervalSeconds(player);
-        int regenAmount = OririConfig.COMMON.mana.regenAmount.get();
         int playerMax = ModManaUtil.getMaxMana(player);
-
-        int intervalTicks = Math.max(1, intervalSeconds * 20);
-
         if (ModManaUtil.getMana(player) > playerMax) {
             ModManaUtil.setMana(player, playerMax);
         }
 
-        ModManaUtil.incTickCounter(player);
-        if (ModManaUtil.getTickCounter(player) >= intervalTicks) {
-            ModManaUtil.setTickCounter(player, 0);
-            if (ModManaUtil.getMana(player) < playerMax && regenAmount > 0) {
-                ModManaUtil.addMana(player, regenAmount);
-            }
-        }
+        ModManaUtil.tick(player);
     }
 
     @SubscribeEvent
@@ -100,6 +89,9 @@ public class ServerEvents {
     public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             ModManaUtil.syncToClient(sp);
+            // Sync world event state to clear/update client state for the new dimension
+            NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
+                    WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
         }
     }
 

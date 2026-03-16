@@ -61,6 +61,12 @@ public class ModItems {
         public static final DeferredItem<Item> CRYSTAL_INGOT = ITEMS.register("crystal_ingot",
                         () -> new Item(new Item.Properties()));
 
+        public static final DeferredItem<Item> RAW_DRAGON_IRON = ITEMS.register("raw_dragon_iron",
+                        () -> new Item(new Item.Properties()));
+
+        public static final DeferredItem<Item> DRAGON_IRON_INGOT = ITEMS.register("dragon_iron_ingot",
+                        () -> new Item(new Item.Properties()));
+
         public static final DeferredItem<Item> MAGIC_UPGRADE_TEMPLATE = ITEMS.register("magic_upgrade_template",
                         () -> new Item(new Item.Properties()));
 

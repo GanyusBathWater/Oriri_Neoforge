@@ -1,0 +1,95 @@
+# Oriri Mod - Loot Generation Configuration File
+# Please fill out the sections below with the requested items and their drop conditions.
+# Once you are done, let me know, and I will implement all of them!
+
+================================================================================
+# 1. STRUCTURE LOOT (Chest Loot)
+# Items that should generate in chests within specific structures.
+# Provide the Item Name, the target Structure(s), and the approximate drop chance.
+# Example: 
+# - Item: Fire Crystal
+#   Structures: Nether Fortresses, Bastion Remnants
+#   Chance: 5% (1 in 20 chests)
+#   Amount: 1
+
+
+--------------------------------------------------------------------------------
+
+- Item: [Your Item Here]
+  Structures: [Vanilla/Modded Structures Here]
+  Chance: [Drop Chance/Rarity]
+  Amount: [Min-Max]
+
+- Item: [Your Item Here]
+  Structures: [Vanilla/Modded Structures Here]
+  Chance: [Drop Chance/Rarity]
+  Amount: [Min-Max]
+
+(Add more as needed...)
+
+
+
+================================================================================
+# 2. MOB DROPS (Entity Loot)
+# Items that should be dropped by specific mobs when they are killed.
+# Provide the Item Name, the target Mob(s), the specific dimension condition (if any), and the drop chance.
+# Example:
+# - Item: Hollow Soul
+#   Mobs: All Passive Mobs (Pigs, Cows, Sheep, etc.)
+#   Condition: Must be in the Overworld
+#   Chance: 2%
+#   Amount: 1
+--------------------------------------------------------------------------------
+
+  Item: Hollow Soul
+  Mobs: All Passive Mobs (Pigs, Cows, Sheep, etc.)
+  Condition: Must be in the Overworld
+  Chance: 2%
+  Amount: 1
+
+- Item: Damned Soul
+  Mobs: All Undead Mobs 
+  Chance: 2%
+  Amount: 1-2
+
+- Item: Power Soul
+  Mobs: All Boss Mobs (Warden, Elder Guardian, Wither etc...)
+  Chance: 100%
+  Amount: 1
+
+  Item: Tortured Soul
+  Mobs: All Mobs
+  Condition: Must be in the Nether
+  Chance: 2%
+  Amount: 1-2
+
+  Item: Void Soul
+  Mobs: All Mobs
+  Condition: Must be in the End
+  Chance: 2%
+  Amount: 1-2
+
+
+
+================================================================================
+# 3. BLOCK DROPS (Rare Block Loot)
+# Items that should rarely drop when breaking specific blocks.
+# Provide the Item Name, the target Block(s), and the drop chance.
+# Example:
+# - Item: Ancient Shard
+#   Blocks: Deepslate, Cobbled Deepslate
+#   Chance: 1% (1 in 100 broken blocks)
+#   Amount: 1
+--------------------------------------------------------------------------------
+
+- Item: Blood Lotus
+  Blocks: Scarlet Lily
+  Chance: 1 in 200
+  Amount: 1
+
+- Item: Iron Roots
+  Blocks: Hanging Roots
+  Chance: 1 in 200
+  Amount: 1
+
+(Add more as needed...)

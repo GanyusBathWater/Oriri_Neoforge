@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:mana_manifestation"
+    },
+    "left": {
+        "item": "oririmod:mana_manifestation"
+    },
+    "center": {
+        "item": "minecraft:dark_oak_sapling"
+    },
+    "right": {
+        "item": "oririmod:mana_manifestation"
+    },
+    "bottom": {
+        "item": "oririmod:mana_manifestation"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:upgraded_dark_oak_sapling",
+        "count": 1
+    },
+    "mana_cost": 50,
+    "required_level": 1
+}

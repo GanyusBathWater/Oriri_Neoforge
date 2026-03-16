@@ -249,6 +249,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_scarlet_deepslate_tiles", has(ModBlocks.SCARLET_DEEPSLATE_TILES))
                                 .save(recipeOutput, "oririmod:cracked_scarlet_deepslate_tiles_from_smelting");
 
+                // Dragon Iron Ingot
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModItems.RAW_DRAGON_IRON), RecipeCategory.MISC,
+                                                ModItems.DRAGON_IRON_INGOT.get(), 0.1f, 200)
+                                .unlockedBy("has_raw_dragon_iron", has(ModItems.RAW_DRAGON_IRON))
+                                .save(recipeOutput, "oririmod:dragon_iron_ingot_from_smelting");
+
                 // --- Sol Sand Recipes ---
                 ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE, 1)
                                 .pattern("BB")
@@ -278,6 +285,12 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .requires(ModBlocks.TILTED_BROKEN_SWORD_BLOCK)
                                 .unlockedBy("has_tilted_broken_sword_block", has(ModBlocks.TILTED_BROKEN_SWORD_BLOCK))
                                 .save(recipeOutput, "oririmod:broken_sword_block_from_tilted");
+
+                // --- Blood Sludge Conversions ---
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.SLIME_BALL, 4)
+                                .requires(ModBlocks.BLOOD_SLUDGE.get())
+                                .unlockedBy("has_blood_sludge", has(ModBlocks.BLOOD_SLUDGE.get()))
+                                .save(recipeOutput, "oririmod:slime_balls_from_blood_sludge");
 
                 /*
                  * ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.BISMUTH.get(),
@@ -329,8 +342,8 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .pattern("ITI")
                                 .pattern("ISI")
                                 .pattern("III")
-                                .define('I', ModBlocks.SCARLET_STONE.get())
-                                .define('S', ModItems.MANA_MANIFESTATION.get())
+                                .define('S', ModBlocks.SCARLET_STONE.get())
+                                .define('I', ModItems.MANA_MANIFESTATION.get())
                                 .define('T', ModItems.MAGIC_UPGRADE_TEMPLATE.get())
                                 .unlockedBy("has_magic_upgrade_template", has(ModItems.MAGIC_UPGRADE_TEMPLATE.get()))
                                 .save(recipeOutput);

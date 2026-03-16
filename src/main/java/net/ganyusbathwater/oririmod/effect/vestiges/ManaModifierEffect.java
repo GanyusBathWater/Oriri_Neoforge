@@ -1,5 +1,6 @@
 package net.ganyusbathwater.oririmod.effect.vestiges;
 
+import net.ganyusbathwater.oririmod.config.OririConfig;
 import net.ganyusbathwater.oririmod.events.vestiges.VestigeDayNightEvents;
 import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -46,17 +47,22 @@ public class ManaModifierEffect implements VestigeEffect {
     @Override
     public void tick(VestigeContext ctx) {
         // Standard-Modus (nicht Tag/Nacht)
-        if (bonusMaxMana != 0 || regenIntervalSeconds != null) return;
+        if (bonusMaxMana != 0 || regenIntervalSeconds != null)
+            return;
 
-        if (ctx == null || ctx.isClient()) return;
+        if (ctx == null || ctx.isClient())
+            return;
 
         Player player = ctx.player();
-        if (player == null) return;
+        if (player == null)
+            return;
 
-        if (player.tickCount % COOLDOWN_TICKS != 0) return;
+        if (player.tickCount % COOLDOWN_TICKS != 0)
+            return;
 
         VestigeDayNightEvents.DayNightStatus status = VestigeDayNightEvents.getStatus(ctx.level());
-        if (status == VestigeDayNightEvents.DayNightStatus.UNKNOWN) return;
+        if (status == VestigeDayNightEvents.DayNightStatus.UNKNOWN)
+            return;
 
         CompoundTag root = player.getPersistentData();
         CompoundTag tag = root.getCompound(NBT_KEY);
@@ -65,15 +71,20 @@ public class ManaModifierEffect implements VestigeEffect {
         int lastStatusId = tag.getInt(NBT_LAST_STATUS);
         boolean applied = tag.getBoolean(NBT_APPLIED);
 
-        if (applied && lastStatusId == newStatusId) return;
+        if (applied && lastStatusId == newStatusId)
+            return;
 
         if (applied) {
-            if (lastStatusId == 1) removeDay(player, tag);
-            else if (lastStatusId == 2) removeNight(player);
+            if (lastStatusId == 1)
+                removeDay(player, tag);
+            else if (lastStatusId == 2)
+                removeNight(player);
         }
 
-        if (newStatusId == 1) applyDay(player, tag);
-        else applyNight(player, tag);
+        if (newStatusId == 1)
+            applyDay(player, tag);
+        else
+            applyNight(player, tag);
 
         tag.putInt(NBT_LAST_STATUS, newStatusId);
         tag.putBoolean(NBT_APPLIED, true);
@@ -82,13 +93,16 @@ public class ManaModifierEffect implements VestigeEffect {
 
     @Override
     public void onEquip(VestigeContext ctx) {
-        if (ctx == null || ctx.isClient()) return;
+        if (ctx == null || ctx.isClient())
+            return;
 
         // Standard-Modus (nicht Tag/Nacht)
-        if (bonusMaxMana == 0 && regenIntervalSeconds == null) return;
+        if (bonusMaxMana == 0 && regenIntervalSeconds == null)
+            return;
 
         Player player = ctx.player();
-        if (player == null) return;
+        if (player == null)
+            return;
 
         if (bonusMaxMana != 0) {
             int currentMax = ModManaUtil.getMaxMana(player);
@@ -102,15 +116,18 @@ public class ManaModifierEffect implements VestigeEffect {
 
     @Override
     public void onUnequip(VestigeContext ctx) {
-        if (ctx == null || ctx.isClient()) return;
+        if (ctx == null || ctx.isClient())
+            return;
 
         Player player = ctx.player();
-        if (player == null) return;
+        if (player == null)
+            return;
 
         // Tag/Nacht-Modus cleanup: nur entfernen, was tatsächlich aktiv war
         if (bonusMaxMana == 0 && regenIntervalSeconds == null) {
             CompoundTag root = player.getPersistentData();
-            if (!root.contains(NBT_KEY)) return;
+            if (!root.contains(NBT_KEY))
+                return;
 
             CompoundTag tag = root.getCompound(NBT_KEY);
             if (!tag.getBoolean(NBT_APPLIED)) {
@@ -174,8 +191,8 @@ public class ManaModifierEffect implements VestigeEffect {
         tag.putBoolean(NBT_DAY_APPLIED, false);
         tag.putInt(NBT_APPLIED_MAX_MANA_BONUS, 0);
 
-        int cur = ModManaUtil.getRegenIntervalSeconds(player);
-        int halved = Math.max(MIN_REGEN_INTERVAL_SECONDS, cur / 2);
+        int baseConfig = OririConfig.COMMON.mana.regenIntervalSeconds.get();
+        int halved = Math.max(MIN_REGEN_INTERVAL_SECONDS, baseConfig / 2);
         ModManaUtil.setRegenIntervalSeconds(player, halved);
     }
 

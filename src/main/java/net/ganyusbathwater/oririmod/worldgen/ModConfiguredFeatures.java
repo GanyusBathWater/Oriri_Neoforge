@@ -60,6 +60,7 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_DRIPSTONE_CLUSTER_KEY = registerKey(
                         "scarlet_dripstone_cluster");
         public static final ResourceKey<ConfiguredFeature<?, ?>> JADE_ORE_KEY = registerKey("jade_ore");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> DRAGON_IRON_ORE_KEY = registerKey("dragon_iron_ore");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
@@ -213,6 +214,14 @@ public class ModConfiguredFeatures {
                                                 ModBlocks.DEEPSLATE_JADE_ORE.get().defaultBlockState()));
 
                 register(context, JADE_ORE_KEY, Feature.ORE, new OreConfiguration(jadeOreTargets, 12));
+
+                List<OreConfiguration.TargetBlockState> dragonIronOreTargets = List.of(
+                                OreConfiguration.target(new BlockMatchTest(Blocks.STONE),
+                                                ModBlocks.DRAGON_IRON_ORE.get().defaultBlockState()),
+                                OreConfiguration.target(new BlockMatchTest(Blocks.DEEPSLATE),
+                                                ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get().defaultBlockState()));
+
+                register(context, DRAGON_IRON_ORE_KEY, Feature.ORE, new OreConfiguration(dragonIronOreTargets, 8));
 
         }
 

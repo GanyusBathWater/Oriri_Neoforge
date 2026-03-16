@@ -11,6 +11,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.ganyusbathwater.oririmod.datagen.ModItemModelProvider;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +44,8 @@ public class DataGenerators {
 
                 generator.addProvider(event.includeServer(),
                                 new ModDamageTypeTagsProvider(packOutput, datapackProvider, existingFileHelper));
+                generator.addProvider(event.includeServer(),
+                                new ModEnchantmentTagsProvider(packOutput, datapackProvider, existingFileHelper));
 
                 generator.addProvider(event.includeServer(), new ModDataMapProvider(packOutput, lookupProvider));
 

@@ -160,6 +160,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 blockWithItem(ModBlocks.JADE_BLOCK, 1);
                 blockWithItem(ModBlocks.JADE_ORE, 1);
                 blockWithItem(ModBlocks.DEEPSLATE_JADE_ORE, 1);
+                blockWithItem(ModBlocks.DRAGON_IRON_ORE, 1);
+                blockWithItem(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE, 1);
                 stairsBlock(ModBlocks.JADE_STAIRS.get(), blockTexture(ModBlocks.JADE_BLOCK.get()));
                 slabBlock(ModBlocks.JADE_SLAB.get(), blockTexture(ModBlocks.JADE_BLOCK.get()),
                                 blockTexture(ModBlocks.JADE_BLOCK.get()));
@@ -201,6 +203,49 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                                 modLoc("block/equinox_table_side"),
                                                 modLoc("block/equinox_table_bottom"),
                                                 modLoc("block/equinox_table_top")));
+
+                // ===== BLOOD SLUDGE =====
+                slimeBlock(ModBlocks.BLOOD_SLUDGE);
+
+                // ===== GLASS & PANES =====
+                blockWithItem(ModBlocks.SOL_GLASS, 2); // Cutout
+
+                paneBlockWithRenderType(((net.minecraft.world.level.block.IronBarsBlock) ModBlocks.SOL_GLASS_PANE.get()),
+                                modLoc("block/sol_glass"),
+                                modLoc("block/sol_glass_pane_top"), "minecraft:cutout");
+        }
+
+        private void slimeBlock(DeferredBlock<?> deferredBlock) {
+                String name = deferredBlock.getId().getPath();
+                ResourceLocation texture = modLoc("block/" + name);
+
+                net.neoforged.neoforge.client.model.generators.BlockModelBuilder model = models()
+                                .withExistingParent(name, mcLoc("block/block"))
+                                .texture("all", texture)
+                                .texture("particle", texture)
+                                .renderType("minecraft:translucent");
+
+                model.element()
+                                .from(0, 0, 0).to(16, 16, 16)
+                                .face(Direction.DOWN).texture("#all").uvs(0, 0, 16, 16).end()
+                                .face(Direction.UP).texture("#all").uvs(0, 0, 16, 16).end()
+                                .face(Direction.NORTH).texture("#all").uvs(0, 0, 16, 16).end()
+                                .face(Direction.SOUTH).texture("#all").uvs(0, 0, 16, 16).end()
+                                .face(Direction.WEST).texture("#all").uvs(0, 0, 16, 16).end()
+                                .face(Direction.EAST).texture("#all").uvs(0, 0, 16, 16).end()
+                                .end();
+
+                model.element()
+                                .from(3, 3, 3).to(13, 13, 13)
+                                .face(Direction.DOWN).texture("#all").uvs(3, 3, 13, 13).end()
+                                .face(Direction.UP).texture("#all").uvs(3, 3, 13, 13).end()
+                                .face(Direction.NORTH).texture("#all").uvs(3, 3, 13, 13).end()
+                                .face(Direction.SOUTH).texture("#all").uvs(3, 3, 13, 13).end()
+                                .face(Direction.WEST).texture("#all").uvs(3, 3, 13, 13).end()
+                                .face(Direction.EAST).texture("#all").uvs(3, 3, 13, 13).end()
+                                .end();
+
+                simpleBlockWithItem(deferredBlock.get(), model);
         }
 
         private void pointedDripstoneBlock() {
@@ -229,7 +274,44 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         model.texture("particle", path);
                         model.renderType(getRenderType(renderType));
                 }
-                simpleBlockWithItem(deferredBlock.get(), cubeAll(deferredBlock.get()));
+                simpleBlockWithItem(deferredBlock.get(), model);
+        }
+
+        public void paneBlockWithRenderType(net.minecraft.world.level.block.IronBarsBlock block, ResourceLocation pane,
+                        ResourceLocation edge, String renderType) {
+                String name = BuiltInRegistries.BLOCK.getKey(block).getPath();
+                net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder builder = getMultipartBuilder(
+                                block);
+
+                BlockModelBuilder post = models().withExistingParent(name + "_post", mcLoc("block/template_glass_pane_post"))
+                                .texture("pane", pane).texture("edge", edge).renderType(renderType);
+                BlockModelBuilder side = models().withExistingParent(name + "_side", mcLoc("block/template_glass_pane_side"))
+                                .texture("pane", pane).texture("edge", edge).renderType(renderType);
+                BlockModelBuilder sideAlt = models()
+                                .withExistingParent(name + "_side_alt", mcLoc("block/template_glass_pane_side_alt"))
+                                .texture("pane", pane).texture("edge", edge).renderType(renderType);
+                BlockModelBuilder noside = models()
+                                .withExistingParent(name + "_noside", mcLoc("block/template_glass_pane_noside"))
+                                .texture("pane", pane).renderType(renderType);
+                BlockModelBuilder nosideAlt = models()
+                                .withExistingParent(name + "_noside_alt", mcLoc("block/template_glass_pane_noside_alt"))
+                                .texture("pane", pane).renderType(renderType);
+
+                builder.part().modelFile(post).addModel().end();
+
+                builder.part().modelFile(side).addModel().condition(BlockStateProperties.NORTH, true).end();
+                builder.part().modelFile(noside).addModel().condition(BlockStateProperties.NORTH, false).end();
+
+                builder.part().modelFile(sideAlt).addModel().condition(BlockStateProperties.SOUTH, true).end();
+                builder.part().modelFile(nosideAlt).rotationY(90).addModel().condition(BlockStateProperties.SOUTH, false)
+                                .end();
+
+                builder.part().modelFile(sideAlt).rotationY(90).addModel().condition(BlockStateProperties.WEST, true).end();
+                builder.part().modelFile(noside).rotationY(270).addModel().condition(BlockStateProperties.WEST, false)
+                                .end();
+
+                builder.part().modelFile(side).rotationY(90).addModel().condition(BlockStateProperties.EAST, true).end();
+                builder.part().modelFile(nosideAlt).addModel().condition(BlockStateProperties.EAST, false).end();
         }
 
         private void grassBlockWithItem(DeferredBlock<?> deferredBlock, int renderType) {
