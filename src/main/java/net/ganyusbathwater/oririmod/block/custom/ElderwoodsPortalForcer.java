@@ -22,7 +22,7 @@ public class ElderwoodsPortalForcer {
 
     public Optional<BlockUtil.FoundRectangle> findPortalAround(BlockPos pos, boolean isEntrance,
             WorldBorder worldBorder) {
-        int i = isEntrance ? 16 : 128;
+        int i = isEntrance ? 16 : 32; // Reduced from 128 to prevent 30M iteration freezes
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int x = -i; x <= i; x++) {

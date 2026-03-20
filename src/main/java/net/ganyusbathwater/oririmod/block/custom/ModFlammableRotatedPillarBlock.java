@@ -35,12 +35,23 @@ public class ModFlammableRotatedPillarBlock extends RotatedPillarBlock {
     public @Nullable BlockState getToolModifiedState(BlockState state, UseOnContext context,
                                                      ItemAbility itemAbility, boolean simulate) {
         if(context.getItemInHand().getItem() instanceof AxeItem) {
-            if(state.is(ModBlocks.STRIPPED_ELDER_LOG_BLOCK)) {
+            if (state.is(ModBlocks.ELDER_LOG_BLOCK.get())) {
                 return ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
             }
-
-            if(state.is(ModBlocks.ELDER_LOG_BLOCK)) {
-                return ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
+            if (state.is(ModBlocks.ELDER_STEM_BLOCK.get())) {
+                return ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
+            }
+            if (state.is(ModBlocks.SCARLET_LOG.get())) {
+                return ModBlocks.STRIPPED_SCARLET_LOG.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
+            }
+            if (state.is(ModBlocks.SCARLET_STEM.get())) {
+                return ModBlocks.STRIPPED_SCARLET_STEM.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
+            }
+            if (state.is(ModBlocks.ABYSS_CROWN_LOG.get())) {
+                return ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
+            }
+            if (state.is(ModBlocks.ABYSS_CROWN_STEM.get())) {
+                return ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
             }
         }
 

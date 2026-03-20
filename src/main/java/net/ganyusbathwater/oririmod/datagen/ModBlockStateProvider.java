@@ -52,17 +52,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 // blockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK, 1);
                 // pillarBlockWithItem(ModBlocks.ELDER_LOG_BLOCK, 1);
                 pillarBlockWithItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK, 1);
-                pillarBlockWithItem(ModBlocks.STRIPPED_ELDER_LOG_BLOCK, 1);
+                axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get()),
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+                                                "block/stripped_elder_log_block_side"),
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+                                                "block/stripped_elder_log_block_top_bottom"));
                 blockWithItem(ModBlocks.ELDER_PLANKS, 1);
                 axisBlock(((RotatedPillarBlock) ModBlocks.ELDER_LOG_BLOCK.get()),
                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/elder_log_block_side"),
                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                 "block/elder_log_block_top_bottom"));
-                axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get()),
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
-                                                "block/stripped_elder_log_block_side"),
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
-                                                "block/elder_log_block_top_bottom"));
+                blockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK, 1);
 
                 stairsBlock(ModBlocks.ELDER_STAIRS.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
                 slabBlock(ModBlocks.ELDER_SLAB.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()),
@@ -210,9 +210,63 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 // ===== GLASS & PANES =====
                 blockWithItem(ModBlocks.SOL_GLASS, 2); // Cutout
 
-                paneBlockWithRenderType(((net.minecraft.world.level.block.IronBarsBlock) ModBlocks.SOL_GLASS_PANE.get()),
+                paneBlockWithRenderType(
+                                ((net.minecraft.world.level.block.IronBarsBlock) ModBlocks.SOL_GLASS_PANE.get()),
                                 modLoc("block/sol_glass"),
                                 modLoc("block/sol_glass_pane_top"), "minecraft:cutout");
+
+                // ===== HARDENED MANASHROOM =====
+                blockWithItem(ModBlocks.HARDENED_MANASHROOM, 1);
+
+                // ===== ABYSS CROWN WOOD SET =====
+                axisBlock(((RotatedPillarBlock) ModBlocks.ABYSS_CROWN_LOG.get()),
+                                modLoc("block/abyss_crown_log"),
+                                modLoc("block/abyss_crown_log_top"));
+                axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get()),
+                                modLoc("block/stripped_abyss_crown_log"),
+                                modLoc("block/stripped_abyss_crown_log_top"));
+
+                // Stems use log texture on all sides (standard for many mods)
+                simpleBlockWithItem(ModBlocks.ABYSS_CROWN_STEM.get(),
+                                models().cubeAll("abyss_crown_stem", modLoc("block/abyss_crown_log")));
+                simpleBlockWithItem(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get(),
+                                models().cubeAll("stripped_abyss_crown_stem",
+                                                modLoc("block/stripped_abyss_crown_log")));
+
+                blockWithItem(ModBlocks.ABYSS_CROWN_PLANKS, 1);
+                stairsBlock(ModBlocks.ABYSS_CROWN_STAIRS.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+                slabBlock(ModBlocks.ABYSS_CROWN_SLAB.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()),
+                                blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+                fenceBlock(ModBlocks.ABYSS_CROWN_FENCE.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+                fenceGateBlock(ModBlocks.ABYSS_CROWN_GATE.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+                blockWithItem(ModBlocks.ABYSS_CROWN_LEAVES, 3);
+                
+                simpleBlockWithItem(ModBlocks.ABYSS_CROWN_SAPLING.get(),
+                                models().cross("abyss_crown_sapling", modLoc("block/abyss_crown_sapling"))
+                                                .renderType("cutout"));
+
+                simpleBlockWithItem(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get(),
+                                models().cross("upgraded_abyss_crown_sapling", modLoc("block/abyss_crown_sapling"))
+                                                .renderType("cutout"));
+
+                generateScarletVineBlock();
+        }
+
+        private void generateScarletVineBlock() {
+                ResourceLocation texture = modLoc("block/scarlet_vine");
+                BlockModelBuilder model = models().withExistingParent("scarlet_vine", mcLoc("block/vine"))
+                                .texture("vine", texture)
+                                .texture("particle", texture)
+                                .renderType("cutout");
+
+                getMultipartBuilder(ModBlocks.SCARLET_VINE.get())
+                                .part().modelFile(model).addModel().condition(BlockStateProperties.NORTH, true).end()
+                                .part().modelFile(model).rotationY(90).addModel().condition(BlockStateProperties.EAST, true).end()
+                                .part().modelFile(model).rotationY(180).addModel().condition(BlockStateProperties.SOUTH, true).end()
+                                .part().modelFile(model).rotationY(270).addModel().condition(BlockStateProperties.WEST, true).end()
+                                .part().modelFile(model).rotationX(270).addModel().condition(BlockStateProperties.UP, true).end();
+                
+                simpleBlockItem(ModBlocks.SCARLET_VINE.get(), model);
         }
 
         private void slimeBlock(DeferredBlock<?> deferredBlock) {
@@ -283,9 +337,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder builder = getMultipartBuilder(
                                 block);
 
-                BlockModelBuilder post = models().withExistingParent(name + "_post", mcLoc("block/template_glass_pane_post"))
+                BlockModelBuilder post = models()
+                                .withExistingParent(name + "_post", mcLoc("block/template_glass_pane_post"))
                                 .texture("pane", pane).texture("edge", edge).renderType(renderType);
-                BlockModelBuilder side = models().withExistingParent(name + "_side", mcLoc("block/template_glass_pane_side"))
+                BlockModelBuilder side = models()
+                                .withExistingParent(name + "_side", mcLoc("block/template_glass_pane_side"))
                                 .texture("pane", pane).texture("edge", edge).renderType(renderType);
                 BlockModelBuilder sideAlt = models()
                                 .withExistingParent(name + "_side_alt", mcLoc("block/template_glass_pane_side_alt"))
@@ -303,14 +359,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 builder.part().modelFile(noside).addModel().condition(BlockStateProperties.NORTH, false).end();
 
                 builder.part().modelFile(sideAlt).addModel().condition(BlockStateProperties.SOUTH, true).end();
-                builder.part().modelFile(nosideAlt).rotationY(90).addModel().condition(BlockStateProperties.SOUTH, false)
+                builder.part().modelFile(nosideAlt).rotationY(90).addModel()
+                                .condition(BlockStateProperties.SOUTH, false)
                                 .end();
 
-                builder.part().modelFile(sideAlt).rotationY(90).addModel().condition(BlockStateProperties.WEST, true).end();
+                builder.part().modelFile(sideAlt).rotationY(90).addModel().condition(BlockStateProperties.WEST, true)
+                                .end();
                 builder.part().modelFile(noside).rotationY(270).addModel().condition(BlockStateProperties.WEST, false)
                                 .end();
 
-                builder.part().modelFile(side).rotationY(90).addModel().condition(BlockStateProperties.EAST, true).end();
+                builder.part().modelFile(side).rotationY(90).addModel().condition(BlockStateProperties.EAST, true)
+                                .end();
                 builder.part().modelFile(nosideAlt).addModel().condition(BlockStateProperties.EAST, false).end();
         }
 

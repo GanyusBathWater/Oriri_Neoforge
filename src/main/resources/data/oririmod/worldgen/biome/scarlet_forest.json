@@ -21,9 +21,6 @@
     },
     "features": [
         [],
-        [
-            "oririmod:scarlet_pond_forest_placed"
-        ],
         [],
         [],
         [],
@@ -31,12 +28,9 @@
         [],
         [],
         [],
-        [
-            "oririmod:scarlet_tree_placed",
-            "oririmod:scarlet_grass_patch_placed",
-            "oririmod:scarlet_tooth_leaves_patch_placed",
-            "oririmod:scarlet_lily_patch_placed"
-        ]
+        [],
+        [],
+        []
     ],
     "spawn_costs": {},
     "spawners": {}

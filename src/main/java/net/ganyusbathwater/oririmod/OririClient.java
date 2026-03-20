@@ -9,6 +9,7 @@ import net.ganyusbathwater.oririmod.particle.ModParticles;
 import net.ganyusbathwater.oririmod.particle.custom.ShiningParticle;
 import net.ganyusbathwater.oririmod.particle.custom.ElderwoodsCaveParticle;
 import net.ganyusbathwater.oririmod.particle.custom.ScarletCaveParticle;
+import net.ganyusbathwater.oririmod.particle.custom.ElysianAbyssParticle;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
@@ -54,6 +55,7 @@ public class OririClient {
         event.registerSpriteSet(ModParticles.SHINING_PARTICLES.get(), ShiningParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELDERWOODS_CAVE_PARTICLE.get(), ElderwoodsCaveParticle.Provider::new);
         event.registerSpriteSet(ModParticles.SCARLET_CAVE_PARTICLE.get(), ScarletCaveParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.ELYSIAN_ABYSS_PARTICLE.get(), ElysianAbyssParticle.Provider::new);
     }
 
     @SubscribeEvent

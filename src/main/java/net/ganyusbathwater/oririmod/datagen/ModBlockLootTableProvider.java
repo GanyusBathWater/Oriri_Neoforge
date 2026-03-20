@@ -1,209 +1,136 @@
 package net.ganyusbathwater.oririmod.datagen;
 
 import net.ganyusbathwater.oririmod.block.ModBlocks;
-import net.ganyusbathwater.oririmod.item.ModItems;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
-import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
-
 import java.util.Set;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.item.Items;
 
 public class ModBlockLootTableProvider extends BlockLootSubProvider {
-        protected ModBlockLootTableProvider(HolderLookup.Provider registries) {
-                super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
-        }
+    public ModBlockLootTableProvider(HolderLookup.Provider provider) {
+        super(Set.of(), FeatureFlags.REGISTRY.allFlags(), provider);
+    }
 
-        @Override
-        protected void generate() {
-                add(ModBlocks.DARK_SOIL_BLOCK.get(),
-                                block -> createSilkTouchOnlyTable(ModBlocks.DARK_SOIL_BLOCK.get()));
-                add(ModBlocks.ELDERBUSH_BLOCK.get(), item -> createSingleItemTable(ModItems.ELDERBERRY.get()));
-                add(ModBlocks.MANA_CRYSTAL_BLOCK.get(),
-                                block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_BLOCK.get()));
-                add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(),
-                                item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
-                add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(),
-                                item -> createSingleItemTable(ModItems.MANA_MANIFESTATION.get()));
+    @Override
+    protected void generate() {
+        dropSelf(ModBlocks.DARK_SOIL_BLOCK.get());
+        dropSelf(ModBlocks.BLOOD_SLUDGE.get());
+        add(ModBlocks.ELDERBUSH_BLOCK.get(), block -> createShearsOnlyDrop(ModBlocks.ELDERBUSH_BLOCK.get()));
+        dropSelf(ModBlocks.MANA_CRYSTAL_BLOCK.get());
+        add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_CLUSTER.get()));
+        dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
+        dropSelf(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
+        dropSelf(ModBlocks.ELDER_PLANKS.get());
+        dropSelf(ModBlocks.ELDER_STAIRS.get());
+        add(ModBlocks.ELDER_SLAB.get(), block -> createSlabItemTable(ModBlocks.ELDER_SLAB.get()));
+        dropSelf(ModBlocks.ELDER_FENCE.get());
+        dropSelf(ModBlocks.ELDER_GATE.get());
+        dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
+        dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
+        dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
+        add(ModBlocks.ELDER_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+        add(ModBlocks.ELDER_LEAVES_FLOWERING.get(), block -> createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+        dropSelf(ModBlocks.ELDER_SPORE_BLOSSOM.get());
+        dropSelf(ModBlocks.ELDER_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_ELDER_SAPLING.get());
 
-                add(ModBlocks.FLUORITE_BLOCK.get(),
-                                block -> createSilkTouchOnlyTable(ModBlocks.FLUORITE_BLOCK.get()));
-                add(ModBlocks.FLUORITE_CLUSTER.get(),
-                                block -> createSilkTouchDispatchTable(block,
-                                                LootItem.lootTableItem(ModItems.FLUORITE_CRYSTAL.get())
-                                                                .apply(SetItemCountFunction
-                                                                                .setCount(UniformGenerator.between(1.0F,
-                                                                                                4.0F)))
-                                                                .apply(ApplyBonusCount.addOreBonusCount(
-                                                                                this.registries.lookupOrThrow(
-                                                                                                Registries.ENCHANTMENT)
-                                                                                                .getOrThrow(Enchantments.FORTUNE)))));
+        // Scarlet Blocks
+        dropSelf(ModBlocks.SCARLET_STONE.get());
+        dropSelf(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.SMOOTH_SCARLET_STONE.get());
+        add(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_STONE_BRICKS.get());
+        dropSelf(ModBlocks.CHISELED_SCARLET_STONE_BRICKS.get());
+        dropSelf(ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get());
+        dropSelf(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get());
 
-                add(ModBlocks.ELDER_LEAVES.get(), block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES.get()));
-                add(ModBlocks.ELDER_LEAVES_FLOWERING.get(),
-                                block -> createShearsOnlyDrop(ModBlocks.ELDER_LEAVES_FLOWERING.get()));
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.POLISHED_SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.CHISELED_SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get());
+        dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get());
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_TILES.get());
+        dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES.get());
 
-                this.dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
-                this.dropSelf(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
-                this.dropSelf(ModBlocks.ELDER_PLANKS.get());
-                this.dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
-                this.dropSelf(ModBlocks.ELDER_SAPLING.get());
-                this.dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
-                this.dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
-                this.dropSelf(ModBlocks.ELDER_SPORE_BLOSSOM.get());
-                this.dropSelf(ModBlocks.ELDER_STAIRS.get());
-                this.dropSelf(ModBlocks.ELDER_SLAB.get());
-                this.dropSelf(ModBlocks.ELDER_FENCE.get());
-                this.dropSelf(ModBlocks.ELDER_GATE.get());
-                this.dropSelf(ModBlocks.STAR_HERB.get());
+        dropSelf(ModBlocks.SCARLET_LOG.get());
+        dropSelf(ModBlocks.STRIPPED_SCARLET_LOG.get());
+        dropSelf(ModBlocks.SCARLET_PLANKS.get());
+        dropSelf(ModBlocks.SCARLET_STAIRS.get());
+        add(ModBlocks.SCARLET_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_FENCE.get());
+        dropSelf(ModBlocks.SCARLET_GATE.get());
+        dropSelf(ModBlocks.SCARLET_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_SCARLET_SAPLING.get());
 
-                this.add(ModBlocks.ELDER_LEAVES.get(),
-                                block -> createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(),
-                                                NORMAL_LEAVES_SAPLING_CHANCES));
+        add(ModBlocks.SCARLET_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.SCARLET_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+        dropSelf(ModBlocks.SCARLET_MOSS.get());
+        add(ModBlocks.SCARLET_VINE.get(), block -> createShearsOnlyDrop(block));
+        dropSelf(ModBlocks.STAR_HERB.get());
+        dropSelf(ModBlocks.SCARLET_GRASS_BLOCK.get());
+        dropSelf(ModBlocks.SCARLET_STEM.get());
+        dropSelf(ModBlocks.STRIPPED_SCARLET_STEM.get());
+        dropSelf(ModBlocks.SCARLET_GRASS.get());
+        dropSelf(ModBlocks.SCARLET_TOOTH_LEAVES.get());
+        dropSelf(ModBlocks.SCARLET_LILY.get());
 
-                this.add(ModBlocks.ELDER_LEAVES_FLOWERING.get(),
-                                block -> createLeavesDrops(block, ModBlocks.ELDER_SAPLING.get(),
-                                                NORMAL_LEAVES_SAPLING_CHANCES));
+        dropSelf(ModBlocks.FLUORITE_BLOCK.get());
+        add(ModBlocks.FLUORITE_CLUSTER.get(), block -> createSilkTouchOnlyTable(ModBlocks.FLUORITE_CLUSTER.get()));
 
-                // ===== SCARLET STONE VARIANTS =====
-                this.dropSelf(ModBlocks.SCARLET_STONE.get());
-                this.dropSelf(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
-                this.dropSelf(ModBlocks.SMOOTH_SCARLET_STONE.get());
-                this.add(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get(), this::createSlabItemTable);
-                this.dropSelf(ModBlocks.SCARLET_STONE_BRICKS.get());
-                this.dropSelf(ModBlocks.CHISELED_SCARLET_STONE_BRICKS.get());
-                this.dropSelf(ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get());
-                this.dropSelf(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get());
+        dropSelf(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get());
+        dropSelf(ModBlocks.POINTED_SCARLET_DRIPSTONE.get());
 
-                // ===== SCARLET DEEPSLATE VARIANTS =====
-                this.dropSelf(ModBlocks.SCARLET_DEEPSLATE.get());
-                this.dropSelf(ModBlocks.POLISHED_SCARLET_DEEPSLATE.get());
-                this.dropSelf(ModBlocks.CHISELED_SCARLET_DEEPSLATE.get());
-                this.dropSelf(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get());
-                this.dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get());
-                this.dropSelf(ModBlocks.SCARLET_DEEPSLATE_TILES.get());
-                this.dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES.get());
+        dropSelf(ModBlocks.SOL_SAND.get());
+        dropSelf(ModBlocks.SOL_SANDSTONE.get());
+        dropSelf(ModBlocks.CUT_SOL_SANDSTONE.get());
+        dropSelf(ModBlocks.CHISELED_SOL_SANDSTONE.get());
 
-                // ===== SCARLET WOOD TYPES =====
-                this.dropSelf(ModBlocks.SCARLET_LOG.get());
-                this.dropSelf(ModBlocks.STRIPPED_SCARLET_LOG.get());
-                this.dropSelf(ModBlocks.SCARLET_PLANKS.get());
-                this.dropSelf(ModBlocks.SCARLET_STAIRS.get());
-                this.add(ModBlocks.SCARLET_SLAB.get(), this::createSlabItemTable);
-                this.dropSelf(ModBlocks.SCARLET_FENCE.get());
-                this.dropSelf(ModBlocks.SCARLET_GATE.get());
-                this.dropSelf(ModBlocks.SCARLET_SAPLING.get());
+        dropSelf(ModBlocks.BROKEN_SWORD_BLOCK.get());
+        dropSelf(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
 
-                // ===== SCARLET VEGETATION =====
-                this.add(ModBlocks.SCARLET_LEAVES.get(),
-                                block -> createLeavesDrops(block, ModBlocks.SCARLET_SAPLING.get(),
-                                                NORMAL_LEAVES_SAPLING_CHANCES));
-                this.dropSelf(ModBlocks.SCARLET_MOSS.get());
-                this.add(ModBlocks.SCARLET_VINE.get(), block -> createShearsOnlyDrop(ModBlocks.SCARLET_VINE.get()));
+        dropSelf(ModBlocks.SOL_GLASS.get());
+        dropSelf(ModBlocks.SOL_GLASS_PANE.get());
 
-                // ===== JADE BLOCKS =====
-                this.dropSelf(ModBlocks.JADE_BLOCK.get());
-                this.add(ModBlocks.JADE_ORE.get(),
-                                block -> createMultipleOreDrops(block, ModItems.JADE.get(), 2.0F, 5.0F));
-                this.add(ModBlocks.DEEPSLATE_JADE_ORE.get(),
-                                block -> createMultipleOreDrops(block, ModItems.JADE.get(), 2.0F, 5.0F));
-                this.add(ModBlocks.DRAGON_IRON_ORE.get(),
-                                block -> createMultipleOreDrops(block, ModItems.RAW_DRAGON_IRON.get(), 1.0F, 1.0F));
-                this.add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(),
-                                block -> createMultipleOreDrops(block, ModItems.RAW_DRAGON_IRON.get(), 1.0F, 1.0F));
-                this.dropSelf(ModBlocks.JADE_STAIRS.get());
-                this.add(ModBlocks.JADE_SLAB.get(), this::createSlabItemTable);
-                this.dropSelf(ModBlocks.JADE_WALL.get());
+        dropSelf(ModBlocks.JADE_BLOCK.get());
+        add(ModBlocks.JADE_ORE.get(), block -> createOreDrop(ModBlocks.JADE_ORE.get(), net.minecraft.world.item.Items.EMERALD));
+        add(ModBlocks.DEEPSLATE_JADE_ORE.get(), block -> createOreDrop(ModBlocks.DEEPSLATE_JADE_ORE.get(), net.minecraft.world.item.Items.EMERALD));
+        add(ModBlocks.DRAGON_IRON_ORE.get(), block -> createOreDrop(ModBlocks.DRAGON_IRON_ORE.get(), net.minecraft.world.item.Items.RAW_IRON));
+        add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(), block -> createOreDrop(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(), net.minecraft.world.item.Items.RAW_IRON));
+        
+        dropSelf(ModBlocks.JADE_STAIRS.get());
+        add(ModBlocks.JADE_SLAB.get(), block -> createSlabItemTable(ModBlocks.JADE_SLAB.get()));
+        dropSelf(ModBlocks.JADE_WALL.get());
 
-                // ===== NEW SCARLET BLOCKS =====
-                this.add(ModBlocks.SCARLET_GRASS_BLOCK.get(),
-                                block -> createSingleItemTableWithSilkTouch(block, Blocks.DIRT));
-                this.dropSelf(ModBlocks.SCARLET_STEM.get());
-                this.dropSelf(ModBlocks.STRIPPED_SCARLET_STEM.get());
-                this.add(ModBlocks.SCARLET_GRASS.get(), block -> createShearsOnlyDrop(block));
-                this.dropSelf(ModBlocks.SCARLET_TOOTH_LEAVES.get()); // Instabreak, so drops self
-                this.dropSelf(ModBlocks.SCARLET_LILY.get());
-                this.dropSelf(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get());
-                this.dropSelf(ModBlocks.POINTED_SCARLET_DRIPSTONE.get());
 
-                // Upgraded Saplings
-                this.dropSelf(ModBlocks.UPGRADED_SCARLET_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_ELDER_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_OAK_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_SPRUCE_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_BIRCH_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_JUNGLE_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_ACACIA_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get());
-                this.dropSelf(ModBlocks.UPGRADED_CHERRY_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_OAK_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_SPRUCE_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_BIRCH_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_JUNGLE_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_ACACIA_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_CHERRY_SAPLING.get());
 
-                // Sol Sand Blocks
-                this.dropSelf(ModBlocks.SOL_SAND.get());
-                this.dropSelf(ModBlocks.SOL_SANDSTONE.get());
-                this.dropSelf(ModBlocks.CUT_SOL_SANDSTONE.get());
-                this.dropSelf(ModBlocks.CHISELED_SOL_SANDSTONE.get());
+        dropSelf(ModBlocks.EQUINOX_TABLE.get());
 
-                // Sword Blocks
-                this.add(ModBlocks.BROKEN_SWORD_BLOCK.get(), block -> createSwordDrops(block));
-                this.add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get(), block -> createSwordDrops(block));
+        dropSelf(ModBlocks.HARDENED_MANASHROOM.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_LOG.get());
+        dropSelf(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_STEM.get());
+        dropSelf(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_PLANKS.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_STAIRS.get());
+        add(ModBlocks.ABYSS_CROWN_SLAB.get(), block -> createSlabItemTable(ModBlocks.ABYSS_CROWN_SLAB.get()));
+        dropSelf(ModBlocks.ABYSS_CROWN_FENCE.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_GATE.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get());
+        add(ModBlocks.ABYSS_CROWN_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ABYSS_CROWN_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+    }
 
-                // Blood Sludge
-                this.dropSelf(ModBlocks.BLOOD_SLUDGE.get());
-
-                // Sol Glass
-                this.add(ModBlocks.SOL_GLASS.get(), block -> createSilkTouchOnlyTable(block));
-                this.add(ModBlocks.SOL_GLASS_PANE.get(), block -> createSilkTouchOnlyTable(block));
-        }
-
-        protected LootTable.Builder createSwordDrops(Block pBlock) {
-                return LootTable.lootTable()
-                                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                                                .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue
-                                                                .exactly(1.0F))
-                                                .add(LootItem.lootTableItem(pBlock).when(this.hasSilkTouch())))
-                                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                                                .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue
-                                                                .exactly(1.0F))
-                                                .add(LootItem.lootTableItem(Items.STICK)
-                                                                .apply(SetItemCountFunction.setCount(
-                                                                                UniformGenerator.between(0.0F, 1.0F))))
-                                                .when(this.hasSilkTouch().invert()))
-                                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                                                .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue
-                                                                .exactly(1.0F))
-                                                .add(LootItem.lootTableItem(Items.IRON_BARS)
-                                                                .apply(SetItemCountFunction.setCount(
-                                                                                UniformGenerator.between(0.0F, 2.0F))))
-                                                .when(this.hasSilkTouch().invert()));
-        }
-
-        protected LootTable.Builder createMultipleOreDrops(Block pBlock, Item item, float minDrops, float maxDrops) {
-                HolderLookup.RegistryLookup<Enchantment> registrylookup = this.registries
-                                .lookupOrThrow(Registries.ENCHANTMENT);
-                return this.createSilkTouchDispatchTable(pBlock,
-                                this.applyExplosionDecay(pBlock, LootItem.lootTableItem(item)
-                                                .apply(SetItemCountFunction
-                                                                .setCount(UniformGenerator.between(minDrops, maxDrops)))
-                                                .apply(ApplyBonusCount.addOreBonusCount(
-                                                                registrylookup.getOrThrow(Enchantments.FORTUNE)))));
-        }
-
-        @Override
-        protected Iterable<Block> getKnownBlocks() {
-                return ModBlocks.BLOCKS.getEntries().stream()
-                                .map(Holder::value)
-                                .filter(block -> block != ModBlocks.EQUINOX_TABLE.get())::iterator;
-        }
+    @Override
+    protected Iterable<Block> getKnownBlocks() {
+        return ModBlocks.BLOCKS.getEntries().stream()
+                .map(e -> (Block)e.get())
+                .filter(block -> block.getLootTable() != net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY)::iterator;
+    }
 }

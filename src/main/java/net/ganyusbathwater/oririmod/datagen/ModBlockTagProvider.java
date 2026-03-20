@@ -27,7 +27,15 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get())
                                 .add(ModBlocks.ELDER_STEM_BLOCK.get())
                                 .add(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get())
-                                .add(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
+                                .add(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get())
+                                .add(ModBlocks.SCARLET_LOG.get())
+                                .add(ModBlocks.STRIPPED_SCARLET_LOG.get())
+                                .add(ModBlocks.SCARLET_STEM.get())
+                                .add(ModBlocks.STRIPPED_SCARLET_STEM.get())
+                                .add(ModBlocks.ABYSS_CROWN_LOG.get())
+                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get())
+                                .add(ModBlocks.ABYSS_CROWN_STEM.get())
+                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get());
 
                 tag(ModTags.Blocks.ELDERWOODS_PROTECTED_STRUCTURE_BLOCKS)
                                 .add(Blocks.STONE_BRICKS)
@@ -45,18 +53,42 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
                 tag(BlockTags.LEAVES)
                                 .add(ModBlocks.ELDER_LEAVES.get())
-                                .add(ModBlocks.ELDER_LEAVES_FLOWERING.get());
+                                .add(ModBlocks.ELDER_LEAVES_FLOWERING.get())
+                                .add(ModBlocks.SCARLET_LEAVES.get())
+                                .add(ModBlocks.ABYSS_CROWN_LEAVES.get());
 
                 tag(BlockTags.FENCES)
                                 .add(ModBlocks.ELDER_FENCE.get())
-                                .add(ModBlocks.SCARLET_FENCE.get());
+                                .add(ModBlocks.SCARLET_FENCE.get())
+                                .add(ModBlocks.ABYSS_CROWN_FENCE.get());
 
                 tag(BlockTags.FENCE_GATES)
                                 .add(ModBlocks.ELDER_GATE.get())
-                                .add(ModBlocks.SCARLET_GATE.get());
+                                .add(ModBlocks.SCARLET_GATE.get())
+                                .add(ModBlocks.ABYSS_CROWN_GATE.get());
 
                 tag(BlockTags.WALLS)
                                 .add(ModBlocks.JADE_WALL.get());
+
+                tag(BlockTags.PLANKS)
+                                .add(ModBlocks.ELDER_PLANKS.get())
+                                .add(ModBlocks.SCARLET_PLANKS.get())
+                                .add(ModBlocks.ABYSS_CROWN_PLANKS.get());
+
+                tag(BlockTags.WOODEN_STAIRS)
+                                .add(ModBlocks.ELDER_STAIRS.get())
+                                .add(ModBlocks.SCARLET_STAIRS.get())
+                                .add(ModBlocks.ABYSS_CROWN_STAIRS.get());
+
+                tag(BlockTags.WOODEN_SLABS)
+                                .add(ModBlocks.ELDER_SLAB.get())
+                                .add(ModBlocks.SCARLET_SLAB.get())
+                                .add(ModBlocks.ABYSS_CROWN_SLAB.get());
+
+                tag(BlockTags.WOODEN_FENCES)
+                                .add(ModBlocks.ELDER_FENCE.get())
+                                .add(ModBlocks.SCARLET_FENCE.get())
+                                .add(ModBlocks.ABYSS_CROWN_FENCE.get());
 
                 tag(ModTags.Blocks.ORES)
                                 .add(ModBlocks.JADE_ORE.get())
@@ -113,7 +145,16 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_STAIRS.get())
                                 .add(ModBlocks.SCARLET_SLAB.get())
                                 .add(ModBlocks.SCARLET_FENCE.get())
-                                .add(ModBlocks.SCARLET_GATE.get());
+                                .add(ModBlocks.SCARLET_GATE.get())
+                                .add(ModBlocks.ABYSS_CROWN_LOG.get())
+                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get())
+                                .add(ModBlocks.ABYSS_CROWN_STEM.get())
+                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get())
+                                .add(ModBlocks.ABYSS_CROWN_PLANKS.get())
+                                .add(ModBlocks.ABYSS_CROWN_STAIRS.get())
+                                .add(ModBlocks.ABYSS_CROWN_SLAB.get())
+                                .add(ModBlocks.ABYSS_CROWN_FENCE.get())
+                                .add(ModBlocks.ABYSS_CROWN_GATE.get());
 
                 tag(BlockTags.MINEABLE_WITH_PICKAXE)
                                 .add(ModBlocks.JADE_BLOCK.get())
@@ -142,7 +183,6 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.MAGIC_BARRIER_BLOCK.get())
                                 .add(ModBlocks.MAGIC_BARRIER_CORE_BLOCK.get())
                                 .add(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get())
-                                .add(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get())
                                 .add(ModBlocks.POINTED_SCARLET_DRIPSTONE.get())
                                 .add(ModBlocks.FLUORITE_BLOCK.get())
                                 .add(ModBlocks.FLUORITE_CLUSTER.get())
@@ -150,7 +190,11 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.CUT_SOL_SANDSTONE.get())
                                 .add(ModBlocks.CHISELED_SOL_SANDSTONE.get())
                                 .add(ModBlocks.BROKEN_SWORD_BLOCK.get())
-                                .add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
+                                .add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get())
+                                .add(ModBlocks.HARDENED_MANASHROOM.get())
+                                .add(ModBlocks.DRAGON_IRON_ORE.get())
+                                .add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get())
+                                .add(ModBlocks.EQUINOX_TABLE.get());
 
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
                                 .add(ModBlocks.DARK_SOIL_BLOCK.get())
@@ -165,7 +209,24 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_LOG.get())
                                 .add(ModBlocks.STRIPPED_SCARLET_LOG.get())
                                 .add(ModBlocks.SCARLET_STEM.get())
-                                .add(ModBlocks.STRIPPED_SCARLET_STEM.get());
+                                .add(ModBlocks.STRIPPED_SCARLET_STEM.get())
+                                .add(ModBlocks.ABYSS_CROWN_LOG.get())
+                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get())
+                                .add(ModBlocks.ABYSS_CROWN_STEM.get())
+                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get());
+
+                tag(BlockTags.NEEDS_DIAMOND_TOOL)
+                                .add(ModBlocks.HARDENED_MANASHROOM.get())
+                                .add(ModBlocks.EQUINOX_TABLE.get());
+
+                tag(BlockTags.NEEDS_IRON_TOOL)
+                                .add(ModBlocks.DRAGON_IRON_ORE.get())
+                                .add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get())
+                                .add(ModBlocks.JADE_ORE.get())
+                                .add(ModBlocks.DEEPSLATE_JADE_ORE.get());
+
+                tag(BlockTags.CLIMBABLE)
+                                .add(ModBlocks.SCARLET_VINE.get());
 
                 tag(BlockTags.DIRT)
                                 .add(ModBlocks.SCARLET_GRASS_BLOCK.get())

@@ -38,6 +38,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"));
     private static final ResourceKey<Biome> ELDERWOODS_CAVE_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods_cave"));
+    private static final ResourceKey<Biome> ELYSIAN_ABYSS_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"));
 
     private final java.util.List<Holder<Biome>> biomes;
 
@@ -103,6 +105,9 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             // Cave biomes
             if (caveNoise > 0.3) {
                 return findBiome(SCARLET_CAVES_KEY);
+            } else if (caveNoise > 0.15) {
+                // Elysian Abyss carved zone — noise band 0.15-0.30
+                return findBiome(ELYSIAN_ABYSS_KEY);
             } else if (caveNoise < -0.3) {
                 return findBiome(ELDERWOODS_CAVE_KEY);
             } else if (caveNoise < -0.15 && caveNoise > -0.2) {

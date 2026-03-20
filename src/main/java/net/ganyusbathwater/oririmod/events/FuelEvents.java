@@ -36,7 +36,15 @@ public class FuelEvents {
                 item == ModBlocks.SCARLET_PLANKS.get().asItem() ||
                 item == ModBlocks.SCARLET_STAIRS.get().asItem() ||
                 item == ModBlocks.SCARLET_FENCE.get().asItem() ||
-                item == ModBlocks.SCARLET_GATE.get().asItem()) {
+                item == ModBlocks.SCARLET_GATE.get().asItem() ||
+                item == ModBlocks.ABYSS_CROWN_LOG.get().asItem() ||
+                item == ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get().asItem() ||
+                item == ModBlocks.ABYSS_CROWN_STEM.get().asItem() ||
+                item == ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get().asItem() ||
+                item == ModBlocks.ABYSS_CROWN_PLANKS.get().asItem() ||
+                item == ModBlocks.ABYSS_CROWN_STAIRS.get().asItem() ||
+                item == ModBlocks.ABYSS_CROWN_FENCE.get().asItem() ||
+                item == ModBlocks.ABYSS_CROWN_GATE.get().asItem()) {
 
             event.setBurnTime(300);
             return;
@@ -44,7 +52,8 @@ public class FuelEvents {
 
         // 150 Ticks (0.75 items) - Slabs
         if (item == ModBlocks.ELDER_SLAB.get().asItem() ||
-                item == ModBlocks.SCARLET_SLAB.get().asItem()) {
+                item == ModBlocks.SCARLET_SLAB.get().asItem() ||
+                item == ModBlocks.ABYSS_CROWN_SLAB.get().asItem()) {
 
             event.setBurnTime(150);
             return;

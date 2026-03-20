@@ -131,6 +131,21 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SOL_GLASS);
                         output.accept(ModBlocks.SOL_GLASS_PANE);
 
+                        // ===== NEW BLOCKS: Hardened Manashroom & Abyss Crown =====
+                        output.accept(ModBlocks.HARDENED_MANASHROOM);
+                        output.accept(ModBlocks.ABYSS_CROWN_LOG);
+                        output.accept(ModBlocks.STRIPPED_ABYSS_CROWN_LOG);
+                        output.accept(ModBlocks.ABYSS_CROWN_STEM);
+                        output.accept(ModBlocks.STRIPPED_ABYSS_CROWN_STEM);
+                        output.accept(ModBlocks.ABYSS_CROWN_PLANKS);
+                        output.accept(ModBlocks.ABYSS_CROWN_STAIRS);
+                        output.accept(ModBlocks.ABYSS_CROWN_SLAB);
+                        output.accept(ModBlocks.ABYSS_CROWN_FENCE);
+                        output.accept(ModBlocks.ABYSS_CROWN_GATE);
+                        output.accept(ModBlocks.ABYSS_CROWN_LEAVES);
+                        output.accept(ModBlocks.ABYSS_CROWN_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING);
+
                         // Sword Blocks
                         output.accept(ModBlocks.BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.TILTED_BROKEN_SWORD_BLOCK);

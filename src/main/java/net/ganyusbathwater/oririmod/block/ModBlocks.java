@@ -4,11 +4,16 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.custom.*;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.ganyusbathwater.oririmod.worldgen.tree.ModTreeGrowers;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.*;
+import net.ganyusbathwater.oririmod.block.custom.AbyssCrownSaplingBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
@@ -31,7 +36,7 @@ public class ModBlocks {
 
         public static final DeferredBlock<Block> ELDERBUSH_BLOCK = registerBlock("elderbush_block",
                         () -> new ElderBerryBush(BlockBehaviour.Properties.of().noOcclusion()
-                                        .isViewBlocking((s, g, p) -> false)));
+                                        .sound(SoundType.GRASS).isViewBlocking((s, g, p) -> false)));
 
         public static final DeferredBlock<Block> MAGIC_BARRIER_BLOCK = registerBlock("magic_barrier_block",
                         () -> new MagicBarrierBlock(BlockBehaviour.Properties.of().noLootTable().noOcclusion()
@@ -341,6 +346,125 @@ public class ModBlocks {
         public static final DeferredBlock<Block> EQUINOX_TABLE = registerBlock("equinox_table",
                         () -> new EquinoxTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE)
                                         .strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
+
+        // ===== NEW BLOCKS: Hardened Manashroom & Abyss Crown =====
+        public static final DeferredBlock<Block> HARDENED_MANASHROOM = registerBlock("hardened_manashroom",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)));
+
+        public static final DeferredBlock<Block> ABYSS_CROWN_LOG = registerBlock("abyss_crown_log",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)));
+
+        public static final DeferredBlock<Block> STRIPPED_ABYSS_CROWN_LOG = registerBlock("stripped_abyss_crown_log",
+                        () -> new ModFlammableRotatedPillarBlock(
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG)));
+
+        public static final DeferredBlock<Block> ABYSS_CROWN_STEM = registerBlock("abyss_crown_stem",
+                        () -> new ModFlammableRotatedPillarBlock(
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD)));
+
+        public static final DeferredBlock<Block> STRIPPED_ABYSS_CROWN_STEM = registerBlock("stripped_abyss_crown_stem",
+                        () -> new ModFlammableRotatedPillarBlock(
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD)));
+
+        public static final DeferredBlock<Block> ABYSS_CROWN_PLANKS = registerBlock("abyss_crown_planks",
+                        () -> new ModFlammableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)));
+
+        public static final DeferredBlock<StairBlock> ABYSS_CROWN_STAIRS = registerBlock("abyss_crown_stairs",
+                        () -> new StairBlock(ModBlocks.ABYSS_CROWN_PLANKS.get().defaultBlockState(),
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS)) {
+                                @Override
+                                public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return true;
+                                }
+
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 20;
+                                }
+
+                                @Override
+                                public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 5;
+                                }
+                        });
+
+        public static final DeferredBlock<SlabBlock> ABYSS_CROWN_SLAB = registerBlock("abyss_crown_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB)) {
+                                @Override
+                                public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return true;
+                                }
+
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 20;
+                                }
+
+                                @Override
+                                public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 5;
+                                }
+                        });
+
+        public static final DeferredBlock<FenceBlock> ABYSS_CROWN_FENCE = registerBlock("abyss_crown_fence",
+                        () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE)) {
+                                @Override
+                                public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return true;
+                                }
+
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 20;
+                                }
+
+                                @Override
+                                public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 5;
+                                }
+                        });
+
+        public static final DeferredBlock<FenceGateBlock> ABYSS_CROWN_GATE = registerBlock("abyss_crown_gate",
+                        () -> new FenceGateBlock(WoodType.ACACIA,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)) {
+                                @Override
+                                public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return true;
+                                }
+
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 20;
+                                }
+
+                                @Override
+                                public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 5;
+                                }
+                        });
+
+        public static final DeferredBlock<Block> ABYSS_CROWN_LEAVES = registerBlock("abyss_crown_leaves",
+                        () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)));
+
+        public static final DeferredBlock<Block> ABYSS_CROWN_SAPLING = registerBlock("abyss_crown_sapling",
+                        () -> new AbyssCrownSaplingBlock(ModTreeGrowers.ABYSS_CROWN_TREE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING), false));
+
+        public static final DeferredBlock<Block> UPGRADED_ABYSS_CROWN_SAPLING = registerBlock("upgraded_abyss_crown_sapling",
+                        () -> new AbyssCrownSaplingBlock(ModTreeGrowers.ABYSS_CROWN_TREE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING), true));
 
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);

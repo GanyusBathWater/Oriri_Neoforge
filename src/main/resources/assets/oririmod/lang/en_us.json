@@ -449,5 +449,19 @@
   "death.attack.element_darkness": "%1$s was swallowed by the dark from %2$s",
   "item.oririmod.raw_dragon_iron": "Raw Dragon Iron",
   "block.oririmod.dragon_iron_ore": "Dragon Iron Ore",
-  "block.oririmod.deepslate_dragon_iron_ore": "Deepslate Dragon Iron Ore"
-}
+  "block.oririmod.deepslate_dragon_iron_ore": "Deepslate Dragon Iron Ore",
+  "block.oririmod.hardened_manashroom": "Hardened Manashroom",
+  "block.oririmod.abyss_crown_log": "Abyss Crown Log",
+  "block.oririmod.stripped_abyss_crown_log": "Stripped Abyss Crown Log",
+  "block.oririmod.abyss_crown_stem": "Abyss Crown Stem",
+  "block.oririmod.stripped_abyss_crown_stem": "Stripped Abyss Crown Stem",
+  "block.oririmod.abyss_crown_planks": "Abyss Crown Planks",
+  "block.oririmod.abyss_crown_stairs": "Abyss Crown Stairs",
+  "block.oririmod.abyss_crown_slab": "Abyss Crown Slab",
+  "block.oririmod.abyss_crown_fence": "Abyss Crown Fence",
+  "block.oririmod.abyss_crown_gate": "Abyss Crown Gate",
+  "block.oririmod.abyss_crown_leaves": "Abyss Crown Leaves",
+  "block.oririmod.abyss_crown_sapling": "Abyss Crown Sapling",
+  "block.oririmod.upgraded_abyss_crown_sapling": "Upgraded Abyss Crown Sapling",
+  "biome.oririmod.elysian_abyss": "Elysian Abyss"
+}

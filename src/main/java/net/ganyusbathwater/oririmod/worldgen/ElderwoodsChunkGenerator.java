@@ -30,9 +30,10 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.fluid.ModFluids;
 import net.ganyusbathwater.oririmod.OririMod;
-import net.neoforged.neoforge.registries.DeferredBlock;
 import net.ganyusbathwater.oririmod.worldgen.carver.ScarletCaveEntranceCarver;
+import net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver;
 
 /**
  * Custom ChunkGenerator for the Elderwoods dimension.
@@ -57,6 +58,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
     private static final BlockState BEDROCK = Blocks.BEDROCK.defaultBlockState();
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
+    private static BlockState AETHER_BLOCK;
 
     // ===== SCARLET BIOME BLOCKS =====
     private static BlockState SCARLET_GRASS;
@@ -72,11 +74,22 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"));
     private static final ResourceKey<Biome> CRYSTAL_CAVES_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"));
+    private static final ResourceKey<Biome> ELYSIAN_ABYSS_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"));
 
     private double seedOffsetX = 0;
     private double seedOffsetZ = 0;
     private double seedOffsetCave = 0;
     private boolean seedInitialized = false;
+
+    // Cached Biome Holders for performance
+    private Holder<Biome> cachedElderwoods;
+    private Holder<Biome> cachedScarletPlains;
+    private Holder<Biome> cachedScarletForest;
+    private Holder<Biome> cachedScarletCaves;
+    private Holder<Biome> cachedCrystalCaves;
+    private Holder<Biome> cachedElderwoodsCave;
+    private Holder<Biome> cachedElysianAbyss;
 
     private final BiomeSource biomeSourceReference;
 
@@ -90,7 +103,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         return CODEC;
     }
 
-    private void initSeed(long seed) {
+    private synchronized void initSeed(long seed) {
         if (!seedInitialized) {
             RandomSource random = RandomSource.create(seed);
             seedOffsetX = random.nextDouble() * 10000.0;
@@ -108,17 +121,30 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 SCARLET_GRASS = ModBlocks.SCARLET_GRASS_BLOCK.get().defaultBlockState();
                 SCARLET_STONE = ModBlocks.SCARLET_STONE.get().defaultBlockState();
                 SCARLET_DEEPSLATE = ModBlocks.SCARLET_DEEPSLATE.get().defaultBlockState();
+                AETHER_BLOCK = ModFluids.AETHER_BLOCK.get().defaultBlockState();
             }
         }
     }
 
-    /**
-     * Check if the given biome holder is a scarlet biome
-     */
+    private void initSeedFromRandomState(RandomState randomState) {
+        if (!seedInitialized) {
+            net.minecraft.world.level.biome.Climate.TargetPoint sample =
+                    randomState.sampler().sample(0, 0, 0);
+            long derivedSeed = Double.doubleToRawLongBits(sample.temperature())
+                    ^ (Double.doubleToRawLongBits(sample.humidity()) * 6364136223846793005L)
+                    ^ (Double.doubleToRawLongBits(sample.continentalness()) * 1442695040888963407L);
+            initSeed(derivedSeed);
+        }
+    }
+
     private boolean isScarletBiome(Holder<Biome> biomeHolder) {
         return biomeHolder.is(SCARLET_PLAINS_KEY) ||
                 biomeHolder.is(SCARLET_FOREST_KEY) ||
                 biomeHolder.is(SCARLET_CAVES_KEY);
+    }
+
+    private boolean isElysianAbyssBiome(Holder<Biome> biomeHolder) {
+        return biomeHolder.is(ELYSIAN_ABYSS_KEY);
     }
 
     private int getSurfaceHeight(int x, int z) {
@@ -138,38 +164,105 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         return BASE_HEIGHT + (int) Math.round(noise);
     }
 
+    private double getAbyssNoise3D(int x, int y, int z) {
+        double nx = (x + seedOffsetX) * 0.05 + seedOffsetCave;
+        double ny = y * 0.08;
+        double nz = (z + seedOffsetZ) * 0.05 + seedOffsetCave;
+
+        // 3D Irrational Noise for micro-surface roughness
+        double noise = 0;
+        // Octave 1 (Rotated 31 deg)
+        double nx1 = nx * 0.857 + nz * 0.515;
+        double nz1 = -nx * 0.515 + nz * 0.857;
+        noise += Math.sin(nx1) * Math.cos(nz1) * Math.sin(ny);
+        // Octave 2 (Irrational Frequency)
+        noise += Math.sin(nx * 1.37) * Math.cos(ny * 1.41) * Math.sin(nz * 1.29) * 0.5;
+
+        return noise / 1.5;
+    }
+
+    private double getAbyssNoise(int x, int z) {
+        double nx = (x + seedOffsetX) * 0.01 + seedOffsetCave;
+        double nz = (z + seedOffsetZ) * 0.01 + seedOffsetCave;
+        
+        // Sum 4 octaves with IRRATIONAL ROTATIONS (breaks all square grid patterns)
+        double noise = 0;
+        // Octave 1 (Rotated 15 deg)
+        double nx1 = nx * 0.966 + nz * 0.259;
+        double nz1 = -nx * 0.259 + nz * 0.966;
+        noise += Math.sin(nx1) * Math.cos(nz1);
+        // Octave 2 (Rotated 31 deg)
+        double nx2 = nx * 0.857 + nz * 0.515;
+        double nz2 = -nx * 0.515 + nz * 0.857;
+        noise += Math.sin(nx2 * 1.37) * Math.cos(nz2 * 1.41) * 0.5;
+        // Octave 3 (67 deg)
+        double nx3 = nx * 0.390 + nz * 0.921;
+        double nz3 = -nx * 0.921 + nz * 0.390;
+        noise += Math.sin(nx3 * 2.11) * Math.cos(nz3 * 2.03) * 0.25;
+        // Octave 4 (113 deg)
+        double nx4 = -nx * 0.390 + nz * 0.921;
+        double nz4 = -nx * 0.921 - nz * 0.390;
+        noise += Math.sin(nx4 * 3.17) * Math.cos(nz4 * 3.23) * 0.125;
+        
+        return noise / 1.875; // Normalize to roughly -1.0 to 1.0 range
+    }
+
     private int getCaveFloorHeight(int x, int z) {
-        double nx = x + seedOffsetCave;
-        double nz = z + seedOffsetCave;
+        double nx = (x + seedOffsetCave) * 0.005;
+        double nz = (z + seedOffsetCave) * 0.005;
+        
+        // Ultra-smooth noise using only low-frequency sine/cos for the "Abyss floor"
+        double noise = Math.sin(nx) * Math.cos(nz);
+        noise += Math.sin(nx * 0.5 + 0.1) * Math.cos(nz * 0.4 + 0.5) * 0.3;
+        
+        double floorHeight = noise * 40.0; // Reduced amplitude for more stable base floor
 
-        double floorNoise = Math.sin(nx * 0.01) * Math.cos(nz * 0.01);
-        floorNoise += Math.sin(nx * 0.03 + 40) * Math.cos(nz * 0.025 + 40) * 0.5;
-        floorNoise += Math.cos(nx * 0.05 + 80) * Math.sin(nz * 0.04 + 80) * 0.3;
+        return -115 + (int) Math.round(floorHeight);
+    }
 
-        int baseFloor = MIN_Y + 35;
-        int floorVariation = (int) (floorNoise * 25);
+    private double getAetherRiverNoise(int x, int z) {
+        double nx = (x + seedOffsetX * 0.5) * 0.006;
+        double nz = (z + seedOffsetZ * 0.5) * 0.006;
+        
+        // Ridge noise for narrow, connecting rivers
+        double noise = Math.sin(nx) * Math.cos(nz + Math.sin(nx * 0.5)) + 
+                      0.5 * Math.sin(nx * 1.7) * Math.cos(nz * 1.5);
+        return noise;
+    }
 
-        return Mth.clamp(baseFloor + floorVariation, MIN_Y + 8, MIN_Y + 60);
+    private double getPillarNoise(int x, int z) {
+        double nx = (x + seedOffsetCave + 555) * 0.04;
+        double nz = (z + seedOffsetCave + 555) * 0.04;
+        return (Math.sin(nx) * Math.cos(nz) + 1.0) / 2.0;
     }
 
     private int getCaveCeilingHeight(int x, int z, int surfaceY) {
-        double nx = x + seedOffsetCave + 500;
-        double nz = z + seedOffsetCave + 500;
+        double nx = (x + seedOffsetCave + 700) * 0.012;
+        double nz = (z + seedOffsetCave + 700) * 0.012;
 
+        // Multi-octave IRRATIONAL noise (breaks grid)
         double ceilNoise = 0;
-        ceilNoise += Math.sin(nx * 0.008) * Math.cos(nz * 0.008) * 1.0;
-        ceilNoise += Math.cos(nx * 0.015 + 30) * Math.sin(nz * 0.012 + 30) * 0.7;
-        ceilNoise += Math.sin(nx * 0.025 + 60) * Math.cos(nz * 0.02 + 60) * 0.5;
-        ceilNoise += Math.cos(nx * 0.04 + 90) * Math.sin(nz * 0.035 + 90) * 0.3;
+        // Octave 1 (Rotated 15 deg)
+        double nx1 = nx * 0.966 + nz * 0.259;
+        double nz1 = -nx * 0.259 + nz * 0.966;
+        ceilNoise += Math.sin(nx1) * Math.cos(nz1);
+        // Octave 2 (Rotated 31 deg)
+        double nx2 = nx * 0.857 + nz * 0.515;
+        double nz2 = -nx * 0.515 + nz * 0.857;
+        ceilNoise += Math.sin(nx2 * 1.93) * Math.cos(nz2 * 1.87) * 0.5;
+        // Octave 3 (67 deg)
+        double nx3 = nx * 0.390 + nz * 0.921;
+        double nz3 = -nx * 0.921 + nz * 0.390;
+        ceilNoise += Math.sin(nx3 * 3.31) * Math.cos(nz3 * 3.19) * 0.25;
 
-        int baseCeiling = 40;
-        int ceilVariation = (int) (ceilNoise * 35);
+        int baseCeiling = 60; 
+        int ceilVariation = (int) (ceilNoise * 18); // Subtle vault variation
 
-        return Mth.clamp(baseCeiling + ceilVariation, 15, surfaceY - 12);
+        return Mth.clamp(baseCeiling + ceilVariation, 30, surfaceY - 10);
     }
 
     private int[] findNearestEntranceCenter(int x, int z) {
-        int gridSize = 180; // Reduced frequency (was 120)
+        int gridSize = 180;
         int gridX = Math.floorDiv(x, gridSize);
         int gridZ = Math.floorDiv(z, gridSize);
 
@@ -207,9 +300,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         int minRadius = 4;
         int entranceTop = surfaceY;
 
-        // Vary entrance bottom depth from Y=-16 to Y=16 based on entrance location
         double depthVariation = Math.sin(entranceCenterX * 0.1 + entranceCenterZ * 0.1 + seedOffsetCave);
-        int entranceBottom = (int) (depthVariation * 16); // Range: -16 to 16
+        int entranceBottom = (int) (depthVariation * 16); 
 
         if (y < entranceBottom || y > entranceTop)
             return false;
@@ -227,7 +319,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double wobble = Math.sin(x * 0.2 + y * 0.1 + seedOffsetCave) *
                 Math.cos(z * 0.2 + y * 0.1 + seedOffsetCave) * 1.5;
 
-        // Add extra irregular noise for more natural shape
         double extraNoise = Mth.sin((float) (x * 0.05 + y * 0.1)) * Mth.cos((float) (z * 0.05 + y * 0.1)) * 1.5;
 
         radiusAtY += wobble + extraNoise;
@@ -235,16 +326,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         return distFromWindingCenter < radiusAtY;
     }
 
-    // === LEGACY CAVE GENERATION (Preserved for reference) ===
-    // This was the old "Cheese Cave" logic using sine waves.
-    // Replaced by Giant Room Walkers for more organic shapes.
     private boolean isCaveLegacy(int x, int y, int z, int surfaceY) {
         if (y <= MIN_Y + 5)
             return false;
-
-        double nx = x + seedOffsetCave;
-        double ny = y;
-        double nz = z + seedOffsetCave;
 
         int caveFloor = getCaveFloorHeight(x, z);
         int caveCeiling = getCaveCeilingHeight(x, z, surfaceY);
@@ -254,33 +338,30 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         if (y > surfaceY - 12)
             return false;
 
-        // === BIG CAVE ROOMS (cheese caves) ===
+        double nx = x + seedOffsetCave;
+        double ny = y;
+        double nz = z + seedOffsetCave;
+
         double cheese = 0.0;
         cheese += Math.sin(nx * 0.02 + 17) * Math.sin(ny * 0.025 + 31) * Math.sin(nz * 0.018 + 43);
         cheese += Math.cos(nx * 0.015 + 67) * Math.cos(ny * 0.02 + 89) * Math.cos(nz * 0.012 + 101) * 0.6;
         cheese += Math.sin(nx * 0.035 + 127) * Math.cos(ny * 0.03 + 151) * Math.sin(nz * 0.025 + 173) * 0.35;
 
         double depthBonus = Math.max(0, (40.0 - y) / 80.0) * 0.15;
-        if (cheese > 0.5 - depthBonus)
-            return true;
-
-        return false;
+        return cheese > 0.5 - depthBonus;
     }
 
-    // Crystal cave zone detection (below Y=-16)
     private static final int CRYSTAL_CAVE_Y_THRESHOLD = -16;
-    private static final double CRYSTAL_ZONE_THRESHOLD = 0.82; // Higher = rarer, smaller geodes
+    private static final double CRYSTAL_ZONE_THRESHOLD = 0.82; 
 
-    // Returns noise value for geode layering (higher = closer to center)
     private double getCrystalZoneNoise(int x, int y, int z) {
         if (y > CRYSTAL_CAVE_Y_THRESHOLD)
             return -1;
 
-        double nx = (x + seedOffsetCave) * 0.035; // Higher frequency = smaller zones
+        double nx = (x + seedOffsetCave) * 0.035; 
         double ny = y * 0.045;
         double nz = (z + seedOffsetCave) * 0.035;
 
-        // 3D noise for crystal zones
         double noise = Mth.sin((float) (nx * 1.5)) * Mth.cos((float) (nz * 1.5));
         noise += Mth.sin((float) (ny * 2.0 + nx)) * 0.5;
         noise += Mth.cos((float) (nx * 3.0 + nz * 2.5)) * 0.3;
@@ -292,64 +373,47 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         return getCrystalZoneNoise(x, y, z) > CRYSTAL_ZONE_THRESHOLD;
     }
 
-    // Get geode layer: 0=none, 1=outer (smooth basalt), 2=middle (calcite), 3=inner
-    // (crystal)
     private int getGeodeLayer(int x, int y, int z) {
         double noise = getCrystalZoneNoise(x, y, z);
         if (noise <= CRYSTAL_ZONE_THRESHOLD - 0.12)
-            return 0; // Not in geode
+            return 0; 
         if (noise <= CRYSTAL_ZONE_THRESHOLD - 0.06)
-            return 1; // Outer layer - smooth basalt
+            return 1; 
         if (noise <= CRYSTAL_ZONE_THRESHOLD)
-            return 2; // Middle layer - calcite
-        return 3; // Inner - crystal blocks
+            return 2; 
+        return 3; 
     }
 
-    // Determine which crystal type (0 = amethyst, 1 = mana crystal)
     private int getCrystalType(int x, int y, int z) {
         double noise = Mth.sin((float) ((x + seedOffsetX) * 0.1)) * Mth.cos((float) ((z + seedOffsetZ) * 0.1));
         noise += Mth.sin((float) (y * 0.15)) * 0.5;
-        return noise > 0 ? 1 : 0; // 1 = mana, 0 = amethyst
+        return noise > 0 ? 1 : 0; 
     }
 
-    // Check if cluster should spawn with more randomness
     private boolean shouldPlaceCluster(int x, int y, int z, long seed) {
-        // Use more varied hash with multiple primes and XOR for less linear patterns
         long hash = ((x * 73856093L) ^ (y * 19349663L) ^ (z * 83492791L) ^ seed);
         hash = (hash * 31 + 17) ^ (hash >> 16);
         hash = hash & 0xFFFFFFFFL;
-        return (hash % 100) < 4; // ~4% chance for clusters on exposed faces
+        return (hash % 100) < 4; 
     }
 
-    // Single consistent lava lake level for the entire dimension
-    private static final int LAVA_LAKE_LEVEL = MIN_Y + 30; // Y = -98
+    private static final int LAVA_LAKE_LEVEL = MIN_Y + 30; 
 
     @Override
     public void applyCarvers(WorldGenRegion level, long seed, RandomState randomState,
             BiomeManager biomeManager, StructureManager structureManager,
             ChunkAccess chunk, GenerationStep.Carving step) {
         if (step == GenerationStep.Carving.AIR || step == GenerationStep.Carving.LIQUID) {
-            // Manual Carver Application Logic (since super.applyCarvers is abstract)
             try {
-                OririMod.LOGGER.info("DEBUG_TRACE: applyCarvers started for step " + step);
-                // Manual Carver Application Logic
-                // We cannot instantiate a valid CarvingContext because we don't have a
-                // NoiseBasedChunkGenerator.
-                // Our custom carver (ScarletCaveEntranceCarver) is designed to handle null
-                // context.
                 net.minecraft.world.level.levelgen.carver.CarvingContext context = null;
-
-                OririMod.LOGGER.info("DEBUG_TRACE: Context created");
-
-                net.minecraft.world.level.chunk.CarvingMask carvingMask = ((net.minecraft.world.level.chunk.ProtoChunk) chunk)
-                        .getOrCreateCarvingMask(step);
-                net.minecraft.world.level.levelgen.Aquifer aquifer = null; // ScarletCaveEntranceCarver doesn't use
-                                                                           // aquifer
+                net.minecraft.world.level.chunk.CarvingMask carvingMask = null;
+                if (chunk instanceof net.minecraft.world.level.chunk.ProtoChunk protoChunk) {
+                    carvingMask = protoChunk.getOrCreateCarvingMask(step);
+                }
+                net.minecraft.world.level.levelgen.Aquifer aquifer = null;
 
                 net.minecraft.core.BlockPos centerPos = chunk.getPos().getMiddleBlockPosition(0);
-                net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = level.getBiome(centerPos);
-                OririMod.LOGGER.info("DEBUG_TRACE: Got biome "
-                        + biome.unwrapKey().map(k -> k.location().toString()).orElse("unknown"));
+                net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = biomeManager.getBiome(centerPos);
 
                 net.minecraft.world.level.biome.BiomeGenerationSettings settings = biome.value()
                         .getGenerationSettings();
@@ -357,27 +421,21 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 for (net.minecraft.core.Holder<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> holder : settings
                         .getCarvers(step)) {
                     net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> carver = holder.value();
-                    OririMod.LOGGER.info("DEBUG_TRACE: Carving with "
-                            + holder.unwrapKey().map(k -> k.location().toString()).orElse("unknown"));
 
-                    // Create a deterministic random source for this chunk's carver
                     net.minecraft.util.RandomSource carverRandom = net.minecraft.util.RandomSource
                             .create(seed ^ chunk.getPos().toLong());
                     if (carver.worldCarver() instanceof ScarletCaveEntranceCarver
                             && carver.isStartChunk(carverRandom)) {
                         carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, chunk.getPos(),
                                 carvingMask);
-                        OririMod.LOGGER.info("DEBUG_TRACE: Finished carving with "
-                                + holder.unwrapKey().map(k -> k.location().toString()).orElse("unknown"));
-                    } else if (!(carver.worldCarver() instanceof ScarletCaveEntranceCarver)) {
-                        OririMod.LOGGER.warn("Skipping incompatible carver "
-                                + holder.unwrapKey().map(k -> k.location().toString()).orElse("unknown")
-                                + " in ElderwoodsChunkGenerator");
+                    } else if (carver.worldCarver() instanceof ElysianAbyssCarver
+                            && isElysianAbyssBiome(biome)) {
+                        carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, chunk.getPos(),
+                                carvingMask);
                     }
                 }
             } catch (Throwable e) {
-                OririMod.LOGGER.error("CRITICAL ERROR in applyCarvers: " + e.getMessage(), e);
-                e.printStackTrace();
+                OririMod.LOGGER.error("ERROR in applyCarvers: " + e.getMessage(), e);
             }
         }
         initSeed(seed);
@@ -395,7 +453,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 int worldZ = startZ + localZ;
                 int surfaceY = getSurfaceHeight(worldX, worldZ);
 
-                // First pass: Remove ALL water and lava blocks in the entire column
                 for (int y = MIN_Y; y <= surfaceY; y++) {
                     pos.set(worldX, y, worldZ);
                     BlockState currentBlock = chunk.getBlockState(pos);
@@ -404,62 +461,55 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     }
                 }
 
-                // Second pass: Carve caves and place lava lakes
-                for (int y = MIN_Y + 6; y <= surfaceY; y++) {
+                // Comprehensive wood swap for structures like Mineshafts
+                for (int y = MIN_Y; y <= surfaceY; y++) {
                     pos.set(worldX, y, worldZ);
                     BlockState currentBlock = chunk.getBlockState(pos);
 
-                    // Swap mineshaft wood blocks to elder wood
                     if (currentBlock.is(Blocks.OAK_PLANKS) || currentBlock.is(Blocks.DARK_OAK_PLANKS)
-                            || currentBlock.is(Blocks.SPRUCE_PLANKS)) {
+                            || currentBlock.is(Blocks.SPRUCE_PLANKS) || currentBlock.is(Blocks.BIRCH_PLANKS)
+                            || currentBlock.is(Blocks.ACACIA_PLANKS) || currentBlock.is(Blocks.JUNGLE_PLANKS)
+                            || currentBlock.is(Blocks.MANGROVE_PLANKS) || currentBlock.is(Blocks.CHERRY_PLANKS)
+                            || currentBlock.is(Blocks.BAMBOO_PLANKS)) {
                         chunk.setBlockState(pos, ModBlocks.ELDER_PLANKS.get().defaultBlockState(), false);
                     } else if (currentBlock.is(Blocks.OAK_FENCE) || currentBlock.is(Blocks.DARK_OAK_FENCE)
-                            || currentBlock.is(Blocks.SPRUCE_FENCE)) {
+                            || currentBlock.is(Blocks.SPRUCE_FENCE) || currentBlock.is(Blocks.BIRCH_FENCE)
+                            || currentBlock.is(Blocks.ACACIA_FENCE) || currentBlock.is(Blocks.JUNGLE_FENCE)
+                            || currentBlock.is(Blocks.MANGROVE_FENCE) || currentBlock.is(Blocks.CHERRY_FENCE)
+                            || currentBlock.is(Blocks.BAMBOO_FENCE) || currentBlock.is(Blocks.OAK_FENCE_GATE)
+                            || currentBlock.is(Blocks.DARK_OAK_FENCE_GATE) || currentBlock.is(Blocks.SPRUCE_FENCE_GATE)
+                            || currentBlock.is(Blocks.BIRCH_FENCE_GATE) || currentBlock.is(Blocks.ACACIA_FENCE_GATE)
+                            || currentBlock.is(Blocks.JUNGLE_FENCE_GATE) || currentBlock.is(Blocks.MANGROVE_FENCE_GATE)
+                            || currentBlock.is(Blocks.CHERRY_FENCE_GATE) || currentBlock.is(Blocks.BAMBOO_FENCE_GATE)) {
                         chunk.setBlockState(pos, ModBlocks.ELDER_FENCE.get().defaultBlockState(), false);
+                    } else if (currentBlock.is(Blocks.OAK_LOG) || currentBlock.is(Blocks.DARK_OAK_LOG)
+                            || currentBlock.is(Blocks.SPRUCE_LOG) || currentBlock.is(Blocks.BIRCH_LOG)
+                            || currentBlock.is(Blocks.ACACIA_LOG) || currentBlock.is(Blocks.JUNGLE_LOG)
+                            || currentBlock.is(Blocks.MANGROVE_LOG) || currentBlock.is(Blocks.CHERRY_LOG)
+                            || currentBlock.is(Blocks.OAK_WOOD) || currentBlock.is(Blocks.DARK_OAK_WOOD)
+                            || currentBlock.is(Blocks.SPRUCE_WOOD) || currentBlock.is(Blocks.BIRCH_WOOD)
+                            || currentBlock.is(Blocks.ACACIA_WOOD) || currentBlock.is(Blocks.JUNGLE_WOOD)
+                            || currentBlock.is(Blocks.MANGROVE_WOOD) || currentBlock.is(Blocks.CHERRY_WOOD)) {
+                        chunk.setBlockState(pos, ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState(), false);
                     }
-
-                    /*
-                     * // === LEGACY CAVE GENERATION (DISABLED) ===
-                     * // Replaced by Giant Room Walkers.
-                     * // This block used the old 'isCave' method which is now renamed to
-                     * 'isCaveLegacy'.
-                     * 
-                     * if (isCaveLegacy(worldX, y, worldZ, surfaceY)) {
-                     * // Lava at consistent level in caves
-                     * if (y <= LAVA_LAKE_LEVEL) {
-                     * chunk.setBlockState(pos, Blocks.LAVA.defaultBlockState(), false);
-                     * } else {
-                     * chunk.setBlockState(pos, AIR, false);
-                     * }
-                     * }
-                     */
                 }
             }
         }
 
-        // Manual Carver Application
-        // Manual Carver Application
-        BlockPos center = chunk.getPos().getMiddleBlockPosition(0);
-
-        // 3x3 Neighbor Check: Carve caves from this chunk AND neighbors into this chunk
         int chunkX = chunk.getPos().x;
         int chunkZ = chunk.getPos().z;
 
-        for (int dx = -12; dx <= 12; dx++) {
-            for (int dz = -12; dz <= 12; dz++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
                 int originX = chunkX + dx;
                 int originZ = chunkZ + dz;
                 carveScarletCaveEntrances(level, chunk, originX, originZ, randomState);
             }
         }
 
-        // Crystal Cluster Placement - Option 4: Avoid chunk borders
-        // Only place clusters 2+ blocks from chunk edges to prevent floating from
-        // adjacent chunk carving. Interior blocks (localX 2-13, localZ 2-13) are safe.
         BlockPos.MutableBlockPos clusterPos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos adjacentPos = new BlockPos.MutableBlockPos();
 
-        // Only process interior of chunk (2 blocks away from edges)
         for (int localX = 2; localX <= 13; localX++) {
             for (int localZ = 2; localZ <= 13; localZ++) {
                 int worldX = startX + localX;
@@ -470,21 +520,16 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     clusterPos.set(worldX, y, worldZ);
                     BlockState currentBlock = chunk.getBlockState(clusterPos);
 
-                    // Only process crystal blocks
                     boolean isCrystalBlock = currentBlock.is(Blocks.AMETHYST_BLOCK) ||
                             currentBlock.is(ModBlocks.MANA_CRYSTAL_BLOCK.get());
                     if (!isCrystalBlock)
                         continue;
 
-                    // Random check - ~4% chance per crystal block
                     if (!shouldPlaceCluster(worldX, y, worldZ, seed))
                         continue;
 
-                    // Get crystal type from the block we're attaching to
                     int crystalType = currentBlock.is(ModBlocks.MANA_CRYSTAL_BLOCK.get()) ? 1 : 0;
 
-                    // Check each face for air and place cluster at FIRST available face only
-                    // UP
                     adjacentPos.set(worldX, y + 1, worldZ);
                     if (chunk.getBlockState(adjacentPos).isAir()) {
                         BlockState cluster = crystalType == 1
@@ -496,7 +541,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         continue;
                     }
 
-                    // DOWN
                     adjacentPos.set(worldX, y - 1, worldZ);
                     if (chunk.getBlockState(adjacentPos).isAir()) {
                         BlockState cluster = crystalType == 1
@@ -508,7 +552,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         continue;
                     }
 
-                    // NORTH
                     adjacentPos.set(worldX, y, worldZ - 1);
                     if (chunk.getBlockState(adjacentPos).isAir()) {
                         BlockState cluster = crystalType == 1
@@ -520,7 +563,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         continue;
                     }
 
-                    // SOUTH
                     adjacentPos.set(worldX, y, worldZ + 1);
                     if (chunk.getBlockState(adjacentPos).isAir()) {
                         BlockState cluster = crystalType == 1
@@ -532,7 +574,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         continue;
                     }
 
-                    // WEST
                     adjacentPos.set(worldX - 1, y, worldZ);
                     if (chunk.getBlockState(adjacentPos).isAir()) {
                         BlockState cluster = crystalType == 1
@@ -544,7 +585,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         continue;
                     }
 
-                    // EAST
                     adjacentPos.set(worldX + 1, y, worldZ);
                     if (chunk.getBlockState(adjacentPos).isAir()) {
                         BlockState cluster = crystalType == 1
@@ -558,12 +598,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             }
         }
 
-        // Fluorite Generation (Crystal Caves Only)
-        // Iterate interior of chunk with a slightly expanded range to allow patterns to
-        // flow naturally
-        // Create a deterministic random source for Fluorite generation
         RandomSource fluoriteRandom = RandomSource.create(seed ^ chunk.getPos().toLong());
-        // Use a different seed offset for fluorite noise so it doesn't align with caves
         double fluoriteNoiseOffset = seedOffsetCave + 12345.0;
 
         for (int localX = 0; localX < 16; localX++) {
@@ -572,41 +607,28 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 int worldZ = startZ + localZ;
                 int surfaceY = getSurfaceHeight(worldX, worldZ);
 
-                // Fluorite cluster patch noise - lower frequency for larger natural patches
-                // Using 0.02 frequency creates patches ~50 blocks wide
                 double patchNoise = Math.sin((worldX + fluoriteNoiseOffset) * 0.02)
                         * Math.cos((worldZ + fluoriteNoiseOffset) * 0.02);
-                // Secondary noise to break it up and make the edges irregular
                 double detailNoise = Math.sin((worldX - fluoriteNoiseOffset) * 0.07)
                         * Math.cos((worldZ - fluoriteNoiseOffset) * 0.07);
 
-                // Combine noises: main patch shape + irregular details
                 double combinedNoise = patchNoise * 0.7 + detailNoise * 0.3;
 
-                // Threshold for patch: > 0.3 means we are inside a patch
                 if (combinedNoise < 0.3)
                     continue;
 
                 for (int y = MIN_Y + 6; y <= surfaceY - 5; y++) {
                     clusterPos.set(worldX, y, worldZ);
 
-                    // 1. Ceiling Check (Fluorite Cluster hanging)
-                    // Condition: Air here, Solid above
                     if (chunk.getBlockState(clusterPos).isAir()) {
                         adjacentPos.set(worldX, y + 1, worldZ);
                         BlockState aboveState = chunk.getBlockState(adjacentPos);
                         if (aboveState.isSolid() && !aboveState.is(Blocks.BEDROCK)) {
-                            // Check Biome at this specific position
                             if (isCrystalCaveBiome(getComputedBiome(level, worldX, y, worldZ))) {
-
-                                // Base chance inside a patch, higher towards the center of the patch
-                                float patchIntensity = (float) ((combinedNoise - 0.3) / 0.7); // 0.0 at edge, 1.0 at
-                                                                                              // center
-                                float chance = 0.05f + (patchIntensity * 0.25f); // 5% to 30% chance based on patch
-                                                                                 // density
+                                float patchIntensity = (float) ((combinedNoise - 0.3) / 0.7); 
+                                float chance = 0.05f + (patchIntensity * 0.25f); 
 
                                 if (fluoriteRandom.nextFloat() < chance) {
-                                    // Tip: Fluorite Cluster directly attached to the ceiling
                                     chunk.setBlockState(clusterPos,
                                             ModBlocks.FLUORITE_CLUSTER.get().defaultBlockState()
                                                     .setValue(BlockStateProperties.FACING, Direction.DOWN),
@@ -622,44 +644,31 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private void carveScarletCaveEntrances(WorldGenRegion level, ChunkAccess chunk, int originX, int originZ,
             RandomState randomState) {
-        // Optimization: Grid-Based Distribution (1 cave per 14x14 chunk grid = ~1/196
-        // chunks)
-        // Slightly rarer to account for massive worm caves
         int gridSize = 14;
         int gridX = Math.floorDiv(originX, gridSize);
         int gridZ = Math.floorDiv(originZ, gridSize);
 
-        // Deterministically pick ONE chunk within this grid cell
         long gridSeed = level.getSeed() ^ (gridX * 341873128712L) ^ (gridZ * 132897987541L);
         RandomSource gridRandom = RandomSource.create(gridSeed);
         int pickX = gridX * gridSize + gridRandom.nextInt(gridSize);
         int pickZ = gridZ * gridSize + gridRandom.nextInt(gridSize);
 
-        // Only carve if the current origin matches the picked chunk
         if (originX != pickX || originZ != pickZ)
             return;
 
-        // Use a stable random for the cave shape itself
         long caveSeed = level.getSeed() ^ (originX * 341873128712L) ^ (originZ * 132897987541L);
         RandomSource random = RandomSource.create(caveSeed);
 
-        // Calculate center of the ORIGIN chunk
         int centerX = (originX << 4) + 8;
         int centerZ = (originZ << 4) + 8;
 
-        // Get surface height at the ORIGIN center
         int surfaceY = getSurfaceHeight(centerX, centerZ);
         if (surfaceY < -64)
             return;
 
-        // Only do block-reading checks (surface type, liquid) when the center is in
-        // THIS chunk.
-        // For cross-chunk origins, the checks already passed when the origin's own
-        // chunk was processed.
         boolean centerInThisChunk = (centerX >> 4) == chunk.getPos().x && (centerZ >> 4) == chunk.getPos().z;
 
         if (centerInThisChunk) {
-            // Only carve entrances on grass/dirt surfaces
             BlockPos.MutableBlockPos surfaceCheckPos = new BlockPos.MutableBlockPos(centerX, surfaceY, centerZ);
             BlockState surfaceBlock = chunk.getBlockState(surfaceCheckPos);
             if (!surfaceBlock.is(Blocks.GRASS_BLOCK) && !surfaceBlock.is(Blocks.DIRT)
@@ -667,8 +676,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 return;
             }
 
-            // Check for liquids (Water, Lava, etc.) in the entrance area to avoid cutting
-            // into ponds
             int checkRadius = 8;
             BlockPos.MutableBlockPos checkPos = new BlockPos.MutableBlockPos();
             for (int cx = -checkRadius; cx <= checkRadius; cx++) {
@@ -676,10 +683,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     checkPos.set(centerX + cx, surfaceY, centerZ + cz);
                     if (chunk.getBlockState(checkPos)
                             .getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) {
-                        // Abort if liquid found
                         return;
                     }
-                    // Check one block below
                     checkPos.set(centerX + cx, surfaceY - 1, centerZ + cz);
                     if (chunk.getBlockState(checkPos)
                             .getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) {
@@ -689,25 +694,14 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             }
         }
 
-        // WORM STARTS HERE
-        // Initial Position
         double x = centerX;
-        double y = surfaceY + 2; // Start slightly above ground
+        double y = surfaceY + 2;
         double z = centerZ;
 
-        // Initial Velocity / Direction
-        // Yaw: Random direction (0-360)
         float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
-        // Pitch: Pointing DOWN (-45 to -90 degrees) to ensure we dig into the ground
         float pitch = -((float) Math.PI / 4.0f) - (random.nextFloat() * (float) Math.PI / 4.0f);
+        float radius = 3.5f + random.nextFloat() * 2.0f;
 
-        // Initial Size
-        float radius = 3.5f + random.nextFloat() * 2.0f; // 3.5 to 5.5
-
-        // EXPLICIT ENTRANCE OPENING:
-        // Carve a tapered funnel at the surface to guarantee the entrance is always
-        // open.
-        // Radius shrinks as we go deeper for a smooth, natural look.
         {
             int maxOpeningRadius = (int) radius + 1;
             int openingTop = surfaceY + 3;
@@ -715,21 +709,17 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             int openingHeight = openingTop - openingBottom;
             BlockPos.MutableBlockPos openPos = new BlockPos.MutableBlockPos();
             for (int oy = openingTop; oy >= openingBottom; oy--) {
-                // Radius tapers from full at the top to ~1/3 at the bottom
                 double taperProgress = (double) (openingTop - oy) / openingHeight;
                 double currentRadius = Mth.lerp(taperProgress, maxOpeningRadius, maxOpeningRadius * 0.33);
                 double radiusSq = currentRadius * currentRadius;
                 int checkRad = (int) Math.ceil(currentRadius);
                 for (int ox = -checkRad; ox <= checkRad; ox++) {
                     for (int oz = -checkRad; oz <= checkRad; oz++) {
-                        if (ox * ox + oz * oz > radiusSq)
-                            continue;
+                        if (ox * ox + oz * oz > radiusSq) continue;
                         int worldX = centerX + ox;
-                        int worldZ = centerZ + oz;
-                        // Only carve blocks within THIS chunk
-                        if (chunk.getPos().x != (worldX >> 4) || chunk.getPos().z != (worldZ >> 4))
-                            continue;
-                        openPos.set(worldX, oy, worldZ);
+                        int worldZ2 = centerZ + oz;
+                        if (chunk.getPos().x != (worldX >> 4) || chunk.getPos().z != (worldZ2 >> 4)) continue;
+                        openPos.set(worldX, oy, worldZ2);
                         BlockState openState = chunk.getBlockState(openPos);
                         if (!openState.is(Blocks.BEDROCK) && !openState.isAir()) {
                             chunk.setBlockState(openPos, Blocks.AIR.defaultBlockState(), false);
@@ -739,47 +729,19 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             }
         }
 
-        // Recursively carve the worm
-        // Max steps ~150 (enough to go deep and wind around)
-        // shouldProtectSurface is FALSE for the entrance worm to allow it to break
-        // through the surface
-        carveWorm(level, chunk, random, x, y, z, yaw, pitch, radius, 150, 0, 1.0f, false);
+        carveWorm(level, chunk, random, x, y, z, yaw, pitch, radius, 120, 0, 1.0f, false);
 
-        // EXTRA: Deep Underground Worms (No surface connection)
-        // Spawn 8-16 extra worms deep down per grid cell, spread out significantly
-        int numDeepWorms = 12 + random.nextInt(7); // 12 to 18
+        int numDeepWorms = 5 + random.nextInt(4); 
         for (int i = 0; i < numDeepWorms; i++) {
-            // Spread over +/- 80 blocks (5 chunks) to cover the grid area
             double dX = centerX + (random.nextInt(160) - 80);
             double dZ = centerZ + (random.nextInt(160) - 80);
-            double dY = random.nextInt(118) - 58; // Y -58 to 60
+            double dY = random.nextInt(118) - 58;
 
             float dYaw = random.nextFloat() * (float) Math.PI * 2.0f;
-            float dPitch = (random.nextFloat() - 0.5f) * (float) Math.PI; // Any direction
+            float dPitch = (random.nextFloat() - 0.5f) * (float) Math.PI;
             float dRadius = 3.0f + random.nextFloat() * 3.0f;
 
-            // shouldProtectSurface is TRUE for deep worms to avoid accidental surface holes
             carveWorm(level, chunk, random, dX, dY, dZ, dYaw, dPitch, dRadius, 120, 0, 1.0f, true);
-        }
-
-        // TITAN CAVE ROOMS (Replaces Cheese Caves and Giant Worms)
-        // Spawn 1 TITAN cavern worm per grid (50% chance)
-        // These are massive, flattened worms that create vast underground halls.
-        if (random.nextFloat() < 0.33f) { // 33% chance per grid
-            double dX = centerX + (random.nextInt(40) - 20);
-            double dZ = centerZ + (random.nextInt(40) - 20);
-            double dY = random.nextInt(100) - 50; // Deep underground (-50 to 50)
-
-            float dYaw = random.nextFloat() * (float) Math.PI * 2.0f;
-            float dPitch = (random.nextFloat() - 0.5f) * 0.2f; // Very flat pitch
-            // Radius 35-70 (Diameter 70-140)
-            float dRadius = 35.0f + random.nextFloat() * 35.0f;
-
-            // Run for fewer steps (creating a "Hall"), flattened vertically (0.6 scale -
-            // Taller)
-            // shouldProtectSurface is TRUE for Titan worms to avoid accidental surface
-            // holes
-            carveWorm(level, chunk, random, dX, dY, dZ, dYaw, dPitch, dRadius, 60, 0, 0.6f, true);
         }
     }
 
@@ -790,15 +752,12 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         if (steps <= 0)
             return;
         if (branchDepth > 2)
-            return; // Prevent infinite recursion
+            return; 
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        // Removed rimBlockState and rimUnderBlockState
-
         int originalSurfaceY = getSurfaceHeight((int) x, (int) z);
 
         for (int i = 0; i < steps; i++) {
-            // 1. Move
             double hDist = Math.cos(pitch);
             double dx = Math.cos(yaw) * hDist;
             double dy = Math.sin(pitch);
@@ -808,52 +767,39 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             y += dy;
             z += dz;
 
-            // 2. Adjust Direction (Simulate Brownian Motion / Noise)
-            yaw += (random.nextFloat() - 0.5f) * 0.4f; // Turn
-            pitch += (random.nextFloat() - 0.5f) * 0.2f; // Slight pitch change
+            yaw += (random.nextFloat() - 0.5f) * 0.4f; 
+            pitch += (random.nextFloat() - 0.5f) * 0.2f; 
 
-            // Flatten pitch if we are deep, to make tunnels instead of just a pit
             if (y < originalSurfaceY - 20) {
                 pitch *= 0.9f;
-                // If pitch gets too flat near bedrock, maybe angle up/down slightly
                 if (Math.abs(pitch) < 0.1f && random.nextFloat() < 0.1f) {
                     pitch = (random.nextFloat() - 0.5f) * 0.5f;
                 }
             }
 
-            // Avoid going too high (back out of ground)
             if (y > originalSurfaceY - 5 && pitch > 0) {
-                pitch = -0.5f; // Push back down
+                pitch = -0.5f; 
             }
 
-            // Bedrock Limit
             if (y < -58) {
-                pitch = 0.5f; // Push up
+                pitch = 0.5f; 
                 y = -58;
             }
 
-            // 4. Branching
-            if (random.nextFloat() < 0.02f && steps > 20) { // 2% chance per step (Reduced from 5%)
-                float branchYaw = yaw + (random.nextFloat() - 0.5f) * 2.0f; // Big turn
+            if (random.nextFloat() < 0.02f && steps > 20) { 
+                float branchYaw = yaw + (random.nextFloat() - 0.5f) * 2.0f; 
                 float branchPitch = pitch + (random.nextFloat() - 0.5f) * 1.0f;
                 carveWorm(level, chunk, random, x, y, z, branchYaw, branchPitch, radius * 0.8f, steps / 2,
                         branchDepth + 1, yScale, shouldProtectSurface);
             }
 
-            // Vary Radius
             radius += (random.nextFloat() - 0.5f) * 0.2f;
-            radius = Mth.clamp(radius, 0.5f, 80.0f); // Allow HYPER-TITAN worms (up to 80 radius = 160 width)
+            radius = Mth.clamp(radius, 0.5f, 25.0f); 
 
-            // Random Room Swellings (Cave Rooms along the tunnel)
-            // 0.05% chance per step to swell into a room (Much RAREr)
-            // Use irregular shape instead of perfect sphere
             if (random.nextFloat() < 0.0005f && steps > 10) {
                 carveIrregularRoom(level, chunk, random, x, y, z, shouldProtectSurface);
             }
 
-            // 3. Carve Sphere
-            // Only affect blocks within the CURRENT chunk to allow multithreading safety
-            // (We iterate radius + padding)
             int checkRad = (int) radius + 2;
             int minX = Mth.floor(x - checkRad);
             int maxX = Mth.floor(x + checkRad);
@@ -862,28 +808,25 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             int minZ = Mth.floor(z - checkRad);
             int maxZ = Mth.floor(z + checkRad);
 
-            // Optimization: Quick check if this sphere even touches the chunk
-            if (minX > chunk.getPos().getMaxBlockX() || maxX < chunk.getPos().getMinBlockX() ||
-                    minZ > chunk.getPos().getMaxBlockZ() || maxZ < chunk.getPos().getMinBlockZ()) {
-                // Continue moving worm simulation, but don't carve blocks
-                // Branching Logic still runs!
-            } else {
-                // Carve blocks
-                for (int bx = minX; bx <= maxX; bx++) {
-                    for (int bz = minZ; bz <= maxZ; bz++) {
-                        // Must be in THIS chunk
-                        if (chunk.getPos().x != (bx >> 4) || chunk.getPos().z != (bz >> 4))
-                            continue;
+            int startX_chunk = chunk.getPos().getMinBlockX();
+            int endX_chunk = chunk.getPos().getMaxBlockX();
+            int startZ_chunk = chunk.getPos().getMinBlockZ();
+            int endZ_chunk = chunk.getPos().getMaxBlockZ();
 
+            int minX_clip = Math.max(minX, startX_chunk);
+            int maxX_clip = Math.min(maxX, endX_chunk);
+            int minZ_clip = Math.max(minZ, startZ_chunk);
+            int maxZ_clip = Math.min(maxZ, endZ_chunk);
+
+            if (minX_clip <= maxX_clip && minZ_clip <= maxZ_clip) {
+                for (int bx = minX_clip; bx <= maxX_clip; bx++) {
+                    for (int bz = minZ_clip; bz <= maxZ_clip; bz++) {
                         for (int by = minY; by <= maxY; by++) {
                             mutablePos.set(bx, by, bz);
                             double dX = x - bx;
-                            double dY = (y - by) / yScale; // Apply vertical scale (flattening)
+                            double dY = (y - by) / yScale;
                             double dZ = z - bz;
-                            // Ellipsoid stretch logic
                             if (dX * dX + dY * dY + dZ * dZ < radius * radius) {
-                                // Surface protection: never carve within 4 blocks of the local surface if flag
-                                // is set
                                 int localSurfaceY = getSurfaceHeight(bx, bz);
                                 if (shouldProtectSurface && by >= localSurfaceY - 3)
                                     continue;
@@ -902,12 +845,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private void carveIrregularRoom(WorldGenRegion level, ChunkAccess chunk, RandomSource random, double x, double y,
             double z, boolean shouldProtectSurface) {
-        int blobs = 3 + random.nextInt(4); // 3-6 overlapping blobs
+        int blobs = 3 + random.nextInt(4); 
         for (int i = 0; i < blobs; i++) {
-            float r = 3.0f + random.nextFloat() * 6.0f; // 3-9 radius
-            // Offset blobs to create irregular shape
+            float r = 3.0f + random.nextFloat() * 6.0f; 
             double offX = (random.nextFloat() - 0.5f) * r * 1.5f;
-            double offY = (random.nextFloat() - 0.5f) * (r * 0.8f); // Slightly flatter vertically
+            double offY = (random.nextFloat() - 0.5f) * (r * 0.8f); 
             double offZ = (random.nextFloat() - 0.5f) * r * 1.5f;
 
             carveSphere(level, chunk, x + offX, y + offY, z + offZ, r, -64, shouldProtectSurface);
@@ -926,23 +868,28 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-        if (minX > chunk.getPos().getMaxBlockX() || maxX < chunk.getPos().getMinBlockX() ||
-                minZ > chunk.getPos().getMaxBlockZ() || maxZ < chunk.getPos().getMinBlockZ()) {
+        int startX_chunk = chunk.getPos().getMinBlockX();
+        int endX_chunk = chunk.getPos().getMaxBlockX();
+        int startZ_chunk = chunk.getPos().getMinBlockZ();
+        int endZ_chunk = chunk.getPos().getMaxBlockZ();
+
+        int minX_clip = Math.max(minX, startX_chunk);
+        int maxX_clip = Math.min(maxX, endX_chunk);
+        int minZ_clip = Math.max(minZ, startZ_chunk);
+        int maxZ_clip = Math.min(maxZ, endZ_chunk);
+
+        if (minX_clip > maxX_clip || minZ_clip > maxZ_clip) {
             return;
         }
 
-        for (int bx = minX; bx <= maxX; bx++) {
-            for (int bz = minZ; bz <= maxZ; bz++) {
-                if (chunk.getPos().x != (bx >> 4) || chunk.getPos().z != (bz >> 4))
-                    continue;
+        for (int bx = minX_clip; bx <= maxX_clip; bx++) {
+            for (int bz = minZ_clip; bz <= maxZ_clip; bz++) {
                 for (int by = minY_block; by <= maxY_block; by++) {
                     mutablePos.set(bx, by, bz);
                     double dX = x - bx;
                     double dY = y - by;
                     double dZ = z - bz;
                     if (dX * dX + dY * dY + dZ * dZ < radius * radius) {
-                        // Surface protection: never carve within 4 blocks of the local surface if flag
-                        // is set
                         int localSurfaceY = getSurfaceHeight(bx, bz);
                         if (shouldProtectSurface && by >= localSurfaceY - 3)
                             continue;
@@ -957,152 +904,130 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         }
     }
 
-    // Manual Biome Selection Logic (Bypassing broken RandomState/BiomeSource)
     private Holder<Biome> getComputedBiome(WorldGenRegion level, int x, int y, int z) {
-        // Initialize if needed (though initSeed should have run)
+        if (cachedElysianAbyss == null) {
+            synchronized (this) {
+                if (cachedElysianAbyss == null) {
+                    var registry = level.registryAccess().registryOrThrow(Registries.BIOME);
+                    cachedElderwoods = registry.getHolderOrThrow(
+                            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods")));
+                    cachedScarletPlains = registry.getHolderOrThrow(SCARLET_PLAINS_KEY);
+                    cachedScarletForest = registry.getHolderOrThrow(SCARLET_FOREST_KEY);
+                    cachedScarletCaves = registry.getHolderOrThrow(SCARLET_CAVES_KEY);
+                    cachedCrystalCaves = registry.getHolderOrThrow(CRYSTAL_CAVES_KEY);
+                    cachedElderwoodsCave = registry.getHolderOrThrow(
+                            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods_cave")));
+                    cachedElysianAbyss = registry.getHolderOrThrow(ELYSIAN_ABYSS_KEY);
+                }
+            }
+        }
+
         if (!seedInitialized)
             initSeed(level.getSeed());
 
         double nx = x + seedOffsetX;
         double nz = z + seedOffsetZ;
 
-        // 1. Surface Noise (Temperature/Humidity equivalent)
-        // Scale: Large regions (e.g. 500-1000 blocks)
         double surfaceNoise = Math.sin(nx * 0.002) * Math.cos(nz * 0.003) +
                 0.5 * Math.cos(nx * 0.005 + 2.0) * Math.sin(nz * 0.005 + 1.0);
 
-        // 2. Cave Noise (Weirdness equivalent)
-        // Scale: Medium regions (e.g. 200 blocks)
-        double caveNoise = Math.sin(nx * 0.01 + seedOffsetCave) * Math.cos(nz * 0.01 + seedOffsetCave);
+        double caveNoise = getAbyssNoise(x, z);
 
-        // Determine surface height at this XZ position for depth-relative biome
-        // transition
         int surfaceY = getSurfaceHeight(x, z);
-        // Surface biomes only apply within 4 blocks of the surface (grass + dirt layer)
-        // Below that = cave biomes
         boolean isBelowSurfaceLayer = y < surfaceY - 4;
 
-        // Biome Logic
         if (isBelowSurfaceLayer) {
-            // Underground: Cave Biomes
-            // Check cave noise to split between Scarlet Caves, Elderwoods Cave, and Crystal
-            // Caves
-            if (caveNoise > 0.3) {
-                return level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(SCARLET_CAVES_KEY);
+            if (caveNoise > 0.15) {
+                return cachedElysianAbyss;
+            } else if (caveNoise > 0.0) {
+                return cachedScarletCaves;
             } else if (caveNoise < -0.3) {
-                // Elderwoods Cave (with its own particles/effects)
-                return level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(
-                        ResourceKey.create(Registries.BIOME,
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods_cave")));
+                return cachedElderwoodsCave;
             } else {
-                // Crystal Caves
-                return level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(
-                        ResourceKey.create(Registries.BIOME,
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves")));
+                return cachedCrystalCaves;
             }
         } else {
-            // Surface: Forest vs Plains vs Standard
             if (surfaceNoise > 0.5) {
-                return level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(SCARLET_FOREST_KEY);
+                return cachedScarletForest;
             } else if (surfaceNoise < -0.5) {
-                return level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(SCARLET_PLAINS_KEY);
+                return cachedScarletPlains;
             } else {
-                // Standard Elderwoods
-                return level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(
-                        ResourceKey.create(Registries.BIOME,
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods")));
+                return cachedElderwoods;
             }
         }
     }
 
     @Override
-    public void buildSurface(WorldGenRegion level, StructureManager structureManager,
-            RandomState random, ChunkAccess chunk) {
+    public void buildSurface(WorldGenRegion level, StructureManager structureManager, RandomState random,
+            ChunkAccess chunk) {
         initSeed(level.getSeed());
+        try {
+            int startX = chunk.getPos().getMinBlockX();
+            int startZ = chunk.getPos().getMinBlockZ();
+            BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-        int startX = chunk.getPos().getMinBlockX();
-        int startZ = chunk.getPos().getMinBlockZ();
+            chunk.fillBiomesFromNoise(
+                    (bx, by, bz, sampler) -> getComputedBiome(level, bx * 4, by * 4, bz * 4),
+                    random.sampler());
 
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        RandomSource bedrockRandom = RandomSource.create(level.getSeed() + chunk.getPos().toLong());
+            for (int localX = 0; localX < 16; localX++) {
+                for (int localZ = 0; localZ < 16; localZ++) {
+                    int worldX = startX + localX;
+                    int worldZ = startZ + localZ;
+                    int surfaceY = getSurfaceHeight(worldX, worldZ);
+                    boolean hasScarletBlocks = SCARLET_STONE != null && SCARLET_DEEPSLATE != null;
+                    boolean lastWasAir = false;
+                    BlockState heightmapState = null;
 
-        // POPULATE BIOMES MANUALLY IN THE CHUNK
-        // This ensures F3, fog, particles, and structure generation see the correct
-        // biomes
-        chunk.fillBiomesFromNoise(
-                (x, y, z, sampler) -> getComputedBiome(level, x * 4, y * 4, z * 4),
-                random.sampler());
+                    for (int y = surfaceY; y >= MIN_Y; y--) {
+                        mutablePos.set(worldX, y, worldZ);
+                        BlockState current = chunk.getBlockState(mutablePos);
+                        boolean isAir = current.isAir();
+                        
+                        // Check biome at THIS height to decide painting rules
+                        Holder<Biome> currentBiome = getComputedBiome(level, worldX, y, worldZ);
+                        boolean isElysianCurrent = isElysianAbyssBiome(currentBiome);
+                        boolean isScarletCurrent = isScarletBiome(currentBiome);
 
-        // SURFACE BUILDING LOGIC
-        for (int localX = 0; localX < 16; localX++) {
-            for (int localZ = 0; localZ < 16; localZ++) {
-                int worldX = startX + localX;
-                int worldZ = startZ + localZ;
-                int surfaceY = getSurfaceHeight(worldX, worldZ);
+                        // A. Top Surface Painting (Forest Floor)
+                        /*
+                        if (y > surfaceY - 4 && y <= surfaceY) {
+                            BlockState grassState = isElysianCurrent ? Blocks.MOSS_BLOCK.defaultBlockState()
+                                    : (isScarletCurrent ? SCARLET_GRASS : GRASS);
+                            
+                            if (y == surfaceY) heightmapState = grassState;
 
-                // Get biome at SURFACE level for heightmaps and top layer
-                Holder<Biome> surfaceBiomeHolder = getComputedBiome(level, worldX, surfaceY, worldZ);
-                boolean isSurfaceScarlet = isScarletBiome(surfaceBiomeHolder);
-                BlockState surfaceGrass = isSurfaceScarlet ? SCARLET_GRASS : GRASS;
+                            boolean isReplaceableStone = current.is(STONE.getBlock()) || current.is(DEEPSLATE.getBlock())
+                                    || (hasScarletBlocks && (current.is(SCARLET_STONE.getBlock()) || current.is(SCARLET_DEEPSLATE.getBlock())));
 
-                for (int y = MIN_Y; y <= surfaceY; y++) {
-                    mutablePos.set(worldX, y, worldZ);
-
-                    // Get biome at current Y level
-                    Holder<Biome> biomeHolder = getComputedBiome(level, worldX, y, worldZ);
-                    boolean scarletBiome = isScarletBiome(biomeHolder);
-                    BlockState stoneBlock = scarletBiome ? SCARLET_STONE : STONE;
-                    BlockState deepslateBlock = scarletBiome ? SCARLET_DEEPSLATE : DEEPSLATE;
-                    BlockState currentGrass = scarletBiome ? SCARLET_GRASS : GRASS;
-
-                    BlockState blockState;
-                    if (y <= MIN_Y + 4) {
-                        blockState = (y == MIN_Y || bedrockRandom.nextFloat() < (1.0f - (y - MIN_Y) * 0.2f))
-                                ? BEDROCK
-                                : deepslateBlock;
-                    } else if (y < 0) {
-                        // Check for geode layers and place appropriate blocks
-                        // Check for geode layers and place appropriate blocks
-                        // GEODES ARE DISABLED IN SCARLET BIOMES AND RESTRICTED TO CRYSTAL CAVES
-                        if (!scarletBiome && isCrystalCaveBiome(biomeHolder)) {
-                            int geodeLayer = getGeodeLayer(worldX, y, worldZ);
-                            if (geodeLayer == 3) {
-                                // Inner - crystal blocks
-                                int crystalType = getCrystalType(worldX, y, worldZ);
-                                blockState = crystalType == 1
-                                        ? ModBlocks.MANA_CRYSTAL_BLOCK.get().defaultBlockState()
-                                        : Blocks.AMETHYST_BLOCK.defaultBlockState();
-                            } else if (geodeLayer == 2) {
-                                // Middle - calcite
-                                blockState = Blocks.CALCITE.defaultBlockState();
-                            } else if (geodeLayer == 1) {
-                                // Outer - smooth basalt
-                                blockState = Blocks.SMOOTH_BASALT.defaultBlockState();
-                            } else {
-                                blockState = deepslateBlock;
+                            if (isReplaceableStone) {
+                                if (y == surfaceY) {
+                                    chunk.setBlockState(mutablePos, grassState, false);
+                                } else {
+                                    chunk.setBlockState(mutablePos, DIRT, false);
+                                }
                             }
-                        } else {
-                            // In Scarlet Biomes, just place deepslate (no geodes)
-                            blockState = deepslateBlock;
                         }
-                    } else if (y == surfaceY) {
-                        blockState = currentGrass;
-                    } else if (y >= surfaceY - 3) {
-                        blockState = DIRT;
-                    } else {
-                        blockState = stoneBlock;
+                        */
+                        // B. Cave Floor Painting (DELETED: Managed by trees or base Stone/Deepslate)
+                        
+                        // C. Cave Ceiling Painting (DELETED: Trees now drive localized overgrowth)
+                        
+                        lastWasAir = isAir;
                     }
 
-                    chunk.setBlockState(mutablePos, blockState, false);
+                    if (heightmapState != null) {
+                        chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG)
+                                .update(localX, surfaceY, localZ, heightmapState);
+                        chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.MOTION_BLOCKING)
+                                .update(localX, surfaceY, localZ, heightmapState);
+                        chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES)
+                                .update(localX, surfaceY, localZ, heightmapState);
+                    }
                 }
-
-                chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG)
-                        .update(localX, surfaceY, localZ, surfaceGrass);
-                chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.MOTION_BLOCKING)
-                        .update(localX, surfaceY, localZ, surfaceGrass);
-                chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES)
-                        .update(localX, surfaceY, localZ, surfaceGrass);
             }
+        } catch (Exception e) {
+            OririMod.LOGGER.error("CRITICAL ERROR in buildSurface for chunk " + chunk.getPos(), e);
         }
     }
 
@@ -1113,6 +1038,121 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState random,
             StructureManager structureManager, ChunkAccess chunk) {
+        try {
+            initSeedFromRandomState(random);
+
+            int startX = chunk.getPos().getMinBlockX();
+            int startZ = chunk.getPos().getMinBlockZ();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    int worldX = startX + x;
+                    int worldZ = startZ + z;
+                    int surfaceY = getSurfaceHeight(worldX, worldZ);
+
+                    double caveNoise = getAbyssNoise(worldX, worldZ);
+                    double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.15, 0.0, 1.0);
+                    boolean isAbyss = caveNoise > 0.08;
+
+                    int originalCaveFloor = getCaveFloorHeight(worldX, worldZ);
+                    int caveCeiling = getCaveCeilingHeight(worldX, worldZ, surfaceY);
+                    
+                    double riverNoise = getAetherRiverNoise(worldX, worldZ);
+                    boolean isRiverPath = isAbyss && Math.abs(riverNoise) < 0.06 && abyssIntensity > 0.05;
+                    
+                    int caveFloor = originalCaveFloor;
+                    if (isRiverPath) {
+                        caveFloor -= 5;
+                    }
+
+                    int verticalCenter = (caveFloor + caveCeiling) / 2;
+                    int roomHalfHeight = Math.max(1, (caveCeiling - caveFloor) / 2);
+
+                    for (int y = MIN_Y; y <= surfaceY; y++) {
+                        pos.set(worldX, y, worldZ);
+
+                        if (y <= MIN_Y + 4) {
+                            chunk.setBlockState(pos, BEDROCK, false);
+                            continue;
+                        }
+
+                        boolean isHollow = false;
+                        if (abyssIntensity > 0.0) {
+                            double distFromCenter = Math.abs(y - verticalCenter);
+                            double verticalFactor = Mth.clamp(1.0 - (distFromCenter / (double)roomHalfHeight), 0.0, 1.0);
+                            double hollowingNoise3D = getAbyssNoise3D(worldX, y, worldZ);
+                            // Smooth the 3D noise contribution near the floor and ceiling using verticalFactor
+                            double hollowingValue = (abyssIntensity * verticalFactor) + (hollowingNoise3D * 0.15 * verticalFactor);
+
+                            if (hollowingValue > 0.35) {
+                                isHollow = true;
+                            }
+                        }
+
+                        if (isHollow) {
+                            if (y < MIN_Y + 6) continue;
+
+                            if (isRiverPath && y < originalCaveFloor && y >= caveFloor) {
+                                chunk.setBlockState(pos, AETHER_BLOCK, false);
+                                continue;
+                            }
+                            
+                            // 3. EXTREME SPARSE PILLARS
+                            int pillarGrid = 160;
+                            int pGX = Math.floorDiv(worldX, pillarGrid);
+                            int pGZ = Math.floorDiv(worldZ, pillarGrid);
+                            
+                            long pSeed = (long)pGX * 418731287L ^ (long)pGZ * 132897987L + (long)seedOffsetCave;
+                            RandomSource pRand = RandomSource.create(pSeed);
+                            
+                            double pNoise = getPillarNoise(worldX, worldZ);
+                            if (pNoise < 0.2) {
+                                chunk.setBlockState(pos, AIR, false);
+                                continue;
+                            }
+                            
+                            double vP = (double)(y - caveFloor) / Math.max(1, (caveCeiling - caveFloor));
+                            double pCenterX = Math.sin(worldX * 0.05 + worldZ * 0.05) * 4.0;
+                            double pCenterZ = Math.cos(worldX * 0.05 - worldZ * 0.05) * 4.0;
+                            double snakeX = Math.sin(vP * Math.PI) * 12.0;
+                            double snakeZ = Math.cos(vP * Math.PI) * 12.0;
+                            
+                            double yNorm = (vP - 0.5) * 2.0;
+                            double baseRad = 1.5 + pRand.nextDouble() * 2.0;
+                            double hourglassRad = baseRad + (yNorm * yNorm * 9.5); 
+                            double roughness = Math.sin(worldX * 0.2) * Math.sin(y * 0.25) * Math.sin(worldZ * 0.2) * 2.0;
+                            
+                            double dx = worldX - (pCenterX + snakeX);
+                            double dz = worldZ - (pCenterZ + snakeZ);
+                            double distSq = dx * dx + dz * dz;
+                            
+                            if (distSq < (hourglassRad + roughness) * (hourglassRad + roughness)) {
+                                chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
+                            } else {
+                                chunk.setBlockState(pos, AIR, false);
+                            }
+                        } else {
+                            // Not hollow: place base stone/deepslate
+                            chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            OririMod.LOGGER.error("CRITICAL: fillFromNoise failed for chunk " + chunk.getPos(), e);
+            BlockPos.MutableBlockPos fallbackPos = new BlockPos.MutableBlockPos();
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    int worldX = chunk.getPos().getMinBlockX() + x;
+                    int worldZ = chunk.getPos().getMinBlockZ() + z;
+                    for (int y = MIN_Y; y <= 72; y++) {
+                        fallbackPos.set(worldX, y, worldZ);
+                        chunk.setBlockState(fallbackPos, y <= MIN_Y + 4 ? BEDROCK : (y < 0 ? DEEPSLATE : STONE), false);
+                    }
+                }
+            }
+        }
         return CompletableFuture.completedFuture(chunk);
     }
 
@@ -1151,7 +1191,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         info.add("Cave Floor: Y=" + getCaveFloorHeight(pos.getX(), pos.getZ()));
         info.add("Cave Ceiling: Y=" + getCaveCeilingHeight(pos.getX(), pos.getZ(), surfaceY));
 
-        // Biome Noise Debug
         net.minecraft.world.level.biome.Climate.Sampler sampler = random.sampler();
         net.minecraft.world.level.biome.Climate.TargetPoint target = sampler.sample(pos.getX(), pos.getY(), pos.getZ());
 

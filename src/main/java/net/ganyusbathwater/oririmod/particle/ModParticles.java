@@ -21,6 +21,9 @@ public class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SCARLET_CAVE_PARTICLE = PARTICLE_TYPES
             .register("scarlet_cave_particle", () -> new SimpleParticleType(false));
 
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELYSIAN_ABYSS_PARTICLE = PARTICLE_TYPES
+            .register("elysian_abyss_particle", () -> new SimpleParticleType(false));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }

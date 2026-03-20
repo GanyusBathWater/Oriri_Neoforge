@@ -16,6 +16,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -23,8 +26,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfigurat
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
-import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_KEY = registerKey("elder_tree");
 
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_TREE_KEY = registerKey("scarlet_tree");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ABYSS_CROWN_TREE_KEY = registerKey("abyss_crown_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_BOULDER_KEY = registerKey(
                         "scarlet_boulder");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_GRASS_PATCH_KEY = registerKey(
@@ -61,6 +63,12 @@ public class ModConfiguredFeatures {
                         "scarlet_dripstone_cluster");
         public static final ResourceKey<ConfiguredFeature<?, ?>> JADE_ORE_KEY = registerKey("jade_ore");
         public static final ResourceKey<ConfiguredFeature<?, ?>> DRAGON_IRON_ORE_KEY = registerKey("dragon_iron_ore");
+
+        // Elysian Abyss features
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ELYSIAN_STONE_MUSHROOM_KEY = registerKey(
+                        "elysian_stone_mushroom");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ELYSIAN_ABYSS_CROWN_TREE_KEY = registerKey(
+                        "elysian_abyss_crown_tree");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
@@ -152,6 +160,15 @@ public class ModConfiguredFeatures {
                 );
                 register(context, SCARLET_TREE_KEY, ModFeatures.ELDER_GIANT_TREE.get(), scarletCfg);
 
+                var abyssCrownCfg = new net.ganyusbathwater.oririmod.worldgen.tree.AbyssCrownTreeConfig(
+                                UniformInt.of(6, 20), // 6-12 small, up to 20 for large
+                                UniformInt.of(1, 2), // 1 or 2 radius
+                                UniformInt.of(5, 12), // canopy radius
+                                BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_LOG.get().defaultBlockState()),
+                                BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_STEM.get().defaultBlockState()),
+                                BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_LEAVES.get().defaultBlockState()));
+                register(context, ABYSS_CROWN_TREE_KEY, ModFeatures.ABYSS_CROWN_TREE_FEATURE.get(), abyssCrownCfg);
+
                 register(context, SCARLET_BOULDER_KEY, ModFeatures.SCARLET_BOULDER.get(),
                                 net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.INSTANCE);
 
@@ -222,6 +239,24 @@ public class ModConfiguredFeatures {
                                                 ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get().defaultBlockState()));
 
                 register(context, DRAGON_IRON_ORE_KEY, Feature.ORE, new OreConfiguration(dragonIronOreTargets, 8));
+
+                // ── Elysian Abyss features ─────────────────────────────────────────────
+
+                // Stone Mushroom formation (15-35 blocks tall)
+                register(context, ELYSIAN_STONE_MUSHROOM_KEY, ModFeatures.STONE_MUSHROOM.get(),
+                                new net.ganyusbathwater.oririmod.worldgen.feature.StoneMushRoomConfig(15, 35));
+
+                // Ceiling-growing Abyss Crown Tree (re-uses same config, placement handles
+                // ceiling logic)
+                var abyssElysianCfg = new net.ganyusbathwater.oririmod.worldgen.tree.AbyssCrownTreeConfig(
+                                UniformInt.of(8, 20),
+                                UniformInt.of(1, 2),
+                                UniformInt.of(5, 10),
+                                BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_LOG.get().defaultBlockState()),
+                                BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_STEM.get().defaultBlockState()),
+                                BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_LEAVES.get().defaultBlockState()));
+                register(context, ELYSIAN_ABYSS_CROWN_TREE_KEY, ModFeatures.ABYSS_CROWN_TREE_FEATURE.get(),
+                                abyssElysianCfg);
 
         }
 

@@ -13,4 +13,7 @@ public class ModTreeGrowers {
     public static final TreeGrower SCARLET_TREE = new TreeGrower(OririMod.MOD_ID + ":scarlet_tree",
             Optional.empty(), Optional.of(ModConfiguredFeatures.SCARLET_TREE_KEY), Optional.empty());
 
+    public static final TreeGrower ABYSS_CROWN_TREE = new TreeGrower(OririMod.MOD_ID + ":abyss_crown_tree",
+            Optional.empty(), Optional.of(ModConfiguredFeatures.ABYSS_CROWN_TREE_KEY), Optional.empty());
+
 }

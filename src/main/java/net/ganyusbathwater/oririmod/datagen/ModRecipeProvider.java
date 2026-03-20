@@ -122,6 +122,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 fenceGateBuilder(ModBlocks.SCARLET_GATE.get(), Ingredient.of(ModBlocks.SCARLET_PLANKS))
                                 .unlockedBy("has_scarlet_planks", has(ModBlocks.SCARLET_PLANKS)).save(recipeOutput);
 
+                // Abyss Crown
+                stairBuilder(ModBlocks.ABYSS_CROWN_STAIRS.get(), Ingredient.of(ModBlocks.ABYSS_CROWN_PLANKS))
+                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_SLAB.get(),
+                                ModBlocks.ABYSS_CROWN_PLANKS);
+                fenceBuilder(ModBlocks.ABYSS_CROWN_FENCE.get(), Ingredient.of(ModBlocks.ABYSS_CROWN_PLANKS))
+                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS)).save(recipeOutput);
+                fenceGateBuilder(ModBlocks.ABYSS_CROWN_GATE.get(), Ingredient.of(ModBlocks.ABYSS_CROWN_PLANKS))
+                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS)).save(recipeOutput);
+
                 // --- Planks from Logs/Stems ---
                 // Elder
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PLANKS.get(), 4)
@@ -158,6 +168,24 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .requires(ModBlocks.STRIPPED_SCARLET_STEM.get())
                                 .unlockedBy("has_stripped_scarlet_stem", has(ModBlocks.STRIPPED_SCARLET_STEM.get()))
                                 .save(recipeOutput, "oririmod:scarlet_planks_from_stripped_stem");
+
+                // Abyss Crown
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_PLANKS.get(), 4)
+                                .requires(ModBlocks.ABYSS_CROWN_LOG.get())
+                                .unlockedBy("has_abyss_crown_log", has(ModBlocks.ABYSS_CROWN_LOG.get()))
+                                .save(recipeOutput, "oririmod:abyss_crown_planks_from_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get())
+                                .unlockedBy("has_stripped_abyss_crown_log", has(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get()))
+                                .save(recipeOutput, "oririmod:abyss_crown_planks_from_stripped_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_PLANKS.get(), 4)
+                                .requires(ModBlocks.ABYSS_CROWN_STEM.get())
+                                .unlockedBy("has_abyss_crown_stem", has(ModBlocks.ABYSS_CROWN_STEM.get()))
+                                .save(recipeOutput, "oririmod:abyss_crown_planks_from_stem");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get())
+                                .unlockedBy("has_stripped_abyss_crown_stem", has(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get()))
+                                .save(recipeOutput, "oririmod:abyss_crown_planks_from_stripped_stem");
 
                 // --- Scarlet Stone Recipes ---
                 // Scarlet Stone Bricks

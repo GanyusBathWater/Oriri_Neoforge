@@ -94,17 +94,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.SCARLET_STONE.get());
                 simpleBlockItem(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
                 simpleBlockItem(ModBlocks.SMOOTH_SCARLET_STONE.get());
-                simpleBlockItem(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get()); // Note: Slabs usually need specific
-                                                                            // handling if they have specific item
-                                                                            // models, but simpleBlockItem might work if
-                                                                            // the parent is correct or if we use
-                                                                            // fenceInventory style for 3D items.
-                                                                            // Actually, standard slab items usually
-                                                                            // just permit the block model. Let's stick
-                                                                            // to simpleBlockItem for now as it parents
-                                                                            // the block model.
-                // Wait, standard slabs often use the block model.
-                // Let's check existing slabs. ELDER_SLAB used simpleBlockItem.
+                simpleBlockItem(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get());
 
                 simpleBlockItem(ModBlocks.SCARLET_STONE_BRICKS.get());
                 simpleBlockItem(ModBlocks.CHISELED_SCARLET_STONE_BRICKS.get());
@@ -138,20 +128,31 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.BROKEN_SWORD_BLOCK.get());
                 simpleBlockItem(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
 
+                // ===== NEW BLOCKS: Hardened Manashroom & Abyss Crown =====
+                simpleBlockItem(ModBlocks.HARDENED_MANASHROOM.get());
+                simpleBlockItem(ModBlocks.ABYSS_CROWN_LOG.get());
+                simpleBlockItem(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get());
+                simpleBlockItem(ModBlocks.ABYSS_CROWN_STEM.get());
+                simpleBlockItem(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get());
+                simpleBlockItem(ModBlocks.ABYSS_CROWN_PLANKS.get());
+                simpleBlockItem(ModBlocks.ABYSS_CROWN_STAIRS.get());
+                simpleBlockItem(ModBlocks.ABYSS_CROWN_SLAB.get());
+                simpleBlockItem(ModBlocks.ABYSS_CROWN_GATE.get());
+                fenceItem(ModBlocks.ABYSS_CROWN_FENCE, ModBlocks.ABYSS_CROWN_PLANKS);
+                simpleBlockItem(ModBlocks.ABYSS_CROWN_LEAVES.get());
+                saplingItem(ModBlocks.ABYSS_CROWN_SAPLING);
+
                 // Flat items (Generated)
                 saplingItem(ModBlocks.SCARLET_SAPLING);
                 saplingItem(ModBlocks.SCARLET_GRASS);
-                saplingItem(ModBlocks.SCARLET_TOOTH_LEAVES); // Bush-like, usually generated item
+                saplingItem(ModBlocks.SCARLET_TOOTH_LEAVES);
                 simpleBlockItem(ModBlocks.SCARLET_LILY.get());
 
-                // Pointed Scarlet Dripstone item model - flat item using the up_tip texture
                 withExistingParent(ModBlocks.POINTED_SCARLET_DRIPSTONE.getId().getPath(),
                                 ResourceLocation.withDefaultNamespace("item/generated"))
                                 .texture("layer0", ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                 "block/pointed_scarlet_stone_up_tip"));
                 saplingItem(ModBlocks.STAR_HERB);
-
-                // Vines typically use generated item model with block texture
                 saplingItem(ModBlocks.SCARLET_VINE);
 
                 // -------------Foods-------------

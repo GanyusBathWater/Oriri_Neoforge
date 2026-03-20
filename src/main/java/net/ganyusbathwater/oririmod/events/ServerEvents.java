@@ -1,5 +1,7 @@
 package net.ganyusbathwater.oririmod.events;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.config.OririConfig;
 import net.ganyusbathwater.oririmod.events.world.WorldEventManager;
@@ -310,49 +312,45 @@ public class ServerEvents {
         if (!serverLevel.dimension().location().toString().equals("oririmod:elderwoods"))
             return;
 
-        // Only process newly generated chunks (not loaded from disk)
-        if (!event.isNewChunk())
-            return;
-
         net.minecraft.world.level.chunk.ChunkAccess chunk = event.getChunk();
-        net.minecraft.core.BlockPos.MutableBlockPos pos = new net.minecraft.core.BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        int minX = chunk.getPos().getMinBlockX();
+        int minZ = chunk.getPos().getMinBlockZ();
 
-        int startX = chunk.getPos().getMinBlockX();
-        int startZ = chunk.getPos().getMinBlockZ();
-
-        for (int localX = 0; localX < 16; localX++) {
-            for (int localZ = 0; localZ < 16; localZ++) {
-                int worldX = startX + localX;
-                int worldZ = startZ + localZ;
-
-                // Process from min to max height
-                for (int y = serverLevel.getMinBuildHeight(); y < serverLevel.getMaxBuildHeight(); y++) {
-                    pos.set(worldX, y, worldZ);
-                    net.minecraft.world.level.block.state.BlockState currentBlock = chunk.getBlockState(pos);
-
-                    // Swap mineshaft wood blocks to elder wood
-                    if (currentBlock.is(net.minecraft.world.level.block.Blocks.OAK_PLANKS) ||
-                            currentBlock.is(net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS) ||
-                            currentBlock.is(net.minecraft.world.level.block.Blocks.SPRUCE_PLANKS)) {
-                        chunk.setBlockState(pos,
-                                net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_PLANKS.get().defaultBlockState(),
-                                false);
-                    } else if (currentBlock.is(net.minecraft.world.level.block.Blocks.OAK_FENCE) ||
-                            currentBlock.is(net.minecraft.world.level.block.Blocks.DARK_OAK_FENCE) ||
-                            currentBlock.is(net.minecraft.world.level.block.Blocks.SPRUCE_FENCE)) {
-                        chunk.setBlockState(pos,
-                                net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_FENCE.get().defaultBlockState(),
-                                false);
-                    } else if (currentBlock.is(net.minecraft.world.level.block.Blocks.OAK_LOG) ||
-                            currentBlock.is(net.minecraft.world.level.block.Blocks.DARK_OAK_LOG) ||
-                            currentBlock.is(net.minecraft.world.level.block.Blocks.SPRUCE_LOG)) {
-                        chunk.setBlockState(pos,
-                                net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState(),
-                                false);
-                    }
-                    // Remove water blocks
-                    else if (currentBlock.is(net.minecraft.world.level.block.Blocks.WATER)) {
-                        chunk.setBlockState(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), false);
+        // Optimized Mineshaft block swap: Restricted to relevant wood types and Y-levels
+        // Using false for the third argument to setBlockState prevents light updates and physics loops.
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                // Focus on the full vertical range where Mineshafts can generate in this dimension
+                for (int y = -128; y <= 128; y++) {
+                    pos.set(minX + x, y, minZ + z);
+                    BlockState state = chunk.getBlockState(pos);
+                    
+                    if (state.is(net.minecraft.world.level.block.Blocks.OAK_PLANKS) || state.is(net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS)
+                            || state.is(net.minecraft.world.level.block.Blocks.SPRUCE_PLANKS) || state.is(net.minecraft.world.level.block.Blocks.BIRCH_PLANKS)
+                            || state.is(net.minecraft.world.level.block.Blocks.ACACIA_PLANKS) || state.is(net.minecraft.world.level.block.Blocks.JUNGLE_PLANKS)
+                            || state.is(net.minecraft.world.level.block.Blocks.MANGROVE_PLANKS) || state.is(net.minecraft.world.level.block.Blocks.CHERRY_PLANKS)
+                            || state.is(net.minecraft.world.level.block.Blocks.BAMBOO_PLANKS)) {
+                        chunk.setBlockState(pos, net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_PLANKS.get().defaultBlockState(), false);
+                    } else if (state.is(net.minecraft.world.level.block.Blocks.OAK_FENCE) || state.is(net.minecraft.world.level.block.Blocks.DARK_OAK_FENCE)
+                            || state.is(net.minecraft.world.level.block.Blocks.SPRUCE_FENCE) || state.is(net.minecraft.world.level.block.Blocks.BIRCH_FENCE)
+                            || state.is(net.minecraft.world.level.block.Blocks.ACACIA_FENCE) || state.is(net.minecraft.world.level.block.Blocks.JUNGLE_FENCE)
+                            || state.is(net.minecraft.world.level.block.Blocks.MANGROVE_FENCE) || state.is(net.minecraft.world.level.block.Blocks.CHERRY_FENCE)
+                            || state.is(net.minecraft.world.level.block.Blocks.BAMBOO_FENCE) || state.is(net.minecraft.world.level.block.Blocks.OAK_FENCE_GATE)
+                            || state.is(net.minecraft.world.level.block.Blocks.DARK_OAK_FENCE_GATE) || state.is(net.minecraft.world.level.block.Blocks.SPRUCE_FENCE_GATE)
+                            || state.is(net.minecraft.world.level.block.Blocks.BIRCH_FENCE_GATE) || state.is(net.minecraft.world.level.block.Blocks.ACACIA_FENCE_GATE)
+                            || state.is(net.minecraft.world.level.block.Blocks.JUNGLE_FENCE_GATE) || state.is(net.minecraft.world.level.block.Blocks.MANGROVE_FENCE_GATE)
+                            || state.is(net.minecraft.world.level.block.Blocks.CHERRY_FENCE_GATE) || state.is(net.minecraft.world.level.block.Blocks.BAMBOO_FENCE_GATE)) {
+                        chunk.setBlockState(pos, net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_FENCE.get().defaultBlockState(), false);
+                    } else if (state.is(net.minecraft.world.level.block.Blocks.OAK_LOG) || state.is(net.minecraft.world.level.block.Blocks.DARK_OAK_LOG)
+                            || state.is(net.minecraft.world.level.block.Blocks.SPRUCE_LOG) || state.is(net.minecraft.world.level.block.Blocks.BIRCH_LOG)
+                            || state.is(net.minecraft.world.level.block.Blocks.ACACIA_LOG) || state.is(net.minecraft.world.level.block.Blocks.JUNGLE_LOG)
+                            || state.is(net.minecraft.world.level.block.Blocks.MANGROVE_LOG) || state.is(net.minecraft.world.level.block.Blocks.CHERRY_LOG)
+                            || state.is(net.minecraft.world.level.block.Blocks.OAK_WOOD) || state.is(net.minecraft.world.level.block.Blocks.DARK_OAK_WOOD)
+                            || state.is(net.minecraft.world.level.block.Blocks.SPRUCE_WOOD) || state.is(net.minecraft.world.level.block.Blocks.BIRCH_WOOD)
+                            || state.is(net.minecraft.world.level.block.Blocks.ACACIA_WOOD) || state.is(net.minecraft.world.level.block.Blocks.JUNGLE_WOOD)
+                            || state.is(net.minecraft.world.level.block.Blocks.MANGROVE_WOOD) || state.is(net.minecraft.world.level.block.Blocks.CHERRY_WOOD)) {
+                        chunk.setBlockState(pos, net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState(), false);
                     }
                 }
             }

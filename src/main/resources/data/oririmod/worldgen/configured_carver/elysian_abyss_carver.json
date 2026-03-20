@@ -1,0 +1,38 @@
+{
+  "type": "oririmod:elysian_abyss_carver",
+  "config": {
+    "probability": 0.9,
+    "y": {
+      "type": "minecraft:constant",
+      "value": {
+        "absolute": -90
+      }
+    },
+    "yScale": {
+      "type": "minecraft:constant",
+      "value": 1.0
+    },
+    "lava_level": {
+      "absolute": -100
+    },
+    "debug_settings": {
+      "debug_mode": false,
+      "barrier_state": {
+        "Name": "minecraft:air"
+      }
+    },
+    "replaceable": "#minecraft:overworld_carver_replaceables",
+    "horizontal_radius_multiplier": {
+      "type": "minecraft:constant",
+      "value": 8.0
+    },
+    "vertical_radius_multiplier": {
+      "type": "minecraft:constant",
+      "value": 1.0
+    },
+    "floor_level": {
+      "type": "minecraft:constant",
+      "value": -1.0
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "effects": {
+    "fog_color": 8421504,
+    "water_color": 5135990,
+    "water_fog_color": 3820338,
+    "sky_color": 405532,
+    "grass_color": 3824048,
+    "foliage_color": 3824048,
+    "particle": {
+      "options": {
+        "type": "oririmod:elysian_abyss_particle"
+      },
+      "probability": 0.003
+    },
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    }
+  },
+  "temperature": 0.5,
+  "downfall": 0.5,
+  "has_precipitation": false,
+  "carvers": {
+    "air": [
+      "oririmod:elysian_abyss_carver"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "spawners": {},
+  "spawn_costs": {}
+}
