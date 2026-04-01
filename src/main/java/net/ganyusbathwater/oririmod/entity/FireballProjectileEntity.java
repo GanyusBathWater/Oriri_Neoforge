@@ -166,6 +166,7 @@ public class FireballProjectileEntity extends AbstractHurtingProjectile implemen
                 this.setScale(1.25F);
                 this.setExplosionRadius(3.67F); // Original: 11.0F
             }
+            default -> {}
         }
     }
 

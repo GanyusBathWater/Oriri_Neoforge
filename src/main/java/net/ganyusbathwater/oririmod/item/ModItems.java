@@ -146,6 +146,101 @@ public class ModItems {
         public static final DeferredItem<ShieldItem> JADE_SHIELD = ITEMS.register("jade_shield",
                         () -> new JadeShieldItem(new Item.Properties().durability(672), ModRarity.RARE));
 
+        public static final DeferredItem<CustomScytheItem> WOOD_SCYTHE = ITEMS.register("wood_scythe",
+                        () -> new CustomScytheItem(Tiers.WOOD,
+                                        new Item.Properties()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(Tiers.WOOD,
+                                                                        2, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.COMMON));
+        public static final DeferredItem<CustomScytheItem> STONE_SCYTHE = ITEMS.register("stone_scythe",
+                        () -> new CustomScytheItem(Tiers.STONE,
+                                        new Item.Properties()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(Tiers.STONE,
+                                                                        2, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.COMMON));
+        public static final DeferredItem<CustomScytheItem> IRON_SCYTHE = ITEMS.register("iron_scythe",
+                        () -> new CustomScytheItem(Tiers.IRON,
+                                        new Item.Properties()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(Tiers.IRON,
+                                                                        2, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.COMMON));
+        public static final DeferredItem<CustomScytheItem> GOLD_SCYTHE = ITEMS.register("gold_scythe",
+                        () -> new CustomScytheItem(Tiers.GOLD,
+                                        new Item.Properties()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(Tiers.GOLD,
+                                                                        2, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.COMMON));
+        public static final DeferredItem<CustomScytheItem> DIAMOND_SCYTHE = ITEMS.register("diamond_scythe",
+                        () -> new CustomScytheItem(Tiers.DIAMOND,
+                                        new Item.Properties()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.DIAMOND, 2, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.COMMON));
+        public static final DeferredItem<CustomScytheItem> NETHERITE_SCYTHE = ITEMS.register("netherite_scythe",
+                        () -> new CustomScytheItem(Tiers.NETHERITE,
+                                        new Item.Properties().fireResistant()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.NETHERITE, 2, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.UNCOMMON));
+
+        public static final DeferredItem<AncientScytheItem> ANCIENT_SCYTHE = ITEMS.register("ancient_scythe",
+                        () -> new AncientScytheItem(Tiers.DIAMOND,
+                                        new Item.Properties()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.DIAMOND, 3, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.MYTHIC));
+        public static final DeferredItem<BlackIceScytheItem> BLACK_ICE_SCYTHE = ITEMS.register("black_ice_scythe",
+                        () -> new BlackIceScytheItem(Tiers.DIAMOND,
+                                        new Item.Properties()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.DIAMOND, 3, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.RARE));
+        public static final DeferredItem<CrystalScytheItem> CRYSTAL_SCYTHE = ITEMS.register("crystal_scythe",
+                        () -> new CrystalScytheItem(Tiers.NETHERITE,
+                                        new Item.Properties().fireResistant()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.NETHERITE, 1, -2.8F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.LEGENDARY));
+
+        public static final DeferredItem<GildedNetheriteScytheItem> GILDED_NETHERITE_SCYTHE = ITEMS.register(
+                        "gilded_netherite_scythe",
+                        () -> new GildedNetheriteScytheItem(Tiers.NETHERITE,
+                                        new Item.Properties().fireResistant()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.NETHERITE, 3, -2.4F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.RARE));
+        public static final DeferredItem<PrismarineScytheItem> PRISMARINE_SCYTHE = ITEMS.register("prismarine_scythe",
+                        () -> new PrismarineScytheItem(Tiers.GOLD,
+                                        new Item.Properties().durability(500)
+                                                        .attributes(CustomScytheItem.createScytheAttributes(Tiers.GOLD,
+                                                                        3, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.RARE));
+        public static final DeferredItem<MoltenScytheItem> MOLTEN_SCYTHE = ITEMS.register("molten_scythe",
+                        () -> new MoltenScytheItem(Tiers.DIAMOND,
+                                        new Item.Properties().fireResistant()
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.DIAMOND, 2, -2.6F, 1.5F))
+                                                        .stacksTo(1),
+                                        ModRarity.MYTHIC));
+        public static final DeferredItem<HarbingerScytheItem> THE_HARBINGER = ITEMS.register("the_harbinger",
+                        () -> new HarbingerScytheItem(Tiers.NETHERITE,
+                                        new Item.Properties().fireResistant().durability(3046)
+                                                        .attributes(CustomScytheItem.createScytheAttributes(
+                                                                        Tiers.NETHERITE, 5, -1.9F, 2.25F))
+                                                        .stacksTo(1),
+                                        ModRarity.GODLY));
+
         public static final DeferredItem<SwordItem> PANDORAS_BLADE = ITEMS.register("pandoras_blade",
                         () -> new CustomSwordItem(Tiers.DIAMOND,
                                         new Item.Properties().fireResistant()

@@ -105,10 +105,12 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             // Cave biomes
             if (caveNoise > 0.3) {
                 return findBiome(SCARLET_CAVES_KEY);
-            } else if (caveNoise > 0.15) {
-                // Elysian Abyss carved zone — noise band 0.15-0.30
+            }
+            if (caveNoise > 0.08) {
+                // Elysian Abyss carved zone — noise band synchronized with generator (> 0.08)
                 return findBiome(ELYSIAN_ABYSS_KEY);
-            } else if (caveNoise < -0.3) {
+            }
+            else if (caveNoise < -0.3) {
                 return findBiome(ELDERWOODS_CAVE_KEY);
             } else if (caveNoise < -0.15 && caveNoise > -0.2) {
                 return findBiome(CRYSTAL_CAVES_KEY);
@@ -131,15 +133,12 @@ public class ElderwoodsBiomeSource extends BiomeSource {
      * Same surface height calculation as ElderwoodsChunkGenerator.getSurfaceHeight
      */
     private int computeSurfaceHeight(int x, int z) {
-        double nx = x + seedOffsetX;
-        double nz = z + seedOffsetZ;
+        // Synchronized with ElderwoodsChunkGenerator
+        double nx = (x + seedOffsetX) * 0.003;
+        double nz = (z + seedOffsetZ) * 0.003;
 
-        double noise = 0.0;
-        noise += Math.sin(nx * 0.0025) * Math.cos(nz * 0.0025) * 10.0;
-        noise += Math.cos(nx * 0.002 + 2.0) * Math.sin(nz * 0.003) * 8.0;
-        noise += Math.sin(nx * 0.007 + 20) * Math.cos(nz * 0.006 + 20) * 5.0;
-        noise += Math.sin(nx * 0.02) * Math.cos(nz * 0.015) * 2.5;
-        noise += Math.sin(nx * 0.05 + 7.0) * Math.cos(nz * 0.04 + 3.0) * 0.8;
+        double noise = Math.sin(nx) * Math.cos(nz) * 12.0; 
+        noise += Math.sin(nx * 0.5 + 2.0) * Math.cos(nz * 0.6 + 1.1) * 6.0;
 
         return ElderwoodsChunkGenerator.BASE_HEIGHT + (int) Math.round(noise);
     }

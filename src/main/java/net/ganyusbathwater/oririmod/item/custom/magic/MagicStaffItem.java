@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.network.chat.Component;
+import net.minecraft.locale.Language;
 
 public class MagicStaffItem extends Item implements ModRarityCarrier {
 
@@ -110,5 +112,32 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
             }
         }
         return false;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        String descriptionId = this.getDescriptionId();
+        Language language = Language.getInstance();
+
+        // Element
+        String elementKey = descriptionId + ".element";
+        if (language.has(elementKey)) {
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+
+        // Mana Cost
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", this.manaCost).withStyle(net.minecraft.ChatFormatting.BLUE));
+
+        // Damage (None for staffs)
+
+        // Lore
+        String loreKey = descriptionId + ".lore";
+        if (language.has(loreKey)) {
+            tooltipComponents.add(Component.translatable(loreKey).withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
+        }
+
+        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
+
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }

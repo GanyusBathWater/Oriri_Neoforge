@@ -43,7 +43,7 @@ public final class TooltipHandler {
             ChatFormatting color = switch (element) {
                 case FIRE -> ChatFormatting.RED;
                 case WATER -> ChatFormatting.AQUA;
-                case EARTH -> ChatFormatting.DARK_GREEN;
+                case EARTH -> ChatFormatting.GOLD;
                 case NATURE -> ChatFormatting.GREEN;
                 case LIGHT -> ChatFormatting.WHITE;
                 case DARKNESS -> ChatFormatting.DARK_PURPLE;

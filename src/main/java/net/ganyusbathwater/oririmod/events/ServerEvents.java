@@ -236,6 +236,14 @@ public class ServerEvents {
             }
         }
     }
+    @SubscribeEvent
+    public static void onShieldBlock(net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent event) {
+        if (event.getDamageSource().getEntity() instanceof LivingEntity attacker) {
+            if (attacker.getMainHandItem().getItem() instanceof net.ganyusbathwater.oririmod.item.custom.CustomScytheItem) {
+                event.setCanceled(true);
+            }
+        }
+    }
 
     @SubscribeEvent
 

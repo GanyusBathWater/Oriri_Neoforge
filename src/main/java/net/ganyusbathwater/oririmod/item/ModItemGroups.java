@@ -192,6 +192,19 @@ public class ModItemGroups {
 
                         // ------------Weapons------------
                         output.accept(ModItems.JADE_SHIELD);
+                        output.accept(ModItems.WOOD_SCYTHE);
+                        output.accept(ModItems.STONE_SCYTHE);
+                        output.accept(ModItems.IRON_SCYTHE);
+                        output.accept(ModItems.GOLD_SCYTHE);
+                        output.accept(ModItems.DIAMOND_SCYTHE);
+                        output.accept(ModItems.NETHERITE_SCYTHE);
+                        output.accept(ModItems.ANCIENT_SCYTHE);
+                        output.accept(ModItems.BLACK_ICE_SCYTHE);
+                        output.accept(ModItems.CRYSTAL_SCYTHE);
+                        output.accept(ModItems.GILDED_NETHERITE_SCYTHE);
+                        output.accept(ModItems.PRISMARINE_SCYTHE);
+                        output.accept(ModItems.MOLTEN_SCYTHE);
+                        output.accept(ModItems.THE_HARBINGER);
                         output.accept(ModItems.PANDORAS_BLADE);
                         output.accept(ModItems.ORAPHIM_BOW);
                         output.accept(ModItems.PIRATE_SABER);

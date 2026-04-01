@@ -192,6 +192,19 @@ public class ModItemModelProvider extends ItemModelProvider {
                 shieldItem(ModItems.JADE_SHIELD);
 
                 handheldItem(ModItems.PANDORAS_BLADE);
+                handheldItem(ModItems.WOOD_SCYTHE);
+                handheldItem(ModItems.STONE_SCYTHE);
+                handheldItem(ModItems.IRON_SCYTHE);
+                handheldItem(ModItems.GOLD_SCYTHE);
+                handheldItem(ModItems.DIAMOND_SCYTHE);
+                handheldItem(ModItems.NETHERITE_SCYTHE);
+                handheldItem(ModItems.ANCIENT_SCYTHE);
+                handheldItem(ModItems.BLACK_ICE_SCYTHE);
+                handheldItem(ModItems.CRYSTAL_SCYTHE);
+                handheldItem(ModItems.GILDED_NETHERITE_SCYTHE);
+                handheldItem(ModItems.PRISMARINE_SCYTHE);
+                handheldItem(ModItems.MOLTEN_SCYTHE);
+                handheldItem(ModItems.THE_HARBINGER);
                 bowItem(ModItems.ORAPHIM_BOW);
                 handheldItem(ModItems.PIRATE_SABER);
 

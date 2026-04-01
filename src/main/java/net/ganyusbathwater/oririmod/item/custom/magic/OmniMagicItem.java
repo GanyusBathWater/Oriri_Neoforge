@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.locale.Language;
 
 public class OmniMagicItem extends Item implements ModRarityCarrier {
 
@@ -447,5 +448,64 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
             }
         }
         return false;
+    }
+
+    private String getDamageTooltip(OmniAbility ab) {
+        if (!ab.isBolt()) return "0.0";
+        return switch (ab.toBolt()) {
+            case SONIC -> "10.0";
+            case BLAZE -> "5.0";
+            case NORMAL -> "6.0";
+            case AMATEUR_FIREBALL -> "5.7 (Splash)";
+            case APPRENTICE_FIREBALL -> "12.7 (Splash)";
+            case JOURNEYMAN_FIREBALL -> "19.7 (Splash)";
+            case WISE_FIREBALL -> "26.7 (Splash)";
+            case EXPLOSIVE -> "3.0 (Radius)";
+            case METEOR -> "4.0 (Power)";
+            case ETERNAL_ICE -> "Area Magic";
+            case ENDER -> "0.0";
+            default -> "0.0";
+        };
+    }
+
+    private String getAbilityElementKey(OmniAbility ab) {
+        return switch (ab) {
+            case BOLT_SONIC -> "item.oririmod.one_thousand_screams.element";
+            case BOLT_BLAZE -> "item.oririmod.staff_of_hell.element";
+            case BOLT_ENDER -> "item.oririmod.staff_of_void.element";
+            case BOLT_EXPLOSIVE -> "item.oririmod.dodoco.element";
+            case BOLT_METEOR -> "item.oririmod.staff_of_cosmos.element";
+            case BOLT_NORMAL -> "item.oririmod.book_of_amateur.element";
+            case STAFF_GROW -> "item.oririmod.staff_of_forest.element";
+            case STAFF_REGEN -> "item.oririmod.staff_of_wise.element";
+            case STAFF_HASTE -> "item.oririmod.staff_of_earth.element";
+        };
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        OmniAbility ab = getSelected(stack);
+        Language language = Language.getInstance();
+
+        // Active Ability
+        tooltipComponents.add(Component.literal("Selected: " + prettyName(ab)).withStyle(net.minecraft.ChatFormatting.GOLD));
+
+        // Element
+        String elementKey = getAbilityElementKey(ab);
+        if (elementKey != null && language.has(elementKey)) {
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+
+        // Mana Cost
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", ab.getManaCost()).withStyle(net.minecraft.ChatFormatting.BLUE));
+
+        // Damage (only if it's a bolt and not ENDER)
+        if (ab.isBolt() && ab.toBolt() != MagicBoltAbility.ENDER) {
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(ab)).withStyle(net.minecraft.ChatFormatting.RED));
+        }
+
+        // We do not append the lore as per the markdown instructions.
+
+        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
     }
 }

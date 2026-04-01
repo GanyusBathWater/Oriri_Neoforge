@@ -148,26 +148,20 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     private int getSurfaceHeight(int x, int z) {
-        double nx = x + seedOffsetX;
-        double nz = z + seedOffsetZ;
+        // Synchronized with ElderwoodsBiomeSource
+        double nx = (x + seedOffsetX) * 0.003;
+        double nz = (z + seedOffsetZ) * 0.003;
 
-        double noise = 0.0;
-        noise += Math.sin(nx * 0.0025) * Math.cos(nz * 0.0025) * 10.0;
-        noise += Math.cos(nx * 0.002 + 2.0) * Math.sin(nz * 0.003) * 8.0;
-        noise += Math.sin(nx * 0.007 + 20) * Math.cos(nz * 0.006 + 20) * 5.0;
-        noise += Math.cos(nx * 0.008) * Math.sin(nz * 0.009 + 15) * 4.0;
-        noise += Math.sin(nx * 0.02 + 50) * Math.cos(nz * 0.018 + 50) * 2.5;
-        noise += Math.sin(nx * 0.05 + 100) * Math.cos(nz * 0.045 + 100) * 1.0;
-        noise += Math.sin(nx * 0.12 + 200) * Math.cos(nz * 0.12 + 200) * 0.4;
+        double noise = Math.sin(nx) * Math.cos(nz) * 12.0; 
+        noise += Math.sin(nx * 0.5 + 2.0) * Math.cos(nz * 0.6 + 1.1) * 6.0;
 
-        noise = Mth.clamp(noise, -HILL_AMPLITUDE, HILL_AMPLITUDE);
         return BASE_HEIGHT + (int) Math.round(noise);
     }
 
     private double getAbyssNoise3D(int x, int y, int z) {
-        double nx = (x + seedOffsetX) * 0.05 + seedOffsetCave;
-        double ny = y * 0.08;
-        double nz = (z + seedOffsetZ) * 0.05 + seedOffsetCave;
+        double nx = (x + seedOffsetX) * 0.02; // Reduced frequency for smoothness
+        double ny = y * 0.12;
+        double nz = (z + seedOffsetZ) * 0.02;
 
         // 3D Irrational Noise for micro-surface roughness
         double noise = 0;
@@ -175,49 +169,17 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double nx1 = nx * 0.857 + nz * 0.515;
         double nz1 = -nx * 0.515 + nz * 0.857;
         noise += Math.sin(nx1) * Math.cos(nz1) * Math.sin(ny);
-        // Octave 2 (Irrational Frequency)
-        noise += Math.sin(nx * 1.37) * Math.cos(ny * 1.41) * Math.sin(nz * 1.29) * 0.5;
 
         return noise / 1.5;
     }
 
-    private double getAbyssNoise(int x, int z) {
-        double nx = (x + seedOffsetX) * 0.01 + seedOffsetCave;
-        double nz = (z + seedOffsetZ) * 0.01 + seedOffsetCave;
+    private int getCaveFloorHeight(int x, int z, int baseFloor) {
+        // Ultra-smooth floor: very low frequency, low amplitude
+        double nx = (x + seedOffsetX) * 0.002;
+        double nz = (z + seedOffsetZ) * 0.002;
         
-        // Sum 4 octaves with IRRATIONAL ROTATIONS (breaks all square grid patterns)
-        double noise = 0;
-        // Octave 1 (Rotated 15 deg)
-        double nx1 = nx * 0.966 + nz * 0.259;
-        double nz1 = -nx * 0.259 + nz * 0.966;
-        noise += Math.sin(nx1) * Math.cos(nz1);
-        // Octave 2 (Rotated 31 deg)
-        double nx2 = nx * 0.857 + nz * 0.515;
-        double nz2 = -nx * 0.515 + nz * 0.857;
-        noise += Math.sin(nx2 * 1.37) * Math.cos(nz2 * 1.41) * 0.5;
-        // Octave 3 (67 deg)
-        double nx3 = nx * 0.390 + nz * 0.921;
-        double nz3 = -nx * 0.921 + nz * 0.390;
-        noise += Math.sin(nx3 * 2.11) * Math.cos(nz3 * 2.03) * 0.25;
-        // Octave 4 (113 deg)
-        double nx4 = -nx * 0.390 + nz * 0.921;
-        double nz4 = -nx * 0.921 - nz * 0.390;
-        noise += Math.sin(nx4 * 3.17) * Math.cos(nz4 * 3.23) * 0.125;
-        
-        return noise / 1.875; // Normalize to roughly -1.0 to 1.0 range
-    }
-
-    private int getCaveFloorHeight(int x, int z) {
-        double nx = (x + seedOffsetCave) * 0.005;
-        double nz = (z + seedOffsetCave) * 0.005;
-        
-        // Ultra-smooth noise using only low-frequency sine/cos for the "Abyss floor"
-        double noise = Math.sin(nx) * Math.cos(nz);
-        noise += Math.sin(nx * 0.5 + 0.1) * Math.cos(nz * 0.4 + 0.5) * 0.3;
-        
-        double floorHeight = noise * 40.0; // Reduced amplitude for more stable base floor
-
-        return -115 + (int) Math.round(floorHeight);
+        double noise = Math.sin(nx) * Math.cos(nz) * 6.0;
+        return baseFloor + (int) Math.round(noise);
     }
 
     private double getAetherRiverNoise(int x, int z) {
@@ -228,6 +190,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double noise = Math.sin(nx) * Math.cos(nz + Math.sin(nx * 0.5)) + 
                       0.5 * Math.sin(nx * 1.7) * Math.cos(nz * 1.5);
         return noise;
+    }
+
+    private double getAbyssNoise(int x, int z) {
+        // Synchronized with ElderwoodsBiomeSource
+        double nx = (x + seedOffsetCave) * 0.01;
+        double nz = (z + seedOffsetCave) * 0.01;
+        return Math.sin(nx) * Math.cos(nz);
     }
 
     private double getPillarNoise(int x, int z) {
@@ -330,7 +299,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         if (y <= MIN_Y + 5)
             return false;
 
-        int caveFloor = getCaveFloorHeight(x, z);
+        int caveFloor = getCaveFloorHeight(x, z, -115);
         int caveCeiling = getCaveCeilingHeight(x, z, surfaceY);
 
         if (y < caveFloor || y > caveCeiling)
@@ -624,7 +593,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         adjacentPos.set(worldX, y + 1, worldZ);
                         BlockState aboveState = chunk.getBlockState(adjacentPos);
                         if (aboveState.isSolid() && !aboveState.is(Blocks.BEDROCK)) {
-                            if (isCrystalCaveBiome(getComputedBiome(level, worldX, y, worldZ))) {
+                            // if (isCrystalCaveBiome(getComputedBiome(level, worldX, y, worldZ))) { // Removed biome check
                                 float patchIntensity = (float) ((combinedNoise - 0.3) / 0.7); 
                                 float chance = 0.05f + (patchIntensity * 0.25f); 
 
@@ -634,7 +603,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                                     .setValue(BlockStateProperties.FACING, Direction.DOWN),
                                             false);
                                 }
-                            }
+                            // }
                         }
                     }
                 }
@@ -976,44 +945,28 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     int worldZ = startZ + localZ;
                     int surfaceY = getSurfaceHeight(worldX, worldZ);
                     boolean hasScarletBlocks = SCARLET_STONE != null && SCARLET_DEEPSLATE != null;
-                    boolean lastWasAir = false;
                     BlockState heightmapState = null;
 
                     for (int y = surfaceY; y >= MIN_Y; y--) {
                         mutablePos.set(worldX, y, worldZ);
                         BlockState current = chunk.getBlockState(mutablePos);
-                        boolean isAir = current.isAir();
                         
                         // Check biome at THIS height to decide painting rules
                         Holder<Biome> currentBiome = getComputedBiome(level, worldX, y, worldZ);
-                        boolean isElysianCurrent = isElysianAbyssBiome(currentBiome);
                         boolean isScarletCurrent = isScarletBiome(currentBiome);
 
+                        BlockState grassState = isScarletCurrent ? SCARLET_GRASS : GRASS;
+
                         // A. Top Surface Painting (Forest Floor)
-                        /*
-                        if (y > surfaceY - 4 && y <= surfaceY) {
-                            BlockState grassState = isElysianCurrent ? Blocks.MOSS_BLOCK.defaultBlockState()
-                                    : (isScarletCurrent ? SCARLET_GRASS : GRASS);
-                            
-                            if (y == surfaceY) heightmapState = grassState;
-
-                            boolean isReplaceableStone = current.is(STONE.getBlock()) || current.is(DEEPSLATE.getBlock())
-                                    || (hasScarletBlocks && (current.is(SCARLET_STONE.getBlock()) || current.is(SCARLET_DEEPSLATE.getBlock())));
-
-                            if (isReplaceableStone) {
-                                if (y == surfaceY) {
-                                    chunk.setBlockState(mutablePos, grassState, false);
-                                } else {
-                                    chunk.setBlockState(mutablePos, DIRT, false);
-                                }
+                        if (y >= surfaceY - 5) {
+                            if (y == surfaceY) {
+                                chunk.setBlockState(mutablePos, grassState, false);
+                                heightmapState = grassState;
+                            } else if (y >= surfaceY - 3) {
+                                chunk.setBlockState(mutablePos, DIRT, false);
                             }
+                            continue;
                         }
-                        */
-                        // B. Cave Floor Painting (DELETED: Managed by trees or base Stone/Deepslate)
-                        
-                        // C. Cave Ceiling Painting (DELETED: Trees now drive localized overgrowth)
-                        
-                        lastWasAir = isAir;
                     }
 
                     if (heightmapState != null) {
@@ -1055,7 +1008,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.15, 0.0, 1.0);
                     boolean isAbyss = caveNoise > 0.08;
 
-                    int originalCaveFloor = getCaveFloorHeight(worldX, worldZ);
+                    int originalCaveFloor = getCaveFloorHeight(worldX, worldZ, -115);
                     int caveCeiling = getCaveCeilingHeight(worldX, worldZ, surfaceY);
                     
                     double riverNoise = getAetherRiverNoise(worldX, worldZ);
@@ -1188,7 +1141,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     public void addDebugScreenInfo(List<String> info, RandomState random, BlockPos pos) {
         int surfaceY = getSurfaceHeight(pos.getX(), pos.getZ());
         info.add("Elderwoods | Surface: Y=" + surfaceY);
-        info.add("Cave Floor: Y=" + getCaveFloorHeight(pos.getX(), pos.getZ()));
+        info.add("Cave Floor: Y=" + getCaveFloorHeight(pos.getX(), pos.getZ(), -115));
         info.add("Cave Ceiling: Y=" + getCaveCeilingHeight(pos.getX(), pos.getZ(), surfaceY));
 
         net.minecraft.world.level.biome.Climate.Sampler sampler = random.sampler();

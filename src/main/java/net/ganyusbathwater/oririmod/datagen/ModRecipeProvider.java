@@ -124,13 +124,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
 
                 // Abyss Crown
                 stairBuilder(ModBlocks.ABYSS_CROWN_STAIRS.get(), Ingredient.of(ModBlocks.ABYSS_CROWN_PLANKS))
-                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS)).save(recipeOutput);
+                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS))
+                                .save(recipeOutput);
                 slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_SLAB.get(),
                                 ModBlocks.ABYSS_CROWN_PLANKS);
                 fenceBuilder(ModBlocks.ABYSS_CROWN_FENCE.get(), Ingredient.of(ModBlocks.ABYSS_CROWN_PLANKS))
-                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS)).save(recipeOutput);
+                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS))
+                                .save(recipeOutput);
                 fenceGateBuilder(ModBlocks.ABYSS_CROWN_GATE.get(), Ingredient.of(ModBlocks.ABYSS_CROWN_PLANKS))
-                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS)).save(recipeOutput);
+                                .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS))
+                                .save(recipeOutput);
 
                 // --- Planks from Logs/Stems ---
                 // Elder
@@ -176,7 +179,8 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .save(recipeOutput, "oririmod:abyss_crown_planks_from_log");
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_PLANKS.get(), 4)
                                 .requires(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get())
-                                .unlockedBy("has_stripped_abyss_crown_log", has(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get()))
+                                .unlockedBy("has_stripped_abyss_crown_log",
+                                                has(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get()))
                                 .save(recipeOutput, "oririmod:abyss_crown_planks_from_stripped_log");
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_PLANKS.get(), 4)
                                 .requires(ModBlocks.ABYSS_CROWN_STEM.get())
@@ -184,7 +188,8 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .save(recipeOutput, "oririmod:abyss_crown_planks_from_stem");
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSS_CROWN_PLANKS.get(), 4)
                                 .requires(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get())
-                                .unlockedBy("has_stripped_abyss_crown_stem", has(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get()))
+                                .unlockedBy("has_stripped_abyss_crown_stem",
+                                                has(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get()))
                                 .save(recipeOutput, "oririmod:abyss_crown_planks_from_stripped_stem");
 
                 // --- Scarlet Stone Recipes ---
@@ -376,7 +381,12 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_magic_upgrade_template", has(ModItems.MAGIC_UPGRADE_TEMPLATE.get()))
                                 .save(recipeOutput);
 
-        }
+                makeScytheRecipe(recipeOutput, Items.OAK_PLANKS, ModItems.WOOD_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, Items.COBBLESTONE, ModItems.STONE_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, Items.IRON_INGOT, ModItems.IRON_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, Items.GOLD_INGOT, ModItems.GOLD_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, Items.DIAMOND, ModItems.DIAMOND_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, Items.NETHERITE_INGOT, ModItems.NETHERITE_SCYTHE.get());        }
 
         private void makeArmorRecipes(RecipeOutput recipeOutput, Item ingot, Item helmet, Item chestplate,
                         Item leggings, Item boots) {
@@ -409,6 +419,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .pattern("I")
                                 .pattern("I")
                                 .pattern("S")
+                                .define('I', ingot)
+                                .define('S', Items.STICK)
+                                .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);
+        }
+
+        private void makeScytheRecipe(RecipeOutput recipeOutput, Item ingot, Item scythe) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, scythe, 1)
+                                .pattern("III")
+                                .pattern("I S")
+                                .pattern("  S")
                                 .define('I', ingot)
                                 .define('S', Items.STICK)
                                 .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);

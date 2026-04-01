@@ -149,6 +149,13 @@ public final class ElementalDamageHandler {
         if (damage < 0.0f)
             damage = 0.0f;
         event.setAmount(damage);
+
+        if (owner instanceof LivingEntity attacker && direct == attacker) {
+            ItemStack weapon = attacker.getMainHandItem();
+            if (weapon.getItem() instanceof net.ganyusbathwater.oririmod.item.custom.CustomScytheItem scythe) {
+                scythe.applyScytheEffects(weapon, target, attacker);
+            }
+        }
     }
 
     public static void setPlayerResistance(Player player, Element element, float resistFraction) {

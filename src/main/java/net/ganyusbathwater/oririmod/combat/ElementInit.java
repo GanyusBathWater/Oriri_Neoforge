@@ -23,5 +23,12 @@ public final class ElementInit {
         ItemElementRegistry.setElement(Items.TRIDENT, Element.WATER);
         ItemElementRegistry.setElement(ModItems.STELLA_PERDITOR.get(), Element.DARKNESS);
         ItemElementRegistry.setElement(ModItems.QILINS_WRATH.get(), Element.TRUE_DAMAGE);
+        ItemElementRegistry.setElement(ModItems.ANCIENT_SCYTHE.get(), Element.DARKNESS);
+        ItemElementRegistry.setElement(ModItems.BLACK_ICE_SCYTHE.get(), Element.WATER);
+        ItemElementRegistry.setElement(ModItems.CRYSTAL_SCYTHE.get(), Element.LIGHT);
+        ItemElementRegistry.setElement(ModItems.GILDED_NETHERITE_SCYTHE.get(), Element.EARTH);
+        ItemElementRegistry.setElement(ModItems.PRISMARINE_SCYTHE.get(), Element.WATER);
+        ItemElementRegistry.setElement(ModItems.MOLTEN_SCYTHE.get(), Element.FIRE);
+        ItemElementRegistry.setElement(ModItems.THE_HARBINGER.get(), Element.TRUE_DAMAGE);
     }
 }

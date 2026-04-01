@@ -22,6 +22,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.network.chat.Component;
+import net.minecraft.locale.Language;
 
 public class MagicBoltItem extends Item implements ModRarityCarrier {
     private final MagicBoltAbility ability;
@@ -319,5 +321,52 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         if (shape.isEmpty())
             return pos.getY() + 1.0; // Fallback: Blockoberseite
         return pos.getY() + shape.max(net.minecraft.core.Direction.Axis.Y);
+    }
+
+    private String getDamageTooltip() {
+        return switch (this.ability) {
+            case SONIC -> "10.0";
+            case BLAZE -> "5.0";
+            case NORMAL -> "6.0";
+            case AMATEUR_FIREBALL -> "5.7 (Splash)";
+            case APPRENTICE_FIREBALL -> "12.7 (Splash)";
+            case JOURNEYMAN_FIREBALL -> "19.7 (Splash)";
+            case WISE_FIREBALL -> "26.7 (Splash)";
+            case EXPLOSIVE -> "3.0 (Radius)";
+            case METEOR -> "4.0 (Power)";
+            case ETERNAL_ICE -> "Area Magic";
+            case ENDER -> "0.0";
+            default -> "0.0";
+        };
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        String descriptionId = this.getDescriptionId();
+        Language language = Language.getInstance();
+
+        // Element
+        String elementKey = descriptionId + ".element";
+        if (language.has(elementKey)) {
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+
+        // Mana Cost
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", this.manaCost).withStyle(net.minecraft.ChatFormatting.BLUE));
+
+        // Damage
+        if (this.ability != MagicBoltAbility.ENDER) {
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip()).withStyle(net.minecraft.ChatFormatting.RED));
+        }
+
+        // Lore
+        String loreKey = descriptionId + ".lore";
+        if (language.has(loreKey)) {
+            tooltipComponents.add(Component.translatable(loreKey).withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
+        }
+
+        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
+
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }
