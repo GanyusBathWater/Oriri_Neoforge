@@ -30,7 +30,6 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
-import net.ganyusbathwater.oririmod.fluid.ModFluids;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.worldgen.carver.ScarletCaveEntranceCarver;
 import net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver;
@@ -58,7 +57,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
     private static final BlockState BEDROCK = Blocks.BEDROCK.defaultBlockState();
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
-    private static BlockState AETHER_BLOCK;
 
     // ===== SCARLET BIOME BLOCKS =====
     private static BlockState SCARLET_GRASS;
@@ -121,7 +119,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 SCARLET_GRASS = ModBlocks.SCARLET_GRASS_BLOCK.get().defaultBlockState();
                 SCARLET_STONE = ModBlocks.SCARLET_STONE.get().defaultBlockState();
                 SCARLET_DEEPSLATE = ModBlocks.SCARLET_DEEPSLATE.get().defaultBlockState();
-                AETHER_BLOCK = ModFluids.AETHER_BLOCK.get().defaultBlockState();
             }
         }
     }
@@ -174,38 +171,18 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     private int getCaveFloorHeight(int x, int z, int baseFloor) {
-        // Ultra-smooth floor: very low frequency, low amplitude
-        double nx = (x + seedOffsetX) * 0.002;
-        double nz = (z + seedOffsetZ) * 0.002;
-        
-        double noise = Math.sin(nx) * Math.cos(nz) * 6.0;
-        return baseFloor + (int) Math.round(noise);
+        return (int) Math.round(getCaveFloorHeightDouble(x, z, baseFloor));
     }
 
-    private double getAetherRiverNoise(int x, int z) {
-        double nx = (x + seedOffsetX * 0.5) * 0.006;
-        double nz = (z + seedOffsetZ * 0.5) * 0.006;
-        
-        // Ridge noise for narrow, connecting rivers
-        double noise = Math.sin(nx) * Math.cos(nz + Math.sin(nx * 0.5)) + 
-                      0.5 * Math.sin(nx * 1.7) * Math.cos(nz * 1.5);
-        return noise;
-    }
-
-    private double getAbyssNoise(int x, int z) {
-        // Synchronized with ElderwoodsBiomeSource
-        double nx = (x + seedOffsetCave) * 0.01;
-        double nz = (z + seedOffsetCave) * 0.01;
-        return Math.sin(nx) * Math.cos(nz);
-    }
-
-    private double getPillarNoise(int x, int z) {
-        double nx = (x + seedOffsetCave + 555) * 0.04;
-        double nz = (z + seedOffsetCave + 555) * 0.04;
-        return (Math.sin(nx) * Math.cos(nz) + 1.0) / 2.0;
+    private double getCaveFloorHeightDouble(int x, int z, int baseFloor) {
+        return (double) baseFloor;
     }
 
     private int getCaveCeilingHeight(int x, int z, int surfaceY) {
+        return (int) Math.round(getCaveCeilingHeightDouble(x, z, surfaceY));
+    }
+
+    private double getCaveCeilingHeightDouble(int x, int z, int surfaceY) {
         double nx = (x + seedOffsetCave + 700) * 0.012;
         double nz = (z + seedOffsetCave + 700) * 0.012;
 
@@ -224,11 +201,28 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double nz3 = -nx * 0.921 + nz * 0.390;
         ceilNoise += Math.sin(nx3 * 3.31) * Math.cos(nz3 * 3.19) * 0.25;
 
-        int baseCeiling = 60; 
-        int ceilVariation = (int) (ceilNoise * 18); // Subtle vault variation
+        double baseCeiling = 60.0; 
+        double ceilVariation = ceilNoise * 18.0; // Subtle vault variation
 
-        return Mth.clamp(baseCeiling + ceilVariation, 30, surfaceY - 10);
+        return Mth.clamp(baseCeiling + ceilVariation, 30.0, (double)surfaceY - 10.0);
     }
+
+
+
+    private double getAbyssNoise(int x, int z) {
+        // Synchronized with ElderwoodsBiomeSource
+        double nx = (x + seedOffsetCave) * 0.01;
+        double nz = (z + seedOffsetCave) * 0.01;
+        return Math.sin(nx) * Math.cos(nz);
+    }
+
+    private double getPillarNoise(int x, int z) {
+        double nx = (x + seedOffsetCave + 555) * 0.04;
+        double nz = (z + seedOffsetCave + 555) * 0.04;
+        return (Math.sin(nx) * Math.cos(nz) + 1.0) / 2.0;
+    }
+
+
 
     private int[] findNearestEntranceCenter(int x, int z) {
         int gridSize = 180;
@@ -1006,21 +1000,15 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
                     double caveNoise = getAbyssNoise(worldX, worldZ);
                     double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.15, 0.0, 1.0);
-                    boolean isAbyss = caveNoise > 0.08;
 
-                    int originalCaveFloor = getCaveFloorHeight(worldX, worldZ, -115);
-                    int caveCeiling = getCaveCeilingHeight(worldX, worldZ, surfaceY);
+                    double caveFloorSmooth = getCaveFloorHeightDouble(worldX, worldZ, -115);
+                    double caveCeilingSmooth = getCaveCeilingHeightDouble(worldX, worldZ, surfaceY);
                     
-                    double riverNoise = getAetherRiverNoise(worldX, worldZ);
-                    boolean isRiverPath = isAbyss && Math.abs(riverNoise) < 0.06 && abyssIntensity > 0.05;
-                    
-                    int caveFloor = originalCaveFloor;
-                    if (isRiverPath) {
-                        caveFloor -= 5;
-                    }
+                    int caveFloor = (int)Math.round(caveFloorSmooth);
+                    int caveCeiling = (int)Math.round(caveCeilingSmooth);
 
-                    int verticalCenter = (caveFloor + caveCeiling) / 2;
-                    int roomHalfHeight = Math.max(1, (caveCeiling - caveFloor) / 2);
+                    double verticalCenter = (caveFloorSmooth + caveCeilingSmooth) / 2.0;
+                    double roomHalfHeight = Math.max(1.0, (caveCeilingSmooth - caveFloorSmooth) / 2.0);
 
                     for (int y = MIN_Y; y <= surfaceY; y++) {
                         pos.set(worldX, y, worldZ);
@@ -1031,11 +1019,16 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         }
 
                         boolean isHollow = false;
-                        if (abyssIntensity > 0.0) {
+                        if (abyssIntensity > 0.1) {
+                            // EL YSIAN ABYSS: Force perfectly flat floor and ceiling bounds
+                            // This ignores 3D noise for the primary cavity to ensure a level floor.
+                            if (y > -115 && y < caveCeilingSmooth) {
+                                isHollow = true;
+                            }
+                        } else if (abyssIntensity > 0.0) {
                             double distFromCenter = Math.abs(y - verticalCenter);
                             double verticalFactor = Mth.clamp(1.0 - (distFromCenter / (double)roomHalfHeight), 0.0, 1.0);
                             double hollowingNoise3D = getAbyssNoise3D(worldX, y, worldZ);
-                            // Smooth the 3D noise contribution near the floor and ceiling using verticalFactor
                             double hollowingValue = (abyssIntensity * verticalFactor) + (hollowingNoise3D * 0.15 * verticalFactor);
 
                             if (hollowingValue > 0.35) {
@@ -1045,11 +1038,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
                         if (isHollow) {
                             if (y < MIN_Y + 6) continue;
-
-                            if (isRiverPath && y < originalCaveFloor && y >= caveFloor) {
-                                chunk.setBlockState(pos, AETHER_BLOCK, false);
-                                continue;
-                            }
                             
                             // 3. EXTREME SPARSE PILLARS
                             int pillarGrid = 160;

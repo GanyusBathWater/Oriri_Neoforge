@@ -42,6 +42,8 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.StoneMushRoomFeature(
                                                         net.ganyusbathwater.oririmod.worldgen.feature.StoneMushRoomConfig.CODEC));
 
+
+
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);
         }

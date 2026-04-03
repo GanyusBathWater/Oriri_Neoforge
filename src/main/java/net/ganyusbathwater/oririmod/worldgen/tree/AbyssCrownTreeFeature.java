@@ -54,7 +54,7 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
         boolean foundCeiling = false;
         if (level.getBlockState(origin).isAir()) {
             // Case A: Picked an air block - search UP for a valid natural ceiling
-            for (int i = 1; i <= 64; i++) {
+            for (int i = 1; i <= 200; i++) {
                 BlockPos potOrigin = origin.above(i);
                 if (isValidAnchor(level.getBlockState(potOrigin.above()))) {
                     origin = potOrigin;

@@ -25,6 +25,7 @@ public class ModBiomeModifiers {
         // Elysian Abyss
         public static final ResourceKey<BiomeModifier> ADD_ELYSIAN_FEATURES = registerKey("add_elysian_features");
 
+
         // Scarlet Forest & Plains
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_FEATURES = registerKey("add_scarlet_forest_features");
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_PLAINS_FEATURES = registerKey("add_scarlet_plains_features");
@@ -88,6 +89,8 @@ public class ModBiomeModifiers {
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_ABYSS_CROWN_TREE_PLACED_KEY),
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_STONE_MUSHROOM_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
+
+
 
                 // Scarlet Forest Features
                 var scarletForestBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,

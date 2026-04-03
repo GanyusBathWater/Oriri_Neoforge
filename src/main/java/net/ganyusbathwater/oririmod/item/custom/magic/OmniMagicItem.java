@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.locale.Language;
 
 public class OmniMagicItem extends Item implements ModRarityCarrier {
 
@@ -485,23 +484,22 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
     @Override
     public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
         OmniAbility ab = getSelected(stack);
-        Language language = Language.getInstance();
 
         // Active Ability
         tooltipComponents.add(Component.literal("Selected: " + prettyName(ab)).withStyle(net.minecraft.ChatFormatting.GOLD));
 
         // Element
         String elementKey = getAbilityElementKey(ab);
-        if (elementKey != null && language.has(elementKey)) {
+        if (elementKey != null) {
             tooltipComponents.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
         }
 
         // Mana Cost
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", ab.getManaCost()).withStyle(net.minecraft.ChatFormatting.BLUE));
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", ab.getManaCost()).withStyle(net.minecraft.ChatFormatting.GRAY));
 
         // Damage (only if it's a bolt and not ENDER)
         if (ab.isBolt() && ab.toBolt() != MagicBoltAbility.ENDER) {
-            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(ab)).withStyle(net.minecraft.ChatFormatting.RED));
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(ab)).withStyle(net.minecraft.ChatFormatting.GRAY));
         }
 
         // We do not append the lore as per the markdown instructions.

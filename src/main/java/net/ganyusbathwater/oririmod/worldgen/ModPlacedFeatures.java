@@ -49,6 +49,7 @@ public class ModPlacedFeatures {
         // Elysian Abyss
         public static final ResourceKey<PlacedFeature> ELYSIAN_STONE_MUSHROOM_PLACED_KEY = registerKey("elysian_stone_mushroom_placed");
         public static final ResourceKey<PlacedFeature> ELYSIAN_ABYSS_CROWN_TREE_PLACED_KEY = registerKey("elysian_abyss_crown_tree_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_AETHER_RIVER_PLACED_KEY = registerKey("elysian_aether_river_placed");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<PlacedFeature> context) {
@@ -186,9 +187,11 @@ public class ModPlacedFeatures {
                 // ── Elysian Abyss Placed Features ─────────────────────────────────────────
                 var configuredStoneMushroom = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_STONE_MUSHROOM_KEY);
                 register(context, ELYSIAN_STONE_MUSHROOM_PLACED_KEY, configuredStoneMushroom, List.of(
-                                RarityFilter.onAverageOnceEvery(3), // Restored to be common again
+                                RarityFilter.onAverageOnceEvery(4), // Sparse, meaningful formations
+                                CountPlacement.of(1), 
                                 InSquarePlacement.spread(),
-                                HeightRangePlacement.uniform(aboveBottom(10), absolute(-10)),
+                                // Synced with tree height range to catch floor/ceiling pairs
+                                HeightRangePlacement.uniform(absolute(-120), absolute(30)),
                                 BiomeFilter.biome()));
 
                 var configuredElysianTree = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_ABYSS_CROWN_TREE_KEY);
@@ -197,8 +200,6 @@ public class ModPlacedFeatures {
                                 InSquarePlacement.spread(),
                                 // Expand range to catch all ceilings vertically (-120 to +30)
                                 HeightRangePlacement.uniform(absolute(-120), absolute(30))));
-
-                // DELETED: Standard Moss clusters removed to allow for clean Grass and Tree-driven Overgrowth
 
         }
 

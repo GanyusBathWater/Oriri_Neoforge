@@ -1,11 +1,12 @@
 package net.ganyusbathwater.oririmod.item.custom;
 
+import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 
 public class MoltenScytheItem extends CustomScytheItem {
-    public MoltenScytheItem(Tier tier, Properties properties, net.ganyusbathwater.oririmod.util.ModRarity rarity) {
+    public MoltenScytheItem(Tier tier, Properties properties, ModRarity rarity) {
         super(tier, properties, rarity);
     }
 
@@ -16,9 +17,10 @@ public class MoltenScytheItem extends CustomScytheItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<net.minecraft.network.chat.Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context,
+            java.util.List<net.minecraft.network.chat.Component> tooltipComponents,
+            net.minecraft.world.item.TooltipFlag tooltipFlag) {
         tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.scythe.ignite"));
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }
-

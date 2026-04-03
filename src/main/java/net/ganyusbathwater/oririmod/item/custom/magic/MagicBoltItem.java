@@ -23,7 +23,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
-import net.minecraft.locale.Language;
 
 public class MagicBoltItem extends Item implements ModRarityCarrier {
     private final MagicBoltAbility ability;
@@ -343,27 +342,24 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
     @Override
     public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
         String descriptionId = this.getDescriptionId();
-        Language language = Language.getInstance();
 
         // Element
         String elementKey = descriptionId + ".element";
-        if (language.has(elementKey)) {
+        if (this.ability != MagicBoltAbility.ENDER) {
             tooltipComponents.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
         }
 
         // Mana Cost
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", this.manaCost).withStyle(net.minecraft.ChatFormatting.BLUE));
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", this.manaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
 
         // Damage
         if (this.ability != MagicBoltAbility.ENDER) {
-            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip()).withStyle(net.minecraft.ChatFormatting.RED));
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip()).withStyle(net.minecraft.ChatFormatting.GRAY));
         }
 
         // Lore
         String loreKey = descriptionId + ".lore";
-        if (language.has(loreKey)) {
-            tooltipComponents.add(Component.translatable(loreKey).withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
-        }
+        tooltipComponents.add(Component.translatable(loreKey).withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
 
         tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
 

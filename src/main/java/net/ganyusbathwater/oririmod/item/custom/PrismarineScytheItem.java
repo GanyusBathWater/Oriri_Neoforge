@@ -1,5 +1,6 @@
 package net.ganyusbathwater.oririmod.item.custom;
 
+import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -7,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 
 public class PrismarineScytheItem extends CustomScytheItem {
-    public PrismarineScytheItem(Tier tier, Properties properties, net.ganyusbathwater.oririmod.util.ModRarity rarity) {
+    public PrismarineScytheItem(Tier tier, Properties properties, ModRarity rarity) {
         super(tier, properties, rarity);
     }
 
@@ -19,9 +20,11 @@ public class PrismarineScytheItem extends CustomScytheItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<net.minecraft.network.chat.Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
-        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.scythe.slowness_weakness"));
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context,
+            java.util.List<net.minecraft.network.chat.Component> tooltipComponents,
+            net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        tooltipComponents
+                .add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.scythe.slowness_weakness"));
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }
-
