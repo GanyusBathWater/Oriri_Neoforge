@@ -90,6 +90,33 @@ public final class ModEntities {
                                                                                         "doom_clock")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<LaserBeamEntity>> LASER_BEAM = ENTITIES
+                        .register("laser_beam",
+                                        () -> EntityType.Builder
+                                                        .<LaserBeamEntity>of(LaserBeamEntity::new, MobCategory.MISC)
+                                                        // Bounding box is at the beam midpoint; tracking range covers long beams
+                                                        .sized(0.5f, 0.5f)
+                                                        .clientTrackingRange(128)
+                                                        .updateInterval(1)  // sync every tick for smooth client rendering
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "laser_beam")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.MagicWaveEntity>> MAGIC_WAVE = ENTITIES
+                        .register("magic_wave",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.MagicWaveEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.MagicWaveEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(1.5f, 0.5f)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "magic_wave")
+                                                                        .toString()));
+
         public static void register(IEventBus modBus) {
                 ENTITIES.register(modBus);
         }

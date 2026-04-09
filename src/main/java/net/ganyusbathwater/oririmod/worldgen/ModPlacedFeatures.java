@@ -190,8 +190,8 @@ public class ModPlacedFeatures {
                                 RarityFilter.onAverageOnceEvery(4), // Sparse, meaningful formations
                                 CountPlacement.of(1), 
                                 InSquarePlacement.spread(),
-                                // Synced with tree height range to catch floor/ceiling pairs
-                                HeightRangePlacement.uniform(absolute(-120), absolute(30)),
+                                // Constrained to cave volume: floor is Y=-115, ceiling starts ~Y=-55
+                                HeightRangePlacement.uniform(absolute(-120), absolute(-80)),
                                 BiomeFilter.biome()));
 
                 var configuredElysianTree = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_ABYSS_CROWN_TREE_KEY);

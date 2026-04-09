@@ -21,7 +21,9 @@ import java.util.UUID;
 public class BossAttackDebugWandItem extends Item {
 
     public enum BossAttackType {
-        SWORD_PROJECTILE, METEOR_SHOWER, LASERBEAM, INSTA_DEATH, ROOT_ATTACK, GROUND_SLAM;
+        SWORD_PROJECTILE, METEOR_SHOWER, LASERBEAM_NORMAL, LASERBEAM_CYLINDER, LASERBEAM_CIRCLE,
+        LASERBEAM_GROUND, LASERBEAM_STARBURST, INSTA_DEATH, ROOT_ATTACK, GROUND_SLAM,
+        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN;
     }
 
     private static final String NBT_SELECTED = "ActiveAttack";
@@ -104,6 +106,55 @@ public class BossAttackDebugWandItem extends Item {
                     && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 BlockPos rootTarget = targetPos != null ? targetPos : player.blockPosition();
                 net.ganyusbathwater.oririmod.util.RootAttackUtil.unleash(serverLevel, rootTarget, player.getId());
+            } else if (current == BossAttackType.LASERBEAM_NORMAL
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                // Beam origin: player eye position
+                Vec3 beamStart = player.getEyePosition();
+                Vec3 beamEnd = target != null ? target.getEyePosition() : (targetPos != null ? Vec3.atCenterOf(targetPos) : beamStart.add(player.getLookAngle().scale(100.0))); // Raycast will automatically shorten this!
+                net.ganyusbathwater.oririmod.util.LaserBeamUtil.unleash(serverLevel,
+                        net.ganyusbathwater.oririmod.util.LaserBeamUtil.LaserBeamConfig.simple(beamStart, beamEnd, 0xFF_00AAFF));
+            } else if (current == BossAttackType.LASERBEAM_CYLINDER
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                Vec3 center = target != null ? target.position() : player.position();
+                // Random start angle so multiple spawns don't overlap perfectly
+                float startRot = player.getRandom().nextFloat() * ((float) Math.PI * 2);
+                net.ganyusbathwater.oririmod.util.LaserBeamUtil.orbitingCylinder(
+                        serverLevel, center, 5.0f, 100.0f, 380.0f / 160.0f, 0xFF_FF0000, 160, startRot);
+            } else if (current == BossAttackType.LASERBEAM_CIRCLE
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                Vec3 center = target != null ? target.position().add(0, 1, 0) : player.position().add(0, 1, 0); // sweep at waist height
+                float startRot = player.getRandom().nextFloat() * ((float) Math.PI * 2);
+                net.ganyusbathwater.oririmod.util.LaserBeamUtil.orbitingClockAngle(
+                        serverLevel, center, 100.0f, 380.0f / 160.0f, 0xFF_AA00FF, 160, startRot);
+            } else if (current == BossAttackType.LASERBEAM_GROUND
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                Vec3 base = target != null ? target.position() : player.position();
+                BlockPos groundPos = BlockPos.containing(base);
+                // Search downwards for solid ground up to typical cavern depth
+                while (groundPos.getY() > level.getMinBuildHeight() && !level.getBlockState(groundPos).isSolidRender(level, groundPos)) {
+                    groundPos = groundPos.below();
+                }
+                net.ganyusbathwater.oririmod.util.LaserBeamUtil.unleash(serverLevel,
+                        net.ganyusbathwater.oririmod.util.LaserBeamUtil.LaserBeamConfig.upward(Vec3.atBottomCenterOf(groundPos.above()), 100.0f, 0xFF_00FF00));
+            } else if (current == BossAttackType.LASERBEAM_STARBURST
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                Vec3 center = target != null ? target.position().add(0, 1.5, 0) : player.position().add(0, 1.5, 0); // chest height
+                int numBeams = 20;
+                int duration = 300; // 15 seconds perfectly
+                float spinSpeedDeg = 720.0f / 300.0f; // 2 full rotations mathematically guaranteed!
+                int laserColor = 0xFF_880000; // Bloody red
+                
+                for (int i = 0; i < numBeams; i++) {
+                    float startYaw = player.getRandom().nextFloat() * ((float) Math.PI * 2);
+                    // Native spherical constraints: 
+                    // Range of exactly -70.0 to +70.0 mathematically guarantees the 40° empty gap zones!
+                    float pitchDeg = -70.0f + (player.getRandom().nextFloat() * 140.0f);
+                    float staticPitch = (float) Math.toRadians(pitchDeg);
+                    boolean isSilent = (i > 0);
+                    
+                    net.ganyusbathwater.oririmod.util.LaserBeamUtil.orbitSphere(
+                            serverLevel, center, 100.0f, staticPitch, spinSpeedDeg, laserColor, duration, startYaw, isSilent);
+                }
             } else if (current == BossAttackType.INSTA_DEATH
                     && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 net.ganyusbathwater.oririmod.entity.DoomClockEntity clock = new net.ganyusbathwater.oririmod.entity.DoomClockEntity(
@@ -111,6 +162,29 @@ public class BossAttackDebugWandItem extends Item {
                 clock.setPos(player.getX(), player.getY() + 3.0, player.getZ());
                 clock.setOwnerId(player.getId());
                 serverLevel.addFreshEntity(clock);
+            } else if (current == BossAttackType.WAVE_CIRCULAR || current == BossAttackType.WAVE_CONE || current == BossAttackType.WAVE_PLAIN) {
+                if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                    Vec3 origin = target != null ? target.position() : player.position();
+                    
+                    // Generate a vibrant random color! (Bounding RGB above 100 to prevent ultra-dark invisible waves)
+                    int r = 100 + level.random.nextInt(156);
+                    int g = 100 + level.random.nextInt(156);
+                    int b = 100 + level.random.nextInt(156);
+                    int randomColor = (0xFF << 24) | (r << 16) | (g << 8) | b;
+
+                    if (current == BossAttackType.WAVE_CIRCULAR) {
+                        net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnCircular(
+                                serverLevel, origin, 32, randomColor, 6f, player.getId());
+                    } else if (current == BossAttackType.WAVE_CONE) {
+                        float facingYaw = (float) Math.toRadians(-player.getYRot());
+                        net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnCone(
+                                serverLevel, origin, facingYaw, randomColor, 6f, player.getId());
+                    } else if (current == BossAttackType.WAVE_PLAIN) {
+                        float facingYaw = (float) Math.toRadians(-player.getYRot());
+                        net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnPlainWave(
+                                serverLevel, origin, facingYaw, randomColor, 6f, player.getId());
+                    }
+                }
             }
         }
 
@@ -198,10 +272,17 @@ public class BossAttackDebugWandItem extends Item {
         return switch (type) {
             case SWORD_PROJECTILE -> "Sword Projectile";
             case METEOR_SHOWER -> "Meteor Shower";
-            case LASERBEAM -> "Laserbeam";
+            case LASERBEAM_NORMAL -> "Laserbeam Normal";
+            case LASERBEAM_CYLINDER -> "Laserbeam Cylinder";
+            case LASERBEAM_CIRCLE -> "Laserbeam Circle";
+            case LASERBEAM_GROUND -> "Laserbeam Ground";
+            case LASERBEAM_STARBURST -> "Laserbeam Starburst";
             case INSTA_DEATH -> "Insta Death";
             case ROOT_ATTACK -> "Root Attack";
             case GROUND_SLAM -> "Ground Slam";
+            case WAVE_CIRCULAR -> "Wave: Circular";
+            case WAVE_CONE -> "Wave: Cone";
+            case WAVE_PLAIN -> "Wave: Plain";
         };
     }
 }
