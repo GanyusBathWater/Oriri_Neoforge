@@ -144,7 +144,8 @@ public final class MagicWaveUtil {
                 0f,             // no damage
                 0,              // no damage interval
                 -1,             // no owner immunity
-                0               // no charge time — circle appears instantly
+                0,              // no charge time — circle appears instantly
+                true            // silent — ground visuals only
         );
 
         LaserBeamEntity beam = LaserBeamUtil.unleash(level, config);
@@ -152,7 +153,6 @@ public final class MagicWaveUtil {
             // Because start=end natively, it points exactly Up (dy=1).
             // This naturally forces the renderer to pitch it -90 degrees exactly flat onto the ground! 
             // It spins completely autonomously via the Renderer without physical orbital movement.
-            beam.setSilent(true); // Don't spam ambient noises from the visual anchor
             beam.setCoreHidden(true); // Completely strip beam geometry layer
             beam.setUseWaveCircle(true); // Use the designated wave_circle.png asset
         }

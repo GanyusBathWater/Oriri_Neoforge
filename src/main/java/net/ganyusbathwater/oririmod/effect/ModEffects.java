@@ -27,6 +27,9 @@ public class ModEffects {
         public static final Holder<MobEffect> ANTI_HEAL_EFFECT = MOB_EFFECTS.register("anti_heal",
                         () -> new AntiHealEffect(MobEffectCategory.HARMFUL, 0x8B0000));
 
+        public static final Holder<MobEffect> THREAT_DETECTION_EFFECT = MOB_EFFECTS.register("threat_detection",
+                        () -> new ThreatDetectionEffect(MobEffectCategory.HARMFUL, 0xCC0000));
+
         public static void registerEffects(IEventBus eventBus) {
                 MOB_EFFECTS.register(eventBus);
                 OririMod.LOGGER.info("Registering Mod Effects for " + OririMod.MOD_ID);

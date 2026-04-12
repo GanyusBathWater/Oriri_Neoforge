@@ -516,5 +516,12 @@
   "item.oririmod.slimy_cooking_book.element": "§2Nature§r",
   "tooltip.oririmod.mana_cost": "Mana Cost: §1%s§r",
   "tooltip.oririmod.damage": "Damage: §c%s§r",
-  "tooltip.oririmod.element": "Element: %s"
+  "tooltip.oririmod.element": "Element: %s",
+  "entity.oririmod.fire_zombie": "Fire Zombie",
+  "entity.oririmod.spore_zombie": "Spore Zombie",
+  "item.oririmod.fire_zombie_spawn_egg": "Fire Zombie Spawn Egg",
+  "item.oririmod.spore_zombie_spawn_egg": "Spore Zombie Spawn Egg",
+  "entity.oririmod.eye_of_desolation": "Eye of Desolation",
+  "item.oririmod.eye_of_desolation_spawn_egg": "Eye of Desolation Spawn Egg",
+  "effect.oririmod.threat_detection": "Threat Detection"
 }

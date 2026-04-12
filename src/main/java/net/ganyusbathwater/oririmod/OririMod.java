@@ -75,6 +75,8 @@ public class OririMod {
         ModEnchantmentEffects.register(modEventBus);
         ModEntities.register(modEventBus);
         ModSounds.register(modEventBus);
+        // Register entity attributes (required for custom Monster subclasses)
+        modEventBus.addListener(this::registerEntityAttributes);
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 
@@ -105,7 +107,16 @@ public class OririMod {
 
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS) {
+            event.accept(ModItems.FIRE_ZOMBIE_SPAWN_EGG);
+            event.accept(ModItems.SPORE_ZOMBIE_SPAWN_EGG);
+            event.accept(ModItems.EYE_OF_DESOLATION_SPAWN_EGG);
+        }
+    }
 
+    private void registerEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
+        event.put(net.ganyusbathwater.oririmod.entity.ModEntities.EYE_OF_DESOLATION.get(),
+                net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity.createAttributes().build());
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

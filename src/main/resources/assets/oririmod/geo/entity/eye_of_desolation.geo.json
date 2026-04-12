@@ -1,0 +1,59 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.unknown",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3.5,
+				"visible_bounds_offset": [0, 1.25, 0]
+			},
+			"bones": [
+				{
+					"name": "eye_of_desolation",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "head",
+					"parent": "eye_of_desolation",
+					"pivot": [0, 24, 0],
+					"cubes": [
+						{"origin": [-2, 22, -2], "size": [4, 4, 4], "uv": [28, 28]},
+						{"origin": [-3, 25, -3], "size": [2, 2, 2], "uv": [16, 36]},
+						{"origin": [-3, 21, -3], "size": [2, 2, 2], "uv": [8, 36]},
+						{"origin": [-3, 21, 1], "size": [2, 2, 2], "uv": [0, 36]},
+						{"origin": [-3, 25, 1], "size": [2, 2, 2], "uv": [22, 34]},
+						{"origin": [1, 25, 1], "size": [2, 2, 2], "uv": [32, 24]},
+						{"origin": [1, 21, 1], "size": [2, 2, 2], "uv": [32, 20]},
+						{"origin": [1, 21, -3], "size": [2, 2, 2], "uv": [32, 16]},
+						{"origin": [1, 25, -3], "size": [2, 2, 2], "uv": [16, 32]}
+					]
+				},
+				{
+					"name": "outer_ring",
+					"parent": "eye_of_desolation",
+					"pivot": [0, 24, 0],
+					"cubes": [
+						{"origin": [-11, 11, -1], "size": [22, 2, 2], "uv": [0, 4]},
+						{"origin": [11, 11, -1], "size": [2, 26, 2], "uv": [8, 8]},
+						{"origin": [-13, 11, -1], "size": [2, 26, 2], "uv": [0, 8]},
+						{"origin": [-11, 35, -1], "size": [22, 2, 2], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "inner_ring",
+					"parent": "eye_of_desolation",
+					"pivot": [0, 24, 0],
+					"cubes": [
+						{"origin": [-5, 29, -1], "size": [10, 2, 2], "uv": [16, 12]},
+						{"origin": [5, 17, -1], "size": [2, 14, 2], "uv": [24, 16]},
+						{"origin": [-7, 17, -1], "size": [2, 14, 2], "uv": [16, 16]},
+						{"origin": [-5, 17, -1], "size": [10, 2, 2], "uv": [16, 8]}
+					]
+				}
+			]
+		}
+	]
+}

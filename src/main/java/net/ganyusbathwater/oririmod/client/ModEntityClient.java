@@ -37,5 +37,9 @@ public class ModEntityClient {
                                 net.ganyusbathwater.oririmod.client.render.LaserBeamRenderer::new);
                 event.registerEntityRenderer(ModEntities.MAGIC_WAVE.get(),
                                 net.ganyusbathwater.oririmod.client.render.MagicWaveRenderer::new);
+                event.registerEntityRenderer(ModEntities.FIRE_ZOMBIE.get(),
+                                net.ganyusbathwater.oririmod.client.render.FireZombieRenderer::new);
+                event.registerEntityRenderer(ModEntities.SPORE_ZOMBIE.get(),
+                                net.ganyusbathwater.oririmod.client.render.SporeZombieRenderer::new);
         }
-}
+}

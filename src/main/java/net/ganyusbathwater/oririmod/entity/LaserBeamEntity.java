@@ -226,7 +226,7 @@ public class LaserBeamEntity extends Entity {
 
         if (this.level().isClientSide) {
             int charge = this.entityData.get(CHARGE_TICKS);
-            if (this.tickCount == 1 && charge > 0) {
+            if (this.tickCount == 1 && charge > 0 && !this.isSilent()) {
                 // Play shrieker wind up sound locally
                 this.level().playLocalSound(this.getX(), this.getY(), this.getZ(),
                         net.minecraft.sounds.SoundEvents.SCULK_SHRIEKER_SHRIEK,

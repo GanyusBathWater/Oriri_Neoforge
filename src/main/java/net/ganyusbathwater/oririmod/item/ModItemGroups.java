@@ -240,6 +240,9 @@ public class ModItemGroups {
                         acceptAllLevels(output, ModItems.BLAZING_PYROMANIAC_GUIDE);
                         acceptAllLevels(output, ModItems.MAGMA_COOKING_BOOK);
                         acceptAllLevels(output, ModItems.SLIMY_COOKING_BOOK);
+                        output.accept(ModItems.FIRE_ZOMBIE_SPAWN_EGG);
+                        output.accept(ModItems.SPORE_ZOMBIE_SPAWN_EGG);
+                        output.accept(ModItems.EYE_OF_DESOLATION_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);

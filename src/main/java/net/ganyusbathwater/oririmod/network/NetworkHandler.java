@@ -6,7 +6,10 @@ import net.ganyusbathwater.oririmod.events.world.WorldEventType;
 import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.ganyusbathwater.oririmod.network.packet.ManaSyncPacket;
 import net.ganyusbathwater.oririmod.network.packet.ManaSyncPayload;
+import net.ganyusbathwater.oririmod.network.packet.SelectBossAttackPayload;
 import net.ganyusbathwater.oririmod.network.packet.SpawnAoEIndicatorPayload;
+import net.ganyusbathwater.oririmod.item.custom.magic.BossAttackDebugWandItem;
+import net.minecraft.network.chat.Component;
 import net.ganyusbathwater.oririmod.network.packet.SyncWorldEventPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +26,8 @@ public final class NetworkHandler {
             "sync_world_event");
     public static final ResourceLocation SPAWN_AOE_INDICATOR = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "spawn_aoe_indicator");
+    public static final ResourceLocation SELECT_BOSS_ATTACK = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "select_boss_attack");
 
     private NetworkHandler() {
     }
@@ -61,7 +66,30 @@ public final class NetworkHandler {
                     net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addIndicator(
                             pkt.getCenter(), pkt.getRadius(), pkt.getDurationTicks(), pkt.getArgbColor());
                 }));
+
+        registrar.playToServer(
+                SelectBossAttackPayload.TYPE,
+                SelectBossAttackPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var player = ctx.player();
+                    if (player != null) {
+                        net.minecraft.world.InteractionHand foundHand = null;
+                        if (player.getMainHandItem().getItem() instanceof BossAttackDebugWandItem) {
+                            foundHand = net.minecraft.world.InteractionHand.MAIN_HAND;
+                        } else if (player.getOffhandItem().getItem() instanceof BossAttackDebugWandItem) {
+                            foundHand = net.minecraft.world.InteractionHand.OFF_HAND;
+                        }
+
+                        if (foundHand != null) {
+                            var stack = player.getItemInHand(foundHand);
+                            BossAttackDebugWandItem.setSelected(stack, payload.attackType());
+                            player.displayClientMessage(Component.literal("Selected Attack: " + BossAttackDebugWandItem.prettyName(payload.attackType()))
+                                    .withStyle(net.minecraft.ChatFormatting.YELLOW), true);
+                        }
+                    }
+                }));
     }
+    
 
     public static void sendManaToPlayer(ServerPlayer player, int mana, int maxMana) {
         PacketDistributor.sendToPlayer(player, new ManaSyncPayload(new ManaSyncPacket(mana, maxMana)));

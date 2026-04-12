@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.item;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.item.custom.*;
 import net.ganyusbathwater.oririmod.item.custom.consumable.*;
 import net.ganyusbathwater.oririmod.item.custom.magic.MagicBoltItem;
@@ -13,6 +14,7 @@ import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.*;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -365,6 +367,26 @@ public class ModItems {
         public static final DeferredItem<SummonerWeaponItem> SLIMY_COOKING_BOOK = ITEMS.register("slimy_cooking_book",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
                                         EntityType.SLIME, ModRarity.RARE, 30, 20, 600, 20));
+
+        // ------------------------------------------Spawn Eggs---------------------------------------------------
+
+        public static final DeferredItem<DeferredSpawnEggItem> FIRE_ZOMBIE_SPAWN_EGG = ITEMS.register(
+                        "fire_zombie_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.FIRE_ZOMBIE,
+                                        0xE25822, 0xFF4500, // outer: ember orange, inner: red-orange
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> SPORE_ZOMBIE_SPAWN_EGG = ITEMS.register(
+                        "spore_zombie_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.SPORE_ZOMBIE,
+                                        0x4A7C3F, 0x9ED96B, // outer: deep moss green, inner: lime spore green
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> EYE_OF_DESOLATION_SPAWN_EGG = ITEMS.register(
+                        "eye_of_desolation_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.EYE_OF_DESOLATION,
+                                        0x1A1A2E, 0xFF1E00, // outer: deep void navy, inner: crimson red
+                                        new Item.Properties()));
 
         // ------------------------------------------------------Armor---------------------------------------------------------
 

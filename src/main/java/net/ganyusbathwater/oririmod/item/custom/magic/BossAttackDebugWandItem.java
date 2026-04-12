@@ -38,12 +38,8 @@ public class BossAttackDebugWandItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
 
         if (player.isShiftKeyDown()) {
-            if (!level.isClientSide) {
-                BossAttackType current = getSelected(stack);
-                BossAttackType next = nextAttack(current);
-                setSelected(stack, next);
-                player.displayClientMessage(Component.literal("Selected Attack: " + prettyName(next))
-                        .withStyle(net.minecraft.ChatFormatting.YELLOW), true);
+            if (level.isClientSide) {
+                net.minecraft.client.Minecraft.getInstance().setScreen(new net.ganyusbathwater.oririmod.client.screen.BossAttackSelectionScreen(stack, hand));
             }
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
         }
@@ -236,7 +232,7 @@ public class BossAttackDebugWandItem extends Item {
         return BossAttackType.SWORD_PROJECTILE;
     }
 
-    private static void setSelected(ItemStack stack, BossAttackType type) {
+    public static void setSelected(ItemStack stack, BossAttackType type) {
         net.minecraft.world.item.component.CustomData data = stack
                 .get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         net.minecraft.nbt.CompoundTag tag = data != null ? data.copyTag() : new net.minecraft.nbt.CompoundTag();
@@ -268,7 +264,7 @@ public class BossAttackDebugWandItem extends Item {
         return vals[(current.ordinal() + 1) % vals.length];
     }
 
-    private static String prettyName(BossAttackType type) {
+    public static String prettyName(BossAttackType type) {
         return switch (type) {
             case SWORD_PROJECTILE -> "Sword Projectile";
             case METEOR_SHOWER -> "Meteor Shower";

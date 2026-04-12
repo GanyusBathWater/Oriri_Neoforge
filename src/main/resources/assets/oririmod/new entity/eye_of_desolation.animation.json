@@ -1,0 +1,195 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"eye_of_desolation_idle": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"outer_ring": {
+					"relative_to": {
+						"rotation": "entity"
+					},
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, 0, 45]
+						},
+						"0.5": {
+							"vector": [0, 0, 90]
+						},
+						"0.75": {
+							"vector": [0, 0, 135]
+						},
+						"1.0": {
+							"vector": [0, 0, 180]
+						},
+						"1.25": {
+							"vector": [0, 0, 225]
+						},
+						"1.5": {
+							"vector": [0, 0, 270]
+						},
+						"1.75": {
+							"vector": [0, 0, 315]
+						},
+						"2.0": {
+							"vector": [0, 0, 360]
+						}
+					}
+				},
+				"inner_ring": {
+					"relative_to": {
+						"rotation": "entity"
+					},
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, 0, -45]
+						},
+						"0.5": {
+							"vector": [0, 0, -90]
+						},
+						"0.75": {
+							"vector": [0, 0, -135]
+						},
+						"1.0": {
+							"vector": [0, 0, -180]
+						},
+						"1.25": {
+							"vector": [0, 0, -225]
+						},
+						"1.5": {
+							"vector": [0, 0, -270]
+						},
+						"1.75": {
+							"vector": [0, 0, -315]
+						},
+						"2.0": {
+							"vector": [0, 0, -360]
+						}
+					}
+				}
+			}
+		},
+		"eye_of_desolation_hover": {
+			"loop": true,
+			"animation_length": 6,
+			"bones": {
+				"eye_of_desolation": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.5": {
+							"vector": [0, -2, 0]
+						},
+						"3.0": {
+							"vector": [0, 0, 0]
+						},
+						"4.5": {
+							"vector": [0, 2, 0]
+						},
+						"6.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"eye_of_desolation_hurt": {
+			"animation_length": 0.5,
+			"bones": {
+				"head": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.2083": {
+							"vector": [-22.4161, -1.2988, -7.3873]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.2083": {
+							"vector": [0, 0, 1.83]
+						},
+						"0.5": {
+							"vector": [0, 0, -0.17]
+						}
+					}
+				}
+			}
+		},
+		"eye_of_desolation_death": {
+			"animation_length": 2.2083,
+			"bones": {
+				"head": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [177.4709, 4.715, -1.2653]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.0833": {
+							"vector": [0, -17, 0]
+						},
+						"0.25": {
+							"vector": [0, -21, -6]
+						}
+					}
+				},
+				"outer_ring": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [-87.4614, -9.9904, -0.4406]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.0833": {
+							"vector": [0, -11, 0]
+						}
+					}
+				},
+				"inner_ring": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [95.019, 4.9809, 0.4369]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.0833": {
+							"vector": [0, -15, 0]
+						}
+					}
+				}
+			}
+		}
+	}
+}

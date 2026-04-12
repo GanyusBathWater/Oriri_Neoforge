@@ -62,7 +62,8 @@ public final class LaserBeamUtil {
             float damage,
             int   damageInterval,
             int   ownerId,
-            int   chargeTicks
+            int   chargeTicks,
+            boolean silent
     ) {
         // ── Convenience factories ──────────────────────────────────────────
 
@@ -71,7 +72,7 @@ public final class LaserBeamUtil {
          * Width: 0.4, Duration: 60 ticks (3 s), Damage: 5.0, Interval: 10 ticks (0.5 s).
          */
         public static LaserBeamConfig simple(Vec3 start, Vec3 end, int color) {
-            return new LaserBeamConfig(start, end, 0.4f, color, 60, 5.0f, 10, -1, 40);
+            return new LaserBeamConfig(start, end, 0.4f, color, 60, 5.0f, 10, -1, 40, false);
         }
 
         /**
@@ -79,7 +80,7 @@ public final class LaserBeamUtil {
          * Width: 1.5, Duration: 80 ticks, Damage: 12.0, Interval: 8 ticks.
          */
         public static LaserBeamConfig heavy(Vec3 start, Vec3 end, int color, int ownerId) {
-            return new LaserBeamConfig(start, end, 1.5f, color, 80, 12.0f, 8, ownerId, 40);
+            return new LaserBeamConfig(start, end, 1.5f, color, 80, 12.0f, 8, ownerId, 40, false);
         }
 
         /**
@@ -90,14 +91,14 @@ public final class LaserBeamUtil {
             return new LaserBeamConfig(
                     groundPos,
                     groundPos.add(0, heightBlocks, 0),
-                    0.3f, color, 40, 6.0f, 5, -1, 40);
+                    0.3f, color, 40, 6.0f, 5, -1, 40, false);
         }
 
         /**
          * A long, thin sniper beam — very narrow, high damage, short duration.
          */
         public static LaserBeamConfig sniper(Vec3 start, Vec3 end, int color, int ownerId) {
-            return new LaserBeamConfig(start, end, 0.15f, color, 20, 20.0f, 20, ownerId, 40);
+            return new LaserBeamConfig(start, end, 0.15f, color, 20, 20.0f, 20, ownerId, 40, false);
         }
     }
 
@@ -131,6 +132,7 @@ public final class LaserBeamUtil {
         beam.setDamageIntervalTicks(config.damageInterval());
         beam.setOwnerId(config.ownerId());
         beam.setChargeTicks(config.chargeTicks());
+        beam.setSilent(config.silent());
 
         level.addFreshEntity(beam);
         return beam;
@@ -142,7 +144,7 @@ public final class LaserBeamUtil {
     public static LaserBeamEntity orbitingCylinder(ServerLevel level, Vec3 center, float radius, float height, float rotSpeedDegPerTick, int color, int duration, float startAngleRad) {
         // Create a dummy simple config (positions will be immediately overwritten by orbit logic)
         LaserBeamConfig config = new LaserBeamConfig(
-                center, center, 0.4f, color, duration, 5.0f, 2, -1, 40);
+                center, center, 0.4f, color, duration, 5.0f, 2, -1, 40, false);
                 
         LaserBeamEntity beam = unleash(level, config);
         if (beam != null) {
@@ -153,7 +155,7 @@ public final class LaserBeamUtil {
 
     public static LaserBeamEntity orbitSphere(ServerLevel level, Vec3 center, float radius, float staticPitchRad, float spinSpeedDeg, int color, int durationTicks, float startYawRad, boolean silent) {
         LaserBeamConfig config = new LaserBeamConfig(
-                center, center, 0.4f, color, durationTicks, 5.0f, 2, -1, 40);
+                center, center, 0.4f, color, durationTicks, 5.0f, 2, -1, 40, silent);
 
         LaserBeamEntity beam = unleash(level, config);
         if (beam != null) {
@@ -169,7 +171,7 @@ public final class LaserBeamUtil {
     public static LaserBeamEntity orbitingClockAngle(ServerLevel level, Vec3 center, float radius, float rotSpeedDegPerTick, int color, int duration, float startAngleRad) {
         // Create a dummy simple config
         LaserBeamConfig config = new LaserBeamConfig(
-                center, center, 0.4f, color, duration, 5.0f, 2, -1, 40);
+                center, center, 0.4f, color, duration, 5.0f, 2, -1, 40, false);
 
         LaserBeamEntity beam = unleash(level, config);
         if (beam != null) {

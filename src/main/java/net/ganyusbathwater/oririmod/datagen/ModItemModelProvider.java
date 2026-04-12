@@ -297,6 +297,9 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.THE_SUN.get());
                 basicItem(ModItems.JUDGEMENT.get());
                 basicItem(ModItems.THE_WORLD.get());
+
+                withExistingParent(ModItems.FIRE_ZOMBIE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.SPORE_ZOMBIE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         }
 
         private void shieldItem(DeferredItem<?> item) {

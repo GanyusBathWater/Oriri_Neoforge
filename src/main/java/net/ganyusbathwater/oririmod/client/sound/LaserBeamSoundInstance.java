@@ -66,7 +66,9 @@ public class LaserBeamSoundInstance extends AbstractTickableSoundInstance {
         // At 0.5 pitch, the wither sound lasts ~17 seconds (340 ticks). 
         // We manually loop it right before it fades completely so it's seamless.
         if (this.lifeTime >= 280) {
-            play(this.beam);
+            // CRITICAL: Schedule the new sound to start on the next frame to avoid 
+            // ConcurrentModificationException in the SoundEngine's tick loop!
+            Minecraft.getInstance().execute(() -> play(this.beam));
             this.stop(); // stop this instance since a new one took over
         }
     }

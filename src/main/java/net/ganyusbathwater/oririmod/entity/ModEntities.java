@@ -1,6 +1,8 @@
 package net.ganyusbathwater.oririmod.entity;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.entity.custom.FireZombieEntity;
+import net.ganyusbathwater.oririmod.entity.custom.SporeZombieEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -117,7 +119,44 @@ public final class ModEntities {
                                                                                         "magic_wave")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<FireZombieEntity>> FIRE_ZOMBIE = ENTITIES
+                        .register("fire_zombie",
+                                        () -> EntityType.Builder.<FireZombieEntity>of(FireZombieEntity::new,
+                                                        MobCategory.MONSTER)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(8)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "fire_zombie")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<SporeZombieEntity>> SPORE_ZOMBIE = ENTITIES
+                        .register("spore_zombie",
+                                        () -> EntityType.Builder.<SporeZombieEntity>of(SporeZombieEntity::new,
+                                                        MobCategory.MONSTER)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(8)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "spore_zombie")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity>> EYE_OF_DESOLATION = ENTITIES
+                        .register("eye_of_desolation",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity::new,
+                                                                        MobCategory.MONSTER)
+                                                        .sized(1.5F, 1.8F)
+                                                        .eyeHeight(1.5F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "eye_of_desolation")
+                                                                        .toString()));
+
         public static void register(IEventBus modBus) {
                 ENTITIES.register(modBus);
         }
 }
+
