@@ -238,6 +238,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.BLAZING_PYROMANIAC_GUIDE);
                 handheldItem(ModItems.MAGMA_COOKING_BOOK);
                 handheldItem(ModItems.SLIMY_COOKING_BOOK);
+                withExistingParent(ModItems.AOE_TEST_ITEM.getId().getPath(), mcLoc("item/handheld"))
+                                .texture("layer0", mcLoc("item/stick"));
 
                 // ------------Armor---------------
 
@@ -300,6 +302,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 withExistingParent(ModItems.FIRE_ZOMBIE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.SPORE_ZOMBIE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.EYE_OF_DESOLATION_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         }
 
         private void shieldItem(DeferredItem<?> item) {

@@ -96,9 +96,15 @@ public class EyeOfDesolationEntity extends Monster implements GeoEntity {
     public void tick() {
         // Record spawn position on the very first tick
         if (!this.hasSpawnPos) {
-            this.spawnX = this.getX();
-            this.spawnY = this.getY(); // Reverting to exact spawn Y for AI stability
-            this.spawnZ = this.getZ();
+            // Aggressively snap to the mathematical center of the Block Grid voxel.
+            // This firmly pushes the 1.5-wide hitbox out of ANY adjacent walls 
+            // and elevates it exactly half a block upwards as requested!
+            net.minecraft.core.BlockPos pos = this.blockPosition();
+            this.spawnX = pos.getX() + 0.5;
+            this.spawnY = pos.getY() + 0.5; 
+            this.spawnZ = pos.getZ() + 0.5;
+            
+            this.setPos(this.spawnX, this.spawnY, this.spawnZ);
             this.hasSpawnPos = true;
         }
 

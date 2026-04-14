@@ -111,6 +111,80 @@ public final class MagicWaveUtil {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // ILLAGER SPECIAL — Delayed Evoker Fangs Cone
+    // ─────────────────────────────────────────────────────────────────────────
+    
+    public static void spawnIllagerSpecial(ServerLevel level, Vec3 origin, float facingYaw, int ownerId) {
+        // Visual Anchor: Safe Zone Magic Circle
+        // Increased from 0.1315f to 0.26f to match the absolute fang gap visually
+        LaserBeamUtil.LaserBeamConfig config = new LaserBeamUtil.LaserBeamConfig(
+                origin, origin, 0.26f, 0xFF_BB00FF, 100, 0f, 0, -1, 0, true
+        );
+        LaserBeamEntity beam = LaserBeamUtil.unleash(level, config);
+        if (beam != null) {
+            beam.setSilent(true);
+            beam.setCoreHidden(true);
+            beam.setUseWaveCircle(true);
+        }
+
+        // Geometric Cone Math
+        float fX = (float) Math.sin(facingYaw);
+        float fZ = (float) Math.cos(facingYaw);
+        float rX = -fZ;
+        float rZ = fX;
+
+        // Configuration Arrays
+        int chargeDelay = 40;     // 2 seconds charge-up
+        int numRows = 40;         // 20 block total distance (0.5 block spacing)
+        float rowSpacing = 0.5f;
+
+        for (int i = 0; i < numRows; i++) {
+            // Calculate delay: 4 blocks/sec means 1 row / 2.5 ticks
+            int warmupDelay = chargeDelay + (int)(i * 2.5f);
+            
+            // Distance of this row from caster
+            float distance = (i + 1) * rowSpacing; // Starts at safe zone 0.5 blocks away
+            int fangCount = 1 + (i / 2); // Cone geometry widening (+1 every two rows for a tighter spread)
+            
+            // Lateral spacing between fangs
+            float space = 1.0f;
+            float span = (fangCount - 1) * space;
+            float startLateral = -span / 2.0f;
+
+            for (int j = 0; j < fangCount; j++) {
+                float lateralOffset = startLateral + j * space;
+                
+                // Base target coordinates
+                double targetX = origin.x + fX * distance + rX * lateralOffset;
+                double targetZ = origin.z + fZ * distance + rZ * lateralOffset;
+                
+                // Smart Terrain Search: Find solid ground natively exactly like the Evoker! 
+                // Bounds between +1 to -3 from caster origin to adapt dynamically to hills
+                double targetY = findFloorY(level, targetX, origin.y, targetZ);
+
+                // Spawn Native Fang!
+                net.minecraft.world.entity.LivingEntity owner = (net.minecraft.world.entity.LivingEntity) level.getEntity(ownerId);
+                net.minecraft.world.entity.projectile.EvokerFangs fang = new net.minecraft.world.entity.projectile.EvokerFangs(
+                        level, targetX, targetY, targetZ, facingYaw, warmupDelay, owner
+                );
+                level.addFreshEntity(fang);
+            }
+        }
+    }
+
+    private static double findFloorY(ServerLevel level, double x, double startY, double z) {
+        net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, startY + 1.0, z);
+        for (int i = 0; i < 5; i++) { // Trace up to 4 blocks down
+            net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(pos.below());
+            if (stateBelow.isSolidRender(level, pos.below()) || !stateBelow.getCollisionShape(level, pos.below()).isEmpty()) {
+                return pos.getY();
+            }
+            pos = pos.below();
+        }
+        return startY; // Fallback
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 

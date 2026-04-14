@@ -33,6 +33,7 @@ public class ThreatDetectionEffect extends MobEffect {
     @Override
     public boolean applyEffectTick(LivingEntity entity, int amplifier) {
         if (!(entity instanceof Player player)) return true;
+        if (player.isCreative() || player.isSpectator()) return true;
         if (!(player.level() instanceof ServerLevel level))  return true;
 
         double radius = 24.0;

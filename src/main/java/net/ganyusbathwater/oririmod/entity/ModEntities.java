@@ -59,6 +59,18 @@ public final class ModEntities {
                                                                                         "root_visual")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.EyeOfTheStormEntity>> EYE_OF_THE_STORM = ENTITIES
+                        .register("eye_of_the_storm",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.EyeOfTheStormEntity>of(
+                                                        net.ganyusbathwater.oririmod.entity.EyeOfTheStormEntity::new,
+                                                        MobCategory.MISC)
+                                                        .sized(1f, 1f)
+                                                        .clientTrackingRange(64)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "eye_of_the_storm")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<IcicleEntity>> ICICLE = ENTITIES.register("icicle",
                         () -> EntityType.Builder.<IcicleEntity>of(IcicleEntity::new, MobCategory.MISC)
                                         .sized(0.5F, 1.0F)

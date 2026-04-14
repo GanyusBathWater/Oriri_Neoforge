@@ -65,6 +65,46 @@ public class ClientEvents {
         int textX = x + size + 6;
         int textY = y + (size / 2) - 4;
         gui.drawString(mc.font, Component.literal(manaText), textX, textY, 0xFFFFFF, true);
+
+        // ── Eye of the Storm: Blinding Blizzard Overlay ──
+        long lastBlizz = player.getPersistentData().getLong("LastBlizzardTick");
+        long lastSafeZn = player.getPersistentData().getLong("LastBlizzardSafeZoneTick");
+        long gameTime = player.level().getGameTime();
+        
+        boolean isSafe = (gameTime - lastSafeZn <= 2);
+        boolean isExp = (gameTime - lastBlizz <= 2);
+
+        if (isExp || isSafe) {
+            int width = mc.getWindow().getGuiScaledWidth();
+            int height = mc.getWindow().getGuiScaledHeight();
+
+            RenderSystem.enableBlend();
+            
+            if (isExp) {
+                // Solid Blinding White Fog background (~70% Opacity) exclusively for EXPOSED players
+                gui.fill(0, 0, width, height, 0xB0FFFFFF);
+            }
+
+            // Falling Snow Cascade Simulator
+            ResourceLocation SNOW_TEX = ResourceLocation.withDefaultNamespace("textures/environment/snow.png");
+            
+            // If strictly inside the magic circle safe zone, just show highly transparent falling snow to establish atmosphere! 
+            float alphaOverlay = isExp ? 0.9f : 0.2f; 
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alphaOverlay);
+            
+            int texSize = 512;
+            int mult = isExp ? 30 : 5; // Snow falls aggressively if exposed, lightly if safe
+            int vOffset = (int) ((gameTime * mult) % texSize); 
+            float uOffsetBase = isExp ? (float) (Math.sin(gameTime / 20.0) * 16.0) : 0f; // Lateral sway only for exposed players
+
+            for (int screenX = 0; screenX < width; screenX += texSize) {
+                for (int screenY = -texSize; screenY < height; screenY += texSize) {
+                    gui.blit(SNOW_TEX, screenX, screenY + vOffset, (int) uOffsetBase, 0, texSize, texSize, texSize, texSize);
+                }
+            }
+            RenderSystem.disableBlend();
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset
+        }
     }
 
     private static ResourceLocation selectTextureByPercent(int percent) {

@@ -30,6 +30,9 @@ public class ModEffects {
         public static final Holder<MobEffect> THREAT_DETECTION_EFFECT = MOB_EFFECTS.register("threat_detection",
                         () -> new ThreatDetectionEffect(MobEffectCategory.HARMFUL, 0xCC0000));
 
+        public static final Holder<MobEffect> COLD_AURA_EFFECT = MOB_EFFECTS.register("cold_aura",
+                        () -> new ColdAuraEffect(MobEffectCategory.HARMFUL, 0x00FFFF));
+
         public static void registerEffects(IEventBus eventBus) {
                 MOB_EFFECTS.register(eventBus);
                 OririMod.LOGGER.info("Registering Mod Effects for " + OririMod.MOD_ID);

@@ -47,6 +47,9 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
 
     private static final RenderType WAVE_CIRCLE_LAYER = RenderType.entityTranslucent(
             ResourceLocation.parse("oririmod:textures/effect/magic_circles/wave_circle.png"));
+            
+    private static final RenderType WATER_CIRCLE_LAYER = RenderType.entityTranslucent(
+            ResourceLocation.parse("oririmod:textures/effect/magic_circles/water_ground.png"));
 
     public LaserBeamRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -117,7 +120,7 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
 
         // ── Render Magic Circle if it has a charge OR is a standalone visual anchor ────
         int charge = entity.getChargeTicks();
-        if (charge > 0 || entity.usesWaveCircle()) {
+        if (charge > 0 || entity.usesWaveCircle() || entity.usesWaterCircle()) {
             float circleAge = totalAge;
             float circleAlpha = 1.0f;
             float circleScale = 1.0f;
@@ -131,7 +134,11 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
             // Branch: Support Zero-Charge Instant Spawns (like our Wave Anchor!)
             if (charge == 0) {
                 // Steadiest sweeping continuous spin for instant-cast magic circles
-                rotAngle = circleAge * 15.0f * ((float)Math.PI / 180f);
+                if (entity.usesWaterCircle()) {
+                    rotAngle = circleAge * 1.5f * ((float)Math.PI / 180f);
+                } else {
+                    rotAngle = circleAge * 15.0f * ((float)Math.PI / 180f);
+                }
                 
                 if (circleAge > duration - 20.0f) {
                     float remaining = duration - circleAge;
@@ -154,10 +161,30 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
             }
 
             if (circleAlpha > 0.01f) {
-                RenderType activeCircleLayer = entity.usesWaveCircle() ? WAVE_CIRCLE_LAYER : CIRCLE_LAYER;
+                int chargeRgb = (charge > 0) ? 0xFF_FFFFFF : argb; // keep charged circle white, but wave anchors inherit color
+                if (entity.usesWaveCircle()) {
+                    chargeRgb = 0xFF_FFFFFF; // Wave and water circles should always prioritize pure texture color mapped
+                }
+                if (entity.usesWaterCircle()) {
+                    chargeRgb = 0xFF_FFFFFF; // Pure
+                }
+
+                RenderType activeCircleLayer = CIRCLE_LAYER;
+                if (entity.usesWaveCircle()) {
+                    activeCircleLayer = WAVE_CIRCLE_LAYER;
+                } else if (entity.usesWaterCircle()) {
+                    activeCircleLayer = WATER_CIRCLE_LAYER;
+                }
+
                 VertexConsumer cvc = buffer.getBuffer(activeCircleLayer);
                 poseStack.pushPose();
-                poseStack.translate(sx, sy, sz);
+                
+                // Add a tiny 0.05f lift to prevent Z-fighting clipping on flat ground
+                double renderY = sy;
+                if ((entity.usesWaveCircle() || entity.usesWaterCircle()) && dy > 0.9f) {
+                    renderY += 0.05f;
+                }
+                poseStack.translate(sx, renderY, sz);
                 
                 // Align to face precisely down the laser beam!
                 poseStack.mulPose(com.mojang.math.Axis.YP.rotation(circleYaw));

@@ -76,6 +76,8 @@ public class LaserBeamEntity extends Entity {
             SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> USE_WAVE_CIRCLE      =
             SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> USE_WATER_CIRCLE     =
+            SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.BOOLEAN);
 
     // ──────────────────────────────────────────────────────────────────────────
     // Constructor
@@ -100,6 +102,7 @@ public class LaserBeamEntity extends Entity {
         builder.define(END_Z, 0.0f);
         builder.define(CORE_HIDDEN, false);
         builder.define(USE_WAVE_CIRCLE, false);
+        builder.define(USE_WATER_CIRCLE, false);
         builder.define(BEAM_WIDTH,      0.4f);
         builder.define(BEAM_COLOR,      0xFF_00AAFF);  // electric blue default
         builder.define(DURATION_TICKS,  60);
@@ -136,6 +139,7 @@ public class LaserBeamEntity extends Entity {
     public void setChargeTicks(int ticks)           { this.entityData.set(CHARGE_TICKS,    ticks);    }
     public void setCoreHidden(boolean hidden)       { this.entityData.set(CORE_HIDDEN,     hidden);   }
     public void setUseWaveCircle(boolean useWave)   { this.entityData.set(USE_WAVE_CIRCLE, useWave);  }
+    public void setUseWaterCircle(boolean use)      { this.entityData.set(USE_WATER_CIRCLE, use);     }
 
     // ──────────────────────────────────────────────────────────────────────────
     // Orbital mechanics (Server-only)
@@ -215,6 +219,7 @@ public class LaserBeamEntity extends Entity {
     public int    getChargeTicks()        { return this.entityData.get(CHARGE_TICKS);     }
     public boolean isCoreHidden()         { return this.entityData.get(CORE_HIDDEN);      }
     public boolean usesWaveCircle()       { return this.entityData.get(USE_WAVE_CIRCLE);  }
+    public boolean usesWaterCircle()      { return this.entityData.get(USE_WATER_CIRCLE); }
 
     // ──────────────────────────────────────────────────────────────────────────
     // Tick logic

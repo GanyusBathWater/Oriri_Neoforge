@@ -68,6 +68,40 @@ public class ServerEvents {
         }
 
         ModManaUtil.tick(player);
+
+        // ── Cold Aura Defrost System ──
+        net.minecraft.world.effect.MobEffectInstance coldAura = player.getEffect(ModEffects.COLD_AURA_EFFECT);
+        if (coldAura != null) {
+            long lastBlizz = player.getPersistentData().getLong("LastBlizzardTick");
+            long gameTime = player.level().getGameTime();
+            
+            // Only defrost if they are safely outside the active blizzard control loop
+            if (gameTime - lastBlizz > 5) {
+                // Is the player near an active light source (ambient light > 11, like lava, torches, lanterns)?
+                boolean fastThaw = player.level().getLightEngine().getRawBrightness(player.blockPosition(), 0) > 11;
+                int currentAmp = coldAura.getAmplifier();
+                int defrostProgress = player.getPersistentData().getInt("ColdAuraDefrostProg");
+                
+                // Advanced Math: Base = 200 ticks (10 seconds)
+                // Fast = Roughly 30 ticks (1.5 seconds)
+                defrostProgress += fastThaw ? 6 : 1; 
+                
+                if (defrostProgress >= 200) {
+                    player.getPersistentData().putInt("ColdAuraDefrostProg", 0);
+                    player.removeEffect(ModEffects.COLD_AURA_EFFECT); // Safely strip current layer
+                    // Re-apply if drops below 0? No, let it organically drop to 0 and disappear.
+                    if (currentAmp > 0) {
+                        player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                                ModEffects.COLD_AURA_EFFECT, 200, currentAmp - 1, false, false, true));
+                    }
+                } else {
+                    player.getPersistentData().putInt("ColdAuraDefrostProg", defrostProgress);
+                }
+            } else {
+                // Trapped in blizzard: Re-freeze/reset any active thaw
+                player.getPersistentData().putInt("ColdAuraDefrostProg", 0);
+            }
+        }
     }
 
     @SubscribeEvent

@@ -41,5 +41,6 @@ public class ModEntityClient {
                                 net.ganyusbathwater.oririmod.client.render.FireZombieRenderer::new);
                 event.registerEntityRenderer(ModEntities.SPORE_ZOMBIE.get(),
                                 net.ganyusbathwater.oririmod.client.render.SporeZombieRenderer::new);
+                event.registerEntityRenderer(ModEntities.EYE_OF_THE_STORM.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
         }
 }

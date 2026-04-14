@@ -23,7 +23,7 @@ public class BossAttackDebugWandItem extends Item {
     public enum BossAttackType {
         SWORD_PROJECTILE, METEOR_SHOWER, LASERBEAM_NORMAL, LASERBEAM_CYLINDER, LASERBEAM_CIRCLE,
         LASERBEAM_GROUND, LASERBEAM_STARBURST, INSTA_DEATH, ROOT_ATTACK, GROUND_SLAM,
-        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN;
+        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM;
     }
 
     private static final String NBT_SELECTED = "ActiveAttack";
@@ -181,6 +181,26 @@ public class BossAttackDebugWandItem extends Item {
                                 serverLevel, origin, facingYaw, randomColor, 6f, player.getId());
                     }
                 }
+            } else if (current == BossAttackType.ILLAGER_SPECIAL
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                Vec3 origin = target != null ? target.position() : player.position();
+                float facingYaw = (float) Math.toRadians(-player.getYRot());
+                net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnIllagerSpecial(
+                        serverLevel, origin, facingYaw, player.getId());
+            } else if (current == BossAttackType.EYE_OF_THE_STORM
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                Vec3 origin = target != null ? target.position() : player.position();
+                net.ganyusbathwater.oririmod.entity.EyeOfTheStormEntity storm = new net.ganyusbathwater.oririmod.entity.EyeOfTheStormEntity(
+                        net.ganyusbathwater.oririmod.entity.ModEntities.EYE_OF_THE_STORM.get(), serverLevel
+                );
+                storm.setPos(origin);
+                serverLevel.addFreshEntity(storm);
+            } else if (current == BossAttackType.ILLAGER_SPECIAL
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                Vec3 origin = target != null ? target.position() : player.position();
+                float facingYaw = (float) Math.toRadians(-player.getYRot());
+                net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnIllagerSpecial(
+                        serverLevel, origin, facingYaw, player.getId());
             }
         }
 
@@ -279,6 +299,8 @@ public class BossAttackDebugWandItem extends Item {
             case WAVE_CIRCULAR -> "Wave: Circular";
             case WAVE_CONE -> "Wave: Cone";
             case WAVE_PLAIN -> "Wave: Plain";
+            case ILLAGER_SPECIAL -> "Illager Special";
+            case EYE_OF_THE_STORM -> "Eye of the Storm";
         };
     }
 }
