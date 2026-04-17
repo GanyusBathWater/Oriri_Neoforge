@@ -18,6 +18,11 @@ public class ModBlockEntities {
             () -> BlockEntityType.Builder.of(EquinoxTableBlockEntity::new,
                     ModBlocks.EQUINOX_TABLE.get()).build(null));
 
+    public static final Supplier<BlockEntityType<RevivalShrineBlockEntity>> REVIVAL_SHRINE = BLOCK_ENTITIES.register(
+            "revival_shrine",
+            () -> BlockEntityType.Builder.of(RevivalShrineBlockEntity::new,
+                    ModBlocks.REVIVAL_SHRINE.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

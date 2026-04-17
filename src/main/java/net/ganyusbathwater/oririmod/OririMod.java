@@ -111,12 +111,15 @@ public class OririMod {
             event.accept(ModItems.FIRE_ZOMBIE_SPAWN_EGG);
             event.accept(ModItems.SPORE_ZOMBIE_SPAWN_EGG);
             event.accept(ModItems.EYE_OF_DESOLATION_SPAWN_EGG);
+            event.accept(ModItems.BLIZZA_SPAWN_EGG);
         }
     }
 
     private void registerEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
         event.put(net.ganyusbathwater.oririmod.entity.ModEntities.EYE_OF_DESOLATION.get(),
                 net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity.createAttributes().build());
+        event.put(net.ganyusbathwater.oririmod.entity.ModEntities.BLIZZA.get(),
+                net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity.createAttributes().build());
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

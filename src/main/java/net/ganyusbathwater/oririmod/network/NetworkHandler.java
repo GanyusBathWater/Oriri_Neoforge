@@ -28,6 +28,8 @@ public final class NetworkHandler {
             "spawn_aoe_indicator");
     public static final ResourceLocation SELECT_BOSS_ATTACK = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "select_boss_attack");
+    public static final ResourceLocation BLIZZA_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "blizza_spawn_title");
 
     private NetworkHandler() {
     }
@@ -65,6 +67,13 @@ public final class NetworkHandler {
                     var pkt = payload.getPacket();
                     net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addIndicator(
                             pkt.getCenter(), pkt.getRadius(), pkt.getDurationTicks(), pkt.getArgbColor());
+                }));
+
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.BlizzaSpawnTitlePayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.BlizzaSpawnTitlePayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.events.ClientEvents.triggerBlizzaTitle();
                 }));
 
         registrar.playToServer(
@@ -119,5 +128,10 @@ public final class NetworkHandler {
         PacketDistributor.sendToPlayersNear(
                 level, null, center.getX(), center.getY(), center.getZ(), 128.0D,
                 new SpawnAoEIndicatorPayload(pkt));
+    }
+
+    public static void sendBlizzaTitleToPlayer(ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.BlizzaSpawnTitlePayload());
     }
 }

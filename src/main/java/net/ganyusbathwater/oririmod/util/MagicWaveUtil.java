@@ -115,10 +115,10 @@ public final class MagicWaveUtil {
     // ─────────────────────────────────────────────────────────────────────────
     
     public static void spawnIllagerSpecial(ServerLevel level, Vec3 origin, float facingYaw, int ownerId) {
-        // Visual Anchor: Safe Zone Magic Circle
-        // Increased from 0.1315f to 0.26f to match the absolute fang gap visually
+        // Light-blue magic circle (issue #9)
+        int LIGHT_BLUE = 0xFF_4FC3F7;
         LaserBeamUtil.LaserBeamConfig config = new LaserBeamUtil.LaserBeamConfig(
-                origin, origin, 0.26f, 0xFF_BB00FF, 100, 0f, 0, -1, 0, true
+                origin, origin, 0.52f, LIGHT_BLUE, 100, 0f, 0, -1, 0, true
         );
         LaserBeamEntity beam = LaserBeamUtil.unleash(level, config);
         if (beam != null) {
@@ -135,7 +135,7 @@ public final class MagicWaveUtil {
 
         // Configuration Arrays
         int chargeDelay = 40;     // 2 seconds charge-up
-        int numRows = 40;         // 20 block total distance (0.5 block spacing)
+        int numRows = 80;         // Issue #9: doubled from 40 → 40 block total distance (0.5 block spacing)
         float rowSpacing = 0.5f;
 
         for (int i = 0; i < numRows; i++) {

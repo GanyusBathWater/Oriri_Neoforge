@@ -17,6 +17,9 @@ public final class EntityElementRegistry {
     }
 
     public static Element getElement(Entity entity) {
+        if (entity instanceof IElementalEntity elementalEntity) {
+            return elementalEntity.getElement();
+        }
         return ENTITY_ELEMENTS.getOrDefault(entity.getType(), Element.PHYSICAL);
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.tags.ItemTags;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.item.Item;
@@ -307,6 +308,15 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .pattern("B")
                                 .define('B', ModBlocks.SOL_SANDSTONE)
                                 .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE)).save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.REVIVAL_SHRINE, 1)
+                                .pattern("AAA")
+                                .pattern("ABA")
+                                .pattern("CCC")
+                                .define('A', Blocks.WHITE_WOOL)
+                                .define('B', ModItems.HOLLOW_SOUL)
+                                .define('C', Blocks.GOLD_BLOCK)
+                                .unlockedBy("has_hollow_soul", has(ModItems.HOLLOW_SOUL)).save(recipeOutput);
 
                 // --- Sword Conversions ---
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModBlocks.TILTED_BROKEN_SWORD_BLOCK, 1)

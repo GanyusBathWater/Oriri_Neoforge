@@ -466,6 +466,10 @@ public class ModBlocks {
                         () -> new AbyssCrownSaplingBlock(ModTreeGrowers.ABYSS_CROWN_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING), true));
 
+        // ===== REVIVAL SHRINE =====
+        public static final DeferredBlock<Block> REVIVAL_SHRINE = registerBlock("revival_shrine",
+                        () -> new RevivalShrineBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).noOcclusion()));
+
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);
                 registerBlockItem(name, toReturn);
@@ -480,6 +484,10 @@ public class ModBlocks {
                 } else if (name.startsWith("upgraded_")) {
                         ModItems.ITEMS.register(name,
                                         () -> new net.ganyusbathwater.oririmod.item.custom.UpgradedSaplingItem(
+                                                        block.get(), new Item.Properties()));
+                } else if (name.equals("revival_shrine")) {
+                        ModItems.ITEMS.register(name,
+                                        () -> new net.ganyusbathwater.oririmod.item.custom.RevivalShrineBlockItem(
                                                         block.get(), new Item.Properties()));
                 } else {
                         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));

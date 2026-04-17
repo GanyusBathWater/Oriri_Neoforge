@@ -47,6 +47,15 @@ public final class ModEntities {
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "meteor")
                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<MagicProjectileEntity>> MAGIC_PROJECTILE = ENTITIES.register(
+                        "magic_projectile",
+                        () -> EntityType.Builder.<MagicProjectileEntity>of(MagicProjectileEntity::new, MobCategory.MISC)
+                                        .sized(0.5F, 0.5F)
+                                        .clientTrackingRange(64)
+                                        .updateInterval(1)
+                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "magic_projectile")
+                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.RootVisualEntity>> ROOT_VISUAL = ENTITIES
                         .register("root_visual",
                                         () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.RootVisualEntity>of(
@@ -165,6 +174,32 @@ public final class ModEntities {
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "eye_of_desolation")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity>> BLIZZA = ENTITIES
+                        .register("blizza",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity::new,
+                                                                        MobCategory.MONSTER)
+                                                        .sized(0.8F, 2.5F)
+                                                        .clientTrackingRange(64)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "blizza")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.SplinterSpiderEntity>> SPLINTER_SPIDER = ENTITIES
+                        .register("splinter_spider",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.SplinterSpiderEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.SplinterSpiderEntity::new,
+                                                                        MobCategory.MONSTER)
+                                                        .sized(1.4F, 0.9F)
+                                                        .clientTrackingRange(8)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "splinter_spider")
                                                                         .toString()));
 
         public static void register(IEventBus modBus) {

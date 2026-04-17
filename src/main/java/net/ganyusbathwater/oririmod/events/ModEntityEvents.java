@@ -14,5 +14,6 @@ public class ModEntityEvents {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(ModEntities.FIRE_ZOMBIE.get(), Zombie.createAttributes().build());
         event.put(ModEntities.SPORE_ZOMBIE.get(), Zombie.createAttributes().build());
+        event.put(ModEntities.SPLINTER_SPIDER.get(), net.minecraft.world.entity.monster.Spider.createAttributes().build());
     }
 }

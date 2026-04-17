@@ -45,6 +45,7 @@ public class EquinoxTableJeiCategory implements IRecipeCategory<EquinoxTableReci
     }
 
     @Override
+    @SuppressWarnings("removal")
     public @NotNull IDrawable getBackground() {
         return this.background;
     }

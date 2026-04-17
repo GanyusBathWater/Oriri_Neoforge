@@ -26,6 +26,10 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.BossAttackDebugWandItem(
                                         new Item.Properties().stacksTo(1)));
 
+        public static final DeferredItem<Item> MAGIC_DEBUG_STICK = ITEMS.register("magic_debug_stick",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.magic.MagicDebugStickItem(
+                                        new Item.Properties().stacksTo(1)));
+
         // -------------------------------------Crafting
         // Items---------------------------------------------------------
 
@@ -112,6 +116,10 @@ public class ModItems {
         public static final DeferredItem<Item> AOE_TEST_ITEM = ITEMS.register("aoe_test_item",
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.AoETestItem(
                                         new Item.Properties().stacksTo(1)));
+                                        
+        public static final DeferredItem<DogTagItem> DOG_TAG = ITEMS.register("dog_tag",
+                        () -> new DogTagItem(new Item.Properties().stacksTo(1)));
+
 
         // ---------------------------------------Foods-----------------------------------------------------------
 
@@ -386,6 +394,18 @@ public class ModItems {
                         "eye_of_desolation_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.EYE_OF_DESOLATION,
                                         0x1A1A2E, 0xFF1E00, // outer: deep void navy, inner: crimson red
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> BLIZZA_SPAWN_EGG = ITEMS.register(
+                        "blizza_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.BLIZZA,
+                                        0x4FC3F7, 0xFFFFFF, // outer: ice blue, inner: crystal white
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> SPLINTER_SPIDER_SPAWN_EGG = ITEMS.register(
+                        "splinter_spider_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.SPLINTER_SPIDER,
+                                        0x342D27, 0x6E5C53, // outer: dark brown, inner: lighter brown
                                         new Item.Properties()));
 
         // ------------------------------------------------------Armor---------------------------------------------------------

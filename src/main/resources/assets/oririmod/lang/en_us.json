@@ -523,5 +523,14 @@
   "item.oririmod.spore_zombie_spawn_egg": "Spore Zombie Spawn Egg",
   "entity.oririmod.eye_of_desolation": "Eye of Desolation",
   "item.oririmod.eye_of_desolation_spawn_egg": "Eye of Desolation Spawn Egg",
-  "effect.oririmod.threat_detection": "Threat Detection"
+  "effect.oririmod.threat_detection": "Threat Detection",
+  "entity.oririmod.blizza": "Blizza",
+  "item.oririmod.blizza_spawn_egg": "Blizza Spawn Egg",
+  "item.oririmod.magic_debug_stick": "Magic Debug Stick",
+  "entity.oririmod.splinter_spider": "Splinter Spider",
+  "item.oririmod.splinter_spider_spawn_egg": "Splinter Spider Spawn Egg",
+  "item.oririmod.dog_tag": "Dog Tag",
+  "tooltip.oririmod.dog_tag": "Your lost pal is waiting for you, use it on a Revival Shrine to bring your friend back",
+  "block.oririmod.revival_shrine": "Revival Shrine",
+  "tooltip.oririmod.revival_shrine": "A mythical artifact, older than most that is known. Old scholars say it resembles an old divine beast called Glitzy."
 }

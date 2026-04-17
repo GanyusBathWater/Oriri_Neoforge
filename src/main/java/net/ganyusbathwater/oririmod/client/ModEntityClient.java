@@ -42,5 +42,13 @@ public class ModEntityClient {
                 event.registerEntityRenderer(ModEntities.SPORE_ZOMBIE.get(),
                                 net.ganyusbathwater.oririmod.client.render.SporeZombieRenderer::new);
                 event.registerEntityRenderer(ModEntities.EYE_OF_THE_STORM.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+                event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
+                                net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
+                event.registerEntityRenderer(ModEntities.BLIZZA.get(),
+                                net.ganyusbathwater.oririmod.client.render.BlizzaRenderer::new);
+                event.registerEntityRenderer(ModEntities.SPLINTER_SPIDER.get(),
+                                net.ganyusbathwater.oririmod.client.render.SplinterSpiderRenderer::new);
+                event.registerEntityRenderer(ModEntities.MAGIC_PROJECTILE.get(),
+                                net.ganyusbathwater.oririmod.client.render.MagicProjectileRenderer::new);
         }
 }

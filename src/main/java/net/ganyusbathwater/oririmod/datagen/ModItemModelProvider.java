@@ -232,6 +232,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.STAFF_OF_ALMIGHTY);
                 withExistingParent(ModItems.BOSS_ATTACK_DEBUG_WAND.getId().getPath(), mcLoc("item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
+                withExistingParent(ModItems.MAGIC_DEBUG_STICK.getId().getPath(), mcLoc("item/handheld"))
+                                .texture("layer0", mcLoc("item/stick"));
                 handheldItem(ModItems.ZOMBIE_ENCYCLOPEDIA);
                 handheldItem(ModItems.SKELETON_ENCYCLOPEDIA);
                 handheldItem(ModItems.IRON_GOLEM_MANUAL);
@@ -303,6 +305,48 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.FIRE_ZOMBIE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.SPORE_ZOMBIE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.EYE_OF_DESOLATION_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.BLIZZA_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.SPLINTER_SPIDER_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+
+                // ===== REVIVAL MECHANICS =====
+                withExistingParent(ModItems.DOG_TAG.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", mcLoc("item/name_tag"));
+                                
+                // Maps the GeoItem Renderer explicitly to the model. We use builtin/entity to trigger it, and inject manual displays.
+                getBuilder(ModBlocks.REVIVAL_SHRINE.getId().getPath())
+                                .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                .transforms()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.GUI)
+                                                .rotation(30, 225, 0)
+                                                .translation(0, 0, 0)
+                                                .scale(0.625f, 0.625f, 0.625f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.GROUND)
+                                                .rotation(0, 0, 0)
+                                                .translation(0, 3, 0)
+                                                .scale(0.25f, 0.25f, 0.25f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIXED)
+                                                .rotation(0, 0, 0)
+                                                .translation(0, 0, 0)
+                                                .scale(0.5f, 0.5f, 0.5f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                                                .rotation(75, 45, 0)
+                                                .translation(0, 2.5f, 0)
+                                                .scale(0.375f, 0.375f, 0.375f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                                                .rotation(0, 45, 0)
+                                                .translation(0, 0, 0)
+                                                .scale(0.40f, 0.40f, 0.40f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                                                .rotation(0, 225, 0)
+                                                .translation(0, 0, 0)
+                                                .scale(0.40f, 0.40f, 0.40f)
+                                                .end()
+                                .end();
         }
 
         private void shieldItem(DeferredItem<?> item) {

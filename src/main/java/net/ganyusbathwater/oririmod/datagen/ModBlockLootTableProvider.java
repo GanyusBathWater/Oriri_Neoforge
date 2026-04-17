@@ -87,6 +87,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
         dropSelf(ModBlocks.BROKEN_SWORD_BLOCK.get());
         dropSelf(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
+        dropSelf(ModBlocks.REVIVAL_SHRINE.get());
 
         dropSelf(ModBlocks.SOL_GLASS.get());
         dropSelf(ModBlocks.SOL_GLASS_PANE.get());

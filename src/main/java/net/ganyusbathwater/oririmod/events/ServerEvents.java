@@ -321,6 +321,23 @@ public class ServerEvents {
             return;
         if (!(entity.level() instanceof ServerLevel))
             return;
+            
+        // ----- Dog Tag Mechanism -----
+        if (entity instanceof net.minecraft.world.entity.animal.Wolf wolf) {
+            if (wolf.isTame() && wolf.hasCustomName()) {
+                ItemStack dogTag = new ItemStack(net.ganyusbathwater.oririmod.item.ModItems.DOG_TAG.get());
+                net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+                wolf.saveWithoutId(tag);
+                dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+                dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, wolf.getCustomName());
+                
+                net.minecraft.world.entity.item.ItemEntity drop = new net.minecraft.world.entity.item.ItemEntity(
+                        wolf.level(), wolf.getX(), wolf.getY(), wolf.getZ(), dogTag);
+                event.getDrops().add(drop);
+            }
+        }
+        // -----------------------------
+
         if (!WorldEventManager.isEventActive(entity.level(), WorldEventType.GREEN_MOON))
             return;
 
@@ -330,6 +347,9 @@ public class ServerEvents {
             List<ItemEntity> originalDrops = new ArrayList<>(event.getDrops());
 
             for (ItemEntity drop : originalDrops) {
+                // If it's a dog tag we just injected, this might duplicate it, but let's prevent duplicating dog tags.
+                if (drop.getItem().is(net.ganyusbathwater.oririmod.item.ModItems.DOG_TAG.get())) continue;
+                
                 ItemStack stack = drop.getItem().copy();
                 stack.setCount(stack.getCount());
                 ItemEntity extra = new ItemEntity(level, drop.getX(), drop.getY(), drop.getZ(), stack);

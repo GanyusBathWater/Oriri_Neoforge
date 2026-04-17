@@ -146,6 +146,8 @@ public class OririClient {
         event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.REVIVAL_SHRINE.get(),
+                net.ganyusbathwater.oririmod.client.render.block.RevivalShrineRenderer::new);
     }
 
     @SubscribeEvent

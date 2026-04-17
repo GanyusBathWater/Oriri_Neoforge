@@ -234,6 +234,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_WISE);
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
                         output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
+                        output.accept(ModItems.MAGIC_DEBUG_STICK);
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.SKELETON_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.IRON_GOLEM_MANUAL);
@@ -242,7 +243,9 @@ public class ModItemGroups {
                         acceptAllLevels(output, ModItems.SLIMY_COOKING_BOOK);
                         output.accept(ModItems.FIRE_ZOMBIE_SPAWN_EGG);
                         output.accept(ModItems.SPORE_ZOMBIE_SPAWN_EGG);
+                        output.accept(ModItems.SPLINTER_SPIDER_SPAWN_EGG);
                         output.accept(ModItems.EYE_OF_DESOLATION_SPAWN_EGG);
+                        output.accept(ModItems.BLIZZA_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);
