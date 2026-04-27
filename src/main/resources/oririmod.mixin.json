@@ -11,7 +11,8 @@
   ],
   "client": [
     "ClientLevelMixin",
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "WolfRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -179,4 +179,44 @@ public final class LaserBeamUtil {
         }
         return beam;
     }
+
+    /**
+     * Spawns a grid of laser beams.
+     * @param level Server level
+     * @param center Center of the grid
+     * @param totalBeams Total number of beams (e.g. 6, 8, 10, 12). Half will run along X, half along Z.
+     * @param arenaSize The total width/length of the square grid area.
+     * @param ownerId Owner ID
+     */
+    public static void spawnMagicGrid(ServerLevel level, Vec3 center, int totalBeams, double arenaSize, int ownerId) {
+        int beamsPerAxis = totalBeams / 2;
+        double gap = arenaSize / (beamsPerAxis + 1); // Distribute evenly across the arena
+        double beamLength = (arenaSize / 2.0) + 6.0; // Extend beyond the arena boundary
+
+        int color = 0xFF_FF0000; // Red
+        int chargeTicks = 40; // 2 seconds charge up
+        int durationTicks = 40; // 2 seconds active
+
+        for (int i = 0; i < beamsPerAxis; i++) {
+            double offset = (i - (beamsPerAxis - 1) / 2.0) * gap;
+
+            // Beam running along Z axis (constant X)
+            Vec3 startZ = center.add(offset, 0, -beamLength);
+            Vec3 endZ = center.add(offset, 0, beamLength);
+
+            LaserBeamConfig configZ = new LaserBeamConfig(
+                    startZ, endZ, 0.4f, color, durationTicks, 8.0f, 5, ownerId, chargeTicks, false
+            );
+            unleash(level, configZ);
+
+            // Beam running along X axis (constant Z)
+            Vec3 startX = center.add(-beamLength, 0, offset);
+            Vec3 endX = center.add(beamLength, 0, offset);
+
+            LaserBeamConfig configX = new LaserBeamConfig(
+                    startX, endX, 0.4f, color, durationTicks, 8.0f, 5, ownerId, chargeTicks, false
+            );
+            unleash(level, configX);
+        }
+    }
 }

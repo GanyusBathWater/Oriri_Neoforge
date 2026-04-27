@@ -44,6 +44,8 @@ public class MagicWaveEntity extends Entity {
             SynchedEntityData.defineId(MagicWaveEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> OWNER_ID =
             SynchedEntityData.defineId(MagicWaveEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CHARGE_TICKS =
+            SynchedEntityData.defineId(MagicWaveEntity.class, EntityDataSerializers.INT);
 
     // ── Local server-only state ───────────────────────────────────────────────
     private int ageTicks = 0;
@@ -62,6 +64,7 @@ public class MagicWaveEntity extends Entity {
         builder.define(DIR_Z,     1f);
         builder.define(DAMAGE,    4f);
         builder.define(OWNER_ID, -1);
+        builder.define(CHARGE_TICKS, 0);
     }
 
     // ── Public setters ─────────────────────────────────────────────────────────
@@ -75,6 +78,7 @@ public class MagicWaveEntity extends Entity {
     }
     public void setWaveDamage(float dmg)   { this.entityData.set(DAMAGE, dmg); }
     public void setOwnerId(int id)         { this.entityData.set(OWNER_ID, id); }
+    public void setChargeTicks(int ticks)  { this.entityData.set(CHARGE_TICKS, ticks); }
 
     // ── Public getters (used by renderer) ─────────────────────────────────────
     public int   getWaveColor()  { return this.entityData.get(WAVE_COLOR); }
@@ -95,9 +99,14 @@ public class MagicWaveEntity extends Entity {
         }
 
         ageTicks++;
+        int charge = this.entityData.get(CHARGE_TICKS);
+        
+        if (ageTicks < charge) {
+            return; // Wait for charge
+        }
 
         // ── Lifetime check ─────────────────────────────────────────────────
-        if (ageTicks >= MAX_LIFETIME) {
+        if (ageTicks >= MAX_LIFETIME + charge) {
             this.discard();
             return;
         }
@@ -188,6 +197,7 @@ public class MagicWaveEntity extends Entity {
         tag.putFloat("DirZ",     this.entityData.get(DIR_Z));
         tag.putFloat("Damage",   this.entityData.get(DAMAGE));
         tag.putInt("OwnerId",    this.entityData.get(OWNER_ID));
+        tag.putInt("ChargeTicks",this.entityData.get(CHARGE_TICKS));
         tag.putInt("AgeTicks",   ageTicks);
     }
 
@@ -198,6 +208,7 @@ public class MagicWaveEntity extends Entity {
         this.entityData.set(DIR_Z,      tag.getFloat("DirZ"));
         this.entityData.set(DAMAGE,     tag.getFloat("Damage"));
         this.entityData.set(OWNER_ID,   tag.getInt("OwnerId"));
+        this.entityData.set(CHARGE_TICKS, tag.getInt("ChargeTicks"));
         ageTicks = tag.getInt("AgeTicks");
     }
 

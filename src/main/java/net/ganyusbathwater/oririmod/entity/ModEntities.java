@@ -202,6 +202,33 @@ public final class ModEntities {
                                                                                         "splinter_spider")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.VenomousPlantEntity>> VENOMOUS_PLANT = ENTITIES
+                        .register("venomous_plant",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.VenomousPlantEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.VenomousPlantEntity::new,
+                                                                        MobCategory.MONSTER)
+                                                        .sized(1.0F, 1.5F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "venomous_plant")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.ThornProjectileEntity>> THORN_PROJECTILE = ENTITIES
+                        .register("thorn_projectile",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.ThornProjectileEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.ThornProjectileEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(0.3F, 0.3F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "thorn_projectile")
+                                                                        .toString()));
+
         public static void register(IEventBus modBus) {
                 ENTITIES.register(modBus);
         }

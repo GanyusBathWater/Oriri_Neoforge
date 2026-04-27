@@ -23,7 +23,7 @@ public class BossAttackDebugWandItem extends Item {
     public enum BossAttackType {
         SWORD_PROJECTILE, METEOR_SHOWER, LASERBEAM_NORMAL, LASERBEAM_CYLINDER, LASERBEAM_CIRCLE,
         LASERBEAM_GROUND, LASERBEAM_STARBURST, INSTA_DEATH, ROOT_ATTACK, GROUND_SLAM,
-        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM;
+        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM, LASERBEAM_GRID;
     }
 
     private static final String NBT_SELECTED = "ActiveAttack";
@@ -170,15 +170,15 @@ public class BossAttackDebugWandItem extends Item {
 
                     if (current == BossAttackType.WAVE_CIRCULAR) {
                         net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnCircular(
-                                serverLevel, origin, 32, randomColor, 6f, player.getId());
+                                serverLevel, origin, 32, randomColor, 6f, player.getId(), 40);
                     } else if (current == BossAttackType.WAVE_CONE) {
                         float facingYaw = (float) Math.toRadians(-player.getYRot());
                         net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnCone(
-                                serverLevel, origin, facingYaw, randomColor, 6f, player.getId());
+                                serverLevel, origin, facingYaw, randomColor, 6f, player.getId(), 40);
                     } else if (current == BossAttackType.WAVE_PLAIN) {
                         float facingYaw = (float) Math.toRadians(-player.getYRot());
                         net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnPlainWave(
-                                serverLevel, origin, facingYaw, randomColor, 6f, player.getId());
+                                serverLevel, origin, facingYaw, randomColor, 6f, player.getId(), 40);
                     }
                 }
             } else if (current == BossAttackType.ILLAGER_SPECIAL
@@ -186,7 +186,7 @@ public class BossAttackDebugWandItem extends Item {
                 Vec3 origin = target != null ? target.position() : player.position();
                 float facingYaw = (float) Math.toRadians(-player.getYRot());
                 net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnIllagerSpecial(
-                        serverLevel, origin, facingYaw, player.getId());
+                        serverLevel, origin, facingYaw, player.getId(), 40);
             } else if (current == BossAttackType.EYE_OF_THE_STORM
                     && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 Vec3 origin = target != null ? target.position() : player.position();
@@ -195,12 +195,14 @@ public class BossAttackDebugWandItem extends Item {
                 );
                 storm.setPos(origin);
                 serverLevel.addFreshEntity(storm);
-            } else if (current == BossAttackType.ILLAGER_SPECIAL
+            } else if (current == BossAttackType.LASERBEAM_GRID
                     && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                Vec3 origin = target != null ? target.position() : player.position();
-                float facingYaw = (float) Math.toRadians(-player.getYRot());
-                net.ganyusbathwater.oririmod.util.MagicWaveUtil.spawnIllagerSpecial(
-                        serverLevel, origin, facingYaw, player.getId());
+                Vec3 center = target != null ? target.position().add(0, 0.5, 0) : player.position().add(0, 0.5, 0);
+                // Cycle through 6, 8, 10, 12 beams randomly for testing
+                int[] possibleBeams = {6, 8, 10, 12};
+                int beamCount = possibleBeams[level.random.nextInt(possibleBeams.length)];
+                double arenaSize = 20.0; // Dynamic arena size (20x20 blocks)
+                net.ganyusbathwater.oririmod.util.LaserBeamUtil.spawnMagicGrid(serverLevel, center, beamCount, arenaSize, player.getId());
             }
         }
 
@@ -301,6 +303,7 @@ public class BossAttackDebugWandItem extends Item {
             case WAVE_PLAIN -> "Wave: Plain";
             case ILLAGER_SPECIAL -> "Illager Special";
             case EYE_OF_THE_STORM -> "Eye of the Storm";
+            case LASERBEAM_GRID -> "Laserbeam Grid";
         };
     }
 }

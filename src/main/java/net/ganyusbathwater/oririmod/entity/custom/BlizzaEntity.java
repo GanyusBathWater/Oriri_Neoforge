@@ -3,6 +3,7 @@ package net.ganyusbathwater.oririmod.entity.custom;
 import net.ganyusbathwater.oririmod.entity.EyeOfTheStormEntity;
 import net.ganyusbathwater.oririmod.entity.ai.BlizzaMagicAttackGoal;
 import net.ganyusbathwater.oririmod.entity.ai.BlizzaMeleeAttackGoal;
+import net.ganyusbathwater.oririmod.effect.ModEffects;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -164,6 +165,11 @@ public class BlizzaEntity extends Monster implements GeoEntity {
             // Issue #7: check if an Eye of the Storm is near Blizza
             boolean stormNearby = isEyeOfStormActive();
             this.entityData.set(DATA_CASTING, stormNearby);
+
+            // Force stationary behavior during Eye of the Storm (issue #12)
+            if (stormNearby) {
+                this.getNavigation().stop();
+            }
 
             // Anti-camp mechanic: If a player stays within 5 blocks for 4 seconds, hit them with Slowness III for 3s
             LivingEntity target = getTarget();
@@ -337,6 +343,11 @@ public class BlizzaEntity extends Monster implements GeoEntity {
         float base = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float damage = isPhase2 ? base * 1.25f : base;
         target.hurt(this.damageSources().mobAttack(this), damage);
+
+        // Apply Cold Aura x3 on hit
+        MobEffectInstance existing = target.getEffect(ModEffects.COLD_AURA_EFFECT);
+        int nextAmp = (existing == null) ? 2 : existing.getAmplifier() + 3;
+        target.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, false, true));
     }
 
     // ── Spawn title ───────────────────────────────────────────────────────
@@ -425,8 +436,20 @@ public class BlizzaEntity extends Monster implements GeoEntity {
             return PlayState.STOP;
         }));
 
-        // Attack — four triggerable animations
-        controllers.add(new AnimationController<>(this, "attack_controller", 0, state -> PlayState.STOP)
+        // Attack — four triggerable animations with dynamic speed (issue #12)
+        controllers.add(new AnimationController<>(this, "attack_controller", 0, state -> {
+            if (this.isEyeOfStormActive() && state.getController().getCurrentAnimation() != null) {
+                String animName = state.getController().getCurrentAnimation().animation().name();
+                if (animName.equals("blizza_magic_3")) {
+                    state.getController().setAnimationSpeed(4.0);
+                } else {
+                    state.getController().setAnimationSpeed(1.0);
+                }
+            } else {
+                state.getController().setAnimationSpeed(1.0);
+            }
+            return PlayState.STOP;
+        })
                 .triggerableAnim("blizza_normal_attack",
                         RawAnimation.begin().then("blizza_normal_attack", Animation.LoopType.PLAY_ONCE))
                 .triggerableAnim("blizza_magic_1",

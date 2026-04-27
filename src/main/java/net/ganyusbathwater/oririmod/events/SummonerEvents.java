@@ -28,25 +28,27 @@ public class SummonerEvents {
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof Mob mob))
             return;
+            
         CompoundTag data = mob.getPersistentData();
-        if (!data.getBoolean(SUMMONED_TAG))
+        String ownerUUID = data.getString(OWNER_TAG);
+        
+        if (ownerUUID.isEmpty())
             return;
 
         Entity attacker = event.getSource().getEntity();
         if (attacker != null) {
-            String ownerUUID = data.getString(OWNER_TAG);
-
             // If the attacker is the owner -> cancel the damage to prevent friendly fire
             // and aggro
-            if (!ownerUUID.isEmpty() && attacker.getStringUUID().equals(ownerUUID)) {
+            if (attacker.getStringUUID().equals(ownerUUID)) {
                 event.setCanceled(true);
+                return;
             }
 
             // If the attacker is another summoned mob from the exact same owner -> cancel
             // damage
-            if (attacker instanceof Mob attackingMob && attackingMob.getPersistentData().getBoolean(SUMMONED_TAG)) {
+            if (attacker instanceof Mob attackingMob) {
                 String attackerOwnerUUID = attackingMob.getPersistentData().getString(OWNER_TAG);
-                if (!ownerUUID.isEmpty() && !attackerOwnerUUID.isEmpty() && ownerUUID.equals(attackerOwnerUUID)) {
+                if (ownerUUID.equals(attackerOwnerUUID)) {
                     event.setCanceled(true);
                 }
             }
@@ -56,6 +58,9 @@ public class SummonerEvents {
     @SubscribeEvent
     public static void onEntityJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
         if (!event.getLevel().isClientSide() && event.getEntity() instanceof Mob mob) {
+            if (mob instanceof net.ganyusbathwater.oririmod.entity.custom.VenomousPlantEntity) {
+                return; // Stationary plants manage their own AI goals when summoned
+            }
             CompoundTag data = mob.getPersistentData();
             if (data.getBoolean(SUMMONED_TAG)) {
                 net.ganyusbathwater.oririmod.item.custom.magic.SummonerWeaponItem.rebuildAI(mob);

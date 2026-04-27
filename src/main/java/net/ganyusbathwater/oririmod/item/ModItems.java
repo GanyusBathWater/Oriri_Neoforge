@@ -8,6 +8,7 @@ import net.ganyusbathwater.oririmod.item.custom.magic.MagicBoltItem;
 import net.ganyusbathwater.oririmod.item.custom.magic.MagicStaffItem;
 import net.ganyusbathwater.oririmod.item.custom.magic.OmniMagicItem;
 import net.ganyusbathwater.oririmod.item.custom.magic.SummonerWeaponItem;
+import net.ganyusbathwater.oririmod.item.custom.magic.IvyBotanicGuideItem;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.*;
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
 import net.ganyusbathwater.oririmod.util.ModRarity;
@@ -375,6 +376,8 @@ public class ModItems {
         public static final DeferredItem<SummonerWeaponItem> SLIMY_COOKING_BOOK = ITEMS.register("slimy_cooking_book",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
                                         EntityType.SLIME, ModRarity.RARE, 30, 20, 600, 20));
+        public static final DeferredItem<IvyBotanicGuideItem> IVY_BOTANIC_GUIDE = ITEMS.register("ivy_botanic_guide",
+                        () -> new IvyBotanicGuideItem(new Item.Properties().stacksTo(1)));
 
         // ------------------------------------------Spawn Eggs---------------------------------------------------
 
@@ -406,6 +409,12 @@ public class ModItems {
                         "splinter_spider_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.SPLINTER_SPIDER,
                                         0x342D27, 0x6E5C53, // outer: dark brown, inner: lighter brown
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> VENOMOUS_PLANT_SPAWN_EGG = ITEMS.register(
+                        "venomous_plant_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.VENOMOUS_PLANT,
+                                        0x2D5A1B, 0x9B59B6, // outer: deep forest green, inner: poison purple
                                         new Item.Properties()));
 
         // ------------------------------------------------------Armor---------------------------------------------------------

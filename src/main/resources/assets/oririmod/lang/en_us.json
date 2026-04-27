@@ -448,6 +448,11 @@
   "entity.oririmod.root_visual": "Root",
   "entity.oririmod.icicle": "Icicle",
   "entity.oririmod.sword_projectile": "Sword Projectile",
+  "entity.oririmod.magic_projectile": "Magic Projectile",
+  "entity.oririmod.eye_of_the_storm": "Eye of the Storm",
+  "entity.oririmod.doom_clock": "Doom Clock",
+  "entity.oririmod.laser_beam": "Laser Beam",
+  "entity.oririmod.magic_wave": "Magic Wave",
   "container.oririmod.equinox_table": "Equinox Table",
   "fluid_type.oririmod.blood_water": "Bloody Water",
   "fluid_type.oririmod.aether": "Aether",
@@ -532,5 +537,15 @@
   "item.oririmod.dog_tag": "Dog Tag",
   "tooltip.oririmod.dog_tag": "Your lost pal is waiting for you, use it on a Revival Shrine to bring your friend back",
   "block.oririmod.revival_shrine": "Revival Shrine",
-  "tooltip.oririmod.revival_shrine": "A mythical artifact, older than most that is known. Old scholars say it resembles an old divine beast called Glitzy."
+  "tooltip.oririmod.revival_shrine": "A mythical artifact, older than most that is known. Old scholars say it resembles an old divine beast called Glitzy.",
+  "entity.oririmod.venomous_plant": "Venomous Plant",
+  "item.oririmod.venomous_plant_spawn_egg": "Venomous Plant Spawn Egg",
+  "entity.oririmod.thorn_projectile": "Thorn Projectile",
+  "item.oririmod.ivy_botanic_guide": "Ivy Botanic Guide",
+  "item.oririmod.ivy_botanic_guide.level": "Level %s",
+  "item.oririmod.ivy_botanic_guide.level.1.description": "Summons 1 Venomous Plant",
+  "item.oririmod.ivy_botanic_guide.level.2.description": "Summons 2 Venomous Plants",
+  "item.oririmod.ivy_botanic_guide.level.3.description": "Summons 3 Venomous Plants",
+  "item.oririmod.ivy_botanic_guide.lore": "A botanical guide with peculiar, moving ivy on its cover.",
+  "item.oririmod.ivy_botanic_guide.element": "§2Nature§r"
 }

@@ -212,6 +212,13 @@ public class ServerEvents {
                 event.setNewDamage(event.getOriginalDamage() * 1.25F);
             }
         }
+
+        // Issue #13: Boost EvokerFangs damage by +2 hearts (4.0f) if owned by Blizza
+        if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.EvokerFangs fangs) {
+            if (fangs.getOwner() instanceof net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity) {
+                event.setNewDamage(event.getNewDamage() + 4.0f);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -328,6 +335,7 @@ public class ServerEvents {
                 ItemStack dogTag = new ItemStack(net.ganyusbathwater.oririmod.item.ModItems.DOG_TAG.get());
                 net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
                 wolf.saveWithoutId(tag);
+                tag.remove("active_effects"); // Clear mob effects so they don't persist on revival
                 dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
                 dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, wolf.getCustomName());
                 

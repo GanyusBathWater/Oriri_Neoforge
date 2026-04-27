@@ -33,8 +33,9 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
             .defineId(SwordProjectileEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> IS_DEAD = SynchedEntityData
             .defineId(SwordProjectileEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<java.util.Optional<UUID>> TARGET_UUID = SynchedEntityData
+            .defineId(SwordProjectileEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
-    private UUID targetId;
     private int deadTimer = 0;
 
     public SwordProjectileEntity(EntityType<? extends ThrowableItemProjectile> entityType, Level level) {
@@ -71,6 +72,7 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
         builder.define(HAS_LOCKED, false);
         builder.define(RANDOM_ROLL, 0.0F);
         builder.define(IS_DEAD, false);
+        builder.define(TARGET_UUID, java.util.Optional.empty());
     }
 
     public float getRandomRoll() {
@@ -87,7 +89,7 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
     }
 
     public void setTargetId(UUID id) {
-        this.targetId = id;
+        this.entityData.set(TARGET_UUID, java.util.Optional.ofNullable(id));
     }
 
     @Override
@@ -135,13 +137,42 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
             }
         }
 
+        // Client dynamic indicator rendering during charge up
+        if (this.level().isClientSide && !this.entityData.get(HAS_LOCKED) && this.tickCount < 40) {
+            java.util.Optional<UUID> targetOpt = this.entityData.get(TARGET_UUID);
+            Entity target = null;
+            if (targetOpt.isPresent()) {
+                target = this.level().getPlayerByUUID(targetOpt.get());
+                // If not a player, search nearby entities
+                if (target == null) {
+                    for (Entity e : this.level().getEntities(null, this.getBoundingBox().inflate(100.0D))) {
+                        if (e.getUUID().equals(targetOpt.get())) {
+                            target = e;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (target == null) {
+                target = this.level().getNearestPlayer(this, 64.0D);
+            }
+            if (target != null) {
+                BlockPos groundPos = findGroundBelow(target.blockPosition());
+                if (groundPos != null) {
+                    net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addCircleIndicator(
+                            this.getUUID(), groundPos, 1.5f, 60, 0xFFFF0000); // 60 ticks duration (40 charge + 20 flight)
+                }
+            }
+        }
+
         // Server only logic
         if (!this.level().isClientSide && !this.entityData.get(HAS_LOCKED)) {
             if (this.tickCount >= 40) {
                 // Lock onto target
                 LivingEntity target = null;
-                if (this.targetId != null && this.level() instanceof ServerLevel serverLevel) {
-                    Entity e = serverLevel.getEntity(this.targetId);
+                java.util.Optional<UUID> targetOpt = this.entityData.get(TARGET_UUID);
+                if (targetOpt.isPresent() && this.level() instanceof ServerLevel serverLevel) {
+                    Entity e = serverLevel.getEntity(targetOpt.get());
                     if (e instanceof LivingEntity le) {
                         target = le;
                     }
@@ -155,9 +186,8 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
                     BlockPos groundPos = findGroundBelow(target.blockPosition());
 
                     if (groundPos != null) {
-                        PacketDistributor.sendToAllPlayers(new SpawnAoEIndicatorPayload(
-                                new SpawnAoEIndicatorPacket(groundPos, 1.5f, 20, 0xFFFF0000)));
-
+                        // We no longer send the packet from the server because the client renders it dynamically!
+                        
                         Vec3 targetVec = new Vec3(groundPos.getX() + 0.5, groundPos.getY() + 1.0,
                                 groundPos.getZ() + 0.5);
                         Vec3 shootVec = targetVec.subtract(this.position()).normalize().scale(1.5D); // Speed

@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.BlockPos;
 
 import java.util.List;
 
@@ -78,6 +79,15 @@ public class LaserBeamEntity extends Entity {
             SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> USE_WATER_CIRCLE     =
             SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.BOOLEAN);
+            
+    // Indicator Sync
+    private static final EntityDataAccessor<Byte> INDICATOR_TYPE = SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Float> ORBIT_CX = SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> ORBIT_CY = SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> ORBIT_CZ = SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> ORBIT_P1 = SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> ORBIT_P2 = SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> ORBIT_P3 = SynchedEntityData.defineId(LaserBeamEntity.class, EntityDataSerializers.FLOAT);
 
     // ──────────────────────────────────────────────────────────────────────────
     // Constructor
@@ -111,6 +121,13 @@ public class LaserBeamEntity extends Entity {
         builder.define(DAMAGE_INTERVAL, 10);
         builder.define(OWNER_ID,        -1);
         builder.define(CHARGE_TICKS,    40);
+        builder.define(INDICATOR_TYPE,  (byte) 0);
+        builder.define(ORBIT_CX, 0f);
+        builder.define(ORBIT_CY, 0f);
+        builder.define(ORBIT_CZ, 0f);
+        builder.define(ORBIT_P1, 0f);
+        builder.define(ORBIT_P2, 0f);
+        builder.define(ORBIT_P3, 0f);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -168,6 +185,13 @@ public class LaserBeamEntity extends Entity {
         this.isCylinderOrbit = true;
         this.isClockOrbit = false;
         this.isSphereOrbit = false;
+        
+        this.entityData.set(INDICATOR_TYPE, (byte) 1);
+        this.entityData.set(ORBIT_CX, (float) center.x);
+        this.entityData.set(ORBIT_CY, (float) center.y);
+        this.entityData.set(ORBIT_CZ, (float) center.z);
+        this.entityData.set(ORBIT_P1, radius);
+        this.entityData.set(ORBIT_P2, speedRad);
     }
 
     public void setClockOrbit(Vec3 center, float radius, float speedRad, float startAngleRad) {
@@ -178,6 +202,14 @@ public class LaserBeamEntity extends Entity {
         this.isClockOrbit = true;
         this.isCylinderOrbit = false;
         this.isSphereOrbit = false;
+        
+        this.entityData.set(INDICATOR_TYPE, (byte) 2);
+        this.entityData.set(ORBIT_CX, (float) center.x);
+        this.entityData.set(ORBIT_CY, (float) center.y);
+        this.entityData.set(ORBIT_CZ, (float) center.z);
+        this.entityData.set(ORBIT_P1, radius);
+        this.entityData.set(ORBIT_P2, speedRad);
+        this.entityData.set(ORBIT_P3, speedRad * this.getDurationTicks()); // sweep angle
     }
 
     public void setSphereOrbit(Vec3 center, float radius, float staticPitchRad, float spinSpeedRad, float startYawRad) {
@@ -189,6 +221,15 @@ public class LaserBeamEntity extends Entity {
         this.isSphereOrbit = true;
         this.isCylinderOrbit = false;
         this.isClockOrbit = false;
+        
+        this.entityData.set(INDICATOR_TYPE, (byte) 3); // Impact point indicator
+    }
+
+    public void setIndicatorType(byte type, float p1, float p2, float p3) {
+        this.entityData.set(INDICATOR_TYPE, type);
+        this.entityData.set(ORBIT_P1, p1);
+        this.entityData.set(ORBIT_P2, p2);
+        this.entityData.set(ORBIT_P3, p3);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -242,6 +283,94 @@ public class LaserBeamEntity extends Entity {
             if (this.tickCount == spawnTick && !this.isSilent()) {
                 playClientSound();
             }
+            
+            byte type = this.entityData.get(INDICATOR_TYPE);
+            java.util.UUID id = this.getUUID();
+            int color = this.getBeamColor();
+            float width = this.getBeamWidth();
+            
+            // Render AoE Indicators while charging
+            if (charge > 0 && this.getAgeTicks() < charge) {
+                int dur = charge;
+                
+                if (type == 0) { // LINE
+                    Vec3 start = this.getBeamStart();
+                    Vec3 end = this.getBeamEnd();
+                    if (start.distanceToSqr(end) > 0.1) {
+                        if (Math.abs(start.x - end.x) < 0.1 && Math.abs(start.z - end.z) < 0.1) {
+                            BlockPos groundPos = BlockPos.containing(start);
+                            while (groundPos.getY() > this.level().getMinBuildHeight() && this.level().getBlockState(groundPos).isAir()) {
+                                groundPos = groundPos.below();
+                            }
+                            net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addCircleIndicator(id, groundPos, width * 1.5f, dur, color);
+                        } else {
+                            net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addLineIndicator(id, start, end, width, dur, color);
+                        }
+                    }
+                } else if (type == 3) { // IMPACT POINT
+                    Vec3 end = this.getBeamEnd();
+                    // Project down to ground to make sure it renders nicely on the floor
+                    BlockPos groundPos = BlockPos.containing(end.x, end.y, end.z);
+                    while (groundPos.getY() > this.level().getMinBuildHeight() && this.level().getBlockState(groundPos).isAir()) {
+                        groundPos = groundPos.below();
+                    }
+                    net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addCircleIndicator(id, groundPos, width * 2f, dur, color);
+                } else if (type == 4) { // EXPANDING CIRCLE
+                    float maxRadius = 4.0f;
+                    float radius = maxRadius * ((float) this.getAgeTicks() / charge);
+                    BlockPos center = BlockPos.containing(this.getBeamStart());
+                    net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addCircleIndicator(id, center, radius, charge, color);
+                } else if (type == 5) { // EXPANDING CONE
+                    float maxRadius = 4.0f;
+                    float radius = maxRadius * ((float) this.getAgeTicks() / charge);
+                    BlockPos center = BlockPos.containing(this.getBeamStart());
+                    float facingYaw = this.entityData.get(ORBIT_P1);
+                    float startAngle = -facingYaw - (float) Math.PI / 2f - (float) Math.toRadians(45); // Adjust for MC rotation
+                    float sweepAngle = (float) Math.toRadians(90);
+                    net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addArcIndicator(id, center, radius, startAngle, sweepAngle, charge, color);
+                } else if (type == 6) { // EXPANDING PLAIN
+                    float maxLength = 4.0f;
+                    float length = maxLength * ((float) this.getAgeTicks() / charge);
+                    Vec3 start = this.getBeamStart();
+                    float facingYaw = this.entityData.get(ORBIT_P1);
+                    float dx = (float) Math.sin(facingYaw);
+                    float dz = (float) Math.cos(facingYaw);
+                    Vec3 end = start.add(dx * length, 0, dz * length);
+                    float w = 1.5f; // half width is 0.75 for left, 0.75 for right
+                    if (start.distanceToSqr(end) > 0.01) {
+                        net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addLineIndicator(id, start, end, w, charge, color);
+                    }
+                }
+            }
+            
+            // For moving beams (Type 1 & 2), show a dynamic 2-second-ahead indicator throughout its lifetime!
+            if (type == 1 || type == 2) {
+                int ticksLeft = charge + this.getDurationTicks() - this.getAgeTicks();
+                if (ticksLeft > 0) {
+                    int lookaheadTicks = 40; // 2 seconds ahead
+                    int activeTicksLeft = Math.max(0, this.getDurationTicks() - Math.max(0, this.getAgeTicks() - charge));
+                    int actualLookahead = Math.min(lookaheadTicks, activeTicksLeft);
+                    
+                    if (actualLookahead > 0) {
+                        BlockPos center = BlockPos.containing(this.entityData.get(ORBIT_CX), this.entityData.get(ORBIT_CY), this.entityData.get(ORBIT_CZ));
+                        float radius = this.entityData.get(ORBIT_P1);
+                        float speedRad = this.entityData.get(ORBIT_P2);
+                        float sweepAngle = speedRad * actualLookahead;
+                        
+                        Vec3 startVec = this.getBeamStart();
+                        float currentAngle = (float) Math.atan2(startVec.z - center.getZ(), startVec.x - center.getX());
+                        
+                        if (type == 1) { // CYLINDER
+                            net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addDonutArcIndicator(
+                                id, center, radius - width, radius + width, currentAngle, sweepAngle, 5, color);
+                        } else { // CIRCLE
+                            net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addDonutArcIndicator(
+                                id, center, 0f, radius + width, currentAngle, sweepAngle, 5, color);
+                        }
+                    }
+                }
+            }
+            
             return; // rendering is handled entirely by LaserBeamRenderer
         }
 

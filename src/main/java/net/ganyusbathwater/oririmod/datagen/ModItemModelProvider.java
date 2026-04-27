@@ -240,6 +240,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.BLAZING_PYROMANIAC_GUIDE);
                 handheldItem(ModItems.MAGMA_COOKING_BOOK);
                 handheldItem(ModItems.SLIMY_COOKING_BOOK);
+                handheldItem(ModItems.IVY_BOTANIC_GUIDE);
                 withExistingParent(ModItems.AOE_TEST_ITEM.getId().getPath(), mcLoc("item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
 
@@ -307,6 +308,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.EYE_OF_DESOLATION_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.BLIZZA_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.SPLINTER_SPIDER_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.VENOMOUS_PLANT_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+
 
                 // ===== REVIVAL MECHANICS =====
                 withExistingParent(ModItems.DOG_TAG.getId().getPath(), mcLoc("item/generated"))

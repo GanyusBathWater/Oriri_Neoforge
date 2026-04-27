@@ -87,7 +87,10 @@ public class BlizzaMagicAttackGoal extends Goal {
     @Override
     public boolean canContinueToUse() {
         if (blizza.isDefeated()) return false;
-        return (timer < ANIM_TICKS) || (tripleMode && tripleCount < 3);
+        
+        // Issue #12: shorten duration to 10 ticks (0.5s) if storm is active during Illager Special
+        int limit = (chosenAttack == BlizzaEntity.ATTACK_ILLAGER && blizza.isEyeOfStormActive()) ? 10 : ANIM_TICKS;
+        return (timer < limit) || (tripleMode && tripleCount < 3);
     }
 
     // ── start / tick / stop ───────────────────────────────────────────────
@@ -125,11 +128,12 @@ public class BlizzaMagicAttackGoal extends Goal {
 
         LivingEntity target = blizza.getTarget();
         if (target != null && target.isAlive()) {
-            blizza.getLookControl().setLookAt(target, 30.0F, 30.0F);
+            // Increase rotation speed to 100.0F for responsive tracking (issue #11)
+            blizza.getLookControl().setLookAt(target, 100.0F, 100.0F);
         }
 
-        // Issue #7: keep Blizza stationary during Eye of the Storm
-        if (chosenAttack == BlizzaEntity.ATTACK_STORM) {
+        // Issue #7 & #12: keep Blizza stationary during Eye of the Storm
+        if (chosenAttack == BlizzaEntity.ATTACK_STORM || blizza.isEyeOfStormActive()) {
             blizza.getNavigation().stop();
         }
 
@@ -193,6 +197,14 @@ public class BlizzaMagicAttackGoal extends Goal {
 
     /** Pick a random attack from {ICICLE, STORM, ILLAGER} ≠ last. */
     private int pickAttack(int last) {
+        LivingEntity target = blizza.getTarget();
+        if (target != null && blizza.distanceToSqr(target) <= 25.0) {
+            // If target is close, 25% chance to force Illager Special (issue #10)
+            if (blizza.getRandom().nextFloat() < 0.25f) {
+                return BlizzaEntity.ATTACK_ILLAGER;
+            }
+        }
+
         int[] options = { BlizzaEntity.ATTACK_ICICLE, BlizzaEntity.ATTACK_STORM, BlizzaEntity.ATTACK_ILLAGER };
         int pick = options[blizza.getRandom().nextInt(options.length)];
         for (int i = 0; i < 10 && pick == last; i++) {
@@ -231,11 +243,21 @@ public class BlizzaMagicAttackGoal extends Goal {
                 serverLevel.addFreshEntity(storm);
             }
             case BlizzaEntity.ATTACK_ILLAGER -> {
-                float yaw = (yawOverride != 0f)
-                        ? yawOverride
-                        : (float) Math.toRadians(-blizza.getYRot());
+                // Issue #11 & #12: calculate yaw directly and use dynamic chargeDelay
+                float yaw;
+                if (yawOverride != 0f) {
+                    yaw = yawOverride;
+                } else {
+                    double dx = target.getX() - blizza.getX();
+                    double dz = target.getZ() - blizza.getZ();
+                    yaw = (float) Math.atan2(dx, dz);
+                }
+                
+                // 10 ticks (0.5s) if storm is active, else 40 ticks (2s)
+                int chargeDelay = blizza.isEyeOfStormActive() ? 10 : 40;
+                
                 Vec3 origin = blizza.position();
-                MagicWaveUtil.spawnIllagerSpecial(serverLevel, origin, yaw, blizza.getId());
+                MagicWaveUtil.spawnIllagerSpecial(serverLevel, origin, yaw, blizza.getId(), chargeDelay);
             }
         }
     }

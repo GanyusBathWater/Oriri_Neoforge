@@ -50,5 +50,9 @@ public class ModEntityClient {
                                 net.ganyusbathwater.oririmod.client.render.SplinterSpiderRenderer::new);
                 event.registerEntityRenderer(ModEntities.MAGIC_PROJECTILE.get(),
                                 net.ganyusbathwater.oririmod.client.render.MagicProjectileRenderer::new);
+                event.registerEntityRenderer(ModEntities.VENOMOUS_PLANT.get(),
+                                net.ganyusbathwater.oririmod.entity.client.VenomousPlantRenderer::new);
+                event.registerEntityRenderer(ModEntities.THORN_PROJECTILE.get(),
+                                net.ganyusbathwater.oririmod.client.render.ThornProjectileRenderer::new);
         }
 }

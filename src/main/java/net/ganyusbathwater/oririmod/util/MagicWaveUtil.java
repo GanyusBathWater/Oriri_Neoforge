@@ -41,7 +41,8 @@ public final class MagicWaveUtil {
      * @param ownerId Server entity ID of caster (immune to damage)
      */
     public static void spawnCircular(ServerLevel level, Vec3 origin,
-                                     int count, int color, float damage, int ownerId) {
+                                     int count, int color, float damage, int ownerId, int chargeTicks) {
+        spawnWaveIndicator(level, origin, (byte) 4, color, chargeTicks, 0, 0, 0); // 4 = Expanding Circle
         spawnGroundCircle(level, origin, color);
 
         double angleStep = (2.0 * Math.PI) / count;
@@ -49,7 +50,7 @@ public final class MagicWaveUtil {
             double angle = i * angleStep;
             float dx = (float) Math.cos(angle);
             float dz = (float) Math.sin(angle);
-            spawnWave(level, origin, dx, dz, color, damage, ownerId);
+            spawnWave(level, origin, dx, dz, color, damage, ownerId, chargeTicks);
         }
     }
 
@@ -65,7 +66,8 @@ public final class MagicWaveUtil {
      * @param facingYaw  Caster's yaw angle in radians (Minecraft convention: 0 = south/+Z)
      */
     public static void spawnCone(ServerLevel level, Vec3 origin, float facingYaw,
-                                 int color, float damage, int ownerId) {
+                                 int color, float damage, int ownerId, int chargeTicks) {
+        spawnWaveIndicator(level, origin, (byte) 5, color, chargeTicks, facingYaw, 0, 0); // 5 = Expanding Cone
         spawnGroundCircle(level, origin, color);
 
         // 13 waves: every 7.5° from -45° to +45°
@@ -78,7 +80,7 @@ public final class MagicWaveUtil {
             float rad = facingYaw + (float) Math.toRadians(deg);
             float dx  = (float) Math.sin(rad);
             float dz  = (float) Math.cos(rad);
-            spawnWave(level, origin, dx, dz, color, damage, ownerId);
+            spawnWave(level, origin, dx, dz, color, damage, ownerId, chargeTicks);
         }
     }
 
@@ -92,7 +94,8 @@ public final class MagicWaveUtil {
      * @param facingYaw  Caster's yaw angle in radians
      */
     public static void spawnPlainWave(ServerLevel level, Vec3 origin, float facingYaw,
-                                      int color, float damage, int ownerId) {
+                                      int color, float damage, int ownerId, int chargeTicks) {
+        spawnWaveIndicator(level, origin, (byte) 6, color, chargeTicks, facingYaw, 0, 0); // 6 = Expanding Plain
         spawnGroundCircle(level, origin, color);
 
         float dx = (float) Math.sin(facingYaw);
@@ -106,7 +109,7 @@ public final class MagicWaveUtil {
         float[] spreads = { 0f, 0.75f, -0.75f };
         for (float spread : spreads) {
             Vec3 lateralOrigin = origin.add(rx * spread, 0, rz * spread);
-            spawnWave(level, lateralOrigin, dx, dz, color, damage, ownerId);
+            spawnWave(level, lateralOrigin, dx, dz, color, damage, ownerId, chargeTicks);
         }
     }
 
@@ -114,9 +117,11 @@ public final class MagicWaveUtil {
     // ILLAGER SPECIAL — Delayed Evoker Fangs Cone
     // ─────────────────────────────────────────────────────────────────────────
     
-    public static void spawnIllagerSpecial(ServerLevel level, Vec3 origin, float facingYaw, int ownerId) {
+    public static void spawnIllagerSpecial(ServerLevel level, Vec3 origin, float facingYaw, int ownerId, int chargeDelay) {
         // Light-blue magic circle (issue #9)
         int LIGHT_BLUE = 0xFF_4FC3F7;
+        spawnWaveIndicator(level, origin, (byte) 5, LIGHT_BLUE, chargeDelay, facingYaw, 0, 0); // 5 = Expanding Cone
+        
         LaserBeamUtil.LaserBeamConfig config = new LaserBeamUtil.LaserBeamConfig(
                 origin, origin, 0.52f, LIGHT_BLUE, 100, 0f, 0, -1, 0, true
         );
@@ -134,7 +139,7 @@ public final class MagicWaveUtil {
         float rZ = fX;
 
         // Configuration Arrays
-        int chargeDelay = 40;     // 2 seconds charge-up
+        // int chargeDelay is now a parameter (issue #12)
         int numRows = 80;         // Issue #9: doubled from 40 → 40 block total distance (0.5 block spacing)
         float rowSpacing = 0.5f;
 
@@ -190,7 +195,7 @@ public final class MagicWaveUtil {
 
     private static void spawnWave(ServerLevel level, Vec3 origin,
                                    float dx, float dz,
-                                   int color, float damage, int ownerId) {
+                                   int color, float damage, int ownerId, int chargeTicks) {
         MagicWaveEntity wave = ModEntities.MAGIC_WAVE.get().create(level);
         if (wave == null) return;
 
@@ -201,6 +206,7 @@ public final class MagicWaveUtil {
         wave.setWaveColor(color);
         wave.setWaveDamage(damage);
         wave.setOwnerId(ownerId);
+        wave.setChargeTicks(chargeTicks);
         level.addFreshEntity(wave);
     }
 
@@ -229,6 +235,18 @@ public final class MagicWaveUtil {
             // It spins completely autonomously via the Renderer without physical orbital movement.
             beam.setCoreHidden(true); // Completely strip beam geometry layer
             beam.setUseWaveCircle(true); // Use the designated wave_circle.png asset
+        }
+    }
+
+    private static void spawnWaveIndicator(ServerLevel level, Vec3 origin, byte type, int color, int chargeTicks, float p1, float p2, float p3) {
+        if (chargeTicks <= 0) return;
+        LaserBeamUtil.LaserBeamConfig config = new LaserBeamUtil.LaserBeamConfig(
+                origin, origin,
+                0f, color, chargeTicks, 0f, 0, -1, chargeTicks, true
+        );
+        LaserBeamEntity beam = LaserBeamUtil.unleash(level, config);
+        if (beam != null) {
+            beam.setIndicatorType(type, p1, p2, p3);
         }
     }
 }

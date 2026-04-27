@@ -26,6 +26,7 @@ public class BlizzaMeleeAttackGoal extends Goal {
 
     private final BlizzaEntity blizza;
     private int timer    = 0;
+    private int nextAttackTick = 0;
     private boolean hitDealt = false;
     /** True when this cycle was substituted with the Illager Special. */
     private boolean useIllager = false;
@@ -39,17 +40,36 @@ public class BlizzaMeleeAttackGoal extends Goal {
     public boolean canUse() {
         if (blizza.isDefeated()) return false;
         if (blizza.getAttackType() != BlizzaEntity.ATTACK_NONE) return false;
+        if (blizza.tickCount < nextAttackTick) return false;
+
         LivingEntity target = blizza.getTarget();
         if (target == null || !target.isAlive()) return false;
+
+        double distSq = blizza.distanceToSqr(target);
+
         // Issue #7: if storm is active, use melee slot regardless of range so Blizza
         // can cast Illager Special from the storm centre
-        if (blizza.isEyeOfStormActive()) return blizza.distanceToSqr(target) <= 48.0 * 48.0;
-        return blizza.distanceToSqr(target) <= MELEE_RANGE_SQ;
+        if (blizza.isEyeOfStormActive()) {
+            return distSq <= 48.0 * 48.0;
+        }
+
+        if (distSq <= MELEE_RANGE_SQ) {
+            // 50% chance to skip the melee swing this time to allow magic attacks to fire
+            if (blizza.getRandom().nextFloat() > 0.5f) {
+                // Set a small delay before we check for melee again (0.5s)
+                nextAttackTick = blizza.tickCount + 10;
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean canContinueToUse() {
-        return timer < ANIM_TICKS && !blizza.isDefeated();
+        // Issue #12: shorten to 10 ticks (0.5s) if storm-boosted special
+        int limit = (useIllager && blizza.isEyeOfStormActive()) ? 10 : ANIM_TICKS;
+        return timer < limit && !blizza.isDefeated();
     }
 
     @Override
@@ -73,7 +93,8 @@ public class BlizzaMeleeAttackGoal extends Goal {
 
         LivingEntity target = blizza.getTarget();
         if (target != null && target.isAlive()) {
-            blizza.getLookControl().setLookAt(target, 30.0F, 30.0F);
+            // Increase rotation speed to 100.0F for responsive tracking (issue #11)
+            blizza.getLookControl().setLookAt(target, 100.0F, 100.0F);
         }
 
         if (useIllager) {
@@ -82,9 +103,13 @@ public class BlizzaMeleeAttackGoal extends Goal {
             if (!hitDealt && timer == ILLAGER_FRAME) {
                 hitDealt = true;
                 if (!blizza.level().isClientSide && blizza.level() instanceof ServerLevel sl) {
-                    float yaw = (float) Math.toRadians(-blizza.getYRot());
+                    double dx = target.getX() - blizza.getX();
+                    double dz = target.getZ() - blizza.getZ();
+                    float yaw = (float) Math.atan2(dx, dz);
                     Vec3 origin = blizza.position();
-                    MagicWaveUtil.spawnIllagerSpecial(sl, origin, yaw, blizza.getId());
+                    
+                    // 10 ticks (0.5s) charge delay during storm (issue #12)
+                    MagicWaveUtil.spawnIllagerSpecial(sl, origin, yaw, blizza.getId(), 10);
                 }
             }
         } else {
@@ -102,5 +127,7 @@ public class BlizzaMeleeAttackGoal extends Goal {
         blizza.setAttackType(BlizzaEntity.ATTACK_NONE);
         blizza.setLastAttack(useIllager ? BlizzaEntity.ATTACK_ILLAGER : BlizzaEntity.ATTACK_MELEE);
         useIllager = false;
+        // 2 second cooldown after a melee swing (or substitution)
+        nextAttackTick = blizza.tickCount + 40;
     }
 }

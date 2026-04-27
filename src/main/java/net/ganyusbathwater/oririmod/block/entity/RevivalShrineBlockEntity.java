@@ -20,10 +20,7 @@ public class RevivalShrineBlockEntity extends BlockEntity implements GeoBlockEnt
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "controller", 0, event -> {
-            event.getController().setAnimation(RawAnimation.begin().thenLoop("animation.revival_shrine.idle"));
-            return PlayState.CONTINUE;
-        }));
+        // No animations for this block
     }
 
     @Override

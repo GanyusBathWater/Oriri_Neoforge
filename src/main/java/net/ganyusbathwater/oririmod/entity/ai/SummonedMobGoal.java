@@ -40,10 +40,13 @@ public class SummonedMobGoal extends NearestAttackableTargetGoal<LivingEntity> {
             SummonTargetMode mode = OririConfig.COMMON.summoner.targetMode.get();
             switch (mode) {
                 case HOSTILE_ONLY:
-                    return target instanceof Monster;
+                    return target instanceof net.minecraft.world.entity.monster.Enemy;
                 case ALL_MOBS:
                     return !(target instanceof Player);
                 case PVP:
+                    if (target instanceof Player player) {
+                        return !player.isCreative() && !player.isSpectator();
+                    }
                     return true;
                 default:
                     return false;
@@ -76,7 +79,7 @@ public class SummonedMobGoal extends NearestAttackableTargetGoal<LivingEntity> {
 
         switch (mode) {
             case HOSTILE_ONLY:
-                return target instanceof Monster && super.canAttack(target, conditions);
+                return target instanceof net.minecraft.world.entity.monster.Enemy && super.canAttack(target, conditions);
             case ALL_MOBS:
                 // All mobs but never players
                 return !(target instanceof Player) && super.canAttack(target, conditions);

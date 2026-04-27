@@ -28,7 +28,7 @@ public class IcicleEntity extends Projectile {
 
     private BlockPos impactPos = BlockPos.ZERO;
     private int maxLife = 20 * 10; // 10s failsafe
-    private static final float DAMAGE = 20.0f; // 10 hearts
+    private static final float DAMAGE = 16.0f; // 8 hearts (issue #13)
     private static final float IMPACT_RADIUS = 1.5f;
     private static final int FREEZE_TICKS = 300; // enough to trigger full freeze effect
 

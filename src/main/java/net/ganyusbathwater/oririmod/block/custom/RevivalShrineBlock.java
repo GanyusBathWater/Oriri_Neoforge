@@ -63,6 +63,8 @@ public class RevivalShrineBlock extends BaseEntityBlock {
                     Wolf wolf = EntityType.WOLF.create(level);
                     if (wolf != null) {
                         wolf.load(customData.copyTag());
+                        wolf.removeAllEffects(); // Ensure no persistent effects from death (like Wither)
+                        wolf.setRemainingFireTicks(0); // Clear fire if the dog died while burning
                         wolf.setPos(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D);
                         // Make sure the UUID is fresh so it doesn't conflict
                         wolf.setUUID(java.util.UUID.randomUUID());

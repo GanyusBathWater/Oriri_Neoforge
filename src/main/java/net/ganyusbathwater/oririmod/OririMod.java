@@ -112,6 +112,7 @@ public class OririMod {
             event.accept(ModItems.SPORE_ZOMBIE_SPAWN_EGG);
             event.accept(ModItems.EYE_OF_DESOLATION_SPAWN_EGG);
             event.accept(ModItems.BLIZZA_SPAWN_EGG);
+            event.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
         }
     }
 
@@ -120,6 +121,8 @@ public class OririMod {
                 net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity.createAttributes().build());
         event.put(net.ganyusbathwater.oririmod.entity.ModEntities.BLIZZA.get(),
                 net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity.createAttributes().build());
+        event.put(net.ganyusbathwater.oririmod.entity.ModEntities.VENOMOUS_PLANT.get(),
+                net.ganyusbathwater.oririmod.entity.custom.VenomousPlantEntity.createAttributes().build());
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
