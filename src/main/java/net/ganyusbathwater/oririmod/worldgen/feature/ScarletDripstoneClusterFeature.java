@@ -35,6 +35,16 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
         RandomSource random = context.random();
         ScarletDripstoneClusterConfig config = context.config();
 
+        // Hard exclusion: never place in Elysian Abyss.
+        // BiomeFilter only checks the origin cell; the feature's ceiling search can
+        // reach the abyss ceiling even when the origin is in scarlet_caves.
+        net.minecraft.resources.ResourceLocation ELYSIAN_RL =
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "elysian_abyss");
+        if (level.getBiome(origin).is(ELYSIAN_RL)) return false;
+        // Also block if the ceiling we'd attach to is inside the abyss Y-range
+        // (rough check: abyss ceiling is typically Y -70 to -20)
+        if (origin.getY() > -80 && origin.getY() < -15) return false;
+
         // Determine which blocks to use
         Block baseBlock = config.useScarletBlocks()
                 ? ModBlocks.SCARLET_DRIPSTONE_BLOCK.get()

@@ -101,6 +101,27 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
         // 2c. Avoid stacking on top of other mushroom formations
         if (level.getBlockState(origin.below()).is(ModBlocks.HARDENED_MANASHROOM.get())) return false;
 
+        // 2d. Exclusion zone: reject if another mushroom centre is within scanRadius blocks
+        //     Scan radius is generous (52 blocks) to honour cap_radius (6-9) + 4 buffer.
+        int scanRadius = 52;
+        BlockPos.MutableBlockPos scanPos = new BlockPos.MutableBlockPos();
+        outer:
+        for (int sx = -scanRadius; sx <= scanRadius; sx += 3) {
+            for (int sz = -scanRadius; sz <= scanRadius; sz += 3) {
+                if (Math.abs(sx) < 6 && Math.abs(sz) < 6) continue; // skip self
+                for (int sy = -5; sy <= 35; sy += 3) {
+                    scanPos.set(origin.getX() + sx, origin.getY() + sy, origin.getZ() + sz);
+                    if (level.getBlockState(scanPos).is(ModBlocks.HARDENED_MANASHROOM.get())) {
+                        double d2 = sx * sx + sz * sz;
+                        if (d2 < (double)((scanRadius) * (scanRadius))) {
+                            return false; // within exclusion zone of an existing mushroom
+                        }
+                        break outer;
+                    }
+                }
+            }
+        }
+
         // ── 3. CALCULATE DIMENSIONS ─────────────────────────────────────────
         int stemHeight = config.minHeight + rng.nextInt(config.maxHeight - config.minHeight + 1);
         int capRadius = 6 + rng.nextInt(4);
@@ -149,19 +170,34 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
             }
         }
 
-        // ── 6. AETHER POOL (on top of cap) ──────────────────────────────────
+        // ── 6. AETHER POOL (on top of cap, in the concave bowl) ─────────────
         BlockState aetherBlock = ModFluids.AETHER_BLOCK.get().defaultBlockState();
         for (int dx = -(capInnerRadius - 1); dx <= capInnerRadius - 1; dx++) {
             for (int dz = -(capInnerRadius - 1); dz <= capInnerRadius - 1; dz++) {
                 if (dx * dx + dz * dz < capInnerRadius * capInnerRadius) {
-                    // Absolute positioning for pool as well
                     BlockPos poolPos = new BlockPos(origin.getX() + dx, capY + capThickness - 1, origin.getZ() + dz);
                     level.setBlock(poolPos, aetherBlock, 3);
                 }
             }
         }
 
-        // ── 7. AETHER RIVER RING ────────────────────────────────────────────
+        // ── 7. AETHER FALLS — rim notches so Aether flows over the cap edge ──
+        // Place 8 evenly-spaced notches around the inner rim.
+        // Each notch removes the solid rim block and places an Aether source
+        // at the bowl lip; Aether then flows outward and cascades down the cap.
+        int notchCount = 8;
+        for (int n = 0; n < notchCount; n++) {
+            double angle = (2.0 * Math.PI / notchCount) * n + rng.nextDouble() * 0.4;
+            int nx = (int) Math.round(Math.cos(angle) * (capInnerRadius));
+            int nz = (int) Math.round(Math.sin(angle) * (capInnerRadius));
+            // Top-most rim layer position
+            BlockPos notchPos = new BlockPos(
+                origin.getX() + nx, capY + capThickness - 1, origin.getZ() + nz);
+            // Replace the solid rim block with Aether source so it can pour outward
+            level.setBlock(notchPos, aetherBlock, 3);
+        }
+
+        // ── 8. AETHER RIVER RING ────────────────────────────────────────────
         carveAetherRing(level, origin, rng, capRadius);
 
         return true;

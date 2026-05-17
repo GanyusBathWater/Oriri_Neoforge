@@ -1,0 +1,58 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "oririmod:gui/darkness_element_symbole.png",
+      "ascent": 10,
+      "height": 13,
+      "chars": [
+        "\uE001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "oririmod:gui/earth_element_symbole.png",
+      "ascent": 10,
+      "height": 13,
+      "chars": [
+        "\uE002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "oririmod:gui/fire_element_symbole.png",
+      "ascent": 10,
+      "height": 13,
+      "chars": [
+        "\uE003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "oririmod:gui/light_element_symbole.png",
+      "ascent": 10,
+      "height": 13,
+      "chars": [
+        "\uE004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "oririmod:gui/nature_element_symbole.png",
+      "ascent": 10,
+      "height": 13,
+      "chars": [
+        "\uE005"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "oririmod:gui/water_element_symbole.png",
+      "ascent": 10,
+      "height": 13,
+      "chars": [
+        "\uE006"
+      ]
+    }
+  ]
+}

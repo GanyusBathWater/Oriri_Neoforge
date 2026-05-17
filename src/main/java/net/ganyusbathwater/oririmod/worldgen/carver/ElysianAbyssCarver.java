@@ -67,40 +67,73 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
 
-        // ── 2.  SURFACE CANYON ──────────────────────────────────────────────
-        // Very rare canyon for occasional lighting
-        if (stableRandom.nextFloat() < 0.03f) { // Reduced from 15% to 3%
-            int cxWorld = startX + 8;
-            int czWorld = startZ + 8;
-            boolean xAligned = stableRandom.nextBoolean();
+        // ── 2.  SURFACE CRACKS / CEILING RIFTS ───────────────────────────
+        // Uses 2-D fBm noise in XZ space so the ceiling opening is a fully
+        // irregular blob — no stripes, no rectangles, no 90° angles.
+        if (stableRandom.nextFloat() < 0.18f) {
+            int numCracks = 1 + (stableRandom.nextFloat() < 0.35f ? 1 : 0);
+            for (int crackIdx = 0; crackIdx < numCracks; crackIdx++) {
+                // Crack centre
+                int cxWorld = startX + 2 + stableRandom.nextInt(12);
+                int czWorld = startZ + 2 + stableRandom.nextInt(12);
+                double peakRadius = 3.0 + stableRandom.nextDouble() * 9.0;
 
-            for (int localX = 0; localX < 16; localX++) {
-                for (int localZ = 0; localZ < 16; localZ++) {
-                    int worldX = startX + localX;
-                    int worldZ = startZ + localZ;
+                // Per-crack phase so each crack has a unique noise field
+                long crackSeed = chunkSeed ^ (crackIdx * 0x9E3779B97F4A7C15L);
+                double ph = (crackSeed & 0xFFFFL) / 65536.0 * Math.PI * 4.0;
 
-                    double wobble = Math.sin(worldX * 0.08) * 4.0 + Math.cos(worldZ * 0.08) * 4.0;
-                    double distToCenter = xAligned ? Math.abs(worldZ - (czWorld + wobble)) : Math.abs(worldX - (cxWorld + wobble));
+                int canyonTop    = maxBuildY;
+                int canyonBottom = Mth.clamp(-60, minBuildY, maxBuildY);
 
-                    int canyonStart = 40;
-                    int canyonEnd = Mth.clamp(160, minBuildY, maxBuildY);
-                    
-                    for (int y = canyonStart; y <= canyonEnd; y++) {
-                        double progress = (double)(y - canyonStart) / (canyonEnd - canyonStart);
-                        double currentWidth = (14.0 + Math.sin(y * 0.04) * 5.0) * Math.sin(progress * Math.PI);
-                        
-                        if (distToCenter < currentWidth) {
-                            mutablePos.set(worldX, y, worldZ);
-                            BlockState state = chunk.getBlockState(mutablePos);
-                            if (this.canReplaceBlock(config, state)) {
-                                chunk.setBlockState(mutablePos, Blocks.CAVE_AIR.defaultBlockState(), false);
-                                if (carvingMask != null) {
-                                    int maskY = y - minBuildY;
-                                    if (maskY >= 0 && maskY < chunk.getHeight()) {
-                                        carvingMask.set(localX, maskY, localZ);
+                for (int localX = 0; localX < 16; localX++) {
+                    for (int localZ = 0; localZ < 16; localZ++) {
+                        int worldX = startX + localX;
+                        int worldZ = startZ + localZ;
+
+                        double rx = worldX - cxWorld;
+                        double rz = worldZ - czWorld;
+
+                        // --- 2-D fBm in XZ: 4 octaves, each rotated to avoid axis bias ---
+                        double fx = rx * 0.12 + ph;
+                        double fz = rz * 0.12;
+                        double fbm = 0.0;
+                        double amp = 1.0;
+                        double freq = 1.0;
+                        for (int oct = 0; oct < 4; oct++) {
+                            // Rotate each octave by ~37.5° to avoid grid alignment
+                            double rfx = fx * freq * 0.809 - fz * freq * 0.588;
+                            double rfz = fx * freq * 0.588 + fz * freq * 0.809;
+                            fbm += Math.sin(rfx) * Math.cos(rfz) * amp;
+                            amp  *= 0.5;
+                            freq *= 2.1;
+                        }
+                        // fbm in [-1, 1]; shift so positive = near centre
+                        double centrePull = 1.0 - Math.sqrt(rx * rx + rz * rz) / (peakRadius * 2.5);
+                        double openness = fbm * 0.6 + centrePull;
+
+                        for (int y = canyonBottom; y <= canyonTop; y++) {
+                            double progress = (double)(y - canyonBottom)
+                                    / Math.max(1, canyonTop - canyonBottom);
+                            // Bell envelope: zero at top/bottom, max at midpoint
+                            double envelope = Math.sin(Mth.clamp(progress, 0.0, 1.0) * Math.PI)
+                                    * peakRadius;
+                            // Y-local noise modulates the threshold
+                            double ynoise = Math.sin(y * 0.11 + ph) * 0.15;
+                            double threshold = 0.05 + ynoise;
+
+                            if (openness + envelope * 0.15 > threshold) {
+                                mutablePos.set(worldX, y, worldZ);
+                                BlockState state = chunk.getBlockState(mutablePos);
+                                if (this.canReplaceBlock(config, state)) {
+                                    chunk.setBlockState(mutablePos,
+                                            Blocks.CAVE_AIR.defaultBlockState(), false);
+                                    if (carvingMask != null) {
+                                        int maskY = y - minBuildY;
+                                        if (maskY >= 0 && maskY < chunk.getHeight())
+                                            carvingMask.set(localX, maskY, localZ);
                                     }
+                                    hit = true;
                                 }
-                                hit = true;
                             }
                         }
                     }

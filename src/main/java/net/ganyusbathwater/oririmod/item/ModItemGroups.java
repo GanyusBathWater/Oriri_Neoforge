@@ -218,6 +218,13 @@ public class ModItemGroups {
                         output.accept(ModItems.SOLS_EMBRACE);
                         output.accept(ModItems.ARBITER_CROSSBOW);
 
+                        output.accept(ModItems.TNT_ARROW);
+                        output.accept(ModItems.EVENT_HORIZON_ARROW);
+                        output.accept(ModItems.DRAGON_IRON_ARROW);
+                        output.accept(ModItems.FROST_ARROW);
+                        output.accept(ModItems.COPPER_ARROW);
+                        output.accept(ModItems.SONIC_ARROW);
+
                         output.accept(ModItems.STAFF_OF_WISE);
                         output.accept(ModItems.STAFF_OF_EARTH);
                         output.accept(ModItems.STAFF_OF_FOREST);
@@ -235,6 +242,7 @@ public class ModItemGroups {
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
                         output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
                         output.accept(ModItems.MAGIC_DEBUG_STICK);
+                        output.accept(ModItems.COSMIC_EXAMPLE); // Stage 1 tooltip test item
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.SKELETON_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.IRON_GOLEM_MANUAL);

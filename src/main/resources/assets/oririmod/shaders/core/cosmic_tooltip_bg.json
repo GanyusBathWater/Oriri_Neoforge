@@ -1,0 +1,23 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
+  "vertex": "oririmod:cosmic_tooltip_bg",
+  "fragment": "oririmod:cosmic_tooltip_bg",
+  "attributes": [
+    "Position",
+    "Color"
+  ],
+  "samplers": [],
+  "uniforms": [
+    { "name": "ModelViewMat",  "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "ProjMat",       "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "CosmicTime",    "type": "float",     "count": 1,  "values": [0.0] },
+    { "name": "ScreenSize",    "type": "float",     "count": 2,  "values": [1.0, 1.0] },
+    { "name": "TooltipOrigin", "type": "float",     "count": 2,  "values": [0.0, 0.0] },
+    { "name": "TooltipSize",   "type": "float",     "count": 2,  "values": [1.0, 1.0] },
+    { "name": "StyleIndex",    "type": "float",     "count": 1,  "values": [0.0] }
+  ]
+}

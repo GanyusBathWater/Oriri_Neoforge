@@ -43,6 +43,16 @@ public class ModItemTagProvider extends ItemTagsProvider {
                         net.ganyusbathwater.oririmod.item.ModItems.MAGMA_COOKING_BOOK.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.SLIMY_COOKING_BOOK.get());
 
+        this.tag(ItemTags.ARROWS)
+                .add(
+                        net.ganyusbathwater.oririmod.item.ModItems.TNT_ARROW.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.EVENT_HORIZON_ARROW.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.DRAGON_IRON_ARROW.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.FROST_ARROW.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.COPPER_ARROW.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.SONIC_ARROW.get()
+                );
+
         this.copy(BlockTags.LOGS, ItemTags.LOGS);
         this.copy(BlockTags.LOGS_THAT_BURN, ItemTags.LOGS_THAT_BURN);
         this.copy(BlockTags.PLANKS, ItemTags.PLANKS);

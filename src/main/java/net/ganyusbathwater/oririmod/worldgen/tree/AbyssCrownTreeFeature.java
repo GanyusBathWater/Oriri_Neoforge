@@ -78,6 +78,26 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
 
         if (!foundCeiling) return false;
 
+        // Y-range guard: reject if ceiling attach point is outside valid cave ceiling zone
+        // Cave ceilings: roughly Y = -70 to Y = 0. Avoids void/bedrock placements.
+        if (origin.getY() < -70 || origin.getY() > 10) return false;
+
+        // Pillar detection: if the column below origin is solid for 30+ blocks,
+        // this is the top of a structural pillar, not a cave ceiling. Reject it.
+        // Trees must only grow from the underside of open cave ceilings.
+        {
+            int solidBelow = 0;
+            for (int i = 1; i <= 35; i++) {
+                BlockPos below = origin.below(i);
+                BlockState bs = level.getBlockState(below);
+                if (!bs.isAir() && !bs.is(net.minecraft.world.level.block.Blocks.CAVE_AIR)) {
+                    solidBelow++;
+                } else {
+                    break; // stop at first air gap (real cave ceiling will have air below)
+                }
+            }
+            if (solidBelow >= 28) return false; // it's a pillar top, not a ceiling
+        }
         // Final Biome Check: Only generate if the snapped attachment point is in the Elysian Abyss
         // This ensures trees "cover the entire ceiling" of the biome without escaping into transition zones.
         var biome = level.getBiome(origin);

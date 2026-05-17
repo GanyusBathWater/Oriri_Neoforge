@@ -63,6 +63,7 @@ public class OririMod {
         NeoForge.EVENT_BUS.register(this);
 
         modEventBus.addListener(NetworkHandler::register);
+        net.ganyusbathwater.oririmod.item.component.ModDataComponents.register(modEventBus);
         ModItemGroups.registerItemGroups(modEventBus);
         ModItems.registerModItems(modEventBus);
         ModBlocks.register(modEventBus);

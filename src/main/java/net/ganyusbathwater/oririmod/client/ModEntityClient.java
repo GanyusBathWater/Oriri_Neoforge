@@ -54,5 +54,14 @@ public class ModEntityClient {
                                 net.ganyusbathwater.oririmod.entity.client.VenomousPlantRenderer::new);
                 event.registerEntityRenderer(ModEntities.THORN_PROJECTILE.get(),
                                 net.ganyusbathwater.oririmod.client.render.ThornProjectileRenderer::new);
+
+                event.registerEntityRenderer(ModEntities.TNT_ARROW.get(), context -> new net.ganyusbathwater.oririmod.client.render.CustomArrowRenderer<>(context, net.minecraft.resources.ResourceLocation.parse("oririmod:textures/entity/tnt_arrow.png")));
+                event.registerEntityRenderer(ModEntities.EVENT_HORIZON_ARROW.get(), context -> new net.ganyusbathwater.oririmod.client.render.FlatItemArrowRenderer<>(context, net.minecraft.resources.ResourceLocation.parse("oririmod:textures/item/event_horizon_arrow.png")));
+                event.registerEntityRenderer(ModEntities.DRAGON_IRON_ARROW.get(), context -> new net.ganyusbathwater.oririmod.client.render.CustomArrowRenderer<>(context, net.minecraft.resources.ResourceLocation.parse("oririmod:textures/entity/dragon_iron_arrow.png")));
+                event.registerEntityRenderer(ModEntities.FROST_ARROW.get(), context -> new net.ganyusbathwater.oririmod.client.render.CustomArrowRenderer<>(context, net.minecraft.resources.ResourceLocation.parse("oririmod:textures/entity/frost_arrow.png")));
+                event.registerEntityRenderer(ModEntities.COPPER_ARROW.get(), context -> new net.ganyusbathwater.oririmod.client.render.CustomArrowRenderer<>(context, net.minecraft.resources.ResourceLocation.parse("oririmod:textures/entity/copper_arrow.png")));
+                event.registerEntityRenderer(ModEntities.SONIC_ARROW.get(), context -> new net.ganyusbathwater.oririmod.client.render.CustomArrowRenderer<>(context, net.minecraft.resources.ResourceLocation.parse("oririmod:textures/entity/sonic_arrow.png")));
+                
+                event.registerEntityRenderer(ModEntities.BLACK_HOLE.get(), net.ganyusbathwater.oririmod.client.render.BlackHoleRenderer::new);
         }
 }

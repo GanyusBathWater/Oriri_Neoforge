@@ -229,6 +229,43 @@ public final class ModEntities {
                                                                                         "thorn_projectile")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.arrow.TntArrowEntity>> TNT_ARROW = ENTITIES
+                        .register("tnt_arrow",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.arrow.TntArrowEntity>of(net.ganyusbathwater.oririmod.entity.custom.arrow.TntArrowEntity::new, MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "tnt_arrow").toString()));
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.arrow.EventHorizonArrowEntity>> EVENT_HORIZON_ARROW = ENTITIES
+                        .register("event_horizon_arrow",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.arrow.EventHorizonArrowEntity>of(net.ganyusbathwater.oririmod.entity.custom.arrow.EventHorizonArrowEntity::new, MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "event_horizon_arrow").toString()));
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.arrow.DragonIronArrowEntity>> DRAGON_IRON_ARROW = ENTITIES
+                        .register("dragon_iron_arrow",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.arrow.DragonIronArrowEntity>of(net.ganyusbathwater.oririmod.entity.custom.arrow.DragonIronArrowEntity::new, MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dragon_iron_arrow").toString()));
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.arrow.FrostArrowEntity>> FROST_ARROW = ENTITIES
+                        .register("frost_arrow",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.arrow.FrostArrowEntity>of(net.ganyusbathwater.oririmod.entity.custom.arrow.FrostArrowEntity::new, MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "frost_arrow").toString()));
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.arrow.CopperArrowEntity>> COPPER_ARROW = ENTITIES
+                        .register("copper_arrow",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.arrow.CopperArrowEntity>of(net.ganyusbathwater.oririmod.entity.custom.arrow.CopperArrowEntity::new, MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "copper_arrow").toString()));
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.arrow.SonicArrowEntity>> SONIC_ARROW = ENTITIES
+                        .register("sonic_arrow",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.arrow.SonicArrowEntity>of(net.ganyusbathwater.oririmod.entity.custom.arrow.SonicArrowEntity::new, MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "sonic_arrow").toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity>> BLACK_HOLE = ENTITIES
+                        .register("black_hole",
+                                        () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity>of(net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity::new, MobCategory.MISC)
+                                                        .sized(1.0F, 1.0F).clientTrackingRange(64).updateInterval(1)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "black_hole").toString()));
+
         public static void register(IEventBus modBus) {
                 ENTITIES.register(modBus);
         }

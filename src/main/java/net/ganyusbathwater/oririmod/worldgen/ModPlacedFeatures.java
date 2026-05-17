@@ -49,7 +49,8 @@ public class ModPlacedFeatures {
         // Elysian Abyss
         public static final ResourceKey<PlacedFeature> ELYSIAN_STONE_MUSHROOM_PLACED_KEY = registerKey("elysian_stone_mushroom_placed");
         public static final ResourceKey<PlacedFeature> ELYSIAN_ABYSS_CROWN_TREE_PLACED_KEY = registerKey("elysian_abyss_crown_tree_placed");
-        public static final ResourceKey<PlacedFeature> ELYSIAN_AETHER_RIVER_PLACED_KEY = registerKey("elysian_aether_river_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_FLOOR_MOSS_PLACED_KEY = registerKey("elysian_floor_moss_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_LICHEN_PLACED_KEY = registerKey("elysian_lichen_placed");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<PlacedFeature> context) {
@@ -200,6 +201,22 @@ public class ModPlacedFeatures {
                                 InSquarePlacement.spread(),
                                 // Expand range to catch all ceilings vertically (-120 to +30)
                                 HeightRangePlacement.uniform(absolute(-120), absolute(30))));
+
+                // Floor moss: scattered at cave-floor elevations, no heightmap (underground)
+                var configuredMoss = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_FLOOR_MOSS_KEY);
+                register(context, ELYSIAN_FLOOR_MOSS_PLACED_KEY, configuredMoss, List.of(
+                                CountPlacement.of(5),
+                                InSquarePlacement.spread(),
+                                HeightRangePlacement.uniform(absolute(-120), absolute(-70)),
+                                BiomeFilter.biome()));
+
+                // Glow lichen: full cave height, multi-surface
+                var configuredLichen = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_LICHEN_KEY);
+                register(context, ELYSIAN_LICHEN_PLACED_KEY, configuredLichen, List.of(
+                                CountPlacement.of(3),
+                                InSquarePlacement.spread(),
+                                HeightRangePlacement.uniform(absolute(-120), absolute(-30)),
+                                BiomeFilter.biome()));
 
         }
 

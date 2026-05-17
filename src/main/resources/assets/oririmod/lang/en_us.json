@@ -547,5 +547,20 @@
   "item.oririmod.ivy_botanic_guide.level.2.description": "Summons 2 Venomous Plants",
   "item.oririmod.ivy_botanic_guide.level.3.description": "Summons 3 Venomous Plants",
   "item.oririmod.ivy_botanic_guide.lore": "A botanical guide with peculiar, moving ivy on its cover.",
-  "item.oririmod.ivy_botanic_guide.element": "§2Nature§r"
+  "item.oririmod.ivy_botanic_guide.element": "§2Nature§r",
+  "item.oririmod.tnt_arrow": "TNT Arrow",
+  "item.oririmod.event_horizon_arrow": "Event Horizon Arrow",
+  "item.oririmod.dragon_iron_arrow": "Dragon Iron Arrow",
+  "item.oririmod.frost_arrow": "Frost Arrow",
+  "item.oririmod.copper_arrow": "Copper Arrow",
+  "item.oririmod.sonic_arrow": "Sonic Arrow",
+  "entity.oririmod.tnt_arrow": "TNT Arrow",
+  "entity.oririmod.event_horizon_arrow": "Event Horizon Arrow",
+  "entity.oririmod.dragon_iron_arrow": "Dragon Iron Arrow",
+  "entity.oririmod.frost_arrow": "Frost Arrow",
+  "entity.oririmod.copper_arrow": "Copper Arrow",
+  "entity.oririmod.sonic_arrow": "Sonic Arrow",
+  "item.oririmod.cosmic_example": "Cosmic Orb [TEST]",
+  "item.oririmod.cosmic_example.desc1": "Renders via CosmicTooltipComponent",
+  "item.oririmod.cosmic_example.desc2": "Stage 1 pipeline verification"
 }

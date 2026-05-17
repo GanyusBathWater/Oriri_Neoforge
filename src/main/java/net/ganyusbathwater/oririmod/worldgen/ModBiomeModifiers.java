@@ -24,6 +24,7 @@ public class ModBiomeModifiers {
 
         // Elysian Abyss
         public static final ResourceKey<BiomeModifier> ADD_ELYSIAN_FEATURES = registerKey("add_elysian_features");
+        public static final ResourceKey<BiomeModifier> ADD_ELYSIAN_DECORATION = registerKey("add_elysian_decoration");
 
 
         // Scarlet Forest & Plains
@@ -79,7 +80,7 @@ public class ModBiomeModifiers {
                                                                 ModPlacedFeatures.DRAGON_IRON_ORE_PLACED_KEY)),
                                                 GenerationStep.Decoration.UNDERGROUND_ORES));
 
-                // Elysian Abyss Features
+                // Elysian Abyss — vegetal: trees + mushrooms
                 var elysianBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"))));
                 context.register(ADD_ELYSIAN_FEATURES,
@@ -89,6 +90,15 @@ public class ModBiomeModifiers {
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_ABYSS_CROWN_TREE_PLACED_KEY),
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_STONE_MUSHROOM_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // Elysian Abyss — underground decoration: moss patches + glow lichen
+                context.register(ADD_ELYSIAN_DECORATION,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                elysianBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_FLOOR_MOSS_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_LICHEN_PLACED_KEY)),
+                                                GenerationStep.Decoration.UNDERGROUND_DECORATION));
 
 
 

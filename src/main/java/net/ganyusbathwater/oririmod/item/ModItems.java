@@ -12,6 +12,8 @@ import net.ganyusbathwater.oririmod.item.custom.magic.IvyBotanicGuideItem;
 import net.ganyusbathwater.oririmod.item.custom.vestiges.*;
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
 import net.ganyusbathwater.oririmod.util.ModRarity;
+import net.ganyusbathwater.oririmod.item.component.ModDataComponents;
+import net.ganyusbathwater.oririmod.item.component.CosmicTooltipData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.*;
 import net.neoforged.bus.api.IEventBus;
@@ -30,6 +32,23 @@ public class ModItems {
         public static final DeferredItem<Item> MAGIC_DEBUG_STICK = ITEMS.register("magic_debug_stick",
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.MagicDebugStickItem(
                                         new Item.Properties().stacksTo(1)));
+
+        /**
+         * Test item for the Stage 1 cosmic tooltip pipeline.
+         * Give via: /give @s oririmod:cosmic_example
+         * Expected: hovering shows a dark-purple tooltip background rendered by
+         * CosmicTooltipComponent (identical to vanilla visually at Stage 1),
+         * confirming the full data-component → surrogate → factory → render chain works.
+         */
+        public static final DeferredItem<CosmicExampleItem> COSMIC_EXAMPLE =
+                        ITEMS.register("cosmic_example",
+                                        () -> new CosmicExampleItem(
+                                                        new Item.Properties()
+                                                                .stacksTo(1)
+                                                                .component(
+                                                                        ModDataComponents.COSMIC_TOOLTIP.get(),
+                                                                        new CosmicTooltipData(0, true)
+                                                                )));
 
         // -------------------------------------Crafting
         // Items---------------------------------------------------------
@@ -280,7 +299,8 @@ public class ModItems {
                                         new Item.Properties().fireResistant()
                                                         .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6,
                                                                         -1.4F))
-                                                        .stacksTo(1),
+                                                        .stacksTo(1)
+                                                        .component(ModDataComponents.COSMIC_TOOLTIP.get(), new CosmicTooltipData(0, true)),
                                         ModRarity.UNIQUE));
         public static final DeferredItem<SwordItem> QILINS_WRATH = ITEMS.register("qilins_wrath",
                         () -> new CustomSwordItem(Tiers.NETHERITE,
@@ -305,6 +325,19 @@ public class ModItems {
                         () -> new CustomCrossbowItem(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
         public static final DeferredItem<BowItem> ORAPHIM_BOW = ITEMS.register("oraphim_bow",
                         () -> new CustomBowItemClass(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
+
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.TntArrowItem> TNT_ARROW = ITEMS.register("tnt_arrow",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.arrow.TntArrowItem(new Item.Properties()));
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.EventHorizonArrowItem> EVENT_HORIZON_ARROW = ITEMS.register("event_horizon_arrow",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.arrow.EventHorizonArrowItem(new Item.Properties()));
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.DragonIronArrowItem> DRAGON_IRON_ARROW = ITEMS.register("dragon_iron_arrow",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.arrow.DragonIronArrowItem(new Item.Properties()));
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.FrostArrowItem> FROST_ARROW = ITEMS.register("frost_arrow",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.arrow.FrostArrowItem(new Item.Properties()));
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.CopperArrowItem> COPPER_ARROW = ITEMS.register("copper_arrow",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.arrow.CopperArrowItem(new Item.Properties()));
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.SonicArrowItem> SONIC_ARROW = ITEMS.register("sonic_arrow",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.arrow.SonicArrowItem(new Item.Properties()));
 
         public static final DeferredItem<MagicStaffItem> STAFF_OF_WISE = ITEMS.register("staff_of_wise",
                         () -> new MagicStaffItem(new Item.Properties().stacksTo(1), MagicStaffItem.StaffAction.REGEN,
@@ -574,6 +607,45 @@ public class ModItems {
                         () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
         public static final DeferredItem<Item> THE_WORLD = ITEMS.register("the_world",
                         () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+
+        public static void registerDispenserBehaviors() {
+                net.minecraft.world.level.block.DispenserBlock.registerBehavior(TNT_ARROW.get(), new net.ganyusbathwater.oririmod.item.ModArrowDispenseBehavior() {
+                        @Override
+                        protected net.minecraft.world.entity.projectile.AbstractArrow getProjectile(net.minecraft.world.level.Level level, net.minecraft.core.Position position, net.minecraft.world.item.ItemStack stack) {
+                                return new net.ganyusbathwater.oririmod.entity.custom.arrow.TntArrowEntity(level, position.x(), position.y(), position.z(), stack.copyWithCount(1), null);
+                        }
+                });
+                net.minecraft.world.level.block.DispenserBlock.registerBehavior(EVENT_HORIZON_ARROW.get(), new net.ganyusbathwater.oririmod.item.ModArrowDispenseBehavior() {
+                        @Override
+                        protected net.minecraft.world.entity.projectile.AbstractArrow getProjectile(net.minecraft.world.level.Level level, net.minecraft.core.Position position, net.minecraft.world.item.ItemStack stack) {
+                                return new net.ganyusbathwater.oririmod.entity.custom.arrow.EventHorizonArrowEntity(level, position.x(), position.y(), position.z(), stack.copyWithCount(1), null);
+                        }
+                });
+                net.minecraft.world.level.block.DispenserBlock.registerBehavior(DRAGON_IRON_ARROW.get(), new net.ganyusbathwater.oririmod.item.ModArrowDispenseBehavior() {
+                        @Override
+                        protected net.minecraft.world.entity.projectile.AbstractArrow getProjectile(net.minecraft.world.level.Level level, net.minecraft.core.Position position, net.minecraft.world.item.ItemStack stack) {
+                                return new net.ganyusbathwater.oririmod.entity.custom.arrow.DragonIronArrowEntity(level, position.x(), position.y(), position.z(), stack.copyWithCount(1), null);
+                        }
+                });
+                net.minecraft.world.level.block.DispenserBlock.registerBehavior(FROST_ARROW.get(), new net.ganyusbathwater.oririmod.item.ModArrowDispenseBehavior() {
+                        @Override
+                        protected net.minecraft.world.entity.projectile.AbstractArrow getProjectile(net.minecraft.world.level.Level level, net.minecraft.core.Position position, net.minecraft.world.item.ItemStack stack) {
+                                return new net.ganyusbathwater.oririmod.entity.custom.arrow.FrostArrowEntity(level, position.x(), position.y(), position.z(), stack.copyWithCount(1), null);
+                        }
+                });
+                net.minecraft.world.level.block.DispenserBlock.registerBehavior(COPPER_ARROW.get(), new net.ganyusbathwater.oririmod.item.ModArrowDispenseBehavior() {
+                        @Override
+                        protected net.minecraft.world.entity.projectile.AbstractArrow getProjectile(net.minecraft.world.level.Level level, net.minecraft.core.Position position, net.minecraft.world.item.ItemStack stack) {
+                                return new net.ganyusbathwater.oririmod.entity.custom.arrow.CopperArrowEntity(level, position.x(), position.y(), position.z(), stack.copyWithCount(1), null);
+                        }
+                });
+                net.minecraft.world.level.block.DispenserBlock.registerBehavior(SONIC_ARROW.get(), new net.ganyusbathwater.oririmod.item.ModArrowDispenseBehavior() {
+                        @Override
+                        protected net.minecraft.world.entity.projectile.AbstractArrow getProjectile(net.minecraft.world.level.Level level, net.minecraft.core.Position position, net.minecraft.world.item.ItemStack stack) {
+                                return new net.ganyusbathwater.oririmod.entity.custom.arrow.SonicArrowEntity(level, position.x(), position.y(), position.z(), stack.copyWithCount(1), null);
+                        }
+                });
+        }
 
         private static void addItemsToIngredientTabItemGroup() {
 

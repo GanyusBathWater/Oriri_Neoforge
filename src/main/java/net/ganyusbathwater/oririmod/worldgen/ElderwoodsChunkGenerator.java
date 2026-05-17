@@ -63,6 +63,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private static BlockState SCARLET_STONE;
     private static BlockState SCARLET_DEEPSLATE;
 
+    // ===== ELYSIAN ABYSS BLOCKS =====
+    private static BlockState AETHER_LIQUID;
+
     // Biome keys for scarlet biomes
     private static final ResourceKey<Biome> SCARLET_PLAINS_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains"));
@@ -119,6 +122,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 SCARLET_GRASS = ModBlocks.SCARLET_GRASS_BLOCK.get().defaultBlockState();
                 SCARLET_STONE = ModBlocks.SCARLET_STONE.get().defaultBlockState();
                 SCARLET_DEEPSLATE = ModBlocks.SCARLET_DEEPSLATE.get().defaultBlockState();
+            }
+            if (AETHER_LIQUID == null) {
+                AETHER_LIQUID = net.ganyusbathwater.oririmod.fluid.ModFluids.AETHER_BLOCK.get().defaultBlockState();
             }
         }
     }
@@ -220,6 +226,110 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double nx = (x + seedOffsetCave + 555) * 0.04;
         double nz = (z + seedOffsetCave + 555) * 0.04;
         return (Math.sin(nx) * Math.cos(nz) + 1.0) / 2.0;
+    }
+
+    /**
+     * Returns the terraced floor Y for Elysian Abyss columns.
+     * Uses smooth-step blending between three tiers so all vertical transitions
+     * are curved/parabolic instead of hard stepped cliffs.
+     * Tiers: -115 (bottom/Aether), -100 (mid), -85 (upper).
+     */
+    private int getElysianTerraceFloor(int x, int z) {
+        double nx = (x + seedOffsetCave + 3100) * 0.006;
+        double nz = (z + seedOffsetCave + 3100) * 0.006;
+        double n = Math.sin(nx) * Math.cos(nz);
+        n += Math.sin(nx * 2.31 + 1.7) * Math.cos(nz * 2.17 + 0.9) * 0.5;
+        n += Math.sin(nx * 4.73 + 3.1) * Math.cos(nz * 4.51 + 2.7) * 0.25;
+        n = Mth.clamp(n / 1.75, -1.0, 1.0);
+
+        // Smooth-step blend zones — wide overlap gives parabolic/curved transitions
+        double t1 = smoothstep(-0.45, -0.20, n);  // bottom → mid
+        double t2 = smoothstep(0.15,  0.40, n);   // mid   → upper
+
+        double floor = Mth.lerp(t1, -115.0, -100.0);
+        floor = Mth.lerp(t2, floor, -85.0);
+        return (int) Math.round(floor);
+    }
+
+    /** Cubic smooth-step: 0 at edge0, 1 at edge1, smooth S-curve between. */
+    private static double smoothstep(double edge0, double edge1, double x) {
+        double t = Mth.clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+        return t * t * (3.0 - 2.0 * t);
+    }
+
+    /**
+     * 3-D boundary noise for organic wall/floor/ceiling erosion.
+     * Increased amplitude for more pronounced erosion on wall transitions.
+     */
+    private double getCaveBoundaryNoise(int x, int y, int z, int xOff, int zOff) {
+        double nx = (x + seedOffsetCave + xOff) * 0.045;
+        double ny = y * 0.07;
+        double nz = (z + seedOffsetCave + zOff) * 0.045;
+        double a = Math.sin(nx * 0.857 + nz * 0.515) * Math.cos(-nx * 0.515 + nz * 0.857) * Math.sin(ny);
+        double b = Math.sin(nx * 1.73 + 0.5) * Math.cos(nz * 1.61 + 1.3) * Math.sin(ny * 1.9) * 0.5;
+        double c = Math.sin(nx * 3.11 + nz * 2.37) * 0.25; // extra high-freq roughness
+        return (a + b + c) / 1.5;
+    }
+
+    /**
+     * Column-level pillar test — kept for backward compatibility with any external callers.
+     * @deprecated Use isElysianPillarBlock for the new 3-D varied pillar system.
+     */
+    @Deprecated
+    private boolean isElysianPillarColumn(int x, int z) {
+        return getPillarNoise(x, z) < 0.2;
+    }
+
+    /**
+     * 3-D pillar membership test.
+     * Grid-based: each 60×60 cell has a 20% chance of containing one pillar.
+     * Each pillar has:
+     *   • Unique base radius (1.5–7 blocks): thin needles to massive columns.
+     *   • Low-freq Y-dependent XZ displacement: smooth tilt / curve.
+     *   • Hourglass taper: wider at floor/ceiling, narrower at centre.
+     */
+    private boolean isElysianPillarBlock(int x, int y, int z, int caveFloor, int caveCeiling) {
+        final int GRID = 60;
+        int gridX = Math.floorDiv(x, GRID);
+        int gridZ = Math.floorDiv(z, GRID);
+
+        for (int gx = gridX - 1; gx <= gridX + 1; gx++) {
+            for (int gz = gridZ - 1; gz <= gridZ + 1; gz++) {
+                // Deterministic seed per grid cell
+                long s = (long) gx * 314159265358L ^ (long) gz * 271828182845L ^ (long) seedOffsetCave;
+                long h1 = s  * 0x9E3779B97F4A7C15L;
+                long h2 = h1 * 0x6C62272E07BB0142L;
+                long h3 = h2 * 0x94D049BB133111EBL;
+
+                // 20% of cells have a pillar
+                if ((h1 >>> 48) > 0xCCCCL) continue;
+
+                // Pillar centre (jittered within cell)
+                double cx = gx * GRID + (double) ((h2 >>> 16) & 0xFFFFL) / 65536.0 * GRID;
+                double cz = gz * GRID + (double) ((h3 >>> 16) & 0xFFFFL) / 65536.0 * GRID;
+
+                // Unique base radius per pillar
+                double baseRadius = 1.5 + (double) ((h1 >>> 16) & 0xFFFFL) / 65536.0 * 5.5;
+
+                // Independent displacement phases per pillar
+                double phX = (double) ((h2 >>> 32) & 0xFFFFL) / 65536.0 * Math.PI * 2.0;
+                double phZ = (double) ((h3 >>> 32) & 0xFFFFL) / 65536.0 * Math.PI * 2.0;
+
+                // Low-freq 3-D displacement: smooth curve/tilt over height
+                double dispX = Math.sin(y * 0.025 + phX) * 5.0 + Math.cos(y * 0.041 + phX * 0.7) * 2.5;
+                double dispZ = Math.sin(y * 0.031 + phZ) * 5.0 + Math.cos(y * 0.019 + phZ * 1.3) * 2.5;
+
+                // Hourglass taper: wider at floor/ceiling, narrower at centre
+                double vP = Mth.clamp((double)(y - caveFloor) / Math.max(1, caveCeiling - caveFloor), 0.0, 1.0);
+                double yNorm = (vP - 0.5) * 2.0;
+                double radius = baseRadius * (1.0 + yNorm * yNorm * 2.0);
+
+                double dx = x - (cx + dispX);
+                double dz = z - (cz + dispZ);
+                if (dx * dx + dz * dz < radius * radius) return true;
+            }
+        }
+        return false;
     }
 
 
@@ -583,6 +693,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 for (int y = MIN_Y + 6; y <= surfaceY - 5; y++) {
                     clusterPos.set(worldX, y, worldZ);
 
+                    // Fluorite is excluded from Elysian Abyss zone
+                    if (getAbyssNoise(worldX, worldZ) > 0.09) continue;
+
                     if (chunk.getBlockState(clusterPos).isAir()) {
                         adjacentPos.set(worldX, y + 1, worldZ);
                         BlockState aboveState = chunk.getBlockState(adjacentPos);
@@ -900,7 +1013,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         boolean isBelowSurfaceLayer = y < surfaceY - 4;
 
         if (isBelowSurfaceLayer) {
-            if (caveNoise > 0.15) {
+            // Threshold matches fillFromNoise abyssIntensity > 0.1 threshold
+            // (caveNoise > 0.09) to prevent biome/geometry mismatch that causes
+            // scarlet-cave features to bleed into the abyss ceiling.
+            if (caveNoise > 0.09 && y < surfaceY - 20) {
                 return cachedElysianAbyss;
             } else if (caveNoise > 0.0) {
                 return cachedScarletCaves;
@@ -1003,12 +1119,20 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
                     double caveFloorSmooth = getCaveFloorHeightDouble(worldX, worldZ, -115);
                     double caveCeilingSmooth = getCaveCeilingHeightDouble(worldX, worldZ, surfaceY);
-                    
+
                     int caveFloor = (int)Math.round(caveFloorSmooth);
                     int caveCeiling = (int)Math.round(caveCeilingSmooth);
 
                     double verticalCenter = (caveFloorSmooth + caveCeilingSmooth) / 2.0;
                     double roomHalfHeight = Math.max(1.0, (caveCeilingSmooth - caveFloorSmooth) / 2.0);
+
+                    // ── Elysian Abyss: pre-compute per-column values ─────────────
+                    int elysianTerraceFloor = -115;
+                    boolean elysianBottomTier = false;
+                    if (abyssIntensity > 0.1) {
+                        elysianTerraceFloor = getElysianTerraceFloor(worldX, worldZ);
+                        elysianBottomTier = (elysianTerraceFloor <= -108);
+                    }
 
                     for (int y = MIN_Y; y <= surfaceY; y++) {
                         pos.set(worldX, y, worldZ);
@@ -1018,65 +1142,52 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             continue;
                         }
 
-                        boolean isHollow = false;
+                        // ── Full Elysian Abyss zone ─────────────────────────────
                         if (abyssIntensity > 0.1) {
-                            // EL YSIAN ABYSS: Force perfectly flat floor and ceiling bounds
-                            // This ignores 3D noise for the primary cavity to ensure a level floor.
-                            if (y > -115 && y < caveCeilingSmooth) {
-                                isHollow = true;
+                            if (y < MIN_Y + 6) continue;
+
+                            // 1. Pillar (3-D per-block: varied radius, tilt, hourglass taper)
+                            if (isElysianPillarBlock(worldX, y, worldZ, caveFloor, caveCeiling)) {
+                                chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
+                                continue;
                             }
-                        } else if (abyssIntensity > 0.0) {
+
+                            // 2. Flat Aether lake — fixed Y-plane so the surface never staircases.
+                            //    Three blocks deep (-115 to -113) only in bottom-tier columns.
+                            if (elysianBottomTier && y >= -115 && y <= -113
+                                    && !isElysianPillarBlock(worldX, y, worldZ, caveFloor, caveCeiling)) {
+                                chunk.setBlockState(pos, AETHER_LIQUID != null ? AETHER_LIQUID : AIR, false);
+                                continue;
+                            }
+
+                            // 3. Organic wall/floor/ceiling erosion via 3-D bias noise
+                            double floorBias = getCaveBoundaryNoise(worldX, y, worldZ, 0, 0);
+                            double ceilBias  = getCaveBoundaryNoise(worldX, y, worldZ, 900, 900);
+                            double effectiveFloor   = elysianTerraceFloor + floorBias * 4.0;
+                            double effectiveCeiling = caveCeilingSmooth - Math.abs(ceilBias) * 5.0;
+
+                            if (y > effectiveFloor && y < effectiveCeiling) {
+                                chunk.setBlockState(pos, AIR, false);
+                            } else {
+                                chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
+                            }
+                            continue;
+                        }
+
+                        // ── Blend / transition zone ──────────────────────────────
+                        if (abyssIntensity > 0.0) {
                             double distFromCenter = Math.abs(y - verticalCenter);
                             double verticalFactor = Mth.clamp(1.0 - (distFromCenter / (double)roomHalfHeight), 0.0, 1.0);
                             double hollowingNoise3D = getAbyssNoise3D(worldX, y, worldZ);
                             double hollowingValue = (abyssIntensity * verticalFactor) + (hollowingNoise3D * 0.15 * verticalFactor);
-
                             if (hollowingValue > 0.35) {
-                                isHollow = true;
-                            }
-                        }
-
-                        if (isHollow) {
-                            if (y < MIN_Y + 6) continue;
-                            
-                            // 3. EXTREME SPARSE PILLARS
-                            int pillarGrid = 160;
-                            int pGX = Math.floorDiv(worldX, pillarGrid);
-                            int pGZ = Math.floorDiv(worldZ, pillarGrid);
-                            
-                            long pSeed = (long)pGX * 418731287L ^ (long)pGZ * 132897987L + (long)seedOffsetCave;
-                            RandomSource pRand = RandomSource.create(pSeed);
-                            
-                            double pNoise = getPillarNoise(worldX, worldZ);
-                            if (pNoise < 0.2) {
                                 chunk.setBlockState(pos, AIR, false);
                                 continue;
                             }
-                            
-                            double vP = (double)(y - caveFloor) / Math.max(1, (caveCeiling - caveFloor));
-                            double pCenterX = Math.sin(worldX * 0.05 + worldZ * 0.05) * 4.0;
-                            double pCenterZ = Math.cos(worldX * 0.05 - worldZ * 0.05) * 4.0;
-                            double snakeX = Math.sin(vP * Math.PI) * 12.0;
-                            double snakeZ = Math.cos(vP * Math.PI) * 12.0;
-                            
-                            double yNorm = (vP - 0.5) * 2.0;
-                            double baseRad = 1.5 + pRand.nextDouble() * 2.0;
-                            double hourglassRad = baseRad + (yNorm * yNorm * 9.5); 
-                            double roughness = Math.sin(worldX * 0.2) * Math.sin(y * 0.25) * Math.sin(worldZ * 0.2) * 2.0;
-                            
-                            double dx = worldX - (pCenterX + snakeX);
-                            double dz = worldZ - (pCenterZ + snakeZ);
-                            double distSq = dx * dx + dz * dz;
-                            
-                            if (distSq < (hourglassRad + roughness) * (hourglassRad + roughness)) {
-                                chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
-                            } else {
-                                chunk.setBlockState(pos, AIR, false);
-                            }
-                        } else {
-                            // Not hollow: place base stone/deepslate
-                            chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
                         }
+
+                        // ── Default solid fill ───────────────────────────────────
+                        chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
                     }
                 }
             }

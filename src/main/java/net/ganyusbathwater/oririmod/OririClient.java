@@ -34,6 +34,14 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.ganyusbathwater.oririmod.client.tooltip.CosmicClientTooltipFactory;
+import net.ganyusbathwater.oririmod.client.tooltip.CosmicTooltipSurrogate;
+import net.ganyusbathwater.oririmod.client.tooltip.ModTooltipRenderTypes;
+import net.ganyusbathwater.oririmod.item.component.ModDataComponents;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -63,6 +71,45 @@ public class OririClient {
         ModItemProperties.addCustomItemProperties();
     }
 
+    // ── Tooltip Component Factory ─────────────────────────────────────────────
+    //
+    // Fired on the MOD event bus, CLIENT dist only.
+    // Associates our common-side surrogate record class with the factory method
+    // that constructs the actual rendering component.
+    // After this registration, whenever the game encounters a CosmicTooltipSurrogate
+    // inside a tooltip component list it will call CosmicClientTooltipFactory::create.
+    @SubscribeEvent
+    public static void onRegisterTooltipFactories(RegisterClientTooltipComponentFactoriesEvent event) {
+        event.register(CosmicTooltipSurrogate.class, CosmicClientTooltipFactory::create);
+    }
+
+    // ── Shader Registration ───────────────────────────────────────────────────
+    //
+    // Fired on the MOD event bus, CLIENT dist only, during resource load.
+    // The ShaderInstance is constructed by NeoForge against the JSON descriptor
+    // at assets/oririmod/shaders/core/cosmic_tooltip_bg.json.
+    //
+    // Stage 1: the shader is registered and stored, but ModTooltipRenderTypes
+    //          still uses the vanilla RenderType.gui() placeholder.
+    // Stage 2: ModTooltipRenderTypes.onShadersRegistered(shader) will be called
+    //          here to build the real custom CompositeRenderType.
+    @SubscribeEvent
+    public static void onRegisterShaders(RegisterShadersEvent event) {
+        try {
+            event.registerShader(
+                    new ShaderInstance(
+                            event.getResourceProvider(),
+                            ModTooltipRenderTypes.COSMIC_BG_SHADER_LOC,
+                            DefaultVertexFormat.POSITION_COLOR
+                    ),
+                    // Callback: build the real CompositeRenderType against the compiled shader.
+                    ModTooltipRenderTypes::onShadersRegistered
+            );
+        } catch (java.io.IOException e) {
+            OririMod.LOGGER.error("[OririMod] Failed to register cosmic_tooltip_bg shader: {}", e.getMessage());
+        }
+    }
+
     @SubscribeEvent
     public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
         event.register(Level.OVERWORLD.location(), new CustomDimensionSpecialEffects());
@@ -81,6 +128,30 @@ public class OririClient {
         event.getToolTip().add(line);
     }
 
+    /**
+     * Replaces the vanilla item-name element (position 0) with our
+     * CosmicTooltipSurrogate so that CosmicTooltipComponent owns the name row.
+     * Description lines stay as vanilla TextComponents and are never touched.
+     */
+    @SubscribeEvent
+    public static void onGatherTooltipCosmic(RenderTooltipEvent.GatherComponents event) {
+        ItemStack stack = event.getItemStack();
+        var cosmicData = stack.get(ModDataComponents.COSMIC_TOOLTIP.get());
+        if (cosmicData == null) return;
+
+        List<Either<FormattedText, TooltipComponent>> list = event.getTooltipElements();
+        if (list.isEmpty() || list.get(0).left().isEmpty()) return;
+
+        // Extract the vanilla name text and wrap it in our surrogate.
+        FormattedText nameText = list.get(0).left().get();
+        Component nameComponent = nameText instanceof Component c
+                ? c
+                : Component.literal(nameText.getString());
+
+        // Replace element 0 — our component now owns the name row.
+        list.set(0, Either.right(new CosmicTooltipSurrogate(cosmicData, nameComponent)));
+    }
+
     @SubscribeEvent
     public static void onGatherTooltip(RenderTooltipEvent.GatherComponents event) {
         ItemStack stack = event.getItemStack();
@@ -95,11 +166,78 @@ public class OririClient {
             if (originalTitle instanceof Component component) {
                 Component colored = component.copy()
                         .setStyle(Style.EMPTY.withColor(rarity.textColor()));
-
                 list.set(0, Either.left(colored));
             }
         }
     }
+
+    @SubscribeEvent
+    public static void onTooltipColor(RenderTooltipEvent.Color event) {
+        ItemStack stack = event.getItemStack();
+        var cosmicData = stack.get(ModDataComponents.COSMIC_TOOLTIP.get());
+        if (cosmicData == null) return;
+
+        // DO NOT modify the vanilla background colors here. 
+        // We want the normal Tooltip background to render as usual.
+
+        // Calculate total tooltip dimensions dynamically, identically to GuiGraphics.renderTooltipInternal.
+        int width = 0;
+        int height = event.getComponents().size() == 1 ? -2 : 0;
+        for (var c : event.getComponents()) {
+            width = Math.max(width, c.getWidth(event.getFont()));
+            height += c.getHeight();
+        }
+
+        // In the Color event, event.getX() and event.getY() are the FINAL positioned coordinates.
+        int x = event.getX();
+        int y = event.getY();
+
+        net.minecraft.client.gui.GuiGraphics graphics = event.getGraphics();
+        
+        // 1. Draw the Vanilla Background FIRST manually
+        net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil.renderTooltipBackground(
+                graphics, x, y, width, height, 400,
+                event.getBackgroundStart(), event.getBackgroundEnd(),
+                event.getBorderStart(), event.getBorderEnd()
+        );
+
+        // 2. Force the vanilla background to render to the screen immediately.
+        // This guarantees that it sits underneath our Nebula Mist.
+        graphics.flush();
+
+        // 3. Draw our Nebula Mist ON TOP of the vanilla background.
+        org.joml.Matrix4f pose = graphics.pose().last().pose();
+        
+        org.joml.Vector4f tl = new org.joml.Vector4f(x, y, 0, 1);
+        org.joml.Vector4f br = new org.joml.Vector4f(x + width, y + height, 0, 1);
+        pose.transform(tl);
+        pose.transform(br);
+        
+        ModTooltipRenderTypes.setTooltipUniforms(tl.x(), tl.y(), br.x() - tl.x(), br.y() - tl.y(), (float) cosmicData.style());
+        
+        com.mojang.blaze3d.vertex.VertexConsumer vc = graphics.bufferSource().getBuffer(
+                ModTooltipRenderTypes.cosmicBackground());
+                
+        // Local Z = 400.0f to match the background's Z-level exactly. The Mist will be drawn 
+        // strictly on top because it is queued after the flush.
+        float z = 400.0f; 
+        vc.addVertex(pose, x,         y + height, z).setColor(0xFF, 0xFF, 0xFF, 0xFF);
+        vc.addVertex(pose, x + width, y + height, z).setColor(0xFF, 0xFF, 0xFF, 0xFF);
+        vc.addVertex(pose, x + width, y,          z).setColor(0xFF, 0xFF, 0xFF, 0xFF);
+        vc.addVertex(pose, x,         y,          z).setColor(0xFF, 0xFF, 0xFF, 0xFF);
+
+        ModTooltipRenderTypes.pushCosmicTimeUniform();
+        
+        // 4. Set the vanilla background and border colors to completely transparent.
+        // This effectively "cancels" the vanilla rendering of the background AFTER our Mist,
+        // preventing it from drawing another 94% opaque dark box OVER our Nebula Mist.
+        event.setBackgroundStart(0);
+        event.setBackgroundEnd(0);
+        event.setBorderStart(0);
+        event.setBorderEnd(0);
+    }
+
+
 
     @SubscribeEvent // on the game event bus
     public static void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {

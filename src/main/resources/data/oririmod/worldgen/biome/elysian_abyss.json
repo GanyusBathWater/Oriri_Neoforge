@@ -1,16 +1,16 @@
 {
   "effects": {
-    "fog_color": 8421504,
-    "water_color": 5135990,
-    "water_fog_color": 3820338,
-    "sky_color": 405532,
-    "grass_color": 3824048,
-    "foliage_color": 3824048,
+    "fog_color": 1315890,
+    "water_color": 6841548,
+    "water_fog_color": 2830488,
+    "sky_color": 131080,
+    "grass_color": 3570784,
+    "foliage_color": 2917204,
     "particle": {
       "options": {
         "type": "oririmod:elysian_abyss_particle"
       },
-      "probability": 0.003
+      "probability": 0.005
     },
     "mood_sound": {
       "sound": "minecraft:ambient.cave",

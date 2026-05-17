@@ -64,6 +64,11 @@ public final class TooltipHandler {
             } else {
                 text = text.withStyle(color);
             }
+            
+            if (!element.getIcon().isEmpty()) {
+                text.append(Component.literal(" " + element.getIcon()).withStyle(ChatFormatting.WHITE));
+            }
+            
             extraLines.add(text);
         }
 

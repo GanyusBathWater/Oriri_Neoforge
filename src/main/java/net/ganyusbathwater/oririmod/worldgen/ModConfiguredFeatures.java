@@ -4,6 +4,7 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.worldgen.tree.ElderGiantTreeConfig;
 import net.ganyusbathwater.oririmod.worldgen.feature.ScarletDripstoneClusterConfig;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.FeatureUtils;
@@ -12,7 +13,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
@@ -44,6 +47,8 @@ public class ModConfiguredFeatures {
         // Elysian Abyss features
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELYSIAN_STONE_MUSHROOM_KEY = registerKey("elysian_stone_mushroom");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELYSIAN_ABYSS_CROWN_TREE_KEY = registerKey("elysian_abyss_crown_tree");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ELYSIAN_FLOOR_MOSS_KEY = registerKey("elysian_floor_moss");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ELYSIAN_LICHEN_KEY = registerKey("elysian_lichen");
 
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
                 GeodeBlockSettings layerConfig = new GeodeBlockSettings(
@@ -92,6 +97,31 @@ public class ModConfiguredFeatures {
 
                 var abyssElysianCfg = new net.ganyusbathwater.oririmod.worldgen.tree.AbyssCrownTreeConfig(UniformInt.of(8, 20), UniformInt.of(1, 2), UniformInt.of(5, 10), BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_LOG.get().defaultBlockState()), BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_STEM.get().defaultBlockState()), BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_LEAVES.get().defaultBlockState()));
                 register(context, ELYSIAN_ABYSS_CROWN_TREE_KEY, ModFeatures.ABYSS_CROWN_TREE_FEATURE.get(), abyssElysianCfg);
+
+                // Floor moss — two-step: place MOSS_BLOCK patches on stone/deepslate,
+                // then MOSS_CARPET on top of those. Bone-meal-analogue plants (carpet, roots).
+                register(context, ELYSIAN_FLOOR_MOSS_KEY, Feature.RANDOM_PATCH,
+                        FeatureUtils.simplePatchConfiguration(
+                                Feature.SIMPLE_BLOCK,
+                                new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.MOSS_CARPET)),
+                                List.of(Blocks.MOSS_BLOCK)
+                        ));
+
+                // Glow lichen on floor, walls, and ceiling — MULTIFACE_GROWTH handles all axes.
+                HolderSet<Block> lichenOn = HolderSet.direct(Block::builtInRegistryHolder,
+                        Blocks.STONE, Blocks.DEEPSLATE, Blocks.CALCITE,
+                        Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE,
+                        Blocks.TUFF, Blocks.BASALT, Blocks.MOSS_BLOCK);
+                register(context, ELYSIAN_LICHEN_KEY, Feature.MULTIFACE_GROWTH,
+                        new MultifaceGrowthConfiguration(
+                                (MultifaceBlock) Blocks.GLOW_LICHEN,
+                                13,     // search range
+                                false,  // canPlaceOnFloor: false — prevents floor specks
+                                true,   // can place on ceiling
+                                true,   // can place on walls
+                                0.5f,   // spread chance
+                                lichenOn
+                        ));
         }
 
         public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {

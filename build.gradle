@@ -194,6 +194,10 @@ dependencies {
     // GeckoLib (Required for Eye of Desolation and future animated mobs)
     implementation "software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}"
 
+    // Lodestone (Required library)
+    compileOnly "curse.maven:lodestone-616457:${lodestone_fileid}"
+    runtimeOnly "curse.maven:lodestone-616457:${lodestone_fileid}"
+
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
     // The group id is ignored when searching -- in this case, it is "blank"

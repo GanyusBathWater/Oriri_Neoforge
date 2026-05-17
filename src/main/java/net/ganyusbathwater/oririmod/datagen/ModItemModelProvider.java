@@ -208,6 +208,13 @@ public class ModItemModelProvider extends ItemModelProvider {
                 bowItem(ModItems.ORAPHIM_BOW);
                 handheldItem(ModItems.PIRATE_SABER);
 
+                basicItem(ModItems.TNT_ARROW.get());
+                basicItem(ModItems.EVENT_HORIZON_ARROW.get());
+                basicItem(ModItems.DRAGON_IRON_ARROW.get());
+                basicItem(ModItems.FROST_ARROW.get());
+                basicItem(ModItems.COPPER_ARROW.get());
+                basicItem(ModItems.SONIC_ARROW.get());
+
                 handheldItem(ModItems.ICE_SWORD);
 
                 handheldItem(ModItems.LAW_BREAKER);
