@@ -3,6 +3,7 @@ package net.ganyusbathwater.oririmod.events;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity;
+import net.ganyusbathwater.oririmod.entity.custom.DeviartrasEntity;
 import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -33,6 +34,13 @@ public class ClientEvents {
             "textures/gui/blizza_boss_bar.png");
     private static final ResourceLocation BLIZZA_PROGRESS = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "textures/gui/blizza_progress.png");
+
+    // ── Deviartras boss bar textures ──────────────────────────────────────
+    private static final ResourceLocation DEVIARTRAS_BAR = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/deviartras_boss_bar.png");
+    private static final ResourceLocation DEVIARTRAS_PROGRESS = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/deviartras_progress.png");
+
     // Boss bar dimensions (blizza_boss_bar.png is 200x20)
     private static final int BAR_W  = 200;
     private static final int BAR_H  = 20;
@@ -41,14 +49,21 @@ public class ClientEvents {
     private static final int PROG_H = 5;
 
     // ── Spawn title state ─────────────────────────────────────────────────
-    /** Stores the end time (ms) for the title. Set externally by the network packet handler. */
+    /** Stores the end time (ms) for the Blizza title. Set externally by the network packet handler. */
     public static long blizzaTitleEndTime = 0;
+    /** Stores the end time (ms) for the Deviartras title. */
+    public static long deviartrasTitleEndTime = 0;
     private static final long TITLE_TOTAL_MS = 4000;
     private static final long TITLE_FADE_MS  = 500;
 
     /** Called on the client thread by the BlizzaSpawnTitlePayload handler. */
     public static void triggerBlizzaTitle() {
         blizzaTitleEndTime = System.currentTimeMillis() + TITLE_TOTAL_MS;
+    }
+
+    /** Called on the client thread by the DeviartrasSpawnTitlePayload handler. */
+    public static void triggerDeviartrasTitle() {
+        deviartrasTitleEndTime = System.currentTimeMillis() + TITLE_TOTAL_MS;
     }
 
     @SubscribeEvent
@@ -130,15 +145,20 @@ public class ClientEvents {
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset
         }
 
-        // ── Blizza custom boss bar ────────────────────────────────────────
-        renderBlizzaBossBar(gui, mc, player);
+        // ── Custom boss bars ──────────────────────────────────────────────
+        int nextY = 8;
+        nextY = renderBlizzaBossBar(gui, mc, player, nextY);
+        nextY = renderDeviartrasBossBar(gui, mc, player, nextY);
 
         // ── Blizza spawn title overlay ────────────────────────────────────
         renderBlizzaTitle(gui, mc);
+
+        // ── Deviartras spawn title overlay ────────────────────────────
+        renderDeviartrasTitle(gui, mc);
     }
 
     // ── Boss bar renderer ─────────────────────────────────────────────────
-    private static void renderBlizzaBossBar(GuiGraphics gui, Minecraft mc, Player player) {
+    private static int renderBlizzaBossBar(GuiGraphics gui, Minecraft mc, Player player, int startY) {
         BlizzaEntity blizza = null;
         double closestDist = 200.0 * 200.0;
         net.minecraft.world.phys.AABB searchBox = player.getBoundingBox().inflate(200.0);
@@ -149,14 +169,14 @@ public class ClientEvents {
                 blizza = b;
             }
         }
-        if (blizza == null) return;
+        if (blizza == null) return startY;
 
         float healthFraction = Math.max(0f, Math.min(1f, blizza.getHealthFraction()));
         int screenW = mc.getWindow().getGuiScaledWidth();
         int barX = (screenW - BAR_W) / 2;
-        int barY = 8;
+        int barY = startY;
         int progOffX = (BAR_W - PROG_W) / 2;
-        int progOffY = (BAR_H - PROG_H) / 2;
+        int progOffY = ((BAR_H - PROG_H) / 2) + 1; // shifted 1 pixel down as requested
         int filledW = (int) (PROG_W * healthFraction);
 
         RenderSystem.enableBlend();
@@ -176,6 +196,50 @@ public class ClientEvents {
         String bossName = blizza.getDisplayName().getString();
         int nameW = mc.font.width(bossName);
         gui.drawString(mc.font, Component.literal(bossName), (screenW - nameW) / 2, barY + BAR_H + 2, 0xFFFFFF, true);
+        
+        return startY + BAR_H + mc.font.lineHeight + 6;
+    }
+
+    private static int renderDeviartrasBossBar(GuiGraphics gui, Minecraft mc, Player player, int startY) {
+        DeviartrasEntity deviartras = null;
+        double closestDist = 200.0 * 200.0;
+        net.minecraft.world.phys.AABB searchBox = player.getBoundingBox().inflate(200.0);
+        for (DeviartrasEntity b : player.level().getEntitiesOfClass(DeviartrasEntity.class, searchBox, e -> e.isAlive())) {
+            double d = player.distanceToSqr(b);
+            if (d < closestDist) {
+                closestDist = d;
+                deviartras = b;
+            }
+        }
+        if (deviartras == null) return startY;
+
+        float healthFraction = Math.max(0f, Math.min(1f, deviartras.getHealthFraction()));
+        int screenW = mc.getWindow().getGuiScaledWidth();
+        int barX = (screenW - BAR_W) / 2;
+        int barY = startY; 
+        int progOffX = (BAR_W - PROG_W) / 2;
+        int progOffY = ((BAR_H - PROG_H) / 2) + 1; // shifted 1 pixel down as requested
+        int filledW = (int) (PROG_W * healthFraction);
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        // Layer 1: background
+        gui.blit(DEVIARTRAS_BAR, barX, barY, 0, 0, BAR_W, BAR_H, BAR_W, BAR_H);
+        // Layer 2: health fill (clipped)
+        if (filledW > 0) {
+            gui.blit(DEVIARTRAS_PROGRESS, barX + progOffX, barY + progOffY, 0, 0, filledW, PROG_H, PROG_W, PROG_H);
+        }
+        // Layer 3: frame on top
+        gui.blit(DEVIARTRAS_BAR, barX, barY, 0, 0, BAR_W, BAR_H, BAR_W, BAR_H);
+
+        RenderSystem.disableBlend();
+
+        String bossName = deviartras.getDisplayName().getString();
+        int nameW = mc.font.width(bossName);
+        gui.drawString(mc.font, Component.literal(bossName), (screenW - nameW) / 2, barY + BAR_H + 2, 0xFFFFFF, true);
+        
+        return startY + BAR_H + mc.font.lineHeight + 6;
     }
 
     // ── Spawn title renderer ──────────────────────────────────────────────
@@ -213,6 +277,47 @@ public class ClientEvents {
         gui.pose().popPose();
 
         gui.drawString(mc.font, line2, (screenW - line2W) / 2, centerY + 16, 0xFFFFFF | alphaInt, true);
+
+        RenderSystem.disableBlend();
+    }
+
+    // ── Deviartras spawn title renderer ────────────────────────────────
+    private static void renderDeviartrasTitle(GuiGraphics gui, Minecraft mc) {
+        long now = System.currentTimeMillis();
+        if (now > deviartrasTitleEndTime) return;
+
+        long remaining = deviartrasTitleEndTime - now;
+        float alpha;
+        if (remaining > TITLE_TOTAL_MS - TITLE_FADE_MS) {
+            alpha = 1f - ((remaining - (TITLE_TOTAL_MS - TITLE_FADE_MS)) / (float) TITLE_FADE_MS);
+        } else if (remaining < TITLE_FADE_MS) {
+            alpha = remaining / (float) TITLE_FADE_MS;
+        } else {
+            alpha = 1f;
+        }
+
+        int screenW  = mc.getWindow().getGuiScaledWidth();
+        int screenH  = mc.getWindow().getGuiScaledHeight();
+        int alphaInt = (int) (alpha * 255) << 24;
+
+        String line1 = "Hatebound Dryad";
+        String line2 = "Deviartras the Sage of Nature";
+        int line1W   = mc.font.width(line1) * 2;
+        int line2W   = mc.font.width(line2);
+        int centerY  = screenH / 3;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        // Large title line in green
+        gui.pose().pushPose();
+        gui.pose().translate((screenW - line1W) / 2f, centerY - 10f, 0f);
+        gui.pose().scale(2f, 2f, 1f);
+        gui.drawString(mc.font, line1, 0, 0, 0x55FF55 | alphaInt, true);
+        gui.pose().popPose();
+
+        // Subtitle in gold
+        gui.drawString(mc.font, line2, (screenW - line2W) / 2, centerY + 16, 0xFFD700 | alphaInt, true);
 
         RenderSystem.disableBlend();
     }

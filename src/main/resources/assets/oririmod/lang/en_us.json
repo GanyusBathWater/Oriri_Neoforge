@@ -562,5 +562,7 @@
   "entity.oririmod.sonic_arrow": "Sonic Arrow",
   "item.oririmod.cosmic_example": "Cosmic Orb [TEST]",
   "item.oririmod.cosmic_example.desc1": "Renders via CosmicTooltipComponent",
-  "item.oririmod.cosmic_example.desc2": "Stage 1 pipeline verification"
-}
+  "item.oririmod.cosmic_example.desc2": "Stage 1 pipeline verification",
+  "entity.oririmod.deviartras": "Deviartras",
+  "item.oririmod.deviartras_spawn_egg": "Deviartras Spawn Egg"
+}

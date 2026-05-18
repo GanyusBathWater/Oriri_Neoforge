@@ -64,6 +64,7 @@ public class OririClient {
         event.registerSpriteSet(ModParticles.ELDERWOODS_CAVE_PARTICLE.get(), ElderwoodsCaveParticle.Provider::new);
         event.registerSpriteSet(ModParticles.SCARLET_CAVE_PARTICLE.get(), ScarletCaveParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELYSIAN_ABYSS_PARTICLE.get(), ElysianAbyssParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.DEVIARTRAS_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.DeviartrasSporeParticle.Provider::new);
     }
 
     @SubscribeEvent
@@ -284,6 +285,10 @@ public class OririClient {
         event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
+        event.registerEntityRenderer(ModEntities.DEVIARTRAS.get(),
+                net.ganyusbathwater.oririmod.entity.client.DeviartrasRenderer::new);
+        event.registerEntityRenderer(ModEntities.SPORE_BLOSSOM.get(),
+                net.ganyusbathwater.oririmod.entity.client.SporeBlossomRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.REVIVAL_SHRINE.get(),
                 net.ganyusbathwater.oririmod.client.render.block.RevivalShrineRenderer::new);
     }

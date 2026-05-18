@@ -450,6 +450,12 @@ public class ModItems {
                                         0x2D5A1B, 0x9B59B6, // outer: deep forest green, inner: poison purple
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> DEVIARTRAS_SPAWN_EGG = ITEMS.register(
+                        "deviartras_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.DEVIARTRAS,
+                                        0x2C5F2E, 0xA8D5A2, // outer: deep forest green, inner: pale nature green
+                                        new Item.Properties()));
+
         // ------------------------------------------------------Armor---------------------------------------------------------
 
         public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet",

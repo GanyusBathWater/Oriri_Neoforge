@@ -30,6 +30,8 @@ public final class NetworkHandler {
             "select_boss_attack");
     public static final ResourceLocation BLIZZA_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "blizza_spawn_title");
+    public static final ResourceLocation DEVIARTRAS_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "deviartras_spawn_title");
 
     private NetworkHandler() {
     }
@@ -74,6 +76,13 @@ public final class NetworkHandler {
                 net.ganyusbathwater.oririmod.network.packet.BlizzaSpawnTitlePayload.STREAM_CODEC,
                 (payload, ctx) -> ctx.enqueueWork(() -> {
                     net.ganyusbathwater.oririmod.events.ClientEvents.triggerBlizzaTitle();
+                }));
+
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.DeviartrasSpawnTitlePayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.DeviartrasSpawnTitlePayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.events.ClientEvents.triggerDeviartrasTitle();
                 }));
 
         registrar.playToServer(
@@ -133,5 +142,10 @@ public final class NetworkHandler {
     public static void sendBlizzaTitleToPlayer(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player,
                 new net.ganyusbathwater.oririmod.network.packet.BlizzaSpawnTitlePayload());
+    }
+
+    public static void sendDeviartrasTitle(ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.DeviartrasSpawnTitlePayload());
     }
 }

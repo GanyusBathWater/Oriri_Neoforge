@@ -114,8 +114,8 @@ public class VenomousPlantEntity extends Monster implements GeoEntity {
         }
 
         // Lock position and rotation BEFORE super.tick()
-        this.setPos(spawnX, spawnY, spawnZ);
-        this.setDeltaMovement(Vec3.ZERO);
+        this.setPos(spawnX, this.getY(), spawnZ);
+        this.setDeltaMovement(new net.minecraft.world.phys.Vec3(0, this.getDeltaMovement().y, 0));
         this.setYRot(spawnYRot);
         this.yRotO = spawnYRot;
         this.setYBodyRot(spawnYRot);
@@ -124,12 +124,15 @@ public class VenomousPlantEntity extends Monster implements GeoEntity {
         super.tick();
 
         // Re-lock AFTER super.tick()
-        this.setPos(spawnX, spawnY, spawnZ);
-        this.setDeltaMovement(Vec3.ZERO);
+        this.setPos(spawnX, this.getY(), spawnZ);
+        this.setDeltaMovement(new net.minecraft.world.phys.Vec3(0, this.getDeltaMovement().y, 0));
         this.setYRot(spawnYRot);
         this.yRotO = spawnYRot;
         this.setYBodyRot(spawnYRot);
         this.yBodyRotO = spawnYRot;
+        
+        // Update spawnY to follow gravity
+        this.spawnY = this.getY();
 
         // Spawn dirt particles during the spawn animation (first 2 seconds)
         if (this.level().isClientSide && this.tickCount <= SPAWN_ANIM_TICKS) {
@@ -148,10 +151,41 @@ public class VenomousPlantEntity extends Monster implements GeoEntity {
         }
     }
 
-    /** Prevent movement from being applied. */
+    // ── Immovable Logic ────────────────────────────────────────────────────────
+    
     @Override
-    public void travel(Vec3 travelVector) {
-        this.setDeltaMovement(Vec3.ZERO);
+    public boolean isPushable() {
+        return false;
+    }
+
+    @Override
+    protected void doPush(net.minecraft.world.entity.Entity entity) {
+        // Do nothing
+    }
+
+    @Override
+    public void push(double x, double y, double z) {
+        // Do nothing
+    }
+
+    @Override
+    public void knockback(double strength, double x, double z) {
+        // Do nothing
+    }
+
+    // ── Resistances & Weaknesses ──────────────────────────────────────────────
+    @Override
+    public boolean addEffect(net.minecraft.world.effect.MobEffectInstance effectInstance, @javax.annotation.Nullable net.minecraft.world.entity.Entity entity) {
+        var type = effectInstance.getEffect();
+        if (type == net.minecraft.world.effect.MobEffects.POISON
+         || type == net.minecraft.world.effect.MobEffects.WITHER
+         || type == net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN
+         || type == net.minecraft.world.effect.MobEffects.BLINDNESS
+         || type == net.minecraft.world.effect.MobEffects.WEAKNESS
+         || type == net.minecraft.world.effect.MobEffects.LEVITATION) {
+            return false; // silently reject — immunity
+        }
+        return super.addEffect(effectInstance, entity);
     }
 
     // ─── Attack logic ─────────────────────────────────────────────────────────
@@ -220,6 +254,18 @@ public class VenomousPlantEntity extends Monster implements GeoEntity {
         // Spawn invincibility for the first second
         if (this.tickCount <= SPAWN_INVINCIBILITY_TICKS) {
             return false;
+        }
+
+        // ── Apply weaknesses ──────────────────────────────────────────────────
+        boolean isFire   = source.is(net.minecraft.world.damagesource.DamageTypes.ON_FIRE)
+                        || source.is(net.minecraft.world.damagesource.DamageTypes.IN_FIRE)
+                        || source.is(net.minecraft.world.damagesource.DamageTypes.LAVA)
+                        || source.is(net.minecraft.world.damagesource.DamageTypes.FIREBALL);
+        boolean isWither = source.is(net.minecraft.world.damagesource.DamageTypes.WITHER)
+                        || source.is(net.minecraft.world.damagesource.DamageTypes.WITHER_SKULL);
+
+        if (isFire || isWither) {
+            amount *= 1.5f;
         }
 
         boolean result = super.hurt(source, amount);

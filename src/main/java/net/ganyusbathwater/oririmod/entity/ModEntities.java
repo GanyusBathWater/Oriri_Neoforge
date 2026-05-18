@@ -162,6 +162,20 @@ public final class ModEntities {
                                                                                         "spore_zombie")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.SporeBlossomEntity>> SPORE_BLOSSOM = ENTITIES
+                        .register("spore_blossom",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.SporeBlossomEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.SporeBlossomEntity::new,
+                                                                        MobCategory.MONSTER)
+                                                        .sized(1.0F, 1.0F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(3)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "spore_blossom")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity>> EYE_OF_DESOLATION = ENTITIES
                         .register("eye_of_desolation",
                                         () -> EntityType.Builder
@@ -265,6 +279,19 @@ public final class ModEntities {
                                         () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity>of(net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity::new, MobCategory.MISC)
                                                         .sized(1.0F, 1.0F).clientTrackingRange(64).updateInterval(1)
                                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "black_hole").toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.DeviartrasEntity>> DEVIARTRAS = ENTITIES
+                        .register("deviartras",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.DeviartrasEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.DeviartrasEntity::new,
+                                                                        MobCategory.MONSTER)
+                                                        .sized(0.8F, 2.5F)
+                                                        .clientTrackingRange(64)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "deviartras")
+                                                                        .toString()));
 
         public static void register(IEventBus modBus) {
                 ENTITIES.register(modBus);
