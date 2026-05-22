@@ -21,8 +21,14 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
     }
 
     private boolean canReplace(WorldGenLevel level, BlockPos pos) {
-        if (!level.isStateAtPosition(pos, state -> state.isAir() || state.is(BlockTags.REPLACEABLE) || state.is(BlockTags.LEAVES) || state.canBeReplaced() || state.is(net.minecraft.world.level.block.Blocks.WATER))) {
-            return false;
+        if (net.ganyusbathwater.oririmod.block.custom.UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
+            if (!level.isStateAtPosition(pos, state -> state.isAir())) {
+                return false;
+            }
+        } else {
+            if (!level.isStateAtPosition(pos, state -> state.isAir() || state.is(BlockTags.REPLACEABLE) || state.is(BlockTags.LEAVES) || state.canBeReplaced() || state.is(net.minecraft.world.level.block.Blocks.WATER))) {
+                return false;
+            }
         }
         return pos.getY() > level.getMinBuildHeight() && pos.getY() < level.getMaxBuildHeight();
     }
@@ -50,60 +56,65 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
         RandomSource rnd = context.random();
         AbyssCrownTreeConfig config = context.config();
 
-        // Universal Snap: Find the cavern roof from any starting height
-        boolean foundCeiling = false;
-        if (level.getBlockState(origin).isAir()) {
-            // Case A: Picked an air block - search UP for a valid natural ceiling
-            for (int i = 1; i <= 200; i++) {
-                BlockPos potOrigin = origin.above(i);
-                if (isValidAnchor(level.getBlockState(potOrigin.above()))) {
-                    origin = potOrigin;
-                    foundCeiling = true;
-                    break;
-                }
-            }
-        } else {
-            // Case B: Picked a solid block - search DOWN for the first air pocket
-            for (int i = 1; i <= 128; i++) {
-                BlockPos potOrigin = origin.below(i);
-                if (level.getBlockState(potOrigin).isAir()) {
+        BlockState originState = level.getBlockState(origin);
+        boolean isSapling = level instanceof net.minecraft.server.level.ServerLevel;
+
+        if (!isSapling) {
+            // Universal Snap: Find the cavern roof from any starting height
+            boolean foundCeiling = false;
+            if (level.getBlockState(origin).isAir()) {
+                // Case A: Picked an air block - search UP for a valid natural ceiling
+                for (int i = 1; i <= 200; i++) {
+                    BlockPos potOrigin = origin.above(i);
                     if (isValidAnchor(level.getBlockState(potOrigin.above()))) {
                         origin = potOrigin;
                         foundCeiling = true;
+                        break;
                     }
-                    break; // Stop at the first interface
+                }
+            } else {
+                // Case B: Picked a solid block - search DOWN for the first air pocket
+                for (int i = 1; i <= 128; i++) {
+                    BlockPos potOrigin = origin.below(i);
+                    if (level.getBlockState(potOrigin).isAir()) {
+                        if (isValidAnchor(level.getBlockState(potOrigin.above()))) {
+                            origin = potOrigin;
+                            foundCeiling = true;
+                        }
+                        break; // Stop at the first interface
+                    }
                 }
             }
-        }
 
-        if (!foundCeiling) return false;
+            if (!foundCeiling) return false;
 
-        // Y-range guard: reject if ceiling attach point is outside valid cave ceiling zone
-        // Cave ceilings: roughly Y = -70 to Y = 0. Avoids void/bedrock placements.
-        if (origin.getY() < -70 || origin.getY() > 10) return false;
+            // Y-range guard: reject if ceiling attach point is outside valid cave ceiling zone
+            // Cave ceilings: roughly Y = -70 to Y = 0. Avoids void/bedrock placements.
+            if (origin.getY() < -70 || origin.getY() > 10) return false;
 
-        // Pillar detection: if the column below origin is solid for 30+ blocks,
-        // this is the top of a structural pillar, not a cave ceiling. Reject it.
-        // Trees must only grow from the underside of open cave ceilings.
-        {
-            int solidBelow = 0;
-            for (int i = 1; i <= 35; i++) {
-                BlockPos below = origin.below(i);
-                BlockState bs = level.getBlockState(below);
-                if (!bs.isAir() && !bs.is(net.minecraft.world.level.block.Blocks.CAVE_AIR)) {
-                    solidBelow++;
-                } else {
-                    break; // stop at first air gap (real cave ceiling will have air below)
+            // Pillar detection: if the column below origin is solid for 30+ blocks,
+            // this is the top of a structural pillar, not a cave ceiling. Reject it.
+            // Trees must only grow from the underside of open cave ceilings.
+            {
+                int solidBelow = 0;
+                for (int i = 1; i <= 35; i++) {
+                    BlockPos below = origin.below(i);
+                    BlockState bs = level.getBlockState(below);
+                    if (!bs.isAir() && !bs.is(net.minecraft.world.level.block.Blocks.CAVE_AIR)) {
+                        solidBelow++;
+                    } else {
+                        break; // stop at first air gap (real cave ceiling will have air below)
+                    }
                 }
+                if (solidBelow >= 28) return false; // it's a pillar top, not a ceiling
             }
-            if (solidBelow >= 28) return false; // it's a pillar top, not a ceiling
-        }
-        // Final Biome Check: Only generate if the snapped attachment point is in the Elysian Abyss
-        // This ensures trees "cover the entire ceiling" of the biome without escaping into transition zones.
-        var biome = level.getBiome(origin);
-        if (!biome.is(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BIOME, 
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(net.ganyusbathwater.oririmod.OririMod.MOD_ID, "elysian_abyss")))) {
-            return false;
+            // Final Biome Check: Only generate if the snapped attachment point is in the Elysian Abyss
+            // This ensures trees "cover the entire ceiling" of the biome without escaping into transition zones.
+            var biome = level.getBiome(origin);
+            if (!biome.is(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BIOME, 
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(net.ganyusbathwater.oririmod.OririMod.MOD_ID, "elysian_abyss")))) {
+                return false;
+            }
         }
 
         // Determine variant: Small (1x1) or Big (2x2)
@@ -115,8 +126,13 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
             boolean allAnchored = true;
             for (int dx = 0; dx < 2; dx++) {
                 for (int dz = 0; dz < 2; dz++) {
-                    // Check the block directly above the trunk start for each part of the 2x2
-                    if (!isValidAnchor(level.getBlockState(origin.offset(dx, 1, dz)))) {
+                    BlockState anchorState = level.getBlockState(origin.offset(dx, 1, dz));
+                    if (isSapling) {
+                        if (anchorState.isAir() || anchorState.is(net.minecraft.world.level.block.Blocks.WATER)) {
+                            allAnchored = false;
+                            break;
+                        }
+                    } else if (!isValidAnchor(anchorState)) {
                         allAnchored = false;
                         break;
                     }
@@ -124,7 +140,7 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
             }
             if (!allAnchored) {
                 // Fallback: If any part is in air, try to just place a 1x1 if the origin's anchor is valid
-                if (isValidAnchor(level.getBlockState(origin.above()))) {
+                if (isSapling || isValidAnchor(level.getBlockState(origin.above()))) {
                     trunkWidth = 1;
                 } else {
                     return false; // Total placement failure

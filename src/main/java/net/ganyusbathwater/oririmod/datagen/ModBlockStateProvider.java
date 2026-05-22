@@ -197,6 +197,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 horizontalBlock(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get(),
                                 models().getExistingFile(modLoc("block/tilted_broken_sword_block")));
 
+                // ===== REVIVAL SHRINE =====
+                horizontalBlock(ModBlocks.REVIVAL_SHRINE.get(),
+                                models().getBuilder("revival_shrine")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", modLoc("block/revival_shrine")));
+
                 // ===== EQUINOX TABLE =====
                 simpleBlockWithItem(ModBlocks.EQUINOX_TABLE.get(),
                                 models().cubeBottomTop("equinox_table",
@@ -247,6 +253,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
                 simpleBlockWithItem(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get(),
                                 models().cross("upgraded_abyss_crown_sapling", modLoc("block/abyss_crown_sapling"))
+                                                .renderType("cutout"));
+
+                // ===== AETHER BLOCKS =====
+                simpleBlockWithItem(ModBlocks.AETHER_MAGMA_BLOCK.get(),
+                                models().cubeAll("aether_magma_block", modLoc("block/aether_magma")));
+                
+                simpleBlock(ModBlocks.AETHER_FIRE_BLOCK.get(),
+                                models().cross("aether_fire_block", modLoc("block/aether_fire"))
                                                 .renderType("cutout"));
 
                 generateScarletVineBlock();

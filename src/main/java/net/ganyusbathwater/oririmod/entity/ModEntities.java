@@ -182,7 +182,7 @@ public final class ModEntities {
                                                         .<net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity>of(
                                                                         net.ganyusbathwater.oririmod.entity.custom.EyeOfDesolationEntity::new,
                                                                         MobCategory.MONSTER)
-                                                        .sized(1.5F, 1.8F)
+                                                        .sized(1.0F, 1.5F)
                                                         .eyeHeight(1.5F)
                                                         .clientTrackingRange(32)
                                                         .build(ResourceLocation
@@ -293,7 +293,21 @@ public final class ModEntities {
                                                                                         "deviartras")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.MermaidEntity>> MERMAID = ENTITIES
+                        .register("mermaid",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.MermaidEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.MermaidEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.WATER_CREATURE)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "mermaid")
+                                                                        .toString()));
+
         public static void register(IEventBus modBus) {
+
                 ENTITIES.register(modBus);
         }
 }

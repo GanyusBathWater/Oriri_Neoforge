@@ -146,6 +146,14 @@ public class BlizzaEntity extends Monster implements GeoEntity {
     public void tick() {
         super.tick();
 
+        if (this.isDefeated) {
+            this.setYRot(this.yRotO);
+            this.setXRot(this.xRotO);
+            this.yBodyRot = this.yBodyRotO;
+            this.yHeadRot = this.yHeadRotO;
+            this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+        }
+
         if (!this.level().isClientSide) {
             // Issue #5: permanent fire/frost/cold immunity — keep it re-applied every second
             if (this.tickCount % 20 == 0 && !isDefeated) {
@@ -347,7 +355,7 @@ public class BlizzaEntity extends Monster implements GeoEntity {
         // Apply Cold Aura x3 on hit
         MobEffectInstance existing = target.getEffect(ModEffects.COLD_AURA_EFFECT);
         int nextAmp = (existing == null) ? 2 : existing.getAmplifier() + 3;
-        target.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, false, true));
+        target.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, true, true));
     }
 
     // ── Spawn title ───────────────────────────────────────────────────────

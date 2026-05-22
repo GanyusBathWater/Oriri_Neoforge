@@ -102,7 +102,9 @@ public final class RootAttackUtil {
             entity.hurt(level.damageSources().generic(), DAMAGE);
 
             // Apply Stunned MobEffect for 4 seconds (80 ticks)
-            entity.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 80, 0, false, true, true));
+            if (!entity.hasEffect(ModEffects.STUNNED_EFFECT) && !entity.hasEffect(ModEffects.STUN_IMMUNITY_EFFECT)) {
+                entity.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 80, 0, false, true, true));
+            }
 
             // Spawn Visual Entity locking onto this entity, duration 80 to match stun
             spawnVisualVine(level, entity.getX(), entity.getY(), entity.getZ(), entity.getId(), 80);

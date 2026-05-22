@@ -168,8 +168,8 @@ public class ModItems {
         public static final DeferredItem<Item> DEVIL_FRUIT = ITEMS.register("devil_fruit",
                         () -> new DevilFruit(new Item.Properties().food(ModFoods.DEVIL_FRUIT)));
 
-        public static final DeferredItem<Item> ELDERWOODS_IGNITER = ITEMS.register("elderwoods_igniter",
-                        () -> new ElderwoodsIgniterItem(new Item.Properties().stacksTo(1).durability(64)));
+        public static final DeferredItem<Item> MANA_IGNITER = ITEMS.register("mana_igniter",
+                        () -> new ManaIgniterItem(new Item.Properties().stacksTo(1).durability(64)));
 
         // ---------------------------------------Weapons---------------------------------------------------------
 
@@ -450,10 +450,22 @@ public class ModItems {
                                         0x2D5A1B, 0x9B59B6, // outer: deep forest green, inner: poison purple
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> SPORE_BLOSSOM_SPAWN_EGG = ITEMS.register(
+                        "spore_blossom_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.SPORE_BLOSSOM,
+                                        0x8A2BE2, 0x32CD32, // outer: purple, inner: lime green
+                                        new Item.Properties()));
+
         public static final DeferredItem<DeferredSpawnEggItem> DEVIARTRAS_SPAWN_EGG = ITEMS.register(
                         "deviartras_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.DEVIARTRAS,
                                         0x2C5F2E, 0xA8D5A2, // outer: deep forest green, inner: pale nature green
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> MERMAID_SPAWN_EGG = ITEMS.register(
+                        "mermaid_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.MERMAID,
+                                        0x00CED1, 0xFF69B4, // outer: dark turquoise, inner: hot pink (Charmed effect)
                                         new Item.Properties()));
 
         // ------------------------------------------------------Armor---------------------------------------------------------

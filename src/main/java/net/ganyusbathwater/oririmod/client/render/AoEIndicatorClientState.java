@@ -60,19 +60,20 @@ public class AoEIndicatorClientState {
     public static void addLineIndicator(java.util.UUID id, net.minecraft.world.phys.Vec3 start, net.minecraft.world.phys.Vec3 end, float width, int durationTicks, int argbColor) {
         BlockPos center = BlockPos.containing(start.add(end).scale(0.5));
         int length = (int) Math.ceil(start.distanceTo(end) / 2.0);
-        int checkRadius = length + (int) Math.ceil(width);
+        float effectiveWidth = Math.max(width, 0.6f);
+        int checkRadius = length + (int) Math.ceil(effectiveWidth);
         
         addCustomIndicator(id, center, checkRadius, durationTicks, argbColor, (pos) -> {
             net.minecraft.world.phys.Vec3 p = new net.minecraft.world.phys.Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
             net.minecraft.world.phys.Vec3 lineDir = end.subtract(start);
             double lengthSq = lineDir.lengthSqr();
-            if (lengthSq == 0) return p.distanceToSqr(start) <= width * width;
+            if (lengthSq == 0) return p.distanceToSqr(start) <= effectiveWidth * effectiveWidth;
             
             double t = Math.max(0, Math.min(1, p.subtract(start).dot(lineDir) / lengthSq));
             net.minecraft.world.phys.Vec3 projection = start.add(lineDir.scale(t));
             double dx = p.x - projection.x;
             double dz = p.z - projection.z;
-            return (dx * dx + dz * dz) <= (width * width);
+            return (dx * dx + dz * dz) <= (effectiveWidth * effectiveWidth);
         });
     }
 
@@ -148,16 +149,11 @@ public class AoEIndicatorClientState {
         
         long currentTick = mc.level.getGameTime();
 
-        // If an indicator with this ID already exists, and we want to update it:
-        // Actually, if we just remove the old one and add the new one, its startTick resets.
-        // We should preserve the startTick if it's an update!
         long startTickToUse = currentTick;
         if (id != null) {
-            for (Iterator<Indicator> it = ACTIVE_INDICATORS.iterator(); it.hasNext();) {
-                Indicator existing = it.next();
+            for (Indicator existing : ACTIVE_INDICATORS) {
                 if (id.equals(existing.id)) {
                     startTickToUse = existing.startTick; // Preserve original start time
-                    it.remove();
                     break;
                 }
             }
@@ -200,7 +196,20 @@ public class AoEIndicatorClientState {
             }
         }
 
-        ACTIVE_INDICATORS.add(new Indicator(id, center, checkRadius, durationTicks, argbColor, startTickToUse, aabbs));
+        Indicator newIndicator = new Indicator(id, center, checkRadius, durationTicks, argbColor, startTickToUse, aabbs);
+
+        if (id != null) {
+            ACTIVE_INDICATORS.add(newIndicator);
+            Iterator<Indicator> it = ACTIVE_INDICATORS.iterator();
+            while (it.hasNext()) {
+                Indicator existing = it.next();
+                if (id.equals(existing.id) && existing != newIndicator) {
+                    it.remove();
+                }
+            }
+        } else {
+            ACTIVE_INDICATORS.add(newIndicator);
+        }
     }
 
     public static void cleanExpired(long currentTick) {

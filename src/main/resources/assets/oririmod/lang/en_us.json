@@ -208,7 +208,7 @@
   "block.oririmod.mana_crystal": "Mana Crystal",
   "block.oririmod.elderwoods_portal_block": "Elderwoods Portal",
   "item.oririmod.elderwoods_portal_block": "Elderwoods Portal",
-  "item.oririmod.elderwoods_igniter": "Elderwoods Igniter",
+  "item.oririmod.mana_igniter": "Mana Igniter",
   "block.oririmod.elder_log_block": "Elder Log",
   "block.oririmod.stripped_elder_log_block": "Stripped Elder Log",
   "block.oririmod.cracked_elder_log_block": "Cracked Elder Log",
@@ -526,6 +526,8 @@
   "entity.oririmod.spore_zombie": "Spore Zombie",
   "item.oririmod.fire_zombie_spawn_egg": "Fire Zombie Spawn Egg",
   "item.oririmod.spore_zombie_spawn_egg": "Spore Zombie Spawn Egg",
+  "entity.oririmod.spore_blossom": "Spore Blossom",
+  "item.oririmod.spore_blossom_spawn_egg": "Spore Blossom Spawn Egg",
   "entity.oririmod.eye_of_desolation": "Eye of Desolation",
   "item.oririmod.eye_of_desolation_spawn_egg": "Eye of Desolation Spawn Egg",
   "effect.oririmod.threat_detection": "Threat Detection",
@@ -564,5 +566,9 @@
   "item.oririmod.cosmic_example.desc1": "Renders via CosmicTooltipComponent",
   "item.oririmod.cosmic_example.desc2": "Stage 1 pipeline verification",
   "entity.oririmod.deviartras": "Deviartras",
-  "item.oririmod.deviartras_spawn_egg": "Deviartras Spawn Egg"
+  "item.oririmod.deviartras_spawn_egg": "Deviartras Spawn Egg",
+  "entity.oririmod.mermaid": "Mermaid",
+  "item.oririmod.mermaid_spawn_egg": "Mermaid Spawn Egg",
+  "block.oririmod.aether_magma_block": "Aether Magma Block",
+  "block.oririmod.aether_fire_block": "Aether Fire"
 }

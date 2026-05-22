@@ -25,8 +25,10 @@ public class CustomHammerItem extends MaceItem implements ModRarityCarrier {
 
                 // threshold: faster than -0.6 blocks/tick down
                 if (fallSpeed < -0.6D) {
-                    // Add stunned effect for 5 seconds (100 ticks)
-                    target.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 100, 0));
+                    if (!target.hasEffect(ModEffects.STUNNED_EFFECT) && !target.hasEffect(ModEffects.STUN_IMMUNITY_EFFECT)) {
+                        // Add stunned effect for 5 seconds (100 ticks)
+                        target.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 100, 0));
+                    }
                 }
 
         }

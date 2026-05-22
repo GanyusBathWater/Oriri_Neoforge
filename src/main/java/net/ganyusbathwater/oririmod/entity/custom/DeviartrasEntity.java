@@ -184,6 +184,14 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     public void tick() {
         super.tick();
 
+        if (this.isDefeated) {
+            this.setYRot(this.yRotO);
+            this.setXRot(this.xRotO);
+            this.yBodyRot = this.yBodyRotO;
+            this.yHeadRot = this.yHeadRotO;
+            this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+        }
+
         if (!this.level().isClientSide) {
 
             float maxHp = (float) this.getAttributeValue(Attributes.MAX_HEALTH);

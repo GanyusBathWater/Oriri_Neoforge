@@ -64,14 +64,7 @@ public class EyeOfDesolationEntity extends Monster implements GeoEntity {
                 .add(Attributes.ARMOR,          8.0D);
     }
 
-    /** 
-     * Refined Hitbox: Moves the physical bounding box 0.5 blocks up 
-     * to make the entity hover, without moving the AI position base.
-     */
-    @Override
-    protected AABB makeBoundingBox() {
-        return super.makeBoundingBox().move(0, 0.5, 0);
-    }
+    // (Removed makeBoundingBox override since tick() handles physical hovering)
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {

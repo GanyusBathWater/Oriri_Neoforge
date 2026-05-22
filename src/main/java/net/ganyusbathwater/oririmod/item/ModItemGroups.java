@@ -61,6 +61,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.JADE_SLAB);
                         output.accept(ModBlocks.JADE_WALL);
                         output.accept(ModBlocks.DARK_SOIL_BLOCK);
+                        output.accept(ModBlocks.AETHER_MAGMA_BLOCK);
                         output.accept(ModBlocks.ELDERBUSH_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
@@ -149,6 +150,7 @@ public class ModItemGroups {
                         // Sword Blocks
                         output.accept(ModBlocks.BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.TILTED_BROKEN_SWORD_BLOCK);
+                        output.accept(ModBlocks.REVIVAL_SHRINE);
 
                         output.accept(ModBlocks.UPGRADED_OAK_SAPLING);
                         output.accept(ModBlocks.UPGRADED_SPRUCE_SAPLING);
@@ -171,6 +173,7 @@ public class ModItemGroups {
                         output.accept(ModItems.FOUR_LEAF_CLOVER);
                         output.accept(ModItems.MIRACLE_SEAWEED);
                         output.accept(ModItems.CALCIUM_CURRANT);
+                        output.accept(ModItems.MANA_IGNITER);
 
                         // -----------Vestiges-----------
                         acceptAllLevels(output, ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
@@ -253,9 +256,12 @@ public class ModItemGroups {
                         output.accept(ModItems.FIRE_ZOMBIE_SPAWN_EGG);
                         output.accept(ModItems.SPORE_ZOMBIE_SPAWN_EGG);
                         output.accept(ModItems.SPLINTER_SPIDER_SPAWN_EGG);
+                        output.accept(ModItems.SPORE_BLOSSOM_SPAWN_EGG);
                         output.accept(ModItems.EYE_OF_DESOLATION_SPAWN_EGG);
                         output.accept(ModItems.BLIZZA_SPAWN_EGG);
                         output.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
+                        output.accept(ModItems.MERMAID_SPAWN_EGG);
+                        output.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);

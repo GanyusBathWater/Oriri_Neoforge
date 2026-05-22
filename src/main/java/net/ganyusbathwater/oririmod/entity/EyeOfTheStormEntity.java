@@ -107,7 +107,7 @@ public class EyeOfTheStormEntity extends Entity {
                         int nextAmp = existing != null ? existing.getAmplifier() + 1 : 0;
                         
                         e.removeEffect(ModEffects.COLD_AURA_EFFECT); // Pull down to reapply natively
-                        e.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, false, true));
+                        e.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, true, true));
                     }
                     
                     e.getPersistentData().putInt("ColdAuraExposureTicks", blizzTicks);

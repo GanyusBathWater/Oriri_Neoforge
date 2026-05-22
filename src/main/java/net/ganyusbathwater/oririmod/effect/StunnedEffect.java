@@ -44,6 +44,11 @@ public class StunnedEffect extends MobEffect {
                         player.getAbilities().setWalkingSpeed(0.1f);
                         player.onUpdateAbilities();
                     }
+                    
+                    if (!livingEntity.level().isClientSide) {
+                        livingEntity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                                net.ganyusbathwater.oririmod.effect.ModEffects.STUN_IMMUNITY_EFFECT, 100, 0, false, false, true));
+                    }
                 }
                 break;
             }

@@ -15,6 +15,9 @@ public class ModEffects {
         public static final Holder<MobEffect> STUNNED_EFFECT = MOB_EFFECTS.register("stunned",
                         () -> new StunnedEffect(MobEffectCategory.HARMFUL, 0x000000));
 
+        public static final Holder<MobEffect> STUN_IMMUNITY_EFFECT = MOB_EFFECTS.register("stun_immunity",
+                        () -> new StunImmunityEffect(MobEffectCategory.BENEFICIAL, 0xCCCCCC));
+
         public static final Holder<MobEffect> BROKEN_EFFECT = MOB_EFFECTS.register("broken",
                         () -> new BrokenEffect(MobEffectCategory.HARMFUL, 0x000000));
 

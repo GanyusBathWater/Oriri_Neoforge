@@ -15,7 +15,9 @@ public class AncientScytheItem extends CustomScytheItem {
     @Override
     public void applyScytheEffects(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         // Applies Stunned effect for 100 ticks (5 seconds)
-        target.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 100, 0), attacker);
+        if (!target.hasEffect(ModEffects.STUNNED_EFFECT) && !target.hasEffect(ModEffects.STUN_IMMUNITY_EFFECT)) {
+            target.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 100, 0), attacker);
+        }
     }
 
     @Override

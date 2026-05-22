@@ -176,9 +176,9 @@ public class SporeBlossomEntity extends Monster implements GeoEntity {
     private PlayState predicate(AnimationState<SporeBlossomEntity> state) {
         int ticks = this.entityData.get(DATA_SPAWN_TICKS);
         if (ticks < 20) {
-            state.getController().setAnimation(RawAnimation.begin().thenPlay("spore_blossom_spawn"));
+            state.getController().setAnimation(RawAnimation.begin().thenPlay("deviartras_spore_blossom_spawn"));
         } else {
-            state.getController().setAnimation(RawAnimation.begin().thenLoop("spore_blossom_idle"));
+            state.getController().setAnimation(RawAnimation.begin().thenLoop("deviartras_spore_blossom_idle"));
         }
         return PlayState.CONTINUE;
     }

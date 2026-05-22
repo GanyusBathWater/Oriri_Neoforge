@@ -325,7 +325,7 @@ public class LaserBeamEntity extends Entity {
                     float radius = maxRadius * ((float) this.getAgeTicks() / charge);
                     BlockPos center = BlockPos.containing(this.getBeamStart());
                     float facingYaw = this.entityData.get(ORBIT_P1);
-                    float startAngle = -facingYaw - (float) Math.PI / 2f - (float) Math.toRadians(45); // Adjust for MC rotation
+                    float startAngle = -facingYaw + (float) Math.PI / 2f - (float) Math.toRadians(45); // Adjust for MC rotation
                     float sweepAngle = (float) Math.toRadians(90);
                     net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addArcIndicator(id, center, radius, startAngle, sweepAngle, charge, color);
                 } else if (type == 6) { // EXPANDING PLAIN

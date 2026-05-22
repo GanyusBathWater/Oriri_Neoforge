@@ -92,7 +92,7 @@ public class ServerEvents {
                     // Re-apply if drops below 0? No, let it organically drop to 0 and disappear.
                     if (currentAmp > 0) {
                         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                                ModEffects.COLD_AURA_EFFECT, 200, currentAmp - 1, false, false, true));
+                                ModEffects.COLD_AURA_EFFECT, 200, currentAmp - 1, false, true, true));
                     }
                 } else {
                     player.getPersistentData().putInt("ColdAuraDefrostProg", defrostProgress);
@@ -184,15 +184,29 @@ public class ServerEvents {
         }
     }
 
-    // Effekt: Erhöhte Spawnrate für Blutmond
+    // Effekt: Erhöhte Spawnrate für Blutmond & Infused Enemies
     @SubscribeEvent
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         Level level = event.getLevel().getLevel();
         if (level instanceof ServerLevel serverLevel && event.getEntity() instanceof Monster monster) {
             if (WorldEventManager.isEventActive(level, WorldEventType.BLOOD_MOON)) {
-                // Verdoppelt die Chance, indem ein zweites Monster mit 50% Wahrscheinlichkeit
-                // gespawnt wird
-                if (serverLevel.random.nextFloat() < 0.5F) {
+                // 25% Chance für einen "Infused" Gegner mit erhöhten Werten
+                if (serverLevel.random.nextFloat() < 0.25F) {
+                    monster.setCustomName(net.minecraft.network.chat.Component.literal("Infused " + monster.getName().getString()));
+                    monster.setCustomNameVisible(true);
+                    
+                    var maxHealth = monster.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+                    if (maxHealth != null) maxHealth.setBaseValue(maxHealth.getBaseValue() * 2.0);
+                    
+                    var attackDamage = monster.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+                    if (attackDamage != null) attackDamage.setBaseValue(attackDamage.getBaseValue() * 1.5);
+                    
+                    var speed = monster.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+                    if (speed != null) speed.setBaseValue(speed.getBaseValue() * 1.2);
+                    
+                    monster.setHealth(monster.getMaxHealth());
+                } else if (serverLevel.random.nextFloat() < 0.5F) {
+                    // Verdoppelt die Chance, indem ein zweites Monster mit 50% Wahrscheinlichkeit gespawnt wird
                     Monster extraMonster = (Monster) monster.getType().create(serverLevel);
                     if (extraMonster != null) {
                         extraMonster.copyPosition(monster);

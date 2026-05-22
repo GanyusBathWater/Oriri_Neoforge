@@ -1,4 +1,4 @@
-package net.ganyusbathwater.oririmod.client.model;
+package net.ganyusbathwater.oririmod.entity.client;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity;

@@ -1,4 +1,4 @@
-package net.ganyusbathwater.oririmod.client.render;
+package net.ganyusbathwater.oririmod.entity.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.ganyusbathwater.oririmod.OririMod;
@@ -20,7 +20,7 @@ public class BlizzaRenderer extends GeoEntityRenderer<BlizzaEntity> {
     private static final int PARTICLE_COLOR = 0xFF4FC3F7;
 
     public BlizzaRenderer(EntityRendererProvider.Context context) {
-        super(context, new net.ganyusbathwater.oririmod.client.model.BlizzaModel());
+        super(context, new BlizzaModel());
     }
 
     @Override

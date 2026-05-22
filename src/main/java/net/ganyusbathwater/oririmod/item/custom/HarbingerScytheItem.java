@@ -15,7 +15,9 @@ public class HarbingerScytheItem extends CustomScytheItem {
     @Override
     public void applyScytheEffects(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         // Ancient Scythe effect
-        target.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 100, 0), attacker);
+        if (!target.hasEffect(ModEffects.STUNNED_EFFECT) && !target.hasEffect(ModEffects.STUN_IMMUNITY_EFFECT)) {
+            target.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 100, 0), attacker);
+        }
         // Crystal Scythe effect
         target.addEffect(new MobEffectInstance(ModEffects.ANTI_HEAL_EFFECT, 100, 0), attacker);
         // Gilded Netherite Scythe effect

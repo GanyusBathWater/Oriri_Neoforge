@@ -466,9 +466,16 @@ public class ModBlocks {
                         () -> new AbyssCrownSaplingBlock(ModTreeGrowers.ABYSS_CROWN_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING), true));
 
-        // ===== REVIVAL SHRINE =====
         public static final DeferredBlock<Block> REVIVAL_SHRINE = registerBlock("revival_shrine",
                         () -> new RevivalShrineBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).noOcclusion()));
+
+        public static final DeferredBlock<Block> AETHER_MAGMA_BLOCK = registerBlock("aether_magma_block",
+                        () -> new AetherMagmaBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MAGMA_BLOCK)
+                                        .lightLevel(state -> 3)));
+
+        public static final DeferredBlock<Block> AETHER_FIRE_BLOCK = BLOCKS.register("aether_fire_block",
+                        () -> new AetherFireBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.FIRE)
+                                        .noCollission().instabreak().lightLevel(state -> 15).noLootTable()));
 
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);

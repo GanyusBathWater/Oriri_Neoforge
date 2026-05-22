@@ -126,6 +126,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.ABYSS_CROWN_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get());
         add(ModBlocks.ABYSS_CROWN_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ABYSS_CROWN_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+
+        dropSelf(ModBlocks.AETHER_MAGMA_BLOCK.get());
     }
 
     @Override

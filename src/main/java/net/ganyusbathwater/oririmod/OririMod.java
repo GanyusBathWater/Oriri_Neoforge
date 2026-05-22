@@ -80,6 +80,8 @@ public class OririMod {
         modEventBus.addListener(this::registerEntityAttributes);
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
+        // Register spawn placements for natural entity spawning
+        modEventBus.addListener(this::registerSpawnPlacements);
 
         // Register GameEvents
         NeoForge.EVENT_BUS.register(GameEvents.class);
@@ -102,6 +104,7 @@ public class OririMod {
             ElementInit.init();
             ElementalDamageHandler.register();
             TooltipHandler.register();
+            ModItems.registerDispenserBehaviors();
         });
 
     }
@@ -115,7 +118,18 @@ public class OririMod {
             event.accept(ModItems.BLIZZA_SPAWN_EGG);
             event.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
             event.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
+            event.accept(ModItems.MERMAID_SPAWN_EGG);
         }
+    }
+
+    private void registerSpawnPlacements(net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent event) {
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.MERMAID.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.ganyusbathwater.oririmod.entity.custom.MermaidEntity::checkMermaidSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
     }
 
     private void registerEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
@@ -180,6 +194,21 @@ public class OririMod {
             } else if (entity instanceof Player player) {
                 player.getAbilities().setWalkingSpeed(0.1f);
                 player.onUpdateAbilities();
+            }
+            
+            // Apply 5 seconds of Stun Immunity
+            if (!entity.level().isClientSide) {
+                entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModEffects.STUN_IMMUNITY_EFFECT, 100, 0, false, false, true));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onEffectAdded(MobEffectEvent.Added event) {
+        if (event.getEffectInstance().getEffect() == ModEffects.STUNNED_EFFECT) {
+            if (event.getEntity().hasEffect(ModEffects.STUN_IMMUNITY_EFFECT)) {
+                // Remove the effect immediately since we have immunity
+                event.getEntity().removeEffect(ModEffects.STUNNED_EFFECT);
             }
         }
     }

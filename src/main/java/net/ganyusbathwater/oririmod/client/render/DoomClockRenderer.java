@@ -55,13 +55,13 @@ public class DoomClockRenderer extends EntityRenderer<DoomClockEntity> {
         // Variables for rotation
         float ticks = entity.getClientTickCount() + partialTicks;
         // The clock ticks from 0 to 240.
-        // Let's make the long hand complete 1 full rotation over 12 seconds
-        // 1 rotation = 360 degrees. 360 / 240 = 1.5 degrees per tick.
-        float longHandAngle = ticks * 1.5f;
-
-        // Let's make the short hand complete 12 full rotations (1 per second)
+        // Let's make the long hand complete 12 full rotations (1 per second)
         // 1 second (20 ticks) = 360 degrees. 360 / 20 = 18 degrees per tick.
-        float shortHandAngle = ticks * 18.0f;
+        float longHandAngle = ticks * 18.0f;
+
+        // Let's make the short hand complete 1 full rotation over 12 seconds
+        // 1 rotation = 360 degrees. 360 / 240 = 1.5 degrees per tick.
+        float shortHandAngle = ticks * 1.5f;
 
         // Note: Clock hands rotate clockwise, which means a negative rotation around
         // the Z axis

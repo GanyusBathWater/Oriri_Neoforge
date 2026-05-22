@@ -31,6 +31,8 @@ public class SonicArrowEntity extends AbstractArrow implements net.minecraft.wor
         if (!this.level().isClientSide() && this.tickCount == 1) {
             // Speed up projectile immediately
             this.setDeltaMovement(this.getDeltaMovement().scale(5.0D));
+            // Reduce base damage to exactly compensate for the 5x speed multiplier
+            this.setBaseDamage(this.getBaseDamage() * 0.2D);
         }
     }
 

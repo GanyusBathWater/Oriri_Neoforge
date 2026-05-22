@@ -173,6 +173,59 @@ public final class MagicIndicatorRender {
 
             pose.popPose();
         }
+
+        // Auto-render elemental magic circles under players using magic weapons
+        for (var p : mc.level.players()) {
+            if (p.isAlive() && p.isUsingItem() && !p.getUseItem().isEmpty()) {
+                net.minecraft.world.item.ItemStack useItem = p.getUseItem();
+                if (useItem.getItem().getClass().getName().contains("oririmod.item.custom.magic")) {
+                    net.ganyusbathwater.oririmod.combat.Element element = net.ganyusbathwater.oririmod.combat.ItemElementRegistry.getElement(useItem);
+                    if (element != net.ganyusbathwater.oririmod.combat.Element.PHYSICAL && element != net.ganyusbathwater.oririmod.combat.Element.TRUE_DAMAGE) {
+                        ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/effect/magic_circles/" + element.name().toLowerCase() + "_ground.png");
+                        if (textureExists(tex)) {
+                            pose.pushPose();
+                            pose.translate(-camPos.x, -camPos.y, -camPos.z);
+
+                            Vec3 center = p.position().add(0, 0.01, 0); // slightly above ground to prevent z-fighting
+
+                            float spinPerTick = 2.0f;
+                            float angleRad = (float) Math.toRadians(spinPerTick * (gameTime + pt));
+                            double sin = Math.sin(angleRad);
+                            double cos = Math.cos(angleRad);
+
+                            Vec3 right = new Vec3(1, 0, 0);
+                            Vec3 up = new Vec3(0, 0, 1);
+
+                            Vec3 rightR = new Vec3(
+                                    right.x * cos + up.x * -sin,
+                                    right.y * cos + up.y * -sin,
+                                    right.z * cos + up.z * -sin
+                            );
+                            Vec3 upR = new Vec3(
+                                    right.x * sin + up.x * cos,
+                                    right.y * sin + up.y * cos,
+                                    right.z * sin + up.z * cos
+                            );
+
+                            float radius = 2.0f;
+
+                            Vec3 c0 = center.add(rightR.scale(-radius)).add(upR.scale(-radius));
+                            Vec3 c1 = center.add(rightR.scale(-radius)).add(upR.scale(radius));
+                            Vec3 c2 = center.add(rightR.scale(radius)).add(upR.scale(radius));
+                            Vec3 c3 = center.add(rightR.scale(radius)).add(upR.scale(-radius));
+
+                            Vec3 uV = c2.subtract(c0);
+                            Vec3 vV = c1.subtract(c0);
+                            Vec3 n = uV.cross(vV).normalize();
+
+                            drawQuad(pose, buffers, tex, 255, 255, 255, 255, c0, c1, c2, c3, (float) n.x, (float) n.y, (float) n.z);
+
+                            pose.popPose();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static boolean textureExists(ResourceLocation tex) {

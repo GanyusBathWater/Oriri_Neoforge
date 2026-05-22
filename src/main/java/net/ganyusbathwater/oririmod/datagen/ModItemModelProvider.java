@@ -167,6 +167,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.MIRACLE_SEAWEED.get());
                 basicItem(ModItems.CALCIUM_CURRANT.get());
                 basicItem(ModItems.DEVIL_FRUIT.get());
+                basicItem(ModItems.MANA_IGNITER.get());
 
                 // -----------Artifacts-----------
 
@@ -315,7 +316,11 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.EYE_OF_DESOLATION_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.BLIZZA_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.SPLINTER_SPIDER_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.SPORE_BLOSSOM_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.VENOMOUS_PLANT_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.MERMAID_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.DEVIARTRAS_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+
 
 
                 // ===== REVIVAL MECHANICS =====

@@ -11,10 +11,12 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderBlockScreenEffectEvent;
 
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public final class AetherHudOverlay {
@@ -23,6 +25,19 @@ public final class AetherHudOverlay {
             "block/aether_gui");
 
     private AetherHudOverlay() {
+    }
+
+    @SubscribeEvent
+    public static void onRenderScreenEffect(RenderBlockScreenEffectEvent event) {
+        if (event.getOverlayType() == RenderBlockScreenEffectEvent.OverlayType.FIRE) {
+            Player player = event.getPlayer();
+            if (player == null || player.level() == null) return;
+            
+            BlockState blockState = player.level().getBlockState(player.blockPosition());
+            if (blockState.is(net.ganyusbathwater.oririmod.block.ModBlocks.AETHER_FIRE_BLOCK.get())) {
+                event.setCanceled(true);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -76,10 +91,17 @@ public final class AetherHudOverlay {
             return false;
 
         FluidState state = mc.level.getFluidState(player.blockPosition());
+        BlockState blockState = mc.level.getBlockState(player.blockPosition());
         // Annahme: ModFluids.AETHER ist ein RegistryObject/Supplier; .get() liefert das
         // registrierte Fluid.
         try {
-            return state.is(ModFluids.AETHER_SOURCE.get()) || state.is(ModFluids.AETHER_FLOWING.get());
+            if (state.is(ModFluids.AETHER_SOURCE.get()) || state.is(ModFluids.AETHER_FLOWING.get())) {
+                return true;
+            }
+            if (blockState.is(net.ganyusbathwater.oririmod.block.ModBlocks.AETHER_FIRE_BLOCK.get())) {
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             // Fallback: falls ModFluids anders definiert ist oder .get() nicht vorhanden
             // ist, sicherer Rückfall

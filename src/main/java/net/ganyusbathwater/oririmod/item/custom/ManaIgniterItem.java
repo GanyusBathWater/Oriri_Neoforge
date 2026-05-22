@@ -11,11 +11,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
-public class ElderwoodsIgniterItem extends Item {
-    public ElderwoodsIgniterItem(Properties properties) {
+public class ManaIgniterItem extends Item {
+    public ManaIgniterItem(Properties properties) {
         super(properties);
     }
 
@@ -52,6 +55,21 @@ public class ElderwoodsIgniterItem extends Item {
                     return InteractionResult.SUCCESS;
                 }
             }
+        }
+        // Fallback: Place Aether Fire
+        BlockPos firePos = pos.relative(context.getClickedFace());
+        if (BaseFireBlock.canBePlacedAt(level, firePos, context.getHorizontalDirection())) {
+            level.playSound(context.getPlayer(), firePos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+            BlockState blockstate = ModBlocks.AETHER_FIRE_BLOCK.get().defaultBlockState();
+            level.setBlock(firePos, blockstate, 11);
+
+            Player player = context.getPlayer();
+            if (player instanceof ServerPlayer serverPlayer) {
+                CriteriaTriggers.PLACED_BLOCK.trigger(serverPlayer, firePos, context.getItemInHand());
+                context.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
+            }
+
+            return InteractionResult.sidedSuccess(level.isClientSide());
         }
 
         return InteractionResult.PASS;
