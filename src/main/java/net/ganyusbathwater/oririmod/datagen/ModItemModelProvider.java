@@ -215,6 +215,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.FROST_ARROW.get());
                 basicItem(ModItems.COPPER_ARROW.get());
                 basicItem(ModItems.SONIC_ARROW.get());
+                basicItem(ModItems.AETHER_CHARGE.get());
 
                 handheldItem(ModItems.ICE_SWORD);
 
@@ -239,6 +240,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.BOOK_OF_WISE);
                 handheldItem(ModItems.STAFF_OF_ALMIGHTY);
                 withExistingParent(ModItems.BOSS_ATTACK_DEBUG_WAND.getId().getPath(), mcLoc("item/handheld"))
+                                .texture("layer0", mcLoc("item/stick"));
+                withExistingParent(ModItems.PARTICLE_DEBUG_WAND.getId().getPath(), mcLoc("item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
                 withExistingParent(ModItems.MAGIC_DEBUG_STICK.getId().getPath(), mcLoc("item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
@@ -320,6 +323,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.VENOMOUS_PLANT_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.MERMAID_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.DEVIARTRAS_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.LOADED_BLAZE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
 
 
 

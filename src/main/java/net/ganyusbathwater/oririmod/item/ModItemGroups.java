@@ -174,6 +174,7 @@ public class ModItemGroups {
                         output.accept(ModItems.MIRACLE_SEAWEED);
                         output.accept(ModItems.CALCIUM_CURRANT);
                         output.accept(ModItems.MANA_IGNITER);
+                        output.accept(ModItems.AETHER_CHARGE);
 
                         // -----------Vestiges-----------
                         acceptAllLevels(output, ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
@@ -244,6 +245,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_WISE);
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
                         output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
+                        output.accept(ModItems.PARTICLE_DEBUG_WAND);
                         output.accept(ModItems.MAGIC_DEBUG_STICK);
                         output.accept(ModItems.COSMIC_EXAMPLE); // Stage 1 tooltip test item
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
@@ -262,6 +264,7 @@ public class ModItemGroups {
                         output.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
                         output.accept(ModItems.MERMAID_SPAWN_EGG);
                         output.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
+                        output.accept(ModItems.LOADED_BLAZE_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);

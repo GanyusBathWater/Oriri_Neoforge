@@ -7,8 +7,10 @@ import net.ganyusbathwater.oririmod.mana.ModManaUtil;
 import net.ganyusbathwater.oririmod.network.packet.ManaSyncPacket;
 import net.ganyusbathwater.oririmod.network.packet.ManaSyncPayload;
 import net.ganyusbathwater.oririmod.network.packet.SelectBossAttackPayload;
+import net.ganyusbathwater.oririmod.network.packet.SelectParticleEffectPayload;
 import net.ganyusbathwater.oririmod.network.packet.SpawnAoEIndicatorPayload;
 import net.ganyusbathwater.oririmod.item.custom.magic.BossAttackDebugWandItem;
+import net.ganyusbathwater.oririmod.item.custom.magic.ParticleDebugWandItem;
 import net.minecraft.network.chat.Component;
 import net.ganyusbathwater.oririmod.network.packet.SyncWorldEventPayload;
 import net.minecraft.core.BlockPos;
@@ -28,6 +30,8 @@ public final class NetworkHandler {
             "spawn_aoe_indicator");
     public static final ResourceLocation SELECT_BOSS_ATTACK = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "select_boss_attack");
+    public static final ResourceLocation SELECT_PARTICLE_EFFECT = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "select_particle_effect");
     public static final ResourceLocation BLIZZA_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "blizza_spawn_title");
     public static final ResourceLocation DEVIARTRAS_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
@@ -103,6 +107,32 @@ public final class NetworkHandler {
                             BossAttackDebugWandItem.setSelected(stack, payload.attackType());
                             player.displayClientMessage(Component.literal("Selected Attack: " + BossAttackDebugWandItem.prettyName(payload.attackType()))
                                     .withStyle(net.minecraft.ChatFormatting.YELLOW), true);
+                        }
+                    }
+                }));
+
+        // Client → Server: player selected a particle effect in ParticleSelectionScreen
+        registrar.playToServer(
+                SelectParticleEffectPayload.TYPE,
+                SelectParticleEffectPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var player = ctx.player();
+                    if (player != null) {
+                        // Find which hand holds the particle wand
+                        net.minecraft.world.InteractionHand foundHand = null;
+                        if (player.getMainHandItem().getItem() instanceof ParticleDebugWandItem) {
+                            foundHand = net.minecraft.world.InteractionHand.MAIN_HAND;
+                        } else if (player.getOffhandItem().getItem() instanceof ParticleDebugWandItem) {
+                            foundHand = net.minecraft.world.InteractionHand.OFF_HAND;
+                        }
+
+                        if (foundHand != null) {
+                            var stack = player.getItemInHand(foundHand);
+                            ParticleDebugWandItem.setSelected(stack, payload.effectType());
+                            player.displayClientMessage(
+                                    Component.literal("Selected Particle: "
+                                            + ParticleDebugWandItem.prettyName(payload.effectType()))
+                                             .withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE), true);
                         }
                     }
                 }));

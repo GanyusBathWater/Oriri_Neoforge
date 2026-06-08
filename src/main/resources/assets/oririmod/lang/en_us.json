@@ -145,6 +145,7 @@
   "item.oririmod.staff_of_eternal_ice": "Staff of the Eternal Ice",
   "item.oririmod.staff_of_almighty": "Staff of the Almighty",
   "item.oririmod.boss_attack_debug_wand": "Boss Attack Debug Wand",
+  "item.oririmod.particle_debug_wand": "Particle Debug Wand",
   "item.oririmod.dodoco": "Dodoco",
   "item.oririmod.one_thousand_screams": "One Thousand Screams",
   "item.oririmod.book_of_amateur": "Book of the Amateur",
@@ -570,5 +571,9 @@
   "entity.oririmod.mermaid": "Mermaid",
   "item.oririmod.mermaid_spawn_egg": "Mermaid Spawn Egg",
   "block.oririmod.aether_magma_block": "Aether Magma Block",
-  "block.oririmod.aether_fire_block": "Aether Fire"
+  "block.oririmod.aether_fire_block": "Aether Fire",
+  "entity.oririmod.loaded_blaze": "Loaded Blaze",
+  "item.oririmod.loaded_blaze_spawn_egg": "Loaded Blaze Spawn Egg",
+  "entity.oririmod.aether_charge_entity": "Aether Charge",
+  "item.oririmod.aether_charge": "Aether Charge"
 }

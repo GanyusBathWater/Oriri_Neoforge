@@ -3,14 +3,14 @@ package net.ganyusbathwater.oririmod.block.custom;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.serialization.MapCodec;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class AetherFireBlock extends BaseFireBlock {
+public class AetherFireBlock extends FireBlock {
     public static final MapCodec<AetherFireBlock> CODEC = simpleCodec(AetherFireBlock::new);
 
     private static final float BASE_DAMAGE = 4.0F;
@@ -21,17 +21,35 @@ public class AetherFireBlock extends BaseFireBlock {
     private static final Map<Entity, Integer> LAST_HIT_TICK = new WeakHashMap<>();
 
     public AetherFireBlock(Properties properties) {
-        super(properties, 4.0f);
+        super(properties);
     }
 
     @Override
-    protected MapCodec<? extends BaseFireBlock> codec() {
-        return CODEC;
+    public MapCodec<FireBlock> codec() {
+        return (MapCodec<FireBlock>) (Object) CODEC;
     }
 
     @Override
-    protected boolean canBurn(BlockState state) {
-        return true;
+    public BlockState updateShape(BlockState state, net.minecraft.core.Direction facing, BlockState facingState, net.minecraft.world.level.LevelAccessor level, BlockPos currentPos, BlockPos facingPos) {
+        if (!this.canSurvive(state, level, currentPos)) {
+            return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        }
+
+        BlockState superState = super.updateShape(state, facing, facingState, level, currentPos, facingPos);
+        BlockState myState = this.defaultBlockState().setValue(AGE, state.getValue(AGE));
+
+        if (superState.is(net.minecraft.world.level.block.Blocks.FIRE)) {
+            for (net.minecraft.world.level.block.state.properties.Property<?> prop : superState.getProperties()) {
+                if (myState.hasProperty(prop)) {
+                    myState = copyProperty(superState, myState, prop);
+                }
+            }
+        }
+        return myState;
+    }
+
+    private <T extends Comparable<T>> BlockState copyProperty(BlockState source, BlockState target, net.minecraft.world.level.block.state.properties.Property<T> property) {
+        return target.setValue(property, source.getValue(property));
     }
 
     @Override

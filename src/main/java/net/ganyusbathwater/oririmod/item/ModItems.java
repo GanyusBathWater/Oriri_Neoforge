@@ -29,6 +29,11 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.BossAttackDebugWandItem(
                                         new Item.Properties().stacksTo(1)));
 
+        /** Debug wand for previewing Lodestone particle effects. Shift+RClick = menu, RClick = spawn. */
+        public static final DeferredItem<Item> PARTICLE_DEBUG_WAND = ITEMS.register("particle_debug_wand",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.magic.ParticleDebugWandItem(
+                                        new Item.Properties().stacksTo(1)));
+
         public static final DeferredItem<Item> MAGIC_DEBUG_STICK = ITEMS.register("magic_debug_stick",
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.MagicDebugStickItem(
                                         new Item.Properties().stacksTo(1)));
@@ -170,6 +175,9 @@ public class ModItems {
 
         public static final DeferredItem<Item> MANA_IGNITER = ITEMS.register("mana_igniter",
                         () -> new ManaIgniterItem(new Item.Properties().stacksTo(1).durability(64)));
+
+        public static final DeferredItem<Item> AETHER_CHARGE = ITEMS.register("aether_charge",
+                        () -> new AetherChargeItem(new Item.Properties()));
 
         // ---------------------------------------Weapons---------------------------------------------------------
 
@@ -468,6 +476,12 @@ public class ModItems {
                                         0x00CED1, 0xFF69B4, // outer: dark turquoise, inner: hot pink (Charmed effect)
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> LOADED_BLAZE_SPAWN_EGG = ITEMS.register(
+                        "loaded_blaze_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.LOADED_BLAZE,
+                                        0xF6B201, 0x00A8FF, // outer: gold, inner: blue fire
+                                        new Item.Properties()));
+
         // ------------------------------------------------------Armor---------------------------------------------------------
 
         public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet",
@@ -663,7 +677,33 @@ public class ModItems {
                                 return new net.ganyusbathwater.oririmod.entity.custom.arrow.SonicArrowEntity(level, position.x(), position.y(), position.z(), stack.copyWithCount(1), null);
                         }
                 });
+                
+                net.minecraft.world.level.block.DispenserBlock.registerBehavior(AETHER_CHARGE.get(), new net.minecraft.core.dispenser.DefaultDispenseItemBehavior() {
+                        @Override
+                        public net.minecraft.world.item.ItemStack execute(net.minecraft.core.dispenser.BlockSource blockSource, net.minecraft.world.item.ItemStack itemStack) {
+                                net.minecraft.core.Direction direction = blockSource.state().getValue(net.minecraft.world.level.block.DispenserBlock.FACING);
+                                net.minecraft.core.Position position = net.minecraft.world.level.block.DispenserBlock.getDispensePosition(blockSource);
+                                double d0 = position.x() + (double)((float)direction.getStepX() * 0.3F);
+                                double d1 = position.y() + (double)((float)direction.getStepY() * 0.3F);
+                                double d2 = position.z() + (double)((float)direction.getStepZ() * 0.3F);
+                                net.minecraft.world.level.Level level = blockSource.level();
+                                net.minecraft.util.RandomSource random = level.getRandom();
+                                double d3 = random.nextGaussian() * 0.05D + (double)direction.getStepX();
+                                double d4 = random.nextGaussian() * 0.05D + (double)direction.getStepY();
+                                double d5 = random.nextGaussian() * 0.05D + (double)direction.getStepZ();
+                                net.ganyusbathwater.oririmod.entity.custom.AetherChargeEntity aetherCharge = new net.ganyusbathwater.oririmod.entity.custom.AetherChargeEntity(level, d0, d1, d2, d3, d4, d5);
+                                level.addFreshEntity(aetherCharge);
+                                itemStack.shrink(1);
+                                return itemStack;
+                        }
+
+                        @Override
+                        protected void playSound(net.minecraft.core.dispenser.BlockSource blockSource) {
+                                blockSource.level().levelEvent(1018, blockSource.pos(), 0);
+                        }
+                });
         }
+
 
         private static void addItemsToIngredientTabItemGroup() {
 

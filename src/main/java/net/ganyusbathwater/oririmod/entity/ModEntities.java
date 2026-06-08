@@ -306,6 +306,34 @@ public final class ModEntities {
                                                                                         "mermaid")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.LoadedBlazeEntity>> LOADED_BLAZE = ENTITIES
+                        .register("loaded_blaze",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.LoadedBlazeEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.LoadedBlazeEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(0.6F, 1.8F)
+                                                        .clientTrackingRange(8)
+                                                        .fireImmune()
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "loaded_blaze")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.AetherChargeEntity>> AETHER_CHARGE_ENTITY = ENTITIES
+                        .register("aether_charge_entity",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.AetherChargeEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.AetherChargeEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MISC)
+                                                        .sized(0.3125F, 0.3125F)
+                                                        .clientTrackingRange(4)
+                                                        .updateInterval(10)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "aether_charge_entity")
+                                                                        .toString()));
+
         public static void register(IEventBus modBus) {
 
                 ENTITIES.register(modBus);

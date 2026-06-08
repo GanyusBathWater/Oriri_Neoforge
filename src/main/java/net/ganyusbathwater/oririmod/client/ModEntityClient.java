@@ -66,5 +66,10 @@ public class ModEntityClient {
 
                 event.registerEntityRenderer(ModEntities.MERMAID.get(),
                                 net.ganyusbathwater.oririmod.entity.client.MermaidRenderer::new);
+                
+                event.registerEntityRenderer(ModEntities.LOADED_BLAZE.get(),
+                                net.ganyusbathwater.oririmod.entity.client.LoadedBlazeRenderer::new);
+                event.registerEntityRenderer(ModEntities.AETHER_CHARGE_ENTITY.get(),
+                                net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         }
 }

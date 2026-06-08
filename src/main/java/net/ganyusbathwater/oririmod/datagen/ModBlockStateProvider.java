@@ -259,11 +259,76 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 simpleBlockWithItem(ModBlocks.AETHER_MAGMA_BLOCK.get(),
                                 models().cubeAll("aether_magma_block", modLoc("block/aether_magma")));
                 
-                simpleBlock(ModBlocks.AETHER_FIRE_BLOCK.get(),
-                                models().cross("aether_fire_block", modLoc("block/aether_fire"))
-                                                .renderType("cutout"));
+                aetherFireBlock();
 
                 generateScarletVineBlock();
+        }
+
+        private void aetherFireBlock() {
+                BlockModelBuilder floor = models().withExistingParent("aether_fire_floor", mcLoc("block/template_fire_floor"))
+                                .texture("fire", modLoc("block/aether_fire")).renderType("cutout");
+                BlockModelBuilder side = models().withExistingParent("aether_fire_side", mcLoc("block/template_fire_side"))
+                                .texture("fire", modLoc("block/aether_fire")).renderType("cutout");
+                BlockModelBuilder sideAlt = models().withExistingParent("aether_fire_side_alt", mcLoc("block/template_fire_side_alt"))
+                                .texture("fire", modLoc("block/aether_fire")).renderType("cutout");
+                BlockModelBuilder up = models().withExistingParent("aether_fire_up", mcLoc("block/template_fire_up"))
+                                .texture("fire", modLoc("block/aether_fire")).renderType("cutout");
+                BlockModelBuilder upAlt = models().withExistingParent("aether_fire_up_alt", mcLoc("block/template_fire_up_alt"))
+                                .texture("fire", modLoc("block/aether_fire")).renderType("cutout");
+
+                net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder builder = getMultipartBuilder(ModBlocks.AETHER_FIRE_BLOCK.get());
+
+                // Floor
+                builder.part().modelFile(floor).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.NORTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.SOUTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.WEST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, false).end();
+
+                // North
+                builder.part().modelFile(side).nextModel().modelFile(sideAlt).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.NORTH, true).end();
+                builder.part().modelFile(side).nextModel().modelFile(sideAlt).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.NORTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.SOUTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.WEST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, false).end();
+
+                // East
+                builder.part().modelFile(side).rotationY(90).nextModel().modelFile(sideAlt).rotationY(90).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST, true).end();
+                builder.part().modelFile(side).rotationY(90).nextModel().modelFile(sideAlt).rotationY(90).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.NORTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.SOUTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.WEST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, false).end();
+
+                // South
+                builder.part().modelFile(side).rotationY(180).nextModel().modelFile(sideAlt).rotationY(180).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.SOUTH, true).end();
+                builder.part().modelFile(side).rotationY(180).nextModel().modelFile(sideAlt).rotationY(180).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.NORTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.SOUTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.WEST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, false).end();
+
+                // West
+                builder.part().modelFile(side).rotationY(270).nextModel().modelFile(sideAlt).rotationY(270).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.WEST, true).end();
+                builder.part().modelFile(side).rotationY(270).nextModel().modelFile(sideAlt).rotationY(270).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.NORTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.SOUTH, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.WEST, false)
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, false).end();
+
+                // Up
+                builder.part().modelFile(up).nextModel().modelFile(upAlt).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, true).end();
         }
 
         private void generateScarletVineBlock() {
