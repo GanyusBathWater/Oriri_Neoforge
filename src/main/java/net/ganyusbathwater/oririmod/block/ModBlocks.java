@@ -22,6 +22,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import net.minecraft.world.level.block.grower.TreeGrower;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import java.util.function.Supplier;
 
 public class ModBlocks {
@@ -77,6 +78,12 @@ public class ModBlocks {
         public static final DeferredBlock<FenceGateBlock> ELDER_GATE = registerBlock("elder_gate",
                         () -> new FenceGateBlock(WoodType.ACACIA,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
+
+        public static final DeferredBlock<DoorBlock> ELDER_DOOR = registerBlock("elder_door",
+                        () -> new DoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+
+        public static final DeferredBlock<TrapDoorBlock> ELDER_TRAPDOOR = registerBlock("elder_trapdoor",
+                        () -> new TrapDoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
 
         public static final DeferredBlock<Block> STRIPPED_ELDER_LOG_BLOCK = registerBlock("stripped_elder_log_block",
                         () -> new ModFlammableRotatedPillarBlock(
@@ -187,6 +194,12 @@ public class ModBlocks {
         public static final DeferredBlock<FenceGateBlock> SCARLET_GATE = registerBlock("scarlet_gate",
                         () -> new FenceGateBlock(WoodType.ACACIA,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
+
+        public static final DeferredBlock<DoorBlock> SCARLET_DOOR = registerBlock("scarlet_door",
+                        () -> new DoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+
+        public static final DeferredBlock<TrapDoorBlock> SCARLET_TRAPDOOR = registerBlock("scarlet_trapdoor",
+                        () -> new TrapDoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
 
         public static final DeferredBlock<Block> SCARLET_SAPLING = registerBlock("scarlet_sapling",
                         () -> new SaplingBlock(ModTreeGrowers.SCARLET_TREE,
@@ -436,6 +449,48 @@ public class ModBlocks {
         public static final DeferredBlock<FenceGateBlock> ABYSS_CROWN_GATE = registerBlock("abyss_crown_gate",
                         () -> new FenceGateBlock(WoodType.ACACIA,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)) {
+                                @Override
+                                public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return true;
+                                }
+
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 20;
+                                }
+
+                                @Override
+                                public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 5;
+                                }
+                        });
+
+        public static final DeferredBlock<DoorBlock> ABYSS_CROWN_DOOR = registerBlock("abyss_crown_door",
+                        () -> new DoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)) {
+                                @Override
+                                public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return true;
+                                }
+
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 20;
+                                }
+
+                                @Override
+                                public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos,
+                                                Direction direction) {
+                                        return 5;
+                                }
+                        });
+
+        public static final DeferredBlock<TrapDoorBlock> ABYSS_CROWN_TRAPDOOR = registerBlock("abyss_crown_trapdoor",
+                        () -> new TrapDoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)) {
                                 @Override
                                 public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
                                                 Direction direction) {

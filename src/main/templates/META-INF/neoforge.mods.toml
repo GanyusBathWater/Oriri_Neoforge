@@ -104,7 +104,14 @@ side="BOTH"
 modId="lodestone"
 type="required"
 versionRange="[1.0,)"
-ordering="NONE"
+ordering="BEFORE"
+side="BOTH"
+
+[[dependencies.oririmod]]
+modId="sodium"
+type="optional"
+versionRange="[0,)"
+ordering="BEFORE"
 side="BOTH"
 
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares

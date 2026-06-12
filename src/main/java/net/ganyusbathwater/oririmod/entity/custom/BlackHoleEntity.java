@@ -28,29 +28,37 @@ public class BlackHoleEntity extends Entity implements GeoEntity {    // --- COM
     
     // System A: Halo
     public static float HALO_SCALE_MULTIPLIER = 1.8f; // Just slightly larger than the core
-    public static java.awt.Color HALO_COLOR_1 = new java.awt.Color(30, 0, 50); // Deep dark purple
-    public static java.awt.Color HALO_COLOR_2 = new java.awt.Color(0, 0, 0);   // Void black
+    public static java.awt.Color HALO_COLOR_1 = new java.awt.Color(0, 0, 0); // Void black
+    public static java.awt.Color HALO_COLOR_2 = new java.awt.Color(10, 10, 20);   // Very dark blue/black
 
-    // System B: Inner Accretion Disk (Emissive)
-    public static float INNER_DISK_RADIUS_MULTIPLIER = 1.1f; // Partially inside the void boundary
-    public static float INNER_DISK_ROTATION_SPEED = 0.8f;    // Extremely high speed
-    public static java.awt.Color INNER_DISK_COLOR_1 = java.awt.Color.WHITE;
-    public static java.awt.Color INNER_DISK_COLOR_2 = java.awt.Color.YELLOW;
+    // System B: Inner Accretion Disk (Emissive) — Blue/White-hot
+    public static float INNER_DISK_RADIUS_MULTIPLIER = 1.1f;
+    public static float INNER_DISK_ROTATION_SPEED = 1.5f; // Hyper-fast
+    public static java.awt.Color INNER_DISK_COLOR_1 = new java.awt.Color(200, 230, 255);   // Blue-white
+    public static java.awt.Color INNER_DISK_COLOR_2 = new java.awt.Color(255, 255, 255); // Blinding White
 
-    // System C: Outer Accretion Disk
-    public static float OUTER_DISK_RADIUS_MULTIPLIER = 1.5f; // Extremely close to the inner ring
-    public static float OUTER_DISK_ROTATION_SPEED = 0.1f;    // Slow orbit
-    public static java.awt.Color OUTER_DISK_COLOR_1 = new java.awt.Color(150, 50, 0); // Dark orange
-    public static java.awt.Color OUTER_DISK_COLOR_2 = new java.awt.Color(60, 0, 100); // Dark purple
+    // System C: Outer Accretion Disk — Bright Orange to Deep Red
+    public static float OUTER_DISK_RADIUS_MULTIPLIER = 1.5f;
+    public static float OUTER_DISK_ROTATION_SPEED = 0.3f;
+    public static java.awt.Color OUTER_DISK_COLOR_1 = new java.awt.Color(255, 100, 0);   // Bright Orange
+    public static java.awt.Color OUTER_DISK_COLOR_2 = new java.awt.Color(150, 20, 0);   // Deep Red
 
     // System D: Suction
-    public static float SUCTION_VISUAL_RADIUS_MULTIPLIER = 3.5f; // Short range beyond core surface
-    public static java.awt.Color SUCTION_VISUAL_COLOR_1 = new java.awt.Color(40, 40, 40); // Ash
-    public static java.awt.Color SUCTION_VISUAL_COLOR_2 = new java.awt.Color(80, 0, 120); // Enderman purple
-    
+    public static float SUCTION_VISUAL_RADIUS_MULTIPLIER = 3.5f;
+    public static java.awt.Color SUCTION_VISUAL_COLOR_1 = new java.awt.Color(255, 150, 50);  // Bright Orange
+    public static java.awt.Color SUCTION_VISUAL_COLOR_2 = new java.awt.Color(255, 255, 255);  // White
+
+    // System E: Energy Arcs
+    public static java.awt.Color ARC_COLOR_1 = new java.awt.Color(100, 200, 255);   // Cyan/Blue
+    public static java.awt.Color ARC_COLOR_2 = new java.awt.Color(255, 255, 255); // Blinding White
+
+    // System F: Ash Cloud
+    public static java.awt.Color ASH_COLOR_1 = new java.awt.Color(20, 10, 0);  // Dark burnt orange
+    public static java.awt.Color ASH_COLOR_2 = new java.awt.Color(0, 0, 0);   // Black
+
     // Nova Explosion
     public static java.awt.Color NOVA_COLOR_1 = java.awt.Color.WHITE;
-    public static java.awt.Color NOVA_COLOR_2 = new java.awt.Color(200, 50, 255);
+    public static java.awt.Color NOVA_COLOR_2 = new java.awt.Color(200, 230, 255);
     // --------------------------------------
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private static final EntityDataAccessor<Integer> MAX_LIFETIME = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.INT);
@@ -155,7 +163,61 @@ public class BlackHoleEntity extends Entity implements GeoEntity {    // --- COM
         float currentRadius = this.getCurrentRadius();
 
         if (this.level().isClientSide) {
-            this.spawnLodestoneParticles(currentRadius, age, maxLife);
+            // Visual Aesthetics: Spawn dust and energy particles that spiral into the center
+            if (currentRadius > 0.5f) {
+                net.minecraft.util.RandomSource random = this.level().random;
+                
+                // Divided by 12 again: Spawn incredibly rarely (e.g. 1 particle every few ticks)
+                float expectedParticles = currentRadius * 0.04f; 
+                int particleCount = (int) expectedParticles;
+                if (random.nextFloat() < (expectedParticles - particleCount)) {
+                    particleCount++;
+                }
+                
+                float maxRad = this.getMaxRadius();
+                float visualScale = (maxRad > 0f) ? (currentRadius / maxRad) * 1.5f : 0f;
+                double centerY = this.getY() + ((13.5f / 16.0f) * visualScale);
+                
+                for (int i = 0; i < particleCount; i++) {
+                    // Spawn particles widely around the black hole (up to ~10-15 blocks away)
+                    double theta = random.nextDouble() * 2 * Math.PI;
+                    double phi = Math.acos(2 * random.nextDouble() - 1);
+                    double r = currentRadius + 1.0 + random.nextDouble() * 12.0;
+                    
+                    double px = this.getX() + r * Math.sin(phi) * Math.cos(theta);
+                    double py = centerY + r * Math.sin(phi) * Math.sin(theta);
+                    double pz = this.getZ() + r * Math.cos(phi);
+                    
+                    // Calculate velocity directly toward the center core
+                    double vx = this.getX() - px;
+                    double vy = centerY - py;
+                    double vz = this.getZ() - pz;
+                    
+                    double len = Math.sqrt(vx*vx + vy*vy + vz*vz);
+                    if (len > 0) {
+                        // We double the speed so it's sucked in extremely fast, and calculate exactly
+                        // how many ticks it will take to reach the center (15 ticks).
+                        // Speed math: len = (speed * 0.05) * ((1 - 0.96^15) / 0.04) -> speed = len * 1.75
+                        double speed = len * 1.75;
+                        
+                        vx = (vx / len) * speed;
+                        vy = (vy / len) * speed;
+                        vz = (vz / len) * speed;
+                        
+                        // We use the ParticleEngine directly so we can grab the particle instance and 
+                        // FORCE it to die instantly upon reaching the center (15 ticks). 
+                        // This prevents it from popping out the other side!
+                        net.minecraft.client.particle.Particle p = net.minecraft.client.Minecraft.getInstance().particleEngine.createParticle(
+                                net.ganyusbathwater.oririmod.particle.ModParticles.ELDERWOODS_CAVE_PARTICLE.get(), 
+                                px, py, pz, 
+                                vx, vy, vz);
+                                
+                        if (p != null) {
+                            p.setLifetime(15); // Mathematically guaranteed to delete exactly at the center!
+                        }
+                    }
+                }
+            }
         } else {
             if (age >= maxLife) {
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), this.getMaxRadius() * 0.8f, Level.ExplosionInteraction.TNT);
@@ -174,7 +236,10 @@ public class BlackHoleEntity extends Entity implements GeoEntity {    // --- COM
                             if (pos.distSqr(center) <= currentRadius * currentRadius) {
                                 BlockState state = this.level().getBlockState(pos);
                                 if (!state.isAir() && state.getDestroySpeed(this.level(), pos) >= 0) {
-                                    this.level().destroyBlock(pos, false, this);
+                                    // Spawn vanilla block break particles
+                                    this.level().levelEvent(2001, pos, net.minecraft.world.level.block.Block.getId(state));
+                                    // Remove block without dropping items
+                                    this.level().removeBlock(pos, false);
                                 }
                             }
                         }
@@ -224,117 +289,4 @@ public class BlackHoleEntity extends Entity implements GeoEntity {    // --- COM
         }
     }
 
-    private void spawnLodestoneParticles(float currentRadius, int age, int maxLife) {
-        if (currentRadius <= 0.01f && age < maxLife - 2) return;
-
-        double cx = this.getX();
-        
-        // The GeckoLib model's center is at Y=13.5 pixels (0.84375 blocks).
-        // Since BlackHoleRenderer scales from Y=0 with a 1.5x multiplier, the visual center moves up as it grows.
-        float visualScale = (currentRadius / this.getMaxRadius()) * 1.5f;
-        double cy = this.getY() + (13.5 / 16.0) * visualScale;
-        
-        double cz = this.getZ();
-        
-        float visualCoreRadius = (currentRadius / this.getMaxRadius()) * VISUAL_CORE_RADIUS_MAX;
-
-        // 3. The Nova Explosion
-        if (age >= maxLife - 1) {
-            for (int i = 0; i < 150; i++) {
-                double vx = (this.random.nextDouble() - 0.5) * 3.0;
-                double vy = (this.random.nextDouble() - 0.5) * 3.0;
-                double vz = (this.random.nextDouble() - 0.5) * 3.0;
-                team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder.create(team.lodestar.lodestone.registry.common.particle.LodestoneParticleTypes.WISP_PARTICLE.get())
-                    .setForceSpawn(true)
-                    .setScaleData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(0.8f, 0).build())
-                    .setTransparencyData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(1.0f, 0).build())
-                    .setColorData(team.lodestar.lodestone.systems.particle.data.color.ColorParticleData.create(NOVA_COLOR_1, NOVA_COLOR_2).build())
-                    .setLifetime(20 + this.random.nextInt(20))
-                    .setMotion(vx, vy, vz)
-                    .spawn(this.level(), cx, cy, cz);
-            }
-            return;
-        }
-
-        float haloScale = visualCoreRadius * HALO_SCALE_MULTIPLIER;
-        float innerRadius = visualCoreRadius * INNER_DISK_RADIUS_MULTIPLIER;
-        float outerRadius = visualCoreRadius * OUTER_DISK_RADIUS_MULTIPLIER;
-        float suctionRadius = visualCoreRadius * SUCTION_VISUAL_RADIUS_MULTIPLIER;
-        
-        // System A: The Compressed Halo (Soft boundary)
-        if (age % 2 == 0) {
-            team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder.create(team.lodestar.lodestone.registry.common.particle.LodestoneParticleTypes.WISP_PARTICLE.get())
-                .setForceSpawn(true)
-                .setScaleData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(haloScale, haloScale * 1.1f).build())
-                .setTransparencyData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(0.7f, 0.0f).build())
-                .setColorData(team.lodestar.lodestone.systems.particle.data.color.ColorParticleData.create(HALO_COLOR_1, HALO_COLOR_2).build())
-                .setSpinData(team.lodestar.lodestone.systems.particle.data.spin.SpinParticleData.create(age * 0.02f, (age + 1) * 0.02f).build())
-                .setLifetime(6)
-                .spawn(this.level(), cx, cy, cz);
-        }
-
-        // System B: Compressed Inner Accretion Disk (Emissive)
-        // Spawning many particles per tick to create a continuous glowing trail
-        for (int i = 0; i < 6; i++) {
-            float angle = (age * INNER_DISK_ROTATION_SPEED) + (i * (float)Math.PI / 3.0f);
-            double px = cx + Math.cos(angle) * innerRadius;
-            double pz = cz + Math.sin(angle) * innerRadius;
-            
-            team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder.create(team.lodestar.lodestone.registry.common.particle.LodestoneParticleTypes.WISP_PARTICLE.get())
-                .setForceSpawn(true)
-                .setScaleData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(visualCoreRadius * 0.5f, 0).build())
-                .setTransparencyData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(1.0f, 0).build())
-                .setColorData(team.lodestar.lodestone.systems.particle.data.color.ColorParticleData.create(INNER_DISK_COLOR_1, INNER_DISK_COLOR_2).build())
-                .setLifetime(5)
-                .spawn(this.level(), px, cy, pz);
-        }
-
-        // System C: Compressed Outer Accretion Disk (Darker, wobbly)
-        for (int i = 0; i < 4; i++) {
-            float angle = -(age * OUTER_DISK_ROTATION_SPEED) + (i * (float)Math.PI / 2.0f);
-            double px = cx + Math.cos(angle) * outerRadius;
-            double pz = cz + Math.sin(angle) * outerRadius;
-            double wobble = Math.sin(age * 0.15f + i) * (visualCoreRadius * 0.3f);
-            
-            team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder.create(team.lodestar.lodestone.registry.common.particle.LodestoneParticleTypes.SMOKE_PARTICLE.get())
-                .setForceSpawn(true)
-                .setScaleData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(visualCoreRadius * 0.6f, 0).build())
-                .setTransparencyData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(0.8f, 0).build())
-                .setColorData(team.lodestar.lodestone.systems.particle.data.color.ColorParticleData.create(OUTER_DISK_COLOR_1, OUTER_DISK_COLOR_2).build())
-                .setLifetime(10)
-                .spawn(this.level(), px, cy + wobble, pz);
-        }
-
-        // System D: Short-Range Visual Suction
-        for (int i = 0; i < 3; i++) {
-            double rx = (this.random.nextDouble() - 0.5) * 2.0 * suctionRadius;
-            double ry = (this.random.nextDouble() - 0.5) * 2.0 * suctionRadius;
-            double rz = (this.random.nextDouble() - 0.5) * 2.0 * suctionRadius;
-            
-            double dist = Math.sqrt(rx*rx + ry*ry + rz*rz);
-            if (dist > suctionRadius || dist < visualCoreRadius) continue;
-
-            double px = cx + rx;
-            double py = cy + ry;
-            double pz = cz + rz;
-
-            // Velocity aimed exactly at center
-            double speedMultiplier = 0.2;
-            double vx = -rx * speedMultiplier;
-            double vy = -ry * speedMultiplier;
-            double vz = -rz * speedMultiplier;
-
-            // Lifetime calculation based on distance and speed to disappear at void edge
-            int calcLifetime = (int)Math.max(1, (dist - visualCoreRadius) / (dist * speedMultiplier));
-            
-            team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder.create(team.lodestar.lodestone.registry.common.particle.LodestoneParticleTypes.TWINKLE_PARTICLE.get())
-                .setForceSpawn(true)
-                .setScaleData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(0.15f, 0).build())
-                .setTransparencyData(team.lodestar.lodestone.systems.particle.data.GenericParticleData.create(1.0f, 0).build())
-                .setColorData(team.lodestar.lodestone.systems.particle.data.color.ColorParticleData.create(SUCTION_VISUAL_COLOR_1, SUCTION_VISUAL_COLOR_2).build())
-                .setLifetime(Math.min(calcLifetime, 15))
-                .setMotion(vx, vy, vz)
-                .spawn(this.level(), px, py, pz);
-        }
-    }
 }

@@ -241,8 +241,6 @@ public class ModItemModelProvider extends ItemModelProvider {
                 handheldItem(ModItems.STAFF_OF_ALMIGHTY);
                 withExistingParent(ModItems.BOSS_ATTACK_DEBUG_WAND.getId().getPath(), mcLoc("item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
-                withExistingParent(ModItems.PARTICLE_DEBUG_WAND.getId().getPath(), mcLoc("item/handheld"))
-                                .texture("layer0", mcLoc("item/stick"));
                 withExistingParent(ModItems.MAGIC_DEBUG_STICK.getId().getPath(), mcLoc("item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
                 handheldItem(ModItems.ZOMBIE_ENCYCLOPEDIA);

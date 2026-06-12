@@ -29,11 +29,6 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.BossAttackDebugWandItem(
                                         new Item.Properties().stacksTo(1)));
 
-        /** Debug wand for previewing Lodestone particle effects. Shift+RClick = menu, RClick = spawn. */
-        public static final DeferredItem<Item> PARTICLE_DEBUG_WAND = ITEMS.register("particle_debug_wand",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.magic.ParticleDebugWandItem(
-                                        new Item.Properties().stacksTo(1)));
-
         public static final DeferredItem<Item> MAGIC_DEBUG_STICK = ITEMS.register("magic_debug_stick",
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.MagicDebugStickItem(
                                         new Item.Properties().stacksTo(1)));

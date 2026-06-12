@@ -75,6 +75,8 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_SLAB);
                         output.accept(ModBlocks.ELDER_FENCE);
                         output.accept(ModBlocks.ELDER_GATE);
+                        output.accept(ModBlocks.ELDER_DOOR);
+                        output.accept(ModBlocks.ELDER_TRAPDOOR);
                         output.accept(ModBlocks.ELDER_LEAVES);
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING);
                         output.accept(ModBlocks.ELDER_SAPLING);
@@ -111,6 +113,8 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SCARLET_SLAB);
                         output.accept(ModBlocks.SCARLET_FENCE);
                         output.accept(ModBlocks.SCARLET_GATE);
+                        output.accept(ModBlocks.SCARLET_DOOR);
+                        output.accept(ModBlocks.SCARLET_TRAPDOOR);
                         output.accept(ModBlocks.SCARLET_SAPLING);
                         output.accept(ModBlocks.UPGRADED_SCARLET_SAPLING);
                         output.accept(ModBlocks.SCARLET_LEAVES);
@@ -143,6 +147,8 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ABYSS_CROWN_SLAB);
                         output.accept(ModBlocks.ABYSS_CROWN_FENCE);
                         output.accept(ModBlocks.ABYSS_CROWN_GATE);
+                        output.accept(ModBlocks.ABYSS_CROWN_DOOR);
+                        output.accept(ModBlocks.ABYSS_CROWN_TRAPDOOR);
                         output.accept(ModBlocks.ABYSS_CROWN_LEAVES);
                         output.accept(ModBlocks.ABYSS_CROWN_SAPLING);
                         output.accept(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING);
@@ -245,7 +251,6 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_WISE);
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
                         output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
-                        output.accept(ModItems.PARTICLE_DEBUG_WAND);
                         output.accept(ModItems.MAGIC_DEBUG_STICK);
                         output.accept(ModItems.COSMIC_EXAMPLE); // Stage 1 tooltip test item
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);

@@ -294,6 +294,38 @@ public class OririClient {
     }
 
     @SubscribeEvent
+    public static void onComputeCameraAngles(net.neoforged.neoforge.client.event.ViewportEvent.ComputeCameraAngles event) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) return;
+        
+        // Scan for nearby BlackHoleEntities for universal screen shake (works with shaders!)
+        double maxDist = 64.0;
+        java.util.List<net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity> holes = mc.level.getEntitiesOfClass(
+                net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity.class, 
+                mc.player.getBoundingBox().inflate(maxDist));
+                
+        if (!holes.isEmpty()) {
+            net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity closest = holes.get(0);
+            double dist = mc.player.distanceTo(closest);
+            
+            if (dist < maxDist && closest.getCurrentRadius() > 0.5f) {
+                float intensity = 1.0f - (float)(dist / maxDist);
+                intensity = intensity * intensity * intensity; // exponential for stronger shake closer up
+                
+                float time = closest.tickCount + (float)event.getPartialTick();
+                
+                float shakePitch = (float)(Math.sin(time * 2.5) * Math.cos(time * 1.5)) * 0.7f * intensity;
+                float shakeYaw = (float)(Math.cos(time * 3.0) * Math.sin(time * 1.1)) * 0.7f * intensity;
+                float shakeRoll = (float)(Math.sin(time * 2.0)) * 0.5f * intensity;
+                
+                event.setPitch(event.getPitch() + shakePitch);
+                event.setYaw(event.getYaw() + shakeYaw);
+                event.setRoll(event.getRoll() + shakeRoll);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
         event.register(
                 net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.EQUINOX_TABLE_MENU.get(),

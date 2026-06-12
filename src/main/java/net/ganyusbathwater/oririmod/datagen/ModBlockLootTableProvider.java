@@ -26,6 +26,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.ELDER_SLAB.get(), block -> createSlabItemTable(ModBlocks.ELDER_SLAB.get()));
         dropSelf(ModBlocks.ELDER_FENCE.get());
         dropSelf(ModBlocks.ELDER_GATE.get());
+        add(ModBlocks.ELDER_DOOR.get(), block -> createDoorTable(block));
+        dropSelf(ModBlocks.ELDER_TRAPDOOR.get());
         dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
         dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
         dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
@@ -60,6 +62,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.SCARLET_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_SLAB.get()));
         dropSelf(ModBlocks.SCARLET_FENCE.get());
         dropSelf(ModBlocks.SCARLET_GATE.get());
+        add(ModBlocks.SCARLET_DOOR.get(), block -> createDoorTable(block));
+        dropSelf(ModBlocks.SCARLET_TRAPDOOR.get());
         dropSelf(ModBlocks.SCARLET_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_SCARLET_SAPLING.get());
 
@@ -123,6 +127,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.ABYSS_CROWN_SLAB.get(), block -> createSlabItemTable(ModBlocks.ABYSS_CROWN_SLAB.get()));
         dropSelf(ModBlocks.ABYSS_CROWN_FENCE.get());
         dropSelf(ModBlocks.ABYSS_CROWN_GATE.get());
+        add(ModBlocks.ABYSS_CROWN_DOOR.get(), block -> createDoorTable(block));
+        dropSelf(ModBlocks.ABYSS_CROWN_TRAPDOOR.get());
         dropSelf(ModBlocks.ABYSS_CROWN_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get());
         add(ModBlocks.ABYSS_CROWN_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ABYSS_CROWN_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));

@@ -52,6 +52,14 @@ public class OririMod {
     // FML will recognize some parameter types like IEventBus or ModContainer and
     // pass them in automatically.
     public OririMod(IEventBus modEventBus, ModContainer modContainer) {
+        // Force RenderStateShard to initialize before parallel deadlock happens with Lodestone + Sodium
+        try {
+            Class.forName("net.minecraft.client.renderer.RenderStateShard");
+            Class.forName("net.minecraft.client.renderer.RenderStateShard$OutputStateShard");
+        } catch (ClassNotFoundException e) {
+            // Ignored
+        }
+
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 

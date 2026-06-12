@@ -8,6 +8,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
@@ -70,6 +72,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 fenceBlock(ModBlocks.ELDER_FENCE.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
                 fenceGateBlock(ModBlocks.ELDER_GATE.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
 
+                doorBlockWithRenderType((DoorBlock) ModBlocks.ELDER_DOOR.get(), modLoc("block/elder_door_bottom"), modLoc("block/elder_door_top"), "cutout");
+                trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.ELDER_TRAPDOOR.get(), modLoc("block/elder_trapdoor"), true, "cutout");
+
                 saplingBlock(ModBlocks.ELDER_SAPLING);
                 saplingBlock(ModBlocks.STAR_HERB);
 
@@ -91,6 +96,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 blockTexture(ModBlocks.SCARLET_PLANKS.get()));
                 fenceBlock(ModBlocks.SCARLET_FENCE.get(), blockTexture(ModBlocks.SCARLET_PLANKS.get()));
                 fenceGateBlock(ModBlocks.SCARLET_GATE.get(), blockTexture(ModBlocks.SCARLET_PLANKS.get()));
+
+                doorBlockWithRenderType((DoorBlock) ModBlocks.SCARLET_DOOR.get(), modLoc("block/scarlet_door_bottom"), modLoc("block/scarlet_door_top"), "cutout");
+                trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.SCARLET_TRAPDOOR.get(), modLoc("block/scarlet_trapdoor"), true, "cutout");
 
                 // Stems use log texture on all sides
                 simpleBlockWithItem(ModBlocks.SCARLET_STEM.get(),
@@ -245,6 +253,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
                 fenceBlock(ModBlocks.ABYSS_CROWN_FENCE.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
                 fenceGateBlock(ModBlocks.ABYSS_CROWN_GATE.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+
+                doorBlockWithRenderType((DoorBlock) ModBlocks.ABYSS_CROWN_DOOR.get(), modLoc("block/abyss_crown_door_bottom"), modLoc("block/abyss_crown_door_top"), "cutout");
+                trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.ABYSS_CROWN_TRAPDOOR.get(), modLoc("block/abyss_crown_trapdoor"), true, "cutout");
                 blockWithItem(ModBlocks.ABYSS_CROWN_LEAVES, 3);
                 
                 simpleBlockWithItem(ModBlocks.ABYSS_CROWN_SAPLING.get(),
