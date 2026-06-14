@@ -14,7 +14,12 @@
             "probability": 0.005
         }
     },
-    "carvers": {},
+    "carvers": {
+        "air": [
+            "minecraft:cave",
+            "minecraft:canyon"
+        ]
+    },
     "features": [
         [],
         [],

@@ -92,6 +92,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private Holder<Biome> cachedElderwoodsCave;
     private Holder<Biome> cachedElysianAbyss;
 
+    // Expose seed and noise offsets for mathematical carver calculations
+    public static long lastSeed = 0;
+    public static double currentSeedOffsetCave = 0;
+
     private final BiomeSource biomeSourceReference;
 
     public ElderwoodsChunkGenerator(BiomeSource biomeSource) {
@@ -110,6 +114,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             seedOffsetX = random.nextDouble() * 10000.0;
             seedOffsetZ = random.nextDouble() * 10000.0;
             seedOffsetCave = random.nextDouble() * 10000.0;
+            currentSeedOffsetCave = seedOffsetCave;
             seedInitialized = true;
 
             // Sync seed to BiomeSource so /locate biome works
@@ -181,7 +186,20 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     private double getCaveFloorHeightDouble(int x, int z, int baseFloor) {
-        return (double) baseFloor;
+        // Generate massive, majestic rolling hills using 2D FBM noise.
+        // Using 2D noise for the primary floor height guarantees zero floating islands
+        // while still providing enormous geographical variation.
+        double scale = 0.008;
+        double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+            (float)(x + seedOffsetCave) * (float)scale, 
+            0.0f,
+            (float)(z + seedOffsetCave) * (float)scale, 
+            3
+        );
+        
+        // noise is roughly -1 to 1. Multiply by 25 to create hills up to 50 blocks tall.
+        // Shift base up slightly so it naturally intersects the -115 Aquifer.
+        return (double) baseFloor + (noise * 25.0) + 5.0;
     }
 
     private int getCaveCeilingHeight(int x, int z, int surfaceY) {
@@ -229,110 +247,40 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     /**
-     * Returns the terraced floor Y for Elysian Abyss columns.
-     * Uses smooth-step blending between three tiers so all vertical transitions
-     * are curved/parabolic instead of hard stepped cliffs.
-     * Tiers: -115 (bottom/Aether), -100 (mid), -85 (upper).
+     * 3D Noise Settings (Density Function) for the Giant Cave Cavern.
      */
-    private int getElysianTerraceFloor(int x, int z) {
-        double nx = (x + seedOffsetCave + 3100) * 0.006;
-        double nz = (z + seedOffsetCave + 3100) * 0.006;
-        double n = Math.sin(nx) * Math.cos(nz);
-        n += Math.sin(nx * 2.31 + 1.7) * Math.cos(nz * 2.17 + 0.9) * 0.5;
-        n += Math.sin(nx * 4.73 + 3.1) * Math.cos(nz * 4.51 + 2.7) * 0.25;
-        n = Mth.clamp(n / 1.75, -1.0, 1.0);
-
-        // Smooth-step blend zones — wide overlap gives parabolic/curved transitions
-        double t1 = smoothstep(-0.45, -0.20, n);  // bottom → mid
-        double t2 = smoothstep(0.15,  0.40, n);   // mid   → upper
-
-        double floor = Mth.lerp(t1, -115.0, -100.0);
-        floor = Mth.lerp(t2, floor, -85.0);
-        return (int) Math.round(floor);
+    private double getElysianCavernDensity(int x, int y, int z, double caveFloor, double caveCeiling, double abyssIntensity) {
+        // Taper the noise toward the center of the cavern so it only warps the walls
+        // This physically guarantees no floating islands can form in the open airspace!
+        double wallNoiseFactor = (1.0 - abyssIntensity);
+        
+        // Unified noise field for general wall texture
+        double scale = 0.012; 
+        double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+            (float)(x + seedOffsetCave) * (float)scale, 
+            (float)y * (float)scale * 1.0f, 
+            (float)(z + seedOffsetCave) * (float)scale, 
+            2
+        ) * (2.5 * wallNoiseFactor); // Strong noise, but zeroed out in the center
+        
+        // Target vertical bounds
+        double roomHalfHeight = Math.max(1.0, (caveCeiling - caveFloor) / 2.0);
+        double verticalCenter = (caveFloor + caveCeiling) / 2.0;
+        
+        double yDist = Math.abs(y - verticalCenter);
+        double normalizedY = yDist / roomHalfHeight;
+        
+        // Base hollow shape
+        double baseDensity = (Math.pow(normalizedY, 4.0) * 3.0) - 1.5; 
+        
+        // --- WALL GRADIENT ---
+        // This math smoothly pushes the density into SOLID rock as abyssIntensity drops to 0.
+        // We use a linear slope so the strong 3.0 noise can organically break through it!
+        double wallGradient = (1.0 - abyssIntensity) * 4.0;
+        
+        // Combine everything (Spurs removed by request to eliminate unnatural horizontal bands)
+        return -noise + baseDensity + wallGradient;
     }
-
-    /** Cubic smooth-step: 0 at edge0, 1 at edge1, smooth S-curve between. */
-    private static double smoothstep(double edge0, double edge1, double x) {
-        double t = Mth.clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
-        return t * t * (3.0 - 2.0 * t);
-    }
-
-    /**
-     * 3-D boundary noise for organic wall/floor/ceiling erosion.
-     * Increased amplitude for more pronounced erosion on wall transitions.
-     */
-    private double getCaveBoundaryNoise(int x, int y, int z, int xOff, int zOff) {
-        double nx = (x + seedOffsetCave + xOff) * 0.045;
-        double ny = y * 0.07;
-        double nz = (z + seedOffsetCave + zOff) * 0.045;
-        double a = Math.sin(nx * 0.857 + nz * 0.515) * Math.cos(-nx * 0.515 + nz * 0.857) * Math.sin(ny);
-        double b = Math.sin(nx * 1.73 + 0.5) * Math.cos(nz * 1.61 + 1.3) * Math.sin(ny * 1.9) * 0.5;
-        double c = Math.sin(nx * 3.11 + nz * 2.37) * 0.25; // extra high-freq roughness
-        return (a + b + c) / 1.5;
-    }
-
-    /**
-     * Column-level pillar test — kept for backward compatibility with any external callers.
-     * @deprecated Use isElysianPillarBlock for the new 3-D varied pillar system.
-     */
-    @Deprecated
-    private boolean isElysianPillarColumn(int x, int z) {
-        return getPillarNoise(x, z) < 0.2;
-    }
-
-    /**
-     * 3-D pillar membership test.
-     * Grid-based: each 60×60 cell has a 20% chance of containing one pillar.
-     * Each pillar has:
-     *   • Unique base radius (1.5–7 blocks): thin needles to massive columns.
-     *   • Low-freq Y-dependent XZ displacement: smooth tilt / curve.
-     *   • Hourglass taper: wider at floor/ceiling, narrower at centre.
-     */
-    private boolean isElysianPillarBlock(int x, int y, int z, int caveFloor, int caveCeiling) {
-        final int GRID = 60;
-        int gridX = Math.floorDiv(x, GRID);
-        int gridZ = Math.floorDiv(z, GRID);
-
-        for (int gx = gridX - 1; gx <= gridX + 1; gx++) {
-            for (int gz = gridZ - 1; gz <= gridZ + 1; gz++) {
-                // Deterministic seed per grid cell
-                long s = (long) gx * 314159265358L ^ (long) gz * 271828182845L ^ (long) seedOffsetCave;
-                long h1 = s  * 0x9E3779B97F4A7C15L;
-                long h2 = h1 * 0x6C62272E07BB0142L;
-                long h3 = h2 * 0x94D049BB133111EBL;
-
-                // 20% of cells have a pillar
-                if ((h1 >>> 48) > 0xCCCCL) continue;
-
-                // Pillar centre (jittered within cell)
-                double cx = gx * GRID + (double) ((h2 >>> 16) & 0xFFFFL) / 65536.0 * GRID;
-                double cz = gz * GRID + (double) ((h3 >>> 16) & 0xFFFFL) / 65536.0 * GRID;
-
-                // Unique base radius per pillar
-                double baseRadius = 1.5 + (double) ((h1 >>> 16) & 0xFFFFL) / 65536.0 * 5.5;
-
-                // Independent displacement phases per pillar
-                double phX = (double) ((h2 >>> 32) & 0xFFFFL) / 65536.0 * Math.PI * 2.0;
-                double phZ = (double) ((h3 >>> 32) & 0xFFFFL) / 65536.0 * Math.PI * 2.0;
-
-                // Low-freq 3-D displacement: smooth curve/tilt over height
-                double dispX = Math.sin(y * 0.025 + phX) * 5.0 + Math.cos(y * 0.041 + phX * 0.7) * 2.5;
-                double dispZ = Math.sin(y * 0.031 + phZ) * 5.0 + Math.cos(y * 0.019 + phZ * 1.3) * 2.5;
-
-                // Hourglass taper: wider at floor/ceiling, narrower at centre
-                double vP = Mth.clamp((double)(y - caveFloor) / Math.max(1, caveCeiling - caveFloor), 0.0, 1.0);
-                double yNorm = (vP - 0.5) * 2.0;
-                double radius = baseRadius * (1.0 + yNorm * yNorm * 2.0);
-
-                double dx = x - (cx + dispX);
-                double dz = z - (cz + dispZ);
-                if (dx * dx + dz * dz < radius * radius) return true;
-            }
-        }
-        return false;
-    }
-
-
 
     private int[] findNearestEntranceCenter(int x, int z) {
         int gridSize = 180;
@@ -473,9 +421,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private static final int LAVA_LAKE_LEVEL = MIN_Y + 30; 
 
     @Override
-    public void applyCarvers(WorldGenRegion level, long seed, RandomState randomState,
-            BiomeManager biomeManager, StructureManager structureManager,
-            ChunkAccess chunk, GenerationStep.Carving step) {
+    public void applyCarvers(WorldGenRegion level, long seed, RandomState randomState, BiomeManager biomeManager,
+                             StructureManager structureManager, ChunkAccess chunk, GenerationStep.Carving step) {
+        
+        lastSeed = seed;
+
         if (step == GenerationStep.Carving.AIR || step == GenerationStep.Carving.LIQUID) {
             try {
                 net.minecraft.world.level.levelgen.carver.CarvingContext context = null;
@@ -494,17 +444,26 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 for (net.minecraft.core.Holder<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> holder : settings
                         .getCarvers(step)) {
                     net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> carver = holder.value();
-
-                    net.minecraft.util.RandomSource carverRandom = net.minecraft.util.RandomSource
-                            .create(seed ^ chunk.getPos().toLong());
-                    if (carver.worldCarver() instanceof ScarletCaveEntranceCarver
-                            && carver.isStartChunk(carverRandom)) {
-                        carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, chunk.getPos(),
-                                carvingMask);
-                    } else if (carver.worldCarver() instanceof ElysianAbyssCarver
-                            && isElysianAbyssBiome(biome)) {
-                        carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, chunk.getPos(),
-                                carvingMask);
+                    
+                    // Run normal biome carvers, excluding the global Abyss Carver
+                    if (!(carver.worldCarver() instanceof ElysianAbyssCarver)) {
+                        try {
+                            net.minecraft.util.RandomSource carverRandom = net.minecraft.util.RandomSource.create(seed ^ chunk.getPos().toLong());
+                            if (carver.isStartChunk(carverRandom)) {
+                                carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, chunk.getPos(), carvingMask);
+                            }
+                        } catch (Exception ex) {
+                            // Vanilla carver failed due to null context. Ignore safely so it doesn't abort the global custom carvers.
+                        }
+                    }
+                }
+                
+                // Run ElysianAbyssCarver globally so massive ravines can cross biome boundaries freely without getting cut off
+                net.minecraft.core.Registry<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> carverRegistry = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.CONFIGURED_CARVER);
+                for (net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> globalCarver : carverRegistry) {
+                    if (globalCarver.worldCarver() instanceof ElysianAbyssCarver) {
+                        net.minecraft.util.RandomSource globalRandom = net.minecraft.util.RandomSource.create(seed ^ chunk.getPos().toLong());
+                        globalCarver.carve(context, chunk, biomeManager::getBiome, globalRandom, aquifer, chunk.getPos(), carvingMask);
                     }
                 }
             } catch (Throwable e) {
@@ -1120,20 +1079,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     double caveFloorSmooth = getCaveFloorHeightDouble(worldX, worldZ, -115);
                     double caveCeilingSmooth = getCaveCeilingHeightDouble(worldX, worldZ, surfaceY);
 
-                    int caveFloor = (int)Math.round(caveFloorSmooth);
-                    int caveCeiling = (int)Math.round(caveCeilingSmooth);
-
-                    double verticalCenter = (caveFloorSmooth + caveCeilingSmooth) / 2.0;
-                    double roomHalfHeight = Math.max(1.0, (caveCeilingSmooth - caveFloorSmooth) / 2.0);
-
-                    // ── Elysian Abyss: pre-compute per-column values ─────────────
-                    int elysianTerraceFloor = -115;
-                    boolean elysianBottomTier = false;
-                    if (abyssIntensity > 0.1) {
-                        elysianTerraceFloor = getElysianTerraceFloor(worldX, worldZ);
-                        elysianBottomTier = (elysianTerraceFloor <= -108);
-                    }
-
                     for (int y = MIN_Y; y <= surfaceY; y++) {
                         pos.set(worldX, y, worldZ);
 
@@ -1142,46 +1087,36 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             continue;
                         }
 
-                        // ── Full Elysian Abyss zone ─────────────────────────────
-                        if (abyssIntensity > 0.1) {
-                            if (y < MIN_Y + 6) continue;
-
-                            // 1. Pillar (3-D per-block: varied radius, tilt, hourglass taper)
-                            if (isElysianPillarBlock(worldX, y, worldZ, caveFloor, caveCeiling)) {
-                                chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
+                        // ── Elysian Abyss Giant Cave Cavern & Central River (Aquifer) ─────────────────────────────
+                        // Evaluate in a much wider boundary so the 3D walls can naturally merge into rock
+                        if (caveNoise > -0.15) {
+                            if (y < MIN_Y + 6) {
+                                chunk.setBlockState(pos, DEEPSLATE, false);
                                 continue;
                             }
 
-                            // 2. Flat Aether lake — fixed Y-plane so the surface never staircases.
-                            //    Three blocks deep (-115 to -113) only in bottom-tier columns.
-                            if (elysianBottomTier && y >= -115 && y <= -113
-                                    && !isElysianPillarBlock(worldX, y, worldZ, caveFloor, caveCeiling)) {
-                                chunk.setBlockState(pos, AETHER_LIQUID != null ? AETHER_LIQUID : AIR, false);
+                            double density = getElysianCavernDensity(worldX, y, worldZ, caveFloorSmooth, caveCeilingSmooth, abyssIntensity);
+                            
+                            // Constant threshold of 0.15. 
+                            // The wall is now driven organically by the density function's wallGradient!
+                            double threshold = 0.15;
+  
+                            if (density < threshold) {
+                                // Hollow space
+                                int aquiferLevel = -115; // Local Aquifer level for the Central River
+                                if (y <= aquiferLevel) {
+                                    // Use AETHER_LIQUID safely
+                                    if (AETHER_LIQUID == null) {
+                                        AETHER_LIQUID = net.ganyusbathwater.oririmod.fluid.ModFluids.AETHER_BLOCK.get().defaultBlockState();
+                                    }
+                                    chunk.setBlockState(pos, AETHER_LIQUID != null ? AETHER_LIQUID : AIR, false);
+                                } else {
+                                    chunk.setBlockState(pos, AIR, false);
+                                }
                                 continue;
-                            }
-
-                            // 3. Organic wall/floor/ceiling erosion via 3-D bias noise
-                            double floorBias = getCaveBoundaryNoise(worldX, y, worldZ, 0, 0);
-                            double ceilBias  = getCaveBoundaryNoise(worldX, y, worldZ, 900, 900);
-                            double effectiveFloor   = elysianTerraceFloor + floorBias * 4.0;
-                            double effectiveCeiling = caveCeilingSmooth - Math.abs(ceilBias) * 5.0;
-
-                            if (y > effectiveFloor && y < effectiveCeiling) {
-                                chunk.setBlockState(pos, AIR, false);
                             } else {
+                                // Solid wall within the abyss
                                 chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
-                            }
-                            continue;
-                        }
-
-                        // ── Blend / transition zone ──────────────────────────────
-                        if (abyssIntensity > 0.0) {
-                            double distFromCenter = Math.abs(y - verticalCenter);
-                            double verticalFactor = Mth.clamp(1.0 - (distFromCenter / (double)roomHalfHeight), 0.0, 1.0);
-                            double hollowingNoise3D = getAbyssNoise3D(worldX, y, worldZ);
-                            double hollowingValue = (abyssIntensity * verticalFactor) + (hollowingNoise3D * 0.15 * verticalFactor);
-                            if (hollowingValue > 0.35) {
-                                chunk.setBlockState(pos, AIR, false);
                                 continue;
                             }
                         }

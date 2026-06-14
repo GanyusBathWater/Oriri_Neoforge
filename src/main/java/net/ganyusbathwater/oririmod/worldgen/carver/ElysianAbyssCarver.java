@@ -1,7 +1,6 @@
 package net.ganyusbathwater.oririmod.worldgen.carver;
 
 import com.mojang.serialization.Codec;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
@@ -19,17 +18,12 @@ import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import java.util.function.Function;
 
 /**
- * Elysian Abyss Carver.
+ * Elysian Abyss Carver - The Skylight Ravine.
  *
- * Carves two things per region:
- * 1. A WIDE elliptical cave room (80-120 blocks tall, very wide horizontally)
- *    centred around Y = -30. The room spans the whole biome chunk area.
- * 2. A narrow CANYON slit from the cave ceiling up to the surface (4-40 blocks wide).
+ * Connects the surface to the Elysian Abyss using a spline-based winding ravine algorithm.
+ * Safely loops over neighboring chunks internally to prevent the chunk-clipping square bug.
  */
 public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
-
-    // Cave room target centre Y
-
 
     public ElysianAbyssCarver(Codec<CaveCarverConfiguration> codec) {
         super(codec);
@@ -37,8 +31,8 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
 
     @Override
     public boolean isStartChunk(CaveCarverConfiguration config, RandomSource random) {
-        // Each chunk is a candidate — the actual per-region selection happens inside carve()
-        return random.nextFloat() <= config.probability;
+        // Probability check is now handled per-origin inside carve() to guarantee cross-chunk sync
+        return true; 
     }
 
     @Override
@@ -47,91 +41,221 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
             RandomSource random, Aquifer aquifer, net.minecraft.world.level.ChunkPos chunkPos,
             CarvingMask carvingMask) {
 
-        int startX = chunkPos.getMinBlockX();
-        int startZ = chunkPos.getMinBlockZ();
-
-        // Valid Y range for the chunk
-        int minBuildY = chunk.getMinBuildHeight();
-        int maxBuildY = chunk.getMaxBuildHeight() - 1;
-
-        // Derive a stable seed for this chunk so cave height/shape is deterministic
-        long chunkSeed = (long) chunkPos.x * 341873128712L ^ (long) chunkPos.z * 132897987541L;
-        RandomSource stableRandom = RandomSource.create(chunkSeed ^ random.nextLong());
-        
-        // ── 1.  MASSIVE CAVERN LOGIC (MOVED TO fillFromNoise) ──────────────────
-        // Caverns are now handled by ElderwoodsChunkGenerator.fillFromNoise for perfect 
-        // biome-alignment and monolithic scale. 
-        // No room carving needed here anymore.
-        
+        int chunkX = chunk.getPos().x;
+        int chunkZ = chunk.getPos().z;
         boolean hit = false;
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
+        // Radius of 12 chunks mathematically guarantees we catch worms that started far away and wind into our chunk
+        // Max length = 120 steps * 1.5 blocks/step = 180 blocks + 11 width = 191 max blocks = 11.9 chunks
+        int radius = 12;
+        for (int ox = chunkX - radius; ox <= chunkX + radius; ox++) {
+            for (int oz = chunkZ - radius; oz <= chunkZ + radius; oz++) {
+                
+                // Deterministic seed for the origin chunk
+                long originSeed = (ox * 341873128712L) ^ (oz * 132897987541L);
+                RandomSource originRandom = RandomSource.create(originSeed);
+                
+                // --- Mathematical Abyss Detection ---
+                double seedOffsetCave = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.currentSeedOffsetCave;
+                double nx = (ox * 16 + seedOffsetCave) * 0.01;
+                double nz = (oz * 16 + seedOffsetCave) * 0.01;
+                double caveNoise = Math.sin(nx) * Math.cos(nz);
+                double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.15, 0.0, 1.0);
+                
+                float ravineChance = 1.0f / 100.0f;
+                if (abyssIntensity > 0.1) {
+                    ravineChance = 1.0f / 40.0f; // Decreased maximum chance from 1/20 to 1/40
+                }
+                
+                // Spawn Ravine canyon
+                if (originRandom.nextFloat() < ravineChance) {
+                    hit |= carveRavine(chunk, ox, oz, originRandom);
+                }
+                
+                // Spawn standard winding cave systems (Worms & Rooms)
+                hit |= carveWorms(chunk, ox, oz, originRandom);
+                
+                // Spawn massive, localized Cheese Chambers
+                hit |= carveCheeseChambers(chunk, ox, oz, originRandom);
+                
+                // Spawn erratic Noodle tunnels for vertical connections
+                hit |= carveNoodles(chunk, ox, oz, originRandom);
+            }
+        }
 
-        // ── 2.  SURFACE CRACKS / CEILING RIFTS ───────────────────────────
-        // Uses 2-D fBm noise in XZ space so the ceiling opening is a fully
-        // irregular blob — no stripes, no rectangles, no 90° angles.
-        if (stableRandom.nextFloat() < 0.18f) {
-            int numCracks = 1 + (stableRandom.nextFloat() < 0.35f ? 1 : 0);
-            for (int crackIdx = 0; crackIdx < numCracks; crackIdx++) {
-                // Crack centre
-                int cxWorld = startX + 2 + stableRandom.nextInt(12);
-                int czWorld = startZ + 2 + stableRandom.nextInt(12);
-                double peakRadius = 3.0 + stableRandom.nextDouble() * 9.0;
+        return hit;
+    }
 
-                // Per-crack phase so each crack has a unique noise field
-                long crackSeed = chunkSeed ^ (crackIdx * 0x9E3779B97F4A7C15L);
-                double ph = (crackSeed & 0xFFFFL) / 65536.0 * Math.PI * 4.0;
-
-                int canyonTop    = maxBuildY;
-                int canyonBottom = Mth.clamp(-60, minBuildY, maxBuildY);
-
-                for (int localX = 0; localX < 16; localX++) {
-                    for (int localZ = 0; localZ < 16; localZ++) {
-                        int worldX = startX + localX;
-                        int worldZ = startZ + localZ;
-
-                        double rx = worldX - cxWorld;
-                        double rz = worldZ - czWorld;
-
-                        // --- 2-D fBm in XZ: 4 octaves, each rotated to avoid axis bias ---
-                        double fx = rx * 0.12 + ph;
-                        double fz = rz * 0.12;
-                        double fbm = 0.0;
-                        double amp = 1.0;
-                        double freq = 1.0;
-                        for (int oct = 0; oct < 4; oct++) {
-                            // Rotate each octave by ~37.5° to avoid grid alignment
-                            double rfx = fx * freq * 0.809 - fz * freq * 0.588;
-                            double rfz = fx * freq * 0.588 + fz * freq * 0.809;
-                            fbm += Math.sin(rfx) * Math.cos(rfz) * amp;
-                            amp  *= 0.5;
-                            freq *= 2.1;
-                        }
-                        // fbm in [-1, 1]; shift so positive = near centre
-                        double centrePull = 1.0 - Math.sqrt(rx * rx + rz * rz) / (peakRadius * 2.5);
-                        double openness = fbm * 0.6 + centrePull;
-
-                        for (int y = canyonBottom; y <= canyonTop; y++) {
-                            double progress = (double)(y - canyonBottom)
-                                    / Math.max(1, canyonTop - canyonBottom);
-                            // Bell envelope: zero at top/bottom, max at midpoint
-                            double envelope = Math.sin(Mth.clamp(progress, 0.0, 1.0) * Math.PI)
-                                    * peakRadius;
-                            // Y-local noise modulates the threshold
-                            double ynoise = Math.sin(y * 0.11 + ph) * 0.15;
-                            double threshold = 0.05 + ynoise;
-
-                            if (openness + envelope * 0.15 > threshold) {
-                                mutablePos.set(worldX, y, worldZ);
-                                BlockState state = chunk.getBlockState(mutablePos);
-                                if (this.canReplaceBlock(config, state)) {
-                                    chunk.setBlockState(mutablePos,
-                                            Blocks.CAVE_AIR.defaultBlockState(), false);
-                                    if (carvingMask != null) {
-                                        int maskY = y - minBuildY;
-                                        if (maskY >= 0 && maskY < chunk.getHeight())
-                                            carvingMask.set(localX, maskY, localZ);
+    private boolean carveWorms(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+        boolean hit = false;
+        
+        // Decreased from 1/5 to 1/8 to prevent destroying the landscape
+        if (random.nextFloat() > 1.0f / 8.0f) return false;
+        
+        // 2 to 5 branches per cave system for sprawling networks
+        int numWorms = 2 + random.nextInt(4);
+        for (int w = 0; w < numWorms; w++) {
+            double x = (originX << 4) + 8 + random.nextInt(16);
+            // Relaxed the extreme bottom bias slightly using pow(1.5) instead of squared
+            // This prevents all caves from clumping at the exact bottom and destroying the void floor
+            double y = -60 + (Math.pow(random.nextFloat(), 1.5f) * 140); 
+            double z = (originZ << 4) + 8 + random.nextInt(16);
+            
+            float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
+            float pitch = (random.nextFloat() - 0.5f) * 0.5f; // Mostly horizontal
+            
+            float baseWidth = 2.0f + random.nextFloat() * 2.5f; // 2 to 4.5 blocks wide
+            int length = 60 + random.nextInt(60);           // 60 to 120 blocks long
+            
+            float currentWidth = baseWidth;
+            float targetWidth = baseWidth;
+            int roomTimer = 0;
+            
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            
+            for (int step = 0; step < length; step++) {
+                x += Math.cos(yaw) * Math.cos(pitch) * 1.5;
+                y += Math.sin(pitch) * 1.5;
+                z += Math.sin(yaw) * Math.cos(pitch) * 1.5;
+                
+                yaw += (random.nextFloat() - 0.5f) * 0.5f; 
+                pitch += (random.nextFloat() - 0.5f) * 0.4f;
+                pitch *= 0.9f; // Strongly dampen pitch so it stays mostly horizontal
+                
+                // Smoothly handle bulbous cave rooms
+                if (roomTimer > 0) {
+                    roomTimer--;
+                    if (roomTimer == 0) {
+                        targetWidth = baseWidth; // Start shrinking back down
+                    }
+                } else if (random.nextFloat() < 0.05f) {
+                    targetWidth = baseWidth + 3.0f + random.nextFloat() * 4.0f;
+                    roomTimer = 4 + random.nextInt(6); // Stay big for a few steps
+                }
+                
+                // Interpolate width so it swells organically instead of instantly jumping
+                currentWidth += (targetWidth - currentWidth) * 0.3f;
+                
+                // Taper the ends of the tunnel so they shrink naturally into the rock
+                double stepProgress = (double) step / length;
+                double endTaper = 1.0;
+                if (stepProgress < 0.1) endTaper = stepProgress / 0.1;
+                if (stepProgress > 0.9) endTaper = (1.0 - stepProgress) / 0.1;
+                
+                double finalWidth = currentWidth * endTaper;
+                if (finalWidth < 0.5) continue;
+                
+                int chunkMinX = chunk.getPos().getMinBlockX();
+                int chunkMaxX = chunk.getPos().getMaxBlockX();
+                int chunkMinZ = chunk.getPos().getMinBlockZ();
+                int chunkMaxZ = chunk.getPos().getMaxBlockZ();
+                
+                int minX = Mth.floor(x - finalWidth);
+                int maxX = Mth.floor(x + finalWidth);
+                int minZ = Mth.floor(z - finalWidth);
+                int maxZ = Mth.floor(z + finalWidth);
+                int minY = Mth.floor(y - finalWidth);
+                int maxY = Mth.floor(y + finalWidth);
+                
+                // Check if this cave step overlaps our currently generating chunk
+                if (maxX >= chunkMinX && minX <= chunkMaxX && maxZ >= chunkMinZ && minZ <= chunkMaxZ) {
+                    for (int bx = Math.max(minX, chunkMinX); bx <= Math.min(maxX, chunkMaxX); bx++) {
+                        for (int bz = Math.max(minZ, chunkMinZ); bz <= Math.min(maxZ, chunkMaxZ); bz++) {
+                            for (int by = minY; by <= maxY; by++) {
+                                double dx = x - bx;
+                                double dy = y - by;
+                                double dz = z - bz;
+                                
+                                if (dx * dx + dy * dy + dz * dz < finalWidth * finalWidth) {
+                                    pos.set(bx, by, bz);
+                                    BlockState state = chunk.getBlockState(pos);
+                                    if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                        hit = true;
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return hit;
+    }
+
+    private boolean carveRavine(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+        boolean hit = false;
+        
+        double x = (originX << 4) + 8 + random.nextInt(16);
+        double z = (originZ << 4) + 8 + random.nextInt(16);
+        
+        float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
+        float width = 4.0f + random.nextFloat() * 5.0f; // 4 to 9 blocks wide
+        int length = 40 + random.nextInt(40);           // 40 to 80 blocks long
+        
+        double topY = chunk.getMaxBuildHeight();
+        double bottomY = -60; 
+        
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        
+        for (int step = 0; step < length; step++) {
+            x += Math.cos(yaw) * 1.5;
+            z += Math.sin(yaw) * 1.5;
+            yaw += (random.nextFloat() - 0.5f) * 0.25f; 
+            
+            width += (random.nextFloat() - 0.5f) * 1.2f; 
+            width = Mth.clamp(width, 3.0f, 15.0f);
+            
+            double stepProgress = (double) step / length;
+            double endTaper = 1.0;
+            if (stepProgress < 0.1) endTaper = stepProgress / 0.1;
+            if (stepProgress > 0.9) endTaper = (1.0 - stepProgress) / 0.1;
+            double currentWidth = width * endTaper;
+            
+            if (currentWidth < 0.5) continue;
+            
+            // Max noise added to radius is roughly 4.5. 
+            // We use 5.0 as an absolute safe margin for the bounding box.
+            double maxPossibleRadius = currentWidth + 5.0;
+            
+            int minX = Mth.floor(x - maxPossibleRadius);
+            int maxX = Mth.floor(x + maxPossibleRadius);
+            int minZ = Mth.floor(z - maxPossibleRadius);
+            int maxZ = Mth.floor(z + maxPossibleRadius);
+            
+            int chunkMinX = chunk.getPos().getMinBlockX();
+            int chunkMaxX = chunk.getPos().getMaxBlockX();
+            int chunkMinZ = chunk.getPos().getMinBlockZ();
+            int chunkMaxZ = chunk.getPos().getMaxBlockZ();
+            
+            // Mathematically safe bounding box check prevents chunk clipping
+            if (maxX >= chunkMinX && minX <= chunkMaxX && maxZ >= chunkMinZ && minZ <= chunkMaxZ) {
+                for (int bx = Math.max(minX, chunkMinX); bx <= Math.min(maxX, chunkMaxX); bx++) {
+                    for (int bz = Math.max(minZ, chunkMinZ); bz <= Math.min(maxZ, chunkMaxZ); bz++) {
+                        double dx = x - bx;
+                        double dz = z - bz;
+                        
+                        double xzNoise = Math.sin(bx * 0.1) * Math.cos(bz * 0.1) * 2.0;
+                        xzNoise += Math.sin(bx * 0.3 + bz * 0.2) * 0.5;
+                        
+                        for (int by = (int) topY; by >= (int) bottomY; by--) {
+                            double yNoise = Math.sin(by * 0.04) * 2.0;
+                            double localRadius = currentWidth + xzNoise + yNoise;
+                            if (localRadius < 0.0) localRadius = 0.0;
+                            
+                            if (dx * dx + dz * dz < localRadius * localRadius) {
+                                double bottomTaperProgress = (by - bottomY) / 25.0;
+                                if (bottomTaperProgress < 1.0) {
+                                    double taperedWidth = currentWidth * bottomTaperProgress;
+                                    if (dx * dx + dz * dz > taperedWidth * taperedWidth) {
+                                        continue;
+                                    }
+                                }
+                                
+                                pos.set(bx, by, bz);
+                                BlockState state = chunk.getBlockState(pos);
+                                if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                                    chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                     hit = true;
                                 }
                             }
@@ -140,7 +264,153 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                 }
             }
         }
+        return hit;
+    }
 
+    private boolean carveCheeseChambers(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+        boolean hit = false;
+        
+        // Decreased from 1/30 to 1/45
+        if (random.nextFloat() > 1.0f / 45.0f) return false;
+        
+        double x = (originX << 4) + 8 + random.nextInt(16);
+        // Relaxed bottom bias
+        double y = -50 + (Math.pow(random.nextFloat(), 1.5f) * 100); 
+        double z = (originZ << 4) + 8 + random.nextInt(16);
+        
+        // Radius between 15 and 28 blocks (massive room)
+        float maxRadius = 15.0f + random.nextFloat() * 13.0f;
+        
+        int minX = Mth.floor(x - maxRadius);
+        int maxX = Mth.floor(x + maxRadius);
+        int minZ = Mth.floor(z - maxRadius);
+        int maxZ = Mth.floor(z + maxRadius);
+        int minY = Mth.floor(y - maxRadius);
+        int maxY = Mth.floor(y + maxRadius);
+        
+        int chunkMinX = chunk.getPos().getMinBlockX();
+        int chunkMaxX = chunk.getPos().getMaxBlockX();
+        int chunkMinZ = chunk.getPos().getMinBlockZ();
+        int chunkMaxZ = chunk.getPos().getMaxBlockZ();
+        
+        // Safe bounding box check
+        if (maxX >= chunkMinX && minX <= chunkMaxX && maxZ >= chunkMinZ && minZ <= chunkMaxZ) {
+            for (int bx = Math.max(minX, chunkMinX); bx <= Math.min(maxX, chunkMaxX); bx++) {
+                for (int bz = Math.max(minZ, chunkMinZ); bz <= Math.min(maxZ, chunkMaxZ); bz++) {
+                    for (int by = minY; by <= maxY; by++) {
+                        double dx = x - bx;
+                        double dy = y - by;
+                        double dz = z - bz;
+                        
+                        // Squish the Y axis slightly so chambers are wider than they are tall
+                        double distanceSq = dx * dx + (dy * dy * 1.5) + dz * dz;
+                        
+                        if (distanceSq < maxRadius * maxRadius) {
+                            
+                            // High frequency 3D noise to create massive pillars, stalagmites, and rough floors
+                            double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                (float)bx * 0.05f, 
+                                (float)by * 0.05f, 
+                                (float)bz * 0.05f, 
+                                3
+                            );
+                            
+                            // Smoothly taper the noise effect toward the edges of the room
+                            double normalizedDist = Math.sqrt(distanceSq) / maxRadius;
+                            double noiseThreshold = 0.3 - (normalizedDist * 0.2); // Core is mostly air, edges are rocky
+                            
+                            // If noise is very high, leave it as solid rock (creates pillars)
+                            if (noise > noiseThreshold) continue;
+                            
+                            BlockPos pos = new BlockPos(bx, by, bz);
+                            BlockState state = chunk.getBlockState(pos);
+                            
+                            if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                                chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                hit = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return hit;
+    }
+
+    private boolean carveNoodles(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+        boolean hit = false;
+        
+        // Decreased from 1/15 to 1/25
+        if (random.nextFloat() > 1.0f / 25.0f) return false;
+        
+        int numNoodles = 3 + random.nextInt(5);
+        for (int w = 0; w < numNoodles; w++) {
+            double x = (originX << 4) + 8 + random.nextInt(16);
+            // Relaxed bottom bias
+            double y = -60 + (Math.pow(random.nextFloat(), 1.5f) * 140); 
+            double z = (originZ << 4) + 8 + random.nextInt(16);
+            
+            float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
+            float pitch = (random.nextFloat() - 0.5f) * 2.0f; // Can go straight up or down!
+            
+            float width = 1.0f + random.nextFloat() * 1.5f; // Very thin, 1 to 2.5 blocks wide
+            int length = 80 + random.nextInt(60);           // Long and spindly
+            
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            
+            for (int step = 0; step < length; step++) {
+                x += Math.cos(yaw) * Math.cos(pitch) * 1.5;
+                y += Math.sin(pitch) * 1.5;
+                z += Math.sin(yaw) * Math.cos(pitch) * 1.5;
+                
+                // Highly erratic direction changes
+                yaw += (random.nextFloat() - 0.5f) * 1.2f; 
+                pitch += (random.nextFloat() - 0.5f) * 1.2f;
+                // Weak damping allows it to spiral and twist
+                pitch *= 0.95f; 
+                
+                double stepProgress = (double) step / length;
+                double endTaper = 1.0;
+                if (stepProgress < 0.1) endTaper = stepProgress / 0.1;
+                if (stepProgress > 0.9) endTaper = (1.0 - stepProgress) / 0.1;
+                
+                double finalWidth = width * endTaper;
+                if (finalWidth < 0.5) continue;
+                
+                int chunkMinX = chunk.getPos().getMinBlockX();
+                int chunkMaxX = chunk.getPos().getMaxBlockX();
+                int chunkMinZ = chunk.getPos().getMinBlockZ();
+                int chunkMaxZ = chunk.getPos().getMaxBlockZ();
+                
+                int minX = Mth.floor(x - finalWidth);
+                int maxX = Mth.floor(x + finalWidth);
+                int minZ = Mth.floor(z - finalWidth);
+                int maxZ = Mth.floor(z + finalWidth);
+                int minY = Mth.floor(y - finalWidth);
+                int maxY = Mth.floor(y + finalWidth);
+                
+                if (maxX >= chunkMinX && minX <= chunkMaxX && maxZ >= chunkMinZ && minZ <= chunkMaxZ) {
+                    for (int bx = Math.max(minX, chunkMinX); bx <= Math.min(maxX, chunkMaxX); bx++) {
+                        for (int bz = Math.max(minZ, chunkMinZ); bz <= Math.min(maxZ, chunkMaxZ); bz++) {
+                            for (int by = minY; by <= maxY; by++) {
+                                double dx = x - bx;
+                                double dy = y - by;
+                                double dz = z - bz;
+                                
+                                if (dx * dx + dy * dy + dz * dz < finalWidth * finalWidth) {
+                                    pos.set(bx, by, bz);
+                                    BlockState state = chunk.getBlockState(pos);
+                                    if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                        hit = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return hit;
     }
 }
