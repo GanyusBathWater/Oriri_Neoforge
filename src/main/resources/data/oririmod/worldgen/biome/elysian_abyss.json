@@ -25,7 +25,7 @@
   "carvers": {
     "air": [
       "oririmod:elysian_abyss_carver",
-      "minecraft:cave",
+      "oririmod:deep_cave",
       "minecraft:canyon"
     ]
   },

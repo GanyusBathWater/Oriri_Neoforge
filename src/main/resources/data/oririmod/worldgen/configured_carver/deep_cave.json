@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:cave",
+  "config": {
+    "probability": 0.14285715,
+    "y": {
+      "type": "minecraft:uniform",
+      "min_inclusive": {
+        "absolute": -117
+      },
+      "max_inclusive": {
+        "absolute": 0
+      }
+    },
+    "yScale": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 0.1,
+      "max_exclusive": 0.9
+    },
+    "lava_level": {
+      "absolute": -128
+    },
+    "debug_settings": {
+      "debug_mode": false,
+      "barrier_state": {
+        "Name": "minecraft:air"
+      }
+    },
+    "replaceable": "#minecraft:overworld_carver_replaceables",
+    "horizontal_radius_multiplier": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1.5,
+      "max_exclusive": 3.0
+    },
+    "vertical_radius_multiplier": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 0.5,
+      "max_exclusive": 1.0
+    },
+    "floor_level": {
+      "type": "minecraft:uniform",
+      "min_inclusive": -1.0,
+      "max_exclusive": -0.4
+    }
+  }
+}

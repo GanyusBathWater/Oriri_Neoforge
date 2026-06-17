@@ -57,48 +57,52 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                 
                 // --- Mathematical Abyss Detection ---
                 double seedOffsetCave = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.currentSeedOffsetCave;
-                double nx = (ox * 16 + seedOffsetCave) * 0.01;
-                double nz = (oz * 16 + seedOffsetCave) * 0.01;
-                double caveNoise = Math.sin(nx) * Math.cos(nz);
+                float scale = 0.0015f;
+                double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float)((ox * 16 + seedOffsetCave) * scale),
+                    0f,
+                    (float)((oz * 16 + seedOffsetCave) * scale),
+                    3
+                );
                 double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.15, 0.0, 1.0);
                 
-                float ravineChance = 1.0f / 100.0f;
+                float ravineChance = 1.0f / 180.0f; // Toned down surface ravines
                 if (abyssIntensity > 0.1) {
-                    ravineChance = 1.0f / 40.0f; // Decreased maximum chance from 1/20 to 1/40
+                    ravineChance = 1.0f / 60.0f; 
                 }
                 
                 // Spawn Ravine canyon
                 if (originRandom.nextFloat() < ravineChance) {
-                    hit |= carveRavine(chunk, ox, oz, originRandom);
+                    hit |= carveRavine(config, chunk, ox, oz, originRandom);
                 }
                 
                 // Spawn standard winding cave systems (Worms & Rooms)
-                hit |= carveWorms(chunk, ox, oz, originRandom);
+                hit |= carveWorms(config, chunk, ox, oz, originRandom);
                 
                 // Spawn massive, localized Cheese Chambers
-                hit |= carveCheeseChambers(chunk, ox, oz, originRandom);
+                hit |= carveCheeseChambers(config, chunk, ox, oz, originRandom);
                 
                 // Spawn erratic Noodle tunnels for vertical connections
-                hit |= carveNoodles(chunk, ox, oz, originRandom);
+                hit |= carveNoodles(config, chunk, ox, oz, originRandom);
             }
         }
 
         return hit;
     }
 
-    private boolean carveWorms(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+    private boolean carveWorms(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
         boolean hit = false;
         
-        // Decreased from 1/5 to 1/8 to prevent destroying the landscape
-        if (random.nextFloat() > 1.0f / 8.0f) return false;
+        // Decreased from 1/8 to 1/10
+        if (random.nextFloat() > 1.0f / 10.0f) return false;
         
         // 2 to 5 branches per cave system for sprawling networks
         int numWorms = 2 + random.nextInt(4);
         for (int w = 0; w < numWorms; w++) {
             double x = (originX << 4) + 8 + random.nextInt(16);
-            // Relaxed the extreme bottom bias slightly using pow(1.5) instead of squared
-            // This prevents all caves from clumping at the exact bottom and destroying the void floor
-            double y = -60 + (Math.pow(random.nextFloat(), 1.5f) * 140); 
+            // Lowered max height from 140 (Y=80) down to 110 (Y=50) to heavily protect the surface!
+            // Increased power bias slightly to 1.7 to keep them deep without destroying the void floor
+            double y = -60 + (Math.pow(random.nextFloat(), 1.7f) * 110); 
             double z = (originZ << 4) + 8 + random.nextInt(16);
             
             float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
@@ -169,7 +173,11 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                 if (dx * dx + dy * dy + dz * dz < finalWidth * finalWidth) {
                                     pos.set(bx, by, bz);
                                     BlockState state = chunk.getBlockState(pos);
-                                    if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                                    if (this.canReplaceBlock(config, state)) {
+                                        // Surface structure protection
+                                        if (by > 50 && chunk.hasAnyStructureReferences()) {
+                                            continue;
+                                        }
                                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                         hit = true;
                                     }
@@ -183,15 +191,15 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         return hit;
     }
 
-    private boolean carveRavine(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+    private boolean carveRavine(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
         boolean hit = false;
         
         double x = (originX << 4) + 8 + random.nextInt(16);
         double z = (originZ << 4) + 8 + random.nextInt(16);
         
         float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
-        float width = 4.0f + random.nextFloat() * 5.0f; // 4 to 9 blocks wide
-        int length = 40 + random.nextInt(40);           // 40 to 80 blocks long
+        float width = 2.0f + random.nextFloat() * 5.0f; // 2 to 7 blocks wide (radius)
+        int length = 35 + random.nextInt(40);           // 35 to 75 blocks long
         
         double topY = chunk.getMaxBuildHeight();
         double bottomY = -60; 
@@ -254,7 +262,11 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                 
                                 pos.set(bx, by, bz);
                                 BlockState state = chunk.getBlockState(pos);
-                                if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                                if (this.canReplaceBlock(config, state)) {
+                                    // Surface structure protection
+                                    if (by > 50 && chunk.hasAnyStructureReferences()) {
+                                        continue;
+                                    }
                                     chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                     hit = true;
                                 }
@@ -267,15 +279,15 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         return hit;
     }
 
-    private boolean carveCheeseChambers(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+    private boolean carveCheeseChambers(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
         boolean hit = false;
         
-        // Decreased from 1/30 to 1/45
-        if (random.nextFloat() > 1.0f / 45.0f) return false;
+        // Decreased from 1/45 to 1/50
+        if (random.nextFloat() > 1.0f / 50.0f) return false;
         
         double x = (originX << 4) + 8 + random.nextInt(16);
-        // Relaxed bottom bias
-        double y = -50 + (Math.pow(random.nextFloat(), 1.5f) * 100); 
+        // Lowered max height (max Y=30)
+        double y = -50 + (Math.pow(random.nextFloat(), 1.7f) * 80); 
         double z = (originZ << 4) + 8 + random.nextInt(16);
         
         // Radius between 15 and 28 blocks (massive room)
@@ -325,7 +337,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                             BlockPos pos = new BlockPos(bx, by, bz);
                             BlockState state = chunk.getBlockState(pos);
                             
-                            if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                            if (this.canReplaceBlock(config, state)) {
                                 chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                 hit = true;
                             }
@@ -337,17 +349,17 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         return hit;
     }
 
-    private boolean carveNoodles(ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+    private boolean carveNoodles(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
         boolean hit = false;
         
-        // Decreased from 1/15 to 1/25
-        if (random.nextFloat() > 1.0f / 25.0f) return false;
+        // Decreased from 1/25 to 1/30
+        if (random.nextFloat() > 1.0f / 30.0f) return false;
         
         int numNoodles = 3 + random.nextInt(5);
         for (int w = 0; w < numNoodles; w++) {
             double x = (originX << 4) + 8 + random.nextInt(16);
-            // Relaxed bottom bias
-            double y = -60 + (Math.pow(random.nextFloat(), 1.5f) * 140); 
+            // Lowered max height
+            double y = -60 + (Math.pow(random.nextFloat(), 1.7f) * 110); 
             double z = (originZ << 4) + 8 + random.nextInt(16);
             
             float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
@@ -400,7 +412,11 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                 if (dx * dx + dy * dy + dz * dz < finalWidth * finalWidth) {
                                     pos.set(bx, by, bz);
                                     BlockState state = chunk.getBlockState(pos);
-                                    if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                                    if (this.canReplaceBlock(config, state)) {
+                                        // Surface structure protection
+                                        if (by > 50 && chunk.hasAnyStructureReferences()) {
+                                            continue;
+                                        }
                                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                         hit = true;
                                     }

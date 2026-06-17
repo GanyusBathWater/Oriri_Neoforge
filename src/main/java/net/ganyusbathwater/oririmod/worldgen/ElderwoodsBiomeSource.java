@@ -92,7 +92,13 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 0.5 * Math.cos(nx * 0.005 + 2.0) * Math.sin(nz * 0.005 + 1.0);
 
         // Cave Noise
-        double caveNoise = Math.sin(nx * 0.01 + seedOffsetCave) * Math.cos(nz * 0.01 + seedOffsetCave);
+        float caveScale = 0.0015f;
+        double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                (float)((x + seedOffsetCave) * caveScale),
+                0f,
+                (float)((z + seedOffsetCave) * caveScale),
+                3
+        );
 
         // Surface height (same as ElderwoodsChunkGenerator.getSurfaceHeight)
         int surfaceY = computeSurfaceHeight(x, z);

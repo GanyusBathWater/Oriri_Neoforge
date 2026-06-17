@@ -16,7 +16,7 @@
     },
     "carvers": {
         "air": [
-            "minecraft:cave",
+            "oririmod:deep_cave",
             "minecraft:canyon"
         ]
     },

@@ -185,15 +185,15 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         return (int) Math.round(getCaveFloorHeightDouble(x, z, baseFloor));
     }
 
-    private double getCaveFloorHeightDouble(int x, int z, int baseFloor) {
+    public static double getCaveFloorHeightDouble(int x, int z, int baseFloor) {
         // Generate massive, majestic rolling hills using 2D FBM noise.
         // Using 2D noise for the primary floor height guarantees zero floating islands
         // while still providing enormous geographical variation.
         double scale = 0.008;
         double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-            (float)(x + seedOffsetCave) * (float)scale, 
+            (float)(x + currentSeedOffsetCave) * (float)scale, 
             0.0f,
-            (float)(z + seedOffsetCave) * (float)scale, 
+            (float)(z + currentSeedOffsetCave) * (float)scale, 
             3
         );
         
@@ -235,9 +235,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private double getAbyssNoise(int x, int z) {
         // Synchronized with ElderwoodsBiomeSource
-        double nx = (x + seedOffsetCave) * 0.01;
-        double nz = (z + seedOffsetCave) * 0.01;
-        return Math.sin(nx) * Math.cos(nz);
+        float scale = 0.0015f;
+        return net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+            (float)((x + seedOffsetCave) * scale),
+            0f,
+            (float)((z + seedOffsetCave) * scale),
+            3
+        );
     }
 
     private double getPillarNoise(int x, int z) {
@@ -271,7 +275,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double normalizedY = yDist / roomHalfHeight;
         
         // Base hollow shape
-        double baseDensity = (Math.pow(normalizedY, 4.0) * 3.0) - 1.5; 
+        double baseDensity = (Math.pow(normalizedY, 2.0) * 3.0) - 1.5; 
         
         // --- WALL GRADIENT ---
         // This math smoothly pushes the density into SOLID rock as abyssIntensity drops to 0.
@@ -280,6 +284,26 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         
         // Combine everything (Spurs removed by request to eliminate unnatural horizontal bands)
         return -noise + baseDensity + wallGradient;
+    }
+
+    public static double getRiverIntensity(int x, int z) {
+        // Main winding river
+        double riverNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+            (float)(x + currentSeedOffsetCave + 1000) * 0.005f, 0.0f, (float)(z + currentSeedOffsetCave + 1000) * 0.005f, 2);
+        // Narrower river valley! Thickness 0.04
+        double mainRiver = Math.max(0.0, 0.04 - Math.abs(riverNoise)); 
+        
+        // Tributary branches: 3 octaves adds high-frequency organic wiggles to break up straight grid lines!
+        double branchNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+            (float)(x + currentSeedOffsetCave + 2000) * 0.006f, 0.0f, (float)(z + currentSeedOffsetCave + 2000) * 0.006f, 3);
+            
+        // Narrow branches (Thickness 0.03) using Math.abs so they reliably spawn as unbroken lines
+        double branchRiver = Math.max(0.0, 0.03 - Math.abs(branchNoise));
+        
+        // Massive scale (30.0) forces the narrow rivers to hit 1.0 intensity extremely quickly.
+        // This ensures they are safely narrow to traverse, but mathematically GUARANTEED to hit their full 4-block depth!
+        double riverIntensity = (mainRiver + branchRiver) * 30.0; 
+        return Math.min(1.0, riverIntensity); // cap at 1.0
     }
 
     private int[] findNearestEntranceCenter(int x, int z) {
@@ -1074,7 +1098,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     int surfaceY = getSurfaceHeight(worldX, worldZ);
 
                     double caveNoise = getAbyssNoise(worldX, worldZ);
-                    double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.15, 0.0, 1.0);
+                    // Widened the divisor from 0.15 to 0.4 to create a gentle, sloping biome boundary
+                    // instead of a massive 90-degree cliff wall!
+                    double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.4, 0.0, 1.0);
 
                     double caveFloorSmooth = getCaveFloorHeightDouble(worldX, worldZ, -115);
                     double caveCeilingSmooth = getCaveCeilingHeightDouble(worldX, worldZ, surfaceY);
@@ -1103,25 +1129,42 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
   
                             if (density < threshold) {
                                 // Hollow space
-                                int aquiferLevel = -115; // Local Aquifer level for the Central River
-                                if (y <= aquiferLevel) {
-                                    // Use AETHER_LIQUID safely
-                                    if (AETHER_LIQUID == null) {
-                                        AETHER_LIQUID = net.ganyusbathwater.oririmod.fluid.ModFluids.AETHER_BLOCK.get().defaultBlockState();
-                                    }
-                                    chunk.setBlockState(pos, AETHER_LIQUID != null ? AETHER_LIQUID : AIR, false);
-                                } else {
-                                    chunk.setBlockState(pos, AIR, false);
-                                }
+                                chunk.setBlockState(pos, AIR, false);
                                 continue;
                             } else {
                                 // Solid wall within the abyss
+                                if (y < caveFloorSmooth + 30 && y >= -117) {
+                                    double noise1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                        (float)worldX * 0.03f, (float)y * 0.03f, (float)worldZ * 0.03f, 2
+                                    );
+                                    double noise2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                        (float)(worldX + 1000) * 0.03f, (float)(y + 1000) * 0.03f, (float)(worldZ + 1000) * 0.03f, 2
+                                    );
+                                    // Intersecting two noise fields creates 1D winding tubular caves (Noodle Caves)
+                                    // instead of giant sheer un-walkable cracks!
+                                    if (Math.abs(noise1) < 0.015 && Math.abs(noise2) < 0.015) {
+                                        chunk.setBlockState(pos, AIR, false);
+                                        continue;
+                                    }
+                                }
                                 chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
                                 continue;
                             }
                         }
 
                         // ── Default solid fill ───────────────────────────────────
+                        if (y < caveFloorSmooth + 30 && y >= -117) {
+                            double noise1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                (float)worldX * 0.03f, (float)y * 0.03f, (float)worldZ * 0.03f, 2
+                            );
+                            double noise2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                (float)(worldX + 1000) * 0.03f, (float)(y + 1000) * 0.03f, (float)(worldZ + 1000) * 0.03f, 2
+                            );
+                            if (Math.abs(noise1) < 0.015 && Math.abs(noise2) < 0.015) {
+                                chunk.setBlockState(pos, AIR, false);
+                                continue;
+                            }
+                        }
                         chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
                     }
                 }

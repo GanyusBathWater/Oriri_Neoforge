@@ -26,6 +26,8 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_ELYSIAN_FEATURES = registerKey("add_elysian_features");
         public static final ResourceKey<BiomeModifier> ADD_ELYSIAN_DECORATION = registerKey("add_elysian_decoration");
 
+        public static final ResourceKey<BiomeModifier> ADD_GLOBAL_AETHER_RIVER = registerKey("add_global_aether_river");
+
 
         // Scarlet Forest & Plains
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_FEATURES = registerKey("add_scarlet_forest_features");
@@ -91,13 +93,16 @@ public class ModBiomeModifiers {
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_STONE_MUSHROOM_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
-                // Elysian Abyss — underground decoration: moss patches + glow lichen
+                // Elysian Abyss — underground decoration: moss patches + glow lichen + pillars
                 context.register(ADD_ELYSIAN_DECORATION,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
                                                 elysianBiomes,
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_FLOOR_MOSS_PLACED_KEY),
-                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_LICHEN_PLACED_KEY)),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_LICHEN_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_ABYSS_PILLAR_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_FLOOR_SPIKE_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELYSIAN_CEILING_SPIKE_PLACED_KEY)),
                                                 GenerationStep.Decoration.UNDERGROUND_DECORATION));
 
 
@@ -146,6 +151,24 @@ public class ModBiomeModifiers {
                                                 elderwoodsCaveBiomes,
                                                 HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.ELDERWOODS_DRIPSTONE_CLUSTER_PLACED_KEY)),
                                                 GenerationStep.Decoration.UNDERGROUND_DECORATION));
+
+                // Global - Deep Aether Rivers
+                // We add this to every single custom biome we've defined in the dimension
+                var allDimensionBiomes = HolderSet.direct(
+                        biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"))),
+                        biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"))),
+                        biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains"))),
+                        biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"))),
+                        biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods_cave"))),
+                        biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods"))),
+                        biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves")))
+                );
+
+                context.register(ADD_GLOBAL_AETHER_RIVER,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                allDimensionBiomes,
+                                                HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.GLOBAL_AETHER_RIVER_PLACED_KEY)),
+                                                GenerationStep.Decoration.LOCAL_MODIFICATIONS));
         }
 
         private static ResourceKey<BiomeModifier> registerKey(String name) {

@@ -42,7 +42,20 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.StoneMushRoomFeature(
                                                         net.ganyusbathwater.oririmod.worldgen.feature.StoneMushRoomConfig.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.GlobalAetherRiverFeature> GLOBAL_AETHER_RIVER = FEATURES
+                        .register("global_aether_river",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.GlobalAetherRiverFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.AbyssPillarFeature> ABYSS_PILLAR = FEATURES
+                        .register("abyss_pillar",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.AbyssPillarFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.AbyssSpikeFeature> ABYSS_SPIKE = FEATURES
+                        .register("abyss_spike",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.AbyssSpikeFeature(
+                                                        net.ganyusbathwater.oririmod.worldgen.feature.AbyssSpikeFeature.AbyssSpikeConfig.CODEC));
 
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);

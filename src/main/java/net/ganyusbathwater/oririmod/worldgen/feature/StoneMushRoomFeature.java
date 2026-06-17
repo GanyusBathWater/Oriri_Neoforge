@@ -85,35 +85,50 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
         // 2a. Safety: floor must be well below the surface
         if (origin.getY() > MAX_FLOOR_Y) return false;
 
+        // ── 3. CALCULATE DIMENSIONS ─────────────────────────────────────────
+        int stemHeight = config.minHeight + rng.nextInt(config.maxHeight - config.minHeight + 1);
+        int capRadius = 4 + rng.nextInt(3); // 4 to 6 blocks wide (Max radius 8 with crust, to fit in chunk bounds and prevent cutting)
+        int capThickness = 4 + rng.nextInt(2); // 4 to 5 blocks thick
+        int capInnerRadius = capRadius - 2;
+
         // 2b. Verify there's a ceiling above (solid block within 120 blocks up)
-        //     This prevents placement on the open surface or very tall canyons
+        //     This prevents placement on the open surface or very tall canyons.
+        //     ALSO: Air Rise Scan ensures we are on the MAIN cavern floor, not a side-cave.
         int ceilingY = -1;
+        int freeAirRise = 0;
         for (int y = origin.getY() + 1; y <= origin.getY() + 120; y++) {
             mPos.set(origin.getX(), y, origin.getZ());
             BlockState state = level.getBlockState(mPos);
-            if (!state.isAir() && !state.is(Blocks.CAVE_AIR) && !state.canBeReplaced()) {
-                ceilingY = y;
+            if (state.isAir() || state.is(Blocks.CAVE_AIR) || state.canBeReplaced() || state.is(Blocks.WATER)) {
+                if (ceilingY == -1) freeAirRise++;
+            } else {
+                if (ceilingY == -1) ceilingY = y;
                 break;
             }
         }
         if (ceilingY == -1) return false; // No ceiling found = not inside a cave
+        if (freeAirRise < stemHeight + capThickness + 2) return false; // Not enough room for this specific mushroom!
 
-        // 2c. Avoid stacking on top of other mushroom formations
-        if (level.getBlockState(origin.below()).is(ModBlocks.HARDENED_MANASHROOM.get())) return false;
+        // 2c. Avoid stacking on top of other mushroom formations (or their magma crusts)
+        BlockState groundState = level.getBlockState(origin.below());
+        if (groundState.is(ModBlocks.HARDENED_MANASHROOM.get()) || groundState.is(ModBlocks.AETHER_MAGMA_BLOCK.get())) {
+            return false;
+        }
 
-        // 2d. Exclusion zone: reject if another mushroom centre is within scanRadius blocks
-        //     Scan radius is generous (52 blocks) to honour cap_radius (6-9) + 4 buffer.
-        int scanRadius = 52;
+        // 2d. Exclusion zone: reject if another mushroom is too close
+        //     Scan radius set to 24 blocks to allow forests while preventing heavy cap clipping.
+        int scanRadius = 12; // Reduced to match smaller mushrooms
         BlockPos.MutableBlockPos scanPos = new BlockPos.MutableBlockPos();
         outer:
-        for (int sx = -scanRadius; sx <= scanRadius; sx += 3) {
-            for (int sz = -scanRadius; sz <= scanRadius; sz += 3) {
-                if (Math.abs(sx) < 6 && Math.abs(sz) < 6) continue; // skip self
-                for (int sy = -5; sy <= 35; sy += 3) {
+        for (int sx = -scanRadius; sx <= scanRadius; sx += 4) {
+            for (int sz = -scanRadius; sz <= scanRadius; sz += 4) {
+                // We check a few vertical levels to catch stems or caps
+                for (int sy = -5; sy <= 35; sy += 5) {
                     scanPos.set(origin.getX() + sx, origin.getY() + sy, origin.getZ() + sz);
-                    if (level.getBlockState(scanPos).is(ModBlocks.HARDENED_MANASHROOM.get())) {
+                    BlockState state = level.getBlockState(scanPos);
+                    if (state.is(ModBlocks.HARDENED_MANASHROOM.get()) || state.is(ModBlocks.AETHER_MAGMA_BLOCK.get())) {
                         double d2 = sx * sx + sz * sz;
-                        if (d2 < (double)((scanRadius) * (scanRadius))) {
+                        if (d2 < scanRadius * scanRadius) {
                             return false; // within exclusion zone of an existing mushroom
                         }
                         break outer;
@@ -121,12 +136,6 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
                 }
             }
         }
-
-        // ── 3. CALCULATE DIMENSIONS ─────────────────────────────────────────
-        int stemHeight = config.minHeight + rng.nextInt(config.maxHeight - config.minHeight + 1);
-        int capRadius = 6 + rng.nextInt(4);
-        int capThickness = 4;
-        int capInnerRadius = capRadius - 2;
 
         // 3a. Verify the mushroom fits below the ceiling
         int totalHeight = stemHeight + capThickness + 2; // +2 for buffer
@@ -137,191 +146,119 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
             if (stemHeight < 8) return false;
         }
 
-        // ── 4. GENERATE STEM (5x5 pillar) ───────────────────────────────────
+        // ── 4. GENERATE STEM (5x5 pillar with Deepslate Gradient) ───────────
         BlockState mushBlock = ModBlocks.HARDENED_MANASHROOM.get().defaultBlockState();
-        for (int y = 0; y < stemHeight; y++) {
-            for (int x = -2; x <= 2; x++) {
-                for (int z = -2; z <= 2; z++) {
-                    level.setBlock(origin.offset(x, y, z), mushBlock, 3);
+        BlockState deepslateBlock = Blocks.DEEPSLATE.defaultBlockState();
+        
+        for (int x = -2; x <= 2; x++) {
+            for (int z = -2; z <= 2; z++) {
+                // Dynamically find the terrain floor for this specific vertical column
+                // so the stem can grow Deepslate "roots" that anchor into cliffs and slopes!
+                int bottomY = 0;
+                while (bottomY > -2 && level.isEmptyBlock(origin.offset(x, bottomY - 1, z))) {
+                    bottomY--;
+                }
+
+                for (int y = bottomY; y < stemHeight; y++) {
+                    double progress = (double) Math.max(0, y) / stemHeight;
+                    BlockState toPlace = mushBlock;
+                    if (y < 0 || progress < 0.2) {
+                        toPlace = deepslateBlock; // Pure deepslate base and roots
+                    } else if (progress < 0.6) {
+                        // Fade out deepslate
+                        if (rng.nextDouble() > (progress - 0.2) / 0.4) {
+                            toPlace = deepslateBlock;
+                        }
+                    }
+                    level.setBlock(origin.offset(x, y, z), toPlace, 3);
                 }
             }
         }
 
-        // ── 5. GENERATE CAP ────────────────────────────────────────────────
-        // capY is the ABSOLUTE Y where the cap starts
+        // ── 5. GENERATE UMBRELLA CAP ────────────────────────────────────────
+        BlockState aetherMagma = ModBlocks.AETHER_MAGMA_BLOCK.get().defaultBlockState();
+        BlockState aetherLiquid = ModFluids.AETHER_BLOCK.get().defaultBlockState();
+        
         int capY = origin.getY() + stemHeight;
-        for (int y = 0; y < capThickness; y++) {
-            for (int dx = -capRadius; dx <= capRadius; dx++) {
-                for (int dz = -capRadius; dz <= capRadius; dz++) {
-                    double distSq = dx * dx + dz * dz;
-                    if (distSq <= capRadius * capRadius) {
-                        // Use absolute positioning — NOT origin.offset() which would double the Y
-                        BlockPos p = new BlockPos(origin.getX() + dx, capY + y, origin.getZ() + dz);
-
-                        // Solid unless it's the center top pool area
-                        if (y < capThickness - 1 || distSq > capInnerRadius * capInnerRadius) {
-                            level.setBlock(p, mushBlock, 3);
+        int maxRadius = capRadius + 2; // Make it a bit wider for the umbrella droop
+        int edgeDrop = 2 + rng.nextInt(3); // How far the edges droop down
+        int bowlRadius = maxRadius - 3;
+        int poolY = capThickness - 2; // The flat surface of the liquid
+        
+        for (int dx = -maxRadius; dx <= maxRadius; dx++) {
+            for (int dz = -maxRadius; dz <= maxRadius; dz++) {
+                double distSq = dx * dx + dz * dz;
+                double dist = Math.sqrt(distSq);
+                if (dist > maxRadius) continue;
+                
+                double t = dist / maxRadius;
+                
+                int topY = (int) Math.round(capThickness * Math.sqrt(1 - t * t));
+                int bottomY = (int) Math.round(-edgeDrop * (t * t));
+                
+                // Form a guaranteed solid lip to contain the Aether bowl
+                if (dist > bowlRadius && dist <= bowlRadius + 2) {
+                    if (topY < poolY + 1) {
+                        topY = poolY + 1;
+                    }
+                }
+                
+                for (int y = bottomY; y <= topY; y++) {
+                    BlockPos p = new BlockPos(origin.getX() + dx, capY + y, origin.getZ() + dz);
+                    
+                    if (dist <= bowlRadius && y >= poolY) {
+                        // Inside the hollow bowl
+                        if (y == poolY) {
+                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).isAir() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(Blocks.CAVE_AIR)) {
+                                level.setBlock(p, aetherLiquid, 3);
+                            }
                         } else {
-                            // Top layer center indentation for Aether pool
-                            level.setBlock(p, Blocks.CAVE_AIR.defaultBlockState(), 3);
+                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(ModFluids.AETHER_BLOCK.get())) {
+                                level.setBlock(p, Blocks.CAVE_AIR.defaultBlockState(), 3);
+                            }
+                        }
+                    } else {
+                        // Solid umbrella tissue
+                        // Make the crust thicker (top 3 blocks and outer horizontal edges) 
+                        // to completely hide the beige manashroom blocks on steep slopes
+                        boolean isCrust = (y >= topY - 2) || (dist > maxRadius - 1.5);
+                        if (isCrust) {
+                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).isAir() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(Blocks.CAVE_AIR)) {
+                                level.setBlock(p, aetherMagma, 3);
+                            }
+                        } else {
+                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).isAir() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(Blocks.CAVE_AIR)) {
+                                level.setBlock(p, mushBlock, 3);
+                            }
                         }
                     }
                 }
             }
         }
 
-        // ── 6. AETHER POOL (on top of cap, in the concave bowl) ─────────────
-        BlockState aetherBlock = ModFluids.AETHER_BLOCK.get().defaultBlockState();
-        for (int dx = -(capInnerRadius - 1); dx <= capInnerRadius - 1; dx++) {
-            for (int dz = -(capInnerRadius - 1); dz <= capInnerRadius - 1; dz++) {
-                if (dx * dx + dz * dz < capInnerRadius * capInnerRadius) {
-                    BlockPos poolPos = new BlockPos(origin.getX() + dx, capY + capThickness - 1, origin.getZ() + dz);
-                    level.setBlock(poolPos, aetherBlock, 3);
-                }
-            }
-        }
-
-        // ── 7. AETHER FALLS — rim notches so Aether flows over the cap edge ──
-        // Place 8 evenly-spaced notches around the inner rim.
-        // Each notch removes the solid rim block and places an Aether source
-        // at the bowl lip; Aether then flows outward and cascades down the cap.
-        int notchCount = 8;
+        // ── 6. AETHER FALLS (Spouts for flowing liquid) ─────────────────────
+        int notchCount = 4 + rng.nextInt(3);
         for (int n = 0; n < notchCount; n++) {
             double angle = (2.0 * Math.PI / notchCount) * n + rng.nextDouble() * 0.4;
-            int nx = (int) Math.round(Math.cos(angle) * (capInnerRadius));
-            int nz = (int) Math.round(Math.sin(angle) * (capInnerRadius));
-            // Top-most rim layer position
-            BlockPos notchPos = new BlockPos(
-                origin.getX() + nx, capY + capThickness - 1, origin.getZ() + nz);
-            // Replace the solid rim block with Aether source so it can pour outward
-            level.setBlock(notchPos, aetherBlock, 3);
+            // Target the crust ring exactly at the lip
+            int nx = (int) Math.round(Math.cos(angle) * (bowlRadius + 1));
+            int nz = (int) Math.round(Math.sin(angle) * (bowlRadius + 1));
+            
+            BlockPos spoutPos = new BlockPos(origin.getX() + nx, capY + poolY, origin.getZ() + nz);
+            
+            // Break the crust and place Aether
+            level.setBlock(spoutPos, aetherLiquid, 3);
+            
+            // Clear everything above the spout to let it flow freely and not suffocate the water source
+            for(int clearY = poolY + 1; clearY <= capThickness + 2; clearY++) {
+                BlockPos toClear = new BlockPos(origin.getX() + nx, capY + clearY, origin.getZ() + nz);
+                level.setBlock(toClear, Blocks.CAVE_AIR.defaultBlockState(), 3);
+            }
+            
+            // GUARANTEED FLOW: Schedule an immediate tick so it cascades down!
+            level.scheduleTick(spoutPos, ModFluids.AETHER_SOURCE.get(), 0);
         }
-
-        // ── 8. AETHER RIVER RING ────────────────────────────────────────────
-        carveAetherRing(level, origin, rng, capRadius);
 
         return true;
-    }
-
-    /**
-     * Carves a shallow aether river ring around the mushroom base.
-     * The ring is a wobbling circle carved 2 blocks into the floor and filled with aether.
-     * 
-     * Key safety: protects mushroom blocks and structures, only carves in cave context.
-     */
-    private void carveAetherRing(WorldGenLevel level, BlockPos origin, RandomSource rng, int mushroomCapRadius) {
-        BlockState aether = ModFluids.AETHER_BLOCK.get().defaultBlockState();
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-
-        // ── NEIGHBOR DETECTION (avoid carving into adjacent mushrooms) ────────
-        List<BlockPos> neighbors = new ArrayList<>();
-        int neighborScan = 52;
-        for (int dx = -neighborScan; dx <= neighborScan; dx += 2) {
-            for (int dz = -neighborScan; dz <= neighborScan; dz += 2) {
-                if (Math.abs(dx) < 8 && Math.abs(dz) < 8) continue;
-                for (int dy = -30; dy <= 30; dy += 6) {
-                    pos.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
-                    if (level.getBlockState(pos).is(ModBlocks.HARDENED_MANASHROOM.get())) {
-                        neighbors.add(pos.immutable());
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Ring parameters
-        int ringDist = mushroomCapRadius + 4 + rng.nextInt(4); // Start ring outside the cap
-        int ringWidth = 3 + rng.nextInt(2);
-        int riverDepth = 2; // Shallow: only 2 blocks deep
-        double phase = rng.nextDouble() * Math.PI * 2.0;
-
-        for (int angleDeg = 0; angleDeg < 360; angleDeg += 1) {
-            double angleRad = Math.toRadians(angleDeg);
-            double wobble = Math.sin(angleRad * 2.3 + phase) * 3.5 + Math.cos(angleRad * 1.9 + phase * 1.5) * 2.0;
-            double r = ringDist + wobble;
-
-            for (double offset = -ringWidth / 2.0; offset <= ringWidth / 2.0; offset += 0.75) {
-                int riverX = (int) Math.round(origin.getX() + (r + offset) * Math.cos(angleRad));
-                int riverZ = (int) Math.round(origin.getZ() + (r + offset) * Math.sin(angleRad));
-
-                // ── COLLISION AVOIDANCE ──
-                boolean excluded = false;
-                for (BlockPos neighbor : neighbors) {
-                    double distSq = Math.pow(riverX - neighbor.getX(), 2) + Math.pow(riverZ - neighbor.getZ(), 2);
-                    if (distSq < 16.0 * 16.0) {
-                        excluded = true;
-                        break;
-                    }
-                }
-                if (excluded) continue;
-
-                int floorY = findCaveFloor(level, riverX, riverZ, origin.getY(), pos);
-                if (floorY == -999) continue;
-
-                // ── SHALLOW TRENCH CARVING ──
-                // Only clear 1 block above floor and carve 2 blocks into the ground
-                // This prevents destroying structures above the river
-                for (int ay = -riverDepth; ay <= 1; ay++) {
-                    pos.set(riverX, floorY + ay, riverZ);
-                    BlockState s = level.getBlockState(pos);
-
-                    // PROTECT mushrooms and important structure blocks
-                    if (isProtectedBlock(s)) continue;
-
-                    level.setBlock(pos, Blocks.CAVE_AIR.defaultBlockState(), 3);
-                }
-
-                // ── FILL WITH AETHER ──
-                // Fill the trench with aether (at and below floor level)
-                for (int dy = 0; dy < riverDepth; dy++) {
-                    pos.set(riverX, floorY - dy, riverZ);
-                    BlockState cur = level.getBlockState(pos);
-                    if (cur.is(Blocks.BEDROCK)) continue;
-                    if (isProtectedBlock(cur)) continue;
-                    level.setBlock(pos, aether, 3);
-                }
-            }
-        }
-    }
-
-    /**
-     * Finds the cave floor at the given XZ position.
-     * Returns the Y of the first air block above solid ground,
-     * but ONLY if there's also a ceiling above (confirming cave context).
-     */
-    private int findCaveFloor(WorldGenLevel level, int x, int z, int fallbackY, BlockPos.MutableBlockPos pos) {
-        for (int y = fallbackY + 12; y >= fallbackY - 16; y--) {
-            pos.set(x, y, z);
-            BlockState state = level.getBlockState(pos);
-            if (state.isAir() || state.is(Blocks.CAVE_AIR)) {
-                pos.set(x, y - 1, z);
-                BlockState below = level.getBlockState(pos);
-                if (!below.isAir() && !below.is(Blocks.BEDROCK) && !below.canBeReplaced()
-                        && !below.is(ModBlocks.HARDENED_MANASHROOM.get())) {
-
-                    // Verify cave context: check there's a ceiling, not open sky
-                    boolean hasCeiling = false;
-                    for (int cy = y + 1; cy <= y + 80; cy++) {
-                        pos.set(x, cy, z);
-                        BlockState ceilState = level.getBlockState(pos);
-                        if (!ceilState.isAir() && !ceilState.is(Blocks.CAVE_AIR)) {
-                            hasCeiling = true;
-                            break;
-                        }
-                    }
-                    if (hasCeiling) return y;
-                }
-            }
-        }
-        return -999;
-    }
-
-    /**
-     * Checks if a block should be protected from river carving.
-     * This prevents rivers from destroying mushroom formations, structure blocks, etc.
-     */
-    private boolean isProtectedBlock(BlockState state) {
-        return state.is(ModBlocks.HARDENED_MANASHROOM.get())
-                || state.is(Blocks.BEDROCK);
     }
 }

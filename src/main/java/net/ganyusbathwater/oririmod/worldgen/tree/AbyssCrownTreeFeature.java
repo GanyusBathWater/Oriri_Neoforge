@@ -34,10 +34,11 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
     }
 
     private void placeLog(WorldGenLevel level, BlockPos pos, Direction.Axis axis, RandomSource rnd, net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider provider) {
-        if (canReplace(level, pos)) {
+        BlockState existing = level.getBlockState(pos);
+        if (canReplace(level, pos) && !existing.is(net.minecraft.world.level.block.Blocks.STONE) && !existing.is(net.minecraft.world.level.block.Blocks.DEEPSLATE)) {
             BlockState state = provider.getState(rnd, pos);
-            if (state.hasProperty(RotatedPillarBlock.AXIS)) {
-                state = state.setValue(RotatedPillarBlock.AXIS, axis);
+            if (state.hasProperty(net.minecraft.world.level.block.RotatedPillarBlock.AXIS)) {
+                state = state.setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, axis);
             }
             level.setBlock(pos, state, 3);
         }
@@ -89,8 +90,9 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
             if (!foundCeiling) return false;
 
             // Y-range guard: reject if ceiling attach point is outside valid cave ceiling zone
-            // Cave ceilings: roughly Y = -70 to Y = 0. Avoids void/bedrock placements.
-            if (origin.getY() < -70 || origin.getY() > 10) return false;
+            // Changed minimum Y from -70 to -20 to avoid deep Cheese Chambers.
+            // Allowed up to Y=70 because the main ceiling can reach Y=35+.
+            if (origin.getY() < -20 || origin.getY() > 70) return false;
 
             // Pillar detection: if the column below origin is solid for 30+ blocks,
             // this is the top of a structural pillar, not a cave ceiling. Reject it.
@@ -107,6 +109,24 @@ public class AbyssCrownTreeFeature extends Feature<AbyssCrownTreeConfig> {
                     }
                 }
                 if (solidBelow >= 28) return false; // it's a pillar top, not a ceiling
+            }
+
+            // Main Room Detection (Air Drop)
+            // Trees should only spawn in the main cavern, which has a massive drop to the floor.
+            // We shoot a ray straight down. If we hit the floor in less than 30 blocks,
+            // we are in a side cave, ravine, or worm tunnel, so we reject it.
+            {
+                int freeAirDrop = 0;
+                for (int i = 1; i <= 35; i++) {
+                    BlockPos below = origin.below(i);
+                    BlockState bs = level.getBlockState(below);
+                    if (bs.isAir() || bs.is(net.minecraft.world.level.block.Blocks.CAVE_AIR) || bs.is(net.minecraft.world.level.block.Blocks.WATER)) {
+                        freeAirDrop++;
+                    } else {
+                        break;
+                    }
+                }
+                if (freeAirDrop < 30) return false; // Side cave detected! Not enough headroom.
             }
             // Final Biome Check: Only generate if the snapped attachment point is in the Elysian Abyss
             // This ensures trees "cover the entire ceiling" of the biome without escaping into transition zones.
