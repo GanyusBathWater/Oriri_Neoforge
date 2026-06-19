@@ -24,9 +24,7 @@
   "has_precipitation": false,
   "carvers": {
     "air": [
-      "oririmod:elysian_abyss_carver",
-      "oririmod:deep_cave",
-      "minecraft:canyon"
+      "oririmod:elysian_abyss_carver"
     ]
   },
   "features": [

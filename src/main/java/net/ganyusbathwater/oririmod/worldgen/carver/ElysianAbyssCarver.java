@@ -25,8 +25,58 @@ import java.util.function.Function;
  */
 public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
 
+    public static final ThreadLocal<net.minecraft.world.level.StructureManager> CURRENT_STRUCTURE_MANAGER = new ThreadLocal<>();
+    public static final ThreadLocal<net.minecraft.core.RegistryAccess> CURRENT_REGISTRY_ACCESS = new ThreadLocal<>();
+    public static final ThreadLocal<java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox>> CURRENT_STRUCTURE_BOXES = new ThreadLocal<>();
+
+    private int getMaxCarveHeight(ChunkAccess chunk, int x, int z) {
+        int defaultMax = 320; 
+        int protectedHeight = defaultMax;
+        
+        java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = CURRENT_STRUCTURE_BOXES.get();
+        if (boxes == null || boxes.isEmpty()) return defaultMax;
+        
+        for (net.minecraft.world.level.levelgen.structure.BoundingBox box : boxes) {
+            int centerX = (box.minX() + box.maxX()) / 2;
+            int centerZ = (box.minZ() + box.maxZ()) / 2;
+            
+            int dx = x - centerX;
+            int dz = z - centerZ;
+            
+            int boxRadiusX = (box.maxX() - box.minX()) / 2;
+            int boxRadiusZ = (box.maxZ() - box.minZ()) / 2;
+            
+            if (boxRadiusX > 0 && boxRadiusZ > 0) {
+                double maxLInfinity = Math.max(Math.abs(dx) / (double)boxRadiusX, Math.abs(dz) / (double)boxRadiusZ);
+                double normX = dx / (double)boxRadiusX;
+                double normZ = dz / (double)boxRadiusZ;
+                double euclidean = Math.sqrt(normX * normX + normZ * normZ);
+                
+                double maxDistCone = 0.5 * maxLInfinity + 0.5 * euclidean;
+                double factor = maxDistCone * maxDistCone; // Parabolic curve
+                
+                double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)x * 0.05f, 0, (float)z * 0.05f, 4) * 12.0;
+                
+                int surfaceY = chunk.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x & 15, z & 15);
+                double safeFoundation = surfaceY - 10;
+                double centerDeepY = Math.max(chunk.getMinBuildHeight() + 10, safeFoundation - 70); 
+                
+                // taper up to defaultMax (320) so it smoothly blends into natural cave without a chunk border!
+                int taperY = (int) Math.round(centerDeepY + (defaultMax - centerDeepY) * factor + noise);
+                
+                protectedHeight = Math.min(protectedHeight, taperY);
+            }
+        }
+        return protectedHeight;
+    }
+
     public ElysianAbyssCarver(Codec<CaveCarverConfiguration> codec) {
         super(codec);
+    }
+
+    @Override
+    public int getRange() {
+        return 8;
     }
 
     @Override
@@ -41,50 +91,52 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
             RandomSource random, Aquifer aquifer, net.minecraft.world.level.ChunkPos chunkPos,
             CarvingMask carvingMask) {
 
-        int chunkX = chunk.getPos().x;
-        int chunkZ = chunk.getPos().z;
+        int ox = chunkPos.x;
+        int oz = chunkPos.z;
         boolean hit = false;
 
-        // Radius of 12 chunks mathematically guarantees we catch worms that started far away and wind into our chunk
-        // Max length = 120 steps * 1.5 blocks/step = 180 blocks + 11 width = 191 max blocks = 11.9 chunks
-        int radius = 12;
-        for (int ox = chunkX - radius; ox <= chunkX + radius; ox++) {
-            for (int oz = chunkZ - radius; oz <= chunkZ + radius; oz++) {
-                
-                // Deterministic seed for the origin chunk
-                long originSeed = (ox * 341873128712L) ^ (oz * 132897987541L);
-                RandomSource originRandom = RandomSource.create(originSeed);
-                
-                // --- Mathematical Abyss Detection ---
-                double seedOffsetCave = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.currentSeedOffsetCave;
-                float scale = 0.0015f;
-                double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                    (float)((ox * 16 + seedOffsetCave) * scale),
-                    0f,
-                    (float)((oz * 16 + seedOffsetCave) * scale),
-                    3
-                );
-                double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.15, 0.0, 1.0);
-                
-                float ravineChance = 1.0f / 180.0f; // Toned down surface ravines
-                if (abyssIntensity > 0.1) {
-                    ravineChance = 1.0f / 60.0f; 
-                }
-                
-                // Spawn Ravine canyon
-                if (originRandom.nextFloat() < ravineChance) {
-                    hit |= carveRavine(config, chunk, ox, oz, originRandom);
-                }
-                
-                // Spawn standard winding cave systems (Worms & Rooms)
-                hit |= carveWorms(config, chunk, ox, oz, originRandom);
-                
-                // Spawn massive, localized Cheese Chambers
-                hit |= carveCheeseChambers(config, chunk, ox, oz, originRandom);
-                
-                // Spawn erratic Noodle tunnels for vertical connections
-                hit |= carveNoodles(config, chunk, ox, oz, originRandom);
+        // Deterministic seed for the origin chunk
+        long originSeed = (ox * 341873128712L) ^ (oz * 132897987541L);
+        RandomSource originRandom = RandomSource.create(originSeed);
+        
+        // --- Mathematical Abyss Detection ---
+        double seedOffsetCave = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.currentSeedOffsetCave;
+        float scale = 0.0015f;
+        double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+            (float)((ox * 16 + seedOffsetCave) * scale),
+            0f,
+            (float)((oz * 16 + seedOffsetCave) * scale),
+            4
+        );
+        
+        caveNoise = Math.abs(caveNoise);
+        
+        // Match the threshold from getElysianCavernDensity
+        double noiseThreshold = 0.08;
+        
+        if (caveNoise > noiseThreshold) {
+            float ravineChance = 1.0f / 35.0f; // Roughly 1 in 35 chunks inside the biome
+            
+            // Higher intensity -> more ravines
+            if (caveNoise > 0.25) {
+                ravineChance = 1.0f / 15.0f; 
+            } else if (caveNoise < 0.12) {
+                ravineChance = 1.0f / 60.0f; 
             }
+            
+            // Spawn Ravine canyon
+            if (originRandom.nextFloat() < ravineChance) {
+                hit |= carveRavine(config, chunk, ox, oz, originRandom);
+            }
+            
+            // Spawn standard winding cave systems (Worms & Rooms)
+            // hit |= carveWorms(config, chunk, ox, oz, originRandom);
+            
+            // Spawn massive, localized Cheese Chambers
+            // hit |= carveCheeseChambers(config, chunk, ox, oz, originRandom);
+            
+            // Spawn erratic Noodle tunnels for vertical connections
+            // hit |= carveNoodles(config, chunk, ox, oz, originRandom);
         }
 
         return hit;
@@ -175,8 +227,16 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                     BlockState state = chunk.getBlockState(pos);
                                     if (this.canReplaceBlock(config, state)) {
                                         // Surface structure protection
-                                        if (by > 50 && chunk.hasAnyStructureReferences()) {
+                                        int maxCarve = getMaxCarveHeight(chunk, bx, bz);
+                                        if (by > maxCarve) {
                                             continue;
+                                        }
+                                        if (by > maxCarve - 12) {
+                                            double fade = (by - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
+                                            double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)bx * 0.1f, (float)by * 0.1f, (float)bz * 0.1f, 2);
+                                            if (noise3D + 0.5 < fade * 1.5) {
+                                                continue;
+                                            }
                                         }
                                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                         hit = true;
@@ -263,9 +323,17 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                 pos.set(bx, by, bz);
                                 BlockState state = chunk.getBlockState(pos);
                                 if (this.canReplaceBlock(config, state)) {
-                                    // Surface structure protection
-                                    if (by > 50 && chunk.hasAnyStructureReferences()) {
+                                    // Euclidean cone structure protection to prevent flat chunk ceilings
+                                    int maxCarve = getMaxCarveHeight(chunk, bx, bz);
+                                    if (by > maxCarve) {
                                         continue;
+                                    }
+                                    if (by > maxCarve - 12) {
+                                        double fade = (by - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
+                                        double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)bx * 0.1f, (float)by * 0.1f, (float)bz * 0.1f, 2);
+                                        if (noise3D + 0.5 < fade * 1.5) {
+                                            continue;
+                                        }
                                     }
                                     chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                     hit = true;
@@ -414,8 +482,16 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                     BlockState state = chunk.getBlockState(pos);
                                     if (this.canReplaceBlock(config, state)) {
                                         // Surface structure protection
-                                        if (by > 50 && chunk.hasAnyStructureReferences()) {
+                                        int maxCarve = getMaxCarveHeight(chunk, bx, bz);
+                                        if (by > maxCarve) {
                                             continue;
+                                        }
+                                        if (by > maxCarve - 12) {
+                                            double fade = (by - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
+                                            double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)bx * 0.1f, (float)by * 0.1f, (float)bz * 0.1f, 2);
+                                            if (noise3D + 0.5 < fade * 1.5) {
+                                                continue;
+                                            }
                                         }
                                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                         hit = true;

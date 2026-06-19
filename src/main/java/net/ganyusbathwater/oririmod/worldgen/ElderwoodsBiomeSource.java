@@ -92,7 +92,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 0.5 * Math.cos(nx * 0.005 + 2.0) * Math.sin(nz * 0.005 + 1.0);
 
         // Cave Noise
-        float caveScale = 0.0015f;
+        float caveScale = 0.0025f;
         double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
                 (float)((x + seedOffsetCave) * caveScale),
                 0f,

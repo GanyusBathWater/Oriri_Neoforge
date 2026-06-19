@@ -39,6 +39,11 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
     }
 
     @Override
+    public int getRange() {
+        return 4; // Check up to 4 chunks away
+    }
+
+    @Override
     public boolean isStartChunk(CaveCarverConfiguration config, RandomSource random) {
         return random.nextFloat() <= config.probability;
     }
@@ -48,48 +53,18 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
             Function<BlockPos, Holder<Biome>> biomeAccessor, RandomSource random, Aquifer aquifer,
             net.minecraft.world.level.ChunkPos chunkPos, CarvingMask carvingMask) {
         net.ganyusbathwater.oririmod.OririMod.LOGGER
-                .info("ScarletCaveEntranceCarver carving chunk at " + chunk.getPos());
-        // We only care about the center of the chunk for the "Entrance" logic
-        BlockPos pos = chunk.getPos().getMiddleBlockPosition(0);
-        int surfaceY = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, pos.getX() & 15, pos.getZ() & 15);
-        net.ganyusbathwater.oririmod.OririMod.LOGGER.info("DEBUG_SCARLET: surfaceY at " + pos + " is " + surfaceY);
-
-        if (surfaceY < -64) {
-            net.ganyusbathwater.oririmod.OririMod.LOGGER.info("DEBUG_SCARLET: surfaceY too low, aborting");
-            return false;
-        }
-
-        // Check for liquids (Water, Lava, etc.) in the entrance area to avoid cutting
-        // into ponds
-        int checkRadius = 8;
-        BlockPos.MutableBlockPos checkPos = new BlockPos.MutableBlockPos();
-        for (int x = -checkRadius; x <= checkRadius; x++) {
-            for (int z = -checkRadius; z <= checkRadius; z++) {
-                checkPos.set(pos.getX() + x, surfaceY, pos.getZ() + z);
-                if (chunk.getBlockState(checkPos).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) {
-                    net.ganyusbathwater.oririmod.OririMod.LOGGER
-                            .info("DEBUG_SCARLET: Aborting carve due to liquid at " + checkPos);
-                    return false;
-                }
-                // Check one block below just in case surfaceY is slightly off or liquid is
-                // recessed
-                checkPos.set(pos.getX() + x, surfaceY - 1, pos.getZ() + z);
-                if (chunk.getBlockState(checkPos).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) {
-                    net.ganyusbathwater.oririmod.OririMod.LOGGER
-                            .info("DEBUG_SCARLET: Aborting carve due to liquid at " + checkPos);
-                    return false;
-                }
-            }
-        }
+                .info("ScarletCaveEntranceCarver carving chunk at " + chunk.getPos() + " from origin " + chunkPos);
+                
+        // Use the origin chunk position so all target chunks agree on the exact same entrance geometry
+        BlockPos pos = chunkPos.getMiddleBlockPosition(0);
+        
+        long originSeed = (chunkPos.x * 341873128712L) ^ (chunkPos.z * 132897987541L);
+        RandomSource originRandom = RandomSource.create(originSeed);
 
         int maxRadius = 8;
         int minRadius = 4;
-        int entranceTop = surfaceY;
-        int entranceBottom = -16 + random.nextInt(32); // Random bottom between -16 and 16
-
-        // Ensure valid range
-        if (entranceBottom >= entranceTop)
-            entranceBottom = entranceTop - 10;
+        int entranceTop = 150; // High enough to cut through any surface terrain
+        int entranceBottom = -16 + originRandom.nextInt(32); // Deterministic bottom
 
         net.ganyusbathwater.oririmod.OririMod.LOGGER
                 .info("DEBUG_SCARLET: Carving from Y=" + entranceTop + " down to Y=" + entranceBottom);
@@ -122,7 +97,7 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
 
             // Wobble/Noise
             double wobble = Math.sin(centerX * 0.2 + y * 0.1) * Math.cos(centerZ * 0.2 + y * 0.1) * 1.5;
-            double extraNoise = random.nextFloat() * 1.5;
+            double extraNoise = originRandom.nextFloat() * 1.5;
 
             radiusAtY += wobble + extraNoise;
 

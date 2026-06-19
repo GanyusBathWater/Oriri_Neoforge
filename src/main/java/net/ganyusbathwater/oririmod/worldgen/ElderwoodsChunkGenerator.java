@@ -235,7 +235,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private double getAbyssNoise(int x, int z) {
         // Synchronized with ElderwoodsBiomeSource
-        float scale = 0.0015f;
+        float scale = 0.0025f;
         return net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
             (float)((x + seedOffsetCave) * scale),
             0f,
@@ -265,7 +265,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             (float)y * (float)scale * 1.0f, 
             (float)(z + seedOffsetCave) * (float)scale, 
             2
-        ) * (2.5 * wallNoiseFactor); // Strong noise, but zeroed out in the center
+        ) * 2.5; // Always apply 3D noise so ceilings/floors are naturally jagged
         
         // Target vertical bounds
         double roomHalfHeight = Math.max(1.0, (caveCeiling - caveFloor) / 2.0);
@@ -280,7 +280,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         // --- WALL GRADIENT ---
         // This math smoothly pushes the density into SOLID rock as abyssIntensity drops to 0.
         // We use a linear slope so the strong 3.0 noise can organically break through it!
-        double wallGradient = (1.0 - abyssIntensity) * 4.0;
+        // The multiplier 2.5 allows the noise function's fringes to organically branch outwards into the surrounding rock infinitely!
+        double wallGradient = (1.0 - abyssIntensity) * 2.5;
         
         // Combine everything (Spurs removed by request to eliminate unnatural horizontal bands)
         return -noise + baseDensity + wallGradient;
@@ -1098,12 +1099,56 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     int surfaceY = getSurfaceHeight(worldX, worldZ);
 
                     double caveNoise = getAbyssNoise(worldX, worldZ);
-                    // Widened the divisor from 0.15 to 0.4 to create a gentle, sloping biome boundary
-                    // instead of a massive 90-degree cliff wall!
-                    double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.4, 0.0, 1.0);
+                    // Reduced divisor from 0.15 to 0.03 to ensure the cavern opens up extremely quickly
+                    // exactly as we enter the Elysian Abyss biome threshold (0.08).
+                    double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.03, 0.0, 1.0);
 
                     double caveFloorSmooth = getCaveFloorHeightDouble(worldX, worldZ, -115);
                     double caveCeilingSmooth = getCaveCeilingHeightDouble(worldX, worldZ, surfaceY);
+
+                    // "?"? Elysian Sanctuary Protective Stalactite Logic "?"?
+                    // We blend a mathematical cone onto the cave ceiling strictly beneath the Sanctuary bounding box
+                    int limitY = MIN_Y; // Lowest point the ceiling can be pulled down to
+                    java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = 
+                        net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.CURRENT_STRUCTURE_BOXES.get();
+                    if (boxes != null && !boxes.isEmpty()) {
+                        for (net.minecraft.world.level.levelgen.structure.BoundingBox box : boxes) {
+                            if (worldX >= box.minX() && worldX <= box.maxX() && worldZ >= box.minZ() && worldZ <= box.maxZ()) {
+                                int centerX = (box.minX() + box.maxX()) / 2;
+                                int centerZ = (box.minZ() + box.maxZ()) / 2;
+                                
+                                int dx = worldX - centerX;
+                                int dz = worldZ - centerZ;
+                                
+                                int boxRadiusX = (box.maxX() - box.minX()) / 2;
+                                int boxRadiusZ = (box.maxZ() - box.minZ()) / 2;
+                                
+                                double maxDistCone = 1.0;
+                                if (boxRadiusX > 0 && boxRadiusZ > 0) {
+                                    double maxLInfinity = Math.max(Math.abs(dx) / (double)boxRadiusX, Math.abs(dz) / (double)boxRadiusZ);
+                                    double normX = dx / (double)boxRadiusX;
+                                    double normZ = dz / (double)boxRadiusZ;
+                                    double euclidean = Math.sqrt(normX * normX + normZ * normZ);
+                                    
+                                    maxDistCone = 0.5 * maxLInfinity + 0.5 * euclidean;
+                                }
+                                
+                                double factor = maxDistCone * maxDistCone; // Parabolic curve
+                                
+                                double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)worldX * 0.05f, 0, (float)worldZ * 0.05f, 4) * 12.0;
+                                
+                                double safeFoundation = surfaceY - 10;
+                                double centerDeepY = Math.max(MIN_Y + 10, safeFoundation - 70); // Deepest point of the cone at center
+                                
+                                // Taper up to 320 to merge perfectly with natural cave!
+                                limitY = (int) Math.round(centerDeepY + (320 - centerDeepY) * factor + noise);
+                                
+                                if (caveCeilingSmooth > limitY) {
+                                    caveCeilingSmooth = limitY;
+                                }
+                            }
+                        }
+                    }
 
                     for (int y = MIN_Y; y <= surfaceY; y++) {
                         pos.set(worldX, y, worldZ);
@@ -1114,58 +1159,70 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         }
 
                         // ── Elysian Abyss Giant Cave Cavern & Central River (Aquifer) ─────────────────────────────
-                        // Evaluate in a much wider boundary so the 3D walls can naturally merge into rock
-                        if (caveNoise > -0.15) {
-                            if (y < MIN_Y + 6) {
-                                chunk.setBlockState(pos, DEEPSLATE, false);
-                                continue;
-                            }
+                        // Evaluate globally so the 3D walls can naturally merge into rock and spawn fractal branches!
+                        if (y < MIN_Y + 6) {
+                            chunk.setBlockState(pos, DEEPSLATE, false);
+                            continue;
+                        }
 
-                            double density = getElysianCavernDensity(worldX, y, worldZ, caveFloorSmooth, caveCeilingSmooth, abyssIntensity);
-                            
-                            // Constant threshold of 0.15. 
-                            // The wall is now driven organically by the density function's wallGradient!
-                            double threshold = 0.15;
-  
-                            if (density < threshold) {
-                                // Hollow space
-                                chunk.setBlockState(pos, AIR, false);
-                                continue;
-                            } else {
-                                // Solid wall within the abyss
-                                if (y < caveFloorSmooth + 30 && y >= -117) {
-                                    double noise1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                        (float)worldX * 0.03f, (float)y * 0.03f, (float)worldZ * 0.03f, 2
-                                    );
-                                    double noise2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                        (float)(worldX + 1000) * 0.03f, (float)(y + 1000) * 0.03f, (float)(worldZ + 1000) * 0.03f, 2
-                                    );
-                                    // Intersecting two noise fields creates 1D winding tubular caves (Noodle Caves)
-                                    // instead of giant sheer un-walkable cracks!
-                                    if (Math.abs(noise1) < 0.015 && Math.abs(noise2) < 0.015) {
-                                        chunk.setBlockState(pos, AIR, false);
-                                        continue;
-                                    }
+                        double density = getElysianCavernDensity(worldX, y, worldZ, caveFloorSmooth, caveCeilingSmooth, abyssIntensity);
+                        
+                        // Constant threshold of 0.15. 
+                        // The wall is now driven organically by the density function's wallGradient!
+                        double threshold = 0.15;
+
+                        if (density < threshold) {
+                            // Hollow space
+                            chunk.setBlockState(pos, AIR, false);
+                            continue;
+                        } else {
+                            // General Cave Generation (Clean 3D Cheese Caves & Wide Tunnels)
+                            // Keep above -105 to ensure we don't carve into the global Aether Rivers, but taper smoothly!
+                            if (y < surfaceY - 15 && y >= -105) {
+                                double cx = worldX + seedOffsetCave;
+                                double cy = y + seedOffsetCave;
+                                double cz = worldZ + seedOffsetCave;
+
+                                // Clean, large 3D Cheese Caves without the messy spaghetti lines
+                                double cheeseNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                    (float)(cx + 3000) * 0.015f,
+                                    (float)(cy + 3000) * 0.015f,
+                                    (float)(cz + 3000) * 0.015f,
+                                    2
+                                );
+                                
+                                // Wide distinct tunnels connecting the caves
+                                double tunnelNoise1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                    (float)cx * 0.015f, (float)cy * 0.015f, (float)cz * 0.015f, 2
+                                );
+                                double tunnelNoise2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                    (float)(cx + 1000) * 0.015f, (float)(cy + 1000) * 0.015f, (float)(cz + 1000) * 0.015f, 2
+                                );
+                                boolean isTunnel = Math.abs(tunnelNoise1) < 0.05 && Math.abs(tunnelNoise2) < 0.05;
+
+                                // Threshold lowered to 0.15 for denser distinct cheese caves
+                                double taperThreshold = 0.15;
+                                
+                                // Smoothly fade the caves out into the floor before they hit the river layer (-105 to -85)
+                                if (y < -85) {
+                                    double taper = (-85 - y) / 20.0; // 0.0 to 1.0
+                                    taperThreshold += taper * 1.5; // Cave shrinks and disappears
+                                    if (taper > 0.4) isTunnel = false; // Pinch off tunnels organically
+                                } else if (y > surfaceY - 35) {
+                                    // Smoothly fade the caves out into the ceiling before they hit the surface crust
+                                    double taper = (y - (surfaceY - 35)) / 20.0; // 0.0 to 1.0
+                                    taperThreshold += taper * 1.5;
+                                    if (taper > 0.4) isTunnel = false;
                                 }
-                                chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
-                                continue;
-                            }
-                        }
 
-                        // ── Default solid fill ───────────────────────────────────
-                        if (y < caveFloorSmooth + 30 && y >= -117) {
-                            double noise1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                (float)worldX * 0.03f, (float)y * 0.03f, (float)worldZ * 0.03f, 2
-                            );
-                            double noise2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                (float)(worldX + 1000) * 0.03f, (float)(y + 1000) * 0.03f, (float)(worldZ + 1000) * 0.03f, 2
-                            );
-                            if (Math.abs(noise1) < 0.015 && Math.abs(noise2) < 0.015) {
-                                chunk.setBlockState(pos, AIR, false);
-                                continue;
+                                if (cheeseNoise > taperThreshold || isTunnel) {
+                                    chunk.setBlockState(pos, AIR, false);
+                                    continue;
+                                }
                             }
+                            chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
+                            continue;
                         }
-                        chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
                     }
                 }
             }
