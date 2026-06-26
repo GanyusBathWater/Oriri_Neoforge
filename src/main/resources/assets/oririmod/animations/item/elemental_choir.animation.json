@@ -1,0 +1,288 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"elemental_swords_idle": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"weapons": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.0": {
+							"vector": [0, 90, 0]
+						},
+						"2.0": {
+							"vector": [0, 180, 0]
+						},
+						"3.0": {
+							"vector": [0, 270, 0]
+						},
+						"4.0": {
+							"vector": [0, 360, 0]
+						}
+					}
+				}
+			}
+		},
+		"elemental_swords_normal_attack_right": {
+			"animation_length": 0.5,
+			"bones": {
+				"earth_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 110]
+						},
+						"0.5": {
+							"vector": [0, 0, 110]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-35, 6, 0]
+						},
+						"0.5": {
+							"vector": [-35, 6, 0]
+						}
+					}
+				},
+				"fire_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 90, 110]
+						},
+						"0.5": {
+							"vector": [0, 90, 110]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-21, -1, 15]
+						},
+						"0.5": {
+							"vector": [-21, -1, 15]
+						}
+					}
+				},
+				"water_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [110, 0, 0]
+						},
+						"0.5": {
+							"vector": [110, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-5, -13, 0]
+						},
+						"0.5": {
+							"vector": [-5, -13, 0]
+						}
+					}
+				},
+				"nature_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -90, 110]
+						},
+						"0.5": {
+							"vector": [0, -90, 110]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-21, -8, -14]
+						},
+						"0.5": {
+							"vector": [-21, -8, -14]
+						}
+					}
+				},
+				"animation_folder_attack": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, -90, 0]
+						},
+						"0.5": {
+							"vector": [0, -180, 0]
+						}
+					}
+				}
+			}
+		},
+		"elemental_swords_normal_attack_left": {
+			"animation_length": 0.5,
+			"bones": {
+				"earth_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 110]
+						},
+						"0.5": {
+							"vector": [0, 0, 110]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-35, 6, 0]
+						},
+						"0.5": {
+							"vector": [-35, 6, 0]
+						}
+					}
+				},
+				"fire_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 90, 110]
+						},
+						"0.5": {
+							"vector": [0, 90, 110]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-21, -1, 15]
+						},
+						"0.5": {
+							"vector": [-21, -1, 15]
+						}
+					}
+				},
+				"water_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [110, 0, 0]
+						},
+						"0.5": {
+							"vector": [110, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-5, -13, 0]
+						},
+						"0.5": {
+							"vector": [-5, -13, 0]
+						}
+					}
+				},
+				"nature_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -90, 110]
+						},
+						"0.5": {
+							"vector": [0, -90, 110]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-21, -8, -14]
+						},
+						"0.5": {
+							"vector": [-21, -8, -14]
+						}
+					}
+				},
+				"animation_folder_attack": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -180, 0]
+						},
+						"0.25": {
+							"vector": [0, -90, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"elemental_swords_special_attack": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5,
+			"bones": {
+				"earth_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, -90]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [5, -13, 0]
+						}
+					}
+				},
+				"fire_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [-90, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, -13, -5]
+						}
+					}
+				},
+				"water_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [90, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [-5, -13, 0]
+						}
+					}
+				},
+				"nature_sword": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [90, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, -13, 5]
+						}
+					}
+				}
+			}
+		}
+	}
+}

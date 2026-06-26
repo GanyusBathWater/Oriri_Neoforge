@@ -29,7 +29,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
     public static final ThreadLocal<net.minecraft.core.RegistryAccess> CURRENT_REGISTRY_ACCESS = new ThreadLocal<>();
     public static final ThreadLocal<java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox>> CURRENT_STRUCTURE_BOXES = new ThreadLocal<>();
 
-    private int getMaxCarveHeight(ChunkAccess chunk, int x, int z) {
+    public static int getMaxCarveHeight(ChunkAccess chunk, int x, int z) {
         int defaultMax = 320; 
         int protectedHeight = defaultMax;
         
@@ -115,13 +115,13 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         double noiseThreshold = 0.08;
         
         if (caveNoise > noiseThreshold) {
-            float ravineChance = 1.0f / 35.0f; // Roughly 1 in 35 chunks inside the biome
+            float ravineChance = 1.0f / 70.0f; // Roughly 1 in 70 chunks inside the biome
             
             // Higher intensity -> more ravines
             if (caveNoise > 0.25) {
-                ravineChance = 1.0f / 15.0f; 
+                ravineChance = 1.0f / 30.0f; 
             } else if (caveNoise < 0.12) {
-                ravineChance = 1.0f / 60.0f; 
+                ravineChance = 1.0f / 120.0f; 
             }
             
             // Spawn Ravine canyon
@@ -130,13 +130,13 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
             }
             
             // Spawn standard winding cave systems (Worms & Rooms)
-            // hit |= carveWorms(config, chunk, ox, oz, originRandom);
+            hit |= carveWorms(config, chunk, ox, oz, originRandom);
             
             // Spawn massive, localized Cheese Chambers
-            // hit |= carveCheeseChambers(config, chunk, ox, oz, originRandom);
+            hit |= carveCheeseChambers(config, chunk, ox, oz, originRandom);
             
             // Spawn erratic Noodle tunnels for vertical connections
-            // hit |= carveNoodles(config, chunk, ox, oz, originRandom);
+            hit |= carveNoodles(config, chunk, ox, oz, originRandom);
         }
 
         return hit;
@@ -238,6 +238,9 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                                 continue;
                                             }
                                         }
+                                        if (by < -105) {
+                                            continue; // Protect aether rivers
+                                        }
                                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                         hit = true;
                                     }
@@ -335,8 +338,11 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                             continue;
                                         }
                                     }
-                                    chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
-                                    hit = true;
+                                        if (by < -105) {
+                                            continue; // Protect aether rivers
+                                        }
+                                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                        hit = true;
                                 }
                             }
                         }
@@ -406,6 +412,9 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                             BlockState state = chunk.getBlockState(pos);
                             
                             if (this.canReplaceBlock(config, state)) {
+                                if (by < -105) {
+                                    continue; // Protect aether rivers
+                                }
                                 chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                 hit = true;
                             }
@@ -492,6 +501,9 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                             if (noise3D + 0.5 < fade * 1.5) {
                                                 continue;
                                             }
+                                        }
+                                        if (by < -105) {
+                                            continue; // Protect aether rivers
                                         }
                                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                                         hit = true;

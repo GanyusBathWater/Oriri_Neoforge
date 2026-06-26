@@ -238,7 +238,7 @@ public final class MagicIndicatorRender {
             int r, int g, int b, int a,
             Vec3 c0, Vec3 c1, Vec3 c2, Vec3 c3,
             float nx, float ny, float nz) {
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucent(tex));
+        VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(tex));
         PoseStack.Pose last = pose.last();
         var poseMat = last.pose();
 

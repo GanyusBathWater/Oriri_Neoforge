@@ -63,6 +63,7 @@ public class ModEntityClient {
                 event.registerEntityRenderer(ModEntities.SONIC_ARROW.get(), context -> new net.ganyusbathwater.oririmod.client.render.CustomArrowRenderer<>(context, net.minecraft.resources.ResourceLocation.parse("oririmod:textures/entity/sonic_arrow.png")));
                 
                 event.registerEntityRenderer(ModEntities.BLACK_HOLE.get(), net.ganyusbathwater.oririmod.client.render.BlackHoleRenderer::new);
+                event.registerEntityRenderer(ModEntities.GIANT_SWORD.get(), net.ganyusbathwater.oririmod.client.render.GiantSwordRenderer::new);
 
                 event.registerEntityRenderer(ModEntities.MERMAID.get(),
                                 net.ganyusbathwater.oririmod.entity.client.MermaidRenderer::new);

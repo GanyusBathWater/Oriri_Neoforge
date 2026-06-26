@@ -1,0 +1,30 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"elemental_swords_idle": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"weapons": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.0": {
+							"vector": [0, 90, 0]
+						},
+						"2.0": {
+							"vector": [0, 180, 0]
+						},
+						"3.0": {
+							"vector": [0, 270, 0]
+						},
+						"4.0": {
+							"vector": [0, 360, 0]
+						}
+					}
+				}
+			}
+		}
+	}
+}

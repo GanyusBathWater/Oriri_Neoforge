@@ -77,6 +77,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.ELDER_SLAB.get());
                 simpleBlockItem(ModBlocks.ELDER_GATE.get());
                 fenceItem(ModBlocks.ELDER_FENCE, ModBlocks.ELDER_PLANKS);
+                doorItem(ModBlocks.ELDER_DOOR);
+                trapdoorItem(ModBlocks.ELDER_TRAPDOOR);
 
                 // Scarlet Blocks
                 simpleBlockItem(ModBlocks.SCARLET_GRASS_BLOCK.get());
@@ -87,6 +89,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.SCARLET_SLAB.get());
                 fenceItem(ModBlocks.SCARLET_FENCE, ModBlocks.SCARLET_PLANKS);
                 simpleBlockItem(ModBlocks.SCARLET_GATE.get());
+                doorItem(ModBlocks.SCARLET_DOOR);
+                trapdoorItem(ModBlocks.SCARLET_TRAPDOOR);
                 simpleBlockItem(ModBlocks.SCARLET_LEAVES.get());
                 simpleBlockItem(ModBlocks.SCARLET_STEM.get());
                 simpleBlockItem(ModBlocks.STRIPPED_SCARLET_STEM.get());
@@ -139,6 +143,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.ABYSS_CROWN_SLAB.get());
                 simpleBlockItem(ModBlocks.ABYSS_CROWN_GATE.get());
                 fenceItem(ModBlocks.ABYSS_CROWN_FENCE, ModBlocks.ABYSS_CROWN_PLANKS);
+                doorItem(ModBlocks.ABYSS_CROWN_DOOR);
+                trapdoorItem(ModBlocks.ABYSS_CROWN_TRAPDOOR);
                 simpleBlockItem(ModBlocks.ABYSS_CROWN_LEAVES.get());
                 saplingItem(ModBlocks.ABYSS_CROWN_SAPLING);
 
@@ -364,6 +370,10 @@ public class ModItemModelProvider extends ItemModelProvider {
                                                 .scale(0.40f, 0.40f, 0.40f)
                                                 .end()
                                 .end();
+
+                getBuilder(ModItems.ELEMENTAL_CHOIR.getId().getPath())
+                                .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:item/handheld"))
+                                .texture("layer0", mcLoc("item/stick"));
         }
 
         private void shieldItem(DeferredItem<?> item) {
@@ -486,5 +496,14 @@ public class ModItemModelProvider extends ItemModelProvider {
                                 ResourceLocation.parse("item/generated")).texture("layer0",
                                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                                 "block/" + item.getId().getPath()));
+        }
+
+        public void trapdoorItem(DeferredBlock<?> block) {
+                this.withExistingParent(block.getId().getPath(), modLoc("block/" + block.getId().getPath() + "_bottom"));
+        }
+
+        public void doorItem(DeferredBlock<?> block) {
+                this.withExistingParent(block.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", modLoc("item/" + block.getId().getPath()));
         }
 }

@@ -121,6 +121,18 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
                         // Carve Air
                         BlockState blockState = chunk.getBlockState(mutablePos);
                         if (this.canReplaceBlock(config, blockState)) {
+                            // Surface structure protection
+                            int maxCarve = net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.getMaxCarveHeight(chunk, worldX, worldZ);
+                            if (y > maxCarve) {
+                                continue;
+                            }
+                            if (y > maxCarve - 12) {
+                                double fade = (y - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
+                                double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)worldX * 0.1f, (float)y * 0.1f, (float)worldZ * 0.1f, 2);
+                                if (noise3D + 0.5 < fade * 1.5) {
+                                    continue;
+                                }
+                            }
                             // Manual carving to avoid using the context (which has a null generator)
                             chunk.setBlockState(mutablePos, Blocks.CAVE_AIR.defaultBlockState(), false);
                             if (carvingMask != null) {

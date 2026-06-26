@@ -16,6 +16,16 @@ public final class ModEntities {
         public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE,
                         OririMod.MOD_ID);
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity>> GIANT_SWORD = ENTITIES
+                        .register("giant_sword",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity>of(net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity::new, MobCategory.MISC)
+                                                        .sized(1.0F, 1.0F)
+                                                        .clientTrackingRange(128)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "giant_sword").toString()));
+
+
         public static final DeferredHolder<EntityType<?>, EntityType<MagicBoltEntity>> MAGIC_BOLT = ENTITIES.register(
                         "magic_bolt",
                         () -> EntityType.Builder.<MagicBoltEntity>of(MagicBoltEntity::new, MobCategory.MISC)

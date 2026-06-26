@@ -23,7 +23,7 @@ public class BossAttackDebugWandItem extends Item {
     public enum BossAttackType {
         SWORD_PROJECTILE, METEOR_SHOWER, LASERBEAM_NORMAL, LASERBEAM_CYLINDER, LASERBEAM_CIRCLE,
         LASERBEAM_GROUND, LASERBEAM_STARBURST, INSTA_DEATH, ROOT_ATTACK, GROUND_SLAM,
-        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM, LASERBEAM_GRID;
+        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM, LASERBEAM_GRID, HEAVENLY_EXECUTION;
     }
 
     private static final String NBT_SELECTED = "ActiveAttack";
@@ -203,6 +203,26 @@ public class BossAttackDebugWandItem extends Item {
                 int beamCount = possibleBeams[level.random.nextInt(possibleBeams.length)];
                 double arenaSize = 20.0; // Dynamic arena size (20x20 blocks)
                 net.ganyusbathwater.oririmod.util.LaserBeamUtil.spawnMagicGrid(serverLevel, center, beamCount, arenaSize, player.getId());
+            } else if (current == BossAttackType.HEAVENLY_EXECUTION
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                BlockPos targetPosFinal = targetPos != null ? targetPos : player.blockPosition();
+                net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity sword = new net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity(
+                        net.ganyusbathwater.oririmod.entity.ModEntities.GIANT_SWORD.get(), serverLevel
+                );
+                // Spawns 15 Blocks in the sky above the target
+                sword.setPos(targetPosFinal.getX() + 0.5, targetPosFinal.getY() + 15.0, targetPosFinal.getZ() + 0.5);
+                sword.ownerId = player.getUUID();
+                
+                // Set default configs (dynamic behavior)
+                sword.delayTicks = 60; // 3 seconds
+                sword.fallSpeed = -3.5f;
+                sword.impactDamage = 20.0f; // 10 hearts
+                sword.explosionDamage = 10.0f; // 5 hearts
+                sword.impactRadius = 7.0f;
+                sword.explosionRadius = 5.0f;
+                sword.embeddedTicks = 80; // 4 seconds
+                
+                serverLevel.addFreshEntity(sword);
             }
         }
 
@@ -304,6 +324,7 @@ public class BossAttackDebugWandItem extends Item {
             case ILLAGER_SPECIAL -> "Illager Special";
             case EYE_OF_THE_STORM -> "Eye of the Storm";
             case LASERBEAM_GRID -> "Laserbeam Grid";
+            case HEAVENLY_EXECUTION -> "Heavenly Execution";
         };
     }
 }

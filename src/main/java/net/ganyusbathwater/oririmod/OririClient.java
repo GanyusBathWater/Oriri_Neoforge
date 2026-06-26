@@ -323,6 +323,31 @@ public class OririClient {
                 event.setRoll(event.getRoll() + shakeRoll);
             }
         }
+        
+        // Scan for GiantSwordEntities for screen shake on impact
+        java.util.List<net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity> swords = mc.level.getEntitiesOfClass(
+                net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity.class, 
+                mc.player.getBoundingBox().inflate(maxDist));
+        for (net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity sword : swords) {
+            if (sword.isImpacted() && sword.clientImpactTicks < 40) {
+                double dist = mc.player.distanceTo(sword);
+                if (dist < maxDist) {
+                    float distIntensity = 1.0f - (float)(dist / maxDist);
+                    float timeIntensity = 1.0f - (sword.clientImpactTicks / 40.0f);
+                    float intensity = distIntensity * timeIntensity * 3.0f; // very intense close up
+                    
+                    // Simple fast shake
+                    float time = sword.tickCount + (float)event.getPartialTick();
+                    float shakePitch = (float)(Math.sin(time * 5.0) * Math.cos(time * 3.0)) * intensity;
+                    float shakeYaw = (float)(Math.cos(time * 6.0) * Math.sin(time * 2.5)) * intensity;
+                    float shakeRoll = (float)(Math.sin(time * 4.0)) * 0.5f * intensity;
+                    
+                    event.setPitch(event.getPitch() + shakePitch);
+                    event.setYaw(event.getYaw() + shakeYaw);
+                    event.setRoll(event.getRoll() + shakeRoll);
+                }
+            }
+        }
     }
 
     @SubscribeEvent
@@ -330,5 +355,34 @@ public class OririClient {
         event.register(
                 net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.EQUINOX_TABLE_MENU.get(),
                 net.ganyusbathwater.oririmod.client.screen.EquinoxTableScreen::new);
+    }
+
+    private static net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer choirRenderer;
+
+    @SubscribeEvent
+    public static void onPlayerRenderPre(net.neoforged.neoforge.client.event.RenderPlayerEvent.Pre event) {
+        net.minecraft.world.entity.player.Player player = event.getEntity();
+        net.minecraft.world.item.ItemStack stack = player.getMainHandItem();
+        
+        if (!(stack.getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ElementalChoirItem)) {
+            return;
+        }
+        
+        if (choirRenderer == null) {
+            choirRenderer = new net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer();
+        }
+        
+        com.mojang.blaze3d.vertex.PoseStack poseStack = event.getPoseStack();
+        poseStack.pushPose();
+        
+        // At this point, the PoseStack is lag-free and perfectly at the player's feet, with NO rotation applied.
+        // We translate it to the torso height (lowered to 0.3 for a better visual offset) and subtract the 0.5 vanilla item centering offset.
+        poseStack.translate(-0.5, (player.getBbHeight() * 0.3) - 0.5, -0.5);
+        
+        net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer.currentRenderEntity = player;
+        choirRenderer.renderByItem(stack, net.minecraft.world.item.ItemDisplayContext.NONE, poseStack, event.getMultiBufferSource(), event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+        net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer.currentRenderEntity = null;
+        
+        poseStack.popPose();
     }
 }

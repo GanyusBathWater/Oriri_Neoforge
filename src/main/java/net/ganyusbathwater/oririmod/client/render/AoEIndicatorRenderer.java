@@ -61,8 +61,8 @@ public class AoEIndicatorRenderer {
             } else if (progress > 0.9f) {
                 alphaMult = 1.0f - ((progress - 0.9f) / 0.1f);
             }
-            // Add a subtle pulsing effect
-            float pulse = 0.8f + 0.2f * (float) Math.sin(progress * Math.PI * 10);
+            // Add a subtle pulsing effect (slower)
+            float pulse = 0.8f + 0.2f * (float) Math.sin(progress * Math.PI * 4);
             alphaMult *= pulse;
 
             int argb = ind.argbColor;

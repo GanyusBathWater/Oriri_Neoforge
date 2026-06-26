@@ -108,6 +108,16 @@ public final class NetworkHandler {
                         }
                     }
                 }));
+
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.ElementalChoirSweepPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.ElementalChoirSweepPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var player = ctx.player();
+                    if (player != null && player.getMainHandItem().getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ElementalChoirItem item) {
+                        item.executeServerSwing(player, player.getMainHandItem());
+                    }
+                }));
     }
     
 

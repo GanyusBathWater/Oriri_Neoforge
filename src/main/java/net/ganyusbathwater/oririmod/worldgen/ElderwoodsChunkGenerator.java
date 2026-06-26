@@ -163,7 +163,71 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double noise = Math.sin(nx) * Math.cos(nz) * 12.0; 
         noise += Math.sin(nx * 0.5 + 2.0) * Math.cos(nz * 0.6 + 1.1) * 6.0;
 
-        return BASE_HEIGHT + (int) Math.round(noise);
+        int naturalHeight = BASE_HEIGHT + (int) Math.round(noise);
+        
+        java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = 
+            net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.CURRENT_STRUCTURE_BOXES.get();
+            
+        if (boxes != null && !boxes.isEmpty()) {
+            double bestBlendHeight = naturalHeight;
+            double maxInfluence = 0.0;
+            
+            for (net.minecraft.world.level.levelgen.structure.BoundingBox box : boxes) {
+                int centerX = (box.minX() + box.maxX()) / 2;
+                int centerZ = (box.minZ() + box.maxZ()) / 2;
+                
+                int boxRadiusX = (box.maxX() - box.minX()) / 2;
+                int boxRadiusZ = (box.maxZ() - box.minZ()) / 2;
+                
+                // Only apply surface flattening to small surface buildings (like the Sanctuary or Outpost).
+                // Massive structures like Mineshafts have huge bounding boxes and should not flatten the surface!
+                if (boxRadiusX > 0 && boxRadiusZ > 0 && boxRadiusX < 48 && boxRadiusZ < 48) {
+                    double dx = x - centerX;
+                    double dz = z - centerZ;
+                    
+                    // We want a flat plateau underneath the structure itself, and a smooth slope blending outward.
+                    double normX = dx / ((double)boxRadiusX + 8.0); // 8 block padding around structure
+                    double normZ = dz / ((double)boxRadiusZ + 8.0);
+                    
+                    double euclidean = Math.sqrt(normX * normX + normZ * normZ);
+                    
+                    // Add organic noise to the distance calculation to break up perfect square boundaries
+                    // This creates a natural jagged edge rather than a mathematical straight line!
+                    double boundaryNoise = Math.sin((x + seedOffsetX) * 0.15) * Math.cos((z + seedOffsetZ) * 0.15) * 0.25;
+                    boundaryNoise += Math.sin((x - z + seedOffsetX) * 0.05) * 0.25;
+                    
+                    euclidean += boundaryNoise;
+                    
+                    if (euclidean < 2.0) { // Influence extends up to 2x the padded radius
+                        double influence = 1.0;
+                        if (euclidean > 1.0) {
+                            // Smooth Hermite interpolation from 1.0 down to 0.0
+                            double t = euclidean - 1.0; // 0 to 1
+                            influence = 1.0 - (t * t * (3.0 - 2.0 * t));
+                        }
+                        
+                        if (influence > maxInfluence) {
+                            maxInfluence = influence;
+                            // Evaluate the natural un-flattened surface height exactly at the center of the structure!
+                            // Because Jigsaw WORLD_SURFACE_WG spawned the structure at this exact natural height,
+                            // blending the plateau to this height guarantees perfect flush alignment with the ground floor!
+                            double cnx = (centerX + seedOffsetX) * 0.003;
+                            double cnz = (centerZ + seedOffsetZ) * 0.003;
+                            double cnoise = Math.sin(cnx) * Math.cos(cnz) * 12.0; 
+                            cnoise += Math.sin(cnx * 0.5 + 2.0) * Math.cos(cnz * 0.6 + 1.1) * 6.0;
+                            bestBlendHeight = BASE_HEIGHT + (int) Math.round(cnoise);
+                        }
+                    }
+                }
+            }
+            
+            if (maxInfluence > 0.0) {
+                // Blend natural height with structure plateau height
+                naturalHeight = (int) Math.round(naturalHeight * (1.0 - maxInfluence) + bestBlendHeight * maxInfluence);
+            }
+        }
+
+        return naturalHeight;
     }
 
     private double getAbyssNoise3D(int x, int y, int z) {
@@ -445,6 +509,30 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private static final int LAVA_LAKE_LEVEL = MIN_Y + 30; 
 
+    private void updateStructureBoxes(StructureManager structureManager, ChunkAccess chunk) {
+        java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<net.minecraft.world.level.levelgen.structure.Structure, it.unimi.dsi.fastutil.longs.LongSet> entry : chunk.getAllReferences().entrySet()) {
+            net.minecraft.world.level.levelgen.structure.Structure structure = entry.getKey();
+            for (long originPosLong : entry.getValue()) {
+                net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(originPosLong);
+                
+                try {
+                    java.util.List<net.minecraft.world.level.levelgen.structure.StructureStart> starts = 
+                        structureManager.startsForStructure(net.minecraft.core.SectionPos.of(originPos, 0), structure);
+                    for (net.minecraft.world.level.levelgen.structure.StructureStart start : starts) {
+                        if (start != null && start.isValid()) {
+                            boxes.add(start.getBoundingBox());
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore structures whose origin chunk is outside the currently available WorldGenRegion.
+                    // This safely filters out faraway massive structures like Mineshafts, preventing deadlocks!
+                }
+            }
+        }
+        net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.CURRENT_STRUCTURE_BOXES.set(boxes);
+    }
+
     @Override
     public void applyCarvers(WorldGenRegion level, long seed, RandomState randomState, BiomeManager biomeManager,
                              StructureManager structureManager, ChunkAccess chunk, GenerationStep.Carving step) {
@@ -452,6 +540,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         lastSeed = seed;
 
         if (step == GenerationStep.Carving.AIR || step == GenerationStep.Carving.LIQUID) {
+            updateStructureBoxes(structureManager, chunk);
             try {
                 net.minecraft.world.level.levelgen.carver.CarvingContext context = null;
                 net.minecraft.world.level.chunk.CarvingMask carvingMask = null;
@@ -469,13 +558,18 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 for (net.minecraft.core.Holder<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> holder : settings
                         .getCarvers(step)) {
                     net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> carver = holder.value();
-                    
                     // Run normal biome carvers, excluding the global Abyss Carver
                     if (!(carver.worldCarver() instanceof ElysianAbyssCarver)) {
                         try {
-                            net.minecraft.util.RandomSource carverRandom = net.minecraft.util.RandomSource.create(seed ^ chunk.getPos().toLong());
-                            if (carver.isStartChunk(carverRandom)) {
-                                carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, chunk.getPos(), carvingMask);
+                            int range = carver.worldCarver().getRange();
+                            for (int rx = -range; rx <= range; rx++) {
+                                for (int rz = -range; rz <= range; rz++) {
+                                    net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(chunk.getPos().x + rx, chunk.getPos().z + rz);
+                                    net.minecraft.util.RandomSource carverRandom = net.minecraft.util.RandomSource.create(seed ^ originPos.toLong());
+                                    if (carver.isStartChunk(carverRandom)) {
+                                        carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, originPos, carvingMask);
+                                    }
+                                }
                             }
                         } catch (Exception ex) {
                             // Vanilla carver failed due to null context. Ignore safely so it doesn't abort the global custom carvers.
@@ -487,8 +581,14 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 net.minecraft.core.Registry<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> carverRegistry = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.CONFIGURED_CARVER);
                 for (net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> globalCarver : carverRegistry) {
                     if (globalCarver.worldCarver() instanceof ElysianAbyssCarver) {
-                        net.minecraft.util.RandomSource globalRandom = net.minecraft.util.RandomSource.create(seed ^ chunk.getPos().toLong());
-                        globalCarver.carve(context, chunk, biomeManager::getBiome, globalRandom, aquifer, chunk.getPos(), carvingMask);
+                        int range = globalCarver.worldCarver().getRange();
+                        for (int rx = -range; rx <= range; rx++) {
+                            for (int rz = -range; rz <= range; rz++) {
+                                net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(chunk.getPos().x + rx, chunk.getPos().z + rz);
+                                net.minecraft.util.RandomSource globalRandom = net.minecraft.util.RandomSource.create(seed ^ originPos.toLong());
+                                globalCarver.carve(context, chunk, biomeManager::getBiome, globalRandom, aquifer, originPos, carvingMask);
+                            }
+                        }
                     }
                 }
             } catch (Throwable e) {
@@ -1085,6 +1185,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState random,
             StructureManager structureManager, ChunkAccess chunk) {
+        updateStructureBoxes(structureManager, chunk);
         try {
             initSeedFromRandomState(random);
 

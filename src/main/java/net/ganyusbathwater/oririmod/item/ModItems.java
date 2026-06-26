@@ -319,6 +319,9 @@ public class ModItems {
                                                         .stacksTo(1),
                                         ModRarity.LEGENDARY));
 
+        public static final DeferredItem<ElementalChoirItem> ELEMENTAL_CHOIR = ITEMS.register("elemental_choir",
+                        () -> new ElementalChoirItem(new Item.Properties().stacksTo(1)));
+
         public static final DeferredItem<MaceItem> MJOELNIR = ITEMS.register("mjoelnir",
                         () -> new CustomHammerItem(
                                         new Item.Properties().attributes(MaceItem.createAttributes()).stacksTo(1),
