@@ -61,5 +61,25 @@ public class ModItemTagProvider extends ItemTagsProvider {
         this.copy(BlockTags.WOODEN_FENCES, ItemTags.WOODEN_FENCES);
         this.copy(BlockTags.FENCE_GATES, ItemTags.FENCE_GATES);
         this.copy(BlockTags.LEAVES, ItemTags.LEAVES);
+        this.copy(BlockTags.WOODEN_BUTTONS, ItemTags.WOODEN_BUTTONS);
+        this.copy(BlockTags.WOODEN_DOORS, ItemTags.WOODEN_DOORS);
+        this.copy(BlockTags.WOODEN_TRAPDOORS, ItemTags.WOODEN_TRAPDOORS);
+        this.copy(BlockTags.WOODEN_PRESSURE_PLATES, ItemTags.WOODEN_PRESSURE_PLATES);
+        this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
+        this.copy(BlockTags.CEILING_HANGING_SIGNS, ItemTags.HANGING_SIGNS);
+
+        this.tag(ItemTags.BOATS)
+                .add(
+                        net.ganyusbathwater.oririmod.item.ModItems.ELDER_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.SCARLET_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_BOAT.get()
+                );
+        
+        this.tag(ItemTags.CHEST_BOATS)
+                .add(
+                        net.ganyusbathwater.oririmod.item.ModItems.ELDER_CHEST_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.SCARLET_CHEST_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_CHEST_BOAT.get()
+                );
     }
 }

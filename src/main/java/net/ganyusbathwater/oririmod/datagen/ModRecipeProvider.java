@@ -136,6 +136,10 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS))
                                 .save(recipeOutput);
 
+                makeWoodRecipes(recipeOutput, ModBlocks.ELDER_PLANKS.get(), ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_BUTTON.get(), ModBlocks.ELDER_PRESSURE_PLATE.get(), ModBlocks.ELDER_DOOR.get(), ModBlocks.ELDER_TRAPDOOR.get(), ModItems.ELDER_SIGN.get(), ModItems.ELDER_HANGING_SIGN.get(), ModItems.ELDER_BOAT.get(), ModItems.ELDER_CHEST_BOAT.get(), "elder");
+                makeWoodRecipes(recipeOutput, ModBlocks.SCARLET_PLANKS.get(), ModBlocks.STRIPPED_SCARLET_LOG.get(), ModBlocks.SCARLET_BUTTON.get(), ModBlocks.SCARLET_PRESSURE_PLATE.get(), ModBlocks.SCARLET_DOOR.get(), ModBlocks.SCARLET_TRAPDOOR.get(), ModItems.SCARLET_SIGN.get(), ModItems.SCARLET_HANGING_SIGN.get(), ModItems.SCARLET_BOAT.get(), ModItems.SCARLET_CHEST_BOAT.get(), "scarlet");
+                makeWoodRecipes(recipeOutput, ModBlocks.ABYSS_CROWN_PLANKS.get(), ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get(), ModBlocks.ABYSS_CROWN_BUTTON.get(), ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get(), ModBlocks.ABYSS_CROWN_DOOR.get(), ModBlocks.ABYSS_CROWN_TRAPDOOR.get(), ModItems.ABYSS_CROWN_SIGN.get(), ModItems.ABYSS_CROWN_HANGING_SIGN.get(), ModItems.ABYSS_CROWN_BOAT.get(), ModItems.ABYSS_CROWN_CHEST_BOAT.get(), "abyss_crown");
+
                 // --- Planks from Logs/Stems ---
                 // Elder
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PLANKS.get(), 4)
@@ -442,5 +446,64 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .define('I', ingot)
                                 .define('S', Items.STICK)
                                 .unlockedBy("has_ingot", has(ingot)).save(recipeOutput);
+        }
+
+        private void makeWoodRecipes(RecipeOutput recipeOutput, Block planks, Block strippedLog, Block button, Block pressurePlate, Block door, Block trapdoor, Item sign, Item hangingSign, Item boat, Item chestBoat, String woodName) {
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, button)
+                                .requires(planks)
+                                .unlockedBy("has_" + woodName + "_planks", has(planks))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, pressurePlate, 1)
+                                .pattern("PP")
+                                .define('P', planks)
+                                .unlockedBy("has_" + woodName + "_planks", has(planks))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, door, 3)
+                                .pattern("PP")
+                                .pattern("PP")
+                                .pattern("PP")
+                                .define('P', planks)
+                                .unlockedBy("has_" + woodName + "_planks", has(planks))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, trapdoor, 2)
+                                .pattern("PPP")
+                                .pattern("PPP")
+                                .define('P', planks)
+                                .unlockedBy("has_" + woodName + "_planks", has(planks))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, sign, 3)
+                                .pattern("PPP")
+                                .pattern("PPP")
+                                .pattern(" S ")
+                                .define('P', planks)
+                                .define('S', Items.STICK)
+                                .unlockedBy("has_" + woodName + "_planks", has(planks))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, hangingSign, 6)
+                                .pattern("C C")
+                                .pattern("LLL")
+                                .pattern("LLL")
+                                .define('C', Items.CHAIN)
+                                .define('L', strippedLog)
+                                .unlockedBy("has_stripped_" + woodName + "_log", has(strippedLog))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, boat, 1)
+                                .pattern("P P")
+                                .pattern("PPP")
+                                .define('P', planks)
+                                .unlockedBy("has_" + woodName + "_planks", has(planks))
+                                .save(recipeOutput);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, chestBoat, 1)
+                                .requires(boat)
+                                .requires(Items.CHEST)
+                                .unlockedBy("has_" + woodName + "_boat", has(boat))
+                                .save(recipeOutput);
         }
 }

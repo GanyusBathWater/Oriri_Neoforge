@@ -135,7 +135,7 @@ public class ElementalChoirItem extends SwordItem implements GeoItem {
         }));
         
         // AttackController: Dedicated strictly to Left-Click swing triggers without dampening
-        controllers.add(new AnimationController<>(this, "AttackController", 1, state -> PlayState.CONTINUE)
+        controllers.add(new AnimationController<>(this, "AttackController", 1, state -> PlayState.STOP)
         .triggerableAnim("attack_sweep_left", RawAnimation.begin().thenPlay("elemental_swords_normal_attack_left"))
         .triggerableAnim("attack_sweep_right", RawAnimation.begin().thenPlay("elemental_swords_normal_attack_right")));
     }

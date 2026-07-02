@@ -79,6 +79,12 @@ public class ModItemModelProvider extends ItemModelProvider {
                 fenceItem(ModBlocks.ELDER_FENCE, ModBlocks.ELDER_PLANKS);
                 doorItem(ModBlocks.ELDER_DOOR);
                 trapdoorItem(ModBlocks.ELDER_TRAPDOOR);
+                buttonItem(ModBlocks.ELDER_BUTTON, ModBlocks.ELDER_PLANKS);
+                withExistingParent(ModBlocks.ELDER_PRESSURE_PLATE.getId().getPath(), modLoc("block/elder_pressure_plate"));
+                basicItem(ModItems.ELDER_SIGN.get());
+                basicItem(ModItems.ELDER_HANGING_SIGN.get());
+                basicItem(ModItems.ELDER_BOAT.get());
+                basicItem(ModItems.ELDER_CHEST_BOAT.get());
 
                 // Scarlet Blocks
                 simpleBlockItem(ModBlocks.SCARLET_GRASS_BLOCK.get());
@@ -94,6 +100,12 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.SCARLET_LEAVES.get());
                 simpleBlockItem(ModBlocks.SCARLET_STEM.get());
                 simpleBlockItem(ModBlocks.STRIPPED_SCARLET_STEM.get());
+                buttonItem(ModBlocks.SCARLET_BUTTON, ModBlocks.SCARLET_PLANKS);
+                withExistingParent(ModBlocks.SCARLET_PRESSURE_PLATE.getId().getPath(), modLoc("block/scarlet_pressure_plate"));
+                basicItem(ModItems.SCARLET_SIGN.get());
+                basicItem(ModItems.SCARLET_HANGING_SIGN.get());
+                basicItem(ModItems.SCARLET_BOAT.get());
+                basicItem(ModItems.SCARLET_CHEST_BOAT.get());
 
                 simpleBlockItem(ModBlocks.SCARLET_STONE.get());
                 simpleBlockItem(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
@@ -145,6 +157,12 @@ public class ModItemModelProvider extends ItemModelProvider {
                 fenceItem(ModBlocks.ABYSS_CROWN_FENCE, ModBlocks.ABYSS_CROWN_PLANKS);
                 doorItem(ModBlocks.ABYSS_CROWN_DOOR);
                 trapdoorItem(ModBlocks.ABYSS_CROWN_TRAPDOOR);
+                buttonItem(ModBlocks.ABYSS_CROWN_BUTTON, ModBlocks.ABYSS_CROWN_PLANKS);
+                withExistingParent(ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.getId().getPath(), modLoc("block/abyss_crown_pressure_plate"));
+                basicItem(ModItems.ABYSS_CROWN_SIGN.get());
+                basicItem(ModItems.ABYSS_CROWN_HANGING_SIGN.get());
+                basicItem(ModItems.ABYSS_CROWN_BOAT.get());
+                basicItem(ModItems.ABYSS_CROWN_CHEST_BOAT.get());
                 simpleBlockItem(ModBlocks.ABYSS_CROWN_LEAVES.get());
                 saplingItem(ModBlocks.ABYSS_CROWN_SAPLING);
 
@@ -468,7 +486,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         }
 
         public void buttonItem(DeferredBlock<?> block, DeferredBlock<Block> baseBlock) {
-                this.withExistingParent(block.getId().getPath(), mcLoc("block/button"))
+                this.withExistingParent(block.getId().getPath(), mcLoc("block/button_inventory"))
                                 .texture("texture", ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                 "block/" + baseBlock.getId().getPath()));
         }

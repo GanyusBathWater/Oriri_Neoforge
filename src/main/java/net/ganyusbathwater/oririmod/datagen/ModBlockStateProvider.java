@@ -75,6 +75,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 doorBlockWithRenderType((DoorBlock) ModBlocks.ELDER_DOOR.get(), modLoc("block/elder_door_bottom"), modLoc("block/elder_door_top"), "cutout");
                 trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.ELDER_TRAPDOOR.get(), modLoc("block/elder_trapdoor"), true, "cutout");
 
+                buttonBlock((net.minecraft.world.level.block.ButtonBlock) ModBlocks.ELDER_BUTTON.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
+                pressurePlateBlock((net.minecraft.world.level.block.PressurePlateBlock) ModBlocks.ELDER_PRESSURE_PLATE.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
+
+                signBlock((net.minecraft.world.level.block.StandingSignBlock) ModBlocks.ELDER_SIGN.get(), (net.minecraft.world.level.block.WallSignBlock) ModBlocks.ELDER_WALL_SIGN.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
+                hangingSignBlock(ModBlocks.ELDER_HANGING_SIGN.get(), ModBlocks.ELDER_WALL_HANGING_SIGN.get(), modLoc("block/elder_log_block_side"));
+
                 saplingBlock(ModBlocks.ELDER_SAPLING);
                 saplingBlock(ModBlocks.STAR_HERB);
 
@@ -99,6 +105,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
                 doorBlockWithRenderType((DoorBlock) ModBlocks.SCARLET_DOOR.get(), modLoc("block/scarlet_door_bottom"), modLoc("block/scarlet_door_top"), "cutout");
                 trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.SCARLET_TRAPDOOR.get(), modLoc("block/scarlet_trapdoor"), true, "cutout");
+
+                buttonBlock((net.minecraft.world.level.block.ButtonBlock) ModBlocks.SCARLET_BUTTON.get(), blockTexture(ModBlocks.SCARLET_PLANKS.get()));
+                pressurePlateBlock((net.minecraft.world.level.block.PressurePlateBlock) ModBlocks.SCARLET_PRESSURE_PLATE.get(), blockTexture(ModBlocks.SCARLET_PLANKS.get()));
+
+                signBlock((net.minecraft.world.level.block.StandingSignBlock) ModBlocks.SCARLET_SIGN.get(), (net.minecraft.world.level.block.WallSignBlock) ModBlocks.SCARLET_WALL_SIGN.get(), blockTexture(ModBlocks.SCARLET_PLANKS.get()));
+                hangingSignBlock(ModBlocks.SCARLET_HANGING_SIGN.get(), ModBlocks.SCARLET_WALL_HANGING_SIGN.get(), modLoc("block/scarlet_log"));
 
                 // Stems use log texture on all sides
                 simpleBlockWithItem(ModBlocks.SCARLET_STEM.get(),
@@ -256,6 +268,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
                 doorBlockWithRenderType((DoorBlock) ModBlocks.ABYSS_CROWN_DOOR.get(), modLoc("block/abyss_crown_door_bottom"), modLoc("block/abyss_crown_door_top"), "cutout");
                 trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.ABYSS_CROWN_TRAPDOOR.get(), modLoc("block/abyss_crown_trapdoor"), true, "cutout");
+
+                buttonBlock((net.minecraft.world.level.block.ButtonBlock) ModBlocks.ABYSS_CROWN_BUTTON.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+                pressurePlateBlock((net.minecraft.world.level.block.PressurePlateBlock) ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+
+                signBlock((net.minecraft.world.level.block.StandingSignBlock) ModBlocks.ABYSS_CROWN_SIGN.get(), (net.minecraft.world.level.block.WallSignBlock) ModBlocks.ABYSS_CROWN_WALL_SIGN.get(), blockTexture(ModBlocks.ABYSS_CROWN_PLANKS.get()));
+                hangingSignBlock(ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get(), modLoc("block/abyss_crown_log"));
                 blockWithItem(ModBlocks.ABYSS_CROWN_LEAVES, 3);
                 
                 simpleBlockWithItem(ModBlocks.ABYSS_CROWN_SAPLING.get(),

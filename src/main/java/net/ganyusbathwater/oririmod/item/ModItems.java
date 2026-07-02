@@ -16,6 +16,7 @@ import net.ganyusbathwater.oririmod.item.component.ModDataComponents;
 import net.ganyusbathwater.oririmod.item.component.CosmicTooltipData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.*;
+import net.ganyusbathwater.oririmod.entity.custom.ModBoatEntity.ModBoatType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -474,6 +475,12 @@ public class ModItems {
                                         0x00CED1, 0xFF69B4, // outer: dark turquoise, inner: hot pink (Charmed effect)
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> REX_ARANEA_SPAWN_EGG = ITEMS.register(
+                        "rex_aranea_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.REX_ARANEA,
+                                        0x1A1A1A, 0x4A0000, // outer: dark grey/black, inner: dark red
+                                        new Item.Properties()));
+
         public static final DeferredItem<DeferredSpawnEggItem> LOADED_BLAZE_SPAWN_EGG = ITEMS.register(
                         "loaded_blaze_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.LOADED_BLAZE,
@@ -702,6 +709,32 @@ public class ModItems {
                 });
         }
 
+
+        public static final DeferredItem<Item> ELDER_SIGN = ITEMS.register("elder_sign",
+                        () -> new SignItem(new Item.Properties().stacksTo(16), net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_WALL_SIGN.get()));
+        public static final DeferredItem<Item> ELDER_HANGING_SIGN = ITEMS.register("elder_hanging_sign",
+                        () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
+        public static final DeferredItem<Item> SCARLET_SIGN = ITEMS.register("scarlet_sign",
+                        () -> new SignItem(new Item.Properties().stacksTo(16), net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_WALL_SIGN.get()));
+        public static final DeferredItem<Item> SCARLET_HANGING_SIGN = ITEMS.register("scarlet_hanging_sign",
+                        () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
+        public static final DeferredItem<Item> ABYSS_CROWN_SIGN = ITEMS.register("abyss_crown_sign",
+                        () -> new SignItem(new Item.Properties().stacksTo(16), net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_WALL_SIGN.get()));
+        public static final DeferredItem<Item> ABYSS_CROWN_HANGING_SIGN = ITEMS.register("abyss_crown_hanging_sign",
+                        () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
+
+        public static final DeferredItem<Item> ELDER_BOAT = ITEMS.register("elder_boat",
+                        () -> new ModBoatItem(false, ModBoatType.ELDER, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> ELDER_CHEST_BOAT = ITEMS.register("elder_chest_boat",
+                        () -> new ModBoatItem(true, ModBoatType.ELDER, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> SCARLET_BOAT = ITEMS.register("scarlet_boat",
+                        () -> new ModBoatItem(false, ModBoatType.SCARLET, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> SCARLET_CHEST_BOAT = ITEMS.register("scarlet_chest_boat",
+                        () -> new ModBoatItem(true, ModBoatType.SCARLET, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> ABYSS_CROWN_BOAT = ITEMS.register("abyss_crown_boat",
+                        () -> new ModBoatItem(false, ModBoatType.ABYSS_CROWN, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> ABYSS_CROWN_CHEST_BOAT = ITEMS.register("abyss_crown_chest_boat",
+                        () -> new ModBoatItem(true, ModBoatType.ABYSS_CROWN, new Item.Properties().stacksTo(1)));
 
         private static void addItemsToIngredientTabItemGroup() {
 

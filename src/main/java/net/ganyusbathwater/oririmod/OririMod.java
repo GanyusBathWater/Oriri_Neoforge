@@ -107,14 +107,13 @@ public class OririMod {
         }
     }
 
-    private void commonSetup(FMLCommonSetupEvent event) {
+    private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             ElementInit.init();
             ElementalDamageHandler.register();
             TooltipHandler.register();
             ModItems.registerDispenserBehaviors();
         });
-
     }
 
     // Add the example block item to the building blocks tab

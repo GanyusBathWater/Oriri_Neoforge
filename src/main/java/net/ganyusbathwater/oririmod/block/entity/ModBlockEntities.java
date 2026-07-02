@@ -23,6 +23,20 @@ public class ModBlockEntities {
             () -> BlockEntityType.Builder.of(RevivalShrineBlockEntity::new,
                     ModBlocks.REVIVAL_SHRINE.get()).build(null));
 
+    public static final Supplier<BlockEntityType<ModSignBlockEntity>> MOD_SIGN = BLOCK_ENTITIES.register(
+            "mod_sign",
+            () -> BlockEntityType.Builder.of(ModSignBlockEntity::new,
+                    ModBlocks.ELDER_SIGN.get(), ModBlocks.ELDER_WALL_SIGN.get(),
+                    ModBlocks.SCARLET_SIGN.get(), ModBlocks.SCARLET_WALL_SIGN.get(),
+                    ModBlocks.ABYSS_CROWN_SIGN.get(), ModBlocks.ABYSS_CROWN_WALL_SIGN.get()).build(null));
+
+    public static final Supplier<BlockEntityType<ModHangingSignBlockEntity>> MOD_HANGING_SIGN = BLOCK_ENTITIES.register(
+            "mod_hanging_sign",
+            () -> BlockEntityType.Builder.of(ModHangingSignBlockEntity::new,
+                    ModBlocks.ELDER_HANGING_SIGN.get(), ModBlocks.ELDER_WALL_HANGING_SIGN.get(),
+                    ModBlocks.SCARLET_HANGING_SIGN.get(), ModBlocks.SCARLET_WALL_HANGING_SIGN.get(),
+                    ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

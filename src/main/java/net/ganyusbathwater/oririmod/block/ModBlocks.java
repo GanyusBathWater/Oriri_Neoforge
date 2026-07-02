@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
+import net.ganyusbathwater.oririmod.util.ModWoodTypes;
+import net.minecraft.world.level.block.IronBarsBlock;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -76,14 +78,14 @@ public class ModBlocks {
                         () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE)));
 
         public static final DeferredBlock<FenceGateBlock> ELDER_GATE = registerBlock("elder_gate",
-                        () -> new FenceGateBlock(WoodType.ACACIA,
+                        () -> new FenceGateBlock(ModWoodTypes.ELDER_WOOD_TYPE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
 
         public static final DeferredBlock<DoorBlock> ELDER_DOOR = registerBlock("elder_door",
-                        () -> new DoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+                        () -> new DoorBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<TrapDoorBlock> ELDER_TRAPDOOR = registerBlock("elder_trapdoor",
-                        () -> new TrapDoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
+                        () -> new TrapDoorBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
 
         public static final DeferredBlock<Block> STRIPPED_ELDER_LOG_BLOCK = registerBlock("stripped_elder_log_block",
                         () -> new ModFlammableRotatedPillarBlock(
@@ -192,14 +194,14 @@ public class ModBlocks {
                         () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE)));
 
         public static final DeferredBlock<FenceGateBlock> SCARLET_GATE = registerBlock("scarlet_gate",
-                        () -> new FenceGateBlock(WoodType.ACACIA,
+                        () -> new FenceGateBlock(ModWoodTypes.SCARLET_WOOD_TYPE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
 
         public static final DeferredBlock<DoorBlock> SCARLET_DOOR = registerBlock("scarlet_door",
-                        () -> new DoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+                        () -> new DoorBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<TrapDoorBlock> SCARLET_TRAPDOOR = registerBlock("scarlet_trapdoor",
-                        () -> new TrapDoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
+                        () -> new TrapDoorBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
 
         public static final DeferredBlock<Block> SCARLET_SAPLING = registerBlock("scarlet_sapling",
                         () -> new SaplingBlock(ModTreeGrowers.SCARLET_TREE,
@@ -447,7 +449,7 @@ public class ModBlocks {
                         });
 
         public static final DeferredBlock<FenceGateBlock> ABYSS_CROWN_GATE = registerBlock("abyss_crown_gate",
-                        () -> new FenceGateBlock(WoodType.ACACIA,
+                        () -> new FenceGateBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)) {
                                 @Override
                                 public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
@@ -469,7 +471,7 @@ public class ModBlocks {
                         });
 
         public static final DeferredBlock<DoorBlock> ABYSS_CROWN_DOOR = registerBlock("abyss_crown_door",
-                        () -> new DoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)) {
+                        () -> new DoorBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)) {
                                 @Override
                                 public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
                                                 Direction direction) {
@@ -490,7 +492,7 @@ public class ModBlocks {
                         });
 
         public static final DeferredBlock<TrapDoorBlock> ABYSS_CROWN_TRAPDOOR = registerBlock("abyss_crown_trapdoor",
-                        () -> new TrapDoorBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)) {
+                        () -> new TrapDoorBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)) {
                                 @Override
                                 public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
                                                 Direction direction) {
@@ -531,6 +533,32 @@ public class ModBlocks {
         public static final DeferredBlock<Block> AETHER_FIRE_BLOCK = BLOCKS.register("aether_fire_block",
                         () -> new AetherFireBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.FIRE)
                                         .noCollission().instabreak().lightLevel(state -> 15).noLootTable()));
+
+        // ===== BUTTONS & PRESSURE PLATES =====
+        public static final DeferredBlock<ButtonBlock> ELDER_BUTTON = registerBlock("elder_button", () -> new ButtonBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+        public static final DeferredBlock<ButtonBlock> SCARLET_BUTTON = registerBlock("scarlet_button", () -> new ButtonBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+        public static final DeferredBlock<ButtonBlock> ABYSS_CROWN_BUTTON = registerBlock("abyss_crown_button", () -> new ButtonBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+
+        public static final DeferredBlock<PressurePlateBlock> ELDER_PRESSURE_PLATE = registerBlock("elder_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+        public static final DeferredBlock<PressurePlateBlock> SCARLET_PRESSURE_PLATE = registerBlock("scarlet_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+        public static final DeferredBlock<PressurePlateBlock> ABYSS_CROWN_PRESSURE_PLATE = registerBlock("abyss_crown_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+
+        // ===== SIGNS & HANGING SIGNS =====
+        public static final DeferredBlock<StandingSignBlock> ELDER_SIGN = BLOCKS.register("elder_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> ELDER_WALL_SIGN = BLOCKS.register("elder_wall_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(ELDER_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> ELDER_HANGING_SIGN = BLOCKS.register("elder_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> ELDER_WALL_HANGING_SIGN = BLOCKS.register("elder_wall_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(ELDER_HANGING_SIGN)));
+
+        public static final DeferredBlock<StandingSignBlock> SCARLET_SIGN = BLOCKS.register("scarlet_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> SCARLET_WALL_SIGN = BLOCKS.register("scarlet_wall_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(SCARLET_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> SCARLET_HANGING_SIGN = BLOCKS.register("scarlet_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> SCARLET_WALL_HANGING_SIGN = BLOCKS.register("scarlet_wall_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(SCARLET_HANGING_SIGN)));
+
+        public static final DeferredBlock<StandingSignBlock> ABYSS_CROWN_SIGN = BLOCKS.register("abyss_crown_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> ABYSS_CROWN_WALL_SIGN = BLOCKS.register("abyss_crown_wall_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(ABYSS_CROWN_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> ABYSS_CROWN_HANGING_SIGN = BLOCKS.register("abyss_crown_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> ABYSS_CROWN_WALL_HANGING_SIGN = BLOCKS.register("abyss_crown_wall_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(ABYSS_CROWN_HANGING_SIGN)));
+
 
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);

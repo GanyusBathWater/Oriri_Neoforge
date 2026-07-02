@@ -344,6 +344,59 @@ public final class ModEntities {
                                                                                         "aether_charge_entity")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.projectile.RexAraneaWebEntity>> REX_ARANEA_WEB = ENTITIES
+                        .register("rex_aranea_web",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.projectile.RexAraneaWebEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.projectile.RexAraneaWebEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MISC)
+                                                        .sized(0.25F, 0.25F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "rex_aranea_web")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.RexAraneaEntity>> REX_ARANEA = ENTITIES
+                        .register("rex_aranea",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.RexAraneaEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.RexAraneaEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(1.4F, 2.25F) // adjusted for wall distance and human body height
+                                                        .clientTrackingRange(64)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "rex_aranea")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.ModBoatEntity>> MOD_BOAT = ENTITIES
+                        .register("mod_boat",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.ModBoatEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.ModBoatEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MISC)
+                                                        .sized(1.375F, 0.5625F)
+                                                        .clientTrackingRange(10)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "mod_boat")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.ModChestBoatEntity>> MOD_CHEST_BOAT = ENTITIES
+                        .register("mod_chest_boat",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.ModChestBoatEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.ModChestBoatEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MISC)
+                                                        .sized(1.375F, 0.5625F)
+                                                        .clientTrackingRange(10)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "mod_chest_boat")
+                                                                        .toString()));
+
         public static void register(IEventBus modBus) {
 
                 ENTITIES.register(modBus);

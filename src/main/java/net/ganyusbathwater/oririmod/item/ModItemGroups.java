@@ -77,12 +77,17 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_GATE);
                         output.accept(ModBlocks.ELDER_DOOR);
                         output.accept(ModBlocks.ELDER_TRAPDOOR);
+                        output.accept(ModBlocks.ELDER_BUTTON);
+                        output.accept(ModBlocks.ELDER_PRESSURE_PLATE);
+                        output.accept(ModItems.ELDER_SIGN);
+                        output.accept(ModItems.ELDER_HANGING_SIGN);
+                        output.accept(ModItems.ELDER_BOAT);
+                        output.accept(ModItems.ELDER_CHEST_BOAT);
                         output.accept(ModBlocks.ELDER_LEAVES);
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING);
                         output.accept(ModBlocks.ELDER_SAPLING);
                         output.accept(ModBlocks.UPGRADED_ELDER_SAPLING);
                         output.accept(ModBlocks.ELDER_SPORE_BLOSSOM);
-                        output.accept(ModBlocks.ELDER_LEAVES); // Added missing leaves if they were missed
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
 
                         // Scarlet Block Group
@@ -115,6 +120,12 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SCARLET_GATE);
                         output.accept(ModBlocks.SCARLET_DOOR);
                         output.accept(ModBlocks.SCARLET_TRAPDOOR);
+                        output.accept(ModBlocks.SCARLET_BUTTON);
+                        output.accept(ModBlocks.SCARLET_PRESSURE_PLATE);
+                        output.accept(ModItems.SCARLET_SIGN);
+                        output.accept(ModItems.SCARLET_HANGING_SIGN);
+                        output.accept(ModItems.SCARLET_BOAT);
+                        output.accept(ModItems.SCARLET_CHEST_BOAT);
                         output.accept(ModBlocks.SCARLET_SAPLING);
                         output.accept(ModBlocks.UPGRADED_SCARLET_SAPLING);
                         output.accept(ModBlocks.SCARLET_LEAVES);
@@ -149,6 +160,12 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ABYSS_CROWN_GATE);
                         output.accept(ModBlocks.ABYSS_CROWN_DOOR);
                         output.accept(ModBlocks.ABYSS_CROWN_TRAPDOOR);
+                        output.accept(ModBlocks.ABYSS_CROWN_BUTTON);
+                        output.accept(ModBlocks.ABYSS_CROWN_PRESSURE_PLATE);
+                        output.accept(ModItems.ABYSS_CROWN_SIGN);
+                        output.accept(ModItems.ABYSS_CROWN_HANGING_SIGN);
+                        output.accept(ModItems.ABYSS_CROWN_BOAT);
+                        output.accept(ModItems.ABYSS_CROWN_CHEST_BOAT);
                         output.accept(ModBlocks.ABYSS_CROWN_LEAVES);
                         output.accept(ModBlocks.ABYSS_CROWN_SAPLING);
                         output.accept(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING);
@@ -270,6 +287,7 @@ public class ModItemGroups {
                         output.accept(ModItems.MERMAID_SPAWN_EGG);
                         output.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
                         output.accept(ModItems.LOADED_BLAZE_SPAWN_EGG);
+                        output.accept(ModItems.REX_ARANEA_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);

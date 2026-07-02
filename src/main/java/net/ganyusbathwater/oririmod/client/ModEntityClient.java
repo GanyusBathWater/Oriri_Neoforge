@@ -70,7 +70,16 @@ public class ModEntityClient {
                 
                 event.registerEntityRenderer(ModEntities.LOADED_BLAZE.get(),
                                 net.ganyusbathwater.oririmod.entity.client.LoadedBlazeRenderer::new);
+                event.registerEntityRenderer(ModEntities.REX_ARANEA.get(),
+                                net.ganyusbathwater.oririmod.entity.client.RexAraneaRenderer::new);
+                event.registerEntityRenderer(ModEntities.REX_ARANEA_WEB.get(),
+                                net.ganyusbathwater.oririmod.client.render.RexAraneaWebRenderer::new);
                 event.registerEntityRenderer(ModEntities.AETHER_CHARGE_ENTITY.get(),
                                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+
+                event.registerEntityRenderer(ModEntities.MOD_BOAT.get(),
+                                pContext -> new net.ganyusbathwater.oririmod.client.render.ModBoatRenderer(pContext, false));
+                event.registerEntityRenderer(ModEntities.MOD_CHEST_BOAT.get(),
+                                pContext -> new net.ganyusbathwater.oririmod.client.render.ModBoatRenderer(pContext, true));
         }
 }

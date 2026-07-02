@@ -14,6 +14,8 @@ import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
 import net.ganyusbathwater.oririmod.util.ModRarityCarrier;
+import net.ganyusbathwater.oririmod.util.ModWoodTypes;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -70,6 +72,10 @@ public class OririClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         ModItemProperties.addCustomItemProperties();
+
+        Sheets.addWoodType(ModWoodTypes.ELDER_WOOD_TYPE);
+        Sheets.addWoodType(ModWoodTypes.SCARLET_WOOD_TYPE);
+        Sheets.addWoodType(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE);
     }
 
     // ── Tooltip Component Factory ─────────────────────────────────────────────
@@ -291,6 +297,10 @@ public class OririClient {
                 net.ganyusbathwater.oririmod.entity.client.SporeBlossomRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.REVIVAL_SHRINE.get(),
                 net.ganyusbathwater.oririmod.client.render.block.RevivalShrineRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.MOD_SIGN.get(),
+                net.minecraft.client.renderer.blockentity.SignRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.MOD_HANGING_SIGN.get(),
+                net.minecraft.client.renderer.blockentity.HangingSignRenderer::new);
     }
 
     @SubscribeEvent

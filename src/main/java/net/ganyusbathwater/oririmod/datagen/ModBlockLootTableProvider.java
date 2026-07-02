@@ -28,6 +28,12 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.ELDER_GATE.get());
         add(ModBlocks.ELDER_DOOR.get(), block -> createDoorTable(block));
         dropSelf(ModBlocks.ELDER_TRAPDOOR.get());
+        dropSelf(ModBlocks.ELDER_BUTTON.get());
+        dropSelf(ModBlocks.ELDER_PRESSURE_PLATE.get());
+        dropOther(ModBlocks.ELDER_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_SIGN.get());
+        dropOther(ModBlocks.ELDER_WALL_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_SIGN.get());
+        dropOther(ModBlocks.ELDER_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_HANGING_SIGN.get());
+        dropOther(ModBlocks.ELDER_WALL_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_HANGING_SIGN.get());
         dropSelf(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
         dropSelf(ModBlocks.ELDER_STEM_BLOCK.get());
         dropSelf(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
@@ -64,6 +70,12 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.SCARLET_GATE.get());
         add(ModBlocks.SCARLET_DOOR.get(), block -> createDoorTable(block));
         dropSelf(ModBlocks.SCARLET_TRAPDOOR.get());
+        dropSelf(ModBlocks.SCARLET_BUTTON.get());
+        dropSelf(ModBlocks.SCARLET_PRESSURE_PLATE.get());
+        dropOther(ModBlocks.SCARLET_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.SCARLET_SIGN.get());
+        dropOther(ModBlocks.SCARLET_WALL_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.SCARLET_SIGN.get());
+        dropOther(ModBlocks.SCARLET_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.SCARLET_HANGING_SIGN.get());
+        dropOther(ModBlocks.SCARLET_WALL_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.SCARLET_HANGING_SIGN.get());
         dropSelf(ModBlocks.SCARLET_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_SCARLET_SAPLING.get());
 
@@ -129,6 +141,12 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.ABYSS_CROWN_GATE.get());
         add(ModBlocks.ABYSS_CROWN_DOOR.get(), block -> createDoorTable(block));
         dropSelf(ModBlocks.ABYSS_CROWN_TRAPDOOR.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_BUTTON.get());
+        dropSelf(ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get());
+        dropOther(ModBlocks.ABYSS_CROWN_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_SIGN.get());
+        dropOther(ModBlocks.ABYSS_CROWN_WALL_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_SIGN.get());
+        dropOther(ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_HANGING_SIGN.get());
+        dropOther(ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_HANGING_SIGN.get());
         dropSelf(ModBlocks.ABYSS_CROWN_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get());
         add(ModBlocks.ABYSS_CROWN_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ABYSS_CROWN_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
