@@ -17,7 +17,8 @@ public record ElderGiantTreeConfig(
                 BlockStateProvider leavesProvider,
                 BlockStateProvider floweringLeavesProvider,
                 float floweringChance,
-                boolean placeSporeBlossoms) implements FeatureConfiguration {
+                boolean placeSporeBlossoms,
+                boolean placeMoonshrooms) implements FeatureConfiguration {
 
         public static final Codec<ElderGiantTreeConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                         IntProvider.CODEC.fieldOf("trunk_height").forGetter(ElderGiantTreeConfig::trunkHeight),
@@ -34,6 +35,8 @@ public record ElderGiantTreeConfig(
                         Codec.FLOAT.fieldOf("flowering_chance").orElse(0.2f)
                                         .forGetter(ElderGiantTreeConfig::floweringChance),
                         Codec.BOOL.fieldOf("place_spore_blossoms").orElse(true)
-                                        .forGetter(ElderGiantTreeConfig::placeSporeBlossoms))
+                                        .forGetter(ElderGiantTreeConfig::placeSporeBlossoms),
+                        Codec.BOOL.fieldOf("place_moonshrooms").orElse(false)
+                                        .forGetter(ElderGiantTreeConfig::placeMoonshrooms))
                         .apply(instance, ElderGiantTreeConfig::new));
 }

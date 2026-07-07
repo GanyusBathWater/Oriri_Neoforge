@@ -145,6 +145,13 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
 
                 // ===== NEW BLOCKS: Hardened Manashroom & Abyss Crown =====
+                withExistingParent(ModBlocks.BLOOD_CAP_BLOCK.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", modLoc("item/blood_cap"));
+                withExistingParent(ModBlocks.GLOWLINGS_BLOCK.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", modLoc("item/glowlings"));
+                withExistingParent(ModBlocks.MOONSHROOM_BLOCK.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", modLoc("item/moonshrooms"));
+
                 simpleBlockItem(ModBlocks.HARDENED_MANASHROOM.get());
                 simpleBlockItem(ModBlocks.ABYSS_CROWN_LOG.get());
                 simpleBlockItem(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get());

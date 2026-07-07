@@ -68,8 +68,8 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
                 BlockPos columnPos = origin.offset(dx, 0, dz);
 
                 // Try to find floor and ceiling
-                BlockPos floorPos = findFloor(level, columnPos, config.floorToCeilingSearchRange());
-                BlockPos ceilingPos = findCeiling(level, columnPos, config.floorToCeilingSearchRange());
+                BlockPos floorPos = findFloor(level, columnPos, config.floorToCeilingSearchRange(), config);
+                BlockPos ceilingPos = findCeiling(level, columnPos, config.floorToCeilingSearchRange(), config);
 
                 // 1. Attempt to place Patch (Base Blocks)
                 // We try to place patch blocks more frequently than spikes to create a "patch"
@@ -127,13 +127,15 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
     /**
      * Find the floor position by searching downward from pos.
      */
-    private BlockPos findFloor(WorldGenLevel level, BlockPos pos, int searchRange) {
+    private BlockPos findFloor(WorldGenLevel level, BlockPos pos, int searchRange, ScarletDripstoneClusterConfig config) {
         BlockPos.MutableBlockPos mutable = pos.mutable();
         for (int i = 0; i < searchRange; i++) {
             BlockState state = level.getBlockState(mutable);
             BlockState below = level.getBlockState(mutable.below());
             if (state.isAir() && below.isSolid() && !isDripstone(below)) {
-                return mutable.immutable();
+                if (isValidAttachmentBlock(below, config)) {
+                    return mutable.immutable();
+                }
             }
             mutable.move(Direction.DOWN);
         }
@@ -143,17 +145,27 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
     /**
      * Find the ceiling position by searching upward from pos.
      */
-    private BlockPos findCeiling(WorldGenLevel level, BlockPos pos, int searchRange) {
+    private BlockPos findCeiling(WorldGenLevel level, BlockPos pos, int searchRange, ScarletDripstoneClusterConfig config) {
         BlockPos.MutableBlockPos mutable = pos.mutable();
         for (int i = 0; i < searchRange; i++) {
             BlockState state = level.getBlockState(mutable);
             BlockState above = level.getBlockState(mutable.above());
             if (state.isAir() && above.isSolid() && !isDripstone(above)) {
-                return mutable.immutable();
+                if (isValidAttachmentBlock(above, config)) {
+                    return mutable.immutable();
+                }
             }
             mutable.move(Direction.UP);
         }
         return null;
+    }
+
+    private boolean isValidAttachmentBlock(BlockState state, ScarletDripstoneClusterConfig config) {
+        if (config.useScarletBlocks()) {
+            return state.is(ModBlocks.SCARLET_STONE.get()) || state.is(ModBlocks.SCARLET_DEEPSLATE.get());
+        } else {
+            return state.is(Blocks.STONE) || state.is(Blocks.DEEPSLATE);
+        }
     }
 
     private boolean isGeodeBlock(BlockState state) {

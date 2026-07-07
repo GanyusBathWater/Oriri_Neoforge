@@ -27,6 +27,9 @@ public class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> DEVIARTRAS_SPORE_PARTICLE = PARTICLE_TYPES
             .register("deviartras_spore", () -> new SimpleParticleType(false));
 
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELDER_SPORE_BLOSSOM_SPORE_PARTICLE = PARTICLE_TYPES
+            .register("elder_spore_blossom_spore", () -> new SimpleParticleType(false));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }

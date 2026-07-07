@@ -57,6 +57,16 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.AbyssSpikeFeature(
                                                         net.ganyusbathwater.oririmod.worldgen.feature.AbyssSpikeFeature.AbyssSpikeConfig.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.AbyssRavineFeature> ABYSS_RAVINE = FEATURES
+                        .register("abyss_ravine",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.AbyssRavineFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.SeaUrchinFeature> SEA_URCHIN_FEATURE = FEATURES
+                        .register("sea_urchin",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.SeaUrchinFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);
         }

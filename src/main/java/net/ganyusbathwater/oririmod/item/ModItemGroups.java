@@ -88,6 +88,9 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_SAPLING);
                         output.accept(ModBlocks.UPGRADED_ELDER_SAPLING);
                         output.accept(ModBlocks.ELDER_SPORE_BLOSSOM);
+                        output.accept(ModBlocks.BLOOD_CAP_BLOCK);
+                        output.accept(ModBlocks.GLOWLINGS_BLOCK);
+                        output.accept(ModBlocks.MOONSHROOM_BLOCK);
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
 
                         // Scarlet Block Group
@@ -174,6 +177,12 @@ public class ModItemGroups {
                         output.accept(ModBlocks.BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.TILTED_BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.REVIVAL_SHRINE);
+
+                        // Forcefield Emitters
+                        output.accept(ModBlocks.REPELLENT_FORCEFIELD_EMITTER);
+                        output.accept(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER);
+                        output.accept(ModBlocks.PROTECTION_FORCEFIELD_EMITTER);
+                        output.accept(ModBlocks.MODIFIER_FORCEFIELD_EMITTER);
 
                         output.accept(ModBlocks.UPGRADED_OAK_SAPLING);
                         output.accept(ModBlocks.UPGRADED_SPRUCE_SAPLING);
@@ -267,6 +276,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BOOK_OF_JOURNEYMAN);
                         output.accept(ModItems.BOOK_OF_WISE);
                         output.accept(ModItems.STAFF_OF_ALMIGHTY);
+                        output.accept(ModItems.THE_GODSEEKER);
                         output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
                         output.accept(ModItems.MAGIC_DEBUG_STICK);
                         output.accept(ModItems.COSMIC_EXAMPLE); // Stage 1 tooltip test item

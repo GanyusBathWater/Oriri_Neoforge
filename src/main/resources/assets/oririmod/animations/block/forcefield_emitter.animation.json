@@ -1,0 +1,47 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"forcefield_emitter_idle": {
+			"loop": true,
+			"animation_length": 8,
+			"bones": {
+				"crystal": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"2.0": {
+							"vector": [90, 0, -90]
+						},
+						"4.0": {
+							"vector": [180, 0, -180]
+						},
+						"6.0": {
+							"vector": [270, 0, -270]
+						},
+						"8.0": {
+							"vector": [360, 0, -360]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"2.0": {
+							"vector": [0, 1, 0]
+						},
+						"4.0": {
+							"vector": [0, 2, 0]
+						},
+						"6.0": {
+							"vector": [0, 0, 0]
+						},
+						"8.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	}
+}

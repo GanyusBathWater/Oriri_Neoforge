@@ -67,6 +67,7 @@ public class OririClient {
         event.registerSpriteSet(ModParticles.SCARLET_CAVE_PARTICLE.get(), ScarletCaveParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELYSIAN_ABYSS_PARTICLE.get(), ElysianAbyssParticle.Provider::new);
         event.registerSpriteSet(ModParticles.DEVIARTRAS_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.DeviartrasSporeParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.ELDER_SPORE_BLOSSOM_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.ElderSporeBlossomSporeParticle.Provider::new);
     }
 
     @SubscribeEvent
@@ -265,6 +266,9 @@ public class OririClient {
         builder.addMix(Potions.AWKWARD, ModItems.DAMNED_SOUL.asItem(), ModPotions.STUNNED_POTION);
         builder.addMix(Potions.NIGHT_VISION, ModItems.ELDERBERRY.asItem(), ModPotions.MOB_SENSE_POTION1);
         builder.addMix(ModPotions.MOB_SENSE_POTION1, Items.GLOWSTONE_DUST, ModPotions.MOB_SENSE_POTION2);
+        
+        builder.addMix(Potions.AWKWARD, net.ganyusbathwater.oririmod.block.ModBlocks.BLOOD_CAP_BLOCK.get().asItem(), ModPotions.ANTI_HEAL_POTION1);
+        builder.addMix(ModPotions.ANTI_HEAL_POTION1, Items.GLOWSTONE_DUST, ModPotions.ANTI_HEAL_POTION2);
     }
 
     @SubscribeEvent
@@ -297,6 +301,12 @@ public class OririClient {
                 net.ganyusbathwater.oririmod.entity.client.SporeBlossomRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.REVIVAL_SHRINE.get(),
                 net.ganyusbathwater.oririmod.client.render.block.RevivalShrineRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.BLOOD_CAP_BE.get(),
+                net.ganyusbathwater.oririmod.client.render.block.BloodCapRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.GLOWLINGS_BE.get(),
+                net.ganyusbathwater.oririmod.client.render.block.GlowlingsRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.MOONSHROOM_BE.get(),
+                net.ganyusbathwater.oririmod.client.render.block.MoonshroomRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.MOD_SIGN.get(),
                 net.minecraft.client.renderer.blockentity.SignRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.MOD_HANGING_SIGN.get(),

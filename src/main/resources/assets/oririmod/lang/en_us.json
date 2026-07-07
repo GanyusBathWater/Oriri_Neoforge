@@ -82,6 +82,9 @@
   "item.oririmod.blood_lotus": "Blood Lotus",
   "item.oririmod.iron_roots": "Iron Roots",
   "item.oririmod.magic_mushroom": "Magic Mushroom",
+  "block.oririmod.blood_cap": "Blood Cap",
+  "block.oririmod.glowling": "Glowlings",
+  "block.oririmod.moonshroom": "Moonshroom",
   "item.oririmod.four_leaf_clover": "Four Leaf Clover",
   "item.oririmod.miracle_seaweed": "Miracle Seaweed",
   "item.oririmod.calcium_currant": "Calcium Currant",
@@ -105,6 +108,8 @@
   "tooltip.oririmod.calcium_currant.uneaten": "When eaten: §9+3 Safe Fall Distance",
   "tooltip.oririmod.devil_fruit.lore": "A devil fruit that was shipped across a grand blue sea, it grants the consumer increased interaction range with entities and blocks",
   "tooltip.oririmod.devil_fruit.uneaten": "When eaten: §9+1 Entity- & Block Interaction Range",
+  "item.oririmod.the_godseeker": "The Godseeker",
+  "tooltip.oririmod.the_godseeker.lore": "A divine artifact, long forgotten, used to set the gods gaze upon you. They will test your worth, but if you prove worthy, they will grant you special things",
   "item.oririmod.stella_perditor": "Stella Perditor",
   "item.oririmod.oraphim_bow": "Oraphim Bow",
   "item.oririmod.qilins_wrath": "Qilin's Wrath",
@@ -611,5 +616,16 @@
   "item.oririmod.aether_charge": "Aether Charge",
   "entity.oririmod.rex_aranea": "Rex Aranea",
   "entity.oririmod.rex_aranea_web": "Rex Aranea Web",
-  "item.oririmod.rex_aranea_spawn_egg": "Rex Aranea Spawn Egg"
-}
+  "item.oririmod.rex_aranea_spawn_egg": "Rex Aranea Spawn Egg",
+  "block.oririmod.repellent_forcefield_emitter": "Repellent Forcefield Emitter",
+  "block.oririmod.attracting_forcefield_emitter": "Attracting Forcefield Emitter",
+  "block.oririmod.protection_forcefield_emitter": "Protection Forcefield Emitter",
+  "block.oririmod.modifier_forcefield_emitter": "Modifier Forcefield Emitter",
+  "effect.oririmod.forcefield_penalty_health": "Forcefield Penalty: Health",
+  "effect.oririmod.forcefield_penalty_armor": "Forcefield Penalty: Armor",
+  "effect.oririmod.forcefield_penalty_armor_toughness": "Forcefield Penalty: Armor Toughness",
+  "effect.oririmod.forcefield_penalty_attack_damage": "Forcefield Penalty: Attack Damage",
+  "effect.oririmod.forcefield_penalty_attack_speed": "Forcefield Penalty: Attack Speed",
+  "effect.oririmod.forcefield_penalty_burning_time": "Forcefield Penalty: Burning Time",
+  "effect.oririmod.forcefield_penalty_fall_damage": "Forcefield Penalty: Fall Damage"
+}

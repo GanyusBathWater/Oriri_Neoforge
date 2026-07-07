@@ -78,6 +78,14 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
     @Override
     public Holder<Biome> getNoiseBiome(int quartX, int quartY, int quartZ, Climate.Sampler sampler) {
+        if (!seedInitialized) {
+            net.minecraft.world.level.biome.Climate.TargetPoint sample = sampler.sample(0, 0, 0);
+            long derivedSeed = 1L 
+                    ^ (Double.doubleToRawLongBits(sample.humidity()) * 6364136223846793005L)
+                    ^ (Double.doubleToRawLongBits(sample.continentalness()) * 1442695040888963407L);
+            initSeed(derivedSeed);
+        }
+
         // Convert quart coordinates to block coordinates
         int x = quartX * 4;
         int y = quartY * 4;
@@ -103,13 +111,15 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         // Surface height (same as ElderwoodsChunkGenerator.getSurfaceHeight)
         int surfaceY = computeSurfaceHeight(x, z);
 
-        // Surface biomes only apply within 4 blocks of the surface
-        boolean isBelowSurfaceLayer = y < surfaceY - 4;
+        // Surface biomes only apply within 16 blocks of the surface to prevent cave features (like geodes) from breaking through
+        boolean isBelowSurfaceLayer = y < surfaceY - 16;
+
+        boolean isScarletSurface = (surfaceNoise > 0.5) || (surfaceNoise < -0.5);
 
         // Find the biome holder from our biome list
         if (isBelowSurfaceLayer) {
             // Cave biomes
-            if (caveNoise > 0.3) {
+            if (isScarletSurface) {
                 return findBiome(SCARLET_CAVES_KEY);
             }
             if (caveNoise > 0.08) {

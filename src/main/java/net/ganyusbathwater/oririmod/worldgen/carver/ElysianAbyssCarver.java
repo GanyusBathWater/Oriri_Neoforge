@@ -30,44 +30,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
     public static final ThreadLocal<java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox>> CURRENT_STRUCTURE_BOXES = new ThreadLocal<>();
 
     public static int getMaxCarveHeight(ChunkAccess chunk, int x, int z) {
-        int defaultMax = 320; 
-        int protectedHeight = defaultMax;
-        
-        java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = CURRENT_STRUCTURE_BOXES.get();
-        if (boxes == null || boxes.isEmpty()) return defaultMax;
-        
-        for (net.minecraft.world.level.levelgen.structure.BoundingBox box : boxes) {
-            int centerX = (box.minX() + box.maxX()) / 2;
-            int centerZ = (box.minZ() + box.maxZ()) / 2;
-            
-            int dx = x - centerX;
-            int dz = z - centerZ;
-            
-            int boxRadiusX = (box.maxX() - box.minX()) / 2;
-            int boxRadiusZ = (box.maxZ() - box.minZ()) / 2;
-            
-            if (boxRadiusX > 0 && boxRadiusZ > 0) {
-                double maxLInfinity = Math.max(Math.abs(dx) / (double)boxRadiusX, Math.abs(dz) / (double)boxRadiusZ);
-                double normX = dx / (double)boxRadiusX;
-                double normZ = dz / (double)boxRadiusZ;
-                double euclidean = Math.sqrt(normX * normX + normZ * normZ);
-                
-                double maxDistCone = 0.5 * maxLInfinity + 0.5 * euclidean;
-                double factor = maxDistCone * maxDistCone; // Parabolic curve
-                
-                double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)x * 0.05f, 0, (float)z * 0.05f, 4) * 12.0;
-                
-                int surfaceY = chunk.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x & 15, z & 15);
-                double safeFoundation = surfaceY - 10;
-                double centerDeepY = Math.max(chunk.getMinBuildHeight() + 10, safeFoundation - 70); 
-                
-                // taper up to defaultMax (320) so it smoothly blends into natural cave without a chunk border!
-                int taperY = (int) Math.round(centerDeepY + (defaultMax - centerDeepY) * factor + noise);
-                
-                protectedHeight = Math.min(protectedHeight, taperY);
-            }
-        }
-        return protectedHeight;
+        return 320; // No artificial structure protection limits
     }
 
     public ElysianAbyssCarver(Codec<CaveCarverConfiguration> codec) {

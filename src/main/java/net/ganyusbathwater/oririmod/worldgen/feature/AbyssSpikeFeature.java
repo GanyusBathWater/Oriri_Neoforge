@@ -30,7 +30,8 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
     }
 
     private boolean isReplaceableBySpike(BlockState state) {
-        return !state.is(Blocks.BEDROCK) && !state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) && !state.is(net.minecraft.tags.BlockTags.DIRT);
+        // Allow replacing stone/deepslate so the root of the spike can anchor into the ceiling!
+        return !state.is(Blocks.BEDROCK) && !state.is(net.minecraft.tags.BlockTags.DIRT);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
             BlockState state = level.getBlockState(mPos);
             BlockState next = level.getBlockState(mPos.relative(config.isCeiling() ? Direction.UP : Direction.DOWN));
 
-            if (isReplaceableBySpike(state) && !isReplaceableBySpike(next) && !next.is(Blocks.BEDROCK)) {
+            if ((state.isAir() || state.is(Blocks.WATER)) && !next.isAir() && !next.is(Blocks.WATER) && !next.is(Blocks.BEDROCK)) {
                 origin = mPos.immutable();
                 foundAnchor = true;
                 break;
@@ -87,10 +88,25 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
         
         // Rare chance for the spike tip to be made of ores!
         boolean isOreSpike = rng.nextDouble() < 0.08; // 8% chance
-        boolean isJade = rng.nextBoolean();
         
-        BlockState oreDeepslate = isJade ? ModBlocks.DEEPSLATE_JADE_ORE.get().defaultBlockState() : ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get().defaultBlockState();
-        BlockState oreStone = isJade ? ModBlocks.JADE_ORE.get().defaultBlockState() : ModBlocks.DRAGON_IRON_ORE.get().defaultBlockState();
+        BlockState oreDeepslate = Blocks.DEEPSLATE.defaultBlockState();
+        BlockState oreStone = Blocks.STONE.defaultBlockState();
+        
+        if (isOreSpike) {
+            int oreType = rng.nextInt(10);
+            switch (oreType) {
+                case 0 -> { oreDeepslate = ModBlocks.DEEPSLATE_JADE_ORE.get().defaultBlockState(); oreStone = ModBlocks.JADE_ORE.get().defaultBlockState(); }
+                case 1 -> { oreDeepslate = ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get().defaultBlockState(); oreStone = ModBlocks.DRAGON_IRON_ORE.get().defaultBlockState(); }
+                case 2 -> { oreDeepslate = Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(); oreStone = Blocks.IRON_ORE.defaultBlockState(); }
+                case 3 -> { oreDeepslate = Blocks.DEEPSLATE_GOLD_ORE.defaultBlockState(); oreStone = Blocks.GOLD_ORE.defaultBlockState(); }
+                case 4 -> { oreDeepslate = Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState(); oreStone = Blocks.DIAMOND_ORE.defaultBlockState(); }
+                case 5 -> { oreDeepslate = Blocks.DEEPSLATE_REDSTONE_ORE.defaultBlockState(); oreStone = Blocks.REDSTONE_ORE.defaultBlockState(); }
+                case 6 -> { oreDeepslate = Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState(); oreStone = Blocks.LAPIS_ORE.defaultBlockState(); }
+                case 7 -> { oreDeepslate = Blocks.DEEPSLATE_COAL_ORE.defaultBlockState(); oreStone = Blocks.COAL_ORE.defaultBlockState(); }
+                case 8 -> { oreDeepslate = Blocks.DEEPSLATE_COPPER_ORE.defaultBlockState(); oreStone = Blocks.COPPER_ORE.defaultBlockState(); }
+                case 9 -> { oreDeepslate = Blocks.DEEPSLATE_EMERALD_ORE.defaultBlockState(); oreStone = Blocks.EMERALD_ORE.defaultBlockState(); }
+            }
+        }
 
         BlockState deepslateBlock = Blocks.DEEPSLATE.defaultBlockState();
         BlockState stoneBlock = Blocks.STONE.defaultBlockState();

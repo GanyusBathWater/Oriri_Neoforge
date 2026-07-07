@@ -32,6 +32,8 @@ public class ModPlacedFeatures {
                         "scarlet_grass_patch_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_TOOTH_LEAVES_PATCH_PLACED_KEY = registerKey(
                         "scarlet_tooth_leaves_patch_placed");
+        public static final ResourceKey<PlacedFeature> STAR_HERB_PATCH_PLACED_KEY = registerKey(
+                        "star_herb_patch_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_LILY_PATCH_PLACED_KEY = registerKey(
                         "scarlet_lily_patch_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_POND_PLAINS_PLACED_KEY = registerKey(
@@ -44,19 +46,35 @@ public class ModPlacedFeatures {
         public static final ResourceKey<PlacedFeature> SCARLET_DRIPSTONE_CLUSTER_PLACED_KEY = registerKey(
                         "scarlet_dripstone_cluster_placed");
         public static final ResourceKey<PlacedFeature> JADE_ORE_PLACED_KEY = registerKey("jade_ore_placed");
-        public static final ResourceKey<PlacedFeature> DRAGON_IRON_ORE_PLACED_KEY = registerKey("dragon_iron_ore_placed");
+        public static final ResourceKey<PlacedFeature> DRAGON_IRON_ORE_PLACED_KEY = registerKey(
+                        "dragon_iron_ore_placed");
 
         // Elysian Abyss
-        public static final ResourceKey<PlacedFeature> ELYSIAN_STONE_MUSHROOM_PLACED_KEY = registerKey("elysian_stone_mushroom_placed");
-        public static final ResourceKey<PlacedFeature> ELYSIAN_ABYSS_CROWN_TREE_PLACED_KEY = registerKey("elysian_abyss_crown_tree_placed");
-        public static final ResourceKey<PlacedFeature> ELYSIAN_ABYSS_PILLAR_PLACED_KEY = registerKey("elysian_abyss_pillar_placed");
-        public static final ResourceKey<PlacedFeature> ELYSIAN_FLOOR_MOSS_PLACED_KEY = registerKey("elysian_floor_moss_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_STONE_MUSHROOM_PLACED_KEY = registerKey(
+                        "elysian_stone_mushroom_placed");
+        public static final ResourceKey<PlacedFeature> BLOOD_CAP_PLACED_KEY = registerKey(
+                        "blood_cap_placed");
+        public static final ResourceKey<PlacedFeature> GLOWLINGS_PLACED_KEY = registerKey(
+                        "glowlings_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_ABYSS_CROWN_TREE_PLACED_KEY = registerKey(
+                        "elysian_abyss_crown_tree_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_ABYSS_PILLAR_PLACED_KEY = registerKey(
+                        "elysian_abyss_pillar_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_FLOOR_MOSS_PLACED_KEY = registerKey(
+                        "elysian_floor_moss_placed");
         public static final ResourceKey<PlacedFeature> ELYSIAN_LICHEN_PLACED_KEY = registerKey("elysian_lichen_placed");
-        public static final ResourceKey<PlacedFeature> ELYSIAN_FLOOR_SPIKE_PLACED_KEY = registerKey("elysian_floor_spike_placed");
-        public static final ResourceKey<PlacedFeature> ELYSIAN_CEILING_SPIKE_PLACED_KEY = registerKey("elysian_ceiling_spike_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_FLOOR_SPIKE_PLACED_KEY = registerKey(
+                        "elysian_floor_spike_placed");
+        public static final ResourceKey<PlacedFeature> ELYSIAN_CEILING_SPIKE_PLACED_KEY = registerKey(
+                        "elysian_ceiling_spike_placed");
 
         // Global
-        public static final ResourceKey<PlacedFeature> GLOBAL_AETHER_RIVER_PLACED_KEY = registerKey("global_aether_river_placed");
+        public static final ResourceKey<PlacedFeature> GLOBAL_AETHER_RIVER_PLACED_KEY = registerKey(
+                        "global_aether_river_placed");
+
+        public static final ResourceKey<PlacedFeature> ABYSS_RAVINE_PLACED_KEY = registerKey("abyss_ravine_placed");
+
+        public static final ResourceKey<PlacedFeature> SEA_URCHIN_PLACED_KEY = registerKey("sea_urchin_placed");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<PlacedFeature> context) {
@@ -117,6 +135,15 @@ public class ModPlacedFeatures {
                                 .getOrThrow(ModConfiguredFeatures.SCARLET_TOOTH_LEAVES_PATCH_KEY);
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_PLACED_KEY, configuredScarletToothLeaves, List.of(
                                 RarityFilter.onAverageOnceEvery(4),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                BiomeFilter.biome()));
+
+                // Star Herb Patch - scattered
+                var configuredStarHerb = configuredFeatures
+                                .getOrThrow(ModConfiguredFeatures.STAR_HERB_PATCH_KEY);
+                register(context, STAR_HERB_PATCH_PLACED_KEY, configuredStarHerb, List.of(
+                                RarityFilter.onAverageOnceEvery(8),
                                 InSquarePlacement.spread(),
                                 PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                                 BiomeFilter.biome()));
@@ -192,24 +219,43 @@ public class ModPlacedFeatures {
                                 BiomeFilter.biome()));
 
                 // ── Elysian Abyss Placed Features ─────────────────────────────────────────
-                var configuredStoneMushroom = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_STONE_MUSHROOM_KEY);
+                var configuredStoneMushroom = configuredFeatures
+                                .getOrThrow(ModConfiguredFeatures.ELYSIAN_STONE_MUSHROOM_KEY);
                 register(context, ELYSIAN_STONE_MUSHROOM_PLACED_KEY, configuredStoneMushroom, List.of(
-                                CountPlacement.of(2), // Increased from sparse 25% chance to 2 guaranteed attempts per chunk
+                                CountPlacement.of(2), // Increased from sparse 25% chance to 2 guaranteed attempts per
+                                                      // chunk
                                 InSquarePlacement.spread(),
                                 // Constrained to cave volume: floor is Y=-115, ceiling starts ~Y=-55
                                 HeightRangePlacement.uniform(absolute(-120), absolute(-80)),
                                 BiomeFilter.biome()));
 
+                var configuredBloodCap = configuredFeatures.getOrThrow(ModConfiguredFeatures.BLOOD_CAP_KEY);
+                register(context, BLOOD_CAP_PLACED_KEY, configuredBloodCap, List.of(
+                                CountPlacement.of(3),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
+
+                var configuredGlowlings = configuredFeatures.getOrThrow(ModConfiguredFeatures.GLOWLINGS_KEY);
+                register(context, GLOWLINGS_PLACED_KEY, configuredGlowlings, List.of(
+                                CountPlacement.of(20),
+                                InSquarePlacement.spread(),
+                                HeightRangePlacement.uniform(absolute(-64), absolute(64)),
+                                EnvironmentScanPlacement.scanningFor(net.minecraft.core.Direction.DOWN, net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.solid(), net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+                                BiomeFilter.biome()));
+
                 var configuredPillar = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_ABYSS_PILLAR_KEY);
                 register(context, ELYSIAN_ABYSS_PILLAR_PLACED_KEY, configuredPillar, List.of(
-                                RarityFilter.onAverageOnceEvery(35), // Extremely rare placement to ensure only 2-4 pillars per massive cavern
+                                RarityFilter.onAverageOnceEvery(35), // Extremely rare placement to ensure only 2-4
+                                                                     // pillars per massive cavern
                                 InSquarePlacement.spread(),
                                 HeightRangePlacement.uniform(absolute(-120), absolute(-80)),
                                 BiomeFilter.biome()));
 
-                var configuredElysianTree = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_ABYSS_CROWN_TREE_KEY);
+                var configuredElysianTree = configuredFeatures
+                                .getOrThrow(ModConfiguredFeatures.ELYSIAN_ABYSS_CROWN_TREE_KEY);
                 register(context, ELYSIAN_ABYSS_CROWN_TREE_PLACED_KEY, configuredElysianTree, List.of(
-                                CountPlacement.of(3), 
+                                CountPlacement.of(3),
                                 InSquarePlacement.spread(),
                                 // Expand range to catch all ceilings vertically (-120 to +30)
                                 HeightRangePlacement.uniform(absolute(-120), absolute(30))));
@@ -239,7 +285,8 @@ public class ModPlacedFeatures {
                                 BiomeFilter.biome()));
 
                 // Ceiling Spikes
-                var configuredCeilingSpike = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_CEILING_SPIKE_KEY);
+                var configuredCeilingSpike = configuredFeatures
+                                .getOrThrow(ModConfiguredFeatures.ELYSIAN_CEILING_SPIKE_KEY);
                 register(context, ELYSIAN_CEILING_SPIKE_PLACED_KEY, configuredCeilingSpike, List.of(
                                 CountPlacement.of(4), // Scatter sparsely to prevent overcrowding
                                 InSquarePlacement.spread(),
@@ -247,11 +294,22 @@ public class ModPlacedFeatures {
                                 BiomeFilter.biome()));
 
                 // Global Deep Aether Rivers
-                register(context, GLOBAL_AETHER_RIVER_PLACED_KEY, configuredFeatures.getOrThrow(ModConfiguredFeatures.GLOBAL_AETHER_RIVER_KEY),
+                register(context, GLOBAL_AETHER_RIVER_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.GLOBAL_AETHER_RIVER_KEY),
                                 List.of());
 
-        }
+                register(context, ABYSS_RAVINE_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.ABYSS_RAVINE_KEY),
+                                List.of());
 
+                register(context, SEA_URCHIN_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.SEA_URCHIN_KEY),
+                                List.of(
+                                                RarityFilter.onAverageOnceEvery(3),
+                                                InSquarePlacement.spread(),
+                                                HeightRangePlacement.uniform(absolute(-64), absolute(64)),
+                                                BiomeFilter.biome()));
+        }
 
         private static ResourceKey<PlacedFeature> registerKey(String name) {
                 return ResourceKey.create(Registries.PLACED_FEATURE,

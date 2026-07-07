@@ -67,16 +67,16 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         BlockPos origin = ctx.origin();
         ElderGiantTreeConfig cfg = ctx.config();
 
-        int rawHeight = clamp(cfg.trunkHeight().sample(rnd), 8, 96);
-        int rawTrunk = clamp(cfg.trunkRadius().sample(rnd), 1, 5);
-        int rawCanopy = clamp(cfg.canopyRadius().sample(rnd), 3, 18);
-        int rawBranch = clamp(cfg.branchLength().sample(rnd), 3, 12);
+        // Sample twice and take the maximum to bias towards larger sizes
+        int rawHeight = clamp(Math.max(cfg.trunkHeight().sample(rnd), cfg.trunkHeight().sample(rnd)), 8, 96);
+        int rawTrunk = clamp(Math.max(cfg.trunkRadius().sample(rnd), cfg.trunkRadius().sample(rnd)), 1, 5);
+        int rawCanopy = clamp(Math.max(cfg.canopyRadius().sample(rnd), cfg.canopyRadius().sample(rnd)), 3, 18);
+        int rawBranch = clamp(Math.max(cfg.branchLength().sample(rnd), cfg.branchLength().sample(rnd)), 3, 12);
 
         int maxHeightForTrunk = clamp(8 + rawTrunk * 12, 8, 96);
         int height = Math.min(rawHeight, maxHeightForTrunk);
 
-        int trunkPreferFromHeight = clamp(1 + height / 12, 1, 5);
-        int trunkSize = clamp((int) Math.round((rawTrunk * 0.6 + trunkPreferFromHeight * 0.4)), 1, 5);
+        int trunkSize = rawTrunk;
 
         int canopyFromHeight = clamp(3 + height / 6, 3, 18);
         int canopyFromTrunk = clamp(trunkSize * 3, 3, 18);
@@ -86,8 +86,6 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             return false;
 
         int branchLenBase = clamp((int) Math.round(rawBranch * (1.0 + trunkSize / 8.0)), 3, 12);
-
-        trunkSize = Math.min(trunkSize, Math.max(1, Math.min(5, 1 + height / 12)));
 
         if (origin.getY() + height + canopyR + 2 >= level.getMaxBuildHeight())
             return false;
@@ -272,6 +270,14 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
         // Replace logs with stems where ends are exposed
         replaceExposedLogsWithStems(level, cfg);
+        
+        if (cfg.placeMoonshrooms()) {
+            placeMoonshrooms(level, cfg, rnd, origin);
+        }
+
+        if (cfg.placeSporeBlossoms() && rnd.nextInt(3) == 0) {
+            placeSporeBlossom(level, cfg, rnd);
+        }
 
         placedBranchLogs.get().clear();
         placedAllLogs.get().clear();
@@ -304,12 +310,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                     // If neighbor is not a log (transparent or different block), it's exposed
                     // We consider leaves as "covering" it enough? No, usually leaves don't hide the
                     // ring if you look closely.
-                    // But the requirement said "where a log's top or bottom texture would be
-                    // exposed".
-                    // If it touches leaves, it's technically hidden by leaves, but if you break
-                    // leaves you see it.
-                    // Let's say if neighbor is NOT a log, it's exposed.
-                    if (!neighborState.is(BlockTags.LOGS)) {
+                    if (!allLogs.contains(neighborPos)) {
                         exposed = true;
                         break;
                     }
@@ -323,6 +324,46 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                     stemState = stemState.setValue(RotatedPillarBlock.AXIS, axis);
                 }
                 setBlock(level, pos, stemState);
+            }
+        }
+    }
+
+    private void placeMoonshrooms(WorldGenLevel level, ElderGiantTreeConfig cfg, RandomSource rnd, BlockPos origin) {
+        if (rnd.nextInt(2) != 0) return; // 50% chance to have moonshrooms at all
+        
+        List<BlockPos> baseLogs = new ArrayList<>();
+        for (BlockPos pos : placedAllLogs.get()) {
+            if (pos.getY() <= origin.getY() + 4) {
+                baseLogs.add(pos);
+            }
+        }
+        
+        java.util.Collections.shuffle(baseLogs, new java.util.Random(rnd.nextLong()));
+        int toPlace = 1 + rnd.nextInt(3);
+        int placed = 0;
+        
+        for (BlockPos pos : baseLogs) {
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                BlockPos target = pos.relative(dir);
+                if (level.isEmptyBlock(target)) {
+                    level.setBlock(target, net.ganyusbathwater.oririmod.block.ModBlocks.MOONSHROOM_BLOCK.get().defaultBlockState().setValue(net.ganyusbathwater.oririmod.block.custom.MoonshroomBlock.FACING, dir), 3);
+                    placed++;
+                    break; // Move to next log
+                }
+            }
+            if (placed >= toPlace) break;
+        }
+    }
+
+    private void placeSporeBlossom(WorldGenLevel level, ElderGiantTreeConfig cfg, RandomSource rnd) {
+        List<BlockPos> branchList = new ArrayList<>(placedBranchLogs.get());
+        java.util.Collections.shuffle(branchList, new java.util.Random(rnd.nextLong()));
+
+        for (BlockPos branchPos : branchList) {
+            BlockPos below = branchPos.below();
+            if (level.isEmptyBlock(below)) {
+                level.setBlock(below, ModBlocks.ELDER_SPORE_BLOSSOM.get().defaultBlockState(), 2);
+                break;
             }
         }
     }

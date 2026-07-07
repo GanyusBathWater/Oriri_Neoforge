@@ -267,6 +267,9 @@ public class ModItems {
                                                                         Tiers.DIAMOND, 2, -2.6F, 1.5F))
                                                         .stacksTo(1),
                                         ModRarity.MYTHIC));
+        public static final DeferredItem<TheGodseekerItem> THE_GODSEEKER = ITEMS.register("the_godseeker",
+                        () -> new TheGodseekerItem(new Item.Properties().stacksTo(1).fireResistant().rarity(net.minecraft.world.item.Rarity.EPIC)));
+
         public static final DeferredItem<HarbingerScytheItem> THE_HARBINGER = ITEMS.register("the_harbinger",
                         () -> new HarbingerScytheItem(Tiers.NETHERITE,
                                         new Item.Properties().fireResistant().durability(3046)

@@ -127,9 +127,27 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_CHERRY_SAPLING.get());
 
+        dropPottedContents(ModBlocks.POTTED_ELDER_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_ELDER_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_SCARLET_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_SCARLET_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_STAR_HERB.get());
+        dropPottedContents(ModBlocks.POTTED_SCARLET_TOOTH_LEAVES.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_OAK_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_SPRUCE_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_BIRCH_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_JUNGLE_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_ACACIA_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_DARK_OAK_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_CHERRY_SAPLING.get());
+
         dropSelf(ModBlocks.EQUINOX_TABLE.get());
 
         dropSelf(ModBlocks.HARDENED_MANASHROOM.get());
+        add(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.get(), block -> createForcefieldEmitterTable(block));
+        add(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.get(), block -> createForcefieldEmitterTable(block));
+        add(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.get(), block -> createForcefieldEmitterTable(block));
+        add(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get(), block -> createForcefieldEmitterTable(block));
         dropSelf(ModBlocks.ABYSS_CROWN_LOG.get());
         dropSelf(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get());
         dropSelf(ModBlocks.ABYSS_CROWN_STEM.get());
@@ -152,6 +170,22 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.ABYSS_CROWN_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ABYSS_CROWN_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
 
         dropSelf(ModBlocks.AETHER_MAGMA_BLOCK.get());
+        dropSelf(ModBlocks.BLOOD_CAP_BLOCK.get());
+        dropSelf(ModBlocks.GLOWLINGS_BLOCK.get());
+        dropSelf(ModBlocks.MOONSHROOM_BLOCK.get());
+    }
+
+    protected net.minecraft.world.level.storage.loot.LootTable.Builder createForcefieldEmitterTable(net.minecraft.world.level.block.Block block) {
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        tag.putBoolean("isActive", false);
+
+        return createSilkTouchDispatchTable(
+                block,
+                this.applyExplosionCondition(block,
+                        net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block)
+                                .apply(net.minecraft.world.level.storage.loot.functions.SetComponentsFunction.setComponent(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag)))
+                )
+        );
     }
 
     @Override

@@ -160,72 +160,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double nx = (x + seedOffsetX) * 0.003;
         double nz = (z + seedOffsetZ) * 0.003;
 
-        double noise = Math.sin(nx) * Math.cos(nz) * 12.0; 
-        noise += Math.sin(nx * 0.5 + 2.0) * Math.cos(nz * 0.6 + 1.1) * 6.0;
+        double noise = Math.sin((x + seedOffsetX) * 0.003) * Math.cos((z + seedOffsetZ) * 0.003) * 12.0; 
+        noise += Math.sin((x + seedOffsetX) * 0.003 * 0.5 + 2.0) * Math.cos((z + seedOffsetZ) * 0.003 * 0.6 + 1.1) * 6.0;
 
         int naturalHeight = BASE_HEIGHT + (int) Math.round(noise);
-        
-        java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = 
-            net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.CURRENT_STRUCTURE_BOXES.get();
-            
-        if (boxes != null && !boxes.isEmpty()) {
-            double bestBlendHeight = naturalHeight;
-            double maxInfluence = 0.0;
-            
-            for (net.minecraft.world.level.levelgen.structure.BoundingBox box : boxes) {
-                int centerX = (box.minX() + box.maxX()) / 2;
-                int centerZ = (box.minZ() + box.maxZ()) / 2;
-                
-                int boxRadiusX = (box.maxX() - box.minX()) / 2;
-                int boxRadiusZ = (box.maxZ() - box.minZ()) / 2;
-                
-                // Only apply surface flattening to small surface buildings (like the Sanctuary or Outpost).
-                // Massive structures like Mineshafts have huge bounding boxes and should not flatten the surface!
-                if (boxRadiusX > 0 && boxRadiusZ > 0 && boxRadiusX < 48 && boxRadiusZ < 48) {
-                    double dx = x - centerX;
-                    double dz = z - centerZ;
-                    
-                    // We want a flat plateau underneath the structure itself, and a smooth slope blending outward.
-                    double normX = dx / ((double)boxRadiusX + 8.0); // 8 block padding around structure
-                    double normZ = dz / ((double)boxRadiusZ + 8.0);
-                    
-                    double euclidean = Math.sqrt(normX * normX + normZ * normZ);
-                    
-                    // Add organic noise to the distance calculation to break up perfect square boundaries
-                    // This creates a natural jagged edge rather than a mathematical straight line!
-                    double boundaryNoise = Math.sin((x + seedOffsetX) * 0.15) * Math.cos((z + seedOffsetZ) * 0.15) * 0.25;
-                    boundaryNoise += Math.sin((x - z + seedOffsetX) * 0.05) * 0.25;
-                    
-                    euclidean += boundaryNoise;
-                    
-                    if (euclidean < 2.0) { // Influence extends up to 2x the padded radius
-                        double influence = 1.0;
-                        if (euclidean > 1.0) {
-                            // Smooth Hermite interpolation from 1.0 down to 0.0
-                            double t = euclidean - 1.0; // 0 to 1
-                            influence = 1.0 - (t * t * (3.0 - 2.0 * t));
-                        }
-                        
-                        if (influence > maxInfluence) {
-                            maxInfluence = influence;
-                            // Evaluate the natural un-flattened surface height exactly at the center of the structure!
-                            // Because Jigsaw WORLD_SURFACE_WG spawned the structure at this exact natural height,
-                            // blending the plateau to this height guarantees perfect flush alignment with the ground floor!
-                            double cnx = (centerX + seedOffsetX) * 0.003;
-                            double cnz = (centerZ + seedOffsetZ) * 0.003;
-                            double cnoise = Math.sin(cnx) * Math.cos(cnz) * 12.0; 
-                            cnoise += Math.sin(cnx * 0.5 + 2.0) * Math.cos(cnz * 0.6 + 1.1) * 6.0;
-                            bestBlendHeight = BASE_HEIGHT + (int) Math.round(cnoise);
-                        }
-                    }
-                }
-            }
-            
-            if (maxInfluence > 0.0) {
-                // Blend natural height with structure plateau height
-                naturalHeight = (int) Math.round(naturalHeight * (1.0 - maxInfluence) + bestBlendHeight * maxInfluence);
-            }
-        }
 
         return naturalHeight;
     }
@@ -525,8 +463,12 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         }
                     }
                 } catch (Exception e) {
-                    // Ignore structures whose origin chunk is outside the currently available WorldGenRegion.
-                    // This safely filters out faraway massive structures like Mineshafts, preventing deadlocks!
+                    // Fallback: If the origin chunk is out of bounds and we can't fetch the exact StructureStart,
+                    // we still know the structure starts at originPos! We add a massive 120-block radius fallback box 
+                    // to ensure protection is applied even when the origin chunk isn't loaded!
+                    int cx = originPos.getMiddleBlockX();
+                    int cz = originPos.getMiddleBlockZ();
+                    boxes.add(new net.minecraft.world.level.levelgen.structure.BoundingBox(cx - 120, -64, cz - 120, cx + 120, 320, cz + 120));
                 }
             }
         }
@@ -784,7 +726,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         adjacentPos.set(worldX, y + 1, worldZ);
                         BlockState aboveState = chunk.getBlockState(adjacentPos);
                         if (aboveState.isSolid() && !aboveState.is(Blocks.BEDROCK)) {
-                            // if (isCrystalCaveBiome(getComputedBiome(level, worldX, y, worldZ))) { // Removed biome check
+                            if (isCrystalCaveBiome(getComputedBiome(level, worldX, y, worldZ))) {
                                 float patchIntensity = (float) ((combinedNoise - 0.3) / 0.7); 
                                 float chance = 0.05f + (patchIntensity * 0.25f); 
 
@@ -794,7 +736,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                                     .setValue(BlockStateProperties.FACING, Direction.DOWN),
                                             false);
                                 }
-                            // }
+                            }
                         }
                     }
                 }
@@ -1090,24 +1032,25 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
         double surfaceNoise = Math.sin(nx * 0.002) * Math.cos(nz * 0.003) +
                 0.5 * Math.cos(nx * 0.005 + 2.0) * Math.sin(nz * 0.005 + 1.0);
+        boolean isScarletSurface = (surfaceNoise > 0.5) || (surfaceNoise < -0.5);
 
         double caveNoise = getAbyssNoise(x, z);
 
         int surfaceY = getSurfaceHeight(x, z);
-        boolean isBelowSurfaceLayer = y < surfaceY - 4;
+        boolean isBelowSurfaceLayer = y < surfaceY - 16;
 
         if (isBelowSurfaceLayer) {
-            // Threshold matches fillFromNoise abyssIntensity > 0.1 threshold
-            // (caveNoise > 0.09) to prevent biome/geometry mismatch that causes
-            // scarlet-cave features to bleed into the abyss ceiling.
-            if (caveNoise > 0.09 && y < surfaceY - 20) {
-                return cachedElysianAbyss;
-            } else if (caveNoise > 0.0) {
+            if (isScarletSurface) {
                 return cachedScarletCaves;
+            }
+            if (caveNoise > 0.08) {
+                return cachedElysianAbyss;
             } else if (caveNoise < -0.3) {
                 return cachedElderwoodsCave;
-            } else {
+            } else if (caveNoise < -0.15 && caveNoise > -0.2) {
                 return cachedCrystalCaves;
+            } else {
+                return cachedElderwoodsCave;
             }
         } else {
             if (surfaceNoise > 0.5) {
@@ -1321,7 +1264,23 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                     continue;
                                 }
                             }
-                            chunk.setBlockState(pos, y < 0 ? DEEPSLATE : STONE, false);
+                            
+                            // Get underground biome to decide stone type
+                            double nx = worldX + seedOffsetX;
+                            double nz = worldZ + seedOffsetZ;
+                            double surfaceNoise = Math.sin(nx * 0.002) * Math.cos(nz * 0.003) +
+                                    0.5 * Math.cos(nx * 0.005 + 2.0) * Math.sin(nz * 0.005 + 1.0);
+                            boolean isScarletSurface = (surfaceNoise > 0.5) || (surfaceNoise < -0.5);
+                            
+                            BlockState stoneState = STONE;
+                            BlockState deepslateState = DEEPSLATE;
+                            
+                            if (isScarletSurface && SCARLET_STONE != null && SCARLET_DEEPSLATE != null) {
+                                stoneState = SCARLET_STONE;
+                                deepslateState = SCARLET_DEEPSLATE;
+                            }
+                            
+                            chunk.setBlockState(pos, y < 0 ? deepslateState : stoneState, false);
                             continue;
                         }
                     }

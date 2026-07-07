@@ -82,10 +82,12 @@ public class ModBlocks {
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
 
         public static final DeferredBlock<DoorBlock> ELDER_DOOR = registerBlock("elder_door",
-                        () -> new DoorBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+                        () -> new DoorBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<TrapDoorBlock> ELDER_TRAPDOOR = registerBlock("elder_trapdoor",
-                        () -> new TrapDoorBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
+                        () -> new TrapDoorBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
 
         public static final DeferredBlock<Block> STRIPPED_ELDER_LOG_BLOCK = registerBlock("stripped_elder_log_block",
                         () -> new ModFlammableRotatedPillarBlock(
@@ -104,7 +106,7 @@ public class ModBlocks {
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA_LEAVES)));
 
         public static final DeferredBlock<Block> ELDER_SPORE_BLOSSOM = registerBlock("elder_spore_blossom",
-                        () -> new SporeBlossomBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SPORE_BLOSSOM)));
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderSporeBlossomBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SPORE_BLOSSOM)));
 
         public static final DeferredBlock<Block> ELDER_LEAVES = registerBlock("elder_leaves",
                         () -> new ElderLeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AZALEA_LEAVES)));
@@ -113,9 +115,15 @@ public class ModBlocks {
                         () -> new SaplingBlock(ModTreeGrowers.ELDER_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
 
+        public static final DeferredBlock<Block> POTTED_ELDER_SAPLING = registerPottedBlock("potted_elder_sapling",
+                        ELDER_SAPLING);
+
         public static final DeferredBlock<Block> UPGRADED_ELDER_SAPLING = registerBlock("upgraded_elder_sapling",
                         () -> new UpgradedSaplingBlock(ModTreeGrowers.ELDER_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+
+        public static final DeferredBlock<Block> POTTED_UPGRADED_ELDER_SAPLING = registerPottedBlock(
+                        "potted_upgraded_elder_sapling", UPGRADED_ELDER_SAPLING);
 
         // ===== SCARLET STONE VARIANTS =====
         public static final DeferredBlock<Block> SCARLET_STONE = registerBlock("scarlet_stone",
@@ -198,18 +206,26 @@ public class ModBlocks {
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
 
         public static final DeferredBlock<DoorBlock> SCARLET_DOOR = registerBlock("scarlet_door",
-                        () -> new DoorBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+                        () -> new DoorBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<TrapDoorBlock> SCARLET_TRAPDOOR = registerBlock("scarlet_trapdoor",
-                        () -> new TrapDoorBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
+                        () -> new TrapDoorBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
 
         public static final DeferredBlock<Block> SCARLET_SAPLING = registerBlock("scarlet_sapling",
                         () -> new SaplingBlock(ModTreeGrowers.SCARLET_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
 
+        public static final DeferredBlock<Block> POTTED_SCARLET_SAPLING = registerPottedBlock("potted_scarlet_sapling",
+                        SCARLET_SAPLING);
+
         public static final DeferredBlock<Block> UPGRADED_SCARLET_SAPLING = registerBlock("upgraded_scarlet_sapling",
                         () -> new UpgradedSaplingBlock(ModTreeGrowers.SCARLET_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+
+        public static final DeferredBlock<Block> POTTED_UPGRADED_SCARLET_SAPLING = registerPottedBlock(
+                        "potted_upgraded_scarlet_sapling", UPGRADED_SCARLET_SAPLING);
 
         // ===== SCARLET VEGETATION =====
         public static final DeferredBlock<Block> SCARLET_LEAVES = registerBlock("scarlet_leaves",
@@ -223,7 +239,12 @@ public class ModBlocks {
 
         public static final DeferredBlock<Block> STAR_HERB = registerBlock("star_herb",
                         () -> new FlowerBlock(SuspiciousStewEffects.EMPTY,
-                                        BlockBehaviour.Properties.ofFullCopy(Blocks.DANDELION)));
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.DANDELION).lightLevel(state -> 7)));
+
+        public static final DeferredBlock<Block> BLOOD_CAP_BLOCK = registerBlock("blood_cap",
+                        () -> new BloodCapBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM).noCollission().instabreak()));
+
+        public static final DeferredBlock<Block> POTTED_STAR_HERB = registerPottedBlock("potted_star_herb", STAR_HERB);
 
         // ===== NEW SCARLET BLOCKS =====
         public static final DeferredBlock<Block> SCARLET_GRASS_BLOCK = registerBlock("scarlet_grass_block",
@@ -244,18 +265,25 @@ public class ModBlocks {
                         () -> new ScarletToothLeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
                                         .noCollission().instabreak()));
 
+        public static final DeferredBlock<Block> POTTED_SCARLET_TOOTH_LEAVES = registerPottedBlock(
+                        "potted_scarlet_tooth_leaves", SCARLET_TOOTH_LEAVES);
+
         public static final DeferredBlock<Block> SCARLET_LILY = registerBlock("scarlet_lily",
                         () -> new ScarletLilyBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.LILY_PAD)));
 
         // ===== FLUORITE BLOCKS =====
         public static final DeferredBlock<Block> FLUORITE_BLOCK = registerBlock("fluorite_block",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
-                                        .strength(1.5f, 1.5f).lightLevel((state) -> 7).noOcclusion()));
+                                        .strength(1.5f, 1.5f).lightLevel((state) -> 5).noOcclusion()));
 
         public static final DeferredBlock<Block> FLUORITE_CLUSTER = registerBlock("fluorite_cluster",
                         () -> new AmethystClusterBlock(7, 3,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER)
-                                                        .lightLevel((state) -> 7).noOcclusion()));
+                                                        .lightLevel((state) -> 5).noOcclusion()));
+
+        public static final DeferredBlock<Block> GLOWLINGS_BLOCK = registerBlock("glowling",
+                        () -> new GlowlingsBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+                                        .noCollission().instabreak().lightLevel((state) -> 5)));
 
         // ===== SCARLET DRIPSTONE =====
         public static final DeferredBlock<Block> SCARLET_DRIPSTONE_BLOCK = registerBlock("scarlet_dripstone_block",
@@ -328,34 +356,52 @@ public class ModBlocks {
                                         .noCollission().noLootTable()
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
+        public static final DeferredBlock<Block> MOONSHROOM_BLOCK = registerBlock("moonshroom",
+                        () -> new MoonshroomBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+                                        .noCollission().instabreak().lightLevel((state) -> 3)));
+
         // ===== UPGRADED VANILLA SAPLINGS =====
         public static final DeferredBlock<Block> UPGRADED_OAK_SAPLING = registerBlock("upgraded_oak_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.OAK,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_OAK_SAPLING = registerPottedBlock(
+                        "potted_upgraded_oak_sapling", UPGRADED_OAK_SAPLING);
 
         public static final DeferredBlock<Block> UPGRADED_SPRUCE_SAPLING = registerBlock("upgraded_spruce_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.SPRUCE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.SPRUCE_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_SPRUCE_SAPLING = registerPottedBlock(
+                        "potted_upgraded_spruce_sapling", UPGRADED_SPRUCE_SAPLING);
 
         public static final DeferredBlock<Block> UPGRADED_BIRCH_SAPLING = registerBlock("upgraded_birch_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.BIRCH,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.BIRCH_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_BIRCH_SAPLING = registerPottedBlock(
+                        "potted_upgraded_birch_sapling", UPGRADED_BIRCH_SAPLING);
 
         public static final DeferredBlock<Block> UPGRADED_JUNGLE_SAPLING = registerBlock("upgraded_jungle_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.JUNGLE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.JUNGLE_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_JUNGLE_SAPLING = registerPottedBlock(
+                        "potted_upgraded_jungle_sapling", UPGRADED_JUNGLE_SAPLING);
 
         public static final DeferredBlock<Block> UPGRADED_ACACIA_SAPLING = registerBlock("upgraded_acacia_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.ACACIA,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.ACACIA_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_ACACIA_SAPLING = registerPottedBlock(
+                        "potted_upgraded_acacia_sapling", UPGRADED_ACACIA_SAPLING);
 
         public static final DeferredBlock<Block> UPGRADED_DARK_OAK_SAPLING = registerBlock("upgraded_dark_oak_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.DARK_OAK,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.DARK_OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_DARK_OAK_SAPLING = registerPottedBlock(
+                        "potted_upgraded_dark_oak_sapling", UPGRADED_DARK_OAK_SAPLING);
 
         public static final DeferredBlock<Block> UPGRADED_CHERRY_SAPLING = registerBlock("upgraded_cherry_sapling",
                         () -> new UpgradedSaplingBlock(TreeGrower.CHERRY,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_CHERRY_SAPLING = registerPottedBlock(
+                        "potted_upgraded_cherry_sapling", UPGRADED_CHERRY_SAPLING);
 
         // ===== EQUINOX TABLE =====
         public static final DeferredBlock<Block> EQUINOX_TABLE = registerBlock("equinox_table",
@@ -471,7 +517,8 @@ public class ModBlocks {
                         });
 
         public static final DeferredBlock<DoorBlock> ABYSS_CROWN_DOOR = registerBlock("abyss_crown_door",
-                        () -> new DoorBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)) {
+                        () -> new DoorBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)) {
                                 @Override
                                 public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
                                                 Direction direction) {
@@ -492,7 +539,8 @@ public class ModBlocks {
                         });
 
         public static final DeferredBlock<TrapDoorBlock> ABYSS_CROWN_TRAPDOOR = registerBlock("abyss_crown_trapdoor",
-                        () -> new TrapDoorBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)) {
+                        () -> new TrapDoorBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)) {
                                 @Override
                                 public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos,
                                                 Direction direction) {
@@ -519,7 +567,8 @@ public class ModBlocks {
                         () -> new AbyssCrownSaplingBlock(ModTreeGrowers.ABYSS_CROWN_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING), false));
 
-        public static final DeferredBlock<Block> UPGRADED_ABYSS_CROWN_SAPLING = registerBlock("upgraded_abyss_crown_sapling",
+        public static final DeferredBlock<Block> UPGRADED_ABYSS_CROWN_SAPLING = registerBlock(
+                        "upgraded_abyss_crown_sapling",
                         () -> new AbyssCrownSaplingBlock(ModTreeGrowers.ABYSS_CROWN_TREE,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING), true));
 
@@ -535,35 +584,123 @@ public class ModBlocks {
                                         .noCollission().instabreak().lightLevel(state -> 15).noLootTable()));
 
         // ===== BUTTONS & PRESSURE PLATES =====
-        public static final DeferredBlock<ButtonBlock> ELDER_BUTTON = registerBlock("elder_button", () -> new ButtonBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
-        public static final DeferredBlock<ButtonBlock> SCARLET_BUTTON = registerBlock("scarlet_button", () -> new ButtonBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
-        public static final DeferredBlock<ButtonBlock> ABYSS_CROWN_BUTTON = registerBlock("abyss_crown_button", () -> new ButtonBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+        public static final DeferredBlock<ButtonBlock> ELDER_BUTTON = registerBlock("elder_button",
+                        () -> new ButtonBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, 30,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+        public static final DeferredBlock<ButtonBlock> SCARLET_BUTTON = registerBlock("scarlet_button",
+                        () -> new ButtonBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, 30,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+        public static final DeferredBlock<ButtonBlock> ABYSS_CROWN_BUTTON = registerBlock("abyss_crown_button",
+                        () -> new ButtonBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, 30,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
 
-        public static final DeferredBlock<PressurePlateBlock> ELDER_PRESSURE_PLATE = registerBlock("elder_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
-        public static final DeferredBlock<PressurePlateBlock> SCARLET_PRESSURE_PLATE = registerBlock("scarlet_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
-        public static final DeferredBlock<PressurePlateBlock> ABYSS_CROWN_PRESSURE_PLATE = registerBlock("abyss_crown_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+        public static final DeferredBlock<PressurePlateBlock> ELDER_PRESSURE_PLATE = registerBlock(
+                        "elder_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.ELDER_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+        public static final DeferredBlock<PressurePlateBlock> SCARLET_PRESSURE_PLATE = registerBlock(
+                        "scarlet_pressure_plate", () -> new PressurePlateBlock(ModWoodTypes.SCARLET_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+        public static final DeferredBlock<PressurePlateBlock> ABYSS_CROWN_PRESSURE_PLATE = registerBlock(
+                        "abyss_crown_pressure_plate",
+                        () -> new PressurePlateBlock(ModWoodTypes.ABYSS_CROWN_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
 
         // ===== SIGNS & HANGING SIGNS =====
-        public static final DeferredBlock<StandingSignBlock> ELDER_SIGN = BLOCKS.register("elder_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
-        public static final DeferredBlock<WallSignBlock> ELDER_WALL_SIGN = BLOCKS.register("elder_wall_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(ELDER_SIGN)));
-        public static final DeferredBlock<CeilingHangingSignBlock> ELDER_HANGING_SIGN = BLOCKS.register("elder_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
-        public static final DeferredBlock<WallHangingSignBlock> ELDER_WALL_HANGING_SIGN = BLOCKS.register("elder_wall_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(ELDER_HANGING_SIGN)));
+        public static final DeferredBlock<StandingSignBlock> ELDER_SIGN = BLOCKS.register("elder_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(
+                                        ModWoodTypes.ELDER_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> ELDER_WALL_SIGN = BLOCKS.register("elder_wall_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(
+                                        ModWoodTypes.ELDER_WOOD_TYPE, BlockBehaviour.Properties
+                                                        .ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(ELDER_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> ELDER_HANGING_SIGN = BLOCKS.register(
+                        "elder_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(
+                                        ModWoodTypes.ELDER_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> ELDER_WALL_HANGING_SIGN = BLOCKS
+                        .register("elder_wall_hanging_sign",
+                                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(
+                                                        ModWoodTypes.ELDER_WOOD_TYPE,
+                                                        BlockBehaviour.Properties
+                                                                        .ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN)
+                                                                        .lootFrom(ELDER_HANGING_SIGN)));
 
-        public static final DeferredBlock<StandingSignBlock> SCARLET_SIGN = BLOCKS.register("scarlet_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
-        public static final DeferredBlock<WallSignBlock> SCARLET_WALL_SIGN = BLOCKS.register("scarlet_wall_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(SCARLET_SIGN)));
-        public static final DeferredBlock<CeilingHangingSignBlock> SCARLET_HANGING_SIGN = BLOCKS.register("scarlet_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
-        public static final DeferredBlock<WallHangingSignBlock> SCARLET_WALL_HANGING_SIGN = BLOCKS.register("scarlet_wall_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(SCARLET_HANGING_SIGN)));
+        public static final DeferredBlock<StandingSignBlock> SCARLET_SIGN = BLOCKS.register("scarlet_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(
+                                        ModWoodTypes.SCARLET_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> SCARLET_WALL_SIGN = BLOCKS.register("scarlet_wall_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(
+                                        ModWoodTypes.SCARLET_WOOD_TYPE, BlockBehaviour.Properties
+                                                        .ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(SCARLET_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> SCARLET_HANGING_SIGN = BLOCKS.register(
+                        "scarlet_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(
+                                        ModWoodTypes.SCARLET_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> SCARLET_WALL_HANGING_SIGN = BLOCKS
+                        .register("scarlet_wall_hanging_sign",
+                                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(
+                                                        ModWoodTypes.SCARLET_WOOD_TYPE,
+                                                        BlockBehaviour.Properties
+                                                                        .ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN)
+                                                                        .lootFrom(SCARLET_HANGING_SIGN)));
 
-        public static final DeferredBlock<StandingSignBlock> ABYSS_CROWN_SIGN = BLOCKS.register("abyss_crown_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
-        public static final DeferredBlock<WallSignBlock> ABYSS_CROWN_WALL_SIGN = BLOCKS.register("abyss_crown_wall_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(ABYSS_CROWN_SIGN)));
-        public static final DeferredBlock<CeilingHangingSignBlock> ABYSS_CROWN_HANGING_SIGN = BLOCKS.register("abyss_crown_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
-        public static final DeferredBlock<WallHangingSignBlock> ABYSS_CROWN_WALL_HANGING_SIGN = BLOCKS.register("abyss_crown_wall_hanging_sign", () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(ABYSS_CROWN_HANGING_SIGN)));
+        public static final DeferredBlock<StandingSignBlock> ABYSS_CROWN_SIGN = BLOCKS.register("abyss_crown_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(
+                                        ModWoodTypes.ABYSS_CROWN_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> ABYSS_CROWN_WALL_SIGN = BLOCKS.register(
+                        "abyss_crown_wall_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(
+                                        ModWoodTypes.ABYSS_CROWN_WOOD_TYPE, BlockBehaviour.Properties
+                                                        .ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(ABYSS_CROWN_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> ABYSS_CROWN_HANGING_SIGN = BLOCKS.register(
+                        "abyss_crown_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(
+                                        ModWoodTypes.ABYSS_CROWN_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> ABYSS_CROWN_WALL_HANGING_SIGN = BLOCKS
+                        .register("abyss_crown_wall_hanging_sign",
+                                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(
+                                                        ModWoodTypes.ABYSS_CROWN_WOOD_TYPE,
+                                                        BlockBehaviour.Properties
+                                                                        .ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN)
+                                                                        .lootFrom(ABYSS_CROWN_HANGING_SIGN)));
 
+        // ===== FORCEFIELD EMITTERS =====
+        public static final DeferredBlock<Block> REPELLENT_FORCEFIELD_EMITTER = registerBlock(
+                        "repellent_forcefield_emitter",
+                        () -> new ForcefieldEmitterBlock(
+                                        net.ganyusbathwater.oririmod.block.custom.ForcefieldVariant.REPELLENT,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
+        public static final DeferredBlock<Block> ATTRACTING_FORCEFIELD_EMITTER = registerBlock(
+                        "attracting_forcefield_emitter",
+                        () -> new ForcefieldEmitterBlock(
+                                        net.ganyusbathwater.oririmod.block.custom.ForcefieldVariant.ATTRACTING,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
+        public static final DeferredBlock<Block> PROTECTION_FORCEFIELD_EMITTER = registerBlock(
+                        "protection_forcefield_emitter",
+                        () -> new ForcefieldEmitterBlock(
+                                        net.ganyusbathwater.oririmod.block.custom.ForcefieldVariant.PROTECTION,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
+        public static final DeferredBlock<Block> MODIFIER_FORCEFIELD_EMITTER = registerBlock(
+                        "modifier_forcefield_emitter",
+                        () -> new ForcefieldEmitterBlock(
+                                        net.ganyusbathwater.oririmod.block.custom.ForcefieldVariant.MODIFIER,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
 
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);
                 registerBlockItem(name, toReturn);
                 return toReturn;
+        }
+
+        private static DeferredBlock<Block> registerPottedBlock(String name, DeferredBlock<Block> plant) {
+                return BLOCKS.register(name, () -> new FlowerPotBlock(() -> (FlowerPotBlock) Blocks.FLOWER_POT, plant,
+                                BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_OAK_SAPLING)));
         }
 
         private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
@@ -578,6 +715,10 @@ public class ModBlocks {
                 } else if (name.equals("revival_shrine")) {
                         ModItems.ITEMS.register(name,
                                         () -> new net.ganyusbathwater.oririmod.item.custom.RevivalShrineBlockItem(
+                                                        block.get(), new Item.Properties()));
+                } else if (name.contains("forcefield_emitter")) {
+                        ModItems.ITEMS.register(name,
+                                        () -> new net.ganyusbathwater.oririmod.item.custom.ForcefieldEmitterBlockItem(
                                                         block.get(), new Item.Properties()));
                 } else {
                         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));

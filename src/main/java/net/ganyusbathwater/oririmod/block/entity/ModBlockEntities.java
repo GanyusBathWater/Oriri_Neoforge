@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.block.entity;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.block.custom.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -23,6 +24,14 @@ public class ModBlockEntities {
             () -> BlockEntityType.Builder.of(RevivalShrineBlockEntity::new,
                     ModBlocks.REVIVAL_SHRINE.get()).build(null));
 
+    public static final Supplier<BlockEntityType<ForcefieldEmitterBlockEntity>> FORCEFIELD_EMITTER = BLOCK_ENTITIES.register(
+            "forcefield_emitter",
+            () -> BlockEntityType.Builder.of(ForcefieldEmitterBlockEntity::new,
+                    ModBlocks.REPELLENT_FORCEFIELD_EMITTER.get(),
+                    ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.get(),
+                    ModBlocks.PROTECTION_FORCEFIELD_EMITTER.get(),
+                    ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get()).build(null));
+
     public static final Supplier<BlockEntityType<ModSignBlockEntity>> MOD_SIGN = BLOCK_ENTITIES.register(
             "mod_sign",
             () -> BlockEntityType.Builder.of(ModSignBlockEntity::new,
@@ -36,6 +45,21 @@ public class ModBlockEntities {
                     ModBlocks.ELDER_HANGING_SIGN.get(), ModBlocks.ELDER_WALL_HANGING_SIGN.get(),
                     ModBlocks.SCARLET_HANGING_SIGN.get(), ModBlocks.SCARLET_WALL_HANGING_SIGN.get(),
                     ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get()).build(null));
+
+    public static final Supplier<BlockEntityType<BloodCapBlockEntity>> BLOOD_CAP_BE = BLOCK_ENTITIES.register(
+            "blood_cap",
+            () -> BlockEntityType.Builder.of(BloodCapBlockEntity::new,
+                    ModBlocks.BLOOD_CAP_BLOCK.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GlowlingsBlockEntity>> GLOWLINGS_BE = BLOCK_ENTITIES.register(
+            "glowlings",
+            () -> BlockEntityType.Builder.of(GlowlingsBlockEntity::new,
+                    ModBlocks.GLOWLINGS_BLOCK.get()).build(null));
+
+    public static final Supplier<BlockEntityType<MoonshroomBlockEntity>> MOONSHROOM_BE = BLOCK_ENTITIES.register(
+            "moonshroom",
+            () -> BlockEntityType.Builder.of(MoonshroomBlockEntity::new,
+                    ModBlocks.MOONSHROOM_BLOCK.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);

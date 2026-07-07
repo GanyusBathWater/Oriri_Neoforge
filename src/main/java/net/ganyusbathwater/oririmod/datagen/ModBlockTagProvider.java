@@ -257,7 +257,11 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.HARDENED_MANASHROOM.get())
                                 .add(ModBlocks.DRAGON_IRON_ORE.get())
                                 .add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get())
-                                .add(ModBlocks.EQUINOX_TABLE.get());
+                                .add(ModBlocks.EQUINOX_TABLE.get())
+                                .add(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.get())
+                                .add(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.get())
+                                .add(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.get())
+                                .add(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get());
 
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
                                 .add(ModBlocks.DARK_SOIL_BLOCK.get())
@@ -286,7 +290,11 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.DRAGON_IRON_ORE.get())
                                 .add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get())
                                 .add(ModBlocks.JADE_ORE.get())
-                                .add(ModBlocks.DEEPSLATE_JADE_ORE.get());
+                                .add(ModBlocks.DEEPSLATE_JADE_ORE.get())
+                                .add(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.get())
+                                .add(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.get())
+                                .add(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.get())
+                                .add(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get());
 
                 tag(BlockTags.CLIMBABLE)
                                 .add(ModBlocks.SCARLET_VINE.get());
