@@ -100,10 +100,11 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
 
         // Element
         String elementKey = descriptionId + ".element";
-        tooltip.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        // Element is handled by TooltipHandler
 
         // Mana Cost
-        tooltip.add(Component.translatable("tooltip.oririmod.mana_cost", this.manaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
+        int actualManaCost = net.ganyusbathwater.oririmod.mana.ModManaUtil.getActualManaCost(this.manaCost, stack, context);
+        tooltip.add(Component.translatable("tooltip.oririmod.mana_cost", actualManaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
 
         // Damage
         tooltip.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(this.summonType, unlockedLevel)).withStyle(net.minecraft.ChatFormatting.GRAY));

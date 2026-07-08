@@ -279,6 +279,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             placeSporeBlossom(level, cfg, rnd);
         }
 
+        placeHangingMoss(level, rnd);
+
         placedBranchLogs.get().clear();
         placedAllLogs.get().clear();
         plannedLeaves.get().clear();
@@ -343,7 +345,11 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         int placed = 0;
         
         for (BlockPos pos : baseLogs) {
-            for (Direction dir : Direction.Plane.HORIZONTAL) {
+            List<Direction> dirs = new ArrayList<>();
+            for (Direction d : Direction.Plane.HORIZONTAL) dirs.add(d);
+            java.util.Collections.shuffle(dirs, new java.util.Random(rnd.nextLong()));
+            
+            for (Direction dir : dirs) {
                 BlockPos target = pos.relative(dir);
                 if (level.isEmptyBlock(target)) {
                     level.setBlock(target, net.ganyusbathwater.oririmod.block.ModBlocks.MOONSHROOM_BLOCK.get().defaultBlockState().setValue(net.ganyusbathwater.oririmod.block.custom.MoonshroomBlock.FACING, dir), 3);
@@ -1527,5 +1533,28 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
     private int clamp(int v, int min, int max) {
         return Math.max(min, Math.min(max, v));
+    }
+
+    private void placeHangingMoss(WorldGenLevel level, RandomSource rnd) {
+        for (BlockPos pos : placedBranchLogs.get()) {
+            if (rnd.nextFloat() < 0.15f) {
+                BlockPos below = pos.below();
+                if (level.getBlockState(below).isAir()) {
+                    int mossLength = 2 + rnd.nextInt(4);
+                    for (int i = 0; i < mossLength; i++) {
+                        BlockPos current = pos.below(i + 1);
+                        if (!level.getBlockState(current).isAir()) {
+                            break;
+                        }
+                        boolean isTip = (i == mossLength - 1) || !level.getBlockState(current.below()).isAir();
+                        BlockState mossState = isTip 
+                                ? ModBlocks.HANGING_ELDER_MOSS.get().defaultBlockState() 
+                                : ModBlocks.HANGING_ELDER_MOSS_PLANT.get().defaultBlockState();
+                        
+                        level.setBlock(current, mossState, 2);
+                    }
+                }
+            }
+        }
     }
 }

@@ -173,6 +173,10 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.BLOOD_CAP_BLOCK.get());
         dropSelf(ModBlocks.GLOWLINGS_BLOCK.get());
         dropSelf(ModBlocks.MOONSHROOM_BLOCK.get());
+        
+        dropSelf(ModBlocks.ELDER_FERN.get());
+        dropSelf(ModBlocks.HANGING_ELDER_MOSS.get());
+        dropOther(ModBlocks.HANGING_ELDER_MOSS_PLANT.get(), ModBlocks.HANGING_ELDER_MOSS.get());
     }
 
     protected net.minecraft.world.level.storage.loot.LootTable.Builder createForcefieldEmitterTable(net.minecraft.world.level.block.Block block) {

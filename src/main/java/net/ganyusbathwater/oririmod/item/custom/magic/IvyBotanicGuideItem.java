@@ -67,7 +67,7 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
 
         // Element
         String elementKey = descriptionId + ".element";
-        tooltip.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        // Element is handled by TooltipHandler
 
         // Mana Cost
         tooltip.add(Component.translatable("tooltip.oririmod.mana_cost", MANA_COST).withStyle(net.minecraft.ChatFormatting.GRAY));

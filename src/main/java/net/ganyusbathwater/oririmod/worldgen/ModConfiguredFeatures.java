@@ -36,6 +36,8 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_BOULDER_KEY = registerKey("scarlet_boulder");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_GRASS_PATCH_KEY = registerKey(
                         "scarlet_grass_patch");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ELDERWOODS_GRASS_PATCH_KEY = registerKey(
+                        "elderwoods_grass_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_TOOTH_LEAVES_PATCH_KEY = registerKey(
                         "scarlet_tooth_leaves_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> STAR_HERB_PATCH_KEY = registerKey(
@@ -52,6 +54,9 @@ public class ModConfiguredFeatures {
                         "scarlet_dripstone_cluster");
         public static final ResourceKey<ConfiguredFeature<?, ?>> JADE_ORE_KEY = registerKey("jade_ore");
         public static final ResourceKey<ConfiguredFeature<?, ?>> DRAGON_IRON_ORE_KEY = registerKey("dragon_iron_ore");
+
+        public static final ResourceKey<ConfiguredFeature<?, ?>> FALLEN_LOGS_KEY = registerKey("fallen_logs");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> LEAF_PILE_KEY = registerKey("leaf_pile_patch");
 
         // Elysian Abyss features
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELYSIAN_STONE_MUSHROOM_KEY = registerKey(
@@ -131,6 +136,15 @@ public class ModConfiguredFeatures {
                                                 new SimpleBlockConfiguration(BlockStateProvider
                                                                 .simple(ModBlocks.SCARLET_GRASS.get())),
                                                 List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get())));
+
+                register(context, ELDERWOODS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
+                                FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
+                                                                net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
+                                                                                .add(Blocks.SHORT_GRASS.defaultBlockState(), 3)
+                                                                                .add(ModBlocks.ELDER_FERN.get().defaultBlockState(), 1)
+                                                )),
+                                                List.of(Blocks.GRASS_BLOCK)));
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
@@ -142,6 +156,12 @@ public class ModConfiguredFeatures {
                 register(context, STAR_HERB_PATCH_KEY, Feature.FLOWER,
                                 new RandomPatchConfiguration(16, 6, 2, PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider.simple(ModBlocks.STAR_HERB.get())))));
+
+                register(context, FALLEN_LOGS_KEY, ModFeatures.FALLEN_LOGS.get(),
+                                new BlockStateConfiguration(ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()));
+
+                register(context, LEAF_PILE_KEY, ModFeatures.ELDER_LEAF_PILE.get(),
+                                net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.NONE);
 
                 register(context, SCARLET_POND_PLAINS_KEY, ModFeatures.BLOOD_WATER_POND.get(),
                                 new net.ganyusbathwater.oririmod.worldgen.feature.BloodWaterPondConfig(

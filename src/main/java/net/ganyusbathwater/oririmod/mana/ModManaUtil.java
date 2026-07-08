@@ -96,6 +96,24 @@ public class ModManaUtil {
         return true;
     }
 
+    public static int getActualManaCost(int baseManaCost, ItemStack weaponStack, net.minecraft.world.item.Item.TooltipContext context) {
+        if (baseManaCost <= 0) return baseManaCost;
+        if (context == null || context.registries() == null) return baseManaCost;
+
+        var registryAccess = context.registries();
+        var manaSavingsOpt = registryAccess.lookup(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .flatMap(reg -> reg.get(ModEnchantments.MANA_SAVINGS));
+
+        if (manaSavingsOpt.isPresent()) {
+            int level = EnchantmentHelper.getItemEnchantmentLevel(manaSavingsOpt.get(), weaponStack);
+            if (level > 0) {
+                float discount = 1.0f - (0.10f * level);
+                return Math.max(1, Math.round(baseManaCost * discount));
+            }
+        }
+        return baseManaCost;
+    }
+
     public static void addMana(Player player, int amount) {
         if (amount <= 0)
             return;

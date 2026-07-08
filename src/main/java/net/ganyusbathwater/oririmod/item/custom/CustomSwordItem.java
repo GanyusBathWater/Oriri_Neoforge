@@ -37,6 +37,15 @@ public class CustomSwordItem extends SwordItem implements ModRarityCarrier {
         return super.getName(stack);
     }
 
+    @Override
+    public Component getHighlightTip(ItemStack item, Component displayName) {
+        if (item.is(ModItems.STELLA_PERDITOR.get())) {
+            // Return a static version of the name for the HUD to prevent the text from resetting and popping up continuously.
+            return super.getName(item).copy().withStyle(style -> style.withColor(0x9E00FF).withBold(true));
+        }
+        return super.getHighlightTip(item, displayName);
+    }
+
     /**
      * Einfache HSV->RGB Konvertierung (h,s,v in [0,1]).
      * Gibt eine 0xRRGGBB-Farbe zurück.

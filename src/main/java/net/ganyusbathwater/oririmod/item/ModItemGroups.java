@@ -91,6 +91,9 @@ public class ModItemGroups {
                         output.accept(ModBlocks.BLOOD_CAP_BLOCK);
                         output.accept(ModBlocks.GLOWLINGS_BLOCK);
                         output.accept(ModBlocks.MOONSHROOM_BLOCK);
+                        output.accept(ModBlocks.ELDER_FERN);
+                        output.accept(ModBlocks.HANGING_ELDER_MOSS);
+                        // output.accept(ModBlocks.HANGING_ELDER_MOSS_PLANT); // Plant body shouldn't be in creative tab
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
 
                         // Scarlet Block Group

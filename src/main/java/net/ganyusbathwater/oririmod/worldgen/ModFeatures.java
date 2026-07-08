@@ -67,6 +67,16 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.SeaUrchinFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.FallenLogsFeature> FALLEN_LOGS = FEATURES
+                        .register("fallen_logs",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.FallenLogsFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.ElderLeafPileFeature> ELDER_LEAF_PILE = FEATURES
+                        .register("elder_leaf_pile",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.ElderLeafPileFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);
         }

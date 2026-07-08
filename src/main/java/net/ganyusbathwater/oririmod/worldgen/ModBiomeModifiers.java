@@ -22,6 +22,7 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_SEA_URCHIN_FEATURES = registerKey("add_sea_urchin_features");
 
         public static final ResourceKey<BiomeModifier> ADD_ELDER_TREES = registerKey("add_elder_trees");
+        public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_OVERGROWTH = registerKey("add_elderwoods_overgrowth");
         public static final ResourceKey<BiomeModifier> ADD_STAR_HERB = registerKey("add_star_herb");
         public static final ResourceKey<BiomeModifier> ADD_JADE_ORE = registerKey("add_jade_ore");
         public static final ResourceKey<BiomeModifier> ADD_DRAGON_IRON_ORE = registerKey("add_dragon_iron_ore");
@@ -68,6 +69,19 @@ public class ModBiomeModifiers {
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(
                                                                                 ModPlacedFeatures.ELDER_TREE_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                context.register(
+                                ADD_ELDERWOODS_OVERGROWTH,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                biomes.getOrThrow(elderBiomesTag),
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(
+                                                                                ModPlacedFeatures.FALLEN_LOGS_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(
+                                                                                ModPlacedFeatures.LEAF_PILE_PATCH_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(
+                                                                                ModPlacedFeatures.ELDERWOODS_GRASS_PATCH_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
                 context.register(

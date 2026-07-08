@@ -311,6 +311,8 @@ public class OririClient {
                 net.minecraft.client.renderer.blockentity.SignRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.MOD_HANGING_SIGN.get(),
                 net.minecraft.client.renderer.blockentity.HangingSignRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.FORCEFIELD_EMITTER.get(),
+                net.ganyusbathwater.oririmod.client.render.block.ForcefieldEmitterRenderer::new);
     }
 
     @SubscribeEvent

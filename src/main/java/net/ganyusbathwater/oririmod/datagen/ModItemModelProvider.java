@@ -178,6 +178,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 saplingItem(ModBlocks.SCARLET_GRASS);
                 saplingItem(ModBlocks.SCARLET_TOOTH_LEAVES);
                 simpleBlockItem(ModBlocks.SCARLET_LILY.get());
+                saplingItem(ModBlocks.ELDER_FERN);
+                saplingItem(ModBlocks.HANGING_ELDER_MOSS);
 
                 withExistingParent(ModBlocks.POINTED_SCARLET_DRIPSTONE.getId().getPath(),
                                 ResourceLocation.withDefaultNamespace("item/generated"))
@@ -361,6 +363,11 @@ public class ModItemModelProvider extends ItemModelProvider {
                                 .texture("layer0", mcLoc("item/name_tag"));
                                 
                 // Maps the GeoItem Renderer explicitly to the model. We use builtin/entity to trigger it, and inject manual displays.
+                applyGeoItemTransforms(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.getId().getPath());
+                applyGeoItemTransforms(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.getId().getPath());
+                applyGeoItemTransforms(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.getId().getPath());
+                applyGeoItemTransforms(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.getId().getPath());
+
                 getBuilder(ModBlocks.REVIVAL_SHRINE.getId().getPath())
                                 .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
                                 .transforms()
@@ -399,6 +406,43 @@ public class ModItemModelProvider extends ItemModelProvider {
                 getBuilder(ModItems.ELEMENTAL_CHOIR.getId().getPath())
                                 .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
+        }
+
+        private void applyGeoItemTransforms(String path) {
+                getBuilder(path)
+                                .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                .transforms()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.GUI)
+                                                .rotation(30, 225, 0)
+                                                .translation(0, -4, 0) // Shifted down a few pixels so it doesn't clip
+                                                .scale(0.625f, 0.625f, 0.625f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.GROUND)
+                                                .rotation(0, 0, 0)
+                                                .translation(0, 3, 0)
+                                                .scale(0.25f, 0.25f, 0.25f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIXED)
+                                                .rotation(0, 0, 0)
+                                                .translation(0, 0, 0)
+                                                .scale(0.5f, 0.5f, 0.5f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                                                .rotation(75, 45, 0)
+                                                .translation(0, 2.5f, 0)
+                                                .scale(0.375f, 0.375f, 0.375f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                                                .rotation(0, 45, 0)
+                                                .translation(0, 0, 0)
+                                                .scale(0.40f, 0.40f, 0.40f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                                                .rotation(0, 225, 0)
+                                                .translation(0, 0, 0)
+                                                .scale(0.40f, 0.40f, 0.40f)
+                                                .end()
+                                .end();
         }
 
         private void shieldItem(DeferredItem<?> item) {

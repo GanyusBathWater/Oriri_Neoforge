@@ -70,15 +70,21 @@ public class ElderwoodsPortalForcer {
 
         Direction right = axis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
 
-        // Simple 4x5 frame (2x3 opening)
+        // First build the frame
         for (int i = -1; i <= 2; i++) {
             for (int j = -1; j <= 4; j++) {
-                BlockPos p = pos.relative(right, i).above(j);
                 if (i == -1 || i == 2 || j == -1 || j == 4) {
+                    BlockPos p = pos.relative(right, i).above(j);
                     level.setBlockAndUpdate(p, frame);
-                } else {
-                    level.setBlockAndUpdate(p, portal);
                 }
+            }
+        }
+        
+        // Then place the portal blocks inside using flag 18 to avoid breaking due to partial updates
+        for (int i = 0; i <= 1; i++) {
+            for (int j = 0; j <= 3; j++) {
+                BlockPos p = pos.relative(right, i).above(j);
+                level.setBlock(p, portal, 18);
             }
         }
     }

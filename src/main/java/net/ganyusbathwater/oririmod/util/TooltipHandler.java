@@ -37,6 +37,15 @@ public final class TooltipHandler {
                     carrier.buildModTooltip(stack, event.getContext(), event.getFlags()));
         }
 
+        // 1.5) Remove native enchantment tooltips for our custom elemental enchantments
+        tooltip.removeIf(comp -> {
+            if (comp.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents translatable) {
+                String key = translatable.getKey();
+                return key.startsWith("enchantment.oririmod.element_");
+            }
+            return false;
+        });
+
         // 2) Element-Zeile hinzufügen
         Element element = ItemElementRegistry.getElement(stack);
         if (element != null && element != Element.PHYSICAL) {

@@ -64,7 +64,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         
         // --- Mathematical Abyss Detection ---
         double seedOffsetCave = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.currentSeedOffsetCave;
-        float scale = 0.0015f;
+        float scale = 0.004f;
         double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
             (float)((ox * 16 + seedOffsetCave) * scale),
             0f,
@@ -75,7 +75,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         caveNoise = Math.abs(caveNoise);
         
         // Match the threshold from getElysianCavernDensity
-        double noiseThreshold = 0.08;
+        double noiseThreshold = 0.20;
         
         if (caveNoise > noiseThreshold) {
             float ravineChance = 1.0f / 70.0f; // Roughly 1 in 70 chunks inside the biome
@@ -280,7 +280,10 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                             if (dx * dx + dz * dz < localRadius * localRadius) {
                                 double bottomTaperProgress = (by - bottomY) / 25.0;
                                 if (bottomTaperProgress < 1.0) {
-                                    double taperedWidth = currentWidth * bottomTaperProgress;
+                                    // Use a square root curve for a U-shaped floor, with a minimum width
+                                    // to act as a middle ground between flat and perfectly sharp.
+                                    double curve = Math.sqrt(bottomTaperProgress);
+                                    double taperedWidth = currentWidth * (0.4 + 0.6 * curve);
                                     if (dx * dx + dz * dz > taperedWidth * taperedWidth) {
                                         continue;
                                     }

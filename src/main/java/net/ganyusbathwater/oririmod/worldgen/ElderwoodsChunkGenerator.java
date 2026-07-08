@@ -237,7 +237,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private double getAbyssNoise(int x, int z) {
         // Synchronized with ElderwoodsBiomeSource
-        float scale = 0.0025f;
+        float scale = 0.004f;
         return net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
             (float)((x + seedOffsetCave) * scale),
             0f,
@@ -1043,7 +1043,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             if (isScarletSurface) {
                 return cachedScarletCaves;
             }
-            if (caveNoise > 0.08) {
+            if (caveNoise > 0.20) {
                 return cachedElysianAbyss;
             } else if (caveNoise < -0.3) {
                 return cachedElderwoodsCave;
@@ -1144,8 +1144,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
                     double caveNoise = getAbyssNoise(worldX, worldZ);
                     // Reduced divisor from 0.15 to 0.03 to ensure the cavern opens up extremely quickly
-                    // exactly as we enter the Elysian Abyss biome threshold (0.08).
-                    double abyssIntensity = Mth.clamp((caveNoise - 0.08) / 0.03, 0.0, 1.0);
+                    // exactly as we enter the Elysian Abyss biome threshold (0.20).
+                    double abyssIntensity = Mth.clamp((caveNoise - 0.20) / 0.03, 0.0, 1.0);
 
                     double caveFloorSmooth = getCaveFloorHeightDouble(worldX, worldZ, -115);
                     double caveCeilingSmooth = getCaveCeilingHeightDouble(worldX, worldZ, surfaceY);

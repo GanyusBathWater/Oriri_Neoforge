@@ -176,6 +176,38 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 simpleBlockWithItem(ModBlocks.SCARLET_LILY.get(),
                                 models().getExistingFile(modLoc("block/scarlet_lily")));
 
+                // Elderwoods Overgrowth
+                simpleBlockWithItem(ModBlocks.ELDER_FERN.get(),
+                                models().withExistingParent("elder_fern", mcLoc("block/tinted_cross"))
+                                                .texture("cross", modLoc("block/elder_fern"))
+                                                .renderType("cutout"));
+
+                simpleBlock(ModBlocks.HANGING_ELDER_MOSS.get(),
+                                models().cross("hanging_elder_moss", modLoc("block/hanging_elder_moss"))
+                                                .renderType("cutout"));
+
+                simpleBlock(ModBlocks.HANGING_ELDER_MOSS_PLANT.get(),
+                                models().cross("hanging_elder_moss_plant", modLoc("block/hanging_elder_moss_plant"))
+                                                .renderType("cutout"));
+
+                // ===== FORCEFIELD EMITTERS =====
+                simpleBlock(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.get(),
+                                models().getBuilder("repellent_forcefield_emitter")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", modLoc("block/forcefield_emitter")));
+                simpleBlock(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.get(),
+                                models().getBuilder("attracting_forcefield_emitter")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", modLoc("block/forcefield_emitter")));
+                simpleBlock(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.get(),
+                                models().getBuilder("protection_forcefield_emitter")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", modLoc("block/forcefield_emitter")));
+                simpleBlock(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get(),
+                                models().getBuilder("modifier_forcefield_emitter")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", modLoc("block/forcefield_emitter")));
+
                 // ===== JADE BLOCKS =====
                 blockWithItem(ModBlocks.JADE_BLOCK, 1);
                 blockWithItem(ModBlocks.JADE_ORE, 1);

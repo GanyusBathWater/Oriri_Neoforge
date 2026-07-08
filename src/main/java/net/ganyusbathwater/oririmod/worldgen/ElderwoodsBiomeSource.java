@@ -100,7 +100,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 0.5 * Math.cos(nx * 0.005 + 2.0) * Math.sin(nz * 0.005 + 1.0);
 
         // Cave Noise
-        float caveScale = 0.0025f;
+        float caveScale = 0.004f;
         double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
                 (float)((x + seedOffsetCave) * caveScale),
                 0f,
@@ -122,8 +122,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             if (isScarletSurface) {
                 return findBiome(SCARLET_CAVES_KEY);
             }
-            if (caveNoise > 0.08) {
-                // Elysian Abyss carved zone — noise band synchronized with generator (> 0.08)
+            if (caveNoise > 0.20) {
+                // Elysian Abyss carved zone — noise band synchronized with generator (> 0.20)
                 return findBiome(ELYSIAN_ABYSS_KEY);
             }
             else if (caveNoise < -0.3) {

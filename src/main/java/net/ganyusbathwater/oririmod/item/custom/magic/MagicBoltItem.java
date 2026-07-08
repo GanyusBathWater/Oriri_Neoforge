@@ -345,12 +345,11 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
         // Element
         String elementKey = descriptionId + ".element";
-        if (this.ability != MagicBoltAbility.ENDER) {
-            tooltipComponents.add(Component.translatable("tooltip.oririmod.element", Component.translatable(elementKey)).withStyle(net.minecraft.ChatFormatting.GRAY));
-        }
+        // Element is handled by TooltipHandler
 
         // Mana Cost
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", this.manaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
+        int actualManaCost = ModManaUtil.getActualManaCost(this.manaCost, stack, context);
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", actualManaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
 
         // Damage
         if (this.ability != MagicBoltAbility.ENDER) {

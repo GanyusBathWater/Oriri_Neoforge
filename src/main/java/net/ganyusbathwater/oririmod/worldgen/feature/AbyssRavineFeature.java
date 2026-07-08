@@ -127,7 +127,10 @@ public class AbyssRavineFeature extends Feature<NoneFeatureConfiguration> {
                             if (dx * dx + dz * dz < localRadius * localRadius) {
                                 double bottomTaperProgress = (by - bottomY) / 25.0;
                                 if (bottomTaperProgress < 1.0) {
-                                    double taperedWidth = currentWidth * bottomTaperProgress;
+                                    // Use a square root curve for a U-shaped floor, with a minimum width
+                                    // to act as a middle ground between flat and perfectly sharp.
+                                    double curve = Math.sqrt(bottomTaperProgress);
+                                    double taperedWidth = currentWidth * (0.4 + 0.6 * curve);
                                     if (dx * dx + dz * dz > taperedWidth * taperedWidth) {
                                         continue;
                                     }

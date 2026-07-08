@@ -42,4 +42,9 @@ public class GlowlingsBlock extends BushBlock implements EntityBlock {
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new GlowlingsBlockEntity(pos, state);
     }
+
+    @Override
+    protected boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.is(net.minecraft.world.level.block.Blocks.STONE) || state.is(net.minecraft.world.level.block.Blocks.DEEPSLATE) || super.mayPlaceOn(state, level, pos);
+    }
 }

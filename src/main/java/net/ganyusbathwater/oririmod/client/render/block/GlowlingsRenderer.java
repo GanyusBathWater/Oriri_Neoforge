@@ -25,18 +25,24 @@ public class GlowlingsRenderer extends GeoBlockRenderer<GlowlingsBlockEntity> {
         for (int i = 0; i < numMushrooms; i++) {
             poseStack.pushPose();
             
-            // Random translation within the block
-            float tx = (random.nextFloat() - 0.5f) * 0.5f;
-            float tz = (random.nextFloat() - 0.5f) * 0.5f;
+            // Move to center
+            poseStack.translate(0.5, 0, 0.5);
+            
+            // Random translation relative to center
+            float tx = (random.nextFloat() - 0.5f) * 0.75f;
+            float tz = (random.nextFloat() - 0.5f) * 0.75f;
             poseStack.translate(tx, 0, tz);
             
             // Random rotation
             float rotY = random.nextFloat() * 360f;
-            poseStack.mulPose(new Quaternionf(new AxisAngle4f((float) Math.toRadians(rotY), 0.0f, 1.0f, 0.0f)));
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
             
-            // Random scale
-            float scale = 0.6f + random.nextFloat() * 0.6f;
+            // Random scale (increased size slightly)
+            float scale = 1.2f + random.nextFloat() * 0.5f;
             poseStack.scale(scale, scale, scale);
+            
+            // Translate back so GeoBlockRenderer's internal translation is negated
+            poseStack.translate(-0.5, 0, -0.5);
             
             super.render(animatable, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
             poseStack.popPose();

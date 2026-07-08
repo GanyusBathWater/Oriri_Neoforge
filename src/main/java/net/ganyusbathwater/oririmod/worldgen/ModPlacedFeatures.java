@@ -30,6 +30,8 @@ public class ModPlacedFeatures {
                         "scarlet_boulder_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_GRASS_PATCH_PLACED_KEY = registerKey(
                         "scarlet_grass_patch_placed");
+        public static final ResourceKey<PlacedFeature> ELDERWOODS_GRASS_PATCH_PLACED_KEY = registerKey(
+                        "elderwoods_grass_patch_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_TOOTH_LEAVES_PATCH_PLACED_KEY = registerKey(
                         "scarlet_tooth_leaves_patch_placed");
         public static final ResourceKey<PlacedFeature> STAR_HERB_PATCH_PLACED_KEY = registerKey(
@@ -40,6 +42,9 @@ public class ModPlacedFeatures {
                         "scarlet_pond_plains_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_POND_FOREST_PLACED_KEY = registerKey(
                         "scarlet_pond_forest_placed");
+
+        public static final ResourceKey<PlacedFeature> FALLEN_LOGS_PLACED_KEY = registerKey("fallen_logs_placed");
+        public static final ResourceKey<PlacedFeature> LEAF_PILE_PATCH_PLACED_KEY = registerKey("leaf_pile_patch_placed");
 
         public static final ResourceKey<PlacedFeature> ELDERWOODS_DRIPSTONE_CLUSTER_PLACED_KEY = registerKey(
                         "elderwoods_dripstone_cluster_placed");
@@ -100,6 +105,20 @@ public class ModPlacedFeatures {
                                 HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES));
                 register(context, ELDER_TREE_PLACED_KEY, configuredElderTree, elderTreeModifiers);
 
+                var configuredFallenLogs = configuredFeatures.getOrThrow(ModConfiguredFeatures.FALLEN_LOGS_KEY);
+                register(context, FALLEN_LOGS_PLACED_KEY, configuredFallenLogs, List.of(
+                                RarityFilter.onAverageOnceEvery(32), // Made very rare
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                BiomeFilter.biome()));
+
+                var configuredLeafPile = configuredFeatures.getOrThrow(ModConfiguredFeatures.LEAF_PILE_KEY);
+                register(context, LEAF_PILE_PATCH_PLACED_KEY, configuredLeafPile, List.of(
+                                CountPlacement.of(2), // Reduced count
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                BiomeFilter.biome()));
+
                 // Scarlet tree - sparser than elder trees
                 var configuredScarletTree = configuredFeatures.getOrThrow(ModConfiguredFeatures.SCARLET_TREE_KEY);
                 List<PlacementModifier> scarletTreeModifiers = List.of(
@@ -126,6 +145,14 @@ public class ModPlacedFeatures {
                                 .getOrThrow(ModConfiguredFeatures.SCARLET_GRASS_PATCH_KEY);
                 register(context, SCARLET_GRASS_PATCH_PLACED_KEY, configuredScarletGrass, List.of(
                                 CountPlacement.of(16),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                BiomeFilter.biome()));
+
+                var configuredElderwoodsGrass = configuredFeatures
+                                .getOrThrow(ModConfiguredFeatures.ELDERWOODS_GRASS_PATCH_KEY);
+                register(context, ELDERWOODS_GRASS_PATCH_PLACED_KEY, configuredElderwoodsGrass, List.of(
+                                CountPlacement.of(12),
                                 InSquarePlacement.spread(),
                                 PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                                 BiomeFilter.biome()));

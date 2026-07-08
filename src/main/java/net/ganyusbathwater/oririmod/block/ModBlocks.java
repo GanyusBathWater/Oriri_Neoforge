@@ -692,6 +692,19 @@ public class ModBlocks {
                                         net.ganyusbathwater.oririmod.block.custom.ForcefieldVariant.MODIFIER,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
 
+        // ===== ELDERWOODS OVERGROWTH =====
+        public static final DeferredBlock<Block> ELDER_FERN = registerBlock("elder_fern",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderFernBlock(
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.FERN)));
+
+        public static final DeferredBlock<Block> HANGING_ELDER_MOSS = registerBlock("hanging_elder_moss",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.HangingElderMossBlock(
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.WEEPING_VINES)));
+
+        public static final DeferredBlock<Block> HANGING_ELDER_MOSS_PLANT = BLOCKS.register("hanging_elder_moss_plant",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.HangingElderMossPlantBlock(
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.WEEPING_VINES_PLANT)));
+
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);
                 registerBlockItem(name, toReturn);

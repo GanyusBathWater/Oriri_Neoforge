@@ -118,7 +118,8 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
         String descriptionId = this.getDescriptionId();
 
         // Mana Cost
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", this.manaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
+        int actualManaCost = ModManaUtil.getActualManaCost(this.manaCost, stack, context);
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", actualManaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
 
         // Damage (None for staffs)
 

@@ -13,7 +13,7 @@ import software.bernie.geckolib.renderer.GeoBlockRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 public class ForcefieldEmitterRenderer extends GeoBlockRenderer<ForcefieldEmitterBlockEntity> {
-    public ForcefieldEmitterRenderer() {
+    public ForcefieldEmitterRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context context) {
         super(new ForcefieldEmitterModel());
         
         // Add layer for the colored crystal
