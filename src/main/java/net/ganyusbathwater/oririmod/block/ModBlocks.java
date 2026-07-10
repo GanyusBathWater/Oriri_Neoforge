@@ -180,6 +180,76 @@ public class ModBlocks {
                         "cracked_scarlet_deepslate_tiles",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CRACKED_DEEPSLATE_TILES)));
 
+        // ===== NEW SCARLET STONE VARIANTS =====
+        public static final DeferredBlock<Block> SCARLET_COBBLESTONE = registerBlock("scarlet_cobblestone",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLESTONE)));
+        public static final DeferredBlock<StairBlock> SCARLET_COBBLESTONE_STAIRS = registerBlock("scarlet_cobblestone_stairs",
+                        () -> new StairBlock(ModBlocks.SCARLET_COBBLESTONE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLESTONE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> SCARLET_COBBLESTONE_SLAB = registerBlock("scarlet_cobblestone_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLESTONE_SLAB)));
+        public static final DeferredBlock<WallBlock> SCARLET_COBBLESTONE_WALL = registerBlock("scarlet_cobblestone_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLESTONE_WALL)));
+
+        public static final DeferredBlock<Block> MOSSY_SCARLET_COBBLESTONE = registerBlock("mossy_scarlet_cobblestone",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_COBBLESTONE)));
+        public static final DeferredBlock<StairBlock> MOSSY_SCARLET_COBBLESTONE_STAIRS = registerBlock("mossy_scarlet_cobblestone_stairs",
+                        () -> new StairBlock(ModBlocks.MOSSY_SCARLET_COBBLESTONE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_COBBLESTONE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> MOSSY_SCARLET_COBBLESTONE_SLAB = registerBlock("mossy_scarlet_cobblestone_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_COBBLESTONE_SLAB)));
+        public static final DeferredBlock<WallBlock> MOSSY_SCARLET_COBBLESTONE_WALL = registerBlock("mossy_scarlet_cobblestone_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_COBBLESTONE_WALL)));
+
+        public static final DeferredBlock<StairBlock> SCARLET_STONE_STAIRS = registerBlock("scarlet_stone_stairs",
+                        () -> new StairBlock(ModBlocks.SCARLET_STONE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> SCARLET_STONE_SLAB = registerBlock("scarlet_stone_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_SLAB)));
+        public static final DeferredBlock<PressurePlateBlock> SCARLET_STONE_PRESSURE_PLATE = registerBlock("scarlet_stone_pressure_plate",
+                        () -> new PressurePlateBlock(BlockSetType.STONE, BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_PRESSURE_PLATE)));
+        public static final DeferredBlock<ButtonBlock> SCARLET_STONE_BUTTON = registerBlock("scarlet_stone_button",
+                        () -> new ButtonBlock(BlockSetType.STONE, 20, BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BUTTON)));
+
+        public static final DeferredBlock<StairBlock> SCARLET_STONE_BRICK_STAIRS = registerBlock("scarlet_stone_brick_stairs",
+                        () -> new StairBlock(ModBlocks.SCARLET_STONE_BRICKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_STAIRS)));
+        public static final DeferredBlock<SlabBlock> SCARLET_STONE_BRICK_SLAB = registerBlock("scarlet_stone_brick_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_SLAB)));
+        public static final DeferredBlock<WallBlock> SCARLET_STONE_BRICK_WALL = registerBlock("scarlet_stone_brick_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_WALL)));
+
+        public static final DeferredBlock<StairBlock> MOSSY_SCARLET_STONE_BRICK_STAIRS = registerBlock("mossy_scarlet_stone_brick_stairs",
+                        () -> new StairBlock(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_STONE_BRICK_STAIRS)));
+        public static final DeferredBlock<SlabBlock> MOSSY_SCARLET_STONE_BRICK_SLAB = registerBlock("mossy_scarlet_stone_brick_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_STONE_BRICK_SLAB)));
+        public static final DeferredBlock<WallBlock> MOSSY_SCARLET_STONE_BRICK_WALL = registerBlock("mossy_scarlet_stone_brick_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_STONE_BRICK_WALL)));
+
+        public static final DeferredBlock<StairBlock> COBBLED_SCARLET_DEEPSLATE_STAIRS = registerBlock("cobbled_scarlet_deepslate_stairs",
+                        () -> new StairBlock(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLED_DEEPSLATE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> COBBLED_SCARLET_DEEPSLATE_SLAB = registerBlock("cobbled_scarlet_deepslate_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLED_DEEPSLATE_SLAB)));
+        public static final DeferredBlock<WallBlock> COBBLED_SCARLET_DEEPSLATE_WALL = registerBlock("cobbled_scarlet_deepslate_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLED_DEEPSLATE_WALL)));
+
+        public static final DeferredBlock<StairBlock> POLISHED_SCARLET_DEEPSLATE_STAIRS = registerBlock("polished_scarlet_deepslate_stairs",
+                        () -> new StairBlock(ModBlocks.POLISHED_SCARLET_DEEPSLATE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_DEEPSLATE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> POLISHED_SCARLET_DEEPSLATE_SLAB = registerBlock("polished_scarlet_deepslate_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_DEEPSLATE_SLAB)));
+        public static final DeferredBlock<WallBlock> POLISHED_SCARLET_DEEPSLATE_WALL = registerBlock("polished_scarlet_deepslate_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_DEEPSLATE_WALL)));
+
+        public static final DeferredBlock<StairBlock> SCARLET_DEEPSLATE_STAIRS = registerBlock("scarlet_deepslate_stairs",
+                        () -> new StairBlock(ModBlocks.SCARLET_DEEPSLATE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE)));
+        public static final DeferredBlock<SlabBlock> SCARLET_DEEPSLATE_SLAB = registerBlock("scarlet_deepslate_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE)));
+        public static final DeferredBlock<WallBlock> SCARLET_DEEPSLATE_WALL = registerBlock("scarlet_deepslate_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE)));
+
+        public static final DeferredBlock<StairBlock> SCARLET_DEEPSLATE_TILE_STAIRS = registerBlock("scarlet_deepslate_tile_stairs",
+                        () -> new StairBlock(ModBlocks.SCARLET_DEEPSLATE_TILES.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_TILE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> SCARLET_DEEPSLATE_TILE_SLAB = registerBlock("scarlet_deepslate_tile_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_TILE_SLAB)));
+        public static final DeferredBlock<WallBlock> SCARLET_DEEPSLATE_TILE_WALL = registerBlock("scarlet_deepslate_tile_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_TILE_WALL)));
+
         // ===== SCARLET WOOD TYPES =====
         public static final DeferredBlock<Block> SCARLET_LOG = registerBlock("scarlet_log",
                         () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)));
@@ -306,6 +376,9 @@ public class ModBlocks {
 
         public static final DeferredBlock<Block> CHISELED_SOL_SANDSTONE = registerBlock("chiseled_sol_sandstone",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CHISELED_SANDSTONE)));
+
+        public static final DeferredBlock<Block> SOL_QUICKSAND = BLOCKS.register("sol_quicksand",
+                        () -> new SolQuicksandBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POWDER_SNOW).sound(SoundType.SAND)));
 
         // ===== BROKEN SWORDS =====
         public static final DeferredBlock<Block> BROKEN_SWORD_BLOCK = registerBlock("broken_sword_block",

@@ -108,21 +108,61 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.SCARLET_CHEST_BOAT.get());
 
                 simpleBlockItem(ModBlocks.SCARLET_STONE.get());
-                simpleBlockItem(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
+                simpleBlockItem(ModBlocks.SCARLET_STONE_STAIRS.get());
+                simpleBlockItem(ModBlocks.SCARLET_STONE_SLAB.get());
+                simpleBlockItem(ModBlocks.SCARLET_STONE_PRESSURE_PLATE.get());
+                buttonItem(ModBlocks.SCARLET_STONE_BUTTON, ModBlocks.SCARLET_STONE);
+
+                simpleBlockItem(ModBlocks.SCARLET_COBBLESTONE.get());
+                simpleBlockItem(ModBlocks.SCARLET_COBBLESTONE_STAIRS.get());
+                simpleBlockItem(ModBlocks.SCARLET_COBBLESTONE_SLAB.get());
+                wallItem(ModBlocks.SCARLET_COBBLESTONE_WALL, ModBlocks.SCARLET_COBBLESTONE);
+
+                simpleBlockItem(ModBlocks.MOSSY_SCARLET_COBBLESTONE.get());
+                simpleBlockItem(ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS.get());
+                simpleBlockItem(ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get());
+                wallItem(ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL, ModBlocks.MOSSY_SCARLET_COBBLESTONE);
+
                 simpleBlockItem(ModBlocks.SMOOTH_SCARLET_STONE.get());
                 simpleBlockItem(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get());
 
                 simpleBlockItem(ModBlocks.SCARLET_STONE_BRICKS.get());
+                simpleBlockItem(ModBlocks.SCARLET_STONE_BRICK_STAIRS.get());
+                simpleBlockItem(ModBlocks.SCARLET_STONE_BRICK_SLAB.get());
+                wallItem(ModBlocks.SCARLET_STONE_BRICK_WALL, ModBlocks.SCARLET_STONE_BRICKS);
+
                 simpleBlockItem(ModBlocks.CHISELED_SCARLET_STONE_BRICKS.get());
                 simpleBlockItem(ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get());
+
                 simpleBlockItem(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get());
+                simpleBlockItem(ModBlocks.MOSSY_SCARLET_STONE_BRICK_STAIRS.get());
+                simpleBlockItem(ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get());
+                wallItem(ModBlocks.MOSSY_SCARLET_STONE_BRICK_WALL, ModBlocks.MOSSY_SCARLET_STONE_BRICKS);
 
                 simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE.get());
+                simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_STAIRS.get());
+                simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_SLAB.get());
+                wallItem(ModBlocks.SCARLET_DEEPSLATE_WALL, ModBlocks.SCARLET_DEEPSLATE);
+
+                simpleBlockItem(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
+                simpleBlockItem(ModBlocks.COBBLED_SCARLET_DEEPSLATE_STAIRS.get());
+                simpleBlockItem(ModBlocks.COBBLED_SCARLET_DEEPSLATE_SLAB.get());
+                wallItem(ModBlocks.COBBLED_SCARLET_DEEPSLATE_WALL, ModBlocks.COBBLED_SCARLET_DEEPSLATE);
+
                 simpleBlockItem(ModBlocks.POLISHED_SCARLET_DEEPSLATE.get());
+                simpleBlockItem(ModBlocks.POLISHED_SCARLET_DEEPSLATE_STAIRS.get());
+                simpleBlockItem(ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB.get());
+                wallItem(ModBlocks.POLISHED_SCARLET_DEEPSLATE_WALL, ModBlocks.POLISHED_SCARLET_DEEPSLATE);
+
                 simpleBlockItem(ModBlocks.CHISELED_SCARLET_DEEPSLATE.get());
                 simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get());
                 simpleBlockItem(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get());
+
                 simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_TILES.get());
+                simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS.get());
+                simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get());
+                wallItem(ModBlocks.SCARLET_DEEPSLATE_TILE_WALL, ModBlocks.SCARLET_DEEPSLATE_TILES);
+
                 simpleBlockItem(ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES.get());
 
                 simpleBlockItem(ModBlocks.SCARLET_MOSS.get());
@@ -319,6 +359,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.PRISMARINE_BOOTS.get());
 
                 basicItem(ModFluids.BLOOD_WATER_BUCKET.get());
+                basicItem(ModItems.SOL_QUICKSAND_BUCKET.get());
 
                 // -------------Arkana-------------
 

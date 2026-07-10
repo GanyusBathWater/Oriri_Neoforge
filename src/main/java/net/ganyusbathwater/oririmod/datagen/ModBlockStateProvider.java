@@ -112,6 +112,46 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 signBlock((net.minecraft.world.level.block.StandingSignBlock) ModBlocks.SCARLET_SIGN.get(), (net.minecraft.world.level.block.WallSignBlock) ModBlocks.SCARLET_WALL_SIGN.get(), blockTexture(ModBlocks.SCARLET_PLANKS.get()));
                 hangingSignBlock(ModBlocks.SCARLET_HANGING_SIGN.get(), ModBlocks.SCARLET_WALL_HANGING_SIGN.get(), modLoc("block/scarlet_log"));
 
+                // --- NEW SCARLET STONE VARIANTS DATAGEN ---
+                blockWithItem(ModBlocks.SCARLET_COBBLESTONE, 1);
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_COBBLESTONE_STAIRS.get(), modLoc("block/scarlet_cobblestone"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_COBBLESTONE_SLAB.get(), modLoc("block/scarlet_cobblestone"), modLoc("block/scarlet_cobblestone"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_COBBLESTONE_WALL.get(), modLoc("block/scarlet_cobblestone"));
+
+                blockWithItem(ModBlocks.MOSSY_SCARLET_COBBLESTONE, 1);
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS.get(), modLoc("block/mossy_scarlet_cobblestone"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get(), modLoc("block/mossy_scarlet_cobblestone"), modLoc("block/mossy_scarlet_cobblestone"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL.get(), modLoc("block/mossy_scarlet_cobblestone"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_STONE_STAIRS.get(), modLoc("block/scarlet_stone"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_STONE_SLAB.get(), modLoc("block/scarlet_stone"), modLoc("block/scarlet_stone"));
+                buttonBlock((net.minecraft.world.level.block.ButtonBlock) ModBlocks.SCARLET_STONE_BUTTON.get(), modLoc("block/scarlet_stone"));
+                pressurePlateBlock((net.minecraft.world.level.block.PressurePlateBlock) ModBlocks.SCARLET_STONE_PRESSURE_PLATE.get(), modLoc("block/scarlet_stone"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_STONE_BRICK_STAIRS.get(), modLoc("block/scarlet_stone_bricks"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_STONE_BRICK_SLAB.get(), modLoc("block/scarlet_stone_bricks"), modLoc("block/scarlet_stone_bricks"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_STONE_BRICK_WALL.get(), modLoc("block/scarlet_stone_bricks"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.MOSSY_SCARLET_STONE_BRICK_STAIRS.get(), modLoc("block/mossy_scarlet_stone_bricks"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get(), modLoc("block/mossy_scarlet_stone_bricks"), modLoc("block/mossy_scarlet_stone_bricks"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.MOSSY_SCARLET_STONE_BRICK_WALL.get(), modLoc("block/mossy_scarlet_stone_bricks"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.COBBLED_SCARLET_DEEPSLATE_STAIRS.get(), modLoc("block/cobbled_scarlet_deepslate"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.COBBLED_SCARLET_DEEPSLATE_SLAB.get(), modLoc("block/cobbled_scarlet_deepslate"), modLoc("block/cobbled_scarlet_deepslate"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.COBBLED_SCARLET_DEEPSLATE_WALL.get(), modLoc("block/cobbled_scarlet_deepslate"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.POLISHED_SCARLET_DEEPSLATE_STAIRS.get(), modLoc("block/polished_scarlet_deepslate"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB.get(), modLoc("block/polished_scarlet_deepslate"), modLoc("block/polished_scarlet_deepslate"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.POLISHED_SCARLET_DEEPSLATE_WALL.get(), modLoc("block/polished_scarlet_deepslate"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_DEEPSLATE_STAIRS.get(), modLoc("block/scarlet_deepslate"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_DEEPSLATE_SLAB.get(), modLoc("block/scarlet_deepslate"), modLoc("block/scarlet_deepslate"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_DEEPSLATE_WALL.get(), modLoc("block/scarlet_deepslate"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS.get(), modLoc("block/scarlet_deepslate_tiles"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get(), modLoc("block/scarlet_deepslate_tiles"), modLoc("block/scarlet_deepslate_tiles"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_DEEPSLATE_TILE_WALL.get(), modLoc("block/scarlet_deepslate_tiles"));
+
                 // Stems use log texture on all sides
                 simpleBlockWithItem(ModBlocks.SCARLET_STEM.get(),
                                 models().cubeAll("scarlet_stem", modLoc("block/scarlet_log")));
@@ -229,6 +269,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
                 // ===== SOL SAND BLOCKS =====
                 blockWithItem(ModBlocks.SOL_SAND, 1);
+                
+                simpleBlock(ModBlocks.SOL_QUICKSAND.get(),
+                                models().cubeAll("sol_quicksand", modLoc("block/sol_quicksand")));
 
                 simpleBlockWithItem(ModBlocks.SOL_SANDSTONE.get(),
                                 models().cubeBottomTop("sol_sandstone", modLoc("block/sol_sandstone"),

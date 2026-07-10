@@ -45,6 +45,7 @@ public class ModItemGroups {
                         output.accept(ModItems.CRYSTAL_INGOT);
                         output.accept(ModFluids.AETHER_BUCKET.get());
                         output.accept(ModFluids.BLOOD_WATER_BUCKET.get());
+                        output.accept(ModItems.SOL_QUICKSAND_BUCKET);
                         output.accept(ModBlocks.BLOOD_SLUDGE.get());
 
                         // -------------Blocks------------
@@ -99,20 +100,61 @@ public class ModItemGroups {
                         // Scarlet Block Group
                         output.accept(ModBlocks.SCARLET_GRASS_BLOCK);
                         output.accept(ModBlocks.SCARLET_STONE);
-                        output.accept(ModBlocks.COBBLED_SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.SCARLET_STONE_STAIRS);
+                        output.accept(ModBlocks.SCARLET_STONE_SLAB);
+                        output.accept(ModBlocks.SCARLET_STONE_PRESSURE_PLATE);
+                        output.accept(ModBlocks.SCARLET_STONE_BUTTON);
+
+                        output.accept(ModBlocks.SCARLET_COBBLESTONE);
+                        output.accept(ModBlocks.SCARLET_COBBLESTONE_STAIRS);
+                        output.accept(ModBlocks.SCARLET_COBBLESTONE_SLAB);
+                        output.accept(ModBlocks.SCARLET_COBBLESTONE_WALL);
+
+                        output.accept(ModBlocks.MOSSY_SCARLET_COBBLESTONE);
+                        output.accept(ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS);
+                        output.accept(ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB);
+                        output.accept(ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL);
+
                         output.accept(ModBlocks.SMOOTH_SCARLET_STONE);
                         output.accept(ModBlocks.SMOOTH_SCARLET_STONE_SLAB);
+
                         output.accept(ModBlocks.SCARLET_STONE_BRICKS);
+                        output.accept(ModBlocks.SCARLET_STONE_BRICK_STAIRS);
+                        output.accept(ModBlocks.SCARLET_STONE_BRICK_SLAB);
+                        output.accept(ModBlocks.SCARLET_STONE_BRICK_WALL);
+
                         output.accept(ModBlocks.CHISELED_SCARLET_STONE_BRICKS);
                         output.accept(ModBlocks.CRACKED_SCARLET_STONE_BRICKS);
+
                         output.accept(ModBlocks.MOSSY_SCARLET_STONE_BRICKS);
+                        output.accept(ModBlocks.MOSSY_SCARLET_STONE_BRICK_STAIRS);
+                        output.accept(ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB);
+                        output.accept(ModBlocks.MOSSY_SCARLET_STONE_BRICK_WALL);
 
                         output.accept(ModBlocks.SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_STAIRS);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_SLAB);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_WALL);
+
+                        output.accept(ModBlocks.COBBLED_SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.COBBLED_SCARLET_DEEPSLATE_STAIRS);
+                        output.accept(ModBlocks.COBBLED_SCARLET_DEEPSLATE_SLAB);
+                        output.accept(ModBlocks.COBBLED_SCARLET_DEEPSLATE_WALL);
+
                         output.accept(ModBlocks.POLISHED_SCARLET_DEEPSLATE);
+                        output.accept(ModBlocks.POLISHED_SCARLET_DEEPSLATE_STAIRS);
+                        output.accept(ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB);
+                        output.accept(ModBlocks.POLISHED_SCARLET_DEEPSLATE_WALL);
+
                         output.accept(ModBlocks.CHISELED_SCARLET_DEEPSLATE);
                         output.accept(ModBlocks.SCARLET_DEEPSLATE_BRICKS);
                         output.accept(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS);
+
                         output.accept(ModBlocks.SCARLET_DEEPSLATE_TILES);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_TILE_WALL);
+
                         output.accept(ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES);
 
                         output.accept(ModBlocks.SCARLET_LOG);

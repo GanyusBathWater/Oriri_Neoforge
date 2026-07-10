@@ -34,6 +34,11 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.MagicDebugStickItem(
                                         new Item.Properties().stacksTo(1)));
 
+        public static final DeferredItem<Item> SOL_QUICKSAND_BUCKET = ITEMS.register("sol_quicksand_bucket",
+                        () -> new net.minecraft.world.item.SolidBucketItem(net.ganyusbathwater.oririmod.block.ModBlocks.SOL_QUICKSAND.get(),
+                                        net.minecraft.sounds.SoundEvents.BUCKET_EMPTY_POWDER_SNOW,
+                                        new Item.Properties().stacksTo(1)));
+
         /**
          * Test item for the Stage 1 cosmic tooltip pipeline.
          * Give via: /give @s oririmod:cosmic_example

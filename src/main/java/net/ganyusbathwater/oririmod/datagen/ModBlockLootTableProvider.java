@@ -45,20 +45,61 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
         // Scarlet Blocks
         dropSelf(ModBlocks.SCARLET_STONE.get());
-        dropSelf(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.SCARLET_STONE_STAIRS.get());
+        add(ModBlocks.SCARLET_STONE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_STONE_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_STONE_PRESSURE_PLATE.get());
+        dropSelf(ModBlocks.SCARLET_STONE_BUTTON.get());
+
+        dropSelf(ModBlocks.SCARLET_COBBLESTONE.get());
+        dropSelf(ModBlocks.SCARLET_COBBLESTONE_STAIRS.get());
+        add(ModBlocks.SCARLET_COBBLESTONE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_COBBLESTONE_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_COBBLESTONE_WALL.get());
+
+        dropSelf(ModBlocks.MOSSY_SCARLET_COBBLESTONE.get());
+        dropSelf(ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS.get());
+        add(ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get(), block -> createSlabItemTable(ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get()));
+        dropSelf(ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL.get());
+
         dropSelf(ModBlocks.SMOOTH_SCARLET_STONE.get());
         add(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get()));
+
         dropSelf(ModBlocks.SCARLET_STONE_BRICKS.get());
+        dropSelf(ModBlocks.SCARLET_STONE_BRICK_STAIRS.get());
+        add(ModBlocks.SCARLET_STONE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_STONE_BRICK_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_STONE_BRICK_WALL.get());
+
         dropSelf(ModBlocks.CHISELED_SCARLET_STONE_BRICKS.get());
         dropSelf(ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get());
+
         dropSelf(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get());
+        dropSelf(ModBlocks.MOSSY_SCARLET_STONE_BRICK_STAIRS.get());
+        add(ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get()));
+        dropSelf(ModBlocks.MOSSY_SCARLET_STONE_BRICK_WALL.get());
 
         dropSelf(ModBlocks.SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_STAIRS.get());
+        add(ModBlocks.SCARLET_DEEPSLATE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_DEEPSLATE_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_WALL.get());
+
+        dropSelf(ModBlocks.COBBLED_SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.COBBLED_SCARLET_DEEPSLATE_STAIRS.get());
+        add(ModBlocks.COBBLED_SCARLET_DEEPSLATE_SLAB.get(), block -> createSlabItemTable(ModBlocks.COBBLED_SCARLET_DEEPSLATE_SLAB.get()));
+        dropSelf(ModBlocks.COBBLED_SCARLET_DEEPSLATE_WALL.get());
+
         dropSelf(ModBlocks.POLISHED_SCARLET_DEEPSLATE.get());
+        dropSelf(ModBlocks.POLISHED_SCARLET_DEEPSLATE_STAIRS.get());
+        add(ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB.get(), block -> createSlabItemTable(ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB.get()));
+        dropSelf(ModBlocks.POLISHED_SCARLET_DEEPSLATE_WALL.get());
+
         dropSelf(ModBlocks.CHISELED_SCARLET_DEEPSLATE.get());
         dropSelf(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get());
         dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get());
+
         dropSelf(ModBlocks.SCARLET_DEEPSLATE_TILES.get());
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS.get());
+        add(ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_TILE_WALL.get());
+
         dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_TILES.get());
 
         dropSelf(ModBlocks.SCARLET_LOG.get());
@@ -100,6 +141,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.SOL_SANDSTONE.get());
         dropSelf(ModBlocks.CUT_SOL_SANDSTONE.get());
         dropSelf(ModBlocks.CHISELED_SOL_SANDSTONE.get());
+        add(ModBlocks.SOL_QUICKSAND.get(), noDrop());
 
         dropSelf(ModBlocks.BROKEN_SWORD_BLOCK.get());
         dropSelf(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
