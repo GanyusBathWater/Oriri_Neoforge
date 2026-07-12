@@ -264,7 +264,6 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get());
 
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
-                                .add(ModBlocks.DARK_SOIL_BLOCK.get())
                                 .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
                                 .add(ModBlocks.SOL_SAND.get())
                                 .add(ModBlocks.BLOOD_SLUDGE.get());
@@ -300,8 +299,7 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_VINE.get());
 
                 tag(BlockTags.DIRT)
-                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
-                                .add(ModBlocks.DARK_SOIL_BLOCK.get());
+                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get());
 
                 tag(BlockTags.DRIPSTONE_REPLACEABLE)
                                 .add(ModBlocks.SCARLET_STONE.get())

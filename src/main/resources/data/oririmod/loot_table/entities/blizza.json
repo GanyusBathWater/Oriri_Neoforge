@@ -2,23 +2,20 @@
   "type": "minecraft:entity",
   "pools": [
     {
-      "rolls": 1,
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "oririmod:gods_trial_active"
+        }
+      ],
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "oririmod:blue_ice_ingot",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 10,
-                "max": 32
-              }
-            }
-          ]
+          "name": "oririmod:staff_of_eternal_ice"
         }
-      ]
+      ],
+      "rolls": 1.0
     }
-  ]
+  ],
+  "random_sequence": "oririmod:entities/blizza"
 }

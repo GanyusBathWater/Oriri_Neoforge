@@ -38,8 +38,7 @@ public final class ColorHandler {
                 Blocks.SHORT_GRASS,
                 Blocks.TALL_GRASS,
                 Blocks.FERN,
-                Blocks.LARGE_FERN,
-                net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_FERN.get()
+                Blocks.LARGE_FERN
         );
         event.register(foliageLike, Blocks.OAK_LEAVES);
     }
@@ -57,7 +56,7 @@ public final class ColorHandler {
         ItemColor leavesItem = (stack, tintIndex) -> (tintIndex == 0) ? foliageColorClient() : -1;
 
         event.register(grassBlockItem, Items.GRASS_BLOCK);
-        event.register(grassPlantsItem, Items.SHORT_GRASS, Items.TALL_GRASS, Items.FERN, Items.LARGE_FERN, net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_FERN.get().asItem());
+        event.register(grassPlantsItem, Items.SHORT_GRASS, Items.TALL_GRASS, Items.FERN, Items.LARGE_FERN);
         event.register(leavesItem, Items.OAK_LEAVES);
     }
 

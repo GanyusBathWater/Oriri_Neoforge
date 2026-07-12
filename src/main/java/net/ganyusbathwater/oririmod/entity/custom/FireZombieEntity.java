@@ -2,25 +2,65 @@ package net.ganyusbathwater.oririmod.entity.custom;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Turtle;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.core.BlockPos;
 public class FireZombieEntity extends Zombie {
 
     /** How many ticks remain before the post-death explosion fires. -1 = alive. */
     private int fuseTimer = -1;
     private DamageSource deathCause;
 
-    public FireZombieEntity(EntityType<? extends Zombie> type, Level level) {
-        super(type, level);
+    public FireZombieEntity(EntityType<? extends Zombie> entityType, Level level) {
+        super(entityType, level);
+    }
+
+    public static boolean checkFireZombieSpawnRules(EntityType<? extends Monster> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
+        // If in Nether, use standard monster spawn logic
+        if (level.getBiome(pos).is(BiomeTags.IS_NETHER)) {
+            return Monster.checkAnyLightMonsterSpawnRules(entityType, level, spawnType, pos, random);
+        }
+        
+        // Otherwise (Overworld), ensure there's lava nearby in the cave
+        boolean hasLava = false;
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        for (int x = -8; x <= 8; x++) {
+            for (int y = -8; y <= 8; y++) {
+                for (int z = -8; z <= 8; z++) {
+                    mutable.set(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                    if (level.getFluidState(mutable).is(FluidTags.LAVA)) {
+                        hasLava = true;
+                        break;
+                    }
+                }
+                if (hasLava) break;
+            }
+            if (hasLava) break;
+        }
+        
+        if (!hasLava) {
+            return false;
+        }
+        
+        // Use any light rules because lava emits light 15
+        return Monster.checkAnyLightMonsterSpawnRules(entityType, level, spawnType, pos, random);
     }
 
     @Override

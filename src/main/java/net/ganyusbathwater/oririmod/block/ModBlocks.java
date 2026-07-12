@@ -31,9 +31,6 @@ public class ModBlocks {
 
         public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(OririMod.MOD_ID);
 
-        public static final DeferredBlock<Block> DARK_SOIL_BLOCK = registerBlock("dark_soil_block",
-                        () -> new GrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
-
         public static final DeferredBlock<Block> BLOOD_SLUDGE = registerBlock("blood_sludge",
                         () -> new SlimeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SLIME_BLOCK)));
 
@@ -242,6 +239,13 @@ public class ModBlocks {
                         () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE)));
         public static final DeferredBlock<WallBlock> SCARLET_DEEPSLATE_WALL = registerBlock("scarlet_deepslate_wall",
                         () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE)));
+
+        public static final DeferredBlock<StairBlock> SCARLET_DEEPSLATE_BRICK_STAIRS = registerBlock("scarlet_deepslate_brick_stairs",
+                        () -> new StairBlock(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICK_STAIRS)));
+        public static final DeferredBlock<SlabBlock> SCARLET_DEEPSLATE_BRICK_SLAB = registerBlock("scarlet_deepslate_brick_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICK_SLAB)));
+        public static final DeferredBlock<WallBlock> SCARLET_DEEPSLATE_BRICK_WALL = registerBlock("scarlet_deepslate_brick_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICK_WALL)));
 
         public static final DeferredBlock<StairBlock> SCARLET_DEEPSLATE_TILE_STAIRS = registerBlock("scarlet_deepslate_tile_stairs",
                         () -> new StairBlock(ModBlocks.SCARLET_DEEPSLATE_TILES.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_TILE_STAIRS)));
@@ -766,9 +770,7 @@ public class ModBlocks {
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
 
         // ===== ELDERWOODS OVERGROWTH =====
-        public static final DeferredBlock<Block> ELDER_FERN = registerBlock("elder_fern",
-                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderFernBlock(
-                                        BlockBehaviour.Properties.ofFullCopy(Blocks.FERN)));
+
 
         public static final DeferredBlock<Block> HANGING_ELDER_MOSS = registerBlock("hanging_elder_moss",
                         () -> new net.ganyusbathwater.oririmod.block.custom.HangingElderMossBlock(

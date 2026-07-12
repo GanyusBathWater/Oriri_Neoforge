@@ -72,6 +72,9 @@
           "output_state": { "Name": "oririmod:elder_stem_block" }
         }
       ]
+    },
+    {
+      "processor_type": "oririmod:loot_chest_processor"
     }
   ]
 }

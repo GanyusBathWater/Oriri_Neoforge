@@ -12,6 +12,10 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.neoforged.neoforge.common.world.BiomeModifier;
 import net.neoforged.neoforge.common.world.BiomeModifiers;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.ganyusbathwater.oririmod.entity.ModEntities;
+import java.util.List;
 
 public class ModBiomeModifiers {
         // Which Biome should it spawn in or in which "stage" it should generate
@@ -48,6 +52,17 @@ public class ModBiomeModifiers {
 
         public static final ResourceKey<BiomeModifier> ADD_GLOWLINGS = registerKey("add_glowlings");
 
+        // Spawns
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FIRE_ZOMBIE = registerKey("add_spawns_fire_zombie");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPORE_ZOMBIE = registerKey("add_spawns_spore_zombie");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPORE_BLOSSOM = registerKey("add_spawns_spore_blossom");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPLINTER_SPIDER = registerKey("add_spawns_splinter_spider");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LOADED_BLAZE = registerKey("add_spawns_loaded_blaze");
+        
+        public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_FOREST_SPAWNS = registerKey("add_elderwoods_forest_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_SCARLET_PLAINS_SPAWNS = registerKey("add_scarlet_plains_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_SPAWNS = registerKey("add_scarlet_forest_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_CAVE_SPAWNS = registerKey("add_cave_spawns");
         // here will be the Features defined and later turned into json files
         public static void bootstrap(BootstrapContext<BiomeModifier> context) {
                 var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -272,6 +287,110 @@ public class ModBiomeModifiers {
                                                 HolderSet.direct(placedFeatures
                                                                 .getOrThrow(ModPlacedFeatures.GLOWLINGS_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // Custom Mob Spawns
+                context.register(ADD_SPAWNS_FIRE_ZOMBIE, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        biomes.getOrThrow(BiomeTags.IS_NETHER),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.FIRE_ZOMBIE.get(), 50, 1, 4))
+                ));
+                context.register(registerKey("add_spawns_fire_zombie_overworld"), new BiomeModifiers.AddSpawnsBiomeModifier(
+                        biomes.getOrThrow(BiomeTags.IS_OVERWORLD),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.FIRE_ZOMBIE.get(), 50, 1, 4))
+                ));
+                
+                context.register(ADD_SPAWNS_SPORE_ZOMBIE, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        biomes.getOrThrow(BiomeTags.IS_JUNGLE),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SPORE_ZOMBIE.get(), 80, 2, 4))
+                ));
+                context.register(registerKey("add_spawns_spore_zombie_lush_caves"), new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("lush_caves")))),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SPORE_ZOMBIE.get(), 80, 2, 4))
+                ));
+                
+                context.register(ADD_SPAWNS_SPORE_BLOSSOM, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        biomes.getOrThrow(BiomeTags.IS_JUNGLE),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SPORE_BLOSSOM.get(), 20, 1, 2))
+                ));
+                context.register(registerKey("add_spawns_spore_blossom_lush_caves"), new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("lush_caves")))),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SPORE_BLOSSOM.get(), 20, 1, 2))
+                ));
+                
+                context.register(ADD_SPAWNS_SPLINTER_SPIDER, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        biomes.getOrThrow(BiomeTags.IS_OVERWORLD),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SPLINTER_SPIDER.get(), 100, 4, 4))
+                ));
+                
+                context.register(ADD_SPAWNS_LOADED_BLAZE, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        biomes.getOrThrow(BiomeTags.IS_NETHER),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.LOADED_BLAZE.get(), 5, 1, 1))
+                ));
+                context.register(registerKey("add_spawns_loaded_blaze_elysian"), new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss")))),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.LOADED_BLAZE.get(), 5, 1, 1))
+                ));
+
+
+                // Dimension Vanilla Spawns
+                List<MobSpawnSettings.SpawnerData> forestSpawns = List.of(
+                        new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, 95, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE_VILLAGER, 5, 1, 1),
+                        new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SLIME, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.WITCH, 5, 1, 1),
+                        new MobSpawnSettings.SpawnerData(EntityType.SHEEP, 12, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.PIG, 10, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.CHICKEN, 10, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.COW, 8, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.BAT, 10, 8, 8)
+                );
+                context.register(ADD_ELDERWOODS_FOREST_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods")))),
+                        forestSpawns
+                ));
+                
+                List<MobSpawnSettings.SpawnerData> monsterSpawns = List.of(
+                        new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, 95, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE_VILLAGER, 5, 1, 1),
+                        new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SLIME, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.WITCH, 5, 1, 1)
+                );
+                context.register(ADD_SCARLET_PLAINS_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains")))),
+                        monsterSpawns
+                ));
+                context.register(ADD_SCARLET_FOREST_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest")))),
+                        monsterSpawns
+                ));
+
+                List<MobSpawnSettings.SpawnerData> caveSpawns = List.of(
+                        new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, 95, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE_VILLAGER, 5, 1, 1),
+                        new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SLIME, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.WITCH, 5, 1, 1),
+                        new MobSpawnSettings.SpawnerData(EntityType.BAT, 10, 8, 8)
+                );
+                context.register(ADD_CAVE_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods_cave"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss")))
+                        ),
+                        caveSpawns
+                ));
         }
 
         private static ResourceKey<BiomeModifier> registerKey(String name) {

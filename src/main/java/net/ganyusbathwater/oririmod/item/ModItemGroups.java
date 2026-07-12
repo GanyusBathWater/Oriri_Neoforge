@@ -61,7 +61,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.JADE_STAIRS);
                         output.accept(ModBlocks.JADE_SLAB);
                         output.accept(ModBlocks.JADE_WALL);
-                        output.accept(ModBlocks.DARK_SOIL_BLOCK);
+
                         output.accept(ModBlocks.AETHER_MAGMA_BLOCK);
                         output.accept(ModBlocks.ELDERBUSH_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
@@ -92,7 +92,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.BLOOD_CAP_BLOCK);
                         output.accept(ModBlocks.GLOWLINGS_BLOCK);
                         output.accept(ModBlocks.MOONSHROOM_BLOCK);
-                        output.accept(ModBlocks.ELDER_FERN);
+
                         output.accept(ModBlocks.HANGING_ELDER_MOSS);
                         // output.accept(ModBlocks.HANGING_ELDER_MOSS_PLANT); // Plant body shouldn't be in creative tab
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
@@ -148,6 +148,9 @@ public class ModItemGroups {
 
                         output.accept(ModBlocks.CHISELED_SCARLET_DEEPSLATE);
                         output.accept(ModBlocks.SCARLET_DEEPSLATE_BRICKS);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_BRICK_SLAB);
+                        output.accept(ModBlocks.SCARLET_DEEPSLATE_BRICK_WALL);
                         output.accept(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS);
 
                         output.accept(ModBlocks.SCARLET_DEEPSLATE_TILES);

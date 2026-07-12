@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "oririmod:gods_trial_active"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "oririmod:ivy_botanic_guide"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "oririmod:entities/deviartras"
+}

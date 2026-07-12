@@ -46,7 +46,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 // -------------Blocks------------
 
-                simpleBlockItem(ModBlocks.DARK_SOIL_BLOCK.get());
+
                 simpleBlockItem(ModBlocks.ELDERBUSH_BLOCK.get());
                 simpleBlockItem(ModBlocks.MAGIC_BARRIER_BLOCK.get());
                 simpleBlockItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK.get());
@@ -156,6 +156,10 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 simpleBlockItem(ModBlocks.CHISELED_SCARLET_DEEPSLATE.get());
                 simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get());
+                simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS.get());
+                simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_BRICK_SLAB.get());
+                wallItem(ModBlocks.SCARLET_DEEPSLATE_BRICK_WALL, ModBlocks.SCARLET_DEEPSLATE_BRICKS);
+
                 simpleBlockItem(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get());
 
                 simpleBlockItem(ModBlocks.SCARLET_DEEPSLATE_TILES.get());
@@ -218,7 +222,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 saplingItem(ModBlocks.SCARLET_GRASS);
                 saplingItem(ModBlocks.SCARLET_TOOTH_LEAVES);
                 simpleBlockItem(ModBlocks.SCARLET_LILY.get());
-                saplingItem(ModBlocks.ELDER_FERN);
+
                 saplingItem(ModBlocks.HANGING_ELDER_MOSS);
 
                 withExistingParent(ModBlocks.POINTED_SCARLET_DRIPSTONE.getId().getPath(),

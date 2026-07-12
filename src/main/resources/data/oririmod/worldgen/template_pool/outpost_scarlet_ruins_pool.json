@@ -1,0 +1,16 @@
+{
+  "name": "oririmod:outpost_scarlet_ruins_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "oririmod:outpost_scarlet_ruins",
+        "processors": "oririmod:loot_chests_only",
+        "projection": "rigid",
+        "override_liquid_settings": "ignore_waterlogging"
+      }
+    }
+  ]
+}

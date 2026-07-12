@@ -14,11 +14,11 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        dropSelf(ModBlocks.DARK_SOIL_BLOCK.get());
+
         dropSelf(ModBlocks.BLOOD_SLUDGE.get());
-        add(ModBlocks.ELDERBUSH_BLOCK.get(), block -> createShearsOnlyDrop(ModBlocks.ELDERBUSH_BLOCK.get()));
+        add(ModBlocks.ELDERBUSH_BLOCK.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool().setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F)).add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.ELDERBERRY.get()).apply(net.minecraft.world.level.storage.loot.functions.SetItemCountFunction.setCount(net.minecraft.world.level.storage.loot.providers.number.UniformGenerator.between(2.0F, 6.0F))))));
         dropSelf(ModBlocks.MANA_CRYSTAL_BLOCK.get());
-        add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), block -> createSilkTouchOnlyTable(ModBlocks.MANA_CRYSTAL_CLUSTER.get()));
+        add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), block -> createOreDrop(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), net.ganyusbathwater.oririmod.item.ModItems.MANA_MANIFESTATION.get()));
         dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
         dropSelf(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
         dropSelf(ModBlocks.ELDER_PLANKS.get());
@@ -44,7 +44,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.UPGRADED_ELDER_SAPLING.get());
 
         // Scarlet Blocks
-        dropSelf(ModBlocks.SCARLET_STONE.get());
+        add(ModBlocks.SCARLET_STONE.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.SCARLET_COBBLESTONE.get()));
         dropSelf(ModBlocks.SCARLET_STONE_STAIRS.get());
         add(ModBlocks.SCARLET_STONE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_STONE_SLAB.get()));
         dropSelf(ModBlocks.SCARLET_STONE_PRESSURE_PLATE.get());
@@ -76,7 +76,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get()));
         dropSelf(ModBlocks.MOSSY_SCARLET_STONE_BRICK_WALL.get());
 
-        dropSelf(ModBlocks.SCARLET_DEEPSLATE.get());
+        add(ModBlocks.SCARLET_DEEPSLATE.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.COBBLED_SCARLET_DEEPSLATE.get()));
         dropSelf(ModBlocks.SCARLET_DEEPSLATE_STAIRS.get());
         add(ModBlocks.SCARLET_DEEPSLATE_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_DEEPSLATE_SLAB.get()));
         dropSelf(ModBlocks.SCARLET_DEEPSLATE_WALL.get());
@@ -93,6 +93,9 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
         dropSelf(ModBlocks.CHISELED_SCARLET_DEEPSLATE.get());
         dropSelf(ModBlocks.SCARLET_DEEPSLATE_BRICKS.get());
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS.get());
+        add(ModBlocks.SCARLET_DEEPSLATE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.SCARLET_DEEPSLATE_BRICK_SLAB.get()));
+        dropSelf(ModBlocks.SCARLET_DEEPSLATE_BRICK_WALL.get());
         dropSelf(ModBlocks.CRACKED_SCARLET_DEEPSLATE_BRICKS.get());
 
         dropSelf(ModBlocks.SCARLET_DEEPSLATE_TILES.get());
@@ -124,15 +127,19 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.SCARLET_MOSS.get());
         add(ModBlocks.SCARLET_VINE.get(), block -> createShearsOnlyDrop(block));
         dropSelf(ModBlocks.STAR_HERB.get());
-        dropSelf(ModBlocks.SCARLET_GRASS_BLOCK.get());
+        add(ModBlocks.SCARLET_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
         dropSelf(ModBlocks.SCARLET_STEM.get());
         dropSelf(ModBlocks.STRIPPED_SCARLET_STEM.get());
         dropSelf(ModBlocks.SCARLET_GRASS.get());
         dropSelf(ModBlocks.SCARLET_TOOTH_LEAVES.get());
-        dropSelf(ModBlocks.SCARLET_LILY.get());
+        this.add(ModBlocks.SCARLET_LILY.get(), block -> createSingleItemTable(block)
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.BLOOD_LOTUS.get())
+                                .when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.02f)))));
 
         dropSelf(ModBlocks.FLUORITE_BLOCK.get());
-        add(ModBlocks.FLUORITE_CLUSTER.get(), block -> createSilkTouchOnlyTable(ModBlocks.FLUORITE_CLUSTER.get()));
+        add(ModBlocks.FLUORITE_CLUSTER.get(), block -> createOreDrop(ModBlocks.FLUORITE_CLUSTER.get(), net.ganyusbathwater.oririmod.item.ModItems.FLUORITE_CRYSTAL.get()));
 
         dropSelf(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get());
         dropSelf(ModBlocks.POINTED_SCARLET_DRIPSTONE.get());
@@ -143,18 +150,18 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.CHISELED_SOL_SANDSTONE.get());
         add(ModBlocks.SOL_QUICKSAND.get(), noDrop());
 
-        dropSelf(ModBlocks.BROKEN_SWORD_BLOCK.get());
-        dropSelf(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get());
+        add(ModBlocks.BROKEN_SWORD_BLOCK.get(), block -> createSilkTouchDispatchTable(block, this.applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.IRON_NUGGET).apply(net.minecraft.world.level.storage.loot.functions.SetItemCountFunction.setCount(net.minecraft.world.level.storage.loot.providers.number.UniformGenerator.between(0.0F, 3.0F))))));
+        add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get(), block -> createSilkTouchDispatchTable(block, this.applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.IRON_NUGGET).apply(net.minecraft.world.level.storage.loot.functions.SetItemCountFunction.setCount(net.minecraft.world.level.storage.loot.providers.number.UniformGenerator.between(0.0F, 3.0F))))));
         dropSelf(ModBlocks.REVIVAL_SHRINE.get());
 
         dropSelf(ModBlocks.SOL_GLASS.get());
         dropSelf(ModBlocks.SOL_GLASS_PANE.get());
 
         dropSelf(ModBlocks.JADE_BLOCK.get());
-        add(ModBlocks.JADE_ORE.get(), block -> createOreDrop(ModBlocks.JADE_ORE.get(), net.minecraft.world.item.Items.EMERALD));
-        add(ModBlocks.DEEPSLATE_JADE_ORE.get(), block -> createOreDrop(ModBlocks.DEEPSLATE_JADE_ORE.get(), net.minecraft.world.item.Items.EMERALD));
-        add(ModBlocks.DRAGON_IRON_ORE.get(), block -> createOreDrop(ModBlocks.DRAGON_IRON_ORE.get(), net.minecraft.world.item.Items.RAW_IRON));
-        add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(), block -> createOreDrop(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(), net.minecraft.world.item.Items.RAW_IRON));
+        add(ModBlocks.JADE_ORE.get(), block -> createOreDrop(ModBlocks.JADE_ORE.get(), net.ganyusbathwater.oririmod.item.ModItems.JADE.get()));
+        add(ModBlocks.DEEPSLATE_JADE_ORE.get(), block -> createOreDrop(ModBlocks.DEEPSLATE_JADE_ORE.get(), net.ganyusbathwater.oririmod.item.ModItems.JADE.get()));
+        add(ModBlocks.DRAGON_IRON_ORE.get(), block -> createOreDrop(ModBlocks.DRAGON_IRON_ORE.get(), net.ganyusbathwater.oririmod.item.ModItems.RAW_DRAGON_IRON.get()));
+        add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(), block -> createOreDrop(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get(), net.ganyusbathwater.oririmod.item.ModItems.RAW_DRAGON_IRON.get()));
         
         dropSelf(ModBlocks.JADE_STAIRS.get());
         add(ModBlocks.JADE_SLAB.get(), block -> createSlabItemTable(ModBlocks.JADE_SLAB.get()));
@@ -214,9 +221,13 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.AETHER_MAGMA_BLOCK.get());
         dropSelf(ModBlocks.BLOOD_CAP_BLOCK.get());
         dropSelf(ModBlocks.GLOWLINGS_BLOCK.get());
-        dropSelf(ModBlocks.MOONSHROOM_BLOCK.get());
+        this.add(ModBlocks.MOONSHROOM_BLOCK.get(), block -> createSingleItemTable(block)
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.MAGIC_MUSHROOM.get())
+                                .when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.05f)))));
         
-        dropSelf(ModBlocks.ELDER_FERN.get());
+
         dropSelf(ModBlocks.HANGING_ELDER_MOSS.get());
         dropOther(ModBlocks.HANGING_ELDER_MOSS_PLANT.get(), ModBlocks.HANGING_ELDER_MOSS.get());
     }

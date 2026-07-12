@@ -142,7 +142,6 @@ public class ModConfiguredFeatures {
                                                 new SimpleBlockConfiguration(new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
                                                                 net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
                                                                                 .add(Blocks.SHORT_GRASS.defaultBlockState(), 3)
-                                                                                .add(ModBlocks.ELDER_FERN.get().defaultBlockState(), 1)
                                                 )),
                                                 List.of(Blocks.GRASS_BLOCK)));
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_KEY, Feature.RANDOM_PATCH,

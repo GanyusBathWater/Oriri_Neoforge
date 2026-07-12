@@ -83,7 +83,11 @@ public class OririMod {
         ModPotions.registerPotions(modEventBus);
         ModEnchantmentEffects.register(modEventBus);
         ModEntities.register(modEventBus);
+        net.ganyusbathwater.oririmod.worldgen.ModStructureProcessors.register(modEventBus);
+        net.ganyusbathwater.oririmod.loot.ModLootConditionTypes.register(modEventBus);
+        net.ganyusbathwater.oririmod.loot.ModLootModifiers.register(modEventBus);
         ModSounds.register(modEventBus);
+
         // Register entity attributes (required for custom Monster subclasses)
         modEventBus.addListener(this::registerEntityAttributes);
         // Register the item to a creative tab
@@ -135,6 +139,48 @@ public class OririMod {
             net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
             net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
             net.ganyusbathwater.oririmod.entity.custom.MermaidEntity::checkMermaidSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.FIRE_ZOMBIE.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.ganyusbathwater.oririmod.entity.custom.FireZombieEntity::checkFireZombieSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.SPORE_ZOMBIE.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.SPORE_BLOSSOM.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.SPLINTER_SPIDER.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.LOADED_BLAZE.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.REX_ARANEA.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules,
             net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
     }

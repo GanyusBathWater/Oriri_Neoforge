@@ -42,7 +42,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
                 blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);
 
-                grassBlockWithItem(ModBlocks.DARK_SOIL_BLOCK, 1);
+
 
                 blockWithItem(ModBlocks.MANA_CRYSTAL_BLOCK, 1);
                 clusterBlockWithItem(ModBlocks.MANA_CRYSTAL_CLUSTER, 2);
@@ -148,6 +148,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_DEEPSLATE_SLAB.get(), modLoc("block/scarlet_deepslate"), modLoc("block/scarlet_deepslate"));
                 wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_DEEPSLATE_WALL.get(), modLoc("block/scarlet_deepslate"));
 
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS.get(), modLoc("block/scarlet_deepslate_bricks"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_DEEPSLATE_BRICK_SLAB.get(), modLoc("block/scarlet_deepslate_bricks"), modLoc("block/scarlet_deepslate_bricks"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_DEEPSLATE_BRICK_WALL.get(), modLoc("block/scarlet_deepslate_bricks"));
+
                 stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS.get(), modLoc("block/scarlet_deepslate_tiles"));
                 slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get(), modLoc("block/scarlet_deepslate_tiles"), modLoc("block/scarlet_deepslate_tiles"));
                 wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_DEEPSLATE_TILE_WALL.get(), modLoc("block/scarlet_deepslate_tiles"));
@@ -217,10 +221,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 models().getExistingFile(modLoc("block/scarlet_lily")));
 
                 // Elderwoods Overgrowth
-                simpleBlockWithItem(ModBlocks.ELDER_FERN.get(),
-                                models().withExistingParent("elder_fern", mcLoc("block/tinted_cross"))
-                                                .texture("cross", modLoc("block/elder_fern"))
-                                                .renderType("cutout"));
 
                 simpleBlock(ModBlocks.HANGING_ELDER_MOSS.get(),
                                 models().cross("hanging_elder_moss", modLoc("block/hanging_elder_moss"))

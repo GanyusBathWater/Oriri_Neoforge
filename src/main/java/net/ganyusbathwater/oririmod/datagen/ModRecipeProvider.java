@@ -140,6 +140,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 makeWoodRecipes(recipeOutput, ModBlocks.SCARLET_PLANKS.get(), ModBlocks.STRIPPED_SCARLET_LOG.get(), ModBlocks.SCARLET_BUTTON.get(), ModBlocks.SCARLET_PRESSURE_PLATE.get(), ModBlocks.SCARLET_DOOR.get(), ModBlocks.SCARLET_TRAPDOOR.get(), ModItems.SCARLET_SIGN.get(), ModItems.SCARLET_HANGING_SIGN.get(), ModItems.SCARLET_BOAT.get(), ModItems.SCARLET_CHEST_BOAT.get(), "scarlet");
                 makeWoodRecipes(recipeOutput, ModBlocks.ABYSS_CROWN_PLANKS.get(), ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get(), ModBlocks.ABYSS_CROWN_BUTTON.get(), ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get(), ModBlocks.ABYSS_CROWN_DOOR.get(), ModBlocks.ABYSS_CROWN_TRAPDOOR.get(), ModItems.ABYSS_CROWN_SIGN.get(), ModItems.ABYSS_CROWN_HANGING_SIGN.get(), ModItems.ABYSS_CROWN_BOAT.get(), ModItems.ABYSS_CROWN_CHEST_BOAT.get(), "abyss_crown");
 
+                makeStoneRecipes(recipeOutput, "scarlet_cobblestone", ModBlocks.SCARLET_COBBLESTONE.get(), ModBlocks.SCARLET_COBBLESTONE_STAIRS.get(), ModBlocks.SCARLET_COBBLESTONE_SLAB.get(), ModBlocks.SCARLET_COBBLESTONE_WALL.get());
+                makeStoneRecipes(recipeOutput, "mossy_scarlet_cobblestone", ModBlocks.MOSSY_SCARLET_COBBLESTONE.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL.get());
+                makeStoneRecipes(recipeOutput, "scarlet_stone_bricks", ModBlocks.SCARLET_STONE_BRICKS.get(), ModBlocks.SCARLET_STONE_BRICK_STAIRS.get(), ModBlocks.SCARLET_STONE_BRICK_SLAB.get(), ModBlocks.SCARLET_STONE_BRICK_WALL.get());
+                makeStoneRecipes(recipeOutput, "mossy_scarlet_stone_bricks", ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get(), ModBlocks.MOSSY_SCARLET_STONE_BRICK_STAIRS.get(), ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get(), ModBlocks.MOSSY_SCARLET_STONE_BRICK_WALL.get());
+                makeStoneRecipes(recipeOutput, "scarlet_deepslate", ModBlocks.SCARLET_DEEPSLATE.get(), ModBlocks.SCARLET_DEEPSLATE_STAIRS.get(), ModBlocks.SCARLET_DEEPSLATE_SLAB.get(), ModBlocks.SCARLET_DEEPSLATE_WALL.get());
+                makeStoneRecipes(recipeOutput, "cobbled_scarlet_deepslate", ModBlocks.COBBLED_SCARLET_DEEPSLATE.get(), ModBlocks.COBBLED_SCARLET_DEEPSLATE_STAIRS.get(), ModBlocks.COBBLED_SCARLET_DEEPSLATE_SLAB.get(), ModBlocks.COBBLED_SCARLET_DEEPSLATE_WALL.get());
+                makeStoneRecipes(recipeOutput, "polished_scarlet_deepslate", ModBlocks.POLISHED_SCARLET_DEEPSLATE.get(), ModBlocks.POLISHED_SCARLET_DEEPSLATE_STAIRS.get(), ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB.get(), ModBlocks.POLISHED_SCARLET_DEEPSLATE_WALL.get());
+                makeStoneRecipes(recipeOutput, "scarlet_deepslate_bricks", ModBlocks.SCARLET_DEEPSLATE_BRICKS.get(), ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS.get(), ModBlocks.SCARLET_DEEPSLATE_BRICK_SLAB.get(), ModBlocks.SCARLET_DEEPSLATE_BRICK_WALL.get());
+                makeStoneRecipes(recipeOutput, "scarlet_deepslate_tiles", ModBlocks.SCARLET_DEEPSLATE_TILES.get(), ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS.get(), ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get(), ModBlocks.SCARLET_DEEPSLATE_TILE_WALL.get());
+
                 // --- Planks from Logs/Stems ---
                 // Elder
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PLANKS.get(), 4)
@@ -198,6 +208,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .save(recipeOutput, "oririmod:abyss_crown_planks_from_stripped_stem");
 
                 // --- Scarlet Stone Recipes ---
+                // Scarlet Stone from Cobblestone
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.SCARLET_COBBLESTONE), RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.SCARLET_STONE.get(), 0.1f, 200)
+                                .unlockedBy("has_scarlet_cobblestone", has(ModBlocks.SCARLET_COBBLESTONE))
+                                .save(recipeOutput, "oririmod:scarlet_stone_from_smelting");
+
                 // Scarlet Stone Bricks
                 ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SCARLET_STONE_BRICKS, 4)
                                 .pattern("BB")
@@ -239,6 +256,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 ModBlocks.SMOOTH_SCARLET_STONE.get());
 
                 // --- Scarlet Deepslate Recipes ---
+                // Scarlet Deepslate from Cobbled Scarlet Deepslate
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.COBBLED_SCARLET_DEEPSLATE), RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.SCARLET_DEEPSLATE.get(), 0.1f, 200)
+                                .unlockedBy("has_cobbled_scarlet_deepslate", has(ModBlocks.COBBLED_SCARLET_DEEPSLATE))
+                                .save(recipeOutput, "oririmod:scarlet_deepslate_from_smelting");
+
                 // Cobbled Scarlet Deepslate -> Polished Scarlet Deepslate
                 ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_SCARLET_DEEPSLATE, 4)
                                 .pattern("BB")
@@ -295,6 +319,19 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .save(recipeOutput, "oririmod:dragon_iron_ingot_from_smelting");
 
                 // --- Sol Sand Recipes ---
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.SOL_SAND), RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.SOL_GLASS.get(), 0.1f, 200)
+                                .unlockedBy("has_sol_sand", has(ModBlocks.SOL_SAND))
+                                .save(recipeOutput, "oririmod:sol_glass_from_smelting");
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.SOL_GLASS_PANE.get(), 16)
+                                .pattern("XXX")
+                                .pattern("XXX")
+                                .define('X', ModBlocks.SOL_GLASS)
+                                .unlockedBy("has_sol_glass", has(ModBlocks.SOL_GLASS))
+                                .save(recipeOutput);
+
                 ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE, 1)
                                 .pattern("BB")
                                 .pattern("BB")
@@ -400,7 +437,80 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 makeScytheRecipe(recipeOutput, Items.IRON_INGOT, ModItems.IRON_SCYTHE.get());
                 makeScytheRecipe(recipeOutput, Items.GOLD_INGOT, ModItems.GOLD_SCYTHE.get());
                 makeScytheRecipe(recipeOutput, Items.DIAMOND, ModItems.DIAMOND_SCYTHE.get());
-                makeScytheRecipe(recipeOutput, Items.NETHERITE_INGOT, ModItems.NETHERITE_SCYTHE.get());        }
+
+                SmithingTransformRecipeBuilder.smithing(
+                                Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+                                Ingredient.of(ModItems.DIAMOND_SCYTHE.get()),
+                                Ingredient.of(Items.NETHERITE_INGOT),
+                                RecipeCategory.COMBAT,
+                                ModItems.NETHERITE_SCYTHE.get())
+                        .unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT))
+                        .save(recipeOutput, "oririmod:netherite_scythe_smithing");
+
+                makeScytheRecipe(recipeOutput, ModItems.ANCIENT_INGOT.get(), ModItems.ANCIENT_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, ModItems.BLUE_ICE_INGOT.get(), ModItems.BLACK_ICE_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, ModItems.CRYSTAL_INGOT.get(), ModItems.CRYSTAL_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, ModItems.GILDED_NETHERRITE_INGOT.get(), ModItems.GILDED_NETHERITE_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, ModItems.MOLTEN_INGOT.get(), ModItems.MOLTEN_SCYTHE.get());
+                makeScytheRecipe(recipeOutput, ModItems.PRISMARINE_IRON_INGOT.get(), ModItems.PRISMARINE_SCYTHE.get());
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.EQUINOX_TABLE.get())
+                                .pattern(" Z ")
+                                .pattern("YXY")
+                                .define('X', Items.ENCHANTING_TABLE)
+                                .define('Y', Items.NETHERITE_INGOT)
+                                .define('Z', ModItems.MANA_MANIFESTATION.get())
+                                .unlockedBy("has_mana_manifestation", has(ModItems.MANA_MANIFESTATION.get()))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.THE_HARBINGER.get())
+                                .pattern("AIB")
+                                .pattern("CDE")
+                                .pattern("FHG")
+                                .define('A', ModItems.NETHERITE_SCYTHE.get())
+                                .define('B', ModItems.ANCIENT_SCYTHE.get())
+                                .define('C', ModItems.BLACK_ICE_SCYTHE.get())
+                                .define('D', ModItems.CRYSTAL_SCYTHE.get())
+                                .define('E', ModItems.GILDED_NETHERITE_SCYTHE.get())
+                                .define('F', ModItems.MOLTEN_SCYTHE.get())
+                                .define('G', ModItems.PRISMARINE_SCYTHE.get())
+                                .define('H', ModItems.MANA_MANIFESTATION.get())
+                                .define('I', ModItems.POWER_SOUL.get())
+                                .unlockedBy("has_mana_manifestation", has(ModItems.MANA_MANIFESTATION.get()))
+                                .save(recipeOutput);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.TOOLS, ModItems.MANA_IGNITER.get())
+                                .requires(Items.IRON_INGOT)
+                                .requires(ModItems.MANA_MANIFESTATION.get())
+                                .unlockedBy("has_mana_manifestation", has(ModItems.MANA_MANIFESTATION.get()))
+                                .save(recipeOutput);
+
+                makeCustomArrow(recipeOutput, Items.TNT, ModItems.TNT_ARROW.get());
+                makeCustomArrow(recipeOutput, ModItems.DRAGON_IRON_INGOT.get(), ModItems.DRAGON_IRON_ARROW.get());
+                makeCustomArrow(recipeOutput, ModItems.BLUE_ICE_INGOT.get(), ModItems.FROST_ARROW.get());
+                makeCustomArrow(recipeOutput, Items.COPPER_INGOT, ModItems.COPPER_ARROW.get());
+                makeCustomArrow(recipeOutput, Items.ECHO_SHARD, ModItems.SONIC_ARROW.get());
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.COMBAT, ModItems.STAFF_OF_ALMIGHTY.get())
+                                .requires(ModItems.STAFF_OF_FOREST.get())
+                                .requires(ModItems.STAFF_OF_EARTH.get())
+                                .requires(ModItems.STAFF_OF_WISE.get())
+                                .requires(ModItems.STAFF_OF_VOID.get())
+                                .requires(ModItems.STAFF_OF_COSMOS.get())
+                                .requires(ModItems.ONE_THOUSAND_SCREAMS.get())
+                                .requires(ModItems.STAFF_OF_HELL.get())
+                                .requires(ModItems.BOOK_OF_WISE.get())
+                                .requires(ModItems.IRAS_SOUL_FRAGMENT.get())
+                                .unlockedBy("has_iras_soul", has(ModItems.IRAS_SOUL_FRAGMENT.get()))
+                                .save(recipeOutput);
+
+                makeStaff(recipeOutput, Ingredient.of(Items.STICK), Ingredient.of(ItemTags.SAPLINGS), ModItems.STAFF_OF_FOREST.get());
+                makeStaff(recipeOutput, Ingredient.of(ModItems.IRON_STICK.get()), Ingredient.of(Items.GOLD_INGOT), ModItems.STAFF_OF_EARTH.get());
+                makeStaff(recipeOutput, Ingredient.of(ModItems.IRON_STICK.get()), Ingredient.of(ModItems.JADE.get()), ModItems.STAFF_OF_WISE.get());
+                makeStaff(recipeOutput, Ingredient.of(ModItems.IRON_STICK.get()), Ingredient.of(Items.ENDER_PEARL), ModItems.STAFF_OF_VOID.get());
+                makeStaff(recipeOutput, Ingredient.of(ModItems.IRON_STICK.get()), Ingredient.of(ModItems.MOON_STONE.get()), ModItems.STAFF_OF_COSMOS.get());
+                makeStaff(recipeOutput, Ingredient.of(Items.STICK), Ingredient.of(ModItems.FIRE_CRYSTAL.get()), ModItems.STAFF_OF_HELL.get());
+        }
 
         private void makeArmorRecipes(RecipeOutput recipeOutput, Item ingot, Item helmet, Item chestplate,
                         Item leggings, Item boots) {
@@ -504,6 +614,39 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .requires(boat)
                                 .requires(Items.CHEST)
                                 .unlockedBy("has_" + woodName + "_boat", has(boat))
+                                .save(recipeOutput);
+        }
+
+        private void makeStoneRecipes(RecipeOutput recipeOutput, String name, Block baseBlock, Block stairs, Block slab, Block wall) {
+                stairBuilder(stairs, Ingredient.of(baseBlock))
+                                .unlockedBy("has_" + name, has(baseBlock)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, slab, baseBlock);
+                if (wall != null) {
+                        wallBuilder(RecipeCategory.BUILDING_BLOCKS, wall, Ingredient.of(baseBlock))
+                                        .unlockedBy("has_" + name, has(baseBlock)).save(recipeOutput);
+                }
+        }
+
+        private void makeCustomArrow(RecipeOutput recipeOutput, net.minecraft.world.level.ItemLike tip, Item result) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, result, 4)
+                                .pattern("F")
+                                .pattern("S")
+                                .pattern("E")
+                                .define('F', tip)
+                                .define('S', Items.STICK)
+                                .define('E', Items.FEATHER)
+                                .unlockedBy("has_tip", has(tip))
+                                .save(recipeOutput);
+        }
+
+        private void makeStaff(RecipeOutput recipeOutput, Ingredient stick, Ingredient head, Item result) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, result, 1)
+                                .pattern("  Z")
+                                .pattern(" Y ")
+                                .pattern("Y  ")
+                                .define('Y', stick)
+                                .define('Z', head)
+                                .unlockedBy("has_stick", has(Items.STICK))
                                 .save(recipeOutput);
         }
 }

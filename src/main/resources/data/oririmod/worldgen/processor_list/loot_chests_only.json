@@ -1,0 +1,7 @@
+{
+  "processors": [
+    {
+      "processor_type": "oririmod:loot_chest_processor"
+    }
+  ]
+}

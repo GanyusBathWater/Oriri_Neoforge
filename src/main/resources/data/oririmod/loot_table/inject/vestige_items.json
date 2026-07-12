@@ -1,0 +1,332 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:bound_of_the_celestial_sisters"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:candy_bag"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:crit_glove"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:duellant_cortex"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:heart_of_the_tank"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:miners_lantern"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:mirror_of_the_void"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:phoenix_feather"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:relic_of_the_past"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:snow_boots"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:solis_brooch"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:spring"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:stigma_of_darkness"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:strange_ender_eye"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:strider_scale"
+        },
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.001,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "functions": [
+            {
+              "components": {
+                "minecraft:custom_data": {
+                  "oriri_level": 1
+                }
+              },
+              "function": "minecraft:set_components"
+            }
+          ],
+          "name": "oririmod:wither_rose"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "oririmod:inject/vestige_items"
+}
