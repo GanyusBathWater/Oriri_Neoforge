@@ -166,7 +166,7 @@ public class BloodWaterPondFeature extends Feature<BloodWaterPondConfig> {
                     // 1. Clear air above pond to remove floating blocks/trees
                     for (int y = surfaceY + 1; y <= waterLevelY + 8; y++) {
                         mutablePos.set(origin.getX() + x, y, origin.getZ() + z);
-                        if (!level.getBlockState(mutablePos).is(Blocks.BEDROCK)) {
+                        if (!level.getBlockState(mutablePos).is(Blocks.BEDROCK) && isNatural(level.getBlockState(mutablePos))) {
                             level.setBlock(mutablePos, airState, 3);
                         }
                     }
@@ -175,7 +175,7 @@ public class BloodWaterPondFeature extends Feature<BloodWaterPondConfig> {
                     if (surfaceY > waterLevelY) {
                         for (int y = surfaceY; y > waterLevelY; y--) {
                             mutablePos.set(origin.getX() + x, y, origin.getZ() + z);
-                            if (!level.getBlockState(mutablePos).is(Blocks.BEDROCK)) {
+                            if (!level.getBlockState(mutablePos).is(Blocks.BEDROCK) && isNatural(level.getBlockState(mutablePos))) {
                                 level.setBlock(mutablePos, airState, 3);
                             }
                         }
@@ -193,7 +193,7 @@ public class BloodWaterPondFeature extends Feature<BloodWaterPondConfig> {
 
                         if (level.isOutsideBuildHeight(mutablePos))
                             continue;
-                        if (level.getBlockState(mutablePos).is(Blocks.BEDROCK))
+                        if (!isNatural(level.getBlockState(mutablePos)))
                             continue;
 
                         level.setBlock(mutablePos, fluidState, 3);
@@ -257,5 +257,9 @@ public class BloodWaterPondFeature extends Feature<BloodWaterPondConfig> {
         }
 
         return placed;
+    }
+
+    private boolean isNatural(BlockState state) {
+        return state.is(BlockTags.DIRT) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.SAND) || state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS) || state.is(Blocks.WATER) || state.canBeReplaced() || state.is(ModBlocks.SCARLET_GRASS_BLOCK.get()) || state.is(ModBlocks.SCARLET_STONE.get()) || state.getBlock() instanceof net.minecraft.world.level.block.BushBlock || state.isAir();
     }
 }

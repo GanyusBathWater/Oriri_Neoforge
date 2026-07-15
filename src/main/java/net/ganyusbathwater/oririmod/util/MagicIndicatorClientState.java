@@ -29,6 +29,51 @@ public class MagicIndicatorClientState {
         INSTANCE.active.remove(entity.getId());
     }
 
+    public static void spawnChargingParticles(net.minecraft.world.level.Level level, LivingEntity living) {
+        if (!level.isClientSide) return;
+        
+        long time = level.getGameTime();
+        Vec3 center = living.position().add(0, living.getBbHeight() * 0.5, 0);
+        
+        net.minecraft.core.particles.ParticleOptions particleType = net.minecraft.core.particles.ParticleTypes.WITCH;
+        net.minecraft.world.item.ItemStack useItem = living.getUseItem();
+        if (useItem != null && !useItem.isEmpty()) {
+            net.ganyusbathwater.oririmod.combat.Element element = net.ganyusbathwater.oririmod.combat.ItemElementRegistry.getElement(useItem);
+            particleType = switch (element) {
+                case FIRE -> net.minecraft.core.particles.ParticleTypes.FLAME;
+                case WATER -> net.minecraft.core.particles.ParticleTypes.SPLASH;
+                case NATURE -> net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER;
+                case LIGHT -> net.minecraft.core.particles.ParticleTypes.END_ROD;
+                case DARKNESS -> net.minecraft.core.particles.ParticleTypes.SMOKE;
+                case EARTH -> net.minecraft.core.particles.ParticleTypes.ASH;
+                case PHYSICAL -> net.minecraft.core.particles.ParticleTypes.CRIT;
+                default -> net.minecraft.core.particles.ParticleTypes.WITCH;
+            };
+        }
+        
+        // Orbital swirl
+        float angle = (time % 40) * (360f / 40f);
+        float rad = (float) Math.toRadians(angle);
+        double radius = 1.0;
+        double ox = Math.cos(rad) * radius;
+        double oz = Math.sin(rad) * radius;
+        double oy = Math.sin((time % 40) / 40.0 * Math.PI * 2) * 0.5;
+        
+        level.addParticle(particleType,
+                center.x + ox, center.y + oy, center.z + oz,
+                0, 0.05, 0);
+
+        // Converging energy (spawn around and move inwards)
+        for (int i = 0; i < 2; i++) {
+            double cx = center.x + (level.random.nextDouble() - 0.5) * 4.0;
+            double cy = center.y + (level.random.nextDouble() - 0.5) * 4.0;
+            double cz = center.z + (level.random.nextDouble() - 0.5) * 4.0;
+            Vec3 dir = center.subtract(cx, cy, cz).normalize().scale(0.15);
+            level.addParticle(particleType,
+                    cx, cy, cz, dir.x, dir.y, dir.z);
+        }
+    }
+
     public Map<Integer, Indicator> getActive() {
         return active;
     }

@@ -123,14 +123,13 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
                 .spin(4.0f)
                 .worldAnchor(groundCenter);
 
-        MagicIndicatorClientState.Indicator.Layer outer = new MagicIndicatorClientState.Indicator.Layer(
-                TEX_OUTER, 1.0f, 10f, 0xFFFFFFFF, 0f, MagicIndicatorClientState.Anchor.PLAYER);
         MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
                 TEX_MID, SUMMON_MID_RADIUS, -6f, 0xFFFFFFFF, 0f, MagicIndicatorClientState.Anchor.WORLD);
         MagicIndicatorClientState.Indicator.Layer inner = new MagicIndicatorClientState.Indicator.Layer(
                 TEX_INNER, SUMMON_INNER_RADIUS, 6f, 0xFFFFFFFF, 0f, MagicIndicatorClientState.Anchor.WORLD);
 
-        MagicIndicatorClientState.startFor(living, b.addLayer(outer).addLayer(mid).addLayer(inner).build());
+        MagicIndicatorClientState.startFor(living, b.addLayer(mid).addLayer(inner).build());
+        MagicIndicatorClientState.spawnChargingParticles(level, living);
     }
 
     @Override

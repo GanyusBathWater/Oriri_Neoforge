@@ -180,7 +180,7 @@ public class OririMod {
             net.ganyusbathwater.oririmod.entity.ModEntities.REX_ARANEA.get(),
             net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
             net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-            net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules,
+            net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
             net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
     }

@@ -296,7 +296,23 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 horizontalBlock(ModBlocks.REVIVAL_SHRINE.get(),
                                 models().getBuilder("revival_shrine")
                                         .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
-                                        .texture("particle", modLoc("block/revival_shrine")));
+                                        .texture("particle", mcLoc("block/white_concrete")));
+
+                // ===== GECKOLIB PLANTS =====
+                simpleBlock(ModBlocks.BLOOD_CAP_BLOCK.get(),
+                                models().getBuilder("blood_cap_block")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", mcLoc("block/red_concrete")));
+
+                horizontalBlock(ModBlocks.MOONSHROOM_BLOCK.get(),
+                                models().getBuilder("moonshroom_block")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", mcLoc("block/light_blue_concrete")));
+
+                simpleBlock(ModBlocks.GLOWLINGS_BLOCK.get(),
+                                models().getBuilder("glowlings_block")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", mcLoc("block/lime_concrete")));
 
                 // ===== EQUINOX TABLE =====
                 simpleBlockWithItem(ModBlocks.EQUINOX_TABLE.get(),

@@ -66,6 +66,22 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         }
     }
 
+    public boolean isSeedInitialized() {
+        return seedInitialized;
+    }
+
+    public double getSeedOffsetX() {
+        return seedOffsetX;
+    }
+
+    public double getSeedOffsetZ() {
+        return seedOffsetZ;
+    }
+
+    public double getSeedOffsetCave() {
+        return seedOffsetCave;
+    }
+
     @Override
     protected MapCodec<? extends BiomeSource> codec() {
         return CODEC;

@@ -29,7 +29,7 @@ public final class MagicIndicatorRender {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES)
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
             return;
 
         Minecraft mc = Minecraft.getInstance();

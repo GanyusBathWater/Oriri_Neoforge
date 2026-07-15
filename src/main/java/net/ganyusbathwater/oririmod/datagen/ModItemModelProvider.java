@@ -60,9 +60,10 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.ELDER_STEM_BLOCK.get());
                 simpleBlockItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get());
                 simpleBlockItem(ModBlocks.MANA_CRYSTAL_BLOCK.get());
-                simpleBlockItem(ModBlocks.MANA_CRYSTAL_CLUSTER.get());
+                saplingItem(ModBlocks.MANA_CRYSTAL_CLUSTER);
                 simpleBlockItem(ModBlocks.FLUORITE_BLOCK.get());
-                simpleBlockItem(ModBlocks.FLUORITE_CLUSTER.get());
+                withExistingParent(ModBlocks.FLUORITE_CLUSTER.getId().getPath(), ResourceLocation.parse("item/generated"))
+                                .texture("layer0", modLoc("block/fluorite_crystal_cluster"));
                 simpleBlockItem(ModBlocks.JADE_BLOCK.get());
                 simpleBlockItem(ModBlocks.JADE_ORE.get());
                 simpleBlockItem(ModBlocks.DEEPSLATE_JADE_ORE.get());
@@ -219,6 +220,16 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 // Flat items (Generated)
                 saplingItem(ModBlocks.SCARLET_SAPLING);
+                withExistingParent(ModBlocks.UPGRADED_ELDER_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/elder_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_SCARLET_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/scarlet_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_OAK_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/oak_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_SPRUCE_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/spruce_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_BIRCH_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/birch_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_JUNGLE_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/jungle_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_ACACIA_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/acacia_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_DARK_OAK_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/dark_oak_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_CHERRY_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/cherry_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/abyss_crown_sapling"));
                 saplingItem(ModBlocks.SCARLET_GRASS);
                 saplingItem(ModBlocks.SCARLET_TOOTH_LEAVES);
                 simpleBlockItem(ModBlocks.SCARLET_LILY.get());

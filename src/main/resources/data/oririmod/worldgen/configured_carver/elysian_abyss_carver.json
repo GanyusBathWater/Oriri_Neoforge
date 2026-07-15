@@ -21,7 +21,7 @@
         "Name": "minecraft:air"
       }
     },
-    "replaceable": "#minecraft:overworld_carver_replaceables",
+    "replaceable": "#oririmod:abyss_carver_replaceables",
     "horizontal_radius_multiplier": {
       "type": "minecraft:constant",
       "value": 8.0

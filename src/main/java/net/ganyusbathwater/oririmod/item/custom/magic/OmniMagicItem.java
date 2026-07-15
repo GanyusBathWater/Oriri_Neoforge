@@ -224,9 +224,6 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                     .worldAnchor(groundCenter)
                     .persistentUntilMeteorImpact(true); // wichtig: nicht vom MagicBoltItem abhängig
 
-            MagicIndicatorClientState.Indicator.Layer outer = new MagicIndicatorClientState.Indicator.Layer(
-                    TEX_ARCANE_OUTER, METEOR_OUTER_RADIUS_PLAYER, 10f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.PLAYER);
             MagicIndicatorClientState.Indicator.Layer mid = new MagicIndicatorClientState.Indicator.Layer(
                     TEX_ARCANE_MID, METEOR_MID_RADIUS_GROUND, -6f, 0xFFFFFFFF, 0f,
                     MagicIndicatorClientState.Anchor.WORLD);
@@ -234,20 +231,12 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                     TEX_ARCANE_INNER, METEOR_INNER_RADIUS_GROUND, 6f, 0xFFFFFFFF, 0f,
                     MagicIndicatorClientState.Anchor.WORLD);
 
-            MagicIndicatorClientState.startFor(living, b.addLayer(outer).addLayer(mid).addLayer(inner).build());
+            MagicIndicatorClientState.startFor(living, b.addLayer(mid).addLayer(inner).build());
         } else {
-            MagicIndicatorClientState.Indicator.Builder b = MagicIndicatorClientState.Indicator.builder()
-                    .duration(0)
-                    .distance(1.6f)
-                    .spin(6f)
-                    .persistentUntilMeteorImpact(true); // damit Renderer nicht sofort entfernt
-
-            MagicIndicatorClientState.Indicator.Layer layer = new MagicIndicatorClientState.Indicator.Layer(
-                    null, 1.2f, 0f, 0xFFFFFFFF, 0f,
-                    MagicIndicatorClientState.Anchor.PLAYER);
-
-            MagicIndicatorClientState.startFor(living, b.addLayer(layer).build());
+            MagicIndicatorClientState.stopFor(living);
         }
+        
+        MagicIndicatorClientState.spawnChargingParticles(level, living);
     }
 
     @Override
@@ -455,10 +444,10 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
             case SONIC -> "10.0";
             case BLAZE -> "5.0";
             case NORMAL -> "6.0";
-            case AMATEUR_FIREBALL -> "5.7 (Splash)";
-            case APPRENTICE_FIREBALL -> "12.7 (Splash)";
-            case JOURNEYMAN_FIREBALL -> "19.7 (Splash)";
-            case WISE_FIREBALL -> "26.7 (Splash)";
+            case AMATEUR_FIREBALL -> "5.0 (Splash)";
+            case APPRENTICE_FIREBALL -> "7.5 (Splash)";
+            case JOURNEYMAN_FIREBALL -> "10.0 (Splash)";
+            case WISE_FIREBALL -> "15.0 (Splash)";
             case EXPLOSIVE -> "3.0 (Radius)";
             case METEOR -> "4.0 (Power)";
             case ETERNAL_ICE -> "Area Magic";

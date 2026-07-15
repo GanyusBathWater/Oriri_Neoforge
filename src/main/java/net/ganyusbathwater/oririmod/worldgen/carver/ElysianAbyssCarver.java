@@ -27,11 +27,6 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
 
     public static final ThreadLocal<net.minecraft.world.level.StructureManager> CURRENT_STRUCTURE_MANAGER = new ThreadLocal<>();
     public static final ThreadLocal<net.minecraft.core.RegistryAccess> CURRENT_REGISTRY_ACCESS = new ThreadLocal<>();
-    public static final ThreadLocal<java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox>> CURRENT_STRUCTURE_BOXES = new ThreadLocal<>();
-
-    public static int getMaxCarveHeight(ChunkAccess chunk, int x, int z) {
-        return 320; // No artificial structure protection limits
-    }
 
     public ElysianAbyssCarver(Codec<CaveCarverConfiguration> codec) {
         super(codec);
@@ -39,7 +34,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
 
     @Override
     public int getRange() {
-        return 8;
+        return 12;
     }
 
     @Override
@@ -62,6 +57,37 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         long originSeed = (ox * 341873128712L) ^ (oz * 132897987541L);
         RandomSource originRandom = RandomSource.create(originSeed);
         
+        // --- Global Structure Avoidance ---
+        // Mathematically predict where structures will generate using deterministic RandomSpread math.
+        // If the carver originates within 8 chunks of a potential Sanctuary, we abort it entirely!
+        long worldSeed = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.lastSeed;
+        int spacing = 20;
+        int separation = 15;
+        int salt = 1234567890; // elderwoods_structures salt
+
+        int regionX = Math.floorDiv(ox, spacing);
+        int regionZ = Math.floorDiv(oz, spacing);
+
+        for (int rx = -1; rx <= 1; rx++) {
+            for (int rz = -1; rz <= 1; rz++) {
+                int rX = regionX + rx;
+                int rZ = regionZ + rz;
+                
+                long seed1 = worldSeed + (long)rX * 341873128712L + (long)rZ * 132897987541L + (long)salt;
+                java.util.Random randomPos = new java.util.Random(seed1);
+                
+                int chunkX = rX * spacing + randomPos.nextInt(spacing - separation);
+                int chunkZ = rZ * spacing + randomPos.nextInt(spacing - separation);
+                
+                int dx = ox - chunkX;
+                int dz = oz - chunkZ;
+                
+                if (dx * dx + dz * dz < 64) { // 8 chunks radius squared = 64
+                    return false; // Abort the entire carver for this origin
+                }
+            }
+        }
+        
         // --- Mathematical Abyss Detection ---
         double seedOffsetCave = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.currentSeedOffsetCave;
         float scale = 0.004f;
@@ -78,11 +104,11 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         double noiseThreshold = 0.20;
         
         if (caveNoise > noiseThreshold) {
-            float ravineChance = 1.0f / 70.0f; // Roughly 1 in 70 chunks inside the biome
+            float ravineChance = 1.0f / 40.0f; // Increased from 1/70 to compensate for aborted ravines
             
             // Higher intensity -> more ravines
             if (caveNoise > 0.25) {
-                ravineChance = 1.0f / 30.0f; 
+                ravineChance = 1.0f / 15.0f; // Increased from 1/30
             } else if (caveNoise < 0.12) {
                 ravineChance = 1.0f / 120.0f; 
             }
@@ -189,18 +215,6 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                     pos.set(bx, by, bz);
                                     BlockState state = chunk.getBlockState(pos);
                                     if (this.canReplaceBlock(config, state)) {
-                                        // Surface structure protection
-                                        int maxCarve = getMaxCarveHeight(chunk, bx, bz);
-                                        if (by > maxCarve) {
-                                            continue;
-                                        }
-                                        if (by > maxCarve - 12) {
-                                            double fade = (by - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
-                                            double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)bx * 0.1f, (float)by * 0.1f, (float)bz * 0.1f, 2);
-                                            if (noise3D + 0.5 < fade * 1.5) {
-                                                continue;
-                                            }
-                                        }
                                         if (by < -105) {
                                             continue; // Protect aether rivers
                                         }
@@ -292,23 +306,11 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                 pos.set(bx, by, bz);
                                 BlockState state = chunk.getBlockState(pos);
                                 if (this.canReplaceBlock(config, state)) {
-                                    // Euclidean cone structure protection to prevent flat chunk ceilings
-                                    int maxCarve = getMaxCarveHeight(chunk, bx, bz);
-                                    if (by > maxCarve) {
-                                        continue;
+                                    if (by < -105) {
+                                        continue; // Protect aether rivers
                                     }
-                                    if (by > maxCarve - 12) {
-                                        double fade = (by - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
-                                        double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)bx * 0.1f, (float)by * 0.1f, (float)bz * 0.1f, 2);
-                                        if (noise3D + 0.5 < fade * 1.5) {
-                                            continue;
-                                        }
-                                    }
-                                        if (by < -105) {
-                                            continue; // Protect aether rivers
-                                        }
-                                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
-                                        hit = true;
+                                    chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                    hit = true;
                                 }
                             }
                         }
@@ -456,18 +458,6 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                     pos.set(bx, by, bz);
                                     BlockState state = chunk.getBlockState(pos);
                                     if (this.canReplaceBlock(config, state)) {
-                                        // Surface structure protection
-                                        int maxCarve = getMaxCarveHeight(chunk, bx, bz);
-                                        if (by > maxCarve) {
-                                            continue;
-                                        }
-                                        if (by > maxCarve - 12) {
-                                            double fade = (by - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
-                                            double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)bx * 0.1f, (float)by * 0.1f, (float)bz * 0.1f, 2);
-                                            if (noise3D + 0.5 < fade * 1.5) {
-                                                continue;
-                                            }
-                                        }
                                         if (by < -105) {
                                             continue; // Protect aether rivers
                                         }

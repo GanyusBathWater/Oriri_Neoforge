@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:overworld_carver_replaceables",
+    "#c:ores",
+    "#forge:ores",
+    "minecraft:coal_ore",
+    "minecraft:deepslate_coal_ore"
+  ]
+}

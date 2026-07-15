@@ -233,6 +233,15 @@ public class ServerEvents {
                 event.setNewDamage(event.getNewDamage() + 4.0f);
             }
         }
+
+        // Molten Armor Counter-attack
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player target && sourceEntity instanceof net.minecraft.world.entity.LivingEntity attacker) {
+            if (!target.level().isClientSide() && target.getInventory().getArmor(0).getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ModArmorItem armorItem) {
+                if (armorItem.hasPlayerCorrectArmorOn(net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, target)) {
+                    attacker.igniteForSeconds(5.0f);
+                }
+            }
+        }
     }
 
     @SubscribeEvent

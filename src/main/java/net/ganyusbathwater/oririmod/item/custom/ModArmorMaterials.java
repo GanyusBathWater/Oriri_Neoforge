@@ -23,58 +23,58 @@ public class ModArmorMaterials {
     public static final Holder<ArmorMaterial> CRYSTAL_ARMOR_MATERIAL = registerArmorMaterial("crystal_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
                 // the int is the defense value
-                attribute.put(ArmorItem.Type.BOOTS, 2);
-                attribute.put(ArmorItem.Type.LEGGINGS, 4);
-                attribute.put(ArmorItem.Type.CHESTPLATE, 6);
-                attribute.put(ArmorItem.Type.HELMET, 2);
+                attribute.put(ArmorItem.Type.BOOTS, 5);
+                attribute.put(ArmorItem.Type.LEGGINGS, 8);
+                attribute.put(ArmorItem.Type.CHESTPLATE, 10);
+                attribute.put(ArmorItem.Type.HELMET, 5);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }), 20, 2f, 0.1f, () -> Ingredient.of(ModItems.CRYSTAL_INGOT.get()));
+            }), 25, 3.5f, 0.2f, () -> Ingredient.of(ModItems.CRYSTAL_INGOT.get()));
 
     public static final Holder<ArmorMaterial> ANCIENT_ARMOR_MATERIAL = registerArmorMaterial("ancient_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
-                attribute.put(ArmorItem.Type.BOOTS, 2);
-                attribute.put(ArmorItem.Type.LEGGINGS, 4);
-                attribute.put(ArmorItem.Type.CHESTPLATE, 6);
-                attribute.put(ArmorItem.Type.HELMET, 2);
+                attribute.put(ArmorItem.Type.BOOTS, 4);
+                attribute.put(ArmorItem.Type.LEGGINGS, 7);
+                attribute.put(ArmorItem.Type.CHESTPLATE, 9);
+                attribute.put(ArmorItem.Type.HELMET, 4);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }), 20, 2f, 0.1f, () -> Ingredient.of(ModItems.ANCIENT_INGOT.get()));
+            }), 20, 3f, 0.15f, () -> Ingredient.of(ModItems.ANCIENT_INGOT.get()));
 
     public static final Holder<ArmorMaterial> BLUE_ICE_ARMOR_MATERIAL = registerArmorMaterial("blue_ice_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
                 attribute.put(ArmorItem.Type.BOOTS, 2);
-                attribute.put(ArmorItem.Type.LEGGINGS, 4);
-                attribute.put(ArmorItem.Type.CHESTPLATE, 6);
-                attribute.put(ArmorItem.Type.HELMET, 2);
+                attribute.put(ArmorItem.Type.LEGGINGS, 6);
+                attribute.put(ArmorItem.Type.CHESTPLATE, 7);
+                attribute.put(ArmorItem.Type.HELMET, 3);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }), 20, 2f, 0.1f, () -> Ingredient.of(ModItems.BLUE_ICE_INGOT.get()));
+            }), 12, 0f, 0f, () -> Ingredient.of(ModItems.BLUE_ICE_INGOT.get()));
 
     public static final Holder<ArmorMaterial> GILDED_NETHERRITE_ARMOR_MATERIAL = registerArmorMaterial(
             "gilded_netherite_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
-                attribute.put(ArmorItem.Type.BOOTS, 2);
-                attribute.put(ArmorItem.Type.LEGGINGS, 4);
-                attribute.put(ArmorItem.Type.CHESTPLATE, 6);
-                attribute.put(ArmorItem.Type.HELMET, 2);
+                attribute.put(ArmorItem.Type.BOOTS, 4);
+                attribute.put(ArmorItem.Type.LEGGINGS, 6);
+                attribute.put(ArmorItem.Type.CHESTPLATE, 8);
+                attribute.put(ArmorItem.Type.HELMET, 4);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }), 20, 2f, 0.1f, () -> Ingredient.of(ModItems.GILDED_NETHERRITE_INGOT.get()));
+            }), 15, 3f, 0.1f, () -> Ingredient.of(ModItems.GILDED_NETHERRITE_INGOT.get()));
 
     public static final Holder<ArmorMaterial> MOLTEN_ARMOR_MATERIAL = registerArmorMaterial("molten_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
-                attribute.put(ArmorItem.Type.BOOTS, 2);
-                attribute.put(ArmorItem.Type.LEGGINGS, 4);
-                attribute.put(ArmorItem.Type.CHESTPLATE, 6);
-                attribute.put(ArmorItem.Type.HELMET, 2);
+                attribute.put(ArmorItem.Type.BOOTS, 3);
+                attribute.put(ArmorItem.Type.LEGGINGS, 6);
+                attribute.put(ArmorItem.Type.CHESTPLATE, 8);
+                attribute.put(ArmorItem.Type.HELMET, 3);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }), 20, 2f, 0.1f, () -> Ingredient.of(ModItems.MOLTEN_INGOT.get()));
+            }), 15, 2f, 0f, () -> Ingredient.of(ModItems.MOLTEN_INGOT.get()));
 
     public static final Holder<ArmorMaterial> PRISMARINE_ARMOR_MATERIAL = registerArmorMaterial("prismarine_armor",
             Util.make(new EnumMap<>(ArmorItem.Type.class), attribute -> {
-                attribute.put(ArmorItem.Type.BOOTS, 2);
-                attribute.put(ArmorItem.Type.LEGGINGS, 4);
-                attribute.put(ArmorItem.Type.CHESTPLATE, 6);
-                attribute.put(ArmorItem.Type.HELMET, 2);
+                attribute.put(ArmorItem.Type.BOOTS, 3);
+                attribute.put(ArmorItem.Type.LEGGINGS, 6);
+                attribute.put(ArmorItem.Type.CHESTPLATE, 8);
+                attribute.put(ArmorItem.Type.HELMET, 3);
                 attribute.put(ArmorItem.Type.BODY, 4);
-            }), 20, 2f, 0.1f, () -> Ingredient.of(ModItems.PRISMARINE_IRON_INGOT.get()));
+            }), 12, 1f, 0f, () -> Ingredient.of(ModItems.PRISMARINE_IRON_INGOT.get()));
 
     private static Holder<ArmorMaterial> registerArmorMaterial(String name,
             EnumMap<ArmorItem.Type, Integer> typeProtection, int enchantability, float toughness,

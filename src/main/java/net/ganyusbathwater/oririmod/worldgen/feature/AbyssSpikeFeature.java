@@ -31,7 +31,10 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
 
     private boolean isReplaceableBySpike(BlockState state) {
         // Allow replacing stone/deepslate so the root of the spike can anchor into the ceiling!
-        return !state.is(Blocks.BEDROCK) && !state.is(net.minecraft.tags.BlockTags.DIRT);
+        return !state.is(Blocks.BEDROCK) && !state.is(net.minecraft.tags.BlockTags.DIRT)
+                && !state.is(ModBlocks.HARDENED_MANASHROOM.get())
+                && !state.is(ModBlocks.AETHER_MAGMA_BLOCK.get())
+                && !state.is(net.ganyusbathwater.oririmod.fluid.ModFluids.AETHER_BLOCK.get());
     }
 
     @Override
@@ -56,7 +59,8 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
             BlockState state = level.getBlockState(mPos);
             BlockState next = level.getBlockState(mPos.relative(config.isCeiling() ? Direction.UP : Direction.DOWN));
 
-            if ((state.isAir() || state.is(Blocks.WATER)) && !next.isAir() && !next.is(Blocks.WATER) && !next.is(Blocks.BEDROCK)) {
+            if ((state.isAir() || state.is(Blocks.WATER)) && !next.isAir() && !next.is(Blocks.WATER) && !next.is(Blocks.BEDROCK)
+                && !next.is(ModBlocks.HARDENED_MANASHROOM.get()) && !next.is(ModBlocks.AETHER_MAGMA_BLOCK.get())) {
                 origin = mPos.immutable();
                 foundAnchor = true;
                 break;

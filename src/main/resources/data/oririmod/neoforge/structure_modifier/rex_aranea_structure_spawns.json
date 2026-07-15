@@ -1,0 +1,18 @@
+{
+  "type": "neoforge:add_spawns",
+  "structures": [
+    "minecraft:mineshaft",
+    "minecraft:mineshaft_mesa",
+    "oririmod:elderwoods_mineshaft",
+    "oririmod:outpost_scarlet_ruins",
+    "oririmod:elderwoods_outpost_ruin"
+  ],
+  "spawners": [
+    {
+      "type": "oririmod:rex_aranea",
+      "weight": 15,
+      "minCount": 1,
+      "maxCount": 1
+    }
+  ]
+}

@@ -173,7 +173,28 @@ public final class ElementalDamageHandler {
             return 0.0f;
         CompoundTag root = player.getPersistentData().getCompound(NBT_ROOT);
         CompoundTag res = root.getCompound(NBT_RESISTS);
-        return clamp01(res.getFloat(element.name()));
+        float baseResistance = clamp01(res.getFloat(element.name()));
+
+        // Add Armor Bonuses
+        if (player.getInventory().getArmor(0).getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ModArmorItem armorItem) {
+            if (armorItem.hasPlayerCorrectArmorOn(armorItem.getMaterial(), player)) {
+                if (element == Element.NATURE && armorItem.getMaterial() == net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.ANCIENT_ARMOR_MATERIAL) {
+                    baseResistance += 0.25f;
+                } else if (element == Element.DARKNESS && armorItem.getMaterial() == net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.BLUE_ICE_ARMOR_MATERIAL) {
+                    baseResistance += 0.25f;
+                } else if (element == Element.LIGHT && armorItem.getMaterial() == net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL) {
+                    baseResistance += 0.25f;
+                } else if (element == Element.EARTH && armorItem.getMaterial() == net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.GILDED_NETHERRITE_ARMOR_MATERIAL) {
+                    baseResistance += 0.25f;
+                } else if (element == Element.FIRE && armorItem.getMaterial() == net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.MOLTEN_ARMOR_MATERIAL) {
+                    baseResistance += 0.25f;
+                } else if (element == Element.WATER && armorItem.getMaterial() == net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.PRISMARINE_ARMOR_MATERIAL) {
+                    baseResistance += 0.25f;
+                }
+            }
+        }
+
+        return clamp01(baseResistance);
     }
 
     public static void setPlayerIncomingMultiplier(Player player, float multiplier) {

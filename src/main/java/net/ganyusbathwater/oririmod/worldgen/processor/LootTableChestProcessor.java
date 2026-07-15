@@ -103,7 +103,7 @@ public class LootTableChestProcessor extends StructureProcessor {
                 if (adjacentDir != null) {
                     Direction leftDir = facing.getClockWise();
                     net.minecraft.world.level.block.state.properties.ChestType type = 
-                        (adjacentDir == leftDir) ? net.minecraft.world.level.block.state.properties.ChestType.RIGHT : net.minecraft.world.level.block.state.properties.ChestType.LEFT;
+                        (adjacentDir == leftDir) ? net.minecraft.world.level.block.state.properties.ChestType.LEFT : net.minecraft.world.level.block.state.properties.ChestType.RIGHT;
                     
                     BlockState newState = info.state().setValue(ChestBlock.TYPE, type);
                     modified.add(new StructureTemplate.StructureBlockInfo(info.pos(), newState, info.nbt()));

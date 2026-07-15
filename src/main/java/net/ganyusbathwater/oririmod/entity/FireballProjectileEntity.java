@@ -26,6 +26,9 @@ public class FireballProjectileEntity extends AbstractHurtingProjectile implemen
     private static final EntityDataAccessor<Float> DATA_EXPLOSION_RADIUS = SynchedEntityData
             .defineId(FireballProjectileEntity.class, EntityDataSerializers.FLOAT);
 
+    private float directHitDamageOverride = -1.0f;
+
+
     public FireballProjectileEntity(EntityType<? extends AbstractHurtingProjectile> entityType, Level level) {
         super(entityType, level);
     }
@@ -86,8 +89,8 @@ public class FireballProjectileEntity extends AbstractHurtingProjectile implemen
             // structural damage.
             // We forcefully apply the theoretical maximum damage equivalent (Radius * 7 +
             // 1) upon direct impact!
-            float directHitDamage = this.getExplosionRadius() * 7.0F + 1.0F;
-            target.hurt(this.damageSources().thrown(this, owner), directHitDamage);
+            float damage = this.directHitDamageOverride > 0 ? this.directHitDamageOverride : (this.getExplosionRadius() * 7.0F + 1.0F);
+            target.hurt(this.damageSources().thrown(this, owner), damage);
 
             this.explode();
             this.discard();
@@ -151,20 +154,23 @@ public class FireballProjectileEntity extends AbstractHurtingProjectile implemen
         switch (ability) {
             case AMATEUR_FIREBALL -> {
                 this.setScale(0.5F);
-                this.setExplosionRadius(0.67F); // Reset to 0.67F originally requested since direct damage is now
-                                                // working
+                this.setExplosionRadius(0.5F);
+                this.directHitDamageOverride = 5.0F;
             }
             case APPRENTICE_FIREBALL -> {
                 this.setScale(0.75F);
-                this.setExplosionRadius(1.67F); // Original: 5.0F
+                this.setExplosionRadius(1.0F);
+                this.directHitDamageOverride = 7.5F;
             }
             case JOURNEYMAN_FIREBALL -> {
                 this.setScale(1.0F);
-                this.setExplosionRadius(2.67F); // Original: 8.0F
+                this.setExplosionRadius(1.5F);
+                this.directHitDamageOverride = 10.0F;
             }
             case WISE_FIREBALL -> {
                 this.setScale(1.25F);
-                this.setExplosionRadius(3.67F); // Original: 11.0F
+                this.setExplosionRadius(2.0F);
+                this.directHitDamageOverride = 15.0F;
             }
             default -> {}
         }

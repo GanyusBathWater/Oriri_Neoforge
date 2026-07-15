@@ -27,6 +27,12 @@ public class AbyssRavineFeature extends Feature<NoneFeatureConfiguration> {
         ChunkPos currentChunk = new ChunkPos(context.origin());
         boolean hit = false;
         
+        long worldSeed = level.getSeed();
+        RandomSource seedRandom = RandomSource.create(worldSeed);
+        seedRandom.nextDouble();
+        seedRandom.nextDouble();
+        double seedOffsetCave = seedRandom.nextDouble() * 10000.0;
+        
         int range = 4;
         
         for (int cx = -range; cx <= range; cx++) {
@@ -37,7 +43,6 @@ public class AbyssRavineFeature extends Feature<NoneFeatureConfiguration> {
                 long originSeed = (ox * 341873128712L) ^ (oz * 132897987541L);
                 RandomSource originRandom = RandomSource.create(originSeed);
                 
-                double seedOffsetCave = ElderwoodsChunkGenerator.currentSeedOffsetCave;
                 float scale = 0.0015f;
                 double caveNoise = FastNoise.fbm3D(
                     (float)((ox * 16 + seedOffsetCave) * scale),
@@ -158,10 +163,15 @@ public class AbyssRavineFeature extends Feature<NoneFeatureConfiguration> {
     private boolean isReplaceable(BlockState state) {
         return state.is(net.minecraft.tags.BlockTags.OVERWORLD_CARVER_REPLACEABLES) || 
                state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) ||
+               state.is(net.minecraft.tags.BlockTags.DIRT) ||
+               state.is(net.minecraft.tags.BlockTags.LEAVES) ||
+               state.is(net.minecraft.tags.BlockTags.LOGS) ||
                state.is(Blocks.WATER) || 
                state.is(Blocks.SAND) || 
                state.is(Blocks.GRAVEL) ||
                state.is(net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_GRASS_BLOCK.get()) ||
-               state.is(net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_STONE.get());
+               state.is(net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_STONE.get()) ||
+               state.canBeReplaced() ||
+               state.getBlock() instanceof net.minecraft.world.level.block.BushBlock;
     }
 }

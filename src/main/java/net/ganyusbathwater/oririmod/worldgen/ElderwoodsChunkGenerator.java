@@ -110,17 +110,22 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private synchronized void initSeed(long seed) {
         if (!seedInitialized) {
-            RandomSource random = RandomSource.create(seed);
-            seedOffsetX = random.nextDouble() * 10000.0;
-            seedOffsetZ = random.nextDouble() * 10000.0;
-            seedOffsetCave = random.nextDouble() * 10000.0;
-            currentSeedOffsetCave = seedOffsetCave;
-            seedInitialized = true;
-
-            // Sync seed to BiomeSource so /locate biome works
             if (this.biomeSourceReference instanceof ElderwoodsBiomeSource elderwoodsBiomeSource) {
-                elderwoodsBiomeSource.initSeed(seed);
+                if (!elderwoodsBiomeSource.isSeedInitialized()) {
+                    elderwoodsBiomeSource.initSeed(seed);
+                }
+                this.seedOffsetX = elderwoodsBiomeSource.getSeedOffsetX();
+                this.seedOffsetZ = elderwoodsBiomeSource.getSeedOffsetZ();
+                this.seedOffsetCave = elderwoodsBiomeSource.getSeedOffsetCave();
+                this.currentSeedOffsetCave = this.seedOffsetCave;
+            } else {
+                RandomSource random = RandomSource.create(seed);
+                seedOffsetX = random.nextDouble() * 10000.0;
+                seedOffsetZ = random.nextDouble() * 10000.0;
+                seedOffsetCave = random.nextDouble() * 10000.0;
+                currentSeedOffsetCave = seedOffsetCave;
             }
+            seedInitialized = true;
 
             // Initialize scarlet block states (lazy init to ensure blocks are registered)
             if (SCARLET_GRASS == null) {
@@ -138,7 +143,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         if (!seedInitialized) {
             net.minecraft.world.level.biome.Climate.TargetPoint sample =
                     randomState.sampler().sample(0, 0, 0);
-            long derivedSeed = Double.doubleToRawLongBits(sample.temperature())
+            long derivedSeed = 1L
                     ^ (Double.doubleToRawLongBits(sample.humidity()) * 6364136223846793005L)
                     ^ (Double.doubleToRawLongBits(sample.continentalness()) * 1442695040888963407L);
             initSeed(derivedSeed);
@@ -447,33 +452,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     private static final int LAVA_LAKE_LEVEL = MIN_Y + 30; 
 
-    private void updateStructureBoxes(StructureManager structureManager, ChunkAccess chunk) {
-        java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = new java.util.ArrayList<>();
-        for (java.util.Map.Entry<net.minecraft.world.level.levelgen.structure.Structure, it.unimi.dsi.fastutil.longs.LongSet> entry : chunk.getAllReferences().entrySet()) {
-            net.minecraft.world.level.levelgen.structure.Structure structure = entry.getKey();
-            for (long originPosLong : entry.getValue()) {
-                net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(originPosLong);
-                
-                try {
-                    java.util.List<net.minecraft.world.level.levelgen.structure.StructureStart> starts = 
-                        structureManager.startsForStructure(net.minecraft.core.SectionPos.of(originPos, 0), structure);
-                    for (net.minecraft.world.level.levelgen.structure.StructureStart start : starts) {
-                        if (start != null && start.isValid()) {
-                            boxes.add(start.getBoundingBox());
-                        }
-                    }
-                } catch (Exception e) {
-                    // Fallback: If the origin chunk is out of bounds and we can't fetch the exact StructureStart,
-                    // we still know the structure starts at originPos! We add a massive 120-block radius fallback box 
-                    // to ensure protection is applied even when the origin chunk isn't loaded!
-                    int cx = originPos.getMiddleBlockX();
-                    int cz = originPos.getMiddleBlockZ();
-                    boxes.add(new net.minecraft.world.level.levelgen.structure.BoundingBox(cx - 120, -64, cz - 120, cx + 120, 320, cz + 120));
-                }
-            }
-        }
-        net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.CURRENT_STRUCTURE_BOXES.set(boxes);
-    }
+
 
     @Override
     public void applyCarvers(WorldGenRegion level, long seed, RandomState randomState, BiomeManager biomeManager,
@@ -482,7 +461,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         lastSeed = seed;
 
         if (step == GenerationStep.Carving.AIR || step == GenerationStep.Carving.LIQUID) {
-            updateStructureBoxes(structureManager, chunk);
             try {
                 net.minecraft.world.level.levelgen.carver.CarvingContext context = null;
                 net.minecraft.world.level.chunk.CarvingMask carvingMask = null;
@@ -491,39 +469,43 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 }
                 net.minecraft.world.level.levelgen.Aquifer aquifer = null;
 
-                net.minecraft.core.BlockPos centerPos = chunk.getPos().getMiddleBlockPosition(0);
-                net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = biomeManager.getBiome(centerPos);
+                // 1. Vanilla Carvers (Properly loaded per origin chunk to allow biome crossing)
+                int vanillaRange = 8;
+                for (int rx = -vanillaRange; rx <= vanillaRange; rx++) {
+                    for (int rz = -vanillaRange; rz <= vanillaRange; rz++) {
+                        net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(chunk.getPos().x + rx, chunk.getPos().z + rz);
+                        net.minecraft.world.level.chunk.ChunkAccess originChunk = level.getChunk(originPos.x, originPos.z);
+                        net.minecraft.core.BlockPos originCenter = originPos.getMiddleBlockPosition(0);
+                        
+                        net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> originBiome = originChunk.getNoiseBiome(
+                            net.minecraft.core.QuartPos.fromBlock(originCenter.getX()), 
+                            0, 
+                            net.minecraft.core.QuartPos.fromBlock(originCenter.getZ())
+                        );
+                        net.minecraft.world.level.biome.BiomeGenerationSettings originSettings = originBiome.value().getGenerationSettings();
 
-                net.minecraft.world.level.biome.BiomeGenerationSettings settings = biome.value()
-                        .getGenerationSettings();
-
-                for (net.minecraft.core.Holder<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> holder : settings
-                        .getCarvers(step)) {
-                    net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> carver = holder.value();
-                    // Run normal biome carvers, excluding the global Abyss Carver
-                    if (!(carver.worldCarver() instanceof ElysianAbyssCarver)) {
-                        try {
-                            int range = carver.worldCarver().getRange();
-                            for (int rx = -range; rx <= range; rx++) {
-                                for (int rz = -range; rz <= range; rz++) {
-                                    net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(chunk.getPos().x + rx, chunk.getPos().z + rz);
+                        for (net.minecraft.core.Holder<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> holder : originSettings.getCarvers(step)) {
+                            net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> carver = holder.value();
+                            // Run normal biome carvers, excluding the global Abyss Carver
+                            if (!(carver.worldCarver() instanceof ElysianAbyssCarver)) {
+                                try {
                                     net.minecraft.util.RandomSource carverRandom = net.minecraft.util.RandomSource.create(seed ^ originPos.toLong());
                                     if (carver.isStartChunk(carverRandom)) {
                                         carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, originPos, carvingMask);
                                     }
+                                } catch (Exception ex) {
+                                    // Vanilla carver failed due to null context. Ignore safely so it doesn't abort the global custom carvers.
                                 }
                             }
-                        } catch (Exception ex) {
-                            // Vanilla carver failed due to null context. Ignore safely so it doesn't abort the global custom carvers.
                         }
                     }
                 }
                 
-                // Run ElysianAbyssCarver globally so massive ravines can cross biome boundaries freely without getting cut off
+                // 2. Run ElysianAbyssCarver globally so massive ravines can cross biome boundaries freely without getting cut off
                 net.minecraft.core.Registry<net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?>> carverRegistry = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.CONFIGURED_CARVER);
                 for (net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver<?> globalCarver : carverRegistry) {
                     if (globalCarver.worldCarver() instanceof ElysianAbyssCarver) {
-                        int range = globalCarver.worldCarver().getRange();
+                        int range = 12; // Back to 12. 16 causes an exponential explosion of bounding box checks and freezes generation.
                         for (int rx = -range; rx <= range; rx++) {
                             for (int rz = -range; rz <= range; rz++) {
                                 net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(chunk.getPos().x + rx, chunk.getPos().z + rz);
@@ -598,8 +580,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         int chunkX = chunk.getPos().x;
         int chunkZ = chunk.getPos().z;
 
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
+        for (int dx = -8; dx <= 8; dx++) {
+            for (int dz = -8; dz <= 8; dz++) {
                 int originX = chunkX + dx;
                 int originZ = chunkZ + dz;
                 carveScarletCaveEntrances(level, chunk, originX, originZ, randomState);
@@ -1128,7 +1110,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState random,
             StructureManager structureManager, ChunkAccess chunk) {
-        updateStructureBoxes(structureManager, chunk);
         try {
             initSeedFromRandomState(random);
 
@@ -1153,46 +1134,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     // "?"? Elysian Sanctuary Protective Stalactite Logic "?"?
                     // We blend a mathematical cone onto the cave ceiling strictly beneath the Sanctuary bounding box
                     int limitY = MIN_Y; // Lowest point the ceiling can be pulled down to
-                    java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = 
-                        net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.CURRENT_STRUCTURE_BOXES.get();
-                    if (boxes != null && !boxes.isEmpty()) {
-                        for (net.minecraft.world.level.levelgen.structure.BoundingBox box : boxes) {
-                            if (worldX >= box.minX() && worldX <= box.maxX() && worldZ >= box.minZ() && worldZ <= box.maxZ()) {
-                                int centerX = (box.minX() + box.maxX()) / 2;
-                                int centerZ = (box.minZ() + box.maxZ()) / 2;
-                                
-                                int dx = worldX - centerX;
-                                int dz = worldZ - centerZ;
-                                
-                                int boxRadiusX = (box.maxX() - box.minX()) / 2;
-                                int boxRadiusZ = (box.maxZ() - box.minZ()) / 2;
-                                
-                                double maxDistCone = 1.0;
-                                if (boxRadiusX > 0 && boxRadiusZ > 0) {
-                                    double maxLInfinity = Math.max(Math.abs(dx) / (double)boxRadiusX, Math.abs(dz) / (double)boxRadiusZ);
-                                    double normX = dx / (double)boxRadiusX;
-                                    double normZ = dz / (double)boxRadiusZ;
-                                    double euclidean = Math.sqrt(normX * normX + normZ * normZ);
-                                    
-                                    maxDistCone = 0.5 * maxLInfinity + 0.5 * euclidean;
-                                }
-                                
-                                double factor = maxDistCone * maxDistCone; // Parabolic curve
-                                
-                                double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)worldX * 0.05f, 0, (float)worldZ * 0.05f, 4) * 12.0;
-                                
-                                double safeFoundation = surfaceY - 10;
-                                double centerDeepY = Math.max(MIN_Y + 10, safeFoundation - 70); // Deepest point of the cone at center
-                                
-                                // Taper up to 320 to merge perfectly with natural cave!
-                                limitY = (int) Math.round(centerDeepY + (320 - centerDeepY) * factor + noise);
-                                
-                                if (caveCeilingSmooth > limitY) {
-                                    caveCeilingSmooth = limitY;
-                                }
-                            }
-                        }
-                    }
 
                     for (int y = MIN_Y; y <= surfaceY; y++) {
                         pos.set(worldX, y, worldZ);

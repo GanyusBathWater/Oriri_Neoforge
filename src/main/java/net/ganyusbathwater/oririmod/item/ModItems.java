@@ -499,111 +499,111 @@ public class ModItems {
 
         public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet",
                         () -> new ModArmorItem(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL, ArmorItem.Type.HELMET,
-                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(45)),
                                         ModRarity.LEGENDARY));
         public static final DeferredItem<ArmorItem> CRYSTAL_CHESTPLATE = ITEMS.register("crystal_chestplate",
                         () -> new ModArmorItem(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE,
-                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(45)),
                                         ModRarity.LEGENDARY));
         public static final DeferredItem<ArmorItem> CRYSTAL_LEGGINGS = ITEMS.register("crystal_leggings",
                         () -> new ModArmorItem(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS,
-                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(45)),
                                         ModRarity.LEGENDARY));
         public static final DeferredItem<ArmorItem> CRYSTAL_BOOTS = ITEMS.register("crystal_boots",
                         () -> new ModArmorItem(ModArmorMaterials.CRYSTAL_ARMOR_MATERIAL, ArmorItem.Type.BOOTS,
-                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(45)),
                                         ModRarity.LEGENDARY));
 
         public static final DeferredItem<ArmorItem> ANCIENT_HELMET = ITEMS.register("ancient_helmet",
                         () -> new ModArmorItem(ModArmorMaterials.ANCIENT_ARMOR_MATERIAL, ArmorItem.Type.HELMET,
-                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(40)),
                                         ModRarity.MYTHIC));
         public static final DeferredItem<ArmorItem> ANCIENT_CHESTPLATE = ITEMS.register("ancient_chestplate",
                         () -> new ModArmorItem(ModArmorMaterials.ANCIENT_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE,
-                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(40)),
                                         ModRarity.MYTHIC));
         public static final DeferredItem<ArmorItem> ANCIENT_LEGGINGS = ITEMS.register("ancient_leggings",
                         () -> new ModArmorItem(ModArmorMaterials.ANCIENT_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS,
-                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(40)),
                                         ModRarity.MYTHIC));
         public static final DeferredItem<ArmorItem> ANCIENT_BOOTS = ITEMS.register("ancient_boots",
                         () -> new ModArmorItem(ModArmorMaterials.ANCIENT_ARMOR_MATERIAL, ArmorItem.Type.BOOTS,
-                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(40)),
                                         ModRarity.MYTHIC));
 
         public static final DeferredItem<ArmorItem> GILDED_NETHERRITE_HELMET = ITEMS.register(
                         "gilded_netherrite_helmet",
                         () -> new ModArmorItem(ModArmorMaterials.GILDED_NETHERRITE_ARMOR_MATERIAL,
                                         ArmorItem.Type.HELMET,
-                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(30)),
                                         ModRarity.MYTHIC));
         public static final DeferredItem<ArmorItem> GILDED_NETHERRITE_CHESTPLATE = ITEMS.register(
                         "gilded_netherrite_chestplate",
                         () -> new ModArmorItem(ModArmorMaterials.GILDED_NETHERRITE_ARMOR_MATERIAL,
                                         ArmorItem.Type.CHESTPLATE,
-                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(30)),
                                         ModRarity.MYTHIC));
         public static final DeferredItem<ArmorItem> GILDED_NETHERRITE_LEGGINGS = ITEMS
                         .register("gilded_netherrite_leggings",
                                         () -> new ModArmorItem(ModArmorMaterials.GILDED_NETHERRITE_ARMOR_MATERIAL,
                                                         ArmorItem.Type.LEGGINGS,
                                                         new Item.Properties().durability(
-                                                                        ArmorItem.Type.LEGGINGS.getDurability(19)),
+                                                                        ArmorItem.Type.LEGGINGS.getDurability(30)),
                                                         ModRarity.MYTHIC));
         public static final DeferredItem<ArmorItem> GILDED_NETHERRITE_BOOTS = ITEMS.register("gilded_netherrite_boots",
                         () -> new ModArmorItem(ModArmorMaterials.GILDED_NETHERRITE_ARMOR_MATERIAL, ArmorItem.Type.BOOTS,
-                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(30)),
                                         ModRarity.MYTHIC));
 
         public static final DeferredItem<ArmorItem> BLUE_ICE_HELMET = ITEMS.register("blue_ice_helmet",
                         () -> new ModArmorItem(ModArmorMaterials.BLUE_ICE_ARMOR_MATERIAL, ArmorItem.Type.HELMET,
-                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(20)),
                                         ModRarity.RARE));
         public static final DeferredItem<ArmorItem> BLUE_ICE_CHESTPLATE = ITEMS.register("blue_ice_chestplate",
                         () -> new ModArmorItem(ModArmorMaterials.BLUE_ICE_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE,
-                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(20)),
                                         ModRarity.RARE));
         public static final DeferredItem<ArmorItem> BLUE_ICE_LEGGINGS = ITEMS.register("blue_ice_leggings",
                         () -> new ModArmorItem(ModArmorMaterials.BLUE_ICE_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS,
-                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(20)),
                                         ModRarity.RARE));
         public static final DeferredItem<ArmorItem> BLUE_ICE_BOOTS = ITEMS.register("blue_ice_boots",
                         () -> new ModArmorItem(ModArmorMaterials.BLUE_ICE_ARMOR_MATERIAL, ArmorItem.Type.BOOTS,
-                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(20)),
                                         ModRarity.RARE));
 
         public static final DeferredItem<ArmorItem> MOLTEN_HELMET = ITEMS.register("molten_helmet",
                         () -> new ModArmorItem(ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, ArmorItem.Type.HELMET,
-                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(33)),
                                         ModRarity.RARE));
         public static final DeferredItem<ArmorItem> MOLTEN_CHESTPLATE = ITEMS.register("molten_chestplate",
                         () -> new ModArmorItem(ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE,
-                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(33)),
                                         ModRarity.RARE));
         public static final DeferredItem<ArmorItem> MOLTEN_LEGGINGS = ITEMS.register("molten_leggings",
                         () -> new ModArmorItem(ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS,
-                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(33)),
                                         ModRarity.RARE));
         public static final DeferredItem<ArmorItem> MOLTEN_BOOTS = ITEMS.register("molten_boots",
                         () -> new ModArmorItem(ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, ArmorItem.Type.BOOTS,
-                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(33)),
                                         ModRarity.RARE));
 
         public static final DeferredItem<ArmorItem> PRISMARINE_HELMET = ITEMS.register("prismarine_helmet",
                         () -> new ModArmorItem(ModArmorMaterials.PRISMARINE_ARMOR_MATERIAL, ArmorItem.Type.HELMET,
-                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(33)),
                                         ModRarity.UNCOMMON));
         public static final DeferredItem<ArmorItem> PRISMARINE_CHESTPLATE = ITEMS.register("prismarine_chestplate",
                         () -> new ModArmorItem(ModArmorMaterials.PRISMARINE_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE,
-                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(33)),
                                         ModRarity.UNCOMMON));
         public static final DeferredItem<ArmorItem> PRISMARINE_LEGGINGS = ITEMS.register("prismarine_leggings",
                         () -> new ModArmorItem(ModArmorMaterials.PRISMARINE_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS,
-                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(33)),
                                         ModRarity.UNCOMMON));
         public static final DeferredItem<ArmorItem> PRISMARINE_BOOTS = ITEMS.register("prismarine_boots",
                         () -> new ModArmorItem(ModArmorMaterials.PRISMARINE_ARMOR_MATERIAL, ArmorItem.Type.BOOTS,
-                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(19)),
+                                        new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(33)),
                                         ModRarity.UNCOMMON));
 
         // ------------------------------------------------------Arcana-----------------------------------------------------------

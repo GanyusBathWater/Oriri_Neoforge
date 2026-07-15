@@ -61,8 +61,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
         long originSeed = (chunkPos.x * 341873128712L) ^ (chunkPos.z * 132897987541L);
         RandomSource originRandom = RandomSource.create(originSeed);
 
-        int maxRadius = 8;
-        int minRadius = 4;
+        int maxRadius = 14; // Increased from 8 to give much more reach
+        int minRadius = 6;  // Increased from 4
         int entranceTop = 150; // High enough to cut through any surface terrain
         int entranceBottom = -16 + originRandom.nextInt(32); // Deterministic bottom
 
@@ -77,8 +77,7 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
 
         // Iterate bounding box
         // Check winding offset to ensure we cover enough area
-        int maxWindingOffset = 6;
-        int maxCheckRad = maxRadius + maxWindingOffset + 2;
+        // Removed maxCheckRad because it caused chunk cutoffs by limiting iteration bounds
 
         boolean hit = false;
         int carvedCount = 0;
@@ -90,8 +89,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
             double depthProgress = (double) (entranceTop - y) / (entranceTop - entranceBottom);
 
             // Winding (Curve)
-            double windingX = Math.sin(depthProgress * 4.0 + centerX * 0.1) * 6.0;
-            double windingZ = Math.cos(depthProgress * 3.5 + centerZ * 0.1) * 6.0;
+            double windingX = Math.sin(depthProgress * 4.0 + centerX * 0.1) * 8.0; // Increased winding
+            double windingZ = Math.cos(depthProgress * 3.5 + centerZ * 0.1) * 8.0;
 
             double radiusAtY = Mth.lerp(depthProgress, maxRadius, minRadius);
 
@@ -101,15 +100,10 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
 
             radiusAtY += wobble + extraNoise;
 
-            for (int x = -maxCheckRad; x <= maxCheckRad; x++) {
-                for (int z = -maxCheckRad; z <= maxCheckRad; z++) {
-                    int worldX = centerX + x;
-                    int worldZ = centerZ + z;
-
-                    // Standard carver boundary check (approximate)
-                    if (chunk.getPos().x != (worldX >> 4) || chunk.getPos().z != (worldZ >> 4)) {
-                        continue;
-                    }
+            for (int worldX = chunk.getPos().getMinBlockX(); worldX <= chunk.getPos().getMaxBlockX(); worldX++) {
+                for (int worldZ = chunk.getPos().getMinBlockZ(); worldZ <= chunk.getPos().getMaxBlockZ(); worldZ++) {
+                    int x = worldX - centerX;
+                    int z = worldZ - centerZ;
 
                     mutablePos.set(worldX, y, worldZ);
 
@@ -121,17 +115,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
                         // Carve Air
                         BlockState blockState = chunk.getBlockState(mutablePos);
                         if (this.canReplaceBlock(config, blockState)) {
-                            // Surface structure protection
-                            int maxCarve = net.ganyusbathwater.oririmod.worldgen.carver.ElysianAbyssCarver.getMaxCarveHeight(chunk, worldX, worldZ);
-                            if (y > maxCarve) {
-                                continue;
-                            }
-                            if (y > maxCarve - 12) {
-                                double fade = (y - (maxCarve - 12)) / 12.0; // 0.0 to 1.0
-                                double noise3D = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)worldX * 0.1f, (float)y * 0.1f, (float)worldZ * 0.1f, 2);
-                                if (noise3D + 0.5 < fade * 1.5) {
-                                    continue;
-                                }
+                            if (y < -105) {
+                                continue; // Protect aether rivers
                             }
                             // Manual carving to avoid using the context (which has a null generator)
                             chunk.setBlockState(mutablePos, Blocks.CAVE_AIR.defaultBlockState(), false);
