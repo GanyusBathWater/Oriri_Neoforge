@@ -24,7 +24,7 @@ public class SplinterSpiderEntity extends Spider {
             boolean isFire = pDamageSource.is(DamageTypeTags.IS_FIRE) || pDamageSource.is(ModDamageTypes.ELEMENT_FIRE);
 
             if (!isFire) {
-                int count = 2 + this.random.nextInt(3); // 2 to 4
+                int count = this.random.nextInt(3); // 0 to 2
                 for (int i = 0; i < count; i++) {
                     CaveSpider caveSpider = EntityType.CAVE_SPIDER.create(this.level());
                     if (caveSpider != null) {

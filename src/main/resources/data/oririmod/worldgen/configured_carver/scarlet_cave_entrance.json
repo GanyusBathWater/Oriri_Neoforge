@@ -1,7 +1,7 @@
 {
     "type": "oririmod:scarlet_cave_entrance",
     "config": {
-        "probability": 0.15,
+        "probability": 0.30,
         "y": {
             "type": "minecraft:uniform",
             "min_inclusive": {

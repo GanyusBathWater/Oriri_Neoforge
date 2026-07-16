@@ -38,10 +38,7 @@ public class ModPlacedFeatures {
                         "star_herb_patch_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_LILY_PATCH_PLACED_KEY = registerKey(
                         "scarlet_lily_patch_placed");
-        public static final ResourceKey<PlacedFeature> SCARLET_POND_PLAINS_PLACED_KEY = registerKey(
-                        "scarlet_pond_plains_placed");
-        public static final ResourceKey<PlacedFeature> SCARLET_POND_FOREST_PLACED_KEY = registerKey(
-                        "scarlet_pond_forest_placed");
+
 
         public static final ResourceKey<PlacedFeature> FALLEN_LOGS_PLACED_KEY = registerKey("fallen_logs_placed");
         public static final ResourceKey<PlacedFeature> LEAF_PILE_PATCH_PLACED_KEY = registerKey("leaf_pile_patch_placed");
@@ -195,24 +192,7 @@ public class ModPlacedFeatures {
                                 PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                                 BiomeFilter.biome()));
 
-                // Scarlet Ponds
-                var configuredScarletPondPlains = configuredFeatures
-                                .getOrThrow(ModConfiguredFeatures.SCARLET_POND_PLAINS_KEY);
-                register(context, SCARLET_POND_PLAINS_PLACED_KEY, configuredScarletPondPlains, List.of(
-                                RarityFilter.onAverageOnceEvery(12), // Reduced frequency (was 2)
-                                InSquarePlacement.spread(),
-                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG), // Use OCEAN_FLOOR to
-                                                                                                // avoid trees
-                                BiomeFilter.biome()));
 
-                var configuredScarletPondForest = configuredFeatures
-                                .getOrThrow(ModConfiguredFeatures.SCARLET_POND_FOREST_KEY);
-                register(context, SCARLET_POND_FOREST_PLACED_KEY, configuredScarletPondForest, List.of(
-                                RarityFilter.onAverageOnceEvery(6), // Reduced frequency (was 1)
-                                InSquarePlacement.spread(),
-                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG), // Use OCEAN_FLOOR to
-                                                                                                // avoid trees
-                                BiomeFilter.biome()));
 
                 // Dripstone Clusters (underground)
                 var configuredElderwoodsDripstone = configuredFeatures

@@ -1,12 +1,13 @@
-package test;
-import net.neoforged.neoforge.common.Tags;
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
+
 public class Test {
-    public static void main(String[] args) {
-        for (Field f : Tags.Blocks.class.getFields()) {
-            if (f.getName().contains("SHEAR")) {
-                System.out.println(f.getName());
-            }
+    public static void main(String[] args) throws Exception {
+        Class<?> clazz = Class.forName("net.minecraft.world.level.levelgen.structure.structures.JigsawStructure");
+        for (Method m : clazz.getDeclaredMethods()) {
+            System.out.println(m);
+        }
+        for (Constructor<?> c : clazz.getDeclaredConstructors()) {
+            System.out.println(c);
         }
     }
 }

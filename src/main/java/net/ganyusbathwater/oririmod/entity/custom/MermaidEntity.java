@@ -115,8 +115,8 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH,       30.0D)
                 .add(Attributes.ARMOR,             4.0D)
-                .add(Attributes.MOVEMENT_SPEED,    0.25D)
-                .add(Attributes.ATTACK_DAMAGE,     4.0D)
+                .add(Attributes.MOVEMENT_SPEED,    0.20D)
+                .add(Attributes.ATTACK_DAMAGE,     2.5D)
                 .add(Attributes.FOLLOW_RANGE,     32.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.0D);
     }

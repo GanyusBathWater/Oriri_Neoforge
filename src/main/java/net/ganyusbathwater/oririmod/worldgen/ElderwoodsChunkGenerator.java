@@ -65,10 +65,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     // ===== ELYSIAN ABYSS BLOCKS =====
     private static BlockState AETHER_LIQUID;
+    private static BlockState BLOOD_WATER;
 
     // Biome keys for scarlet biomes
-    private static final ResourceKey<Biome> SCARLET_PLAINS_KEY = ResourceKey.create(
-            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains"));
+    private static final ResourceKey<Biome> SCARLET_SWAMP_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"));
     private static final ResourceKey<Biome> SCARLET_FOREST_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"));
     private static final ResourceKey<Biome> SCARLET_CAVES_KEY = ResourceKey.create(
@@ -85,7 +86,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     // Cached Biome Holders for performance
     private Holder<Biome> cachedElderwoods;
-    private Holder<Biome> cachedScarletPlains;
+    private Holder<Biome> cachedScarletSwamp;
     private Holder<Biome> cachedScarletForest;
     private Holder<Biome> cachedScarletCaves;
     private Holder<Biome> cachedCrystalCaves;
@@ -136,6 +137,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             if (AETHER_LIQUID == null) {
                 AETHER_LIQUID = net.ganyusbathwater.oririmod.fluid.ModFluids.AETHER_BLOCK.get().defaultBlockState();
             }
+            if (BLOOD_WATER == null) {
+                BLOOD_WATER = net.ganyusbathwater.oririmod.fluid.ModFluids.BLOOD_WATER_BLOCK.get().defaultBlockState();
+            }
         }
     }
 
@@ -151,7 +155,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     private boolean isScarletBiome(Holder<Biome> biomeHolder) {
-        return biomeHolder.is(SCARLET_PLAINS_KEY) ||
+        return biomeHolder.is(SCARLET_SWAMP_KEY) ||
                 biomeHolder.is(SCARLET_FOREST_KEY) ||
                 biomeHolder.is(SCARLET_CAVES_KEY);
     }
@@ -167,6 +171,36 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
         double noise = Math.sin((x + seedOffsetX) * 0.003) * Math.cos((z + seedOffsetZ) * 0.003) * 12.0; 
         noise += Math.sin((x + seedOffsetX) * 0.003 * 0.5 + 2.0) * Math.cos((z + seedOffsetZ) * 0.003 * 0.6 + 1.1) * 6.0;
+
+        // Swamp transition logic
+        double surfaceNoise = Math.sin((x + seedOffsetX) * 0.002) * Math.cos((z + seedOffsetZ) * 0.003) +
+                0.5 * Math.cos((x + seedOffsetX) * 0.005 + 2.0) * Math.sin((z + seedOffsetZ) * 0.005 + 1.0);
+        
+        if (surfaceNoise < -0.3) {
+            double swampFactor = Math.min(1.0, (-0.3 - surfaceNoise) / 0.2); // 0.0 to 1.0
+            
+            // High-frequency bumpy noise for the swamp floor using FastNoise FBM
+            double bumpyNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float)((x + seedOffsetX) * 0.05),
+                    0f,
+                    (float)((z + seedOffsetZ) * 0.05),
+                    2
+            ) * 3.0;
+            
+            double originalNoise = noise;
+            double rimNoise = Math.max(originalNoise, 1.0); // Ensure rim is at least BASE_HEIGHT + 1
+            double basinNoise = -3.0 + bumpyNoise; // Floor varies around BASE_HEIGHT - 3, allowing islands to breach the water
+            
+            if (swampFactor < 0.2) {
+                // Raise to the rim
+                double t = swampFactor / 0.2;
+                noise = net.minecraft.util.Mth.lerp(t, originalNoise, rimNoise);
+            } else {
+                // Drop down into the basin
+                double t = (swampFactor - 0.2) / 0.8;
+                noise = net.minecraft.util.Mth.lerp(t, rimNoise, basinNoise);
+            }
+        }
 
         int naturalHeight = BASE_HEIGHT + (int) Math.round(noise);
 
@@ -474,13 +508,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 for (int rx = -vanillaRange; rx <= vanillaRange; rx++) {
                     for (int rz = -vanillaRange; rz <= vanillaRange; rz++) {
                         net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(chunk.getPos().x + rx, chunk.getPos().z + rz);
-                        net.minecraft.world.level.chunk.ChunkAccess originChunk = level.getChunk(originPos.x, originPos.z);
                         net.minecraft.core.BlockPos originCenter = originPos.getMiddleBlockPosition(0);
                         
-                        net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> originBiome = originChunk.getNoiseBiome(
-                            net.minecraft.core.QuartPos.fromBlock(originCenter.getX()), 
-                            0, 
-                            net.minecraft.core.QuartPos.fromBlock(originCenter.getZ())
+                        net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> originBiome = this.biomeSource.getNoiseBiome(
+                                net.minecraft.core.QuartPos.fromBlock(originCenter.getX()), 
+                                0, 
+                                net.minecraft.core.QuartPos.fromBlock(originCenter.getZ()), 
+                                randomState.sampler()
                         );
                         net.minecraft.world.level.biome.BiomeGenerationSettings originSettings = originBiome.value().getGenerationSettings();
 
@@ -995,7 +1029,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     var registry = level.registryAccess().registryOrThrow(Registries.BIOME);
                     cachedElderwoods = registry.getHolderOrThrow(
                             ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods")));
-                    cachedScarletPlains = registry.getHolderOrThrow(SCARLET_PLAINS_KEY);
+                    cachedScarletSwamp = registry.getHolderOrThrow(SCARLET_SWAMP_KEY);
                     cachedScarletForest = registry.getHolderOrThrow(SCARLET_FOREST_KEY);
                     cachedScarletCaves = registry.getHolderOrThrow(SCARLET_CAVES_KEY);
                     cachedCrystalCaves = registry.getHolderOrThrow(CRYSTAL_CAVES_KEY);
@@ -1038,7 +1072,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             if (surfaceNoise > 0.5) {
                 return cachedScarletForest;
             } else if (surfaceNoise < -0.5) {
-                return cachedScarletPlains;
+                return cachedScarletSwamp;
             } else {
                 return cachedElderwoods;
             }
@@ -1079,8 +1113,19 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         // A. Top Surface Painting (Forest Floor)
                         if (y >= surfaceY - 5) {
                             if (y == surfaceY) {
-                                chunk.setBlockState(mutablePos, grassState, false);
-                                heightmapState = grassState;
+                                if (y < BASE_HEIGHT - 1 && currentBiome.is(SCARLET_SWAMP_KEY)) {
+                                    double mudNoise = Math.sin(worldX * 0.1) * Math.cos(worldZ * 0.1) + 0.5 * Math.sin(worldX * 0.03 + 2.0) * Math.cos(worldZ * 0.04 - 1.0);
+                                    if (mudNoise > 0.3 || y < BASE_HEIGHT - 2) {
+                                        chunk.setBlockState(mutablePos, Blocks.MUD.defaultBlockState(), false);
+                                        heightmapState = Blocks.MUD.defaultBlockState();
+                                    } else {
+                                        chunk.setBlockState(mutablePos, grassState, false);
+                                        heightmapState = grassState;
+                                    }
+                                } else {
+                                    chunk.setBlockState(mutablePos, grassState, false);
+                                    heightmapState = grassState;
+                                }
                             } else if (y >= surfaceY - 3) {
                                 chunk.setBlockState(mutablePos, DIRT, false);
                             }
@@ -1135,11 +1180,28 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     // We blend a mathematical cone onto the cave ceiling strictly beneath the Sanctuary bounding box
                     int limitY = MIN_Y; // Lowest point the ceiling can be pulled down to
 
-                    for (int y = MIN_Y; y <= surfaceY; y++) {
+                    int maxY = Math.max(surfaceY, BASE_HEIGHT - 1);
+                    for (int y = MIN_Y; y <= maxY; y++) {
                         pos.set(worldX, y, worldZ);
 
                         if (y <= MIN_Y + 4) {
                             chunk.setBlockState(pos, BEDROCK, false);
+                            continue;
+                        }
+
+                        if (y > surfaceY) {
+                            double surfaceNoise = Math.sin((worldX + seedOffsetX) * 0.002) * Math.cos((worldZ + seedOffsetZ) * 0.003) +
+                                    0.5 * Math.cos((worldX + seedOffsetX) * 0.005 + 2.0) * Math.sin((worldZ + seedOffsetZ) * 0.005 + 1.0);
+                            
+                            // surfaceNoise < -0.34 ensures we are inside the raised rim of the swamp crater
+                            if (surfaceNoise < -0.34) {
+                                // Fill blood water up to BASE_HEIGHT - 2 so it stays contained
+                                if (y <= BASE_HEIGHT - 2) {
+                                    chunk.setBlockState(pos, BLOOD_WATER, false);
+                                    continue;
+                                }
+                            }
+                            chunk.setBlockState(pos, AIR, false);
                             continue;
                         }
 

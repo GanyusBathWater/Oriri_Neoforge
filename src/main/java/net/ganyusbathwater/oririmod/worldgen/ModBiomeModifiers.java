@@ -41,8 +41,8 @@ public class ModBiomeModifiers {
         // Scarlet Forest & Plains
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_FEATURES = registerKey(
                         "add_scarlet_forest_features");
-        public static final ResourceKey<BiomeModifier> ADD_SCARLET_PLAINS_FEATURES = registerKey(
-                        "add_scarlet_plains_features");
+        public static final ResourceKey<BiomeModifier> ADD_SCARLET_SWAMP_FEATURES = registerKey(
+                        "add_scarlet_swamp_features");
 
         // Cave Decorations
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_CAVE_FEATURES = registerKey(
@@ -60,7 +60,7 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LOADED_BLAZE = registerKey("add_spawns_loaded_blaze");
         
         public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_FOREST_SPAWNS = registerKey("add_elderwoods_forest_spawns");
-        public static final ResourceKey<BiomeModifier> ADD_SCARLET_PLAINS_SPAWNS = registerKey("add_scarlet_plains_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_SCARLET_SWAMP_SPAWNS = registerKey("add_scarlet_swamp_spawns");
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_SPAWNS = registerKey("add_scarlet_forest_spawns");
         public static final ResourceKey<BiomeModifier> ADD_CAVE_SPAWNS = registerKey("add_cave_spawns");
         // here will be the Features defined and later turned into json files
@@ -170,8 +170,6 @@ public class ModBiomeModifiers {
                                                 scarletForestBiomes,
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(
-                                                                                ModPlacedFeatures.SCARLET_POND_FOREST_PLACED_KEY),
-                                                                placedFeatures.getOrThrow(
                                                                                 ModPlacedFeatures.SCARLET_TREE_PLACED_KEY),
                                                                 placedFeatures.getOrThrow(
                                                                                 ModPlacedFeatures.SCARLET_GRASS_PATCH_PLACED_KEY),
@@ -183,15 +181,15 @@ public class ModBiomeModifiers {
                                                                                 ModPlacedFeatures.BLOOD_CAP_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
-                // Scarlet Plains Features
+                // Scarlet Swamp Features
                 var scarletPlainsBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains"))));
-                context.register(ADD_SCARLET_PLAINS_FEATURES,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"))));
+                context.register(ADD_SCARLET_SWAMP_FEATURES,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
                                                 scarletPlainsBiomes,
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(
-                                                                                ModPlacedFeatures.SCARLET_POND_PLAINS_PLACED_KEY),
+                                                                                ModPlacedFeatures.SCARLET_TREE_PLACED_KEY),
                                                                 placedFeatures.getOrThrow(
                                                                                 ModPlacedFeatures.SCARLET_BOULDER_PLACED_KEY),
                                                                 placedFeatures.getOrThrow(
@@ -256,7 +254,7 @@ public class ModBiomeModifiers {
                                                                 "scarlet_forest"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
                                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
-                                                                "scarlet_plains"))),
+                                                                "scarlet_swamp"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
                                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                                 "elderwoods_cave"))),
@@ -362,8 +360,8 @@ public class ModBiomeModifiers {
                         new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4),
                         new MobSpawnSettings.SpawnerData(EntityType.WITCH, 5, 1, 1)
                 );
-                context.register(ADD_SCARLET_PLAINS_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
-                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains")))),
+                context.register(ADD_SCARLET_SWAMP_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp")))),
                         monsterSpawns
                 ));
                 context.register(ADD_SCARLET_FOREST_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(

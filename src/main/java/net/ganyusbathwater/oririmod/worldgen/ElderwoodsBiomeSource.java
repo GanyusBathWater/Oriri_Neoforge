@@ -28,8 +28,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     // Biome resource keys (same as in ElderwoodsChunkGenerator)
     private static final ResourceKey<Biome> ELDERWOODS_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods"));
-    private static final ResourceKey<Biome> SCARLET_PLAINS_KEY = ResourceKey.create(
-            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains"));
+    private static final ResourceKey<Biome> SCARLET_SWAMP_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"));
     private static final ResourceKey<Biome> SCARLET_FOREST_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"));
     private static final ResourceKey<Biome> SCARLET_CAVES_KEY = ResourceKey.create(
@@ -154,7 +154,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             if (surfaceNoise > 0.5) {
                 return findBiome(SCARLET_FOREST_KEY);
             } else if (surfaceNoise < -0.5) {
-                return findBiome(SCARLET_PLAINS_KEY);
+                return findBiome(SCARLET_SWAMP_KEY);
             } else {
                 return findBiome(ELDERWOODS_KEY);
             }
@@ -171,6 +171,27 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
         double noise = Math.sin(nx) * Math.cos(nz) * 12.0; 
         noise += Math.sin(nx * 0.5 + 2.0) * Math.cos(nz * 0.6 + 1.1) * 6.0;
+
+        // Swamp transition logic
+        double surfaceNoise = Math.sin((x + seedOffsetX) * 0.002) * Math.cos((z + seedOffsetZ) * 0.003) +
+                0.5 * Math.cos((x + seedOffsetX) * 0.005 + 2.0) * Math.sin((z + seedOffsetZ) * 0.005 + 1.0);
+        
+        if (surfaceNoise < -0.3) {
+            double swampFactor = Math.min(1.0, (-0.3 - surfaceNoise) / 0.2); // 0.0 to 1.0
+            
+            // High-frequency bumpy noise for the swamp floor using FastNoise FBM
+            double bumpyNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float)((x + seedOffsetX) * 0.05),
+                    0f,
+                    (float)((z + seedOffsetZ) * 0.05),
+                    2
+            ) * 3.0;
+            
+            // Lower terrain into a basin at BASE_HEIGHT - 2, plus bumpy variations
+            double swampNoise = -2.0 + bumpyNoise;
+            
+            noise = net.minecraft.util.Mth.lerp(swampFactor, noise, swampNoise);
+        }
 
         return ElderwoodsChunkGenerator.BASE_HEIGHT + (int) Math.round(noise);
     }

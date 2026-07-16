@@ -565,7 +565,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             BlockPos below = p.below();
             boolean belowReplaceable = withinBuildHeight(level, below)
                     && (level.getBlockState(below).isAir() || level.getBlockState(below).is(BlockTags.REPLACEABLE)
-                            || level.getBlockState(below).is(BlockTags.LEAVES));
+                            || level.getBlockState(below).is(BlockTags.LEAVES)
+                            || !level.getBlockState(below).getFluidState().isEmpty());
             if (canReplaceForLog(level, p)) {
                 placeLog(level, p, Direction.Axis.Y, cfg, rnd, false, cfg.rootProvider());
                 placed++;
@@ -591,7 +592,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             if (!withinBuildHeight(level, probe))
                 break;
             BlockState s = level.getBlockState(probe);
-            if (s.isAir() || s.is(BlockTags.REPLACEABLE) || s.is(BlockTags.LEAVES) || s.is(Blocks.TALL_GRASS)) {
+            if (s.isAir() || s.is(BlockTags.REPLACEABLE) || s.is(BlockTags.LEAVES) || s.is(Blocks.TALL_GRASS)
+                    || !s.getFluidState().isEmpty()) {
                 count++;
                 probe = probe.below();
             } else {
@@ -1505,9 +1507,9 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             return true;
         BlockState s = level.getBlockState(pos);
         if (!s.getFluidState().isEmpty())
-            return false;
+            return true;
         return s.isAir() || s.is(BlockTags.REPLACEABLE) || s.is(BlockTags.LEAVES) || s.is(Blocks.GRASS_BLOCK)
-                || s.is(Blocks.TALL_GRASS);
+                || s.is(Blocks.TALL_GRASS) || s.is(Blocks.MUD);
     }
 
     private boolean canReplaceForLeaves(WorldGenLevel level, BlockPos pos) {
@@ -1517,9 +1519,9 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         if (s.getBlock() instanceof RotatedPillarBlock)
             return false;
         if (!s.getFluidState().isEmpty())
-            return false;
+            return true;
         return s.isAir() || s.is(BlockTags.REPLACEABLE) || s.is(BlockTags.LEAVES) || s.is(Blocks.GRASS_BLOCK)
-                || s.is(Blocks.TALL_GRASS);
+                || s.is(Blocks.TALL_GRASS) || s.is(Blocks.MUD);
     }
 
     private boolean withinBuildHeight(WorldGenLevel level, BlockPos pos) {

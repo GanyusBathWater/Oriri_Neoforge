@@ -27,10 +27,7 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.ScarletBoulderFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
-        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.BloodWaterPondFeature> BLOOD_WATER_POND = FEATURES
-                        .register("blood_water_pond",
-                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.BloodWaterPondFeature(
-                                                        net.ganyusbathwater.oririmod.worldgen.feature.BloodWaterPondConfig.CODEC));
+
 
         public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.ScarletDripstoneClusterFeature> DRIPSTONE_CLUSTER = FEATURES
                         .register("dripstone_cluster",

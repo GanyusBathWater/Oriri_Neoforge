@@ -6,7 +6,7 @@
       "type": "oririmod:mermaid",
       "weight": 20,
       "minCount": 1,
-      "maxCount": 2
+      "maxCount": 1
     }
   ]
 }

@@ -84,6 +84,7 @@ public class OririMod {
         ModEnchantmentEffects.register(modEventBus);
         ModEntities.register(modEventBus);
         net.ganyusbathwater.oririmod.worldgen.ModStructureProcessors.register(modEventBus);
+        net.ganyusbathwater.oririmod.worldgen.structure.ModStructureTypes.register(modEventBus);
         net.ganyusbathwater.oririmod.loot.ModLootConditionTypes.register(modEventBus);
         net.ganyusbathwater.oririmod.loot.ModLootModifiers.register(modEventBus);
         ModSounds.register(modEventBus);
@@ -209,11 +210,11 @@ public class OririMod {
             net.minecraft.core.Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = registryAccess
                     .registryOrThrow(net.minecraft.core.registries.Registries.BIOME);
             net.minecraft.resources.ResourceLocation scarletPlainsRL = net.minecraft.resources.ResourceLocation
-                    .fromNamespaceAndPath(MOD_ID, "scarlet_plains");
+                    .fromNamespaceAndPath(MOD_ID, "scarlet_swamp");
 
             if (biomeRegistry.containsKey(scarletPlainsRL)) {
                 net.minecraft.world.level.biome.Biome biome = biomeRegistry.get(scarletPlainsRL);
-                OririMod.LOGGER.info("DEBUG_SCARLET: Found Scarlet Plains biome!");
+                OririMod.LOGGER.info("DEBUG_SCARLET: Found Scarlet Swamp biome!");
 
                 // Inspect Carvers
                 var carvers = biome.getGenerationSettings()
@@ -229,7 +230,7 @@ public class OririMod {
                     }
                 }
             } else {
-                OririMod.LOGGER.info("DEBUG_SCARLET: CRITICAL - Scarlet Plains biome NOT found in registry!");
+                OririMod.LOGGER.info("DEBUG_SCARLET: CRITICAL - Scarlet Swamp biome NOT found in registry!");
             }
         }
     }

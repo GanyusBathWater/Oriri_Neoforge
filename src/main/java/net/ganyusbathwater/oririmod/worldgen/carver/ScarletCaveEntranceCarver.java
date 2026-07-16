@@ -28,8 +28,8 @@ import java.util.function.Function;
 public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfiguration> {
 
     // Biome keys for scarlet biomes
-    private static final ResourceKey<Biome> SCARLET_PLAINS_KEY = ResourceKey.create(
-            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_plains"));
+    private static final ResourceKey<Biome> SCARLET_SWAMP_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"));
     private static final ResourceKey<Biome> SCARLET_FOREST_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"));
 

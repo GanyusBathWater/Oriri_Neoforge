@@ -113,10 +113,10 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                 ravineChance = 1.0f / 120.0f; 
             }
             
-            // Spawn Ravine canyon
-            if (originRandom.nextFloat() < ravineChance) {
-                hit |= carveRavine(config, chunk, ox, oz, originRandom);
-            }
+            // Spawn Ravine canyon - DISABLED per request
+            // if (originRandom.nextFloat() < ravineChance) {
+            //     hit |= carveRavine(config, chunk, ox, oz, originRandom);
+            // }
             
             // Spawn standard winding cave systems (Worms & Rooms)
             hit |= carveWorms(config, chunk, ox, oz, originRandom);

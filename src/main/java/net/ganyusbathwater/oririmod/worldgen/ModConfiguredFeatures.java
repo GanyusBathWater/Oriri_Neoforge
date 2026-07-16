@@ -44,10 +44,7 @@ public class ModConfiguredFeatures {
                         "star_herb_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_LILY_PATCH_KEY = registerKey(
                         "scarlet_lily_patch");
-        public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_POND_PLAINS_KEY = registerKey(
-                        "scarlet_pond_plains");
-        public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_POND_FOREST_KEY = registerKey(
-                        "scarlet_pond_forest");
+
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDERWOODS_DRIPSTONE_CLUSTER_KEY = registerKey(
                         "elderwoods_dripstone_cluster");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_DRIPSTONE_CLUSTER_KEY = registerKey(
@@ -162,12 +159,7 @@ public class ModConfiguredFeatures {
                 register(context, LEAF_PILE_KEY, ModFeatures.ELDER_LEAF_PILE.get(),
                                 net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.NONE);
 
-                register(context, SCARLET_POND_PLAINS_KEY, ModFeatures.BLOOD_WATER_POND.get(),
-                                new net.ganyusbathwater.oririmod.worldgen.feature.BloodWaterPondConfig(
-                                                UniformInt.of(5, 12), UniformInt.of(2, 4)));
-                register(context, SCARLET_POND_FOREST_KEY, ModFeatures.BLOOD_WATER_POND.get(),
-                                new net.ganyusbathwater.oririmod.worldgen.feature.BloodWaterPondConfig(
-                                                UniformInt.of(3, 6), UniformInt.of(1, 2)));
+
 
                 register(context, ELDERWOODS_DRIPSTONE_CLUSTER_KEY, ModFeatures.DRIPSTONE_CLUSTER.get(),
                                 new ScarletDripstoneClusterConfig(UniformInt.of(5, 10), 3, 3, 12, false));
