@@ -1116,8 +1116,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 if (y < BASE_HEIGHT - 1 && currentBiome.is(SCARLET_SWAMP_KEY)) {
                                     double mudNoise = Math.sin(worldX * 0.1) * Math.cos(worldZ * 0.1) + 0.5 * Math.sin(worldX * 0.03 + 2.0) * Math.cos(worldZ * 0.04 - 1.0);
                                     if (mudNoise > 0.3 || y < BASE_HEIGHT - 2) {
-                                        chunk.setBlockState(mutablePos, Blocks.MUD.defaultBlockState(), false);
-                                        heightmapState = Blocks.MUD.defaultBlockState();
+                                        chunk.setBlockState(mutablePos, Blocks.DIRT.defaultBlockState(), false);
+                                        heightmapState = Blocks.DIRT.defaultBlockState();
                                     } else {
                                         chunk.setBlockState(mutablePos, grassState, false);
                                         heightmapState = grassState;
@@ -1308,11 +1308,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types types, LevelHeightAccessor level, RandomState random) {
+        initSeedFromRandomState(random);
         return getSurfaceHeight(x, z);
     }
 
     @Override
     public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor level, RandomState random) {
+        initSeedFromRandomState(random);
         int surfaceY = getSurfaceHeight(x, z);
         BlockState[] states = new BlockState[WORLD_HEIGHT];
 

@@ -1,0 +1,12 @@
+{
+  "values": [
+    "oririmod:dragon_iron_ore",
+    "oririmod:deepslate_dragon_iron_ore",
+    "oririmod:jade_ore",
+    "oririmod:deepslate_jade_ore",
+    "oririmod:repellent_forcefield_emitter",
+    "oririmod:attracting_forcefield_emitter",
+    "oririmod:protection_forcefield_emitter",
+    "oririmod:modifier_forcefield_emitter"
+  ]
+}

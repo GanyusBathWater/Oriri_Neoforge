@@ -40,7 +40,8 @@ public class ForcefieldEvents {
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getEntity() instanceof net.minecraft.world.entity.player.Player player && !player.isCreative()) {
             Level level = player.level();
-            if (ForcefieldEmitterBlockEntity.isProtectionNearby(level, event.getPos())) {
+            // Pass the placed block's position as the excluded position, so the emitter doesn't block itself
+            if (ForcefieldEmitterBlockEntity.isProtectionNearby(level, event.getPos(), event.getPos())) {
                 event.setCanceled(true);
             }
         }

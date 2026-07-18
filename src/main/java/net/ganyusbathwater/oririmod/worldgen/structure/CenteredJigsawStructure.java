@@ -43,12 +43,16 @@ public class CenteredJigsawStructure extends Structure {
         ChunkPos chunkPos = context.chunkPos();
         int x = chunkPos.getMiddleBlockX();
         int z = chunkPos.getMiddleBlockZ();
-        int radius = 16; // strict 1 chunk radius check
+        int radius = 32; // strict 2 chunk radius check
         
-        Set<Holder<Biome>> biomesWithin = context.biomeSource().getBiomesWithin(x, context.chunkGenerator().getSeaLevel(), z, radius, context.randomState().sampler());
-        for (Holder<Biome> biome : biomesWithin) {
-            if (!this.biomes().contains(biome)) {
-                return Optional.empty(); // Cancel generation if too close to border
+        int step = 8;
+        for (int checkX = x - radius; checkX <= x + radius; checkX += step) {
+            for (int checkZ = z - radius; checkZ <= z + radius; checkZ += step) {
+                int height = context.chunkGenerator().getBaseHeight(checkX, checkZ, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState());
+                Holder<Biome> biome = context.biomeSource().getNoiseBiome(checkX >> 2, height >> 2, checkZ >> 2, context.randomState().sampler());
+                if (!this.biomes().contains(biome)) {
+                    return Optional.empty(); // Cancel generation if too close to border on the surface
+                }
             }
         }
         

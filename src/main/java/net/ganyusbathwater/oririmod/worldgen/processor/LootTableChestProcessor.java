@@ -82,28 +82,36 @@ public class LootTableChestProcessor extends StructureProcessor {
             if (info.state().is(Blocks.CHEST) && info.state().getValue(ChestBlock.TYPE) == net.minecraft.world.level.block.state.properties.ChestType.SINGLE) {
                 Direction facing = info.state().getValue(ChestBlock.FACING);
                 
-                StructureTemplate.StructureBlockInfo adjacentChest = null;
-                Direction adjacentDir = null;
+                boolean foundPartner = false;
+                StructureTemplate.StructureBlockInfo partner = null;
                 
                 for (StructureTemplate.StructureBlockInfo other : globalInfos) {
                     if (other != info && other.state().is(Blocks.CHEST) && other.state().getValue(ChestBlock.FACING) == facing) {
-                        int dx = other.pos().getX() - info.pos().getX();
-                        int dz = other.pos().getZ() - info.pos().getZ();
-                        if (Math.abs(dx) + Math.abs(dz) == 1 && other.pos().getY() == info.pos().getY()) {
-                            adjacentChest = other;
-                            if (dx == 1) adjacentDir = Direction.EAST;
-                            else if (dx == -1) adjacentDir = Direction.WEST;
-                            else if (dz == 1) adjacentDir = Direction.SOUTH;
-                            else if (dz == -1) adjacentDir = Direction.NORTH;
+                        int dx = Math.abs(other.pos().getX() - info.pos().getX());
+                        int dz = Math.abs(other.pos().getZ() - info.pos().getZ());
+                        if (dx + dz == 1 && other.pos().getY() == info.pos().getY()) {
+                            foundPartner = true;
+                            partner = other;
                             break;
                         }
                     }
                 }
                 
-                if (adjacentDir != null) {
-                    Direction leftDir = facing.getClockWise();
-                    net.minecraft.world.level.block.state.properties.ChestType type = 
-                        (adjacentDir == leftDir) ? net.minecraft.world.level.block.state.properties.ChestType.LEFT : net.minecraft.world.level.block.state.properties.ChestType.RIGHT;
+                if (foundPartner && partner != null) {
+                    Direction adjacentDir = null;
+                    if (info.pos().getX() < partner.pos().getX()) adjacentDir = Direction.EAST;
+                    else if (info.pos().getX() > partner.pos().getX()) adjacentDir = Direction.WEST;
+                    else if (info.pos().getZ() < partner.pos().getZ()) adjacentDir = Direction.SOUTH;
+                    else if (info.pos().getZ() > partner.pos().getZ()) adjacentDir = Direction.NORTH;
+                    
+                    net.minecraft.world.level.block.state.properties.ChestType type = net.minecraft.world.level.block.state.properties.ChestType.SINGLE;
+                    if (adjacentDir != null) {
+                        if (adjacentDir == facing.getClockWise()) {
+                            type = net.minecraft.world.level.block.state.properties.ChestType.LEFT;
+                        } else {
+                            type = net.minecraft.world.level.block.state.properties.ChestType.RIGHT;
+                        }
+                    }
                     
                     BlockState newState = info.state().setValue(ChestBlock.TYPE, type);
                     modified.add(new StructureTemplate.StructureBlockInfo(info.pos(), newState, info.nbt()));

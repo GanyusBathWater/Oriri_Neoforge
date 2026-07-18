@@ -105,9 +105,14 @@ public class ForcefieldEmitterBlockEntity extends BlockEntity implements GeoBloc
     }
     
     public static boolean isProtectionNearby(Level level, BlockPos targetPos) {
+        return isProtectionNearby(level, targetPos, null);
+    }
+    
+    public static boolean isProtectionNearby(Level level, BlockPos targetPos, BlockPos excludePos) {
         Set<BlockPos> set = PROTECTION_EMITTERS.get(level);
         if (set == null || set.isEmpty()) return false;
         for (BlockPos pos : set) {
+            if (pos.equals(excludePos)) continue;
             if (pos.distSqr(targetPos) <= 32 * 32) return true;
         }
         return false;

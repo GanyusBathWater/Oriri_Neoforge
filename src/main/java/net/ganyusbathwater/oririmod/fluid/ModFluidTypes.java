@@ -30,13 +30,13 @@ public final class ModFluidTypes {
         public static final DeferredHolder<FluidType, FluidType> BLOOD_WATER_TYPE = FLUID_TYPES.register("blood_water",
                         () -> new FluidType(FluidType.Properties.create()
                                         .lightLevel(0)
-                                        .viscosity(6000) // Lava-like viscosity (slow flow)
-                                        .density(3000) // Lava-like density
+                                        .viscosity(1000) // Lowered to water-like to allow jumping out of 1-block depth
+                                        .density(1000)
                                         .canExtinguish(true)
                                         .supportsBoating(true)
                                         .canDrown(true) // Can drown in it
                                         .canSwim(true) // Can swim in it
-                                        .canPushEntity(false) // No longer pushes the player aggressively
+                                        .motionScale(0.0) // No longer pushes the player aggressively, but doesn't break swimming
                                         .canHydrate(false)
                                         .pathType(null)));
 
