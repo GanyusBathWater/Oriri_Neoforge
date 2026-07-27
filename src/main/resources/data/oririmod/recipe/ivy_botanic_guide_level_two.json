@@ -4,16 +4,16 @@
         "item": "oririmod:damned_soul"
     },
     "left": {
-        "item": "minecraft:bonemeal"
+        "item": "minecraft:bone_meal"
     },
     "center": {
         "item": "oririmod:ivy_botanic_guide"
     },
     "right": {
-        "item": "minecraft:bonemeal"
+        "item": "minecraft:bone_meal"
     },
     "bottom": {
-        "item": "minecraft:vines"
+        "item": "minecraft:vine"
     },
     "template": {
         "item": "oririmod:magic_upgrade_template"

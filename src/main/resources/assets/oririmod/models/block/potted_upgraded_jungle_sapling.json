@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "plant":  "minecraft:block/jungle_sapling"
+                 },
+    "parent":  "minecraft:block/flower_pot_cross"
+}

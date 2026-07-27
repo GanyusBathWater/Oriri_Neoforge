@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "plant":  "oririmod:block/scarlet_sapling"
+                 },
+    "parent":  "minecraft:block/flower_pot_cross"
+}

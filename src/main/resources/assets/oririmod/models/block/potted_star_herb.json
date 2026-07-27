@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "plant":  "oririmod:block/star_herb"
+                 },
+    "parent":  "minecraft:block/flower_pot_cross"
+}

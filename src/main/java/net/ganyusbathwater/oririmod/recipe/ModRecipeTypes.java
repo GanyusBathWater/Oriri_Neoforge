@@ -16,7 +16,7 @@ public class ModRecipeTypes {
                     () -> new RecipeType<EquinoxTableRecipe>() {
                         @Override
                         public String toString() {
-                            return "oririmod:equinox_table";
+                            return "equinox_table";
                         }
                     });
 

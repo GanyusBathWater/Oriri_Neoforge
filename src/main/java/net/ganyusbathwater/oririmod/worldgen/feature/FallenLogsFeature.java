@@ -28,6 +28,11 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
         if (!level.getBlockState(origin.below()).isSolid() || !level.getBlockState(origin).isAir()) {
             return false;
         }
+        
+        net.minecraft.world.level.ChunkPos centerChunk = null;
+        if (level instanceof net.minecraft.server.level.WorldGenRegion wgr) {
+            centerChunk = wgr.getCenter();
+        }
 
         // 1. Determine size (solid 2x2 to 4x4)
         int trunkSize = 2 + random.nextInt(3); // 2, 3, or 4
@@ -43,12 +48,12 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
                 for (int y = 0; y < stumpHeight; y++) {
                     BlockPos pos = origin.offset(x, y, z);
                     if (level.getBlockState(pos).canBeReplaced()) {
-                        level.setBlock(pos, verticalLogState, 2);
+                        safeSetBlock(level, pos, verticalLogState, centerChunk);
                         
                         // Add spikes to the top of the stump to make it look snapped
                         if (y == stumpHeight - 1 && random.nextFloat() < 0.3f) {
                             if (level.getBlockState(pos.above()).canBeReplaced()) {
-                                level.setBlock(pos.above(), verticalLogState, 2);
+                                safeSetBlock(level, pos.above(), verticalLogState, centerChunk);
                             }
                         }
                     }
@@ -70,10 +75,10 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
                 if (random.nextFloat() < 0.6f) {
                     BlockPos rootPos = origin.offset(x, 0, z);
                     if (level.getBlockState(rootPos).canBeReplaced()) {
-                        level.setBlock(rootPos, stemState, 2);
+                        safeSetBlock(level, rootPos, stemState, centerChunk);
                         // Maybe extend one block down to ground
                         if (!level.getBlockState(rootPos.below()).isSolid()) {
-                            level.setBlock(rootPos.below(), stemState, 2);
+                            safeSetBlock(level, rootPos.below(), stemState, centerChunk);
                         }
                         
                         // Maybe extend one block outward
@@ -82,9 +87,9 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
                             int dz = z == min ? -1 : (z == max ? 1 : 0);
                             BlockPos outPos = rootPos.offset(dx, 0, dz);
                             if (level.getBlockState(outPos).canBeReplaced()) {
-                                level.setBlock(outPos, stemState, 2);
+                                safeSetBlock(level, outPos, stemState, centerChunk);
                                 if (!level.getBlockState(outPos.below()).isSolid()) {
-                                    level.setBlock(outPos.below(), stemState, 2);
+                                    safeSetBlock(level, outPos.below(), stemState, centerChunk);
                                 }
                             }
                         }
@@ -129,11 +134,11 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
                     }
                     
                     if (level.getBlockState(pos).canBeReplaced()) {
-                        level.setBlock(pos, horizontalLogState, 2);
+                        safeSetBlock(level, pos, horizontalLogState, centerChunk);
                     }
                     // Drop down blocks if hanging in the air near the start to connect to ground
                     if (y == 0 && !level.getBlockState(pos.below()).isSolid() && random.nextFloat() < 0.5f) {
-                        level.setBlock(pos.below(), horizontalLogState, 2);
+                        safeSetBlock(level, pos.below(), horizontalLogState, centerChunk);
                     }
                 }
             }
@@ -158,7 +163,7 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
                             BlockState leafState = random.nextFloat() < 0.15f ? 
                                 ModBlocks.ELDER_LEAVES_FLOWERING.get().defaultBlockState() : 
                                 ModBlocks.ELDER_LEAVES.get().defaultBlockState();
-                            level.setBlock(pos, leafState, 2);
+                            safeSetBlock(level, pos, leafState, centerChunk);
                         }
                     }
                 }
@@ -166,5 +171,16 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
         }
 
         return true;
+    }
+
+    private void safeSetBlock(WorldGenLevel level, BlockPos pos, BlockState state, net.minecraft.world.level.ChunkPos centerChunk) {
+        if (centerChunk != null) {
+            int chunkX = pos.getX() >> 4;
+            int chunkZ = pos.getZ() >> 4;
+            if (Math.abs(centerChunk.x - chunkX) > 0 || Math.abs(centerChunk.z - chunkZ) > 0) {
+                return; // Suppress log spam by safely discarding out-of-bounds blocks
+            }
+        }
+        level.setBlock(pos, state, 2);
     }
 }

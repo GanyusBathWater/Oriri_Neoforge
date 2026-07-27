@@ -13,7 +13,7 @@
         "item": "minecraft:magma_cream"
     },
     "bottom": {
-        "item": "oririmod:magma_block"
+        "item": "oririmod:aether_magma_block"
     },
     "template": {
         "item": "oririmod:magic_upgrade_template"
