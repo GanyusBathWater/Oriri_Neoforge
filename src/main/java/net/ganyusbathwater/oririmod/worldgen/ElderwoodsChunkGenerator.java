@@ -496,7 +496,12 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
         if (step == GenerationStep.Carving.AIR || step == GenerationStep.Carving.LIQUID) {
             try {
-                net.minecraft.world.level.levelgen.carver.CarvingContext context = null;
+                net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator dummyGen = new net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator(
+                        this.biomeSource,
+                        level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.NOISE_SETTINGS)
+                                .getHolderOrThrow(net.minecraft.world.level.levelgen.NoiseGeneratorSettings.CAVES)
+                );
+                net.minecraft.world.level.levelgen.carver.CarvingContext context = new net.minecraft.world.level.levelgen.carver.CarvingContext(dummyGen, level.registryAccess(), chunk.getHeightAccessorForGeneration(), null, randomState, null);
                 net.minecraft.world.level.chunk.CarvingMask carvingMask = null;
                 if (chunk instanceof net.minecraft.world.level.chunk.ProtoChunk protoChunk) {
                     carvingMask = protoChunk.getOrCreateCarvingMask(step);
@@ -528,7 +533,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                         carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, originPos, carvingMask);
                                     }
                                 } catch (Exception ex) {
-                                    // Vanilla carver failed due to null context. Ignore safely so it doesn't abort the global custom carvers.
+                                    // Ignore
                                 }
                             }
                         }

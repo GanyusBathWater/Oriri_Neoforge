@@ -76,7 +76,7 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> GLOBAL_AETHER_RIVER_KEY = registerKey(
                         "global_aether_river");
 
-        public static final ResourceKey<ConfiguredFeature<?, ?>> ABYSS_RAVINE_KEY = registerKey("abyss_ravine");
+
 
         public static final ResourceKey<ConfiguredFeature<?, ?>> SEA_URCHIN_KEY = registerKey("sea_urchin");
 
@@ -236,7 +236,7 @@ public class ModConfiguredFeatures {
 
                 register(context, GLOBAL_AETHER_RIVER_KEY, ModFeatures.GLOBAL_AETHER_RIVER.get(),
                                 FeatureConfiguration.NONE);
-                register(context, ABYSS_RAVINE_KEY, ModFeatures.ABYSS_RAVINE.get(), new NoneFeatureConfiguration());
+
 
                 register(context, SEA_URCHIN_KEY, ModFeatures.SEA_URCHIN_FEATURE.get(), new NoneFeatureConfiguration());
         }

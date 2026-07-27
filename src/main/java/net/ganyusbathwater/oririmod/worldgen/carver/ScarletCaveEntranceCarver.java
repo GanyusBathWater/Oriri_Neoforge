@@ -73,6 +73,7 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
         int centerZ = pos.getZ();
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos neighborPos = new BlockPos.MutableBlockPos();
         // Removed rimBlockState and rimUnderBlockState as they are no longer used
 
         // Iterate bounding box
@@ -123,6 +124,26 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
                             if (carvingMask != null) {
                                 carvingMask.set(mutablePos.getX() & 15, mutablePos.getY(), mutablePos.getZ() & 15);
                             }
+                            
+                            // Check if adjacent to liquid inside this chunk to schedule block update (post-processing)
+                            for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.values()) {
+                                int nx = mutablePos.getX() + dir.getStepX();
+                                int ny = mutablePos.getY() + dir.getStepY();
+                                int nz = mutablePos.getZ() + dir.getStepZ();
+                                if (nx >= chunk.getPos().getMinBlockX() && nx <= chunk.getPos().getMaxBlockX() &&
+                                    nz >= chunk.getPos().getMinBlockZ() && nz <= chunk.getPos().getMaxBlockZ() &&
+                                    ny >= chunk.getMinBuildHeight() && ny < chunk.getMaxBuildHeight()) {
+                                    
+                                    neighborPos.set(nx, ny, nz);
+                                    net.minecraft.world.level.material.FluidState fState = chunk.getFluidState(neighborPos);
+                                    if (!fState.isEmpty()) {
+                                        chunk.markPosForPostprocessing(neighborPos);
+                                        chunk.markPosForPostprocessing(mutablePos);
+                                        chunk.getFluidTicks().schedule(new net.minecraft.world.ticks.ScheduledTick<>(fState.getType(), new BlockPos(nx, ny, nz), 0, 0));
+                                    }
+                                }
+                            }
+                            
                             hit = true;
                             carvedCount++;
                         }

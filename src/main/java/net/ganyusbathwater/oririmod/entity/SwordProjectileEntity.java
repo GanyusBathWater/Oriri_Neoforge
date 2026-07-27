@@ -37,6 +37,7 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
             .defineId(SwordProjectileEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
     private int deadTimer = 0;
+    public float damageAmount = 10.0F;
 
     public SwordProjectileEntity(EntityType<? extends ThrowableItemProjectile> entityType, Level level) {
         super(entityType, level);
@@ -90,6 +91,13 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
 
     public void setTargetId(UUID id) {
         this.entityData.set(TARGET_UUID, java.util.Optional.ofNullable(id));
+    }
+
+    public void fireInstantly(Vec3 shootVec, float damage) {
+        this.damageAmount = damage;
+        this.setDeltaMovement(shootVec);
+        this.entityData.set(HAS_LOCKED, true);
+        this.tickCount = 40; // Skip hover phase
     }
 
     @Override
@@ -211,7 +219,7 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
     protected void onHitEntity(EntityHitResult result) {
         if (!this.entityData.get(IS_DEAD)) {
             if (!this.level().isClientSide) {
-                result.getEntity().hurt(this.damageSources().magic(), 10.0F); // 10 magic damage
+                result.getEntity().hurt(this.damageSources().magic(), damageAmount);
                 this.discard(); // Despawn instantly upon hitting an entity
             }
         }
@@ -243,6 +251,7 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
         tag.putBoolean("HasLocked", this.entityData.get(HAS_LOCKED));
         tag.putBoolean("IsDead", this.entityData.get(IS_DEAD));
         tag.putFloat("RandomRoll", this.entityData.get(RANDOM_ROLL));
+        tag.putFloat("DamageAmount", this.damageAmount);
     }
 
     @Override
@@ -251,5 +260,8 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
         this.entityData.set(HAS_LOCKED, tag.getBoolean("HasLocked"));
         this.entityData.set(IS_DEAD, tag.getBoolean("IsDead"));
         this.entityData.set(RANDOM_ROLL, tag.getFloat("RandomRoll"));
+        if (tag.contains("DamageAmount")) {
+            this.damageAmount = tag.getFloat("DamageAmount");
+        }
     }
 }

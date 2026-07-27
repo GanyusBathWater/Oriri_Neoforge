@@ -21,7 +21,7 @@ import java.util.UUID;
 public class BossAttackDebugWandItem extends Item {
 
     public enum BossAttackType {
-        SWORD_PROJECTILE, METEOR_SHOWER, LASERBEAM_NORMAL, LASERBEAM_CYLINDER, LASERBEAM_CIRCLE,
+        SWORD_PROJECTILE, SWORD_CIRCLE, METEOR_SHOWER, LASERBEAM_NORMAL, LASERBEAM_CYLINDER, LASERBEAM_CIRCLE,
         LASERBEAM_GROUND, LASERBEAM_STARBURST, INSTA_DEATH, ROOT_ATTACK, GROUND_SLAM,
         WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM, LASERBEAM_GRID, HEAVENLY_EXECUTION;
     }
@@ -94,6 +94,17 @@ public class BossAttackDebugWandItem extends Item {
                     sword.setTargetId(targetId);
                 }
                 serverLevel.addFreshEntity(sword);
+            } else if (current == BossAttackType.SWORD_CIRCLE
+                    && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                net.ganyusbathwater.oririmod.entity.SwordCircleEntity circle = new net.ganyusbathwater.oririmod.entity.SwordCircleEntity(
+                        net.ganyusbathwater.oririmod.entity.ModEntities.SWORD_CIRCLE.get(), level);
+                if (targetId != null) {
+                    circle.setTargetId(targetId);
+                } else {
+                    circle.setTargetId(player.getUUID()); // Default to testing on self if no target
+                }
+                circle.setPos(player.getX(), player.getY() + 3.0, player.getZ());
+                serverLevel.addFreshEntity(circle);
             } else if (current == BossAttackType.METEOR_SHOWER
                     && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 BlockPos meteorTarget = targetPos != null ? targetPos : player.blockPosition();
@@ -309,6 +320,7 @@ public class BossAttackDebugWandItem extends Item {
     public static String prettyName(BossAttackType type) {
         return switch (type) {
             case SWORD_PROJECTILE -> "Sword Projectile";
+            case SWORD_CIRCLE -> "Sword Circle";
             case METEOR_SHOWER -> "Meteor Shower";
             case LASERBEAM_NORMAL -> "Laserbeam Normal";
             case LASERBEAM_CYLINDER -> "Laserbeam Cylinder";

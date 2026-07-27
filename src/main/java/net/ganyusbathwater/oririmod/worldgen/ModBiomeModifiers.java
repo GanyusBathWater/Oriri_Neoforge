@@ -36,7 +36,7 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_ELYSIAN_DECORATION = registerKey("add_elysian_decoration");
 
         public static final ResourceKey<BiomeModifier> ADD_GLOBAL_AETHER_RIVER = registerKey("add_global_aether_river");
-        public static final ResourceKey<BiomeModifier> ADD_ABYSS_RAVINE = registerKey("add_abyss_ravine");
+
 
         // Scarlet Forest & Plains
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_FEATURES = registerKey(
@@ -237,13 +237,6 @@ public class ModBiomeModifiers {
                                                 HolderSet.direct(placedFeatures.getOrThrow(
                                                                 ModPlacedFeatures.GLOBAL_AETHER_RIVER_PLACED_KEY)),
                                                 GenerationStep.Decoration.LOCAL_MODIFICATIONS));
-
-                context.register(ADD_ABYSS_RAVINE,
-                                new BiomeModifiers.AddFeaturesBiomeModifier(
-                                                elysianBiomes,
-                                                HolderSet.direct(placedFeatures
-                                                                .getOrThrow(ModPlacedFeatures.ABYSS_RAVINE_PLACED_KEY)),
-                                                GenerationStep.Decoration.RAW_GENERATION));
 
                 var nonScarletCaveBiomes = HolderSet.direct(
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME,

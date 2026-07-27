@@ -43,6 +43,7 @@ public class ModItemGroups {
                         output.accept(ModItems.GILDED_NETHERRITE_INGOT);
                         output.accept(ModItems.ANCIENT_INGOT);
                         output.accept(ModItems.CRYSTAL_INGOT);
+                        output.accept(ModItems.MAGIC_UPGRADE_TEMPLATE);
                         output.accept(ModFluids.AETHER_BUCKET.get());
                         output.accept(ModFluids.BLOOD_WATER_BUCKET.get());
                         output.accept(ModItems.SOL_QUICKSAND_BUCKET);
@@ -225,6 +226,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.TILTED_BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.REVIVAL_SHRINE);
+                        output.accept(ModItems.DOG_TAG);
 
                         // Forcefield Emitters
                         output.accept(ModBlocks.REPELLENT_FORCEFIELD_EMITTER);
@@ -255,6 +257,22 @@ public class ModItemGroups {
                         output.accept(ModItems.CALCIUM_CURRANT);
                         output.accept(ModItems.MANA_IGNITER);
                         output.accept(ModItems.AETHER_CHARGE);
+
+                        // Potions
+                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1));
+                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1));
+                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.LINGERING_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1));
+                        
+                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2));
+                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2));
+                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.LINGERING_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2));
+
+                        // Enchanted Books
+                        itemDisplayParameters.holders().lookup(net.minecraft.core.registries.Registries.ENCHANTMENT).ifPresent(reg -> {
+                            reg.get(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING).ifPresent(ench -> {
+                                output.accept(net.minecraft.world.item.EnchantedBookItem.createForEnchantment(new net.minecraft.world.item.enchantment.EnchantmentInstance(ench, 5)));
+                            });
+                        });
 
                         // -----------Vestiges-----------
                         acceptAllLevels(output, ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
@@ -301,6 +319,7 @@ public class ModItemGroups {
                         output.accept(ModItems.QILINS_WRATH);
                         output.accept(ModItems.SOLS_EMBRACE);
                         output.accept(ModItems.ARBITER_CROSSBOW);
+                        output.accept(ModItems.ELEMENTAL_CHOIR);
 
                         output.accept(ModItems.TNT_ARROW);
                         output.accept(ModItems.EVENT_HORIZON_ARROW);

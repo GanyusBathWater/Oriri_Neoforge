@@ -40,6 +40,12 @@ public class ModPotions {
         public static final Holder<Potion> ANTI_HEAL_POTION2 = POTIONS.register("anti_heal_potion2",
                         () -> new Potion(new MobEffectInstance(ModEffects.ANTI_HEAL_EFFECT, 1200, 1)));
 
+        public static final Holder<Potion> MANA_REGEN_POTION1 = POTIONS.register("mana_regen_potion1",
+                        () -> new Potion(new MobEffectInstance(ModEffects.MANA_REGENERATION_EFFECT, 1200, 0)));
+
+        public static final Holder<Potion> MANA_REGEN_POTION2 = POTIONS.register("mana_regen_potion2",
+                        () -> new Potion(new MobEffectInstance(ModEffects.MANA_REGENERATION_EFFECT, 1200, 1)));
+
         public static void registerPotions(IEventBus eventBus) {
                 POTIONS.register(eventBus);
                 OririMod.LOGGER.info("Registering Mod Potions for " + OririMod.MOD_ID);

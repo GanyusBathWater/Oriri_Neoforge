@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
@@ -20,7 +21,7 @@ import org.joml.Matrix4f;
 public class MagicWaveRenderer extends EntityRenderer<MagicWaveEntity> {
 
     private static final RenderType WAVE_LAYER =
-            RenderType.entityTranslucent(
+            RenderType.entityTranslucentEmissive(
                     ResourceLocation.parse("oririmod:textures/effect/magic_circles/wave.png"));
 
     // Base dimensions for the V-shape geometries
@@ -97,7 +98,7 @@ public class MagicWaveRenderer extends EntityRenderer<MagicWaveEntity> {
                 fX, fZ, rX, rZ, 
                 HALF_WIDTH * 1.3f, HALF_HEIGHT, HALF_WIDTH * 1.3f, // sweepBack matches width for pure 45deg
                 ghostShift, ghostY, 
-                cR, cG, cB, alpha * 0.40f, packedLight);
+                cR, cG, cB, alpha * 0.40f, LightTexture.FULL_BRIGHT);
 
         // ── Second V-Shape (Core surging layer) ─────────────────────────────
         // Reduced amplitude heavily to stop "shaking" horizontally.
@@ -106,7 +107,7 @@ public class MagicWaveRenderer extends EntityRenderer<MagicWaveEntity> {
                 fX, fZ, rX, rZ, 
                 HALF_WIDTH, HALF_HEIGHT, HALF_WIDTH, 
                 coreShift, coreY,
-                cR, cG, cB, alpha * 0.95f, packedLight);
+                cR, cG, cB, alpha * 0.95f, LightTexture.FULL_BRIGHT);
 
         poseStack.popPose();
     }

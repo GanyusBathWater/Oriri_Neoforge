@@ -111,6 +111,19 @@ public final class ModEntities {
                                                                                         "sword_projectile")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.SwordCircleEntity>> SWORD_CIRCLE = ENTITIES
+                        .register("sword_circle",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.SwordCircleEntity>of(net.ganyusbathwater.oririmod.entity.SwordCircleEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(0.5F, 0.5F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "sword_circle")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<DoomClockEntity>> DOOM_CLOCK = ENTITIES
                         .register("doom_clock",
                                         () -> EntityType.Builder

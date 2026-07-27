@@ -53,6 +53,11 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        int castingLevel = getCastingLevel(stack, level);
+        int actualCooldown = cooldownTicks;
+        if (castingLevel > 0) {
+            actualCooldown = Math.max(1, (int)(cooldownTicks * (1.0f - (castingLevel * 0.15f))));
+        }
 
         switch (action) {
             case GROW -> {
@@ -63,10 +68,10 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
                     if (!level.isClientSide && level instanceof ServerLevel server) {
                         grown = tryBonemeal(server, pos) || tryBonemeal(server, pos.relative(hit.getDirection()));
                         if (grown) {
-                            // nur wenn Mana verfügbar und erfolgreich verbraucht wird
                             if (ModManaUtil.tryConsumeMana(player, manaCost, stack)) {
                                 server.levelEvent(1505, pos, 0);
-                                player.getCooldowns().addCooldown(this, Math.max(5, cooldownTicks));
+                                player.getCooldowns().addCooldown(this, Math.max(5, actualCooldown));
+                                stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
                                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
                             }
                         }
@@ -79,7 +84,8 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
                     if (ModManaUtil.tryConsumeMana(player, manaCost, stack)) {
                         player.addEffect(
                                 new MobEffectInstance(MobEffects.REGENERATION, durationTicks, amplifier, false, true));
-                        player.getCooldowns().addCooldown(this, cooldownTicks);
+                        player.getCooldowns().addCooldown(this, actualCooldown);
+                        stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
                     }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
@@ -89,7 +95,8 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
                     if (ModManaUtil.tryConsumeMana(player, manaCost, stack)) {
                         player.addEffect(
                                 new MobEffectInstance(MobEffects.DIG_SPEED, durationTicks, amplifier, false, true));
-                        player.getCooldowns().addCooldown(this, cooldownTicks);
+                        player.getCooldowns().addCooldown(this, actualCooldown);
+                        stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
                     }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
@@ -111,6 +118,12 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
             }
         }
         return false;
+    }
+
+    private int getCastingLevel(ItemStack stack, Level level) {
+        return stack.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY)
+                .getLevel(level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                        .getHolderOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING));
     }
 
     @Override

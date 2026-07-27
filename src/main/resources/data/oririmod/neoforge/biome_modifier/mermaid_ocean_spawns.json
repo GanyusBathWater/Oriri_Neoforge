@@ -4,7 +4,7 @@
   "spawners": [
     {
       "type": "oririmod:mermaid",
-      "weight": 10,
+      "weight": 7,
       "minCount": 1,
       "maxCount": 1
     }

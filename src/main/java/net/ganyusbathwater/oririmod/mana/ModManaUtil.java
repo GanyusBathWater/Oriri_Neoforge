@@ -236,13 +236,20 @@ public class ModManaUtil {
             }
         }
 
+        float enchantMultiplier = 1.0f;
         if (enchantCount > 0) {
             // Speed up regen by 10% per armor piece with the enchantment:
-            float speedMultiplier = Math.max(0.1f, 1.0f - (0.10f * enchantCount));
-            return Math.max(1, Math.round(baseTicks * speedMultiplier));
+            enchantMultiplier = Math.max(0.1f, 1.0f - (0.10f * enchantCount));
         }
 
-        return baseTicks;
+        float effectMultiplier = 1.0f;
+        var regenEffectInstance = player.getEffect(net.ganyusbathwater.oririmod.effect.ModEffects.MANA_REGENERATION_EFFECT);
+        if (regenEffectInstance != null) {
+            int amplifier = regenEffectInstance.getAmplifier();
+            effectMultiplier = 1.0f / (amplifier + 2);
+        }
+
+        return Math.max(1, Math.round(baseTicks * enchantMultiplier * effectMultiplier));
     }
 
     public static void resetRegenIntervalSeconds(Player player) {

@@ -355,77 +355,77 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.arrow.SonicArrowItem(new Item.Properties()));
 
         public static final DeferredItem<MagicStaffItem> STAFF_OF_WISE = ITEMS.register("staff_of_wise",
-                        () -> new MagicStaffItem(new Item.Properties().stacksTo(1), MagicStaffItem.StaffAction.REGEN,
+                        () -> new MagicStaffItem(new Item.Properties().stacksTo(1).durability(128), MagicStaffItem.StaffAction.REGEN,
                                         400, 0, 500,
                                         20, ModRarity.MYTHIC));
         public static final DeferredItem<MagicStaffItem> STAFF_OF_EARTH = ITEMS.register("staff_of_earth",
-                        () -> new MagicStaffItem(new Item.Properties().stacksTo(1), MagicStaffItem.StaffAction.HASTE,
+                        () -> new MagicStaffItem(new Item.Properties().stacksTo(1).durability(128), MagicStaffItem.StaffAction.HASTE,
                                         400, 1, 600,
                                         12, ModRarity.RARE));
         public static final DeferredItem<MagicStaffItem> STAFF_OF_FOREST = ITEMS.register("staff_of_forest",
-                        () -> new MagicStaffItem(new Item.Properties().stacksTo(1), MagicStaffItem.StaffAction.GROW, 0,
+                        () -> new MagicStaffItem(new Item.Properties().stacksTo(1).durability(128), MagicStaffItem.StaffAction.GROW, 0,
                                         0, 20, 6,
                                         ModRarity.UNCOMMON));
 
         public static final DeferredItem<MagicBoltItem> ONE_THOUSAND_SCREAMS = ITEMS.register("one_thousand_screams",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.SONIC, 2, 12,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(1000), MagicBoltAbility.SONIC, 2, 12,
                                         ModRarity.MYTHIC));
         public static final DeferredItem<MagicBoltItem> STAFF_OF_HELL = ITEMS.register("staff_of_hell",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.BLAZE, 2, 8,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(666), MagicBoltAbility.BLAZE, 2, 8,
                                         ModRarity.RARE));
         public static final DeferredItem<MagicBoltItem> STAFF_OF_COSMOS = ITEMS.register("staff_of_cosmos",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.METEOR, 2, 40,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(128), MagicBoltAbility.METEOR, 2, 40,
                                         ModRarity.LEGENDARY));
         public static final DeferredItem<MagicBoltItem> STAFF_OF_VOID = ITEMS.register("staff_of_void",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.ENDER, 2, 18,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(126), MagicBoltAbility.ENDER, 2, 18,
                                         ModRarity.MYTHIC));
         public static final DeferredItem<MagicBoltItem> STAFF_OF_ETERNAL_ICE = ITEMS.register("staff_of_eternal_ice",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.ETERNAL_ICE, 0, 80,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(128), MagicBoltAbility.ETERNAL_ICE, 0, 80,
                                         ModRarity.LEGENDARY));
         public static final DeferredItem<MagicBoltItem> DODOCO = ITEMS.register("dodoco",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.EXPLOSIVE, 2, 20,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(128), MagicBoltAbility.EXPLOSIVE, 2, 20,
                                         ModRarity.RARE));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_AMATEUR = ITEMS.register("book_of_amateur",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.AMATEUR_FIREBALL, 2,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(64), MagicBoltAbility.AMATEUR_FIREBALL, 2,
                                         4,
                                         ModRarity.COMMON));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_APPRENTICE = ITEMS.register("book_of_apprentice",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.APPRENTICE_FIREBALL,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(128), MagicBoltAbility.APPRENTICE_FIREBALL,
                                         2, 6,
                                         ModRarity.UNCOMMON));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_JOURNEYMAN = ITEMS.register("book_of_journeyman",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.JOURNEYMAN_FIREBALL,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(196), MagicBoltAbility.JOURNEYMAN_FIREBALL,
                                         2, 10,
                                         ModRarity.RARE));
         public static final DeferredItem<MagicBoltItem> BOOK_OF_WISE = ITEMS.register("book_of_wise",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1), MagicBoltAbility.WISE_FIREBALL, 2,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(256), MagicBoltAbility.WISE_FIREBALL, 2,
                                         16,
                                         ModRarity.MYTHIC));
         public static final DeferredItem<OmniMagicItem> STAFF_OF_ALMIGHTY = ITEMS.register("staff_of_almighty",
-                        () -> new OmniMagicItem(new Item.Properties().stacksTo(1), ModRarity.GODLY, 2, 500, 1));
+                        () -> new OmniMagicItem(new Item.Properties().stacksTo(1).durability(2048), ModRarity.GODLY, 2, 500, 1));
 
         public static final DeferredItem<SummonerWeaponItem> ZOMBIE_ENCYCLOPEDIA = ITEMS.register("zombie_encyclopedia",
-                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
                                         EntityType.ZOMBIE, ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> SKELETON_ENCYCLOPEDIA = ITEMS.register(
                         "skeleton_encyclopedia",
-                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
                                         EntityType.SKELETON, ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> IRON_GOLEM_MANUAL = ITEMS.register("iron_golem_manual",
-                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
                                         EntityType.IRON_GOLEM, ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> BLAZING_PYROMANIAC_GUIDE = ITEMS.register(
                         "blazing_pyromaniac_guide",
-                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
                                         EntityType.BLAZE, ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> MAGMA_COOKING_BOOK = ITEMS.register("magma_cooking_book",
-                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
                                         EntityType.MAGMA_CUBE, ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> SLIMY_COOKING_BOOK = ITEMS.register("slimy_cooking_book",
-                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1),
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
                                         EntityType.SLIME, ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<IvyBotanicGuideItem> IVY_BOTANIC_GUIDE = ITEMS.register("ivy_botanic_guide",
-                        () -> new IvyBotanicGuideItem(new Item.Properties().stacksTo(1)));
+                        () -> new IvyBotanicGuideItem(new Item.Properties().stacksTo(1).durability(128)));
 
         // ------------------------------------------Spawn Eggs---------------------------------------------------
 

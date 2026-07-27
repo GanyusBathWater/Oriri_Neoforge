@@ -68,7 +68,43 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ABYSS_CROWN_GATE.get());
 
                 tag(BlockTags.WALLS)
-                                .add(ModBlocks.JADE_WALL.get());
+                                .add(ModBlocks.JADE_WALL.get())
+                                .add(ModBlocks.SCARLET_STONE_BRICK_WALL.get())
+                                .add(ModBlocks.MOSSY_SCARLET_STONE_BRICK_WALL.get())
+                                .add(ModBlocks.COBBLED_SCARLET_DEEPSLATE_WALL.get())
+                                .add(ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL.get())
+                                .add(ModBlocks.POLISHED_SCARLET_DEEPSLATE_WALL.get())
+                                .add(ModBlocks.SCARLET_COBBLESTONE_WALL.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_BRICK_WALL.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_TILE_WALL.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_WALL.get());
+
+                tag(BlockTags.STAIRS)
+                                .add(ModBlocks.SCARLET_STONE_STAIRS.get())
+                                .add(ModBlocks.SCARLET_STONE_BRICK_STAIRS.get())
+                                .add(ModBlocks.MOSSY_SCARLET_STONE_BRICK_STAIRS.get())
+                                .add(ModBlocks.COBBLED_SCARLET_DEEPSLATE_STAIRS.get())
+                                .add(ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS.get())
+                                .add(ModBlocks.POLISHED_SCARLET_DEEPSLATE_STAIRS.get())
+                                .add(ModBlocks.SCARLET_COBBLESTONE_STAIRS.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_STAIRS.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS.get())
+                                .add(ModBlocks.JADE_STAIRS.get());
+
+                tag(BlockTags.SLABS)
+                                .add(ModBlocks.SCARLET_STONE_SLAB.get())
+                                .add(ModBlocks.SCARLET_STONE_BRICK_SLAB.get())
+                                .add(ModBlocks.MOSSY_SCARLET_STONE_BRICK_SLAB.get())
+                                .add(ModBlocks.COBBLED_SCARLET_DEEPSLATE_SLAB.get())
+                                .add(ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get())
+                                .add(ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB.get())
+                                .add(ModBlocks.SCARLET_COBBLESTONE_SLAB.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_BRICK_SLAB.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_SLAB.get())
+                                .add(ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get())
+                                .add(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get())
+                                .add(ModBlocks.JADE_SLAB.get());
 
                 tag(BlockTags.PLANKS)
                                 .add(ModBlocks.ELDER_PLANKS.get())
@@ -365,5 +401,11 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 tag(BlockTags.DRIPSTONE_REPLACEABLE)
                                 .add(ModBlocks.SCARLET_STONE.get())
                                 .add(ModBlocks.SCARLET_DEEPSLATE.get());
+                                
+                tag(BlockTags.REPLACEABLE)
+                                .add(ModBlocks.SCARLET_VINE.get());
+                                
+                tag(BlockTags.FALL_DAMAGE_RESETTING)
+                                .add(ModBlocks.SCARLET_VINE.get());
         }
 }

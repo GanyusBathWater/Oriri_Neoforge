@@ -169,14 +169,27 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         }
 
         int usedTicks = getUseDuration(stack, living) - timeLeft;
+        int castingLevel = getCastingLevel(stack, level);
         int minCharge = 10;
+        if (castingLevel > 0) {
+            minCharge = Math.max(1, (int)(minCharge * (1.0f - (castingLevel * 0.15f))));
+        }
+        
         if (usedTicks < minCharge)
             return;
+
+        int actualCooldown = cooldown;
+        if (castingLevel > 0) {
+            actualCooldown = Math.max(1, (int)(cooldown * (1.0f - (castingLevel * 0.15f))));
+        }
 
         if (living instanceof Player p) {
             // Spieler muss Mana besitzen
             if (!ModManaUtil.tryConsumeMana(p, manaCost, stack))
                 return;
+            
+            InteractionHand hand = p.getItemInHand(InteractionHand.MAIN_HAND) == stack ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+            stack.hurtAndBreak(1, p, LivingEntity.getSlotForHand(hand));
         }
 
         if (this.ability == MagicBoltAbility.ETERNAL_ICE) {
@@ -193,7 +206,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
                     0x8888DDFF);
 
             if (living instanceof Player p && cooldown > 0) {
-                p.getCooldowns().addCooldown(this, cooldown);
+                p.getCooldowns().addCooldown(this, actualCooldown);
             }
             return;
         }
@@ -225,7 +238,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             level.addFreshEntity(meteor);
 
             if (living instanceof Player p) {
-                p.getCooldowns().addCooldown(this, cooldown);
+                p.getCooldowns().addCooldown(this, actualCooldown);
             }
             return;
         }
@@ -250,7 +263,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             }
 
             if (living instanceof Player p) {
-                p.getCooldowns().addCooldown(this, cooldown);
+                p.getCooldowns().addCooldown(this, actualCooldown);
             }
             return;
         }
@@ -272,13 +285,19 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         level.addFreshEntity(bolt);
 
         if (living instanceof Player p) {
-            p.getCooldowns().addCooldown(this, cooldown);
+            p.getCooldowns().addCooldown(this, actualCooldown);
         }
     }
 
     @Override
     public ModRarity getModRarity() {
         return rarity;
+    }
+
+    private int getCastingLevel(ItemStack stack, Level level) {
+        return stack.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY)
+                .getLevel(level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                        .getHolderOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING));
     }
 
     private static BlockHitResult raycastToGround(Level level, LivingEntity living, double range) {

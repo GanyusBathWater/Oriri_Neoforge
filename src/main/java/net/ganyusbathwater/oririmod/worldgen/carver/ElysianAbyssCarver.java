@@ -104,19 +104,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         double noiseThreshold = 0.20;
         
         if (caveNoise > noiseThreshold) {
-            float ravineChance = 1.0f / 40.0f; // Increased from 1/70 to compensate for aborted ravines
-            
-            // Higher intensity -> more ravines
-            if (caveNoise > 0.25) {
-                ravineChance = 1.0f / 15.0f; // Increased from 1/30
-            } else if (caveNoise < 0.12) {
-                ravineChance = 1.0f / 120.0f; 
-            }
-            
-            // Spawn Ravine canyon - DISABLED per request
-            // if (originRandom.nextFloat() < ravineChance) {
-            //     hit |= carveRavine(config, chunk, ox, oz, originRandom);
-            // }
+
             
             // Spawn standard winding cave systems (Worms & Rooms)
             hit |= carveWorms(config, chunk, ox, oz, originRandom);
@@ -231,95 +219,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         return hit;
     }
 
-    private boolean carveRavine(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
-        boolean hit = false;
-        
-        double x = (originX << 4) + 8 + random.nextInt(16);
-        double z = (originZ << 4) + 8 + random.nextInt(16);
-        
-        float yaw = random.nextFloat() * (float) Math.PI * 2.0f;
-        float width = 2.0f + random.nextFloat() * 5.0f; // 2 to 7 blocks wide (radius)
-        int length = 35 + random.nextInt(40);           // 35 to 75 blocks long
-        
-        double topY = chunk.getMaxBuildHeight();
-        double bottomY = -60; 
-        
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        
-        for (int step = 0; step < length; step++) {
-            x += Math.cos(yaw) * 1.5;
-            z += Math.sin(yaw) * 1.5;
-            yaw += (random.nextFloat() - 0.5f) * 0.25f; 
-            
-            width += (random.nextFloat() - 0.5f) * 1.2f; 
-            width = Mth.clamp(width, 3.0f, 15.0f);
-            
-            double stepProgress = (double) step / length;
-            double endTaper = 1.0;
-            if (stepProgress < 0.1) endTaper = stepProgress / 0.1;
-            if (stepProgress > 0.9) endTaper = (1.0 - stepProgress) / 0.1;
-            double currentWidth = width * endTaper;
-            
-            if (currentWidth < 0.5) continue;
-            
-            // Max noise added to radius is roughly 4.5. 
-            // We use 5.0 as an absolute safe margin for the bounding box.
-            double maxPossibleRadius = currentWidth + 5.0;
-            
-            int minX = Mth.floor(x - maxPossibleRadius);
-            int maxX = Mth.floor(x + maxPossibleRadius);
-            int minZ = Mth.floor(z - maxPossibleRadius);
-            int maxZ = Mth.floor(z + maxPossibleRadius);
-            
-            int chunkMinX = chunk.getPos().getMinBlockX();
-            int chunkMaxX = chunk.getPos().getMaxBlockX();
-            int chunkMinZ = chunk.getPos().getMinBlockZ();
-            int chunkMaxZ = chunk.getPos().getMaxBlockZ();
-            
-            // Mathematically safe bounding box check prevents chunk clipping
-            if (maxX >= chunkMinX && minX <= chunkMaxX && maxZ >= chunkMinZ && minZ <= chunkMaxZ) {
-                for (int bx = Math.max(minX, chunkMinX); bx <= Math.min(maxX, chunkMaxX); bx++) {
-                    for (int bz = Math.max(minZ, chunkMinZ); bz <= Math.min(maxZ, chunkMaxZ); bz++) {
-                        double dx = x - bx;
-                        double dz = z - bz;
-                        
-                        double xzNoise = Math.sin(bx * 0.1) * Math.cos(bz * 0.1) * 2.0;
-                        xzNoise += Math.sin(bx * 0.3 + bz * 0.2) * 0.5;
-                        
-                        for (int by = (int) topY; by >= (int) bottomY; by--) {
-                            double yNoise = Math.sin(by * 0.04) * 2.0;
-                            double localRadius = currentWidth + xzNoise + yNoise;
-                            if (localRadius < 0.0) localRadius = 0.0;
-                            
-                            if (dx * dx + dz * dz < localRadius * localRadius) {
-                                double bottomTaperProgress = (by - bottomY) / 25.0;
-                                if (bottomTaperProgress < 1.0) {
-                                    // Use a square root curve for a U-shaped floor, with a minimum width
-                                    // to act as a middle ground between flat and perfectly sharp.
-                                    double curve = Math.sqrt(bottomTaperProgress);
-                                    double taperedWidth = currentWidth * (0.4 + 0.6 * curve);
-                                    if (dx * dx + dz * dz > taperedWidth * taperedWidth) {
-                                        continue;
-                                    }
-                                }
-                                
-                                pos.set(bx, by, bz);
-                                BlockState state = chunk.getBlockState(pos);
-                                if (this.canReplaceBlock(config, state)) {
-                                    if (by < -105) {
-                                        continue; // Protect aether rivers
-                                    }
-                                    chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
-                                    hit = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return hit;
-    }
+
 
     private boolean carveCheeseChambers(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
         boolean hit = false;

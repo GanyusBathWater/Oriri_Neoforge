@@ -197,7 +197,14 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
         }
 
         int usedTicks = getUseDuration(stack, living) - timeLeft;
-        if (usedTicks < chargeDurationTicks) {
+        int castingLevel = living.level() != null ? getCastingLevel(stack, living.level()) : 0;
+        
+        int actualCharge = chargeDurationTicks;
+        if (castingLevel > 0) {
+            actualCharge = Math.max(1, (int)(chargeDurationTicks * (1.0f - (castingLevel * 0.15f))));
+        }
+
+        if (usedTicks < actualCharge) {
             return; // Not charged enough
         }
 
@@ -257,7 +264,20 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
 
         serverLevel.addFreshEntity(summoned);
 
-        player.getCooldowns().addCooldown(this, cooldownTicks);
+        int actualCooldown = cooldownTicks;
+        if (castingLevel > 0) {
+            actualCooldown = Math.max(1, (int)(cooldownTicks * (1.0f - (castingLevel * 0.15f))));
+        }
+        player.getCooldowns().addCooldown(this, actualCooldown);
+        
+        InteractionHand hand = player.getItemInHand(InteractionHand.MAIN_HAND) == stack ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+        stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
+    }
+
+    private int getCastingLevel(ItemStack stack, Level level) {
+        return stack.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY)
+                .getLevel(level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                        .getHolderOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING));
     }
 
     private void upgradeSummon(Mob summoned, int level, Player player) {

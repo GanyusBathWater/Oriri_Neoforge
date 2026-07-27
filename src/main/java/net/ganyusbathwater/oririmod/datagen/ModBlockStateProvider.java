@@ -460,10 +460,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
                 getMultipartBuilder(ModBlocks.SCARLET_VINE.get())
                                 .part().modelFile(model).addModel().condition(BlockStateProperties.NORTH, true).end()
-                                .part().modelFile(model).rotationY(90).addModel().condition(BlockStateProperties.EAST, true).end()
-                                .part().modelFile(model).rotationY(180).addModel().condition(BlockStateProperties.SOUTH, true).end()
-                                .part().modelFile(model).rotationY(270).addModel().condition(BlockStateProperties.WEST, true).end()
-                                .part().modelFile(model).rotationX(270).addModel().condition(BlockStateProperties.UP, true).end();
+                                .part().modelFile(model).rotationY(90).uvLock(true).addModel().condition(BlockStateProperties.EAST, true).end()
+                                .part().modelFile(model).rotationY(180).uvLock(true).addModel().condition(BlockStateProperties.SOUTH, true).end()
+                                .part().modelFile(model).rotationY(270).uvLock(true).addModel().condition(BlockStateProperties.WEST, true).end()
+                                .part().modelFile(model).rotationX(270).uvLock(true).addModel().condition(BlockStateProperties.UP, true).end();
                 
                 simpleBlockItem(ModBlocks.SCARLET_VINE.get(), model);
         }

@@ -271,6 +271,9 @@ public class LaserBeamEntity extends Entity {
         super.tick();
 
         if (this.level().isClientSide) {
+            int currentAge = this.entityData.get(AGE_TICKS);
+            this.entityData.set(AGE_TICKS, currentAge + 1);
+
             int charge = this.entityData.get(CHARGE_TICKS);
             if (this.tickCount == 1 && charge > 0 && !this.isSilent()) {
                 // Play shrieker wind up sound locally
@@ -317,12 +320,14 @@ public class LaserBeamEntity extends Entity {
                     net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addCircleIndicator(id, groundPos, width * 2f, dur, color);
                 } else if (type == 4) { // EXPANDING CIRCLE
                     float maxRadius = 4.0f;
-                    float radius = maxRadius * ((float) this.getAgeTicks() / charge);
+                    float progress = Math.min(1.0f, ((float) this.getAgeTicks() / charge) * 1.5f);
+                    float radius = maxRadius * progress;
                     BlockPos center = BlockPos.containing(this.getBeamStart());
                     net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addCircleIndicator(id, center, radius, charge, color);
                 } else if (type == 5) { // EXPANDING CONE
                     float maxRadius = 4.0f;
-                    float radius = maxRadius * ((float) this.getAgeTicks() / charge);
+                    float progress = Math.min(1.0f, ((float) this.getAgeTicks() / charge) * 1.5f);
+                    float radius = maxRadius * progress;
                     BlockPos center = BlockPos.containing(this.getBeamStart());
                     float facingYaw = this.entityData.get(ORBIT_P1);
                     float startAngle = -facingYaw + (float) Math.PI / 2f - (float) Math.toRadians(45); // Adjust for MC rotation
@@ -330,7 +335,8 @@ public class LaserBeamEntity extends Entity {
                     net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addArcIndicator(id, center, radius, startAngle, sweepAngle, charge, color);
                 } else if (type == 6) { // EXPANDING PLAIN
                     float maxLength = 4.0f;
-                    float length = maxLength * ((float) this.getAgeTicks() / charge);
+                    float progress = Math.min(1.0f, ((float) this.getAgeTicks() / charge) * 1.5f);
+                    float length = maxLength * progress;
                     Vec3 start = this.getBeamStart();
                     float facingYaw = this.entityData.get(ORBIT_P1);
                     float dx = (float) Math.sin(facingYaw);
@@ -357,6 +363,10 @@ public class LaserBeamEntity extends Entity {
                         float speedRad = this.entityData.get(ORBIT_P2);
                         float sweepAngle = speedRad * actualLookahead;
                         
+                        if (this.getAgeTicks() < charge) {
+                            sweepAngle *= ((float) this.getAgeTicks() / charge);
+                        }
+                        
                         Vec3 startVec = this.getBeamStart();
                         float currentAngle = (float) Math.atan2(startVec.z - center.getZ(), startVec.x - center.getX());
                         
@@ -367,6 +377,50 @@ public class LaserBeamEntity extends Entity {
                             net.ganyusbathwater.oririmod.client.render.AoEIndicatorClientState.addDonutArcIndicator(
                                 id, center, 0f, radius + width, currentAngle, sweepAngle, 5, color);
                         }
+                    }
+                }
+            }
+            
+            // Particle Emission
+            if (this.getAgeTicks() > charge && this.getAgeTicks() < charge + this.getDurationTicks()) {
+                Vec3 start = this.getBeamStart();
+                Vec3 end = this.getBeamEnd();
+                Vec3 dir = end.subtract(start);
+                double length = dir.length();
+                
+                if (length > 0) {
+                    dir = dir.normalize();
+                    float r = ((color >> 16) & 0xFF) / 255.0f;
+                    float g = ((color >> 8) & 0xFF) / 255.0f;
+                    float b = (color & 0xFF) / 255.0f;
+
+                    // 1-2 particles per tick along the beam
+                    for (int i = 0; i < 2; i++) {
+                        if (this.random.nextFloat() > 0.5f) continue;
+                        
+                        double t = this.random.nextDouble() * length;
+                        Vec3 pPos = start.add(dir.scale(t));
+                        
+                        // Outward velocity
+                        Vec3 randomVec = new Vec3(this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5);
+                        Vec3 outward = randomVec.subtract(dir.scale(randomVec.dot(dir))).normalize().scale(0.15 + this.random.nextDouble() * 0.15);
+                        
+                        this.level().addParticle(
+                                new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(r, g, b), 0.8f + this.random.nextFloat() * 0.5f),
+                                pPos.x, pPos.y, pPos.z,
+                                outward.x, outward.y, outward.z
+                        );
+                    }
+                    
+                    // Lava impact particles
+                    if (this.random.nextFloat() < 0.4f) {
+                        this.level().addParticle(
+                                net.minecraft.core.particles.ParticleTypes.LAVA,
+                                end.x, end.y, end.z,
+                                (this.random.nextDouble() - 0.5) * 0.2, 
+                                this.random.nextDouble() * 0.2, 
+                                (this.random.nextDouble() - 0.5) * 0.2
+                        );
                     }
                 }
             }

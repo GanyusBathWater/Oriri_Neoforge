@@ -29,6 +29,8 @@ public class ModEntityClient {
                 event.registerEntityRenderer(ModEntities.ICICLE.get(), IcicleRenderer::new);
                 event.registerEntityRenderer(ModEntities.SWORD_PROJECTILE.get(),
                                 net.ganyusbathwater.oririmod.client.render.SwordProjectileRenderer::new);
+                event.registerEntityRenderer(ModEntities.SWORD_CIRCLE.get(),
+                                net.ganyusbathwater.oririmod.client.render.SwordCircleRenderer::new);
                 event.registerEntityRenderer(ModEntities.ROOT_VISUAL.get(),
                                 net.ganyusbathwater.oririmod.client.render.RootVisualRenderer::new);
                 event.registerEntityRenderer(ModEntities.DOOM_CLOCK.get(),

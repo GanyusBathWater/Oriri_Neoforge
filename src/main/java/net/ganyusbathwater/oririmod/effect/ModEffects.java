@@ -36,6 +36,9 @@ public class ModEffects {
         public static final Holder<MobEffect> COLD_AURA_EFFECT = MOB_EFFECTS.register("cold_aura",
                         () -> new ColdAuraEffect(MobEffectCategory.HARMFUL, 0x00FFFF));
 
+        public static final Holder<MobEffect> MANA_REGENERATION_EFFECT = MOB_EFFECTS.register("mana_regeneration",
+                        () -> new ManaRegenerationEffect(MobEffectCategory.BENEFICIAL, 0x00A5FF));
+
         public static final Holder<MobEffect> FORCEFIELD_PENALTY_HEALTH = MOB_EFFECTS.register("forcefield_penalty_health",
                         () -> new ForcefieldPenaltyEffect(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, "forcefield_penalty_health", -0.05, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 

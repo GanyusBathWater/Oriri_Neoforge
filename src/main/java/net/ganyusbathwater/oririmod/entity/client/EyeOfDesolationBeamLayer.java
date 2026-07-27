@@ -106,7 +106,7 @@ public class EyeOfDesolationBeamLayer extends GeoRenderLayer<EyeOfDesolationEnti
         Vec3 up = dir.cross(right).normalize();
 
         Matrix4f posM = poseStack.last().pose();
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.entityTranslucentEmissive(BEAM_TEXTURE));
+        VertexConsumer vc = bufferSource.getBuffer(net.ganyusbathwater.oririmod.client.render.ModRenderTypes.getAdditiveBeam(BEAM_TEXTURE));
         float uvOffset = -(tickCount + partialTick) * 0.04f;
 
         // 3 planes, 60 degrees apart for volumetric look

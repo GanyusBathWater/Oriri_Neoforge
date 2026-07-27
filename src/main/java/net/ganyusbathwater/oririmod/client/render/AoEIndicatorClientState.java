@@ -154,6 +154,8 @@ public class AoEIndicatorClientState {
             for (Indicator existing : ACTIVE_INDICATORS) {
                 if (id.equals(existing.id)) {
                     startTickToUse = existing.startTick; // Preserve original start time
+                    // Increase duration so it doesn't expire if we keep feeding it
+                    durationTicks = Math.max(durationTicks, (int)(currentTick - startTickToUse) + durationTicks);
                     break;
                 }
             }

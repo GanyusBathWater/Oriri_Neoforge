@@ -31,6 +31,8 @@ public class ModEnchantments {
                         ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "mana_capacity"));
         public static final ResourceKey<Enchantment> MANA_SAVINGS = ResourceKey.create(Registries.ENCHANTMENT,
                         ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "mana_savings"));
+        public static final ResourceKey<Enchantment> CASTING = ResourceKey.create(Registries.ENCHANTMENT,
+                        ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "casting"));
 
         public static final ResourceKey<Enchantment> ELEMENT_FIRE = ResourceKey.create(Registries.ENCHANTMENT,
                         ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "element_fire"));
@@ -146,6 +148,12 @@ public class ModEnchantments {
                                 items.getOrThrow(net.ganyusbathwater.oririmod.util.ModTags.Items.MANA_WEAPONS),
                                 1, 5,
                                 Enchantment.dynamicCost(10, 10), Enchantment.dynamicCost(60, 10), 5,
+                                EquipmentSlotGroup.MAINHAND, EquipmentSlotGroup.OFFHAND)));
+
+                registerEnchantments(context, CASTING, Enchantment.enchantment(Enchantment.definition(
+                                items.getOrThrow(net.ganyusbathwater.oririmod.util.ModTags.Items.MANA_WEAPONS),
+                                1, 5,
+                                Enchantment.dynamicCost(10, 10), Enchantment.dynamicCost(60, 10), 2,
                                 EquipmentSlotGroup.MAINHAND, EquipmentSlotGroup.OFFHAND)));
 
                 // --- ELEMENT ENCHANTMENTS ---

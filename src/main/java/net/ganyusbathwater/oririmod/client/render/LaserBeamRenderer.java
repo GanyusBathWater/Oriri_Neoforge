@@ -39,8 +39,8 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
      * RenderType.debugFilledBox() is opaque.  We use entityTranslucentCull() with
      * a 1×1 white texture (same ResourceLocation trick as EndRodRenderer).
      */
-    private static final RenderType BEAM_LAYER = RenderType.entityTranslucent(
-            ResourceLocation.withDefaultNamespace("textures/misc/white.png"));
+    private static final ResourceLocation BEAM_NOISE_TEXTURE = ResourceLocation.parse("oririmod:textures/effect/beam_noise.png");
+    private static final RenderType BEAM_LAYER = ModRenderTypes.getAdditiveBeam(BEAM_NOISE_TEXTURE);
 
     private static final RenderType CIRCLE_LAYER = RenderType.entityTranslucent(
             ResourceLocation.parse("oririmod:textures/effect/magic_circles/beam_circle.png"));
@@ -58,7 +58,7 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
     @Override
     public ResourceLocation getTextureLocation(LaserBeamEntity entity) {
         // Required override; the actual texture is set per-layer below.
-        return ResourceLocation.withDefaultNamespace("textures/misc/white.png");
+        return BEAM_NOISE_TEXTURE;
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -292,30 +292,26 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
             PoseStack.Pose   pose   = poseStack.last();
             Matrix4f         posM   = pose.pose();
             VertexConsumer   vc     = buffer.getBuffer(BEAM_LAYER);
+            float uvOffset = -(totalAge) * 0.35f; // Massively increased speed for a lightspeed effect
+            float uvLen = dirLen * 0.5f; // Scale UV so it doesn't stretch over long distances
 
-            // Layer 1 — Outer glow (3× width, 12% alpha)
+            // Layer 1 — Outer glow (2.5× width, 40% alpha, slow scroll)
             drawQuadLayer(vc, posM, pose,
                     sx, sy, sz, ex, ey, ez,
-                    rX, rY, rZ, halfW * 3.0f,
-                    coreR, coreG, coreB, 0.12f * alphaScale);
+                    rX, rY, rZ, halfW * 2.5f,
+                    coreR, coreG, coreB, 0.40f * alphaScale, uvOffset * 0.5f, uvLen);
 
-            // Layer 2 — Mid glow (2× width, 30% alpha)
-            drawQuadLayer(vc, posM, pose,
-                    sx, sy, sz, ex, ey, ez,
-                    rX, rY, rZ, halfW * 2.0f,
-                    coreR, coreG, coreB, 0.30f * alphaScale);
-
-            // Layer 3 — Core beam (1× width, full alpha)
+            // Layer 2 — Core beam (1× width, full alpha, normal scroll)
             drawQuadLayer(vc, posM, pose,
                     sx, sy, sz, ex, ey, ez,
                     rX, rY, rZ, halfW,
-                    coreR, coreG, coreB, 1.0f * alphaScale);
+                    coreR, coreG, coreB, 1.0f * alphaScale, uvOffset, uvLen);
 
-            // Layer 4 — Hot core (white, flickers, very thin)
+            // Layer 3 — Hot core (white, flickers, fast scroll)
             drawQuadLayer(vc, posM, pose,
                     sx, sy, sz, ex, ey, ez,
-                    rX, rY, rZ, halfW * 0.25f * flicker,
-                    1.0f, 1.0f, 1.0f, 1.0f * alphaScale);
+                    rX, rY, rZ, halfW * 0.4f * flicker,
+                    1.0f, 1.0f, 1.0f, 1.0f * alphaScale, uvOffset * 1.5f, uvLen);
 
             poseStack.popPose();
         }
@@ -343,12 +339,16 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
             float ex, float ey, float ez,
             float rX, float rY, float rZ,
             float halfWidth,
-            float r, float g, float b, float a) {
+            float r, float g, float b, float a,
+            float vOffset, float vLength) {
+
+        float v1 = vOffset;
+        float v2 = vOffset + vLength;
 
         // v0 — start, −right
         vc.addVertex(posM, sx - rX * halfWidth, sy - rY * halfWidth, sz - rZ * halfWidth)
           .setColor(r, g, b, a)
-          .setUv(0.0f, 0.0f)
+          .setUv(0.0f, v1)
           .setOverlay(OverlayTexture.NO_OVERLAY)
           .setLight(LightTexture.FULL_BRIGHT)
           .setNormal(pose, rX, rY, rZ);
@@ -356,7 +356,7 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
         // v1 — start, +right
         vc.addVertex(posM, sx + rX * halfWidth, sy + rY * halfWidth, sz + rZ * halfWidth)
           .setColor(r, g, b, a)
-          .setUv(1.0f, 0.0f)
+          .setUv(1.0f, v1)
           .setOverlay(OverlayTexture.NO_OVERLAY)
           .setLight(LightTexture.FULL_BRIGHT)
           .setNormal(pose, rX, rY, rZ);
@@ -364,7 +364,7 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
         // v2 — end, +right
         vc.addVertex(posM, ex + rX * halfWidth, ey + rY * halfWidth, ez + rZ * halfWidth)
           .setColor(r, g, b, a)
-          .setUv(1.0f, 1.0f)
+          .setUv(1.0f, v2)
           .setOverlay(OverlayTexture.NO_OVERLAY)
           .setLight(LightTexture.FULL_BRIGHT)
           .setNormal(pose, rX, rY, rZ);
@@ -372,7 +372,7 @@ public class LaserBeamRenderer extends EntityRenderer<LaserBeamEntity> {
         // v3 — end, −right
         vc.addVertex(posM, ex - rX * halfWidth, ey - rY * halfWidth, ez - rZ * halfWidth)
           .setColor(r, g, b, a)
-          .setUv(0.0f, 1.0f)
+          .setUv(0.0f, v2)
           .setOverlay(OverlayTexture.NO_OVERLAY)
           .setLight(LightTexture.FULL_BRIGHT)
           .setNormal(pose, rX, rY, rZ);

@@ -9,6 +9,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
 
 @EventBusSubscriber(modid = OririMod.MOD_ID)
 public class ForcefieldEvents {
@@ -45,5 +46,14 @@ public class ForcefieldEvents {
                 event.setCanceled(true);
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
+        Level level = event.getLevel();
+        if (level.isClientSide()) return;
+
+        // Remove any block from the explosion's affected list that is within a protection forcefield
+        event.getAffectedBlocks().removeIf(pos -> ForcefieldEmitterBlockEntity.isProtectionNearby(level, pos));
     }
 }

@@ -128,6 +128,12 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
         ItemStack stack = player.getItemInHand(hand);
         OmniAbility ab = getSelected(stack);
 
+        int castingLevel = getCastingLevel(stack, level);
+        int actualCooldown = cooldown;
+        if (castingLevel > 0) {
+            actualCooldown = Math.max(1, (int)(cooldown * (1.0f - (castingLevel * 0.15f))));
+        }
+
         // Fähigkeit durchschalten mit Shift
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide) {
@@ -156,7 +162,8 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                     BlockPos pos = hit.getBlockPos();
                     boolean ok = tryBonemeal((ServerLevel) level, pos) || tryBonemeal((ServerLevel) level, pos.above());
                     if (ok && ModManaUtil.tryConsumeMana(player, ab.getManaCost(), stack)) {
-                        player.getCooldowns().addCooldown(this, cooldown);
+                        player.getCooldowns().addCooldown(this, actualCooldown);
+                        stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
                     }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
@@ -166,7 +173,8 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                     if (ModManaUtil.tryConsumeMana(player, ab.getManaCost(), stack)) {
                         player.addEffect(
                                 new MobEffectInstance(MobEffects.REGENERATION, effectDuration, effectAmplifier));
-                        player.getCooldowns().addCooldown(this, cooldown);
+                        player.getCooldowns().addCooldown(this, actualCooldown);
+                        stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
                     }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
@@ -175,7 +183,8 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 if (!level.isClientSide) {
                     if (ModManaUtil.tryConsumeMana(player, ab.getManaCost(), stack)) {
                         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, effectDuration, effectAmplifier));
-                        player.getCooldowns().addCooldown(this, cooldown);
+                        player.getCooldowns().addCooldown(this, actualCooldown);
+                        stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
                     }
                 }
                 return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
@@ -280,7 +289,13 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
 
         // Server: Aktion ausführen
         int usedTicks = getUseDuration(stack, living) - timeLeft;
+        int castingLevel = getCastingLevel(stack, level);
         int minCharge = 10;
+        int actualCooldown = cooldown;
+        if (castingLevel > 0) {
+            minCharge = Math.max(1, (int)(minCharge * (1.0f - (castingLevel * 0.15f))));
+            actualCooldown = Math.max(1, (int)(cooldown * (1.0f - (castingLevel * 0.15f))));
+        }
 
         if (ab.isBolt()) {
             if (usedTicks < minCharge)
@@ -289,6 +304,8 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
             if (living instanceof Player p) {
                 if (!ModManaUtil.tryConsumeMana(p, ab.getManaCost(), stack))
                     return;
+                InteractionHand hand = p.getItemInHand(InteractionHand.MAIN_HAND) == stack ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+                stack.hurtAndBreak(1, p, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
             }
 
             if (ab == OmniAbility.BOLT_METEOR) {
@@ -316,7 +333,7 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 level.addFreshEntity(meteor);
 
                 if (living instanceof Player p) {
-                    p.getCooldowns().addCooldown(this, cooldown);
+                    p.getCooldowns().addCooldown(this, actualCooldown);
                 }
                 return;
             }
@@ -338,12 +355,18 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
             level.addFreshEntity(bolt);
 
             if (living instanceof Player p) {
-                p.getCooldowns().addCooldown(this, cooldown);
+                p.getCooldowns().addCooldown(this, actualCooldown);
             }
         }
     }
 
     // ---------- Data Components: Auswahl speichern ----------
+
+    private int getCastingLevel(ItemStack stack, Level level) {
+        return stack.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY)
+                .getLevel(level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                        .getHolderOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING));
+    }
 
     private static OmniAbility getSelected(ItemStack stack) {
         net.minecraft.world.item.component.CustomData data = stack

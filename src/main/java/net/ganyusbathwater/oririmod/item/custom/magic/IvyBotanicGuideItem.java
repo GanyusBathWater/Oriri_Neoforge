@@ -140,7 +140,13 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
         }
 
         int usedTicks = getUseDuration(stack, living) - timeLeft;
-        if (usedTicks < CHARGE_DURATION_TICKS) {
+        int castingLevel = getCastingLevel(stack, level);
+        int actualCharge = CHARGE_DURATION_TICKS;
+        if (castingLevel > 0) {
+            actualCharge = Math.max(1, (int)(CHARGE_DURATION_TICKS * (1.0f - (castingLevel * 0.15f))));
+        }
+
+        if (usedTicks < actualCharge) {
             return;
         }
 
@@ -196,10 +202,26 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
                     .forEach(g -> newPlant.targetSelector.removeGoal(g.getGoal()));
             newPlant.targetSelector.addGoal(1, new net.ganyusbathwater.oririmod.entity.ai.SummonedMobGoal(newPlant));
             
+            // Glowing effect so the summoner can track the mob
+            newPlant.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING, 600, 0, false, false));
+
             serverLevel.addFreshEntity(newPlant);
         }
 
-        player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
+        int actualCooldown = COOLDOWN_TICKS;
+        if (castingLevel > 0) {
+            actualCooldown = Math.max(1, (int)(COOLDOWN_TICKS * (1.0f - (castingLevel * 0.15f))));
+        }
+        player.getCooldowns().addCooldown(this, actualCooldown);
+        
+        InteractionHand hand = player.getItemInHand(InteractionHand.MAIN_HAND) == stack ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+        stack.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
+    }
+
+    private int getCastingLevel(ItemStack stack, Level level) {
+        return stack.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY)
+                .getLevel(level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                        .getHolderOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING));
     }
 
     private static BlockHitResult raycastToDistance(Level level, LivingEntity living, double range) {

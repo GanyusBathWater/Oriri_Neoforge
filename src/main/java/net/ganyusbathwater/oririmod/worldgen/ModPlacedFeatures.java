@@ -74,7 +74,7 @@ public class ModPlacedFeatures {
         public static final ResourceKey<PlacedFeature> GLOBAL_AETHER_RIVER_PLACED_KEY = registerKey(
                         "global_aether_river_placed");
 
-        public static final ResourceKey<PlacedFeature> ABYSS_RAVINE_PLACED_KEY = registerKey("abyss_ravine_placed");
+
 
         public static final ResourceKey<PlacedFeature> SEA_URCHIN_PLACED_KEY = registerKey("sea_urchin_placed");
 
@@ -303,10 +303,6 @@ public class ModPlacedFeatures {
                 // Global Deep Aether Rivers
                 register(context, GLOBAL_AETHER_RIVER_PLACED_KEY,
                                 configuredFeatures.getOrThrow(ModConfiguredFeatures.GLOBAL_AETHER_RIVER_KEY),
-                                List.of());
-
-                register(context, ABYSS_RAVINE_PLACED_KEY,
-                                configuredFeatures.getOrThrow(ModConfiguredFeatures.ABYSS_RAVINE_KEY),
                                 List.of());
 
                 register(context, SEA_URCHIN_PLACED_KEY,
