@@ -14,6 +14,7 @@ public class ModStructureTypes {
     public static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES = DeferredRegister.create(Registries.STRUCTURE_TYPE, OririMod.MOD_ID);
 
     public static final Supplier<StructureType<CenteredJigsawStructure>> CENTERED_JIGSAW = STRUCTURE_TYPES.register("centered_jigsaw", () -> type(CenteredJigsawStructure.CODEC));
+    public static final Supplier<StructureType<GridStructure>> GRID = STRUCTURE_TYPES.register("grid", () -> type(GridStructure.CODEC));
 
     private static <S extends Structure> StructureType<S> type(MapCodec<S> codec) {
         return () -> codec;

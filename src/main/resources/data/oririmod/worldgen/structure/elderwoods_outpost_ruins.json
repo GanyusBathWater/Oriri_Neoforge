@@ -1,0 +1,15 @@
+{
+  "type": "oririmod:grid",
+  "biomes": "oririmod:elderwoods",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {},
+  "basename": "oririmod:elderwoods_outpost_ruins",
+  "width_chunks": 2,
+  "depth_chunks": 2,
+  "grid_size": 48,
+  "start_height": {
+    "absolute": -1
+  },
+  "use_expansion_hack": false
+}

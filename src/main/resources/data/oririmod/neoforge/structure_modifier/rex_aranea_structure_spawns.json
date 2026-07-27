@@ -4,8 +4,8 @@
     "minecraft:mineshaft",
     "minecraft:mineshaft_mesa",
     "oririmod:elderwoods_mineshaft",
-    "oririmod:outpost_scarlet_ruins",
-    "oririmod:elderwoods_outpost_ruin"
+    "oririmod:elderwoods_outpost_scarlet_ruins",
+    "oririmod:elderwoods_outpost_ruins"
   ],
   "spawners": [
     {

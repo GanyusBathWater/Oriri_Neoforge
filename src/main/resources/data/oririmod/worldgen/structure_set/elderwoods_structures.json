@@ -1,7 +1,7 @@
 {
   "structures": [
-    { "structure": "oririmod:elderwoods_outpost_intact", "weight": 1 },
-    { "structure": "oririmod:elderwoods_outpost_ruin", "weight": 1 },
+    { "structure": "oririmod:elderwoods_outpost", "weight": 1 },
+    { "structure": "oririmod:elderwoods_outpost_ruins", "weight": 1 },
     { "structure": "oririmod:elderwoods_sanctuary", "weight": 1 }
   ],
   "placement": {

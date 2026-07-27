@@ -50,12 +50,12 @@ public class LootTableChestProcessor extends StructureProcessor {
         }
 
         if (lootTable != null) {
-            Direction facing = Direction.NORTH;
-            if (state.hasProperty(HorizontalDirectionalBlock.FACING)) {
-                facing = state.getValue(HorizontalDirectionalBlock.FACING);
+            Direction globalFacing = Direction.NORTH;
+            if (blockInfoGlobal.state().hasProperty(HorizontalDirectionalBlock.FACING)) {
+                globalFacing = blockInfoGlobal.state().getValue(HorizontalDirectionalBlock.FACING);
             }
             
-            BlockState newChestState = Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing);
+            BlockState newChestState = Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, globalFacing);
             
             CompoundTag nbt = new CompoundTag();
             nbt.putString("id", "minecraft:chest");
@@ -77,44 +77,70 @@ public class LootTableChestProcessor extends StructureProcessor {
             StructurePlaceSettings settings) {
         
         java.util.List<StructureTemplate.StructureBlockInfo> modified = new java.util.ArrayList<>();
+        java.util.Set<BlockPos> processed = new java.util.HashSet<>();
         
         for (StructureTemplate.StructureBlockInfo info : globalInfos) {
+            if (processed.contains(info.pos())) continue;
+            
             if (info.state().is(Blocks.CHEST) && info.state().getValue(ChestBlock.TYPE) == net.minecraft.world.level.block.state.properties.ChestType.SINGLE) {
                 Direction facing = info.state().getValue(ChestBlock.FACING);
                 
-                boolean foundPartner = false;
                 StructureTemplate.StructureBlockInfo partner = null;
                 
                 for (StructureTemplate.StructureBlockInfo other : globalInfos) {
-                    if (other != info && other.state().is(Blocks.CHEST) && other.state().getValue(ChestBlock.FACING) == facing) {
+                    if (other != info && !processed.contains(other.pos()) && other.state().is(Blocks.CHEST) && other.state().getValue(ChestBlock.FACING) == facing) {
                         int dx = Math.abs(other.pos().getX() - info.pos().getX());
                         int dz = Math.abs(other.pos().getZ() - info.pos().getZ());
                         if (dx + dz == 1 && other.pos().getY() == info.pos().getY()) {
-                            foundPartner = true;
                             partner = other;
                             break;
                         }
                     }
                 }
                 
-                if (foundPartner && partner != null) {
+                if (partner != null) {
                     Direction adjacentDir = null;
                     if (info.pos().getX() < partner.pos().getX()) adjacentDir = Direction.EAST;
                     else if (info.pos().getX() > partner.pos().getX()) adjacentDir = Direction.WEST;
                     else if (info.pos().getZ() < partner.pos().getZ()) adjacentDir = Direction.SOUTH;
                     else if (info.pos().getZ() > partner.pos().getZ()) adjacentDir = Direction.NORTH;
                     
-                    net.minecraft.world.level.block.state.properties.ChestType type = net.minecraft.world.level.block.state.properties.ChestType.SINGLE;
+                    Direction correctedFacing = facing;
+                    // Vanilla double chests CANNOT be front-to-back. The facing must be perpendicular to the axis they are placed on.
+                    if (adjacentDir != null && adjacentDir.getAxis() == facing.getAxis()) {
+                        correctedFacing = facing.getClockWise();
+                        System.out.println("[ChestProcessor] Auto-correcting impossible front-to-back chest from " + facing + " to " + correctedFacing);
+                    }
+
+                    net.minecraft.world.level.block.state.properties.ChestType infoType = net.minecraft.world.level.block.state.properties.ChestType.SINGLE;
+                    net.minecraft.world.level.block.state.properties.ChestType partnerType = net.minecraft.world.level.block.state.properties.ChestType.SINGLE;
+                    
                     if (adjacentDir != null) {
-                        if (adjacentDir == facing.getClockWise()) {
-                            type = net.minecraft.world.level.block.state.properties.ChestType.LEFT;
+                        if (adjacentDir == correctedFacing.getClockWise()) {
+                            infoType = net.minecraft.world.level.block.state.properties.ChestType.LEFT;
+                            partnerType = net.minecraft.world.level.block.state.properties.ChestType.RIGHT;
                         } else {
-                            type = net.minecraft.world.level.block.state.properties.ChestType.RIGHT;
+                            infoType = net.minecraft.world.level.block.state.properties.ChestType.RIGHT;
+                            partnerType = net.minecraft.world.level.block.state.properties.ChestType.LEFT;
                         }
                     }
                     
-                    BlockState newState = info.state().setValue(ChestBlock.TYPE, type);
-                    modified.add(new StructureTemplate.StructureBlockInfo(info.pos(), newState, info.nbt()));
+                    // Log out exactly what is calculated so we can cross-reference with world geometry
+                    System.out.println("[ChestProcessor] Pair: " + info.pos() + " & " + partner.pos() + " | Final Facing: " + correctedFacing + " | AdjDir: " + adjacentDir + " | Types: " + infoType + ", " + partnerType);
+                    
+                    BlockState infoState = info.state().setValue(ChestBlock.TYPE, infoType).setValue(ChestBlock.FACING, correctedFacing);
+                    BlockState partnerState = partner.state().setValue(ChestBlock.TYPE, partnerType).setValue(ChestBlock.FACING, correctedFacing);
+                    
+                    if (infoType == net.minecraft.world.level.block.state.properties.ChestType.LEFT) {
+                        modified.add(new StructureTemplate.StructureBlockInfo(info.pos(), infoState, info.nbt()));
+                        modified.add(new StructureTemplate.StructureBlockInfo(partner.pos(), partnerState, partner.nbt()));
+                    } else {
+                        modified.add(new StructureTemplate.StructureBlockInfo(partner.pos(), partnerState, partner.nbt()));
+                        modified.add(new StructureTemplate.StructureBlockInfo(info.pos(), infoState, info.nbt()));
+                    }
+                    
+                    processed.add(info.pos());
+                    processed.add(partner.pos());
                     continue;
                 }
             }
