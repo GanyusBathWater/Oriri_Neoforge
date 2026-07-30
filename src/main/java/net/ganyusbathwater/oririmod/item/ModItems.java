@@ -491,8 +491,12 @@ public class ModItems {
 
         public static final DeferredItem<DeferredSpawnEggItem> LOADED_BLAZE_SPAWN_EGG = ITEMS.register(
                         "loaded_blaze_spawn_egg",
-                        () -> new DeferredSpawnEggItem(ModEntities.LOADED_BLAZE,
-                                        0xF6B201, 0x00A8FF, // outer: gold, inner: blue fire
+                        () -> new DeferredSpawnEggItem(ModEntities.LOADED_BLAZE, 0xF6B201, 0x00A8FF,
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> FAIRY_SPAWN_EGG = ITEMS.register(
+                        "fairy_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.FAIRY, 0xA8E6CF, 0xFF00FF,
                                         new Item.Properties()));
 
         // ------------------------------------------------------Armor---------------------------------------------------------

@@ -26,7 +26,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -50,7 +49,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  *
  * ─── Attack Roster ──────────────────────────────────────────────────────────
  *   Melee         – 10 dmg + Poison 5s  (no global CD gate)
- *   Passive Vex   – on-hit, own 600-t CD, spawns 1 (+1 in P2) Vex
+ *   Passive Fairy   – on-hit, own 600-t CD, spawns 1 (+1 in P2) Fairy
  *   Skill 1 – Overgrowth  : summons plant_turret(s), dirt particles ticks 15-20
  *   Skill 2 – Vine Lock   : placeholder mechanic (see vineLockMechanic())
  *   Skill 3 – Spore Blossom: summons eye_of_desolation(s) at exact tick 20
@@ -112,9 +111,9 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     private int     defeatTicks   = 0;
     private boolean lootDropped   = false;
 
-    // ── Passive Vex cooldown ───────────────────────────────────────────────────
+    // ── Passive Fairy cooldown ───────────────────────────────────────────────────
     /** Independent passive cooldown – 600 t (30 s). Does NOT share the global CD. */
-    private int vexPassiveCooldown = 0;
+    private int fairyPassiveCooldown = 0;
 
     // ── Hit & Run mechanic ─────────────────────────────────────────────────────
     /**
@@ -221,8 +220,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
                 meleeProximityTicks = 0;
             }
 
-            // ── Passive Vex cooldown tick ─────────────────────────────────────
-            if (vexPassiveCooldown > 0) vexPassiveCooldown--;
+            // ── Passive Fairy cooldown tick ─────────────────────────────────────
+            if (fairyPassiveCooldown > 0) fairyPassiveCooldown--;
 
             // ── Concurrent Melee Logic ────────────────────────────────────────
             if (meleeCooldown > 0) meleeCooldown--;
@@ -306,11 +305,11 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
             // ── Trigger hurt animation ────────────────────────────────────────
             triggerAnim("hurt_controller", "deviartras_hurt");
 
-            // ── Passive: Vex spawn on any hit ─────────────────────────────────
+            // ── Passive: Fairy spawn on any hit ─────────────────────────────────
             // Independent 600-tick cooldown (30 s), no animation required.
-            if (vexPassiveCooldown <= 0) {
-                vexPassiveCooldown = 600;
-                spawnVex();
+            if (fairyPassiveCooldown <= 0) {
+                fairyPassiveCooldown = 600;
+                spawnFairy();
             }
         }
         return result;
@@ -400,23 +399,23 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     // ── Mob summon helpers (used by DeviartrasAttackGoal) ─────────────────────
 
     /**
-     * Passive skill: spawns 1 Vex (Phase 2: 2).
+     * Passive skill: spawns 1 Fairy (Phase 2: 2).
      * Positions are randomised ±2 blocks around the boss.
      */
-    public void spawnVex() {
+    public void spawnFairy() {
         if (!(level() instanceof ServerLevel serverLevel)) return;
         int count = isPhase2 ? 2 : 1;
         for (int i = 0; i < count; i++) {
-            Vex vex = EntityType.VEX.create(serverLevel);
-            if (vex == null) continue;
+            FairyEntity fairy = ModEntities.FAIRY.get().create(serverLevel);
+            if (fairy == null) continue;
             double ox = (random.nextDouble() - 0.5) * 4.0;
             double oz = (random.nextDouble() - 0.5) * 4.0;
-            vex.setPos(this.getX() + ox, this.getY() + 1.0, this.getZ() + oz);
-            vex.finalizeSpawn(serverLevel,
+            fairy.setPos(this.getX() + ox, this.getY() + 1.0, this.getZ() + oz);
+            fairy.finalizeSpawn(serverLevel,
                     serverLevel.getCurrentDifficultyAt(this.blockPosition()),
                     MobSpawnType.MOB_SUMMONED, null);
-            vex.setOwner(this);
-            serverLevel.addFreshEntity(vex);
+            fairy.setOwner(this);
+            serverLevel.addFreshEntity(fairy);
         }
     }
 
@@ -506,7 +505,7 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
         tag.putBoolean("IsDefeated",      isDefeated);
         tag.putInt("DefeatTicks",         defeatTicks);
         tag.putBoolean("LootDropped",     lootDropped);
-        tag.putInt("VexPassiveCooldown",  vexPassiveCooldown);
+        tag.putInt("FairyPassiveCooldown",  fairyPassiveCooldown);
         tag.putInt("MeleeProximityTicks", meleeProximityTicks);
         tag.putInt("MeleeCooldown",       meleeCooldown);
         tag.putInt("MeleeAnimTimer",      meleeAnimTimer);
@@ -519,7 +518,7 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
         isDefeated         = tag.getBoolean("IsDefeated");
         defeatTicks        = tag.getInt("DefeatTicks");
         lootDropped        = tag.getBoolean("LootDropped");
-        vexPassiveCooldown = tag.getInt("VexPassiveCooldown");
+        fairyPassiveCooldown = tag.getInt("FairyPassiveCooldown");
         meleeProximityTicks = tag.getInt("MeleeProximityTicks");
         meleeCooldown      = tag.getInt("MeleeCooldown");
         meleeAnimTimer     = tag.getInt("MeleeAnimTimer");

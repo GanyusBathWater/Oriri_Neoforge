@@ -410,6 +410,20 @@ public final class ModEntities {
                                                                                         "mod_chest_boat")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.FairyEntity>> FAIRY = ENTITIES
+                        .register("fairy",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.FairyEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.FairyEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(0.4F, 0.8F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "fairy")
+                                                                        .toString()));
+
+
         public static void register(IEventBus modBus) {
 
                 ENTITIES.register(modBus);

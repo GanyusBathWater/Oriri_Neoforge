@@ -365,6 +365,7 @@ public class ModItemGroups {
                         output.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
                         output.accept(ModItems.LOADED_BLAZE_SPAWN_EGG);
                         output.accept(ModItems.REX_ARANEA_SPAWN_EGG);
+                        output.accept(ModItems.FAIRY_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);
