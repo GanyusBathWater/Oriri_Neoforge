@@ -176,6 +176,13 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 10, true, false,
                 target -> target.getPersistentData().getBoolean("OririSummoned")));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 0, true, false, 
+            (entity) -> {
+                return entity instanceof net.minecraft.world.entity.monster.Monster 
+                    && !entity.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                    && !entity.getPersistentData().getBoolean("IsNoxusMob");
+            }
+        ));
     }
 
 
@@ -415,6 +422,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
                     serverLevel.getCurrentDifficultyAt(this.blockPosition()),
                     MobSpawnType.MOB_SUMMONED, null);
             fairy.setOwner(this);
+            fairy.getPersistentData().putBoolean("OririSummoned", true);
+            fairy.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(fairy);
         }
     }
@@ -451,6 +460,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
             }
 
             turret.setPos(candidate.getX() + 0.5, candidate.getY(), candidate.getZ() + 0.5);
+            turret.getPersistentData().putBoolean("OririSummoned", true);
+            turret.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(turret);
         }
     }
@@ -480,6 +491,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
             }
 
             eye.setPos(candidate.getX() + 0.5, candidate.getY(), candidate.getZ() + 0.5);
+            eye.getPersistentData().putBoolean("OririSummoned", true);
+            eye.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(eye);
         }
     }
@@ -580,5 +593,13 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return animCache;
+    }
+
+    @Override
+    public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
+        if (target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || target.getPersistentData().getBoolean("IsNoxusMob")) {
+            return false;
+        }
+        return super.canAttack(target);
     }
 }

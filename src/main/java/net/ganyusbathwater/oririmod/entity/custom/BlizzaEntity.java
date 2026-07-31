@@ -139,6 +139,13 @@ public class BlizzaEntity extends Monster implements GeoEntity {
         // Issue #6: target player summons too (identified by OririSummoned NBT flag)
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 10, true, false, 
                 (target) -> target.getPersistentData().getBoolean("OririSummoned")));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 0, true, false, 
+            (entity) -> {
+                return entity instanceof net.minecraft.world.entity.monster.Monster 
+                    && !entity.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                    && !entity.getPersistentData().getBoolean("IsNoxusMob");
+            }
+        ));
     }
 
     // ── Tick ──────────────────────────────────────────────────────────────
@@ -234,6 +241,8 @@ public class BlizzaEntity extends Monster implements GeoEntity {
             stray.setPos(this.getX() + off[0], this.getY() + off[1], this.getZ() + off[2]);
             stray.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(this.blockPosition()),
                     net.minecraft.world.entity.MobSpawnType.MOB_SUMMONED, null);
+            stray.getPersistentData().putBoolean("OririSummoned", true);
+            stray.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(stray);
         }
     }
@@ -481,5 +490,13 @@ public class BlizzaEntity extends Monster implements GeoEntity {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return animCache;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || target.getPersistentData().getBoolean("IsNoxusMob")) {
+            return false;
+        }
+        return super.canAttack(target);
     }
 }

@@ -73,7 +73,7 @@ public class SporeBlossomEntity extends Monster implements GeoEntity {
                 // Apply Poison to nearby entities
                 if (this.tickCount % 10 == 0) { // Check every half second to save performance
                     AABB aabb = this.getBoundingBox().inflate(radius, radius, radius);
-                    List<LivingEntity> entities = this.level().getEntitiesOfClass(LivingEntity.class, aabb, e -> e.isAlive() && e != this && !(e instanceof DeviartrasEntity) && !(e instanceof SporeBlossomEntity));
+                    List<LivingEntity> entities = this.level().getEntitiesOfClass(LivingEntity.class, aabb, e -> e.isAlive() && e != this && !(e instanceof DeviartrasEntity) && !(e instanceof SporeBlossomEntity) && !e.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) && !e.getPersistentData().getBoolean("IsNoxusMob"));
                     
                     for (LivingEntity entity : entities) {
                         double distSq = this.distanceToSqr(entity);

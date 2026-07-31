@@ -292,6 +292,8 @@ public class OririClient {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.AIR_SLICE.get(),
+                net.ganyusbathwater.oririmod.entity.client.AirSliceRenderer::new);
         event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);

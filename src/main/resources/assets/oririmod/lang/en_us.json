@@ -607,6 +607,7 @@
   "item.oririmod.magma_cooking_book.element": "§4Fire§r",
   "item.oririmod.slimy_cooking_book.element": "§2Nature§r",
   "tooltip.oririmod.mana_cost": "Mana Cost: §1%s§r",
+  "tooltip.oririmod.qilins_wrath.desc": "Hold Right-Click to unleash a devastating red Air Slice.",
   "tooltip.oririmod.damage": "Damage: §c%s§r",
   "tooltip.oririmod.element": "Element: %s",
   "entity.oririmod.fire_zombie": "Fire Zombie",
@@ -697,5 +698,14 @@
   "emi_loot.chest.oririmod:inject/event_horizon_trial": "Event Horizon Trial Reward",
   "emi_loot.chest.oririmod:inject/fire_crystal": "Fire Crystal Reward",
   "emi_loot.chest.oririmod:inject/devil_fruit_sunken": "Devil Fruit Sunken Reward",
-  "emi_loot.chest.oririmod:inject/devil_fruit_shipwreck": "Devil Fruit Shipwreck Reward"
+  "emi_loot.chest.oririmod:inject/devil_fruit_shipwreck": "Devil Fruit Shipwreck Reward",
+  "entity.oririmod.noxus_knight": "Knight of Noxus",
+  "entity.oririmod.noxus_general": "General of Noxus",
+  "entity.oririmod.noxus_paladin": "Paladin of Noxus",
+  "item.oririmod.noxus_knight_spawn_egg": "Knight of Noxus Spawn Egg",
+  "item.oririmod.noxus_general_spawn_egg": "General of Noxus Spawn Egg",
+  "item.oririmod.noxus_paladin_spawn_egg": "Paladin of Noxus Spawn Egg",
+  "item.oririmod.iron_noxus_helmet": "Iron Noxus Helmet",
+  "item.oririmod.netherite_noxus_helmet": "Netherite Noxus Helmet",
+  "item.oririmod.gilded_netherrite_noxus_helmet": "Gilded Netherite Noxus Helmet"
 }

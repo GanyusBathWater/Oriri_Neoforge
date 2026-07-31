@@ -72,6 +72,9 @@ public class ModEntityClient {
                 event.registerEntityRenderer(ModEntities.FAIRY.get(),
                                 net.ganyusbathwater.oririmod.entity.client.FairyRenderer::new);
                 
+                event.registerEntityRenderer(ModEntities.NOXUS_KNIGHT.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
+                event.registerEntityRenderer(ModEntities.NOXUS_GENERAL.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
+                event.registerEntityRenderer(ModEntities.NOXUS_PALADIN.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
                 event.registerEntityRenderer(ModEntities.LOADED_BLAZE.get(),
                                 net.ganyusbathwater.oririmod.entity.client.LoadedBlazeRenderer::new);
                 event.registerEntityRenderer(ModEntities.REX_ARANEA.get(),

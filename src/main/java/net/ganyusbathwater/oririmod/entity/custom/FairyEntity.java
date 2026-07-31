@@ -124,6 +124,18 @@ public class FairyEntity extends Monster implements GeoEntity, net.ganyusbathwat
         
         this.targetSelector.addGoal(1, (new HurtByTargetGoal(this)).setAlertOthers());
         this.targetSelector.addGoal(2, new ProtectDryadGoal(this));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 0, true, false, 
+            (entity) -> {
+                return entity instanceof net.minecraft.world.entity.monster.Monster 
+                    && !entity.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                    && !entity.getPersistentData().getBoolean("IsNoxusMob");
+            }
+        ) {
+            @Override
+            public boolean canUse() {
+                return FairyEntity.this.getPersistentData().getBoolean("IsNoxusMob") && super.canUse();
+            }
+        });
     }
 
     @Override
@@ -194,6 +206,16 @@ public class FairyEntity extends Monster implements GeoEntity, net.ganyusbathwat
     }
 
 
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (this.getPersistentData().getBoolean("IsNoxusMob")) {
+            if (target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || target.getPersistentData().getBoolean("IsNoxusMob")) {
+                return false;
+            }
+        }
+        return super.canAttack(target);
+    }
 
     // --- CUSTOM PROTECT DRYAD GOAL ---
     static class ProtectDryadGoal extends TargetGoal {

@@ -315,7 +315,7 @@ public class ModItems {
                                                         .component(ModDataComponents.COSMIC_TOOLTIP.get(), new CosmicTooltipData(0, true)),
                                         ModRarity.UNIQUE));
         public static final DeferredItem<SwordItem> QILINS_WRATH = ITEMS.register("qilins_wrath",
-                        () -> new CustomSwordItem(Tiers.NETHERITE,
+                        () -> new net.ganyusbathwater.oririmod.item.custom.magic.QilinsWrathItem(Tiers.NETHERITE,
                                         new Item.Properties().fireResistant()
                                                         .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6,
                                                                         -1.4F))
@@ -499,6 +499,21 @@ public class ModItems {
                         () -> new DeferredSpawnEggItem(ModEntities.FAIRY, 0xA8E6CF, 0xFF00FF,
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> NOXUS_KNIGHT_SPAWN_EGG = ITEMS.register(
+                        "noxus_knight_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.NOXUS_KNIGHT, 0x4A4A4A, 0xFFFFFF,
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> NOXUS_GENERAL_SPAWN_EGG = ITEMS.register(
+                        "noxus_general_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.NOXUS_GENERAL, 0x211A16, 0xFFFFFF,
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> NOXUS_PALADIN_SPAWN_EGG = ITEMS.register(
+                        "noxus_paladin_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.NOXUS_PALADIN, 0x5C4627, 0x00FF00,
+                                        new Item.Properties()));
+
         // ------------------------------------------------------Armor---------------------------------------------------------
 
         public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet",
@@ -534,6 +549,24 @@ public class ModItems {
                         () -> new ModArmorItem(ModArmorMaterials.ANCIENT_ARMOR_MATERIAL, ArmorItem.Type.BOOTS,
                                         new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(40)),
                                         ModRarity.MYTHIC));
+
+        public static final DeferredItem<ArmorItem> IRON_NOXUS_HELMET = ITEMS.register(
+                        "iron_noxus_helmet",
+                        () -> new NoxusHelmetItem(ArmorMaterials.IRON,
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(15)),
+                                        ModRarity.COMMON, "knight"));
+
+        public static final DeferredItem<ArmorItem> NETHERITE_NOXUS_HELMET = ITEMS.register(
+                        "netherite_noxus_helmet",
+                        () -> new NoxusHelmetItem(ArmorMaterials.NETHERITE,
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(37)),
+                                        ModRarity.RARE, "general"));
+
+        public static final DeferredItem<ArmorItem> GILDED_NETHERRITE_NOXUS_HELMET = ITEMS.register(
+                        "gilded_netherrite_noxus_helmet",
+                        () -> new NoxusHelmetItem(ModArmorMaterials.GILDED_NETHERRITE_ARMOR_MATERIAL,
+                                        new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(30)),
+                                        ModRarity.MYTHIC, "paladin"));
 
         public static final DeferredItem<ArmorItem> GILDED_NETHERRITE_HELMET = ITEMS.register(
                         "gilded_netherrite_helmet",

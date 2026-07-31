@@ -366,12 +366,19 @@ public class ModItemGroups {
                         output.accept(ModItems.LOADED_BLAZE_SPAWN_EGG);
                         output.accept(ModItems.REX_ARANEA_SPAWN_EGG);
                         output.accept(ModItems.FAIRY_SPAWN_EGG);
+                        output.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
+                        output.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
+                        output.accept(ModItems.NOXUS_PALADIN_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);
                         output.accept(ModItems.CRYSTAL_CHESTPLATE);
                         output.accept(ModItems.CRYSTAL_LEGGINGS);
                         output.accept(ModItems.CRYSTAL_BOOTS);
+
+                        output.accept(ModItems.IRON_NOXUS_HELMET);
+                        output.accept(ModItems.NETHERITE_NOXUS_HELMET);
+                        output.accept(ModItems.GILDED_NETHERRITE_NOXUS_HELMET);
 
                         output.accept(ModItems.ANCIENT_HELMET);
                         output.accept(ModItems.ANCIENT_CHESTPLATE);

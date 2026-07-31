@@ -3,7 +3,31 @@
   "biomes": "oririmod:elderwoods",
   "step": "surface_structures",
   "terrain_adaptation": "beard_thin",
-  "spawn_overrides": {},
+  "spawn_overrides": {
+    "monster": {
+      "bounding_box": "piece",
+      "spawns": [
+        {
+          "type": "oririmod:noxus_knight",
+          "weight": 70,
+          "minCount": 1,
+          "maxCount": 2
+        },
+        {
+          "type": "oririmod:noxus_general",
+          "weight": 25,
+          "minCount": 1,
+          "maxCount": 1
+        },
+        {
+          "type": "oririmod:noxus_paladin",
+          "weight": 5,
+          "minCount": 1,
+          "maxCount": 1
+        }
+      ]
+    }
+  },
   "basename": "oririmod:elderwoods_outpost",
   "width_chunks": 2,
   "depth_chunks": 2,

@@ -252,6 +252,20 @@ public final class ModEntities {
                                                                                         "venomous_plant")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.AirSliceEntity>> AIR_SLICE = ENTITIES
+                        .register("air_slice",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.AirSliceEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.AirSliceEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(2.5F, 2.5F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "air_slice")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.ThornProjectileEntity>> THORN_PROJECTILE = ENTITIES
                         .register("thorn_projectile",
                                         () -> EntityType.Builder
@@ -423,6 +437,45 @@ public final class ModEntities {
                                                                                         "fairy")
                                                                         .toString()));
 
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity>> NOXUS_KNIGHT = ENTITIES
+                        .register("noxus_knight",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(8)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "noxus_knight")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity>> NOXUS_GENERAL = ENTITIES
+                        .register("noxus_general",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(8)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "noxus_general")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity>> NOXUS_PALADIN = ENTITIES
+                        .register("noxus_paladin",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(8)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "noxus_paladin")
+                                                                        .toString()));
 
         public static void register(IEventBus modBus) {
 

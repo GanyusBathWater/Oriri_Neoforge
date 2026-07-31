@@ -83,7 +83,7 @@ public class EyeOfTheStormEntity extends Entity {
         // Expand the target list to hit ALL LivingEntities (Players and Mobs!)
         List<net.minecraft.world.entity.LivingEntity> exposedEntities = this.level().getEntitiesOfClass(
                 net.minecraft.world.entity.LivingEntity.class, stormBox, 
-                e -> !(e instanceof Player p && (p.isSpectator() || p.isCreative())) && e.isAlive()
+                e -> !(e instanceof Player p && (p.isSpectator() || p.isCreative())) && e.isAlive() && !e.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) && !e.getPersistentData().getBoolean("IsNoxusMob")
         );
 
         for (net.minecraft.world.entity.LivingEntity e : exposedEntities) {

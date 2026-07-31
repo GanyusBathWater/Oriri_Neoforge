@@ -99,6 +99,18 @@ public class VenomousPlantEntity extends Monster implements GeoEntity {
                 p -> p instanceof Player player
                         && !player.isCreative()
                         && !player.isSpectator()));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 0, true, false, 
+            (entity) -> {
+                return entity instanceof net.minecraft.world.entity.monster.Monster 
+                    && !entity.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                    && !entity.getPersistentData().getBoolean("IsNoxusMob");
+            }
+        ) {
+            @Override
+            public boolean canUse() {
+                return VenomousPlantEntity.this.getPersistentData().getBoolean("IsNoxusMob") && super.canUse();
+            }
+        });
     }
 
     // ─── Tick ─────────────────────────────────────────────────────────────────
@@ -364,5 +376,15 @@ public class VenomousPlantEntity extends Monster implements GeoEntity {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return animCache;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (this.getPersistentData().getBoolean("IsNoxusMob")) {
+            if (target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || target.getPersistentData().getBoolean("IsNoxusMob")) {
+                return false;
+            }
+        }
+        return super.canAttack(target);
     }
 }

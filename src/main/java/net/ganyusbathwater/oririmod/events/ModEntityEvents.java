@@ -19,5 +19,20 @@ public class ModEntityEvents {
         event.put(ModEntities.LOADED_BLAZE.get(), net.ganyusbathwater.oririmod.entity.custom.LoadedBlazeEntity.createAttributes().build());
         event.put(ModEntities.REX_ARANEA.get(), net.ganyusbathwater.oririmod.entity.custom.RexAraneaEntity.createAttributes().build());
         event.put(ModEntities.FAIRY.get(), net.ganyusbathwater.oririmod.entity.custom.FairyEntity.createAttributes().build());
+        event.put(ModEntities.NOXUS_KNIGHT.get(), net.minecraft.world.entity.monster.Monster.createMonsterAttributes()
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, 25.0)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE, 2.5)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED, 0.1)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE, 0.5).build());
+        event.put(ModEntities.NOXUS_GENERAL.get(), net.minecraft.world.entity.monster.Monster.createMonsterAttributes()
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, 30.0)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE, 5.0)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED, 0.1)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE, 1.0).build());
+        event.put(ModEntities.NOXUS_PALADIN.get(), net.minecraft.world.entity.monster.Monster.createMonsterAttributes()
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, 35.0)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE, 7.5)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED, 0.05)
+            .add(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE, 1.5).build());
     }
 }

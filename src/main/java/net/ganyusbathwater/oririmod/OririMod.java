@@ -131,6 +131,9 @@ public class OririMod {
             event.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
             event.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
             event.accept(ModItems.MERMAID_SPAWN_EGG);
+            event.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
+            event.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
+            event.accept(ModItems.NOXUS_PALADIN_SPAWN_EGG);
         }
     }
 
@@ -179,6 +182,27 @@ public class OririMod {
         );
         event.register(
             net.ganyusbathwater.oririmod.entity.ModEntities.REX_ARANEA.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.NOXUS_KNIGHT.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.NOXUS_GENERAL.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.NOXUS_PALADIN.get(),
             net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
             net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
             net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,

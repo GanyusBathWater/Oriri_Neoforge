@@ -1,0 +1,48 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.unknown",
+				"texture_width": 16,
+				"texture_height": 16,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "air_slice",
+					"pivot": [0, 8.25, 1],
+					"rotation": [0, 0, 0],
+					"cubes": [
+						{
+							"origin": [-1, 0, -8], 
+							"size": [0, 16, 16], 
+							"pivot": [-1, 8, 0], 
+							"rotation": [0, -15, 0], 
+							"uv": {
+								"east": {"uv": [16, 0], "uv_size": [-16, 16]},
+								"west": {"uv": [0, 0], "uv_size": [16, 16]}
+							}
+						},
+						{
+							"origin": [1, 0, -8], 
+							"size": [0, 16, 16], 
+							"pivot": [1, 8, 0], 
+							"rotation": [0, 15, 0], 
+							"uv": {
+								"east": {"uv": [16, 0], "uv_size": [-16, 16]},
+								"west": {"uv": [0, 0], "uv_size": [16, 16]}
+							}
+						}
+					],
+					"locators": {
+						"air_slice_top": [0, 15, 2],
+						"air_slice_bottom": [0, 2, 2]
+					}
+				}
+			]
+		}
+	]
+}
