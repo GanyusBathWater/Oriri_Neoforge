@@ -34,6 +34,16 @@ public final class NetworkHandler {
             "blizza_spawn_title");
     public static final ResourceLocation DEVIARTRAS_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "deviartras_spawn_title");
+    public static final ResourceLocation HOMEWARD_CONFIRM_REQUEST = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "homeward_confirm_request");
+    public static final ResourceLocation HOMEWARD_CONFIRM = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "homeward_confirm");
+    public static final ResourceLocation OPEN_DUNGEON_SCREEN = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "open_dungeon_screen");
+    public static final ResourceLocation DUNGEON_ACTION = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "dungeon_action");
+    public static final ResourceLocation PLAY_DUNGEON_MUSIC = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "play_dungeon_music");
 
     private NetworkHandler() {
     }
@@ -87,6 +97,26 @@ public final class NetworkHandler {
                     net.ganyusbathwater.oririmod.events.ClientEvents.triggerDeviartrasTitle();
                 }));
 
+        // Homeward: server → client open confirm screen
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.HomewardConfirmRequestPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.HomewardConfirmRequestPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.minecraft.client.Minecraft.getInstance()
+                            .setScreen(new net.ganyusbathwater.oririmod.client.screen.HomewardConfirmScreen());
+                }));
+
+        // Homeward: client → server confirm or cancel
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.HomewardConfirmPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.HomewardConfirmPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var player = ctx.player();
+                    if (player instanceof net.minecraft.server.level.ServerPlayer sp && payload.confirmed()) {
+                        net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
+                    }
+                }));
+
         registrar.playToServer(
                 SelectBossAttackPayload.TYPE,
                 SelectBossAttackPayload.STREAM_CODEC,
@@ -118,6 +148,32 @@ public final class NetworkHandler {
                         item.executeServerSwing(player, player.getMainHandItem());
                     }
                 }));
+
+        // Dungeon Keeper: server → client open dungeon screen
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() ->
+                        net.minecraft.client.Minecraft.getInstance()
+                                .setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonKeeperScreen(payload))
+                ));
+
+        // Dungeon Keeper: client → server party actions
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.DungeonActionPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.DungeonActionPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    if (!(ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp)) return;
+                    net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyActionHandler.handle(sp, payload);
+                }));
+
+        // Dungeon Music: server → client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.PlayDungeonMusicPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.PlayDungeonMusicPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() ->
+                        net.ganyusbathwater.oririmod.client.DungeonMusicHandler.handle(payload)
+                ));
     }
     
 
@@ -159,5 +215,10 @@ public final class NetworkHandler {
     public static void sendDeviartrasTitle(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player,
                 new net.ganyusbathwater.oririmod.network.packet.DeviartrasSpawnTitlePayload());
+    }
+
+    public static void sendHomewardConfirmRequest(ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.HomewardConfirmRequestPayload());
     }
 }

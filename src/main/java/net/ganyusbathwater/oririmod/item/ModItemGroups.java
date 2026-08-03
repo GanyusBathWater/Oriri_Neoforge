@@ -227,6 +227,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.TILTED_BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.REVIVAL_SHRINE);
                         output.accept(ModItems.DOG_TAG);
+                        output.accept(ModItems.HOMEWARD);
 
                         // Forcefield Emitters
                         output.accept(ModBlocks.REPELLENT_FORCEFIELD_EMITTER);

@@ -707,5 +707,27 @@
   "item.oririmod.noxus_paladin_spawn_egg": "Paladin of Noxus Spawn Egg",
   "item.oririmod.iron_noxus_helmet": "Iron Noxus Helmet",
   "item.oririmod.netherite_noxus_helmet": "Netherite Noxus Helmet",
-  "item.oririmod.gilded_netherrite_noxus_helmet": "Gilded Netherite Noxus Helmet"
+  "item.oririmod.gilded_netherrite_noxus_helmet": "Gilded Netherite Noxus Helmet",
+
+  "item.oririmod.homeward": "Homeward",
+  "tooltip.oririmod.homeward.lore": "§oA relic carved from the memory of a distant hearth§r",
+  "tooltip.oririmod.homeward.desc": "Hold to channel — returns you home or lets you leave a Dungeon",
+  "tooltip.oririmod.homeward.no_mana": "Not enough Mana!",
+  "tooltip.oririmod.homeward.teleported": "You have returned home.",
+  "screen.oririmod.homeward.title": "Leave the Dungeon?",
+  "screen.oririmod.homeward.line1": "You are about to leave this dungeon.",
+  "screen.oririmod.homeward.line2": "Your progress will be saved.",
+  "screen.oririmod.homeward.leave": "Leave",
+  "screen.oririmod.homeward.cancel": "Cancel",
+
+  "entity.oririmod.dungeon_marker": "Dungeon Marker",
+
+  "message.oririmod.dungeon.no_break": "You cannot break blocks inside a dungeon!",
+  "message.oririmod.dungeon.no_place": "You cannot place blocks inside a dungeon!",
+  "message.oririmod.dungeon.item_banned": "That item is forbidden inside this dungeon!",
+  "message.oririmod.dungeon.died": "You have been removed from the dungeon. Your progress has been saved.",
+  "message.oririmod.dungeon.timeout": "The dungeon has timed out. You have been removed.",
+  "message.oririmod.dungeon.complete": "Dungeon Complete! Well done, heroes!",
+
+  "entity.oririmod.dungeon_keeper": "Dungeon Keeper"
 }

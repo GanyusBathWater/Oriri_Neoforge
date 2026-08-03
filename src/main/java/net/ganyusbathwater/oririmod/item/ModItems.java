@@ -146,6 +146,9 @@ public class ModItems {
         public static final DeferredItem<DogTagItem> DOG_TAG = ITEMS.register("dog_tag",
                         () -> new DogTagItem(new Item.Properties().stacksTo(1)));
 
+        public static final DeferredItem<HomewardItem> HOMEWARD = ITEMS.register("homeward",
+                        () -> new HomewardItem(new Item.Properties().stacksTo(1)));
+
 
         // ---------------------------------------Foods-----------------------------------------------------------
 

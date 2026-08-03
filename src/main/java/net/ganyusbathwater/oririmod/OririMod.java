@@ -118,6 +118,7 @@ public class OririMod {
             ElementalDamageHandler.register();
             TooltipHandler.register();
             ModItems.registerDispenserBehaviors();
+            net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.init();
         });
     }
 
@@ -221,6 +222,8 @@ public class OririMod {
                 net.ganyusbathwater.oririmod.entity.custom.DeviartrasEntity.createAttributes().build());
         event.put(net.ganyusbathwater.oririmod.entity.ModEntities.SPORE_BLOSSOM.get(),
                 net.ganyusbathwater.oririmod.entity.custom.SporeBlossomEntity.createAttributes().build());
+        event.put(net.ganyusbathwater.oririmod.entity.ModEntities.DUNGEON_KEEPER.get(),
+                net.ganyusbathwater.oririmod.dungeon.entity.DungeonKeeperEntity.createAttributes().build());
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

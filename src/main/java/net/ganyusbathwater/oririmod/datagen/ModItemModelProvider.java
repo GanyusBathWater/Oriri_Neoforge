@@ -418,7 +418,10 @@ public class ModItemModelProvider extends ItemModelProvider {
                 // ===== REVIVAL MECHANICS =====
                 withExistingParent(ModItems.DOG_TAG.getId().getPath(), mcLoc("item/generated"))
                                 .texture("layer0", mcLoc("item/name_tag"));
-                                
+
+                // ===== DUNGEON SYSTEM =====
+                basicItem(ModItems.HOMEWARD.get());
+
                 // Maps the GeoItem Renderer explicitly to the model. We use builtin/entity to trigger it, and inject manual displays.
                 applyGeoItemTransforms(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.getId().getPath());
                 applyGeoItemTransforms(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.getId().getPath());

@@ -477,6 +477,33 @@ public final class ModEntities {
                                                                                         "noxus_paladin")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity>> DUNGEON_MARKER = ENTITIES
+                        .register("dungeon_marker",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity>of(
+                                                                        net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(0.0F, 0.0F)      // No hitbox — purely logical
+                                                        .noSave()               // Don't save to chunk NBT (we manage lifecycle)
+                                                        .clientTrackingRange(0) // Server-only
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "dungeon_marker")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.dungeon.entity.DungeonKeeperEntity>> DUNGEON_KEEPER = ENTITIES
+                        .register("dungeon_keeper",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.dungeon.entity.DungeonKeeperEntity>of(
+                                                                        net.ganyusbathwater.oririmod.dungeon.entity.DungeonKeeperEntity::new,
+                                                                        MobCategory.MISC)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(10)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "dungeon_keeper")
+                                                                        .toString()));
+
         public static void register(IEventBus modBus) {
 
                 ENTITIES.register(modBus);
