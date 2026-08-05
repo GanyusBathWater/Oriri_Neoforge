@@ -89,6 +89,7 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
     // ── Hunger / Eating Mechanics ─────────────────────────────────────────
     private int fishEatenCount = 0;
     private int hungerCooldown = 0;
+    private boolean isAggressive = false;
 
     // ── Animation & State Tracking ────────────────────────────────────────
     private int outOfWaterTicks = 0;
@@ -155,6 +156,11 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
         int finColorIndex = this.random.nextInt(OCEANIC_PALETTE.length);
         this.entityData.set(DATA_HAIR_COLOR, OCEANIC_PALETTE[hairColorIndex]);
         this.entityData.set(DATA_FIN_COLOR, OCEANIC_PALETTE[finColorIndex]);
+        
+        if (this.random.nextFloat() < 0.10F) {
+            this.isAggressive = true;
+        }
+        
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
@@ -178,8 +184,7 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
             }
         });
 
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true,
-                p -> p instanceof Player player && !player.isCreative() && !player.isSpectator()));
+        this.targetSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, AbstractFish.class, false) {
             @Override
             public boolean canUse() {
@@ -188,6 +193,17 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
             @Override
             public boolean canContinueToUse() {
                 return MermaidEntity.this.hungerCooldown <= 0 && super.canContinueToUse();
+            }
+        });
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, true,
+                p -> p instanceof Player player && !player.isCreative() && !player.isSpectator()) {
+            @Override
+            public boolean canUse() {
+                return (MermaidEntity.this.isAggressive || MermaidEntity.this.hungerCooldown < -2400) && super.canUse();
+            }
+            @Override
+            public boolean canContinueToUse() {
+                return (MermaidEntity.this.isAggressive || MermaidEntity.this.hungerCooldown < -2400) && super.canContinueToUse();
             }
         });
     }
@@ -246,11 +262,11 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
             }
 
             // ── Hunger Cooldown ──────────────────────────────────────────
-            if (this.hungerCooldown > 0) {
+            if (this.hungerCooldown > -24000) {
                 this.hungerCooldown--;
-                if (this.hungerCooldown == 0 && this.getTarget() instanceof AbstractFish) {
-                    this.setTarget(null);
-                }
+            }
+            if (this.hungerCooldown == 0 && this.getTarget() instanceof AbstractFish) {
+                this.setTarget(null);
             }
 
             // ── Prevent drowning ─────────────────────────────────────────
@@ -300,6 +316,9 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
                     this.hungerCooldown = 6000; // 5 minutes (20 ticks * 60 seconds * 5)
                     this.fishEatenCount = 0;
                     this.setTarget(null);
+                } else if (this.hungerCooldown < 0) {
+                    // Reset starvation timer if she ate a fish but isn't full yet
+                    this.hungerCooldown = 0;
                 }
                 return true;
             }
@@ -330,6 +349,7 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
         tag.putInt("FinColor", this.entityData.get(DATA_FIN_COLOR));
         tag.putInt("HungerCooldown", this.hungerCooldown);
         tag.putInt("FishEatenCount", this.fishEatenCount);
+        tag.putBoolean("IsAggressive", this.isAggressive);
     }
 
     @Override
@@ -346,6 +366,9 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
         }
         if (tag.contains("FishEatenCount")) {
             this.fishEatenCount = tag.getInt("FishEatenCount");
+        }
+        if (tag.contains("IsAggressive")) {
+            this.isAggressive = tag.getBoolean("IsAggressive");
         }
     }
 

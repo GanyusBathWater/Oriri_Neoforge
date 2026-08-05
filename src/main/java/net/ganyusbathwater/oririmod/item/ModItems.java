@@ -517,6 +517,15 @@ public class ModItems {
                         () -> new DeferredSpawnEggItem(ModEntities.NOXUS_PALADIN, 0x5C4627, 0x00FF00,
                                         new Item.Properties()));
 
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.DungeonMarkerItem> DUNGEON_MARKER_SPAWN_EGG = ITEMS.register(
+                        "dungeon_marker_spawn_egg",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.DungeonMarkerItem(new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> DUNGEON_KEEPER_SPAWN_EGG = ITEMS.register(
+                        "dungeon_keeper_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.DUNGEON_KEEPER, 0x4A4A4A, 0xFFD700,
+                                        new Item.Properties()));
+
         // ------------------------------------------------------Armor---------------------------------------------------------
 
         public static final DeferredItem<ArmorItem> CRYSTAL_HELMET = ITEMS.register("crystal_helmet",

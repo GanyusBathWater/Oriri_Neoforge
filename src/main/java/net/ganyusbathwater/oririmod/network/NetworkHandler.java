@@ -44,6 +44,10 @@ public final class NetworkHandler {
             "dungeon_action");
     public static final ResourceLocation PLAY_DUNGEON_MUSIC = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "play_dungeon_music");
+    public static final ResourceLocation OPEN_MARKER_SCREEN = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "open_marker_screen");
+    public static final ResourceLocation SYNC_MARKER_DATA = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "sync_marker_data");
 
     private NetworkHandler() {
     }
@@ -174,6 +178,40 @@ public final class NetworkHandler {
                 (payload, ctx) -> ctx.enqueueWork(() ->
                         net.ganyusbathwater.oririmod.client.DungeonMusicHandler.handle(payload)
                 ));
+
+        // Marker GUI: server -> client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenMarkerScreenPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenMarkerScreenPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() ->
+                        net.minecraft.client.Minecraft.getInstance()
+                                .setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonMarkerScreen(payload))
+                ));
+
+        // Marker GUI: client -> server
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.SyncMarkerDataPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncMarkerDataPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var player = ctx.player();
+                    if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        net.minecraft.world.entity.Entity entity = sp.serverLevel().getEntity(payload.entityId());
+                        if (entity instanceof net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity marker) {
+                            marker.setStageId(payload.stageId());
+                            marker.setStageType(payload.stageType());
+                            marker.setRole(payload.role());
+                            
+                            net.minecraft.nbt.CompoundTag extra = marker.getExtraData();
+                            extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_ENEMY_TYPE, payload.enemyType());
+                            extra.putInt(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_COUNT, payload.count());
+                            extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SWITCH_ID, payload.switchId());
+                            extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_LOOT_TABLE, payload.lootTable());
+                            extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_BOSS_ID, payload.bossId());
+                            
+                            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§aMarker configuration saved!"), true);
+                        }
+                    }
+                }));
     }
     
 

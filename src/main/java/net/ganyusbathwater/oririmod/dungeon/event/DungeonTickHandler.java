@@ -40,8 +40,9 @@ public class DungeonTickHandler {
             if (!level.dimension().location().getPath().startsWith("dungeon_")) continue;
 
             DungeonManager manager = DungeonManager.get(level);
-            for (Map.Entry<UUID, DungeonInstance> entry : manager.getActiveInstances().entrySet()) {
-                tickInstance(level, manager, entry.getValue());
+            List<DungeonInstance> activeInstances = new java.util.ArrayList<>(manager.getActiveInstances().values());
+            for (DungeonInstance instance : activeInstances) {
+                tickInstance(level, manager, instance);
             }
         }
     }
@@ -78,7 +79,7 @@ public class DungeonTickHandler {
             // Teleport players to the stage's designated spawn point if defined
             if (nextDef.getPlayerSpawnPos() != null) {
                 var spawnPos = nextDef.getPlayerSpawnPos();
-                for (UUID playerId : instance.getPlayers()) {
+                for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
                     ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
                     if (sp != null) {
                         sp.teleportTo(level, spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, 0f, 0f);
@@ -98,7 +99,7 @@ public class DungeonTickHandler {
                 net.minecraft.resources.ResourceLocation track = dungeonDef.stageTrackOverrides().getOrDefault(nextDef.getStageId(), dungeonDef.dungeonTrack());
                 if (track != null) {
                     var payload = new net.ganyusbathwater.oririmod.network.packet.PlayDungeonMusicPayload(track, true, true);
-                    for (UUID playerId : instance.getPlayers()) {
+                    for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
                         ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
                         if (sp != null) net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, payload);
                     }
@@ -132,7 +133,7 @@ public class DungeonTickHandler {
         String name = def.getStageId().replace("_", " ");
         Component msg = Component.literal("Stage: " + name)
                 .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-        for (UUID playerId : instance.getPlayers()) {
+        for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
             ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
             if (sp != null) sp.displayClientMessage(msg, true);
         }
@@ -144,7 +145,7 @@ public class DungeonTickHandler {
                 
         // Award Progression
         net.ganyusbathwater.oririmod.dungeon.data.PlayerDungeonData progressData = net.ganyusbathwater.oririmod.dungeon.data.PlayerDungeonData.get(level);
-        for (UUID playerId : instance.getPlayers()) {
+        for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
             progressData.markCompleted(playerId, instance.getDungeonId());
             ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
             if (sp != null) {
@@ -161,7 +162,9 @@ public class DungeonTickHandler {
             level.setBlock(chestPos, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState(), 3);
             net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(chestPos);
             if (be instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE) {
-                chestBE.setLootTable(def.rewardLootTable(), level.getRandom().nextLong());
+                net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> lootKey = 
+                        net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, def.rewardLootTable());
+                chestBE.setLootTable(lootKey, level.getRandom().nextLong());
             }
             OririMod.LOGGER.info("[DungeonTickHandler] Spawned Loot Chest for {} at {}", instance.getDungeonId(), chestPos);
         }
@@ -172,7 +175,7 @@ public class DungeonTickHandler {
 
     private static void ejectAll(ServerLevel level, DungeonManager manager, DungeonInstance instance, String langKey) {
         Component msg = Component.translatable(langKey).withStyle(ChatFormatting.RED);
-        for (UUID playerId : instance.getPlayers()) {
+        for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
             ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
             if (sp != null) {
                 sp.displayClientMessage(msg, false);

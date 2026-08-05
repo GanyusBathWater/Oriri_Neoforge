@@ -130,9 +130,17 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.SCARLET_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
         dropSelf(ModBlocks.SCARLET_STEM.get());
         dropSelf(ModBlocks.STRIPPED_SCARLET_STEM.get());
-        dropSelf(ModBlocks.SCARLET_GRASS.get());
+        this.add(ModBlocks.SCARLET_GRASS.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable()
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .when(net.minecraft.world.level.storage.loot.predicates.MatchTool.toolMatches(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(net.minecraft.world.item.Items.SHEARS)).or(this.hasSilkTouch()))
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block))));
         dropSelf(ModBlocks.SCARLET_TOOTH_LEAVES.get());
-        this.add(ModBlocks.SCARLET_LILY.get(), block -> createSingleItemTable(block)
+        this.add(ModBlocks.SCARLET_LILY.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable()
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .when(net.minecraft.world.level.storage.loot.predicates.MatchTool.toolMatches(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(net.minecraft.world.item.Items.SHEARS)).or(this.hasSilkTouch()))
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block)))
                 .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
                         .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
                         .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.BLOOD_LOTUS.get())
@@ -221,7 +229,11 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.AETHER_MAGMA_BLOCK.get());
         dropSelf(ModBlocks.BLOOD_CAP_BLOCK.get());
         dropSelf(ModBlocks.GLOWLINGS_BLOCK.get());
-        this.add(ModBlocks.MOONSHROOM_BLOCK.get(), block -> createSingleItemTable(block)
+        this.add(ModBlocks.MOONSHROOM_BLOCK.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable()
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .when(net.minecraft.world.level.storage.loot.predicates.MatchTool.toolMatches(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(net.minecraft.world.item.Items.SHEARS)).or(this.hasSilkTouch()))
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block)))
                 .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
                         .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
                         .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.MAGIC_MUSHROOM.get())

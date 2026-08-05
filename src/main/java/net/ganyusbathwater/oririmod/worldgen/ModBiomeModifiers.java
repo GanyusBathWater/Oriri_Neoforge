@@ -313,7 +313,7 @@ public class ModBiomeModifiers {
                 
                 context.register(ADD_SPAWNS_SPLINTER_SPIDER, new BiomeModifiers.AddSpawnsBiomeModifier(
                         biomes.getOrThrow(BiomeTags.IS_OVERWORLD),
-                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SPLINTER_SPIDER.get(), 100, 4, 4))
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SPLINTER_SPIDER.get(), 20, 4, 4))
                 ));
                 
                 context.register(ADD_SPAWNS_LOADED_BLAZE, new BiomeModifiers.AddSpawnsBiomeModifier(

@@ -70,7 +70,6 @@ public class DungeonMarkerEntity extends Entity {
     public DungeonMarkerEntity(EntityType<?> type, Level level) {
         super(type, level);
         this.noPhysics = true; // Don't apply physics (gravity, collision)
-        this.setInvisible(true);
     }
 
     // -------------------------------------------------------------------------
@@ -136,10 +135,64 @@ public class DungeonMarkerEntity extends Entity {
     // -------------------------------------------------------------------------
 
     @Override
-    public boolean isInvisible() { return true; }
+    public net.minecraft.world.InteractionResult interact(net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand) {
+        if (hand == net.minecraft.world.InteractionHand.MAIN_HAND && player.isCreative()) {
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                net.ganyusbathwater.oririmod.network.packet.OpenMarkerScreenPayload payload = 
+                    new net.ganyusbathwater.oririmod.network.packet.OpenMarkerScreenPayload(
+                        this.getId(),
+                        this.blockPosition(),
+                        this.getStageId(),
+                        this.getStageType(),
+                        this.getRole(),
+                        this.extraData.getString(TAG_ENEMY_TYPE),
+                        this.extraData.getInt(TAG_COUNT),
+                        this.extraData.getString(TAG_SWITCH_ID),
+                        this.extraData.getString(TAG_LOOT_TABLE),
+                        this.extraData.getString(TAG_BOSS_ID),
+                        buildStageSummary()
+                    );
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, payload);
+            }
+            return net.minecraft.world.InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+        return super.interact(player, hand);
+    }
+
+    private String buildStageSummary() {
+        if (this.level().isClientSide || this.getStageId().isEmpty()) return "No summary available.";
+        java.util.List<DungeonMarkerEntity> markers = ((net.minecraft.server.level.ServerLevel)this.level()).getEntitiesOfClass(
+            DungeonMarkerEntity.class, 
+            this.getBoundingBox().inflate(128.0), 
+            m -> m.getStageId().equals(this.getStageId())
+        );
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        for (DungeonMarkerEntity m : markers) {
+            counts.put(m.getRole(), counts.getOrDefault(m.getRole(), 0) + 1);
+        }
+        if (counts.isEmpty()) return "No other markers found.";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Stage '").append(this.getStageId()).append("' markers:\n");
+        for (java.util.Map.Entry<String, Integer> entry : counts.entrySet()) {
+            sb.append("- ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+        return sb.toString().trim();
+    }
 
     @Override
-    public boolean isPickable() { return false; }
+    public boolean isPickable() { return true; }
+
+    @Override
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
+        if (source.getEntity() instanceof net.minecraft.world.entity.player.Player player && player.isCreative()) {
+            if (!this.level().isClientSide) {
+                this.discard();
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal("Removed Marker"), true);
+            }
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean isPushable() { return false; }

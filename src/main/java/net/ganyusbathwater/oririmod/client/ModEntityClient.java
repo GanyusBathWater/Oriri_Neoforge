@@ -44,6 +44,7 @@ public class ModEntityClient {
                 event.registerEntityRenderer(ModEntities.SPORE_ZOMBIE.get(),
                                 net.ganyusbathwater.oririmod.client.render.SporeZombieRenderer::new);
                 event.registerEntityRenderer(ModEntities.EYE_OF_THE_STORM.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+                event.registerEntityRenderer(ModEntities.DUNGEON_MARKER.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
                 event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
                 event.registerEntityRenderer(ModEntities.BLIZZA.get(),

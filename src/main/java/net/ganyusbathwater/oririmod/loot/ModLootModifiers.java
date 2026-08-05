@@ -15,6 +15,12 @@ public class ModLootModifiers {
 
     public static final Supplier<MapCodec<AddLootTableModifier>> ADD_LOOT_TABLE =
             LOOT_MODIFIER_SERIALIZERS.register("add_loot_table", () -> AddLootTableModifier.CODEC);
+            
+    public static final Supplier<MapCodec<AddMobLootModifier>> ADD_MOB_LOOT =
+            LOOT_MODIFIER_SERIALIZERS.register("add_mob_loot", () -> AddMobLootModifier.CODEC);
+
+    public static final Supplier<MapCodec<AddPassiveMobLootModifier>> ADD_PASSIVE_MOB_LOOT =
+            LOOT_MODIFIER_SERIALIZERS.register("add_passive_mob_loot", () -> AddPassiveMobLootModifier.CODEC);
 
     public static void register(IEventBus eventBus) {
         LOOT_MODIFIER_SERIALIZERS.register(eventBus);

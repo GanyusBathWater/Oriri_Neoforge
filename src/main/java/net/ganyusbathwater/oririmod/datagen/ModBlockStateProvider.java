@@ -453,10 +453,16 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         private void generateScarletVineBlock() {
                 ResourceLocation texture = modLoc("block/scarlet_vine");
-                BlockModelBuilder model = models().withExistingParent("scarlet_vine", mcLoc("block/vine"))
-                                .texture("vine", texture)
+                net.neoforged.neoforge.client.model.generators.BlockModelBuilder model = models().getBuilder("scarlet_vine")
+                                .renderType("cutout")
                                 .texture("particle", texture)
-                                .renderType("cutout");
+                                .texture("vine", texture)
+                                .element()
+                                .from(0, 0, 0.8f).to(16, 16, 0.8f)
+                                .shade(false)
+                                .face(Direction.NORTH).uvs(16, 0, 0, 16).texture("#vine").end()
+                                .face(Direction.SOUTH).uvs(0, 0, 16, 16).texture("#vine").end()
+                                .end();
 
                 getMultipartBuilder(ModBlocks.SCARLET_VINE.get())
                                 .part().modelFile(model).addModel().condition(BlockStateProperties.NORTH, true).end()
@@ -465,7 +471,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 .part().modelFile(model).rotationY(270).uvLock(true).addModel().condition(BlockStateProperties.WEST, true).end()
                                 .part().modelFile(model).rotationX(270).uvLock(true).addModel().condition(BlockStateProperties.UP, true).end();
                 
-                simpleBlockItem(ModBlocks.SCARLET_VINE.get(), model);
+                itemModels().singleTexture("scarlet_vine", mcLoc("item/generated"), "layer0", texture);
         }
 
         private void slimeBlock(DeferredBlock<?> deferredBlock) {

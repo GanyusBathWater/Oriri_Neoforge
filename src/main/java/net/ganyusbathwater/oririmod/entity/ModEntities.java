@@ -483,9 +483,8 @@ public final class ModEntities {
                                                         .<net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity>of(
                                                                         net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity::new,
                                                                         MobCategory.MISC)
-                                                        .sized(0.0F, 0.0F)      // No hitbox — purely logical
-                                                        .noSave()               // Don't save to chunk NBT (we manage lifecycle)
-                                                        .clientTrackingRange(0) // Server-only
+                                                        .sized(0.5F, 0.5F)
+                                                        .clientTrackingRange(64)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "dungeon_marker")

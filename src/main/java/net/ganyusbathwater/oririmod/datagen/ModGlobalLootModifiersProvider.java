@@ -136,11 +136,10 @@ public class ModGlobalLootModifiersProvider extends GlobalLootModifierProvider {
                 new LootItemCondition[]{LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().of(EntityTypeTags.UNDEAD)).build()},
                 ModInjectionLootTables.key("damned_soul")));
         
-        // Hollow Soul: Passive mobs (Animals usually don't have a broad tag in 1.21 but there are tags like #minecraft:animals)
-        add("hollow_soul_passive", new AddLootTableModifier(
-                new LootItemCondition[]{LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().of(net.minecraft.tags.EntityTypeTags.FALL_DAMAGE_IMMUNE)).build()}, // Placeholder: wait, let's use a custom condition or check if there is an animal tag. We will use inverted Monster tag for now.
+        // Hollow Soul: Passive mobs (Animals, AmbientCreatures, WaterAnimals, Villagers)
+        add("hollow_soul_passive", new net.ganyusbathwater.oririmod.loot.AddPassiveMobLootModifier(
+                new LootItemCondition[]{},
                 ModInjectionLootTables.key("hollow_soul")));
-        // Better Hollow Soul: Just check if the entity isn't a monster/undead etc. Or we can just use the #forge:animals or similar if it exists. We'll refine this later if it's an issue.
 
         // Power Soul: Bosses (Wither, Ender Dragon, Elder Guardian, Warden)
         add("power_soul_wither", new AddLootTableModifier(new LootItemCondition[]{LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().of(EntityType.WITHER)).build()}, ModInjectionLootTables.key("power_soul")));
@@ -149,7 +148,7 @@ public class ModGlobalLootModifiersProvider extends GlobalLootModifierProvider {
         add("power_soul_warden", new AddLootTableModifier(new LootItemCondition[]{LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().of(EntityType.WARDEN)).build()}, ModInjectionLootTables.key("power_soul")));
 
         // Tortured Soul: Nether mobs
-        add("tortured_soul_nether", new AddLootTableModifier(
+        add("tortured_soul_nether", new net.ganyusbathwater.oririmod.loot.AddMobLootModifier(
                 new LootItemCondition[]{LocationCheck.checkLocation(LocationPredicate.Builder.location().setDimension(net.minecraft.world.level.Level.NETHER)).build()},
                 ModInjectionLootTables.key("tortured_soul")));
         
