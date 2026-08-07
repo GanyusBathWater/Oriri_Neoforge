@@ -59,7 +59,7 @@ public class OririConfig {
         public final ModConfigSpec.DoubleValue eclipseChance;
         public final ModConfigSpec.IntValue nightEventDuration;
         public final ModConfigSpec.IntValue eclipseDuration;
-        public final ModConfigSpec.BooleanValue overrideVanillaSkyColorForShaders;
+        public final ModConfigSpec.EnumValue<net.ganyusbathwater.oririmod.util.ShaderCompatMode> overrideVanillaSkyColorForShaders;
 
         WorldEvents(ModConfigSpec.Builder b) {
             nightEventChance = b
@@ -76,8 +76,8 @@ public class OririConfig {
                     .comment("Duration of an eclipse in ticks. 6000 ticks = 5 minutes.")
                     .defineInRange("eclipseDuration", 6000, 600, 24000);
             overrideVanillaSkyColorForShaders = b
-                    .comment("Override Vanilla Sky Color to support shader packs during celestial events.", "Turn this off if you experience visual glitches with other weather/sky mods.")
-                    .define("overrideVanillaSkyColorForShaders", true);
+                    .comment("Override Vanilla Sky Color to support shader packs during celestial events.", "ON: Always override", "OFF: Never override", "DYNAMIC: Only override when a shader pack is actively enabled")
+                    .defineEnum("overrideVanillaSkyColorForShaders", net.ganyusbathwater.oririmod.util.ShaderCompatMode.DYNAMIC);
         }
     }
 

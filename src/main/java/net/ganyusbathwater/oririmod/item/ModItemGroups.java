@@ -260,19 +260,48 @@ public class ModItemGroups {
                         output.accept(ModItems.AETHER_CHARGE);
 
                         // Potions
-                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1));
-                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1));
-                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.LINGERING_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1));
-                        
-                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2));
-                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2));
-                        output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.LINGERING_POTION, net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2));
+                        java.util.List<net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion>> allPotions = java.util.List.of(
+                                net.ganyusbathwater.oririmod.potion.ModPotions.STUNNED_POTION,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION1,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION2,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION3,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION1,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION2,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION1,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION2,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2
+                        );
+                        for (var potionHolder : allPotions) {
+                            output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, potionHolder));
+                            output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, potionHolder));
+                            output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.LINGERING_POTION, potionHolder));
+                        }
 
                         // Enchanted Books
                         itemDisplayParameters.holders().lookup(net.minecraft.core.registries.Registries.ENCHANTMENT).ifPresent(reg -> {
-                            reg.get(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING).ifPresent(ench -> {
-                                output.accept(net.minecraft.world.item.EnchantedBookItem.createForEnchantment(new net.minecraft.world.item.enchantment.EnchantmentInstance(ench, 5)));
-                            });
+                            java.util.Map<net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> enchs = new java.util.LinkedHashMap<>();
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.SNIPER, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.INVINCIBLE, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.TEACHER, 3);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_REGENERATION, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_CAPACITY, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_SAVINGS, 5);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING, 5);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_FIRE, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_WATER, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_NATURE, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_EARTH, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_LIGHT, 1);
+                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_DARKNESS, 1);
+                            
+                            for (var entry : enchs.entrySet()) {
+                                reg.get(entry.getKey()).ifPresent(ench -> {
+                                    for (int lvl = 1; lvl <= entry.getValue(); lvl++) {
+                                        output.accept(net.minecraft.world.item.EnchantedBookItem.createForEnchantment(new net.minecraft.world.item.enchantment.EnchantmentInstance(ench, lvl)));
+                                    }
+                                });
+                            }
                         });
 
                         // -----------Vestiges-----------

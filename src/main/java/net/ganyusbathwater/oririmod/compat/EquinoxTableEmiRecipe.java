@@ -29,10 +29,24 @@ public class EquinoxTableEmiRecipe implements EmiRecipe {
         this.id = id;
         this.recipe = recipe;
 
+        dev.emi.emi.api.stack.EmiIngredient centerIngredient = EmiIngredient.of(recipe.getCenter());
+        if (recipe instanceof net.ganyusbathwater.oririmod.recipe.MagicEquinoxUpgradeRecipe upgradeRecipe) {
+            java.util.List<dev.emi.emi.api.stack.EmiIngredient> modifiedStacks = new java.util.ArrayList<>();
+            for (net.minecraft.world.item.ItemStack stack : recipe.getCenter().getItems()) {
+                net.minecraft.world.item.ItemStack copy = stack.copy();
+                net.minecraft.world.item.component.CustomData data = copy.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);
+                net.minecraft.nbt.CompoundTag tag = data.copyTag();
+                tag.putInt("oriri_level", upgradeRecipe.getRequiredLevel());
+                copy.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+                modifiedStacks.add(EmiStack.of(copy));
+            }
+            centerIngredient = dev.emi.emi.api.stack.EmiIngredient.of(modifiedStacks);
+        }
+
         this.inputs = List.of(
                 EmiIngredient.of(recipe.getTop()),
                 EmiIngredient.of(recipe.getLeft()),
-                EmiIngredient.of(recipe.getCenter()),
+                centerIngredient,
                 EmiIngredient.of(recipe.getRight()),
                 EmiIngredient.of(recipe.getBottom()),
                 EmiIngredient.of(recipe.getTemplate()));
@@ -77,13 +91,13 @@ public class EquinoxTableEmiRecipe implements EmiRecipe {
         widgets.addTexture(new EmiTexture(TEXTURE, 5, 5, 158, 72), 0, 0);
 
         // Draw slots (using same coordinates as JEI minus 6)
-        widgets.addSlot(EmiIngredient.of(recipe.getTop()), 35 - 6, 14 - 6).drawBack(false);
-        widgets.addSlot(EmiIngredient.of(recipe.getLeft()), 17 - 6, 32 - 6).drawBack(false);
-        widgets.addSlot(EmiIngredient.of(recipe.getCenter()), 35 - 6, 32 - 6).drawBack(false);
-        widgets.addSlot(EmiIngredient.of(recipe.getRight()), 53 - 6, 32 - 6).drawBack(false);
-        widgets.addSlot(EmiIngredient.of(recipe.getBottom()), 35 - 6, 50 - 6).drawBack(false);
+        widgets.addSlot(inputs.get(0), 35 - 6, 14 - 6).drawBack(false);
+        widgets.addSlot(inputs.get(1), 17 - 6, 32 - 6).drawBack(false);
+        widgets.addSlot(inputs.get(2), 35 - 6, 32 - 6).drawBack(false);
+        widgets.addSlot(inputs.get(3), 53 - 6, 32 - 6).drawBack(false);
+        widgets.addSlot(inputs.get(4), 35 - 6, 50 - 6).drawBack(false);
 
-        widgets.addSlot(EmiIngredient.of(recipe.getTemplate()), 89 - 6, 17 - 6).drawBack(false);
+        widgets.addSlot(inputs.get(5), 89 - 6, 17 - 6).drawBack(false);
 
         widgets.addSlot(outputs.get(0), 141 - 6, 32 - 6).recipeContext(this).drawBack(false);
 

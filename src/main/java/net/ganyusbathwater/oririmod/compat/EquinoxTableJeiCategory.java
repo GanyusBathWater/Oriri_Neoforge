@@ -65,7 +65,20 @@ public class EquinoxTableJeiCategory implements IRecipeCategory<EquinoxTableReci
         // Input: Left
         builder.addSlot(RecipeIngredientRole.INPUT, 17 - 6, 32 - 6).addIngredients(recipe.getLeft());
         // Input: Center
-        builder.addSlot(RecipeIngredientRole.INPUT, 35 - 6, 32 - 6).addIngredients(recipe.getCenter());
+        if (recipe instanceof net.ganyusbathwater.oririmod.recipe.MagicEquinoxUpgradeRecipe upgradeRecipe) {
+            java.util.List<ItemStack> modifiedStacks = new java.util.ArrayList<>();
+            for (ItemStack stack : recipe.getCenter().getItems()) {
+                ItemStack copy = stack.copy();
+                net.minecraft.world.item.component.CustomData data = copy.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);
+                net.minecraft.nbt.CompoundTag tag = data.copyTag();
+                tag.putInt("oriri_level", upgradeRecipe.getRequiredLevel());
+                copy.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+                modifiedStacks.add(copy);
+            }
+            builder.addSlot(RecipeIngredientRole.INPUT, 35 - 6, 32 - 6).addItemStacks(modifiedStacks);
+        } else {
+            builder.addSlot(RecipeIngredientRole.INPUT, 35 - 6, 32 - 6).addIngredients(recipe.getCenter());
+        }
         // Input: Right
         builder.addSlot(RecipeIngredientRole.INPUT, 53 - 6, 32 - 6).addIngredients(recipe.getRight());
         // Input: Bottom

@@ -33,7 +33,16 @@ public abstract class ClientLevelMixin {
      */
     @Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true)
     private void oriri_overrideSkyColorForShaders(net.minecraft.world.phys.Vec3 pPos, float pPartialTick, CallbackInfoReturnable<net.minecraft.world.phys.Vec3> cir) {
-        if (net.ganyusbathwater.oririmod.config.OririConfig.COMMON.worldEvents.overrideVanillaSkyColorForShaders.get()) {
+        net.ganyusbathwater.oririmod.util.ShaderCompatMode mode = net.ganyusbathwater.oririmod.config.OririConfig.COMMON.worldEvents.overrideVanillaSkyColorForShaders.get();
+        boolean shouldOverride = false;
+        
+        if (mode == net.ganyusbathwater.oririmod.util.ShaderCompatMode.ON) {
+            shouldOverride = true;
+        } else if (mode == net.ganyusbathwater.oririmod.util.ShaderCompatMode.DYNAMIC) {
+            shouldOverride = net.ganyusbathwater.oririmod.util.ShaderDetector.isShaderActive();
+        }
+
+        if (shouldOverride) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level != null) {
                 if (WorldEventManager.isEventActive(mc.level, WorldEventType.BLOOD_MOON)) {

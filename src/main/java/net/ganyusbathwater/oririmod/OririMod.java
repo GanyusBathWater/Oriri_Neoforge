@@ -138,6 +138,34 @@ public class OririMod {
             event.accept(ModItems.DUNGEON_MARKER_SPAWN_EGG);
             event.accept(ModItems.DUNGEON_KEEPER_SPAWN_EGG);
         }
+
+        if (event.getTabKey().location().getNamespace().equals("minecraft")) {
+            event.getEntries().entrySet().removeIf(entry -> {
+                net.minecraft.world.item.ItemStack stack = entry.getKey();
+                
+                if (stack.is(net.minecraft.world.item.Items.POTION) || stack.is(net.minecraft.world.item.Items.SPLASH_POTION) || stack.is(net.minecraft.world.item.Items.LINGERING_POTION)) {
+                    net.minecraft.world.item.alchemy.PotionContents contents = stack.get(net.minecraft.core.component.DataComponents.POTION_CONTENTS);
+                    if (contents != null && contents.potion().isPresent()) {
+                        net.minecraft.resources.ResourceLocation potionId = contents.potion().get().unwrapKey().map(net.minecraft.resources.ResourceKey::location).orElse(null);
+                        if (potionId != null && potionId.getNamespace().equals(MOD_ID)) {
+                            return true;
+                        }
+                    }
+                }
+                
+                if (stack.is(net.minecraft.world.item.Items.ENCHANTED_BOOK)) {
+                    net.minecraft.world.item.enchantment.ItemEnchantments enchantments = stack.getOrDefault(net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+                    for (net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchKey : enchantments.keySet()) {
+                        net.minecraft.resources.ResourceLocation enchId = enchKey.unwrapKey().map(net.minecraft.resources.ResourceKey::location).orElse(null);
+                        if (enchId != null && enchId.getNamespace().equals(MOD_ID)) {
+                            return true;
+                        }
+                    }
+                }
+                
+                return false;
+            });
+        }
     }
 
     private void registerSpawnPlacements(net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent event) {

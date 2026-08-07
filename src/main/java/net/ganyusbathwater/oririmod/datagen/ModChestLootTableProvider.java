@@ -18,6 +18,8 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 import java.util.function.BiConsumer;
 
@@ -42,6 +44,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.COAL).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
                         .add(LootItem.lootTableItem(Items.COBBLESTONE).setWeight(25).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 16.0F))))
                         .add(LootItem.lootTableItem(ModBlocks.ELDER_SAPLING).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost/training")),
@@ -57,6 +63,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.POTION).setWeight(5).apply(SetPotionFunction.setPotion(Potions.SWIFTNESS)))
                         .add(LootItem.lootTableItem(Items.POTION).setWeight(5).apply(SetPotionFunction.setPotion(Potions.STRENGTH)))
                         .add(LootItem.lootTableItem(Items.POTION).setWeight(5).apply(SetPotionFunction.setPotion(Potions.HEALING)))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost/kitchen")),
@@ -74,6 +84,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.BEEF).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
                         .add(LootItem.lootTableItem(ModItems.ELDERBERRY).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
                         .add(LootItem.lootTableItem(Items.MUSHROOM_STEW).setWeight(5))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost/library")),
@@ -84,6 +98,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.PAPER).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 6.0F))))
                         .add(LootItem.lootTableItem(Items.WRITABLE_BOOK).setWeight(5))
                         .add(LootItem.lootTableItem(Items.FEATHER).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost_ruins/storage")),
@@ -101,6 +119,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.COAL).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
                         .add(LootItem.lootTableItem(Items.COBBLESTONE).setWeight(25).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 16.0F))))
                         .add(LootItem.lootTableItem(ModBlocks.ELDER_SAPLING).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost_ruins/training")),
@@ -120,6 +142,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.POTION).setWeight(5).apply(SetPotionFunction.setPotion(Potions.SWIFTNESS)))
                         .add(LootItem.lootTableItem(Items.POTION).setWeight(5).apply(SetPotionFunction.setPotion(Potions.STRENGTH)))
                         .add(LootItem.lootTableItem(Items.POTION).setWeight(5).apply(SetPotionFunction.setPotion(Potions.HEALING)))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost_ruins/kitchen")),
@@ -135,6 +161,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.WHEAT).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 6.0F))))
                         .add(LootItem.lootTableItem(ModItems.ELDERBERRY).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
                         .add(LootItem.lootTableItem(Items.SUSPICIOUS_STEW).setWeight(10))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost_ruins/library")),
@@ -149,6 +179,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.PAPER).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 6.0F))))
                         .add(LootItem.lootTableItem(Items.WRITABLE_BOOK).setWeight(5))
                         .add(LootItem.lootTableItem(Items.FEATHER).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
 
         output.accept(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "chests/outpost_ruins/scarlet_storage")),
@@ -166,6 +200,10 @@ public class ModChestLootTableProvider implements LootTableSubProvider {
                         .add(LootItem.lootTableItem(Items.COAL).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
                         .add(LootItem.lootTableItem(ModBlocks.SCARLET_COBBLESTONE).setWeight(25).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 16.0F))))
                         .add(LootItem.lootTableItem(ModBlocks.SCARLET_SAPLING).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+                ).withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE))
                 ));
     }
 }

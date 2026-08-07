@@ -269,6 +269,9 @@ public class OririClient {
         
         builder.addMix(Potions.AWKWARD, net.ganyusbathwater.oririmod.block.ModBlocks.BLOOD_CAP_BLOCK.get().asItem(), ModPotions.ANTI_HEAL_POTION1);
         builder.addMix(ModPotions.ANTI_HEAL_POTION1, Items.GLOWSTONE_DUST, ModPotions.ANTI_HEAL_POTION2);
+        
+        builder.addMix(Potions.AWKWARD, ModItems.MANA_MANIFESTATION.get(), ModPotions.MANA_REGEN_POTION1);
+        builder.addMix(ModPotions.MANA_REGEN_POTION1, Items.GLOWSTONE_DUST, ModPotions.MANA_REGEN_POTION2);
     }
 
     @SubscribeEvent
@@ -317,60 +320,77 @@ public class OririClient {
                 net.ganyusbathwater.oririmod.client.render.block.ForcefieldEmitterRenderer::new);
     }
 
+    private static float blackHoleShakeIntensity = 0f;
+    private static float blackHoleTimeBase = 0f;
+    private static float swordShakeIntensity = 0f;
+    private static float swordTimeBase = 0f;
+
     @SubscribeEvent
-    public static void onComputeCameraAngles(net.neoforged.neoforge.client.event.ViewportEvent.ComputeCameraAngles event) {
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
         
-        // Scan for nearby BlackHoleEntities for universal screen shake (works with shaders!)
         double maxDist = 64.0;
+        
+        // Scan for BlackHoleEntities (runs 20 times a second, not every frame pass!)
         java.util.List<net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity> holes = mc.level.getEntitiesOfClass(
                 net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity.class, 
                 mc.player.getBoundingBox().inflate(maxDist));
                 
+        blackHoleShakeIntensity = 0f;
         if (!holes.isEmpty()) {
             net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity closest = holes.get(0);
             double dist = mc.player.distanceTo(closest);
             
             if (dist < maxDist && closest.getCurrentRadius() > 0.5f) {
                 float intensity = 1.0f - (float)(dist / maxDist);
-                intensity = intensity * intensity * intensity; // exponential for stronger shake closer up
-                
-                float time = closest.tickCount + (float)event.getPartialTick();
-                
-                float shakePitch = (float)(Math.sin(time * 2.5) * Math.cos(time * 1.5)) * 0.7f * intensity;
-                float shakeYaw = (float)(Math.cos(time * 3.0) * Math.sin(time * 1.1)) * 0.7f * intensity;
-                float shakeRoll = (float)(Math.sin(time * 2.0)) * 0.5f * intensity;
-                
-                event.setPitch(event.getPitch() + shakePitch);
-                event.setYaw(event.getYaw() + shakeYaw);
-                event.setRoll(event.getRoll() + shakeRoll);
+                blackHoleShakeIntensity = intensity * intensity * intensity;
+                blackHoleTimeBase = closest.tickCount;
             }
         }
         
-        // Scan for GiantSwordEntities for screen shake on impact
+        // Scan for GiantSwordEntities
         java.util.List<net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity> swords = mc.level.getEntitiesOfClass(
                 net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity.class, 
                 mc.player.getBoundingBox().inflate(maxDist));
+                
+        swordShakeIntensity = 0f;
         for (net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity sword : swords) {
             if (sword.isImpacted() && sword.clientImpactTicks < 40) {
                 double dist = mc.player.distanceTo(sword);
                 if (dist < maxDist) {
                     float distIntensity = 1.0f - (float)(dist / maxDist);
                     float timeIntensity = 1.0f - (sword.clientImpactTicks / 40.0f);
-                    float intensity = distIntensity * timeIntensity * 3.0f; // very intense close up
-                    
-                    // Simple fast shake
-                    float time = sword.tickCount + (float)event.getPartialTick();
-                    float shakePitch = (float)(Math.sin(time * 5.0) * Math.cos(time * 3.0)) * intensity;
-                    float shakeYaw = (float)(Math.cos(time * 6.0) * Math.sin(time * 2.5)) * intensity;
-                    float shakeRoll = (float)(Math.sin(time * 4.0)) * 0.5f * intensity;
-                    
-                    event.setPitch(event.getPitch() + shakePitch);
-                    event.setYaw(event.getYaw() + shakeYaw);
-                    event.setRoll(event.getRoll() + shakeRoll);
+                    swordShakeIntensity = distIntensity * timeIntensity * 3.0f;
+                    swordTimeBase = sword.tickCount;
+                    break;
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onComputeCameraAngles(net.neoforged.neoforge.client.event.ViewportEvent.ComputeCameraAngles event) {
+        if (blackHoleShakeIntensity > 0f) {
+            float time = blackHoleTimeBase + (float)event.getPartialTick();
+            float shakePitch = (float)(Math.sin(time * 2.5) * Math.cos(time * 1.5)) * 0.7f * blackHoleShakeIntensity;
+            float shakeYaw = (float)(Math.cos(time * 3.0) * Math.sin(time * 1.1)) * 0.7f * blackHoleShakeIntensity;
+            float shakeRoll = (float)(Math.sin(time * 2.0)) * 0.5f * blackHoleShakeIntensity;
+            
+            event.setPitch(event.getPitch() + shakePitch);
+            event.setYaw(event.getYaw() + shakeYaw);
+            event.setRoll(event.getRoll() + shakeRoll);
+        }
+        
+        if (swordShakeIntensity > 0f) {
+            float time = swordTimeBase + (float)event.getPartialTick();
+            float shakePitch = (float)(Math.sin(time * 5.0) * Math.cos(time * 3.0)) * swordShakeIntensity;
+            float shakeYaw = (float)(Math.cos(time * 6.0) * Math.sin(time * 2.5)) * swordShakeIntensity;
+            float shakeRoll = (float)(Math.sin(time * 4.0)) * 0.5f * swordShakeIntensity;
+            
+            event.setPitch(event.getPitch() + shakePitch);
+            event.setYaw(event.getYaw() + shakeYaw);
+            event.setRoll(event.getRoll() + shakeRoll);
         }
     }
 
