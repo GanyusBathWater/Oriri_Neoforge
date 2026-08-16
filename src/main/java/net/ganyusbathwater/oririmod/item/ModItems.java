@@ -154,8 +154,10 @@ public class ModItems {
 
         public static final DeferredItem<Item> ELDERBERRY = ITEMS.register("elderberry",
                         () -> new Item(new Item.Properties().food(ModFoods.ELDERBERRY)));
+        public static final DeferredItem<Item> EONIC_DRAGON_FRUIT = ITEMS.register("eonic_dragon_fruit",
+                        () -> new DragonFruit(new Item.Properties().food(ModFoods.EONIC_DRAGON_FRUIT)));
         public static final DeferredItem<Item> DRAGON_FRUIT = ITEMS.register("dragon_fruit",
-                        () -> new DragonFruit(new Item.Properties().food(ModFoods.DRAGON_FRUIT)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.consumable.NormalDragonFruitItem(new Item.Properties()));
         public static final DeferredItem<Item> THE_FIRST_APPLE = ITEMS.register("the_first_apple",
                         () -> new TheFirstApple(new Item.Properties().food(ModFoods.THE_FIRST_APPLE)));
         public static final DeferredItem<Item> BLOOD_LOTUS = ITEMS.register("blood_lotus",
@@ -182,6 +184,19 @@ public class ModItems {
 
         public static final DeferredItem<Item> AETHER_CHARGE = ITEMS.register("aether_charge",
                         () -> new AetherChargeItem(new Item.Properties()));
+
+        // ---------------------------------------Epoch Items---------------------------------------------------------
+
+        public static final DeferredItem<Item> EPOCH_SIGN = ITEMS.register("epoch_sign",
+                        () -> new SignItem(new Item.Properties().stacksTo(16), net.ganyusbathwater.oririmod.block.ModBlocks.EPOCH_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.EPOCH_WALL_SIGN.get()));
+        public static final DeferredItem<Item> EPOCH_HANGING_SIGN = ITEMS.register("epoch_hanging_sign",
+                        () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.EPOCH_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.EPOCH_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
+        
+        public static final DeferredItem<Item> EPOCH_BOAT = ITEMS.register("epoch_boat",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.ModBoatItem(false, ModBoatType.EPOCH, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> EPOCH_CHEST_BOAT = ITEMS.register("epoch_chest_boat",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.ModBoatItem(true, ModBoatType.EPOCH, new Item.Properties().stacksTo(1)));
+
 
         // ---------------------------------------Weapons---------------------------------------------------------
 

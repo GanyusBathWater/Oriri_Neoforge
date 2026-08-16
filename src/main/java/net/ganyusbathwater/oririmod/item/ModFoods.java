@@ -8,7 +8,8 @@ public class ModFoods
 {
     public static final FoodProperties ELDERBERRY = new FoodProperties.Builder().nutrition(1).alwaysEdible().effect(()-> new MobEffectInstance(MobEffects.GLOWING), 1).build();
 
-    public static final FoodProperties DRAGON_FRUIT = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+    public static final FoodProperties EONIC_DRAGON_FRUIT = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
+    public static final FoodProperties DRAGON_FRUIT = new FoodProperties.Builder().nutrition(5).alwaysEdible().build();
 
     public static final FoodProperties THE_FIRST_APPLE = new FoodProperties.Builder().nutrition(20).alwaysEdible().build();
 

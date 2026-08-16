@@ -375,6 +375,58 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 models().cross("upgraded_abyss_crown_sapling", modLoc("block/abyss_crown_sapling"))
                                                 .renderType("cutout"));
 
+                // ===== EPOCH WOOD SET =====
+                axisBlock(((RotatedPillarBlock) ModBlocks.EPOCH_WOOD_LOG.get()),
+                                modLoc("block/epoch_wood_log"),
+                                modLoc("block/epoch_wood_top"));
+                axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get()),
+                                modLoc("block/stripped_epoch_wood_log"),
+                                modLoc("block/stripped_epoch_wood_log_top"));
+
+                simpleBlockWithItem(ModBlocks.EPOCH_WOOD.get(),
+                                models().cubeAll("epoch_wood", modLoc("block/epoch_wood_log")));
+                simpleBlockWithItem(ModBlocks.STRIPPED_EPOCH_WOOD.get(),
+                                models().cubeAll("stripped_epoch_wood",
+                                                modLoc("block/stripped_epoch_wood_log")));
+
+                blockWithItem(ModBlocks.EPOCH_WOOD_PLANKS, 1);
+                stairsBlock(ModBlocks.EPOCH_STAIRS.get(), blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()));
+                slabBlock(ModBlocks.EPOCH_SLAB.get(), blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()),
+                                blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()));
+                fenceBlock(ModBlocks.EPOCH_FENCE.get(), blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()));
+                fenceGateBlock(ModBlocks.EPOCH_GATE.get(), blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()));
+
+                doorBlockWithRenderType((DoorBlock) ModBlocks.EPOCH_DOOR.get(), modLoc("block/epoch_door_bottom"), modLoc("block/epoch_door_top"), "cutout");
+                trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.EPOCH_TRAPDOOR.get(), modLoc("block/epoch_trapdoor"), true, "cutout");
+
+                buttonBlock((net.minecraft.world.level.block.ButtonBlock) ModBlocks.EPOCH_BUTTON.get(), blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()));
+                pressurePlateBlock((net.minecraft.world.level.block.PressurePlateBlock) ModBlocks.EPOCH_PRESSURE_PLATE.get(), blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()));
+
+                signBlock((net.minecraft.world.level.block.StandingSignBlock) ModBlocks.EPOCH_SIGN.get(), (net.minecraft.world.level.block.WallSignBlock) ModBlocks.EPOCH_WALL_SIGN.get(), blockTexture(ModBlocks.EPOCH_WOOD_PLANKS.get()));
+                hangingSignBlock(ModBlocks.EPOCH_HANGING_SIGN.get(), ModBlocks.EPOCH_WALL_HANGING_SIGN.get(), modLoc("block/epoch_wood_log"));
+                
+                blockWithItem(ModBlocks.EPOCH_CACTUS, 1);
+                
+                simpleBlockWithItem(ModBlocks.EPOCH_SAPLING.get(),
+                                models().cross("epoch_sapling", modLoc("block/epoch_sapling"))
+                                                .renderType("cutout"));
+
+                simpleBlockWithItem(ModBlocks.UPGRADED_EPOCH_SAPLING.get(),
+                                models().cross("upgraded_epoch_sapling", modLoc("block/epoch_sapling"))
+                                                .renderType("cutout"));
+
+                simpleBlock(ModBlocks.POTTED_EPOCH_SAPLING.get(),
+                                models().withExistingParent("potted_epoch_sapling", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", modLoc("block/epoch_sapling")).renderType("cutout"));
+
+                simpleBlock(ModBlocks.POTTED_UPGRADED_EPOCH_SAPLING.get(),
+                                models().withExistingParent("potted_upgraded_epoch_sapling", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", modLoc("block/epoch_sapling")).renderType("cutout"));
+
+                simpleBlock(ModBlocks.POTTED_MYRIAD_CACTUS.get(),
+                                models().withExistingParent("potted_myriad_cactus", mcLoc("block/potted_cactus"))
+                                                .texture("cactus", modLoc("block/myriad_cactus_side")).renderType("cutout"));
+
                 // ===== AETHER BLOCKS =====
                 simpleBlockWithItem(ModBlocks.AETHER_MAGMA_BLOCK.get(),
                                 models().cubeAll("aether_magma_block", modLoc("block/aether_magma")));
@@ -382,6 +434,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 aetherFireBlock();
 
                 generateScarletVineBlock();
+
+                // ===== MYRIAD CACTUS =====
+                myriadCactusBlock();
+
+                // ===== DRAGONFRUIT PLANT =====
+                directionalBlock(ModBlocks.DRAGONFRUIT_PLANT.get(),
+                                models().cross("dragonfruit_plant", modLoc("block/dragonfruit_plant"))
+                                                .renderType("cutout"));
         }
 
         private void aetherFireBlock() {
@@ -719,5 +779,55 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 });
                 simpleBlockItem(deferredBlock.get(), model);
         }
+
+        private void myriadCactusBlock() {
+        net.minecraft.resources.ResourceLocation side = modLoc("block/myriad_cactus_side");
+        net.minecraft.resources.ResourceLocation bottom = modLoc("block/myriad_cactus_bottom");
+        net.minecraft.resources.ResourceLocation top = modLoc("block/myriad_cactus_top");
+
+        net.neoforged.neoforge.client.model.generators.BlockModelBuilder coreUp = models().getBuilder("myriad_cactus_core_up")
+                .texture("side", side).texture("bottom", bottom).texture("top", top).texture("particle", side)
+                .element().from(1, 0, 1).to(15, 15, 15)
+                .face(Direction.DOWN).texture("#bottom").cullface(Direction.DOWN).end()
+                .face(Direction.UP).texture("#top").end()
+                .face(Direction.NORTH).texture("#side").uvs(1, 1, 15, 16).end()
+                .face(Direction.SOUTH).texture("#side").uvs(1, 1, 15, 16).end()
+                .face(Direction.WEST).texture("#side").uvs(1, 1, 15, 16).end()
+                .face(Direction.EAST).texture("#side").uvs(1, 1, 15, 16).end()
+                .end();
+
+        net.neoforged.neoforge.client.model.generators.BlockModelBuilder branchUp = models().getBuilder("myriad_cactus_branch_up")
+                .texture("side", side).texture("bottom", bottom).texture("top", top).texture("particle", side)
+                .element().from(1, 15, 1).to(15, 16, 15)
+                .face(Direction.UP).texture("#top").cullface(Direction.UP).end()
+                .face(Direction.NORTH).texture("#side").uvs(1, 0, 15, 1).end()
+                .face(Direction.SOUTH).texture("#side").uvs(1, 0, 15, 1).end()
+                .face(Direction.WEST).texture("#side").uvs(1, 0, 15, 1).end()
+                .face(Direction.EAST).texture("#side").uvs(1, 0, 15, 1).end()
+                .end();
+
+        net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder builder = getMultipartBuilder(ModBlocks.MYRIAD_CACTUS.get());
+
+        for (Direction facing : Direction.values()) {
+            int rotX = facing == Direction.DOWN ? 180 : facing.getAxis().isHorizontal() ? 90 : 0;
+            int rotY = facing.getAxis().isVertical() ? 0 : (((int) facing.toYRot()) + 180) % 360;
+
+            builder.part().modelFile(coreUp).rotationX(rotX).rotationY(rotY).addModel()
+                    .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING, facing).end();
+
+            for (Direction branchDir : Direction.values()) {
+                if (facing == branchDir.getOpposite()) continue;
+
+                int bRotX = branchDir == Direction.DOWN ? 180 : branchDir.getAxis().isHorizontal() ? 90 : 0;
+                int bRotY = branchDir.getAxis().isVertical() ? 0 : (((int) branchDir.toYRot()) + 180) % 360;
+                
+                net.minecraft.world.level.block.state.properties.BooleanProperty prop = net.ganyusbathwater.oririmod.block.custom.MyriadCactusBlock.getDirectionProperty(branchDir);
+
+                builder.part().modelFile(branchUp).rotationX(bRotX).rotationY(bRotY).addModel()
+                        .condition(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING, facing)
+                        .condition(prop, true).end();
+            }
+        }
+    }
 
 }

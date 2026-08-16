@@ -218,6 +218,42 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.ABYSS_CROWN_LEAVES.get());
                 saplingItem(ModBlocks.ABYSS_CROWN_SAPLING);
 
+                // Epoch Wood Set
+                simpleBlockItem(ModBlocks.EPOCH_WOOD_LOG.get());
+                simpleBlockItem(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get());
+                simpleBlockItem(ModBlocks.EPOCH_WOOD.get());
+                simpleBlockItem(ModBlocks.STRIPPED_EPOCH_WOOD.get());
+                simpleBlockItem(ModBlocks.EPOCH_WOOD_PLANKS.get());
+                simpleBlockItem(ModBlocks.EPOCH_STAIRS.get());
+                simpleBlockItem(ModBlocks.EPOCH_SLAB.get());
+                simpleBlockItem(ModBlocks.EPOCH_GATE.get());
+                fenceItem(ModBlocks.EPOCH_FENCE, ModBlocks.EPOCH_WOOD_PLANKS);
+                doorItem(ModBlocks.EPOCH_DOOR);
+                trapdoorItem(ModBlocks.EPOCH_TRAPDOOR);
+                buttonItem(ModBlocks.EPOCH_BUTTON, ModBlocks.EPOCH_WOOD_PLANKS);
+                withExistingParent(ModBlocks.EPOCH_PRESSURE_PLATE.getId().getPath(), modLoc("block/epoch_pressure_plate"));
+                basicItem(ModItems.EPOCH_SIGN.get());
+                basicItem(ModItems.EPOCH_HANGING_SIGN.get());
+                basicItem(ModItems.EPOCH_BOAT.get());
+                basicItem(ModItems.EPOCH_CHEST_BOAT.get());
+                simpleBlockItem(ModBlocks.EPOCH_CACTUS.get());
+                saplingItem(ModBlocks.EPOCH_SAPLING);
+                getBuilder(ModBlocks.MYRIAD_CACTUS.getId().getPath())
+                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(mcLoc("block/block")))
+                        .texture("top", modLoc("block/myriad_cactus_top"))
+                        .texture("bottom", modLoc("block/myriad_cactus_bottom"))
+                        .texture("side", modLoc("block/myriad_cactus_side"))
+                        .texture("particle", modLoc("block/myriad_cactus_side"))
+                        .element()
+                            .from(1, 0, 1).to(15, 16, 15)
+                            .face(net.minecraft.core.Direction.DOWN).texture("#bottom").cullface(net.minecraft.core.Direction.DOWN).end()
+                            .face(net.minecraft.core.Direction.UP).texture("#top").end()
+                            .face(net.minecraft.core.Direction.NORTH).texture("#side").end()
+                            .face(net.minecraft.core.Direction.SOUTH).texture("#side").end()
+                            .face(net.minecraft.core.Direction.WEST).texture("#side").end()
+                            .face(net.minecraft.core.Direction.EAST).texture("#side").end()
+                        .end();
+
                 // Flat items (Generated)
                 saplingItem(ModBlocks.SCARLET_SAPLING);
                 withExistingParent(ModBlocks.UPGRADED_ELDER_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/elder_sapling"));
@@ -230,6 +266,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModBlocks.UPGRADED_DARK_OAK_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/dark_oak_sapling"));
                 withExistingParent(ModBlocks.UPGRADED_CHERRY_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/cherry_sapling"));
                 withExistingParent(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/abyss_crown_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_EPOCH_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/epoch_sapling"));
                 saplingItem(ModBlocks.SCARLET_GRASS);
                 saplingItem(ModBlocks.SCARLET_TOOTH_LEAVES);
                 simpleBlockItem(ModBlocks.SCARLET_LILY.get());
@@ -242,11 +279,13 @@ public class ModItemModelProvider extends ItemModelProvider {
                                                 "block/pointed_scarlet_stone_up_tip"));
                 saplingItem(ModBlocks.STAR_HERB);
                 saplingItem(ModBlocks.SCARLET_VINE);
+                saplingItem(ModBlocks.DRAGONFRUIT_PLANT);
 
                 // -------------Foods-------------
 
                 basicItem(ModItems.ELDERBERRY.get());
                 basicItem(ModItems.IRON_ROOTS.get());
+                basicItem(ModItems.EONIC_DRAGON_FRUIT.get());
                 basicItem(ModItems.DRAGON_FRUIT.get());
                 basicItem(ModItems.THE_FIRST_APPLE.get());
                 basicItem(ModItems.BLOOD_LOTUS.get());

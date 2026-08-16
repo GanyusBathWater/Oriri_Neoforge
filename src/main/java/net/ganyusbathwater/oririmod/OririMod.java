@@ -46,6 +46,9 @@ public class OririMod {
     public static final String MOD_ID = "oririmod";
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
+    
+    // Global world seed captured for custom dimension noise generation
+    public static long globalWorldSeed = 42069L;
 
     // The constructor for the mod class is the first code that is run when your mod
     // is loaded.
@@ -119,6 +122,7 @@ public class OririMod {
             TooltipHandler.register();
             ModItems.registerDispenserBehaviors();
             net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.init();
+            ModBlocks.registerPottedPlants();
         });
     }
 
@@ -140,15 +144,17 @@ public class OririMod {
         }
 
         if (event.getTabKey().location().getNamespace().equals("minecraft")) {
-            event.getEntries().entrySet().removeIf(entry -> {
-                net.minecraft.world.item.ItemStack stack = entry.getKey();
-                
+            java.util.List<net.minecraft.world.item.ItemStack> toRemove = new java.util.ArrayList<>();
+            
+            java.lang.Iterable<net.minecraft.world.item.ItemStack> allEntries = com.google.common.collect.Iterables.concat(event.getParentEntries(), event.getSearchEntries());
+            for (net.minecraft.world.item.ItemStack stack : allEntries) {
                 if (stack.is(net.minecraft.world.item.Items.POTION) || stack.is(net.minecraft.world.item.Items.SPLASH_POTION) || stack.is(net.minecraft.world.item.Items.LINGERING_POTION)) {
                     net.minecraft.world.item.alchemy.PotionContents contents = stack.get(net.minecraft.core.component.DataComponents.POTION_CONTENTS);
                     if (contents != null && contents.potion().isPresent()) {
                         net.minecraft.resources.ResourceLocation potionId = contents.potion().get().unwrapKey().map(net.minecraft.resources.ResourceKey::location).orElse(null);
                         if (potionId != null && potionId.getNamespace().equals(MOD_ID)) {
-                            return true;
+                            toRemove.add(stack);
+                            continue;
                         }
                     }
                 }
@@ -158,13 +164,16 @@ public class OririMod {
                     for (net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchKey : enchantments.keySet()) {
                         net.minecraft.resources.ResourceLocation enchId = enchKey.unwrapKey().map(net.minecraft.resources.ResourceKey::location).orElse(null);
                         if (enchId != null && enchId.getNamespace().equals(MOD_ID)) {
-                            return true;
+                            toRemove.add(stack);
+                            break;
                         }
                     }
                 }
-                
-                return false;
-            });
+            }
+            
+            for (net.minecraft.world.item.ItemStack stack : toRemove) {
+                event.remove(stack, net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+            }
         }
     }
 
@@ -262,7 +271,8 @@ public class OririMod {
     public static class GameEvents {
         @SubscribeEvent
         public static void onServerStarting(ServerStartingEvent event) {
-            OririMod.LOGGER.info("DEBUG_SCARLET: onServerStarting called");
+            OririMod.globalWorldSeed = event.getServer().getWorldData().worldGenOptions().seed();
+            OririMod.LOGGER.info("DEBUG_SCARLET: onServerStarting called, captured world seed: " + OririMod.globalWorldSeed);
             net.minecraft.core.RegistryAccess registryAccess = event.getServer().registryAccess();
             net.minecraft.core.Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = registryAccess
                     .registryOrThrow(net.minecraft.core.registries.Registries.BIOME);

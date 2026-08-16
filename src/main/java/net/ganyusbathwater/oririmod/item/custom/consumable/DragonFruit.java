@@ -27,7 +27,7 @@ public class DragonFruit extends Item {
     private static final ResourceLocation LUCK_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dragon_fruit_luck");
 
     public DragonFruit(Properties settings) {
-        super(settings.food(ModFoods.DRAGON_FRUIT));
+        super(settings.food(ModFoods.EONIC_DRAGON_FRUIT));
     }
 
     private boolean hasEaten(Player player) {

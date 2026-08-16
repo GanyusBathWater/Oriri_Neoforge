@@ -139,6 +139,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 makeWoodRecipes(recipeOutput, ModBlocks.ELDER_PLANKS.get(), ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_BUTTON.get(), ModBlocks.ELDER_PRESSURE_PLATE.get(), ModBlocks.ELDER_DOOR.get(), ModBlocks.ELDER_TRAPDOOR.get(), ModItems.ELDER_SIGN.get(), ModItems.ELDER_HANGING_SIGN.get(), ModItems.ELDER_BOAT.get(), ModItems.ELDER_CHEST_BOAT.get(), "elder");
                 makeWoodRecipes(recipeOutput, ModBlocks.SCARLET_PLANKS.get(), ModBlocks.STRIPPED_SCARLET_LOG.get(), ModBlocks.SCARLET_BUTTON.get(), ModBlocks.SCARLET_PRESSURE_PLATE.get(), ModBlocks.SCARLET_DOOR.get(), ModBlocks.SCARLET_TRAPDOOR.get(), ModItems.SCARLET_SIGN.get(), ModItems.SCARLET_HANGING_SIGN.get(), ModItems.SCARLET_BOAT.get(), ModItems.SCARLET_CHEST_BOAT.get(), "scarlet");
                 makeWoodRecipes(recipeOutput, ModBlocks.ABYSS_CROWN_PLANKS.get(), ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get(), ModBlocks.ABYSS_CROWN_BUTTON.get(), ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get(), ModBlocks.ABYSS_CROWN_DOOR.get(), ModBlocks.ABYSS_CROWN_TRAPDOOR.get(), ModItems.ABYSS_CROWN_SIGN.get(), ModItems.ABYSS_CROWN_HANGING_SIGN.get(), ModItems.ABYSS_CROWN_BOAT.get(), ModItems.ABYSS_CROWN_CHEST_BOAT.get(), "abyss_crown");
+                makeWoodRecipes(recipeOutput, ModBlocks.EPOCH_WOOD_PLANKS.get(), ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get(), ModBlocks.EPOCH_BUTTON.get(), ModBlocks.EPOCH_PRESSURE_PLATE.get(), ModBlocks.EPOCH_DOOR.get(), ModBlocks.EPOCH_TRAPDOOR.get(), ModItems.EPOCH_SIGN.get(), ModItems.EPOCH_HANGING_SIGN.get(), ModItems.EPOCH_BOAT.get(), ModItems.EPOCH_CHEST_BOAT.get(), "epoch");
 
                 makeStoneRecipes(recipeOutput, "scarlet_cobblestone", ModBlocks.SCARLET_COBBLESTONE.get(), ModBlocks.SCARLET_COBBLESTONE_STAIRS.get(), ModBlocks.SCARLET_COBBLESTONE_SLAB.get(), ModBlocks.SCARLET_COBBLESTONE_WALL.get());
                 makeStoneRecipes(recipeOutput, "mossy_scarlet_cobblestone", ModBlocks.MOSSY_SCARLET_COBBLESTONE.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL.get());
@@ -206,6 +207,33 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_stripped_abyss_crown_stem",
                                                 has(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get()))
                                 .save(recipeOutput, "oririmod:abyss_crown_planks_from_stripped_stem");
+
+                // Epoch Wood
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.EPOCH_WOOD_PLANKS.get(), 4)
+                                .requires(ModBlocks.EPOCH_WOOD_LOG.get())
+                                .unlockedBy("has_epoch_wood_log", has(ModBlocks.EPOCH_WOOD_LOG.get()))
+                                .save(recipeOutput, "oririmod:epoch_wood_planks_from_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.EPOCH_WOOD_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get())
+                                .unlockedBy("has_stripped_epoch_wood_log", has(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get()))
+                                .save(recipeOutput, "oririmod:epoch_wood_planks_from_stripped_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.EPOCH_WOOD_PLANKS.get(), 4)
+                                .requires(ModBlocks.EPOCH_WOOD.get())
+                                .unlockedBy("has_epoch_wood", has(ModBlocks.EPOCH_WOOD.get()))
+                                .save(recipeOutput, "oririmod:epoch_wood_planks_from_wood");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.EPOCH_WOOD_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_EPOCH_WOOD.get())
+                                .unlockedBy("has_stripped_epoch_wood", has(ModBlocks.STRIPPED_EPOCH_WOOD.get()))
+                                .save(recipeOutput, "oririmod:epoch_wood_planks_from_stripped_wood");
+
+                // Upgraded Epoch Sapling
+                stairBuilder(ModBlocks.EPOCH_STAIRS.get(), Ingredient.of(ModBlocks.EPOCH_WOOD_PLANKS))
+                                .unlockedBy("has_epoch_wood_planks", has(ModBlocks.EPOCH_WOOD_PLANKS)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.EPOCH_SLAB.get(), ModBlocks.EPOCH_WOOD_PLANKS.get());
+                fenceBuilder(ModBlocks.EPOCH_FENCE.get(), Ingredient.of(ModBlocks.EPOCH_WOOD_PLANKS))
+                                .unlockedBy("has_epoch_wood_planks", has(ModBlocks.EPOCH_WOOD_PLANKS)).save(recipeOutput);
+                fenceGateBuilder(ModBlocks.EPOCH_GATE.get(), Ingredient.of(ModBlocks.EPOCH_WOOD_PLANKS))
+                                .unlockedBy("has_epoch_wood_planks", has(ModBlocks.EPOCH_WOOD_PLANKS)).save(recipeOutput);
 
                 // --- Scarlet Stone Recipes ---
                 // Scarlet Stone from Cobblestone

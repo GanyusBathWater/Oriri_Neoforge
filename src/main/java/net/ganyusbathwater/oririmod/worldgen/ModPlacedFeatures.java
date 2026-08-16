@@ -26,6 +26,15 @@ public class ModPlacedFeatures {
 
         public static final ResourceKey<PlacedFeature> ELDER_TREE_PLACED_KEY = registerKey("elder_tree_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_TREE_PLACED_KEY = registerKey("scarlet_tree_placed");
+        
+        // Golden Desert Features
+        public static final ResourceKey<PlacedFeature> EPOCH_TREE_BARREN_PLACED_KEY = registerKey("epoch_tree_barren_placed");
+        public static final ResourceKey<PlacedFeature> EPOCH_TREE_FRUITFUL_PLACED_KEY = registerKey("epoch_tree_fruitful_placed");
+        public static final ResourceKey<PlacedFeature> MYRIAD_CACTUS_PLACED_KEY = registerKey("myriad_cactus_placed");
+        public static final ResourceKey<PlacedFeature> OASIS_PLACED_KEY = registerKey("oasis_placed");
+        public static final ResourceKey<PlacedFeature> QUICKSAND_POND_PLACED_KEY = registerKey("quicksand_pond_placed");
+        public static final ResourceKey<PlacedFeature> WAR_GRAVE_PLACED_KEY = registerKey("war_grave_placed");
+        
         public static final ResourceKey<PlacedFeature> SCARLET_BOULDER_PLACED_KEY = registerKey(
                         "scarlet_boulder_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_GRASS_PATCH_PLACED_KEY = registerKey(
@@ -131,9 +140,51 @@ public class ModPlacedFeatures {
                                 CountPlacement.of(1),
                                 RarityFilter.onAverageOnceEvery(60), // Rare generation
                                 InSquarePlacement.spread(),
-                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG)); // Land on ground/under
-                                                                                                 // water
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG)); // Land on ground/under water
                 register(context, SCARLET_BOULDER_PLACED_KEY, configuredScarletBoulder, scarletBoulderModifiers);
+
+                // Golden Desert Feature Placements
+                var configuredEpochTreeBarren = configuredFeatures.getOrThrow(ModConfiguredFeatures.EPOCH_TREE_KEY);
+                register(context, EPOCH_TREE_BARREN_PLACED_KEY, configuredEpochTreeBarren, List.of(
+                                RarityFilter.onAverageOnceEvery(5),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
+
+                var configuredEpochTreeFruitful = configuredFeatures.getOrThrow(ModConfiguredFeatures.EPOCH_TREE_FRUITFUL_KEY);
+                register(context, EPOCH_TREE_FRUITFUL_PLACED_KEY, configuredEpochTreeFruitful, List.of(
+                                RarityFilter.onAverageOnceEvery(30),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
+
+                var configuredMyriadCactus = configuredFeatures.getOrThrow(ModConfiguredFeatures.MYRIAD_CACTUS_KEY);
+                register(context, MYRIAD_CACTUS_PLACED_KEY, configuredMyriadCactus, List.of(
+                                RarityFilter.onAverageOnceEvery(3),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
+
+                var configuredOasis = configuredFeatures.getOrThrow(ModConfiguredFeatures.OASIS_KEY);
+                register(context, OASIS_PLACED_KEY, configuredOasis, List.of(
+                                RarityFilter.onAverageOnceEvery(20),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
+
+                var configuredQuicksand = configuredFeatures.getOrThrow(ModConfiguredFeatures.QUICKSAND_POND_KEY);
+                register(context, QUICKSAND_POND_PLACED_KEY, configuredQuicksand, List.of(
+                                RarityFilter.onAverageOnceEvery(100),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
+                                
+                var configuredWarGrave = configuredFeatures.getOrThrow(ModConfiguredFeatures.WAR_GRAVE_KEY);
+                register(context, WAR_GRAVE_PLACED_KEY, configuredWarGrave, List.of(
+                                RarityFilter.onAverageOnceEvery(350),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
 
                 // Scarlet Vegetation Placements
 

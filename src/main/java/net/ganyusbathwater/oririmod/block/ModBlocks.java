@@ -656,6 +656,7 @@ public class ModBlocks {
                         () -> new AetherMagmaBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MAGMA_BLOCK)
                                         .lightLevel(state -> 3)));
 
+
         public static final DeferredBlock<Block> AETHER_FIRE_BLOCK = BLOCKS.register("aether_fire_block",
                         () -> new AetherFireBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.FIRE)
                                         .noCollission().instabreak().lightLevel(state -> 15).noLootTable()));
@@ -769,6 +770,61 @@ public class ModBlocks {
                                         net.ganyusbathwater.oririmod.block.custom.ForcefieldVariant.MODIFIER,
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
 
+        // ===== EPOCH WOOD =====
+        public static final DeferredBlock<Block> EPOCH_WOOD_LOG = registerBlock("epoch_wood_log",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)));
+        public static final DeferredBlock<Block> STRIPPED_EPOCH_WOOD_LOG = registerBlock("stripped_epoch_wood_log",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG)));
+        public static final DeferredBlock<Block> EPOCH_WOOD = registerBlock("epoch_wood",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD)));
+        public static final DeferredBlock<Block> STRIPPED_EPOCH_WOOD = registerBlock("stripped_epoch_wood",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD)));
+        public static final DeferredBlock<Block> EPOCH_WOOD_PLANKS = registerBlock("epoch_wood_planks",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)));
+        public static final DeferredBlock<StairBlock> EPOCH_STAIRS = registerBlock("epoch_stairs",
+                        () -> new StairBlock(ModBlocks.EPOCH_WOOD_PLANKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS)));
+        public static final DeferredBlock<SlabBlock> EPOCH_SLAB = registerBlock("epoch_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB)));
+        public static final DeferredBlock<FenceBlock> EPOCH_FENCE = registerBlock("epoch_fence",
+                        () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE)));
+        public static final DeferredBlock<FenceGateBlock> EPOCH_GATE = registerBlock("epoch_gate",
+                        () -> new FenceGateBlock(ModWoodTypes.EPOCH_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
+        public static final DeferredBlock<DoorBlock> EPOCH_DOOR = registerBlock("epoch_door",
+                        () -> new DoorBlock(ModWoodTypes.EPOCH_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+        public static final DeferredBlock<TrapDoorBlock> EPOCH_TRAPDOOR = registerBlock("epoch_trapdoor",
+                        () -> new TrapDoorBlock(ModWoodTypes.EPOCH_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
+        public static final DeferredBlock<PressurePlateBlock> EPOCH_PRESSURE_PLATE = registerBlock("epoch_pressure_plate",
+                        () -> new PressurePlateBlock(ModWoodTypes.EPOCH_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+        public static final DeferredBlock<ButtonBlock> EPOCH_BUTTON = registerBlock("epoch_button",
+                        () -> new ButtonBlock(ModWoodTypes.EPOCH_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+        
+        public static final DeferredBlock<StandingSignBlock> EPOCH_SIGN = BLOCKS.register("epoch_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.EPOCH_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> EPOCH_WALL_SIGN = BLOCKS.register("epoch_wall_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.EPOCH_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(EPOCH_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> EPOCH_HANGING_SIGN = BLOCKS.register("epoch_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.EPOCH_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> EPOCH_WALL_HANGING_SIGN = BLOCKS.register("epoch_wall_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.EPOCH_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(EPOCH_HANGING_SIGN)));
+
+        public static final DeferredBlock<Block> EPOCH_SAPLING = registerBlock("epoch_sapling",
+                        () -> new SaplingBlock(ModTreeGrowers.EPOCH_TREE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_EPOCH_SAPLING = registerPottedBlock("potted_epoch_sapling", EPOCH_SAPLING);
+        
+        public static final DeferredBlock<Block> UPGRADED_EPOCH_SAPLING = registerBlock("upgraded_epoch_sapling",
+                        () -> new UpgradedSaplingBlock(ModTreeGrowers.EPOCH_TREE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_EPOCH_SAPLING = registerPottedBlock("potted_upgraded_epoch_sapling", UPGRADED_EPOCH_SAPLING);
+
+        public static final DeferredBlock<Block> EPOCH_CACTUS = registerBlock("epoch_cactus",
+                        () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CACTUS)));
+
+        // ===== NEW CACTI AND PLANTS =====
+        public static final DeferredBlock<Block> MYRIAD_CACTUS = registerBlock("myriad_cactus",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.MyriadCactusBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CACTUS).noOcclusion()));
+        public static final DeferredBlock<Block> POTTED_MYRIAD_CACTUS = registerPottedBlock("potted_myriad_cactus", MYRIAD_CACTUS);
+        public static final DeferredBlock<Block> DRAGONFRUIT_PLANT = registerBlock("dragonfruit_plant",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.DragonfruitPlantBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CACTUS).noCollission().instabreak()));
+
         // ===== ELDERWOODS OVERGROWTH =====
 
 
@@ -815,5 +871,25 @@ public class ModBlocks {
 
         public static void register(IEventBus eventBus) {
                 BLOCKS.register(eventBus);
+        }
+
+        public static void registerPottedPlants() {
+                FlowerPotBlock pot = (FlowerPotBlock) Blocks.FLOWER_POT;
+                pot.addPlant(ELDER_SAPLING.getId(), POTTED_ELDER_SAPLING);
+                pot.addPlant(UPGRADED_ELDER_SAPLING.getId(), POTTED_UPGRADED_ELDER_SAPLING);
+                pot.addPlant(SCARLET_SAPLING.getId(), POTTED_SCARLET_SAPLING);
+                pot.addPlant(UPGRADED_SCARLET_SAPLING.getId(), POTTED_UPGRADED_SCARLET_SAPLING);
+                pot.addPlant(STAR_HERB.getId(), POTTED_STAR_HERB);
+                pot.addPlant(SCARLET_TOOTH_LEAVES.getId(), POTTED_SCARLET_TOOTH_LEAVES);
+                pot.addPlant(UPGRADED_OAK_SAPLING.getId(), POTTED_UPGRADED_OAK_SAPLING);
+                pot.addPlant(UPGRADED_SPRUCE_SAPLING.getId(), POTTED_UPGRADED_SPRUCE_SAPLING);
+                pot.addPlant(UPGRADED_BIRCH_SAPLING.getId(), POTTED_UPGRADED_BIRCH_SAPLING);
+                pot.addPlant(UPGRADED_JUNGLE_SAPLING.getId(), POTTED_UPGRADED_JUNGLE_SAPLING);
+                pot.addPlant(UPGRADED_ACACIA_SAPLING.getId(), POTTED_UPGRADED_ACACIA_SAPLING);
+                pot.addPlant(UPGRADED_DARK_OAK_SAPLING.getId(), POTTED_UPGRADED_DARK_OAK_SAPLING);
+                pot.addPlant(UPGRADED_CHERRY_SAPLING.getId(), POTTED_UPGRADED_CHERRY_SAPLING);
+                pot.addPlant(EPOCH_SAPLING.getId(), POTTED_EPOCH_SAPLING);
+                pot.addPlant(UPGRADED_EPOCH_SAPLING.getId(), POTTED_UPGRADED_EPOCH_SAPLING);
+                pot.addPlant(MYRIAD_CACTUS.getId(), POTTED_MYRIAD_CACTUS);
         }
 }

@@ -59,6 +59,7 @@ public class ModBoatEntity extends Boat {
         return switch (getModVariant()) {
             case SCARLET -> ModItems.SCARLET_BOAT.get();
             case ABYSS_CROWN -> ModItems.ABYSS_CROWN_BOAT.get();
+            case EPOCH -> ModItems.EPOCH_BOAT.get();
             default -> ModItems.ELDER_BOAT.get();
         };
     }
@@ -66,7 +67,8 @@ public class ModBoatEntity extends Boat {
     public enum ModBoatType {
         ELDER("elder"),
         SCARLET("scarlet"),
-        ABYSS_CROWN("abyss_crown");
+        ABYSS_CROWN("abyss_crown"),
+        EPOCH("epoch");
 
         private final String name;
 

@@ -33,6 +33,13 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_KEY = registerKey("elder_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_TREE_KEY = registerKey("scarlet_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ABYSS_CROWN_TREE_KEY = registerKey("abyss_crown_tree");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> EPOCH_TREE_KEY = registerKey("epoch_tree");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> EPOCH_TREE_FRUITFUL_KEY = registerKey("epoch_tree_fruitful");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> MYRIAD_CACTUS_KEY = registerKey("myriad_cactus");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> OASIS_KEY = registerKey("oasis");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> QUICKSAND_POND_KEY = registerKey("quicksand_pond");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> WAR_GRAVE_KEY = registerKey("war_grave");
+        
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_BOULDER_KEY = registerKey("scarlet_boulder");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_GRASS_PATCH_KEY = registerKey(
                         "scarlet_grass_patch");
@@ -124,6 +131,20 @@ public class ModConfiguredFeatures {
                                 BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_STEM.get().defaultBlockState()),
                                 BlockStateProvider.simple(ModBlocks.ABYSS_CROWN_LEAVES.get().defaultBlockState()));
                 register(context, ABYSS_CROWN_TREE_KEY, ModFeatures.ABYSS_CROWN_TREE_FEATURE.get(), abyssCrownCfg);
+
+                // Golden Desert Features
+                register(context, EPOCH_TREE_KEY, ModFeatures.EPOCH_TREE_FEATURE.get(),
+                                new net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature.EpochTreeConfig(false));
+                register(context, EPOCH_TREE_FRUITFUL_KEY, ModFeatures.EPOCH_TREE_FEATURE.get(),
+                                new net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature.EpochTreeConfig(true));
+                register(context, MYRIAD_CACTUS_KEY, ModFeatures.MYRIAD_CACTUS_FEATURE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+                register(context, OASIS_KEY, ModFeatures.OASIS_FEATURE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+                register(context, QUICKSAND_POND_KEY, ModFeatures.QUICKSAND_POND_FEATURE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+                register(context, WAR_GRAVE_KEY, ModFeatures.WAR_GRAVE_FEATURE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
 
                 register(context, SCARLET_BOULDER_KEY, ModFeatures.SCARLET_BOULDER.get(),
                                 NoneFeatureConfiguration.INSTANCE);

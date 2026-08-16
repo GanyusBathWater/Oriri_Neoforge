@@ -197,6 +197,9 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropPottedContents(ModBlocks.POTTED_UPGRADED_ACACIA_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_DARK_OAK_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_CHERRY_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_EPOCH_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_EPOCH_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_MYRIAD_CACTUS.get());
 
         dropSelf(ModBlocks.EQUINOX_TABLE.get());
 
@@ -225,6 +228,44 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.ABYSS_CROWN_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get());
         add(ModBlocks.ABYSS_CROWN_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ABYSS_CROWN_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+
+        dropSelf(ModBlocks.EPOCH_WOOD_LOG.get());
+        dropSelf(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get());
+        dropSelf(ModBlocks.EPOCH_WOOD.get());
+        dropSelf(ModBlocks.STRIPPED_EPOCH_WOOD.get());
+        dropSelf(ModBlocks.EPOCH_WOOD_PLANKS.get());
+        dropSelf(ModBlocks.EPOCH_STAIRS.get());
+        add(ModBlocks.EPOCH_SLAB.get(), block -> createSlabItemTable(ModBlocks.EPOCH_SLAB.get()));
+        dropSelf(ModBlocks.EPOCH_FENCE.get());
+        dropSelf(ModBlocks.EPOCH_GATE.get());
+        add(ModBlocks.EPOCH_DOOR.get(), block -> createDoorTable(block));
+        dropSelf(ModBlocks.EPOCH_TRAPDOOR.get());
+        dropSelf(ModBlocks.EPOCH_BUTTON.get());
+        dropSelf(ModBlocks.EPOCH_PRESSURE_PLATE.get());
+        dropOther(ModBlocks.EPOCH_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.EPOCH_SIGN.get());
+        dropOther(ModBlocks.EPOCH_WALL_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.EPOCH_SIGN.get());
+        dropOther(ModBlocks.EPOCH_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.EPOCH_HANGING_SIGN.get());
+        dropOther(ModBlocks.EPOCH_WALL_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.EPOCH_HANGING_SIGN.get());
+        dropSelf(ModBlocks.EPOCH_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_EPOCH_SAPLING.get());
+        dropSelf(ModBlocks.EPOCH_CACTUS.get());
+        dropSelf(ModBlocks.MYRIAD_CACTUS.get());
+
+        this.add(ModBlocks.DRAGONFRUIT_PLANT.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable()
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .when(net.minecraft.world.level.storage.loot.predicates.MatchTool.toolMatches(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(net.minecraft.world.item.Items.SHEARS)).or(this.hasSilkTouch()))
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block)))
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .when(net.minecraft.world.level.storage.loot.predicates.MatchTool.toolMatches(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(net.minecraft.world.item.Items.SHEARS)).or(this.hasSilkTouch()).invert())
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.DRAGON_FRUIT.get())
+                                .when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.50f))))
+                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                        .when(net.minecraft.world.level.storage.loot.predicates.MatchTool.toolMatches(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(net.minecraft.world.item.Items.SHEARS)).or(this.hasSilkTouch()).invert())
+                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.EONIC_DRAGON_FRUIT.get())
+                                .when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.02f)))));
 
         dropSelf(ModBlocks.AETHER_MAGMA_BLOCK.get());
         dropSelf(ModBlocks.BLOOD_CAP_BLOCK.get());

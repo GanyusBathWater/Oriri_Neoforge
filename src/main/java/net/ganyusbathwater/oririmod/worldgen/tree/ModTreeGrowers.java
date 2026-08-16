@@ -16,4 +16,6 @@ public class ModTreeGrowers {
     public static final TreeGrower ABYSS_CROWN_TREE = new TreeGrower(OririMod.MOD_ID + ":abyss_crown_tree",
             Optional.empty(), Optional.of(ModConfiguredFeatures.ABYSS_CROWN_TREE_KEY), Optional.empty());
 
+    public static final TreeGrower EPOCH_TREE = new TreeGrower(OririMod.MOD_ID + ":epoch_tree",
+            Optional.empty(), Optional.of(ModConfiguredFeatures.EPOCH_TREE_KEY), Optional.empty());
 }

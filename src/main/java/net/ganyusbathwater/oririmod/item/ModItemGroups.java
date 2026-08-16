@@ -222,6 +222,30 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ABYSS_CROWN_SAPLING);
                         output.accept(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING);
 
+                        // Epoch Wood
+                        output.accept(ModBlocks.EPOCH_WOOD_LOG);
+                        output.accept(ModBlocks.STRIPPED_EPOCH_WOOD_LOG);
+                        output.accept(ModBlocks.EPOCH_WOOD);
+                        output.accept(ModBlocks.STRIPPED_EPOCH_WOOD);
+                        output.accept(ModBlocks.EPOCH_WOOD_PLANKS);
+                        output.accept(ModBlocks.EPOCH_STAIRS);
+                        output.accept(ModBlocks.EPOCH_SLAB);
+                        output.accept(ModBlocks.EPOCH_FENCE);
+                        output.accept(ModBlocks.EPOCH_GATE);
+                        output.accept(ModBlocks.EPOCH_DOOR);
+                        output.accept(ModBlocks.EPOCH_TRAPDOOR);
+                        output.accept(ModBlocks.EPOCH_BUTTON);
+                        output.accept(ModBlocks.EPOCH_PRESSURE_PLATE);
+                        output.accept(ModItems.EPOCH_SIGN);
+                        output.accept(ModItems.EPOCH_HANGING_SIGN);
+                        output.accept(ModItems.EPOCH_BOAT);
+                        output.accept(ModItems.EPOCH_CHEST_BOAT);
+                        output.accept(ModBlocks.EPOCH_CACTUS);
+                        output.accept(ModBlocks.EPOCH_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_EPOCH_SAPLING);
+                        output.accept(ModBlocks.MYRIAD_CACTUS);
+                        output.accept(ModBlocks.DRAGONFRUIT_PLANT);
+
                         // Sword Blocks
                         output.accept(ModBlocks.BROKEN_SWORD_BLOCK);
                         output.accept(ModBlocks.TILTED_BROKEN_SWORD_BLOCK);
@@ -247,6 +271,7 @@ public class ModItemGroups {
 
                         // -------------Foods-------------
                         output.accept(ModItems.ELDERBERRY);
+                        output.accept(ModItems.EONIC_DRAGON_FRUIT);
                         output.accept(ModItems.DRAGON_FRUIT);
                         output.accept(ModItems.IRON_ROOTS);
                         output.accept(ModItems.DEVIL_FRUIT);

@@ -71,6 +71,32 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.ElderLeafPileFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        // Golden Desert Features
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.MyriadCactusFeature> MYRIAD_CACTUS_FEATURE = FEATURES
+                        .register("myriad_cactus",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.MyriadCactusFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature> EPOCH_TREE_FEATURE = FEATURES
+                        .register("epoch_tree",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature(
+                                                        net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature.EpochTreeConfig.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.WarGraveFeature> WAR_GRAVE_FEATURE = FEATURES
+                        .register("war_grave",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.WarGraveFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.OasisFeature> OASIS_FEATURE = FEATURES
+                        .register("oasis",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.OasisFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.QuicksandPondFeature> QUICKSAND_POND_FEATURE = FEATURES
+                        .register("quicksand_pond",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.QuicksandPondFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);
         }

@@ -13,4 +13,7 @@ public class ModWoodTypes {
 
     public static final BlockSetType ABYSS_CROWN_BLOCK_SET_TYPE = BlockSetType.register(new BlockSetType(OririMod.MOD_ID + ":abyss_crown"));
     public static final WoodType ABYSS_CROWN_WOOD_TYPE = WoodType.register(new WoodType(OririMod.MOD_ID + ":abyss_crown", ABYSS_CROWN_BLOCK_SET_TYPE));
+
+    public static final BlockSetType EPOCH_BLOCK_SET_TYPE = BlockSetType.register(new BlockSetType(OririMod.MOD_ID + ":epoch"));
+    public static final WoodType EPOCH_WOOD_TYPE = WoodType.register(new WoodType(OririMod.MOD_ID + ":epoch", EPOCH_BLOCK_SET_TYPE));
 }

@@ -157,10 +157,6 @@ public class ModGlobalLootModifiersProvider extends GlobalLootModifierProvider {
                 new LootItemCondition[]{LocationCheck.checkLocation(LocationPredicate.Builder.location().setDimension(net.minecraft.world.level.Level.END)).build()},
                 ModInjectionLootTables.key("void_soul")));
 
-        // Dragon Fruit: Jungle biome
-        add("dragon_fruit_jungle", new AddLootTableModifier(
-                new LootItemCondition[]{LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiomes(registries.join().lookupOrThrow(Registries.BIOME).getOrThrow(BiomeTags.IS_JUNGLE))).build()},
-                ModInjectionLootTables.key("dragon_fruit")));
 
         // One Thousand Screams: Warden
         add("one_thousand_screams_warden", new AddLootTableModifier(
