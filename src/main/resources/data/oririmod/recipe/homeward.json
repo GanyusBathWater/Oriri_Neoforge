@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "MTM",
+    " M "
+  ],
+  "key": {
+    "M": {
+      "item": "oririmod:mana_manifestation"
+    },
+    "T": {
+      "item": "minecraft:totem_of_undying"
+    }
+  },
+  "result": {
+    "id": "oririmod:homeward",
+    "count": 1
+  }
+}
