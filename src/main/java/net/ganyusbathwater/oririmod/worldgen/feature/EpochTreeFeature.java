@@ -65,12 +65,12 @@ public class EpochTreeFeature extends Feature<EpochTreeFeature.EpochTreeConfig> 
                         if (random.nextFloat() < 0.5f) {
                             BlockPos leafPos = p.relative(d);
                             if (level.isEmptyBlock(leafPos) || level.getBlockState(leafPos).canBeReplaced()) {
-                                setBlock(level, leafPos, vineState.setValue(net.minecraft.world.level.block.LeavesBlock.DISTANCE, 1));
+                                setBlock(level, leafPos, vineState.setValue(net.ganyusbathwater.oririmod.block.custom.EpochCactusLeavesBlock.EXTENDED_DISTANCE, 1));
                             }
                         }
                     }
                     if (i == height - 1 && (level.isEmptyBlock(p.above()) || level.getBlockState(p.above()).canBeReplaced())) {
-                        setBlock(level, p.above(), vineState.setValue(net.minecraft.world.level.block.LeavesBlock.DISTANCE, 1));
+                        setBlock(level, p.above(), vineState.setValue(net.ganyusbathwater.oririmod.block.custom.EpochCactusLeavesBlock.EXTENDED_DISTANCE, 1));
                     }
                 }
             }
@@ -109,7 +109,7 @@ public class EpochTreeFeature extends Feature<EpochTreeFeature.EpochTreeConfig> 
                         if (d != Direction.DOWN && random.nextFloat() < 0.7f) {
                             BlockPos leafPos = current.relative(d);
                             if (level.isEmptyBlock(leafPos) || level.getBlockState(leafPos).canBeReplaced()) {
-                                setBlock(level, leafPos, vineState.setValue(net.minecraft.world.level.block.LeavesBlock.DISTANCE, 1));
+                                setBlock(level, leafPos, vineState.setValue(net.ganyusbathwater.oririmod.block.custom.EpochCactusLeavesBlock.EXTENDED_DISTANCE, 1));
                             }
                         }
                     }
@@ -144,9 +144,9 @@ public class EpochTreeFeature extends Feature<EpochTreeFeature.EpochTreeConfig> 
                     }
 
                     if (level.isEmptyBlock(vPos) || level.getBlockState(vPos).canBeReplaced()) {
-                        // Set distance from log to prevent decay (maxes at 7 in vanilla)
-                        int distance = Math.min(7, i + 1);
-                        setBlock(level, vPos, vineState.setValue(net.minecraft.world.level.block.LeavesBlock.DISTANCE, distance));
+                        // Set distance from log to prevent decay (maxes at 15 in custom)
+                        int distance = Math.min(15, i + 1);
+                        setBlock(level, vPos, vineState.setValue(net.ganyusbathwater.oririmod.block.custom.EpochCactusLeavesBlock.EXTENDED_DISTANCE, distance));
                         lastVinePos = vPos;
                     } else {
                         break;

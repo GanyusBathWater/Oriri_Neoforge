@@ -343,6 +343,7 @@ public class ModItemGroups {
                         acceptAllLevels(output, ModItems.SOLIS_BROOCH);
                         acceptAllLevels(output, ModItems.SPRING);
                         acceptAllLevels(output, ModItems.STIGMA_OF_DARKNESS);
+                        output.accept(ModItems.ESSENCE_OF_DARKNESS.get());
                         acceptAllLevels(output, ModItems.STRANGE_ENDER_EYE);
                         acceptAllLevels(output, ModItems.STRIDER_SCALE);
                         acceptAllLevels(output, ModItems.WITHER_ROSE);

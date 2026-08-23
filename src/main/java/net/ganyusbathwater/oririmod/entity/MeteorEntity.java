@@ -169,7 +169,7 @@ public class MeteorEntity extends Projectile {
         server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX(), getY(), getZ(), 30, 1.8, 0.3, 1.8, 0.02);
 
         ExplosionInteraction interaction = this.destroysBlocks ? ExplosionInteraction.TNT : ExplosionInteraction.NONE;
-        server.explode(null, getX(), getY(), getZ(), explosionPower, interaction);
+        server.explode(this, getX(), getY(), getZ(), explosionPower, interaction);
         igniteAround(server, this.blockPosition(), fireRadius);
 
         discard();

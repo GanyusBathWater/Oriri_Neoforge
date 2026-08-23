@@ -515,4 +515,9 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
 
         tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
     }
+
+    @Override
+    public int getEnchantmentValue() {
+        return 18; // High enchantability for magic weapons
+    }
 }

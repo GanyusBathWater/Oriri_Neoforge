@@ -63,8 +63,10 @@ public class ModManaUtil {
         if (player.isCreative())
             return true;
         int current = getMana(player);
-        if (current < amount)
+        if (current < amount) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.oririmod.not_enough_mana").withStyle(net.minecraft.ChatFormatting.RED), true);
             return false;
+        }
         setMana(player, current - amount);
         return true;
     }
@@ -90,8 +92,10 @@ public class ModManaUtil {
         }
 
         int current = getMana(player);
-        if (current < amount)
+        if (current < amount) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.oririmod.not_enough_mana").withStyle(net.minecraft.ChatFormatting.RED), true);
             return false;
+        }
         setMana(player, current - amount);
         return true;
     }

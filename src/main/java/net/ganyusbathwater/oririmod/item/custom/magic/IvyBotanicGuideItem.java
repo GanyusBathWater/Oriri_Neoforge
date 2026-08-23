@@ -230,4 +230,9 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
         Vec3 end = eye.add(look.scale(range));
         return level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.SOURCE_ONLY, living));
     }
+
+    @Override
+    public int getEnchantmentValue() {
+        return 18; // High enchantability for magic weapons
+    }
 }

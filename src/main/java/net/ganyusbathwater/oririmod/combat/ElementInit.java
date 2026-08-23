@@ -1,5 +1,6 @@
 package net.ganyusbathwater.oririmod.combat;
 
+import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
@@ -13,13 +14,97 @@ public final class ElementInit {
         // Mobs
         EntityElementRegistry.setElement(EntityType.BLAZE, Element.FIRE);
         EntityElementRegistry.setElement(EntityType.ZOMBIE, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.SKELETON, Element.EARTH);
+        EntityElementRegistry.setElement(EntityType.CREEPER, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.SPIDER, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.CAVE_SPIDER, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.ENDERMAN, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.ZOMBIFIED_PIGLIN, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.PIGLIN, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.PIGLIN_BRUTE, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.GHAST, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.MAGMA_CUBE, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.WITHER_SKELETON, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.WITHER, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.ENDER_DRAGON, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.SLIME, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.WITCH, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.VINDICATOR, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.EVOKER, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.PILLAGER, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.RAVAGER, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.VEX, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.ILLUSIONER, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.WARDEN, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.GUARDIAN, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.ELDER_GUARDIAN, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.PHANTOM, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.DROWNED, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.HUSK, Element.EARTH);
+        EntityElementRegistry.setElement(EntityType.STRAY, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.SHULKER, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.SILVERFISH, Element.EARTH);
+        EntityElementRegistry.setElement(EntityType.ENDERMITE, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.HOGLIN, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.ZOGLIN, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.BREEZE, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.BOGGED, Element.NATURE);
+        
+        EntityElementRegistry.setElement(ModEntities.FIRE_ZOMBIE.get(), Element.FIRE);
+        EntityElementRegistry.setElement(ModEntities.SPORE_ZOMBIE.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.SPORE_BLOSSOM.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.EYE_OF_DESOLATION.get(), Element.FIRE);
+        EntityElementRegistry.setElement(ModEntities.BLIZZA.get(), Element.WATER);
+        EntityElementRegistry.setElement(ModEntities.SPLINTER_SPIDER.get(), Element.DARKNESS);
+        EntityElementRegistry.setElement(ModEntities.VENOMOUS_PLANT.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.BLACK_HOLE.get(), Element.DARKNESS);
+        EntityElementRegistry.setElement(ModEntities.DEVIARTRAS.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.MERMAID.get(), Element.WATER);
+        EntityElementRegistry.setElement(ModEntities.LOADED_BLAZE.get(), Element.FIRE);
+        EntityElementRegistry.setElement(ModEntities.REX_ARANEA_WEB.get(), Element.DARKNESS);
+        EntityElementRegistry.setElement(ModEntities.REX_ARANEA.get(), Element.DARKNESS);
+        EntityElementRegistry.setElement(ModEntities.FAIRY.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.NOXUS_KNIGHT.get(), Element.LIGHT);
+        EntityElementRegistry.setElement(ModEntities.NOXUS_GENERAL.get(), Element.LIGHT);
+        EntityElementRegistry.setElement(ModEntities.NOXUS_PALADIN.get(), Element.LIGHT);
+
 
         // Projectiles
         EntityElementRegistry.setElement(EntityType.SMALL_FIREBALL, Element.FIRE);
-
+        EntityElementRegistry.setElement(ModEntities.GIANT_SWORD.get(), Element.LIGHT);
+        EntityElementRegistry.setElement(ModEntities.FIREBALL_PROJECTILE.get(), Element.FIRE);
+        EntityElementRegistry.setElement(ModEntities.METEOR.get(), Element.EARTH);
+        EntityElementRegistry.setElement(ModEntities.ROOT_VISUAL.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.EYE_OF_THE_STORM.get(), Element.WATER);
+        EntityElementRegistry.setElement(ModEntities.ICICLE.get(), Element.WATER);
+        EntityElementRegistry.setElement(ModEntities.SWORD_PROJECTILE.get(), Element.PHYSICAL);
+        EntityElementRegistry.setElement(ModEntities.SWORD_CIRCLE.get(), Element.PHYSICAL);
+        EntityElementRegistry.setElement(ModEntities.DOOM_CLOCK.get(), Element.TRUE_DAMAGE);
+        EntityElementRegistry.setElement(ModEntities.AIR_SLICE.get(), Element.LIGHT);
+        EntityElementRegistry.setElement(ModEntities.THORN_PROJECTILE.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.TNT_ARROW.get(), Element.PHYSICAL);
+        EntityElementRegistry.setElement(ModEntities.EVENT_HORIZON_ARROW.get(), Element.DARKNESS);
+        EntityElementRegistry.setElement(ModEntities.DRAGON_IRON_ARROW.get(), Element.TRUE_DAMAGE);
+        EntityElementRegistry.setElement(ModEntities.FROST_ARROW.get(), Element.WATER);
+        EntityElementRegistry.setElement(ModEntities.COPPER_ARROW.get(), Element.EARTH);
+        EntityElementRegistry.setElement(ModEntities.SONIC_ARROW.get(), Element.DARKNESS);
+        EntityElementRegistry.setElement(ModEntities.AETHER_CHARGE_ENTITY.get(), Element.FIRE);
         // Items/Weapons
-        ItemElementRegistry.setElement(Items.DIAMOND_SWORD, Element.PHYSICAL);
+        ItemElementRegistry.setElement(Items.WOODEN_SWORD, Element.NATURE);
+        ItemElementRegistry.setElement(Items.STONE_SWORD, Element.EARTH);
+        ItemElementRegistry.setElement(Items.GOLDEN_SWORD, Element.EARTH);
         ItemElementRegistry.setElement(Items.IRON_SWORD, Element.EARTH);
+        ItemElementRegistry.setElement(Items.DIAMOND_SWORD, Element.PHYSICAL);
+        ItemElementRegistry.setElement(Items.NETHERITE_SWORD, Element.FIRE);
+        ItemElementRegistry.setElement(Items.WOODEN_AXE, Element.NATURE);
+        ItemElementRegistry.setElement(Items.STONE_AXE, Element.EARTH);
+        ItemElementRegistry.setElement(Items.GOLDEN_AXE, Element.EARTH);
+        ItemElementRegistry.setElement(Items.IRON_AXE, Element.EARTH);
+        ItemElementRegistry.setElement(Items.DIAMOND_AXE, Element.WATER);
+        ItemElementRegistry.setElement(Items.NETHERITE_AXE, Element.FIRE);
+        ItemElementRegistry.setElement(Items.BOW, Element.PHYSICAL);
+        ItemElementRegistry.setElement(Items.CROSSBOW, Element.PHYSICAL);
+        ItemElementRegistry.setElement(Items.MACE, Element.EARTH);
         ItemElementRegistry.setElement(Items.TRIDENT, Element.WATER);
         ItemElementRegistry.setElement(ModItems.STELLA_PERDITOR.get(), Element.DARKNESS);
         ItemElementRegistry.setElement(ModItems.QILINS_WRATH.get(), Element.TRUE_DAMAGE);

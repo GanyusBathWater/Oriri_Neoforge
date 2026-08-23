@@ -241,7 +241,6 @@ public class BlizzaEntity extends Monster implements GeoEntity {
             stray.setPos(this.getX() + off[0], this.getY() + off[1], this.getZ() + off[2]);
             stray.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(this.blockPosition()),
                     net.minecraft.world.entity.MobSpawnType.MOB_SUMMONED, null);
-            stray.getPersistentData().putBoolean("OririSummoned", true);
             stray.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(stray);
         }

@@ -1,4 +1,7 @@
 {
+  "config.jade.plugin_oririmod.element_symbol": "Element Symbols",
+  "curios.identifier.essence": "Essence",
+  "item.oririmod.essence_of_darkness": "Essence of Darkness",
   "block.oririmod.equinox_table": "Equinox Table",
   "tooltip.oririmod.upgraded_sapling.lore": "Can be placed and grows on most blocks. Will force grow the tree, only replacing air blocks. Perfectly for tight spaces!",
   "item.oririmod.fire_crystal": "Fire Crystal",
@@ -611,6 +614,7 @@
   "tooltip.oririmod.qilins_wrath.desc": "Hold Right-Click to unleash a devastating red Air Slice.",
   "tooltip.oririmod.damage": "Damage: §c%s§r",
   "tooltip.oririmod.element": "Element: %s",
+  "message.oririmod.not_enough_mana": "Not enough Mana!",
   "entity.oririmod.fire_zombie": "Fire Zombie",
   "entity.oririmod.spore_zombie": "Spore Zombie",
   "item.oririmod.fire_zombie_spawn_egg": "Fire Zombie Spawn Egg",

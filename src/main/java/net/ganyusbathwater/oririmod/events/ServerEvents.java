@@ -229,9 +229,18 @@ public class ServerEvents {
 
         // Issue #13: Boost EvokerFangs damage by +2 hearts (4.0f) if owned by Blizza
         if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.EvokerFangs fangs) {
-            if (fangs.getOwner() instanceof net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity) {
-                event.setNewDamage(event.getNewDamage() + 4.0f);
+            LivingEntity owner = fangs.getOwner();
+            if (owner != null) {
+                if (owner instanceof net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity) {
+                    event.setNewDamage(event.getNewDamage() + 4.0f);
+                }
             }
+        }
+
+        // Reduce Meteor damage to prevent it from one-shotting bosses while keeping the huge explosion crater
+        if (event.getSource().getDirectEntity() instanceof net.ganyusbathwater.oririmod.entity.MeteorEntity) {
+            // Cap damage to 20 (10 hearts) and heavily reduce the base multiplier.
+            event.setNewDamage(Math.min(event.getNewDamage() * 0.15f, 20.0f));
         }
 
         // Molten Armor Counter-attack
@@ -239,6 +248,20 @@ public class ServerEvents {
             if (!target.level().isClientSide() && target.getInventory().getArmor(0).getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ModArmorItem armorItem) {
                 if (armorItem.hasPlayerCorrectArmorOn(net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, target)) {
                     attacker.igniteForSeconds(5.0f);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingIncomingDamage(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
+        if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.EvokerFangs fangs) {
+            LivingEntity owner = fangs.getOwner();
+            if (owner != null) {
+                boolean isOwnerNoxus = owner.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || owner.getPersistentData().getBoolean("IsNoxusMob");
+                Entity target = event.getEntity();
+                if (isOwnerNoxus && (target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || target.getPersistentData().getBoolean("IsNoxusMob") || target == owner)) {
+                    event.setCanceled(true);
                 }
             }
         }

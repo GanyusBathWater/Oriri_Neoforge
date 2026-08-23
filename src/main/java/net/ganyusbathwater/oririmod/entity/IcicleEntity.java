@@ -171,6 +171,14 @@ public class IcicleEntity extends Projectile {
         List<Entity> entities = level().getEntities(this, area);
         for (Entity e : entities) {
             if (e instanceof LivingEntity living) {
+                if (living.getId() == getOwnerId()) continue;
+                
+                Entity owner = server.getEntity(getOwnerId());
+                boolean isOwnerNoxus = owner != null && (owner.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || owner.getPersistentData().getBoolean("IsNoxusMob"));
+                if (isOwnerNoxus && (living.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || living.getPersistentData().getBoolean("IsNoxusMob"))) {
+                    continue;
+                }
+
                 // Deal 10 hearts of damage
                 living.hurt(level().damageSources().freeze(), DAMAGE);
                 // Apply freezing

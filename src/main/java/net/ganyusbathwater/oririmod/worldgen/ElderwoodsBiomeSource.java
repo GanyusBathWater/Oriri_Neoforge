@@ -171,9 +171,9 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             return findBiome(GOLDEN_DESERT_KEY);
         } else {
             // Humidity controls the woodland biomes
-            if (humNoise > 0.1) {
+            if (humNoise > 0.3) {
                 return findBiome(SCARLET_SWAMP_KEY); // Wet
-            } else if (humNoise > -0.1) {
+            } else if (humNoise > 0.2) {
                 return findBiome(SCARLET_FOREST_KEY); // Normal
             } else {
                 return findBiome(ELDERWOODS_KEY); // Dry
@@ -195,8 +195,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         // Desert threshold is tempNoise = 0.15. We blend from 0.05 to 0.25
         double desertWeight = net.minecraft.util.Mth.clamp((tempNoise - 0.05) / 0.20, 0.0, 1.0);
         
-        // Swamp threshold is humNoise = 0.1. We blend from 0.0 to 0.20
-        double swampWeight = net.minecraft.util.Mth.clamp((humNoise - 0.0) / 0.20, 0.0, 1.0);
+        // Swamp threshold is humNoise = 0.3. We blend from 0.2 to 0.40
+        double swampWeight = net.minecraft.util.Mth.clamp((humNoise - 0.2) / 0.20, 0.0, 1.0);
 
         // 1. Base Rolling Hills (Elderwoods / Scarlet Forest)
         double nx = (x + seedOffsetX) * 0.003;

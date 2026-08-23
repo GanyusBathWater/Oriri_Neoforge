@@ -143,4 +143,9 @@ public class MyriadCactusBlock extends DirectionalBlock {
     protected boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
+
+    @Override
+    protected void entityInside(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, net.minecraft.world.entity.Entity entity) {
+        entity.hurt(level.damageSources().cactus(), 1.0F);
+    }
 }

@@ -144,4 +144,9 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
 
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
+
+    @Override
+    public int getEnchantmentValue() {
+        return 18; // High enchantability for magic weapons
+    }
 }

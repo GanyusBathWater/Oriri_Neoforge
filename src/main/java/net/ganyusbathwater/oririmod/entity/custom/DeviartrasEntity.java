@@ -422,7 +422,6 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
                     serverLevel.getCurrentDifficultyAt(this.blockPosition()),
                     MobSpawnType.MOB_SUMMONED, null);
             fairy.setOwner(this);
-            fairy.getPersistentData().putBoolean("OririSummoned", true);
             fairy.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(fairy);
         }
@@ -460,7 +459,6 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
             }
 
             turret.setPos(candidate.getX() + 0.5, candidate.getY(), candidate.getZ() + 0.5);
-            turret.getPersistentData().putBoolean("OririSummoned", true);
             turret.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(turret);
         }
@@ -491,7 +489,6 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
             }
 
             eye.setPos(candidate.getX() + 0.5, candidate.getY(), candidate.getZ() + 0.5);
-            eye.getPersistentData().putBoolean("OririSummoned", true);
             eye.getPersistentData().putBoolean("IsNoxusMob", true);
             serverLevel.addFreshEntity(eye);
         }

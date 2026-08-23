@@ -314,25 +314,26 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.STRANGE_ENDER_EYE.get());
                 basicItem(ModItems.STRIDER_SCALE.get());
                 basicItem(ModItems.WITHER_ROSE.get());
+                withExistingParent(ModItems.ESSENCE_OF_DARKNESS.getId().getPath(), mcLoc("item/generated")).texture("layer0", mcLoc("item/nether_star"));
 
                 // ------------Weapons------------
 
                 shieldItem(ModItems.JADE_SHIELD);
 
                 handheldItem(ModItems.PANDORAS_BLADE);
-                handheldItem(ModItems.WOOD_SCYTHE);
-                handheldItem(ModItems.STONE_SCYTHE);
-                handheldItem(ModItems.IRON_SCYTHE);
-                handheldItem(ModItems.GOLD_SCYTHE);
-                handheldItem(ModItems.DIAMOND_SCYTHE);
-                handheldItem(ModItems.NETHERITE_SCYTHE);
-                handheldItem(ModItems.ANCIENT_SCYTHE);
-                handheldItem(ModItems.BLACK_ICE_SCYTHE);
-                handheldItem(ModItems.CRYSTAL_SCYTHE);
-                handheldItem(ModItems.GILDED_NETHERITE_SCYTHE);
-                handheldItem(ModItems.PRISMARINE_SCYTHE);
-                handheldItem(ModItems.MOLTEN_SCYTHE);
-                handheldItem(ModItems.THE_HARBINGER);
+                scytheItem(ModItems.WOOD_SCYTHE);
+                scytheItem(ModItems.STONE_SCYTHE);
+                scytheItem(ModItems.IRON_SCYTHE);
+                scytheItem(ModItems.GOLD_SCYTHE);
+                scytheItem(ModItems.DIAMOND_SCYTHE);
+                scytheItem(ModItems.NETHERITE_SCYTHE);
+                scytheItem(ModItems.ANCIENT_SCYTHE);
+                scytheItem(ModItems.BLACK_ICE_SCYTHE);
+                scytheItem(ModItems.CRYSTAL_SCYTHE);
+                scytheItem(ModItems.GILDED_NETHERITE_SCYTHE);
+                scytheItem(ModItems.PRISMARINE_SCYTHE);
+                scytheItem(ModItems.MOLTEN_SCYTHE);
+                scytheItem(ModItems.THE_HARBINGER);
                 bowItem(ModItems.ORAPHIM_BOW);
                 handheldItem(ModItems.PIRATE_SABER);
 
@@ -577,6 +578,33 @@ public class ModItemModelProvider extends ItemModelProvider {
                                 ResourceLocation.parse("item/handheld")).texture("layer0",
                                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                                 "item/" + item.getId().getPath()));
+        }
+
+        private ItemModelBuilder scytheItem(DeferredItem<?> item) {
+                return withExistingParent(item.getId().getPath(), ResourceLocation.parse("item/handheld"))
+                                .texture("layer0", ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "item/" + item.getId().getPath()))
+                                .transforms()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                                                .rotation(0, -90, 55)
+                                                .translation(0, 4.0f, 0.5f)
+                                                .scale(1.7f, 1.7f, 1.7f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                                                .rotation(0, 90, -55)
+                                                .translation(0, 4.0f, 0.5f)
+                                                .scale(1.7f, 1.7f, 1.7f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                                                .rotation(0, -90, 25)
+                                                .translation(1.13f, 3.2f, 1.13f)
+                                                .scale(1.36f, 1.36f, 1.36f)
+                                                .end()
+                                        .transform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                                                .rotation(0, 90, -25)
+                                                .translation(1.13f, 3.2f, 1.13f)
+                                                .scale(1.36f, 1.36f, 1.36f)
+                                                .end()
+                                .end();
         }
 
         private void bowItem(DeferredItem<?> deferredItem) {

@@ -226,6 +226,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
             meteor.configure(ground.immutable(), 12.0f, 7);
             meteor.setOwnerId(living.getId());
+            meteor.setOwner(living);
             NetworkHandler.sendAoEIndicatorToPlayersAround((ServerLevel) level, ground.immutable(), 13.0f, 40,
                     0x88FF6600);
 
@@ -372,5 +373,10 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
 
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    }
+
+    @Override
+    public int getEnchantmentValue() {
+        return 18; // High enchantability for magic weapons
     }
 }

@@ -816,7 +816,7 @@ public class ModBlocks {
         public static final DeferredBlock<Block> POTTED_UPGRADED_EPOCH_SAPLING = registerPottedBlock("potted_upgraded_epoch_sapling", UPGRADED_EPOCH_SAPLING);
 
         public static final DeferredBlock<Block> EPOCH_CACTUS = registerBlock("epoch_cactus",
-                        () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CACTUS)));
+                        () -> new net.ganyusbathwater.oririmod.block.custom.EpochCactusLeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CACTUS)));
 
         // ===== NEW CACTI AND PLANTS =====
         public static final DeferredBlock<Block> MYRIAD_CACTUS = registerBlock("myriad_cactus",

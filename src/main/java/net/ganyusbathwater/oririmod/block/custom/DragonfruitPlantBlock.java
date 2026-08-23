@@ -27,7 +27,22 @@ public class DragonfruitPlantBlock extends Block {
         Direction direction = state.getValue(FACING);
         BlockPos attachedPos = pos.relative(direction.getOpposite());
         BlockState attachedState = level.getBlockState(attachedPos);
-        return attachedState.is(ModBlocks.EPOCH_CACTUS.get());
+        return attachedState.is(ModBlocks.MYRIAD_CACTUS.get()) || attachedState.is(ModBlocks.EPOCH_CACTUS.get());
+    }
+
+    @Override
+    public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, net.minecraft.world.level.LevelAccessor level, BlockPos currentPos, BlockPos facingPos) {
+        if (!state.canSurvive(level, currentPos)) {
+            level.scheduleTick(currentPos, this, 1);
+        }
+        return super.updateShape(state, facing, facingState, level, currentPos, facingPos);
+    }
+
+    @Override
+    protected void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
+        if (!state.canSurvive(level, pos)) {
+            level.destroyBlock(pos, true);
+        }
     }
 
     @Nullable

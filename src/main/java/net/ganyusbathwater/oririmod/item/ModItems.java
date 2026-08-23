@@ -131,6 +131,8 @@ public class ModItems {
                         () -> new Spring(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<VestigeItem> STIGMA_OF_DARKNESS = ITEMS.register("stigma_of_darkness",
                         () -> new StigmaOfDarkness(new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> ESSENCE_OF_DARKNESS = ITEMS.register("essence_of_darkness",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.EssenceOfDarknessItem(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<VestigeItem> STRANGE_ENDER_EYE = ITEMS.register("strange_ender_eye",
                         () -> new StrangeEnderEye(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<VestigeItem> STRIDER_SCALE = ITEMS.register("strider_scale",
