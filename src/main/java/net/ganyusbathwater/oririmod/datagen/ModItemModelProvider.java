@@ -312,9 +312,16 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.SPRING.get());
                 basicItem(ModItems.STIGMA_OF_DARKNESS.get());
                 basicItem(ModItems.STRANGE_ENDER_EYE.get());
-                basicItem(ModItems.STRIDER_SCALE.get());
+                withExistingParent(ModItems.STRIDER_SCALE.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("item/strider_scale"));
                 basicItem(ModItems.WITHER_ROSE.get());
-                withExistingParent(ModItems.ESSENCE_OF_DARKNESS.getId().getPath(), mcLoc("item/generated")).texture("layer0", mcLoc("item/nether_star"));
+                withExistingParent(ModItems.ESSENCE_OF_DARKNESS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("gui/sprites/darkness_element_symbole"));
+                withExistingParent(ModItems.THE_GODSEEKER.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", modLoc("item/godseeker_inactive"))
+                                .override()
+                                .predicate(mcLoc("active"), 1.0F)
+                                .model(withExistingParent(ModItems.THE_GODSEEKER.getId().getPath() + "_active", mcLoc("item/generated"))
+                                                .texture("layer0", modLoc("item/godseeker_active")))
+                                .end();
 
                 // ------------Weapons------------
 
@@ -335,6 +342,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 scytheItem(ModItems.MOLTEN_SCYTHE);
                 scytheItem(ModItems.THE_HARBINGER);
                 bowItem(ModItems.ORAPHIM_BOW);
+                bowItem(ModItems.ARCUS_LUCIS);
                 handheldItem(ModItems.PIRATE_SABER);
 
                 basicItem(ModItems.TNT_ARROW.get());
@@ -449,6 +457,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.SPORE_BLOSSOM_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.VENOMOUS_PLANT_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.MERMAID_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.MERMAID_SCALE.getId().getPath(), "item/generated")
+                        .texture("layer0", mcLoc("item/nether_star"));
                 withExistingParent(ModItems.DEVIARTRAS_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.LOADED_BLAZE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.FAIRY_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
@@ -505,7 +515,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 getBuilder(ModItems.ELEMENTAL_CHOIR.getId().getPath())
                                 .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:item/handheld"))
-                                .texture("layer0", mcLoc("item/stick"));
+                                .texture("layer0", modLoc("item/elemental_choir_item"));
         }
 
         private void applyGeoItemTransforms(String path) {

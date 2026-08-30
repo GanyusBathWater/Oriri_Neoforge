@@ -13,6 +13,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.DyedItemColor;
+
 public class ModItemGroups {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister
             .create(Registries.CREATIVE_MODE_TAB, OririMod.MOD_ID);
@@ -344,9 +347,15 @@ public class ModItemGroups {
                         acceptAllLevels(output, ModItems.SPRING);
                         acceptAllLevels(output, ModItems.STIGMA_OF_DARKNESS);
                         output.accept(ModItems.ESSENCE_OF_DARKNESS.get());
+                        
+                        ItemStack mermaidScale = new ItemStack(ModItems.MERMAID_SCALE.get());
+                        mermaidScale.set(DataComponents.DYED_COLOR, new DyedItemColor(new java.util.Random().nextInt(0xFFFFFF), true));
+                        output.accept(mermaidScale);
+                        
                         acceptAllLevels(output, ModItems.STRANGE_ENDER_EYE);
                         acceptAllLevels(output, ModItems.STRIDER_SCALE);
                         acceptAllLevels(output, ModItems.WITHER_ROSE);
+                        output.accept(ModItems.MERMAID_SCALE.get());
 
                         // ------------Weapons------------
                         output.accept(ModItems.JADE_SHIELD);
@@ -365,6 +374,7 @@ public class ModItemGroups {
                         output.accept(ModItems.THE_HARBINGER);
                         output.accept(ModItems.PANDORAS_BLADE);
                         output.accept(ModItems.ORAPHIM_BOW);
+                        output.accept(ModItems.ARCUS_LUCIS);
                         output.accept(ModItems.PIRATE_SABER);
 
                         output.accept(ModItems.ICE_SWORD);

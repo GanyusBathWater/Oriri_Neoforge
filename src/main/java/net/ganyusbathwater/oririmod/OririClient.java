@@ -61,6 +61,12 @@ import java.util.UUID;
 public class OririClient {
 
     @SubscribeEvent
+    public static void onAddLayers(net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers event) {
+        net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.AURORA_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.AuroraCosmeticRenderer(event.getContext());
+        net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.MermaidCosmeticRenderer(event.getContext());
+    }
+
+    @SubscribeEvent
     public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.SHINING_PARTICLES.get(), ShiningParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELDERWOODS_CAVE_PARTICLE.get(), ElderwoodsCaveParticle.Provider::new);
@@ -77,6 +83,7 @@ public class OririClient {
         Sheets.addWoodType(ModWoodTypes.ELDER_WOOD_TYPE);
         Sheets.addWoodType(ModWoodTypes.SCARLET_WOOD_TYPE);
         Sheets.addWoodType(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE);
+        
     }
 
     // ── Tooltip Component Factory ─────────────────────────────────────────────

@@ -122,7 +122,8 @@ public class ModItemTagProvider extends ItemTagsProvider {
                 );
 
         this.tag(ItemTags.BOW_ENCHANTABLE)
-                .add(net.ganyusbathwater.oririmod.item.ModItems.ORAPHIM_BOW.get());
+                .add(net.ganyusbathwater.oririmod.item.ModItems.ORAPHIM_BOW.get())
+                .add(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get());
 
         this.tag(ItemTags.CROSSBOW_ENCHANTABLE)
                 .add(net.ganyusbathwater.oririmod.item.ModItems.ARBITER_CROSSBOW.get());

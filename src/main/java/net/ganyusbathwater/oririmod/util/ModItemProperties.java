@@ -12,8 +12,10 @@ import net.minecraft.world.item.component.ChargedProjectiles;
 public class ModItemProperties {
     public static void addCustomItemProperties() {
         makeCustomBow(ModItems.ORAPHIM_BOW.get());
+        makeCustomBow(ModItems.ARCUS_LUCIS.get());
         makeCustomCrossbow(ModItems.ARBITER_CROSSBOW.get());
         makeCustomShield(ModItems.JADE_SHIELD.get());
+        makeGodseeker(ModItems.THE_GODSEEKER.get());
     }
 
     private static void makeCustomBow(Item item) {
@@ -74,6 +76,16 @@ public class ModItemProperties {
                 (p_174590_, p_174591_, p_174592_, p_174593_) -> {
                     return p_174592_ != null && p_174592_.isUsingItem() && p_174592_.getUseItem() == p_174590_ ? 1.0F
                             : 0.0F;
+                });
+    }
+
+    private static void makeGodseeker(Item item) {
+        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("active"),
+                (stack, level, entity, seed) -> {
+                    if (level != null) {
+                        return level.getDifficulty() == net.minecraft.world.Difficulty.HARD ? 1.0F : 0.0F;
+                    }
+                    return 0.0F;
                 });
     }
 }

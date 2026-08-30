@@ -1,26 +1,16 @@
 package net.ganyusbathwater.oririmod.entity.custom.cosmetic;
 
-import software.bernie.geckolib.animatable.GeoReplacedEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import net.ganyusbathwater.oririmod.client.render.entity.template.AbstractPlayerCosmeticAnimatable;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.util.GeckoLibUtil;
-import net.minecraft.world.entity.EntityType;
 
-public class AuroraCosmeticAnimatable implements GeoReplacedEntity {
+public class AuroraCosmeticAnimatable extends AbstractPlayerCosmeticAnimatable {
     
     public static final AuroraCosmeticAnimatable INSTANCE = new AuroraCosmeticAnimatable();
 
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-
     private AuroraCosmeticAnimatable() {}
-
-    @Override
-    public EntityType<?> getReplacingEntityType() {
-        return EntityType.PLAYER;
-    }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
@@ -40,10 +30,5 @@ public class AuroraCosmeticAnimatable implements GeoReplacedEntity {
         }
         event.getController().setAnimation(software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("animation.player.idle"));
         return PlayState.CONTINUE;
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
     }
 }

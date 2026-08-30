@@ -333,6 +333,100 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public static void onArrowJoinLevel(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+            Entity shooter = arrow.getOwner();
+            if (shooter instanceof LivingEntity livingShooter) {
+                net.minecraft.world.item.ItemStack weapon = null;
+                try {
+                    weapon = arrow.getWeaponItem(); 
+                } catch (Throwable t) {
+                    weapon = livingShooter.getMainHandItem();
+                }
+                
+                if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get())) {
+                    arrow.getPersistentData().putBoolean("ArcusLucisHoming", true);
+                } else if (livingShooter.getOffhandItem().is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get())) {
+                    arrow.getPersistentData().putBoolean("ArcusLucisHoming", true);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onArrowTick(EntityTickEvent.Pre event) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow && !arrow.level().isClientSide) {
+            if (arrow.getPersistentData().getBoolean("ArcusLucisHoming")) {
+                if (arrow.getDeltaMovement().lengthSqr() < 0.05) return; // Stop homing if it has stopped moving (e.g., stuck in ground)
+                
+                // Homing Logic
+                net.minecraft.world.phys.AABB scanBox = arrow.getBoundingBox().inflate(15.0D);
+                java.util.List<LivingEntity> entities = arrow.level().getEntitiesOfClass(LivingEntity.class, scanBox, 
+                        e -> e != arrow.getOwner() && e.isAlive() && !(e instanceof net.minecraft.world.entity.animal.Animal));
+                
+                LivingEntity bestTarget = null;
+                double bestScore = Double.MAX_VALUE;
+                net.minecraft.world.phys.Vec3 arrowPos = arrow.position();
+                net.minecraft.world.phys.Vec3 currentDir = arrow.getDeltaMovement().normalize();
+
+                for (LivingEntity e : entities) {
+                    net.minecraft.world.phys.Vec3 targetCenter = e.getBoundingBox().getCenter();
+                    net.minecraft.world.phys.Vec3 dirToTarget = targetCenter.subtract(arrowPos).normalize();
+                    double dotProduct = currentDir.dot(dirToTarget);
+                    
+                    // Only target entities roughly in front of the arrow (dot > 0.4 means within ~66 degrees)
+                    if (dotProduct > 0.4) {
+                        // Check Line of Sight
+                        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
+                                arrowPos, targetCenter, net.minecraft.world.level.ClipContext.Block.COLLIDER, 
+                                net.minecraft.world.level.ClipContext.Fluid.NONE, arrow);
+                        net.minecraft.world.phys.HitResult hitResult = arrow.level().clip(context);
+                        
+                        if (hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+                            double dist = arrow.distanceToSqr(e);
+                            // Score based on distance and how directly we are aiming at it
+                            double score = dist / dotProduct; 
+                            if (score < bestScore) {
+                                bestScore = score;
+                                bestTarget = e;
+                            }
+                        }
+                    }
+                }
+
+                if (bestTarget != null) {
+                    net.minecraft.world.phys.Vec3 targetPos = bestTarget.getBoundingBox().getCenter();
+                    net.minecraft.world.phys.Vec3 desiredDir = targetPos.subtract(arrowPos).normalize();
+                    
+                    // Interpolate towards target (0.2 is turning speed)
+                    net.minecraft.world.phys.Vec3 newDir = currentDir.scale(0.8).add(desiredDir.scale(0.2)).normalize();
+                    double speed = arrow.getDeltaMovement().length();
+                    if (speed < 0.1) speed = 1.0; 
+                    
+                    arrow.setDeltaMovement(newDir.scale(speed));
+                    
+                    // Update rotation for the client
+                    double horizDist = newDir.horizontalDistance();
+                    arrow.setYRot((float)(net.minecraft.util.Mth.atan2(newDir.x, newDir.z) * (double)(180F / (float)Math.PI)));
+                    arrow.setXRot((float)(net.minecraft.util.Mth.atan2(newDir.y, horizDist) * (double)(180F / (float)Math.PI)));
+                    arrow.yRotO = arrow.getYRot();
+                    arrow.xRotO = arrow.getXRot();
+                    
+                    // Force velocity sync to client to prevent visual rubberbanding!
+                    arrow.hasImpulse = true;
+                    
+                    // Spawn particles trail
+                    if (arrow.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                        serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, 
+                            arrow.getX(), arrow.getY(), arrow.getZ(), 1, 0.0, 0.0, 0.0, 0.01);
+                    }
+                }
+            }
+        }
+    }
+
+
+    @SubscribeEvent
 
     public static void onEntityTick(EntityTickEvent.Pre event) {
         if (!(event.getEntity() instanceof Monster monster))

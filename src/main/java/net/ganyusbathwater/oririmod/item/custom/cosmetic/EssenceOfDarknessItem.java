@@ -7,4 +7,9 @@ public class EssenceOfDarknessItem extends Item implements ICurioItem {
     public EssenceOfDarknessItem(Properties properties) {
         super(properties);
     }
+
+    @Override
+    public boolean isFoil(net.minecraft.world.item.ItemStack stack) {
+        return true;
+    }
 }
