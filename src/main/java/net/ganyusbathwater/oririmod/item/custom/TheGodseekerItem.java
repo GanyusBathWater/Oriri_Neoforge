@@ -86,6 +86,20 @@ public class TheGodseekerItem extends Item {
     }
 
     @Override
+    public void inventoryTick(ItemStack pStack, Level pLevel, Entity pEntity, int pSlotId, boolean pIsSelected) {
+        if (!pLevel.isClientSide() && pLevel instanceof ServerLevel serverLevel) {
+            boolean isActive = GodsTrialData.get(serverLevel).isActive();
+            net.minecraft.world.item.component.CustomData customData = pStack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);
+            net.minecraft.nbt.CompoundTag tag = customData.copyTag();
+            boolean currentlyActive = tag.getBoolean("oriri_godstrial_active");
+            if (currentlyActive != isActive) {
+                tag.putBoolean("oriri_godstrial_active", isActive);
+                pStack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+            }
+        }
+    }
+
+    @Override
     public boolean isFoil(ItemStack pStack) {
         return true;
     }

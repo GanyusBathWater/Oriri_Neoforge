@@ -62,7 +62,7 @@ public class ModItems {
         public static final DeferredItem<Item> FIRE_CRYSTAL = ITEMS.register("fire_crystal",
                         () -> new Item(new Item.Properties()));
         public static final DeferredItem<Item> MERMAID_SCALE = ITEMS.register("mermaid_scale",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.MermaidScaleItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(-1, true))));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.MermaidScaleItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.BASE_COLOR, net.minecraft.world.item.DyeColor.CYAN)));
         public static final DeferredItem<Item> MANA_MANIFESTATION = ITEMS.register("mana_manifestation",
                         () -> new Item(new Item.Properties()));
         public static final DeferredItem<Item> MOON_STONE = ITEMS.register("moon_stone",
@@ -365,7 +365,7 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.CustomBowItemClass(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
 
         public static final DeferredItem<net.minecraft.world.item.BowItem> ARCUS_LUCIS = ITEMS.register("arcus_lucis",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.CustomBowItemClass(new Item.Properties().stacksTo(1), ModRarity.GODLY));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.ArcusLucisItem(new Item.Properties().stacksTo(1), ModRarity.GODLY));
 
         public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.TntArrowItem> TNT_ARROW = ITEMS.register("tnt_arrow",
                         () -> new net.ganyusbathwater.oririmod.item.custom.arrow.TntArrowItem(new Item.Properties()));

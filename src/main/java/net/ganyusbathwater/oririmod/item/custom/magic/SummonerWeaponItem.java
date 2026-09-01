@@ -212,18 +212,12 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
             return;
         }
 
-        if (!ModManaUtil.tryConsumeMana(player, manaCost, stack)) {
-            return;
-        }
-
         ServerLevel serverLevel = (ServerLevel) level;
 
         BlockHitResult hitResult = raycastToDistance(level, player, 12.0);
         if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
             return;
         }
-
-        BlockPos spawnPos = hitResult.getBlockPos().relative(hitResult.getDirection());
 
         // Determine the actual EntityType based on weapon type and level
         int weaponLevel = Math.max(1, getUnlockedLevel(stack));
@@ -234,6 +228,29 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
             if (weaponLevel >= 3)
                 actualType = (EntityType<? extends Mob>) EntityType.STRAY;
         }
+
+        // Enforce summon cap
+        String playerUUID = player.getStringUUID();
+        int currentSummons = 0;
+        for (Mob mob : serverLevel.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(128.0D))) {
+            if (mob.getType() == actualType) {
+                CompoundTag data = mob.getPersistentData();
+                if (data.getBoolean(SUMMONED_TAG) && playerUUID.equals(data.getString(OWNER_TAG))) {
+                    currentSummons++;
+                }
+            }
+        }
+
+        if (currentSummons >= weaponLevel) {
+            player.displayClientMessage(Component.literal("Maximum summons reached!").withStyle(net.minecraft.ChatFormatting.RED), true);
+            return;
+        }
+
+        if (!ModManaUtil.tryConsumeMana(player, manaCost, stack)) {
+            return;
+        }
+
+        BlockPos spawnPos = hitResult.getBlockPos().relative(hitResult.getDirection());
 
         // Spawn the mob
         Mob summoned = actualType.create(serverLevel);

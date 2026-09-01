@@ -314,7 +314,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.STRANGE_ENDER_EYE.get());
                 withExistingParent(ModItems.STRIDER_SCALE.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("item/strider_scale"));
                 basicItem(ModItems.WITHER_ROSE.get());
-                withExistingParent(ModItems.ESSENCE_OF_DARKNESS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("gui/sprites/darkness_element_symbole"));
+                basicItem(ModItems.ESSENCE_OF_DARKNESS.get());
                 withExistingParent(ModItems.THE_GODSEEKER.getId().getPath(), mcLoc("item/generated"))
                                 .texture("layer0", modLoc("item/godseeker_inactive"))
                                 .override()
@@ -458,7 +458,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.VENOMOUS_PLANT_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.MERMAID_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.MERMAID_SCALE.getId().getPath(), "item/generated")
-                        .texture("layer0", mcLoc("item/nether_star"));
+                        .texture("layer0", modLoc("item/mermaid_scale"));
                 withExistingParent(ModItems.DEVIARTRAS_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.LOADED_BLAZE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.FAIRY_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));

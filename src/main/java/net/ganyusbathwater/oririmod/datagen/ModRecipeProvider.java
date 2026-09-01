@@ -450,6 +450,19 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .define('S', Items.STRING)
                                 .unlockedBy("has_crystal_ingot", has(ModItems.CRYSTAL_INGOT.get())).save(recipeOutput);
 
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.ARCUS_LUCIS.get(), 1)
+                                .pattern("OMA")
+                                .pattern("NIN")
+                                .pattern("BMC")
+                                .define('O', ModItems.ORAPHIM_BOW.get())
+                                .define('M', ModItems.MOON_STONE.get())
+                                .define('N', ModBlocks.MANA_CRYSTAL_BLOCK.get())
+                                .define('A', ModItems.ARBITER_CROSSBOW.get())
+                                .define('B', Items.BOW)
+                                .define('C', Items.CROSSBOW)
+                                .define('I', ModItems.IRAS_SOUL_FRAGMENT.get())
+                                .unlockedBy("has_oraphim_bow", has(ModItems.ORAPHIM_BOW.get())).save(recipeOutput);
+
                 ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.MAGIC_UPGRADE_TEMPLATE.get(), 2)
                                 .pattern("ITI")
                                 .pattern("ISI")
@@ -538,6 +551,22 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 makeStaff(recipeOutput, Ingredient.of(ModItems.IRON_STICK.get()), Ingredient.of(Items.ENDER_PEARL), ModItems.STAFF_OF_VOID.get());
                 makeStaff(recipeOutput, Ingredient.of(ModItems.IRON_STICK.get()), Ingredient.of(ModItems.MOON_STONE.get()), ModItems.STAFF_OF_COSMOS.get());
                 makeStaff(recipeOutput, Ingredient.of(Items.STICK), Ingredient.of(ModItems.FIRE_CRYSTAL.get()), ModItems.STAFF_OF_HELL.get());
+                
+                makeMermaidScaleDyeRecipes(recipeOutput);
+        }
+
+        private void makeMermaidScaleDyeRecipes(RecipeOutput recipeOutput) {
+                for (net.minecraft.world.item.DyeColor color : net.minecraft.world.item.DyeColor.values()) {
+                        Item dyeItem = net.minecraft.world.item.DyeItem.byColor(color);
+                        net.minecraft.world.item.ItemStack outputStack = new net.minecraft.world.item.ItemStack(ModItems.MERMAID_SCALE.get());
+                        outputStack.set(net.minecraft.core.component.DataComponents.BASE_COLOR, color);
+
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, outputStack)
+                                        .requires(ModItems.MERMAID_SCALE.get())
+                                        .requires(dyeItem)
+                                        .unlockedBy("has_mermaid_scale", has(ModItems.MERMAID_SCALE.get()))
+                                        .save(recipeOutput, "oririmod:mermaid_scale_dye_" + color.getName());
+                }
         }
 
         private void makeArmorRecipes(RecipeOutput recipeOutput, Item ingot, Item helmet, Item chestplate,

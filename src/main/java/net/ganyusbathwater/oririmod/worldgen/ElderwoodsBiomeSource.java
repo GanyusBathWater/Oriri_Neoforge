@@ -153,6 +153,49 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     /**
+     * Evaluates the biome precisely at the given 1x1x1 block coordinate.
+     * Prevents the 4x4 chunky block rendering caused by getNoiseBiome.
+     */
+    public Holder<Biome> getBlockBiome(int x, int y, int z) {
+        if (!seedInitialized) {
+            syncSeed(net.ganyusbathwater.oririmod.OririMod.globalWorldSeed);
+        }
+
+        Holder<Biome> surfaceBiome = getSurfaceBiome(x, z);
+
+        // Surface height check for caves
+        int surfaceY = computeSurfaceHeight(x, z, surfaceBiome);
+        boolean isBelowSurfaceLayer = y < surfaceY - 16;
+
+        if (isBelowSurfaceLayer) {
+            // Cave biomes
+            float caveScale = 0.004f;
+            double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float)((x + seedOffsetCave) * caveScale),
+                    0f,
+                    (float)((z + seedOffsetCave) * caveScale),
+                    3
+            );
+
+            // Scarlet Caves cleanly spawn under Scarlet Swamps and Scarlet Forests
+            if (surfaceBiome.is(SCARLET_SWAMP_KEY) || surfaceBiome.is(SCARLET_FOREST_KEY)) {
+                return findBiome(SCARLET_CAVES_KEY);
+            }
+            if (caveNoise > 0.20) {
+                return findBiome(ELYSIAN_ABYSS_KEY);
+            } else if (caveNoise < -0.3) {
+                return findBiome(ELDERWOODS_CAVE_KEY);
+            } else if (caveNoise < -0.15 && caveNoise > -0.2) {
+                return findBiome(CRYSTAL_CAVES_KEY);
+            } else {
+                return findBiome(ELDERWOODS_CAVE_KEY);
+            }
+        }
+
+        return surfaceBiome;
+    }
+
+    /**
      * Unified 2D MultiNoise map for surface biomes (Temperature/Humidity).
      * Prevents overlapping rules and forces continuous borders.
      */

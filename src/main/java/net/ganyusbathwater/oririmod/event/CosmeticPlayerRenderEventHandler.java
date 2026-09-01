@@ -18,6 +18,7 @@ public class CosmeticPlayerRenderEventHandler {
 
     public static AuroraCosmeticRenderer AURORA_COSMETIC_RENDERER;
     public static net.ganyusbathwater.oririmod.client.render.entity.MermaidCosmeticRenderer MERMAID_COSMETIC_RENDERER;
+    public static net.ganyusbathwater.oririmod.client.render.entity.MermaidHeadfinsRenderer MERMAID_HEADFINS_RENDERER;
 
     private static boolean hasCurioEquipped(Player player, Item item) {
         return CuriosApi.getCuriosInventory(player)
@@ -31,21 +32,36 @@ public class CosmeticPlayerRenderEventHandler {
     public static void onPlayerRenderPre(RenderPlayerEvent.Pre event) {
         Player player = event.getEntity();
         if (hasCurioEquipped(player, ModItems.ESSENCE_OF_DARKNESS.get())) {
-            event.setCanceled(true);
-            if (AURORA_COSMETIC_RENDERER != null) {
-                float partialTick = event.getPartialTick();
-                // We use player.getYRot() for the entityYaw argument since the event doesn't provide it directly in 1.21.1
-                float entityYaw = net.minecraft.util.Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot);
-                AURORA_COSMETIC_RENDERER.render((net.minecraft.client.player.AbstractClientPlayer) player, entityYaw, partialTick, event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
-            }
+            // Do NOT cancel the event. If we cancel it, PlayerRenderer.render never runs,
+            // setupAnim() never updates the bone rotations, and the cosmetic T-poses.
+            // Instead, we just hide all vanilla player body parts so they don't render underneath.
+            event.getRenderer().getModel().head.visible = false;
+            event.getRenderer().getModel().hat.visible = false;
+            event.getRenderer().getModel().body.visible = false;
+            event.getRenderer().getModel().jacket.visible = false;
+            event.getRenderer().getModel().rightArm.visible = false;
+            event.getRenderer().getModel().rightSleeve.visible = false;
+            event.getRenderer().getModel().leftArm.visible = false;
+            event.getRenderer().getModel().leftSleeve.visible = false;
+            event.getRenderer().getModel().rightLeg.visible = false;
+            event.getRenderer().getModel().rightPants.visible = false;
+            event.getRenderer().getModel().leftLeg.visible = false;
+            event.getRenderer().getModel().leftPants.visible = false;
+            
+            // We also need to manually call setupAnim if it was expected to be fully synchronized with the cosmetic.
+            // But since the event is no longer canceled, the vanilla renderer will call setupAnim right after this Pre event anyway!
         }
         
         if (hasCurioEquipped(player, ModItems.MERMAID_SCALE.get())) {
-            // Hide the vanilla legs
-            event.getRenderer().getModel().rightLeg.visible = false;
-            event.getRenderer().getModel().leftLeg.visible = false;
-            event.getRenderer().getModel().rightPants.visible = false;
-            event.getRenderer().getModel().leftPants.visible = false;
+            boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) || player.isVisuallySwimming();
+            
+            if (inWater) {
+                // Hide the vanilla legs only in water
+                event.getRenderer().getModel().rightLeg.visible = false;
+                event.getRenderer().getModel().leftLeg.visible = false;
+                event.getRenderer().getModel().rightPants.visible = false;
+                event.getRenderer().getModel().leftPants.visible = false;
+            }
             
             if (MERMAID_COSMETIC_RENDERER != null) {
                 float partialTick = event.getPartialTick();
@@ -63,12 +79,6 @@ public class CosmeticPlayerRenderEventHandler {
                 float ageInTicks = player.tickCount + partialTick;
                 
                 event.getRenderer().getModel().setupAnim((net.minecraft.client.player.AbstractClientPlayer) player, f8, f5, ageInTicks, netHeadYaw, headPitch);
-                
-                boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) || player.isVisuallySwimming();
-                if (!inWater) {
-                    // Render the LAND model perfectly at the root, exactly as it was before!
-                    MERMAID_COSMETIC_RENDERER.render((net.minecraft.client.player.AbstractClientPlayer) player, entityYaw, partialTick, event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
-                }
             }
         }
     }
@@ -79,6 +89,7 @@ public class CosmeticPlayerRenderEventHandler {
             net.minecraft.client.renderer.entity.LivingEntityRenderer<net.minecraft.client.player.AbstractClientPlayer, net.minecraft.client.model.PlayerModel<net.minecraft.client.player.AbstractClientPlayer>> renderer = event.getSkin(skin);
             if (renderer != null) {
                 renderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.MermaidCosmeticLayer(renderer));
+                renderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.AuroraCosmeticLayer(renderer));
             }
         }
     }
@@ -186,7 +197,18 @@ public class CosmeticPlayerRenderEventHandler {
                     net.minecraft.client.renderer.RenderType renderType = MERMAID_COSMETIC_RENDERER.getRenderType(animatable, model.getTextureResource(animatable), event.getMultiBufferSource(), partialTick);
                     com.mojang.blaze3d.vertex.VertexConsumer buffer = event.getMultiBufferSource().getBuffer(renderType);
                     
-                    int color = MERMAID_COSMETIC_RENDERER.getRenderColor(animatable, partialTick, event.getPackedLight()).getColor();
+                    int rawColor = CuriosApi.getCuriosInventory(player).map(inv -> {
+                        return inv.findFirstCurio(ModItems.MERMAID_SCALE.get()).map(slotResult -> {
+                            net.minecraft.world.item.ItemStack stack = slotResult.stack();
+                            net.minecraft.world.item.DyeColor baseColor = stack.get(net.minecraft.core.component.DataComponents.BASE_COLOR);
+                            if (baseColor != null) {
+                                return baseColor.getTextureDiffuseColor();
+                            }
+                            return 0xFFFFFF;
+                        }).orElse(0xFFFFFF);
+                    }).orElse(0xFFFFFF);
+                    
+                    int color = software.bernie.geckolib.util.Color.ofOpaque(rawColor).getColor();
                     
                     MERMAID_COSMETIC_RENDERER.preRender(poseStack, animatable, model.getBakedModel(model.getModelResource(animatable)), event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
                     MERMAID_COSMETIC_RENDERER.renderRecursively(poseStack, animatable, armBone, renderType, event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);

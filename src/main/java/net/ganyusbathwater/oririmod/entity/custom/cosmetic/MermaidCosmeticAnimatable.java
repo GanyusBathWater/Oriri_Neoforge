@@ -24,11 +24,15 @@ public class MermaidCosmeticAnimatable extends AbstractPlayerCosmeticAnimatable 
         if (entity instanceof Player player) {
             boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType));
             if (player.isVisuallySwimming() || inWater) {
-                event.getController().setAnimation(software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("mermaid_essence_swimming"));
+                if (event.isMoving()) {
+                    event.getController().setAnimation(software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("mermaid_essence_swimming"));
+                } else {
+                    event.getController().setAnimation(software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("mermaid_essence_idle"));
+                }
                 return PlayState.CONTINUE;
             }
         }
-        event.getController().setAnimation(software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("mermaid_essence_idle_fins"));
+        event.getController().setAnimation(software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("mermaid_essence_idle"));
         return PlayState.CONTINUE;
     }
 }

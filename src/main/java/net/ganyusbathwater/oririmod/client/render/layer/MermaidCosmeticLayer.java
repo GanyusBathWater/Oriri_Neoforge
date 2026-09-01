@@ -32,32 +32,44 @@ public class MermaidCosmeticLayer extends RenderLayer<AbstractClientPlayer, Play
             return;
         }
 
+        boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) || player.isVisuallySwimming();
+        
         if (CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER != null) {
-            poseStack.pushPose();
-
-            boolean inWater = player.isInWater()
-                    || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType))
-                    || player.isVisuallySwimming();
-
-            if (!inWater) {
+            if (inWater) {
+                // TAIL MODEL
+                poseStack.pushPose();
+                
+                this.getParentModel().body.translateAndRotate(poseStack);
+                
+                poseStack.scale(1.0F, -1.0F, 1.0F);
+                poseStack.translate(0.0F, -1.5F, 0.0F);
+                
+                float entityYaw = net.minecraft.util.Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot);
+                CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER.render(player, entityYaw, partialTick, poseStack, buffer, packedLight);
+                
                 poseStack.popPose();
-                return;
+            } else {
+                // LAND MODEL
+                poseStack.pushPose();
+                
+                poseStack.scale(-1.0F, -1.0F, 1.0F);
+                poseStack.translate(0.0F, -1.5F, 0.0F);
+                
+                CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER.render(player, 180.0F, partialTick, poseStack, buffer, packedLight);
+                
+                poseStack.popPose();
             }
-
-            // TAIL MODEL: Physically attach the origin to the Vanilla body bone
-            this.getParentModel().body.translateAndRotate(poseStack);
-
-            // Un-invert Vanilla's Y-axis so GeckoLib renders right-side up
-            poseStack.scale(1.0F, -1.0F, 1.0F);
-
-            // Apply a static downward translation to align the waists
+        }
+        
+        if (CosmeticPlayerRenderEventHandler.MERMAID_HEADFINS_RENDERER != null) {
+            // HEADFINS MODEL (renders on both Land and Water)
+            poseStack.pushPose();
+            
+            poseStack.scale(-1.0F, -1.0F, 1.0F);
             poseStack.translate(0.0F, -1.5F, 0.0F);
-
-            // 4. Render the GeckoLib model using the inherited PoseStack
-            float entityYaw = net.minecraft.util.Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot);
-            CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER.render(player, entityYaw, partialTick, poseStack,
-                    buffer, packedLight);
-
+            
+            CosmeticPlayerRenderEventHandler.MERMAID_HEADFINS_RENDERER.render(player, 180.0F, partialTick, poseStack, buffer, packedLight);
+            
             poseStack.popPose();
         }
     }

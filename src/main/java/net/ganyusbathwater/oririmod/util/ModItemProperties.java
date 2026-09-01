@@ -82,8 +82,9 @@ public class ModItemProperties {
     private static void makeGodseeker(Item item) {
         ItemProperties.register(item, ResourceLocation.withDefaultNamespace("active"),
                 (stack, level, entity, seed) -> {
-                    if (level != null) {
-                        return level.getDifficulty() == net.minecraft.world.Difficulty.HARD ? 1.0F : 0.0F;
+                    net.minecraft.world.item.component.CustomData customData = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);
+                    if (customData.contains("oriri_godstrial_active")) {
+                        return customData.copyTag().getBoolean("oriri_godstrial_active") ? 1.0F : 0.0F;
                     }
                     return 0.0F;
                 });

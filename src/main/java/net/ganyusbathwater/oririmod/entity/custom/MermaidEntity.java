@@ -185,7 +185,28 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
     // ── AI goals ──────────────────────────────────────────────────────────
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true) {
+            private int customAttackTime = 0;
+            
+            @Override
+            public void tick() {
+                super.tick();
+                if (this.customAttackTime > 0) {
+                    this.customAttackTime--;
+                }
+                
+                net.minecraft.world.entity.LivingEntity target = this.mob.getTarget();
+                if (target != null && this.customAttackTime <= 0) {
+                    double dist = this.mob.distanceToSqr(target);
+                    // Force attack if within 2.5 blocks distance (6.25D) and has line of sight
+                    if (dist < 6.25D && this.mob.getSensing().hasLineOfSight(target)) {
+                        this.customAttackTime = 20; // 1 second cooldown
+                        this.mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                        this.mob.doHurtTarget(target);
+                    }
+                }
+            }
+        });
         // Use custom 3D wander goal for water, and standard stroll for land
         this.goalSelector.addGoal(4, new MermaidWanderGoal(this));
         this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.0D) {
@@ -216,6 +237,11 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
         });
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, true,
                 p -> p instanceof Player player && !player.isCreative() && !player.isSpectator()) {
+            
+            {
+                this.setUnseenMemoryTicks(600); // 30 seconds memory to prevent dropping hiding players
+            }
+
             @Override
             public boolean canUse() {
                 return (MermaidEntity.this.isAggressive || MermaidEntity.this.hungerCooldown < -2400) && super.canUse();
@@ -233,10 +259,7 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
     @Override
     public void travel(net.minecraft.world.phys.Vec3 travelVector) {
         if (this.isEffectiveAi() && this.isInWater()) {
-            // Apply speed multiplier based on whether she is hunting (fast) or wandering
-            // (cruising)
-            float speedMult = this.getTarget() != null ? 1.5F : 0.8F;
-            this.moveRelative(this.getSpeed() * speedMult, travelVector);
+            this.moveRelative(this.getSpeed(), travelVector);
             this.move(net.minecraft.world.entity.MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
         } else {
@@ -500,40 +523,45 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
         @Override
         public void tick() {
             if (this.mob.isInWater()) {
+                LivingEntity target = this.mob.getTarget();
+
                 if (this.operation == net.minecraft.world.entity.ai.control.MoveControl.Operation.MOVE_TO) {
                     double d0 = this.wantedX - this.mob.getX();
                     double d1 = this.wantedY - this.mob.getY();
                     double d2 = this.wantedZ - this.mob.getZ();
+                    
+                    double distSqr = d0 * d0 + d1 * d1 + d2 * d2;
+                    
+                    if (distSqr < 0.0001D) {
+                        this.mob.setSpeed(0.0F);
+                        return;
+                    }
 
-                    // If wandering (no target) and within 1.5 blocks of the node, consider it
-                    // reached
-                    if (this.mob.getTarget() == null && (d0 * d0 + d1 * d1 + d2 * d2 < 2.25D)) {
+                    if (target == null && distSqr < 2.25D) {
                         this.operation = net.minecraft.world.entity.ai.control.MoveControl.Operation.WAIT;
                         this.mob.setSpeed(0.0F);
                         return;
                     }
 
-                    // Steer yaw
+                    double horizontalDist = Math.sqrt(d0 * d0 + d2 * d2);
+                    d1 /= Math.sqrt(distSqr);
+                    
                     float targetYaw = (float) (net.minecraft.util.Mth.atan2(d2, d0) * (180F / (float) Math.PI)) - 90.0F;
                     this.mob.setYRot(this.rotlerp(this.mob.getYRot(), targetYaw, 90.0F));
                     this.mob.yBodyRot = this.mob.getYRot();
                     this.mob.yHeadRot = this.mob.getYRot();
-
-                    // Steer pitch
-                    double horizontalDist = Math.sqrt(d0 * d0 + d2 * d2);
-                    float targetPitch = (float) (-(net.minecraft.util.Mth.atan2(d1, horizontalDist)
-                            * (180F / (float) Math.PI)));
+                    
+                    float targetPitch = (float) (-(net.minecraft.util.Mth.atan2(this.wantedY - this.mob.getY(), horizontalDist) * (180F / (float) Math.PI)));
                     this.mob.setXRot(this.rotlerp(this.mob.getXRot(), targetPitch, 90.0F));
 
-                    // Calculate 3D thrust components! Without this, she only swims horizontally and
-                    // spins!
-                    float speed = (float) (this.speedModifier * this.mob
-                            .getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
-                    this.mob.setSpeed(speed);
-                    float pitchCos = net.minecraft.util.Mth.cos(this.mob.getXRot() * ((float) Math.PI / 180F));
-                    float pitchSin = net.minecraft.util.Mth.sin(this.mob.getXRot() * ((float) Math.PI / 180F));
-                    this.mob.setZza(pitchCos * speed);
-                    this.mob.setYya(-pitchSin * speed);
+                    float speedMod = target != null ? 1.5F : 0.8F;
+                    float f1 = (float) (speedMod * this.speedModifier * this.mob.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+                    float f2 = net.minecraft.util.Mth.lerp(0.125F, this.mob.getSpeed(), f1);
+                    this.mob.setSpeed(f2);
+                    
+                    // Directly apply vertical movement to DeltaMovement (Vanilla aquatic behavior)
+                    // The horizontal movement is inherently handled by aiStep forcing Zza to getSpeed() based on YRot.
+                    this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(0.0D, (double)this.mob.getSpeed() * d1 * 0.1D, 0.0D));
                 } else {
                     this.mob.setSpeed(0.0F);
                     this.mob.setXxa(0.0F);
@@ -541,8 +569,7 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
                     this.mob.setZza(0.0F);
                 }
             } else {
-                // We are on land! Rely on standard MoveControl which flawlessly handles jumping
-                // up 1 block steps!
+                // We are on land! Rely on standard MoveControl which flawlessly handles jumping up 1 block steps!
                 super.tick();
             }
         }

@@ -58,6 +58,15 @@ public final class ColorHandler {
         event.register(grassBlockItem, Items.GRASS_BLOCK);
         event.register(grassPlantsItem, Items.SHORT_GRASS, Items.TALL_GRASS, Items.FERN, Items.LARGE_FERN);
         event.register(leavesItem, Items.OAK_LEAVES);
+
+        ItemColor mermaidScaleItem = (stack, tintIndex) -> {
+            if (tintIndex == 0) {
+                net.minecraft.world.item.DyeColor color = stack.get(net.minecraft.core.component.DataComponents.BASE_COLOR);
+                if (color != null) return color.getTextureDiffuseColor();
+            }
+            return -1;
+        };
+        event.register(mermaidScaleItem, net.ganyusbathwater.oririmod.item.ModItems.MERMAID_SCALE.get());
     }
 
     // ---------- Helpers ----------

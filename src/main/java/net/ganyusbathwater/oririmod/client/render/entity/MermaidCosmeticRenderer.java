@@ -40,9 +40,9 @@ public class MermaidCosmeticRenderer extends AbstractPlayerCosmeticRenderer<Merm
             int color = CuriosApi.getCuriosInventory(player).map(inv -> {
                 return inv.findFirstCurio(ModItems.MERMAID_SCALE.get()).map(slotResult -> {
                     ItemStack stack = slotResult.stack();
-                    net.minecraft.world.item.component.DyedItemColor dyedItemColor = stack.get(DataComponents.DYED_COLOR);
-                    if (dyedItemColor != null) {
-                        return dyedItemColor.rgb();
+                    net.minecraft.world.item.DyeColor baseColor = stack.get(DataComponents.BASE_COLOR);
+                    if (baseColor != null) {
+                        return baseColor.getTextureDiffuseColor();
                     }
                     return 0xFFFFFF;
                 }).orElse(0xFFFFFF);
@@ -57,13 +57,6 @@ public class MermaidCosmeticRenderer extends AbstractPlayerCosmeticRenderer<Merm
 
     @Override
     protected void applyRotations(MermaidCosmeticAnimatable animatable, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
-        if (this.currentEntity instanceof Player player) {
-            boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) || player.isVisuallySwimming();
-            if (!inWater) {
-                // LAND MODEL: Needs the base GeckoLib entity rotation (180 - yaw) because it is rendered at the root!
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F - rotationYaw));
-            }
-            // TAIL MODEL (inWater): No-op because the RenderLayer ALREADY applies the body's yaw and pitch via PoseStack!
-        }
+        // No-op because MermaidCosmeticLayer handles the PoseStack completely!
     }
 }

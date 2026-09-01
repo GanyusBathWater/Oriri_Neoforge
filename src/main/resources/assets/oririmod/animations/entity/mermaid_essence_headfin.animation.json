@@ -1,0 +1,49 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"mermaid_essence_idle_headfins": {
+			"loop": true,
+			"animation_length": 3,
+			"bones": {
+				"headfin_right": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.75": {
+							"vector": [0, 12.5, 0]
+						},
+						"1.5": {
+							"vector": [0, 0, 0]
+						},
+						"2.25": {
+							"vector": [0, -12.5, 0]
+						},
+						"3.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"headfin_left": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.75": {
+							"vector": [0, -12.5, 0]
+						},
+						"1.5": {
+							"vector": [0, 0, 0]
+						},
+						"2.25": {
+							"vector": [0, 12.5, 0]
+						},
+						"3.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	}
+}

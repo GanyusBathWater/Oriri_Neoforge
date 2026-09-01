@@ -150,6 +150,20 @@ public final class NetworkHandler {
                     var player = ctx.player();
                     if (player != null && player.getMainHandItem().getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ElementalChoirItem item) {
                         item.executeServerSwing(player, player.getMainHandItem());
+                        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new net.ganyusbathwater.oririmod.network.packet.SyncChoirSwingPayload(player.getId()));
+                    }
+                }));
+
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncChoirSwingPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncChoirSwingPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var player = ctx.player();
+                    if (player != null && player.level().isClientSide) {
+                        net.minecraft.world.entity.Entity entity = player.level().getEntity(payload.playerId());
+                        if (entity instanceof net.minecraft.world.entity.player.Player swingingPlayer) {
+                            net.ganyusbathwater.oririmod.item.custom.ElementalChoirItem.CLIENT_LAST_SWING_TICK.put(swingingPlayer, swingingPlayer.level().getGameTime());
+                        }
                     }
                 }));
 

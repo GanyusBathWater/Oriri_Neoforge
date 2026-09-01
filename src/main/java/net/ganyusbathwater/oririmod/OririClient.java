@@ -64,6 +64,7 @@ public class OririClient {
     public static void onAddLayers(net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers event) {
         net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.AURORA_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.AuroraCosmeticRenderer(event.getContext());
         net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.MermaidCosmeticRenderer(event.getContext());
+        net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.MERMAID_HEADFINS_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.MermaidHeadfinsRenderer(event.getContext());
     }
 
     @SubscribeEvent

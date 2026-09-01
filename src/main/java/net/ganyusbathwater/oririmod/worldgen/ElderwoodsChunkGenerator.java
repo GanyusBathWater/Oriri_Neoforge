@@ -1019,8 +1019,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         mutablePos.set(worldX, y, worldZ);
                         BlockState current = chunk.getBlockState(mutablePos);
 
-                        // Check biome at THIS height to decide painting rules
-                        Holder<Biome> currentBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, y / 4, worldZ / 4, random.sampler());
+                        // Check biome at THIS exact block coordinate to decide painting rules for pixel-perfect borders!
+                        Holder<Biome> currentBiome;
+                        if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
+                            currentBiome = ebs.getBlockBiome(worldX, y, worldZ);
+                        } else {
+                            currentBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, y / 4, worldZ / 4, random.sampler());
+                        }
                         boolean isScarletCurrent = isScarletBiome(currentBiome);
                         boolean isDesertCurrent = isGoldenDesertBiome(currentBiome);
 
@@ -1194,8 +1199,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 }
                             }
                             
-                            // Get underground biome to decide stone type
-                            Holder<Biome> currentBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, y / 4, worldZ / 4, random.sampler());
+                            // Get underground biome to decide stone type using 1-block precise biome!
+                            Holder<Biome> currentBiome;
+                            if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
+                                currentBiome = ebs.getBlockBiome(worldX, y, worldZ);
+                            } else {
+                                currentBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, y / 4, worldZ / 4, random.sampler());
+                            }
                             boolean isScarletCurrent = isScarletBiome(currentBiome);
 
                             BlockState stoneState = STONE;

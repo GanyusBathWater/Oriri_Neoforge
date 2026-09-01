@@ -74,6 +74,14 @@ public class ElementalChoirItem extends SwordItem implements GeoItem {
     }
 
     @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+        if (!level.isClientSide) {
+            GeoItem.getOrAssignId(stack, (ServerLevel) level);
+        }
+        super.inventoryTick(stack, level, entity, slotId, isSelected);
+    }
+
+    @Override
     public void onUseTick(Level level, LivingEntity livingEntity, ItemStack stack, int count) {
         if (!level.isClientSide && livingEntity instanceof Player player) {
             int ticksUsed = this.getUseDuration(stack, livingEntity) - count;

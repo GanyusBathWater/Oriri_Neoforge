@@ -769,5 +769,8 @@
   "block.oririmod.myriad_cactus": "Myriad Cactus",
   "block.oririmod.dragonfruit_plant": "Dragonfruit Plant",
   "item.oririmod.eonic_dragon_fruit": "Eonic Dragon Fruit",
-  "tooltip.oririmod.normal_dragon_fruit.cleanse": "25% Chance to cleanse a negative effect"
+  "tooltip.oririmod.normal_dragon_fruit.cleanse": "25% Chance to cleanse a negative effect",
+  "tooltip.oririmod.arcus_lucis.lore": "You feel an entire nebula soaring through the strings of this cosmic bow",
+  "tooltip.oririmod.arcus_lucis.homing": "Arrows shot through this bow have homing abilities",
+  "tooltip.oririmod.arcus_lucis.conversion": "Normal arrows are converted to spectral arrows"
 }

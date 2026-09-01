@@ -70,6 +70,7 @@ public final class ElementInit {
 
 
         // Projectiles
+        EntityElementRegistry.setElement(EntityType.SPECTRAL_ARROW, Element.LIGHT);
         EntityElementRegistry.setElement(EntityType.SMALL_FIREBALL, Element.FIRE);
         EntityElementRegistry.setElement(ModEntities.GIANT_SWORD.get(), Element.LIGHT);
         EntityElementRegistry.setElement(ModEntities.FIREBALL_PROJECTILE.get(), Element.FIRE);
@@ -104,6 +105,8 @@ public final class ElementInit {
         ItemElementRegistry.setElement(Items.NETHERITE_AXE, Element.FIRE);
         ItemElementRegistry.setElement(Items.BOW, Element.PHYSICAL);
         ItemElementRegistry.setElement(Items.CROSSBOW, Element.PHYSICAL);
+        ItemElementRegistry.setElement(Items.SPECTRAL_ARROW, Element.LIGHT);
+        ItemElementRegistry.setElement(ModItems.ARCUS_LUCIS.get(), Element.LIGHT);
         ItemElementRegistry.setElement(Items.MACE, Element.EARTH);
         ItemElementRegistry.setElement(Items.TRIDENT, Element.WATER);
         ItemElementRegistry.setElement(ModItems.STELLA_PERDITOR.get(), Element.DARKNESS);

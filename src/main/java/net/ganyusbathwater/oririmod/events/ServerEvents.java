@@ -344,9 +344,26 @@ public class ServerEvents {
                     weapon = livingShooter.getMainHandItem();
                 }
                 
-                if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get())) {
-                    arrow.getPersistentData().putBoolean("ArcusLucisHoming", true);
-                } else if (livingShooter.getOffhandItem().is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get())) {
+                boolean isArcus = (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get())) ||
+                                  livingShooter.getOffhandItem().is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get());
+
+                if (isArcus) {
+                    if (arrow.getClass() == net.minecraft.world.entity.projectile.Arrow.class) {
+                        event.setCanceled(true);
+                        net.minecraft.world.entity.projectile.SpectralArrow spectral = new net.minecraft.world.entity.projectile.SpectralArrow(
+                            arrow.level(), 
+                            livingShooter, 
+                            new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SPECTRAL_ARROW),
+                            weapon
+                        );
+                        spectral.copyPosition(arrow);
+                        spectral.setDeltaMovement(arrow.getDeltaMovement());
+                        spectral.setYRot(arrow.getYRot());
+                        spectral.setXRot(arrow.getXRot());
+                        spectral.getPersistentData().putBoolean("ArcusLucisHoming", true);
+                        arrow.level().addFreshEntity(spectral);
+                        return;
+                    }
                     arrow.getPersistentData().putBoolean("ArcusLucisHoming", true);
                 }
             }
