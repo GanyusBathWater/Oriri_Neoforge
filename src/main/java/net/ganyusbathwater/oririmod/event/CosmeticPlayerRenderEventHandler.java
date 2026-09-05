@@ -32,24 +32,30 @@ public class CosmeticPlayerRenderEventHandler {
     public static void onPlayerRenderPre(RenderPlayerEvent.Pre event) {
         Player player = event.getEntity();
         if (hasCurioEquipped(player, ModItems.ESSENCE_OF_DARKNESS.get())) {
-            // Do NOT cancel the event. If we cancel it, PlayerRenderer.render never runs,
-            // setupAnim() never updates the bone rotations, and the cosmetic T-poses.
-            // Instead, we just hide all vanilla player body parts so they don't render underneath.
-            event.getRenderer().getModel().head.visible = false;
-            event.getRenderer().getModel().hat.visible = false;
-            event.getRenderer().getModel().body.visible = false;
-            event.getRenderer().getModel().jacket.visible = false;
-            event.getRenderer().getModel().rightArm.visible = false;
-            event.getRenderer().getModel().rightSleeve.visible = false;
-            event.getRenderer().getModel().leftArm.visible = false;
-            event.getRenderer().getModel().leftSleeve.visible = false;
-            event.getRenderer().getModel().rightLeg.visible = false;
-            event.getRenderer().getModel().rightPants.visible = false;
-            event.getRenderer().getModel().leftLeg.visible = false;
-            event.getRenderer().getModel().leftPants.visible = false;
+            // Cancel the Vanilla render event completely to hide Vanilla items and body.
+            event.setCanceled(true);
             
-            // We also need to manually call setupAnim if it was expected to be fully synchronized with the cosmetic.
-            // But since the event is no longer canceled, the vanilla renderer will call setupAnim right after this Pre event anyway!
+            if (AURORA_COSMETIC_RENDERER != null) {
+                float partialTick = event.getPartialTick();
+                float entityYaw = net.minecraft.util.Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot);
+                
+                float f5 = 0.0F;
+                float f8 = 0.0F;
+                if (!player.isPassenger() && player.isAlive()) {
+                    f5 = player.walkAnimation.speed(partialTick);
+                    f8 = player.walkAnimation.position(partialTick);
+                    if (f5 > 1.0F) f5 = 1.0F;
+                }
+                float netHeadYaw = net.minecraft.util.Mth.lerp(partialTick, player.yHeadRotO, player.yHeadRot) - entityYaw;
+                float headPitch = net.minecraft.util.Mth.lerp(partialTick, player.xRotO, player.getXRot());
+                float ageInTicks = player.tickCount + partialTick;
+                
+                // Manually populate vanilla bone rotations so we can copy them
+                event.getRenderer().getModel().setupAnim((net.minecraft.client.player.AbstractClientPlayer) player, f8, f5, ageInTicks, netHeadYaw, headPitch);
+                
+                // Render our cosmetic as the root renderer
+                AURORA_COSMETIC_RENDERER.render((net.minecraft.client.player.AbstractClientPlayer) player, entityYaw, partialTick, event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
+            }
         }
         
         if (hasCurioEquipped(player, ModItems.MERMAID_SCALE.get())) {
@@ -84,12 +90,39 @@ public class CosmeticPlayerRenderEventHandler {
     }
     
     @SubscribeEvent
-    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
+    public static void onAddLayers(net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers event) {
+        if (MERMAID_COSMETIC_RENDERER == null) {
+            MERMAID_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.MermaidCosmeticRenderer(
+                new net.minecraft.client.renderer.entity.EntityRendererProvider.Context(
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher(),
+                    net.minecraft.client.Minecraft.getInstance().getItemRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getBlockRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getResourceManager(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityModels(),
+                    net.minecraft.client.Minecraft.getInstance().font
+                )
+            );
+        }
+        
+        if (AURORA_COSMETIC_RENDERER == null) {
+            AURORA_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.AuroraCosmeticRenderer(
+                new net.minecraft.client.renderer.entity.EntityRendererProvider.Context(
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher(),
+                    net.minecraft.client.Minecraft.getInstance().getItemRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getBlockRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getResourceManager(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityModels(),
+                    net.minecraft.client.Minecraft.getInstance().font
+                )
+            );
+        }
+
         for (net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
             net.minecraft.client.renderer.entity.LivingEntityRenderer<net.minecraft.client.player.AbstractClientPlayer, net.minecraft.client.model.PlayerModel<net.minecraft.client.player.AbstractClientPlayer>> renderer = event.getSkin(skin);
-            if (renderer != null) {
-                renderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.MermaidCosmeticLayer(renderer));
-                renderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.AuroraCosmeticLayer(renderer));
+            if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer playerRenderer) {
+                playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.MermaidCosmeticLayer(playerRenderer));
             }
         }
     }

@@ -7,12 +7,19 @@ import software.bernie.geckolib.model.GeoModel;
 
 public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCosmeticAnimatable> extends GeoReplacedEntityRenderer<AbstractClientPlayer, T> {
 
-    public AbstractPlayerCosmeticRenderer(EntityRendererProvider.Context renderManager, GeoModel<T> model, T animatable) {
+    public final boolean isRenderLayer;
+
+    public AbstractPlayerCosmeticRenderer(EntityRendererProvider.Context renderManager, GeoModel<T> model, T animatable, boolean isRenderLayer) {
         super(renderManager, model, animatable);
+        this.isRenderLayer = isRenderLayer;
         
         addRenderLayer(new software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer<>(this) {
             @Override
             public void renderForBone(com.mojang.blaze3d.vertex.PoseStack poseStack, T animatable, software.bernie.geckolib.cache.object.GeoBone bone, net.minecraft.client.renderer.RenderType renderType, net.minecraft.client.renderer.MultiBufferSource bufferSource, com.mojang.blaze3d.vertex.VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
+                // If this cosmetic is rendered as a layer on the native player model,
+                // the native ItemInHandLayer will already render the items. We skip it here to prevent double rendering.
+                if (isRenderLayer) return;
+
                 if (((AbstractPlayerCosmeticRenderer<?>) this.getRenderer()).getCurrentEntity() instanceof net.minecraft.world.entity.player.Player player) {
                     boolean isRight = bone.getName().equals("right_item") || bone.getName().equals("rightItem") || bone.getName().equals("bipedRightItem");
                     boolean isLeft = bone.getName().equals("left_item") || bone.getName().equals("leftItem") || bone.getName().equals("bipedLeftItem");
@@ -54,23 +61,45 @@ public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCos
 
     @Override
     protected void applyRotations(T animatable, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
-        // Do NOT call super.applyRotations()!
-        // GeoReplacedEntityRenderer internally fetches the entity's yBodyRot and applies it.
-        // Since we are rendering inside a Vanilla RenderLayer, the PoseStack ALREADY has:
-        // - yBodyRot
-        // - Swimming pitch
-        // - Fall flying pitch
-        // - Death rotation
-        // If we apply them again here, the cosmetic model will spin twice as fast as the player!
+        if (!isRenderLayer) {
+            super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick, nativeScale);
 
-        if (this.currentEntity instanceof net.minecraft.world.entity.player.Player player) {
-            float swimAmount = player.getSwimAmount(partialTick);
-            
-            if (swimAmount > 0.0F && !player.isFallFlying()) {
-                // We ONLY need the local space translation to slide the Mermaid tail down the spine!
-                // The actual pitch rotation is already handled by the Vanilla PoseStack!
-                poseStack.translate(0.0F, -1.0F * swimAmount, 0.0F);
+            if (this.currentEntity instanceof net.minecraft.world.entity.player.Player player) {
+                float swimAmount = player.getSwimAmount(partialTick);
+                float viewXRot = player.getViewXRot(partialTick);
+
+                if (player.isFallFlying()) {
+                    float fallFlyingTicks = (float)player.getFallFlyingTicks() + partialTick;
+                    float clampedFall = net.minecraft.util.Mth.clamp(fallFlyingTicks * fallFlyingTicks / 100.0F, 0.0F, 1.0F);
+                    if (!player.isAutoSpinAttack()) {
+                        poseStack.translate(0.0F, 1.2F, 0.0F);
+                        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(clampedFall * (-90.0F - viewXRot)));
+                        poseStack.translate(0.0F, -1.2F, 0.0F);
+                    }
+
+                    net.minecraft.world.phys.Vec3 viewVector = player.getViewVector(partialTick);
+                    net.minecraft.world.phys.Vec3 movementVector = player.getDeltaMovement();
+                    double horizontalSpeed = movementVector.horizontalDistanceSqr();
+                    double viewDistance = viewVector.horizontalDistanceSqr();
+                    if (horizontalSpeed > 0.0 && viewDistance > 0.0) {
+                        double dotProduct = (movementVector.x * viewVector.x + movementVector.z * viewVector.z) / Math.sqrt(horizontalSpeed * viewDistance);
+                        double crossProduct = movementVector.x * viewVector.z - movementVector.z * viewVector.x;
+                        poseStack.mulPose(com.mojang.math.Axis.YP.rotation((float)(Math.signum(crossProduct) * Math.acos(dotProduct))));
+                    }
+                } else if (swimAmount > 0.0F) {
+                    float targetPitch = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) ? -90.0F - player.getXRot() : -90.0F;
+                    float lerpedPitch = net.minecraft.util.Mth.lerp(swimAmount, 0.0F, targetPitch);
+                    poseStack.translate(0.0F, 1.2F, 0.0F);
+                    poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(lerpedPitch));
+                    poseStack.translate(0.0F, -1.2F, 0.0F);
+                    
+                    poseStack.translate(0.0F, -1.0F * swimAmount, 0.0F);
+                }
             }
+        } else {
+            // RenderLayers do not need to apply any global rotations or translations.
+            // The Vanilla PoseStack passed to the layer ALREADY contains the player's 
+            // swimming pitch, fall flying pitch, and swimming translations!
         }
     }
 }

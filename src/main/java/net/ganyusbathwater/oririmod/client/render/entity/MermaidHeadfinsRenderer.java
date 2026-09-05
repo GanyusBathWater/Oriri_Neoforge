@@ -13,7 +13,7 @@ import net.minecraft.core.component.DataComponents;
 public class MermaidHeadfinsRenderer extends AbstractPlayerCosmeticRenderer<MermaidHeadfinsAnimatable> {
 
     public MermaidHeadfinsRenderer(EntityRendererProvider.Context renderManager) {
-        super(renderManager, new MermaidHeadfinsModel(), MermaidHeadfinsAnimatable.INSTANCE);
+        super(renderManager, new MermaidHeadfinsModel(), MermaidHeadfinsAnimatable.INSTANCE, true);
     }
 
     @Override

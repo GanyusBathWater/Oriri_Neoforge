@@ -19,7 +19,7 @@ public class MermaidCosmeticRenderer extends AbstractPlayerCosmeticRenderer<Merm
 
     public MermaidCosmeticRenderer(EntityRendererProvider.Context renderManager) {
         // Pass the land model as default, we will override getGeoModel()
-        super(renderManager, new MermaidLandModel(), MermaidCosmeticAnimatable.INSTANCE);
+        super(renderManager, new MermaidLandModel(), MermaidCosmeticAnimatable.INSTANCE, true);
         this.landModel = this.getGeoModel();
         this.tailModel = new MermaidTailModel();
     }
@@ -55,8 +55,4 @@ public class MermaidCosmeticRenderer extends AbstractPlayerCosmeticRenderer<Merm
         return super.getRenderColor(animatable, partialTick, packedLight);
     }
 
-    @Override
-    protected void applyRotations(MermaidCosmeticAnimatable animatable, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
-        // No-op because MermaidCosmeticLayer handles the PoseStack completely!
-    }
 }

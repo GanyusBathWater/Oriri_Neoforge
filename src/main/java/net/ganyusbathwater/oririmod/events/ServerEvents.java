@@ -254,6 +254,50 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent event) {
+        Entity sourceEntity = event.getSource().getEntity();
+        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !player.level().isClientSide()) {
+            net.minecraft.world.item.ItemStack weapon = player.getMainHandItem();
+            if (weapon.getItem() instanceof net.ganyusbathwater.oririmod.item.custom.SolsEmbraceItem) {
+                net.minecraft.world.entity.LivingEntity target = event.getEntity();
+                net.minecraft.world.level.Level level = target.level();
+                
+                if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                    // Visual explosion
+                    serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER, 
+                        target.getX(), target.getY() + target.getBbHeight() / 2.0, target.getZ(), 
+                        1, 0, 0, 0, 0);
+                    level.playSound(null, target.getX(), target.getY(), target.getZ(), 
+                        net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
+                }
+                
+                // AOE Damage
+                java.util.List<net.minecraft.world.entity.LivingEntity> nearbyEntities = level.getEntitiesOfClass(
+                    net.minecraft.world.entity.LivingEntity.class, 
+                    target.getBoundingBox().inflate(4.0D)
+                );
+                
+                for (net.minecraft.world.entity.LivingEntity e : nearbyEntities) {
+                    if (e == target || e == player) continue;
+                    
+                    // Damage if aggressive or neutral in combat
+                    boolean isHostile = e instanceof net.minecraft.world.entity.monster.Enemy;
+                    boolean inCombat = e.getLastHurtByMob() != null;
+                    if (e instanceof net.minecraft.world.entity.Mob mob) {
+                        if (mob.getTarget() != null) inCombat = true;
+                    }
+                    
+                    if (isHostile || inCombat) {
+                        e.hurt(level.damageSources().explosion(target, player), 10.0F);
+                        e.setRemainingFireTicks(100);
+                    }
+                }
+            }
+        }
+    }
+
+
+    @SubscribeEvent
     public static void onLivingIncomingDamage(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
         if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.EvokerFangs fangs) {
             LivingEntity owner = fangs.getOwner();
@@ -269,6 +313,70 @@ public class ServerEvents {
 
     @SubscribeEvent
     public static void onProjectileImpact(ProjectileImpactEvent event) {
+        Projectile projectile = event.getProjectile();
+
+        // Oraphim Bow Whirlwind Ability (Only for fully charged shots)
+        if (!projectile.level().isClientSide() && projectile instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+            net.minecraft.world.item.ItemStack weapon = null;
+            try {
+                weapon = arrow.getWeaponItem();
+            } catch (Throwable t) {
+                // Ignore, weapon item might not be accessible
+            }
+            if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ORAPHIM_BOW.get()) && arrow.isCritArrow()) {
+                net.minecraft.world.level.Level level = arrow.level();
+                net.minecraft.world.phys.Vec3 epicenter = arrow.position();
+
+                // Spawn visually stunning server-sided math-based vortex particles
+                if (level instanceof ServerLevel serverLevel) {
+                    for (int i = 0; i < 40; i++) {
+                        double theta = serverLevel.random.nextDouble() * 2 * Math.PI;
+                        double radius = serverLevel.random.nextDouble() * 5.0; // 5 block radius visual
+                        double pX = epicenter.x + radius * Math.cos(theta);
+                        double pY = epicenter.y + serverLevel.random.nextDouble() * 2.0;
+                        double pZ = epicenter.z + radius * Math.sin(theta);
+                        
+                        // Calculate swirl velocity
+                        double vX = -Math.sin(theta) * 0.5 + (epicenter.x - pX) * 0.1;
+                        double vY = 0.1;
+                        double vZ = Math.cos(theta) * 0.5 + (epicenter.z - pZ) * 0.1;
+                        
+                        serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, pX, pY, pZ, 0, vX, vY, vZ, 1.0);
+                        if (i % 4 == 0) {
+                            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, pX, pY, pZ, 1, 0, 0, 0, 0);
+                        }
+                    }
+                    serverLevel.playSound(null, epicenter.x, epicenter.y, epicenter.z, net.minecraft.sounds.SoundEvents.WITHER_SHOOT, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.5f);
+                }
+
+                // Entity Suction
+                java.util.List<Entity> entities = level.getEntities(arrow, arrow.getBoundingBox().inflate(5.0));
+                for (Entity entity : entities) {
+                    if (entity instanceof LivingEntity living && entity != arrow.getOwner()) {
+                        double distSq = epicenter.distanceToSqr(living.position());
+                        if (distSq <= 25.0) { // 5 blocks radius squared
+                            double dist = Math.sqrt(distSq);
+                            double pullStrength = 1.0 - (dist / 5.0);
+                            pullStrength = Math.pow(pullStrength, 1.5);
+                            double kbResist = living.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
+                            double actualPull = pullStrength * 6 * (1.0 - kbResist);
+
+                            if (actualPull > 0) {
+                                net.minecraft.world.phys.Vec3 dir = epicenter.subtract(living.position()).normalize();
+                                // Add a slight upward lift (0.3) so ground friction doesn't immediately cancel the pull
+                                net.minecraft.world.phys.Vec3 pullVelocity = dir.scale(actualPull).add(0, 0.3, 0);
+                                living.setDeltaMovement(living.getDeltaMovement().add(pullVelocity));
+                                living.hasImpulse = true;
+                                if (living instanceof Player player) {
+                                    living.hurtMarked = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (event.getRayTraceResult() instanceof EntityHitResult entityHit) {
             Entity hitEntity = entityHit.getEntity();
 
@@ -280,7 +388,6 @@ public class ServerEvents {
                     if (blocker.level().isClientSide())
                         return;
 
-                    Projectile projectile = event.getProjectile();
                     Vec3 currentVelocity = projectile.getDeltaMovement();
                     double speed = Math.max(currentVelocity.length(), 1.0) * 1.5;
 
@@ -502,6 +609,60 @@ public class ServerEvents {
             }
         }
         // -----------------------------
+
+        // ----- Arbiter Crossbow Mechanism -----
+        if (entity instanceof net.minecraft.world.entity.monster.Monster) {
+            net.minecraft.world.item.ItemStack weapon = null;
+            LivingEntity attacker = null;
+            
+            if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+                attacker = arrow.getOwner() instanceof LivingEntity ? (LivingEntity) arrow.getOwner() : null;
+                try {
+                    weapon = arrow.getWeaponItem();
+                } catch (Throwable t) {}
+            } else if (event.getSource().getDirectEntity() instanceof LivingEntity directAttacker) {
+                attacker = directAttacker;
+            }
+            
+            if (attacker != null && (weapon == null || weapon.isEmpty())) {
+                weapon = attacker.getMainHandItem();
+                if (weapon == null || weapon.isEmpty() || !weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARBITER_CROSSBOW.get())) {
+                    weapon = attacker.getOffhandItem();
+                }
+            }
+                
+            if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARBITER_CROSSBOW.get())) {
+                    net.ganyusbathwater.oririmod.OririMod.LOGGER.debug("Arbiter Crossbow loot roll triggered on {}", entity.getName().getString());
+                    double luck = attacker != null ? attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.LUCK) : 0;
+                    
+                    // 50% Double Loot
+                    if (level.random.nextFloat() < 0.5f) {
+                        net.ganyusbathwater.oririmod.OririMod.LOGGER.debug("Arbiter Crossbow rolled DOUBLE LOOT!");
+                        List<ItemEntity> originalDrops = new ArrayList<>(event.getDrops());
+                        for (ItemEntity drop : originalDrops) {
+                            ItemStack stack = drop.getItem().copy();
+                            ItemEntity extra = new ItemEntity(level, drop.getX(), drop.getY(), drop.getZ(), stack);
+                            event.getDrops().add(extra);
+                        }
+                    }
+                    
+                    // Independent Rare Metal drops scaling with luck (+1% flat chance per luck point)
+                    float ironChance = 0.02f + (float)(luck * 0.01f);
+                    float goldChance = 0.01f + (float)(luck * 0.01f);
+                    float diamondChance = 0.005f + (float)(luck * 0.01f);
+                    
+                    if (level.random.nextFloat() < ironChance) {
+                        event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), new ItemStack(net.minecraft.world.item.Items.IRON_INGOT)));
+                    }
+                    if (level.random.nextFloat() < goldChance) {
+                        event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), new ItemStack(net.minecraft.world.item.Items.GOLD_INGOT)));
+                    }
+                    if (level.random.nextFloat() < diamondChance) {
+                        event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), new ItemStack(net.minecraft.world.item.Items.DIAMOND)));
+                    }
+                }
+        }
+        // --------------------------------------
 
         if (!WorldEventManager.isEventActive(entity.level(), WorldEventType.GREEN_MOON))
             return;

@@ -34,65 +34,110 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
                 // The PlayerRenderer already called it for this exact frame before invoking RenderLayers.
                 // This means playerModel ALREADY has the perfect xRot, yRot, zRot for all body parts!
 
-                if (head != null && !isFirstPerson) {
-                    // When the RenderLayer locks this model to the Vanilla head bone,
-                    // we DO NOT need to apply any rotations! The PoseStack handles it.
-                    // However, if it's the Tail model or Land model, it needs raw tracking.
-                    head.setRotX(-playerModel.head.xRot);
-                    head.setRotY(-playerModel.head.yRot);
-                    head.setRotZ(-playerModel.head.zRot);
-                    
-                    head.setPosX(playerModel.head.x);
-                    head.setPosY(-playerModel.head.y);
-                    head.setPosZ(playerModel.head.z);
-                }
-                if (rightArm != null && !isFirstPerson) {
-                    rightArm.setRotX(-playerModel.rightArm.xRot);
-                    rightArm.setRotY(-playerModel.rightArm.yRot);
-                    rightArm.setRotZ(-playerModel.rightArm.zRot);
-                }
-                if (leftArm != null && !isFirstPerson) {
-                    leftArm.setRotX(-playerModel.leftArm.xRot);
-                    leftArm.setRotY(-playerModel.leftArm.yRot);
-                    leftArm.setRotZ(-playerModel.leftArm.zRot);
-                }
-                if (rightLeg != null) {
-                    rightLeg.setRotX(-playerModel.rightLeg.xRot);
-                    rightLeg.setRotY(-playerModel.rightLeg.yRot);
-                    rightLeg.setRotZ(-playerModel.rightLeg.zRot);
-                    
-                    rightLeg.setPosX(playerModel.rightLeg.x - (-1.9F));
-                    rightLeg.setPosY(-(playerModel.rightLeg.y - 12.0F));
-                    rightLeg.setPosZ(playerModel.rightLeg.z);
-                }
-                if (leftLeg != null) {
-                    leftLeg.setRotX(-playerModel.leftLeg.xRot);
-                    leftLeg.setRotY(-playerModel.leftLeg.yRot);
-                    leftLeg.setRotZ(-playerModel.leftLeg.zRot);
-                    
-                    leftLeg.setPosX(playerModel.leftLeg.x - 1.9F);
-                    leftLeg.setPosY(-(playerModel.leftLeg.y - 12.0F));
-                    leftLeg.setPosZ(playerModel.leftLeg.z);
-                }
-                
                 GeoBone torso = getAnimationProcessor().getBone("torso");
                 GeoBone body = getAnimationProcessor().getBone("body");
-                if (body != null) {
-                    body.setRotX(-playerModel.body.xRot);
-                    body.setRotY(-playerModel.body.yRot);
-                    body.setRotZ(-playerModel.body.zRot);
+                GeoBone mainBody = body != null ? body : torso;
+
+                float bodyXRot = 0, bodyYRot = 0, bodyZRot = 0;
+                float bodyDX = 0, bodyDY = 0, bodyDZ = 0;
+
+                if (mainBody != null) {
+                    mainBody.setRotX(-playerModel.body.xRot);
+                    mainBody.setRotY(-playerModel.body.yRot);
+                    mainBody.setRotZ(-playerModel.body.zRot);
                     
-                    body.setPosX(playerModel.body.x);
-                    body.setPosY(-playerModel.body.y);
-                    body.setPosZ(playerModel.body.z);
-                } else if (torso != null) {
-                    torso.setRotX(-playerModel.body.xRot);
-                    torso.setRotY(-playerModel.body.yRot);
-                    torso.setRotZ(-playerModel.body.zRot);
+                    mainBody.setPosX(playerModel.body.x);
+                    mainBody.setPosY(-playerModel.body.y);
+                    mainBody.setPosZ(playerModel.body.z);
                     
-                    torso.setPosX(playerModel.body.x);
-                    torso.setPosY(-playerModel.body.y);
-                    torso.setPosZ(playerModel.body.z);
+                    bodyXRot = playerModel.body.xRot;
+                    bodyYRot = playerModel.body.yRot;
+                    bodyZRot = playerModel.body.zRot;
+                    bodyDX = playerModel.body.x;
+                    bodyDY = playerModel.body.y;
+                    bodyDZ = playerModel.body.z;
+                }
+
+                // Helper to check if a bone inherits from the main body
+                java.util.function.Predicate<GeoBone> isDescendantOfBody = (b) -> {
+                    if (mainBody == null) return false;
+                    GeoBone p = b.getParent();
+                    while (p != null) {
+                        if (p == mainBody) return true;
+                        p = p.getParent();
+                    }
+                    return false;
+                };
+
+                if (head != null && !isFirstPerson) {
+                    boolean childOfBody = isDescendantOfBody.test(head);
+                    head.setRotX(-(playerModel.head.xRot - (childOfBody ? bodyXRot : 0)));
+                    head.setRotY(-(playerModel.head.yRot - (childOfBody ? bodyYRot : 0)));
+                    head.setRotZ(-(playerModel.head.zRot - (childOfBody ? bodyZRot : 0)));
+                    
+                    if (!childOfBody) {
+                        head.setPosX(playerModel.head.x);
+                        head.setPosY(-playerModel.head.y);
+                        head.setPosZ(playerModel.head.z);
+                    } else {
+                        head.setPosX(0); head.setPosY(0); head.setPosZ(0);
+                    }
+                }
+                if (rightArm != null && !isFirstPerson) {
+                    boolean childOfBody = isDescendantOfBody.test(rightArm);
+                    rightArm.setRotX(-(playerModel.rightArm.xRot - (childOfBody ? bodyXRot : 0)));
+                    rightArm.setRotY(-(playerModel.rightArm.yRot - (childOfBody ? bodyYRot : 0)));
+                    rightArm.setRotZ((playerModel.rightArm.zRot - (childOfBody ? bodyZRot : 0)));
+                    
+                    if (!childOfBody) {
+                        rightArm.setPosX((playerModel.rightArm.x - (-5.0F)));
+                        rightArm.setPosY(-(playerModel.rightArm.y - 2.0F));
+                        rightArm.setPosZ(playerModel.rightArm.z);
+                    } else {
+                        rightArm.setPosX(0); rightArm.setPosY(0); rightArm.setPosZ(0);
+                    }
+                }
+                if (leftArm != null && !isFirstPerson) {
+                    boolean childOfBody = isDescendantOfBody.test(leftArm);
+                    leftArm.setRotX(-(playerModel.leftArm.xRot - (childOfBody ? bodyXRot : 0)));
+                    leftArm.setRotY(-(playerModel.leftArm.yRot - (childOfBody ? bodyYRot : 0)));
+                    leftArm.setRotZ((playerModel.leftArm.zRot - (childOfBody ? bodyZRot : 0)));
+                    
+                    if (!childOfBody) {
+                        leftArm.setPosX((playerModel.leftArm.x - 5.0F));
+                        leftArm.setPosY(-(playerModel.leftArm.y - 2.0F));
+                        leftArm.setPosZ(playerModel.leftArm.z);
+                    } else {
+                        leftArm.setPosX(0); leftArm.setPosY(0); leftArm.setPosZ(0);
+                    }
+                }
+                if (rightLeg != null) {
+                    boolean childOfBody = isDescendantOfBody.test(rightLeg);
+                    rightLeg.setRotX(-(playerModel.rightLeg.xRot - (childOfBody ? bodyXRot : 0)));
+                    rightLeg.setRotY(-(playerModel.rightLeg.yRot - (childOfBody ? bodyYRot : 0)));
+                    rightLeg.setRotZ((playerModel.rightLeg.zRot - (childOfBody ? bodyZRot : 0)));
+                    
+                    if (!childOfBody) {
+                        rightLeg.setPosX((playerModel.rightLeg.x - (-1.9F)));
+                        rightLeg.setPosY(-(playerModel.rightLeg.y - 12.0F));
+                        rightLeg.setPosZ(playerModel.rightLeg.z);
+                    } else {
+                        rightLeg.setPosX(0); rightLeg.setPosY(0); rightLeg.setPosZ(0);
+                    }
+                }
+                if (leftLeg != null) {
+                    boolean childOfBody = isDescendantOfBody.test(leftLeg);
+                    leftLeg.setRotX(-(playerModel.leftLeg.xRot - (childOfBody ? bodyXRot : 0)));
+                    leftLeg.setRotY(-(playerModel.leftLeg.yRot - (childOfBody ? bodyYRot : 0)));
+                    leftLeg.setRotZ((playerModel.leftLeg.zRot - (childOfBody ? bodyZRot : 0)));
+                    
+                    if (!childOfBody) {
+                        leftLeg.setPosX((playerModel.leftLeg.x - 1.9F));
+                        leftLeg.setPosY(-(playerModel.leftLeg.y - 12.0F));
+                        leftLeg.setPosZ(playerModel.leftLeg.z);
+                    } else {
+                        leftLeg.setPosX(0); leftLeg.setPosY(0); leftLeg.setPosZ(0);
+                    }
                 }
             }
         }

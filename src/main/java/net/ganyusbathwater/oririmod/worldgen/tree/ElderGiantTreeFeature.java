@@ -1148,13 +1148,21 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             if (isScarletTree && r.nextFloat() < 0.20f) {
                 BlockPos below = p.below();
                 if (withinBuildHeight(level, below) && level.isEmptyBlock(below)) {
-                    level.setBlock(below, ModBlocks.SCARLET_VINE.get().defaultBlockState(), 2);
+                    net.minecraft.world.level.block.state.properties.BooleanProperty[] vineSides = new net.minecraft.world.level.block.state.properties.BooleanProperty[]{
+                        net.minecraft.world.level.block.VineBlock.NORTH, 
+                        net.minecraft.world.level.block.VineBlock.SOUTH, 
+                        net.minecraft.world.level.block.VineBlock.EAST, 
+                        net.minecraft.world.level.block.VineBlock.WEST
+                    };
+                    net.minecraft.world.level.block.state.properties.BooleanProperty chosenSide = vineSides[r.nextInt(4)];
+                    
+                    level.setBlock(below, ModBlocks.SCARLET_VINE.get().defaultBlockState().setValue(net.minecraft.world.level.block.VineBlock.UP, true).setValue(chosenSide, true), 2);
 
                     // Chance to grow down further
                     if (r.nextFloat() < 0.4f) {
                         BlockPos below2 = below.below();
                         if (withinBuildHeight(level, below2) && level.isEmptyBlock(below2)) {
-                            level.setBlock(below2, ModBlocks.SCARLET_VINE.get().defaultBlockState(), 2);
+                            level.setBlock(below2, ModBlocks.SCARLET_VINE.get().defaultBlockState().setValue(chosenSide, true), 2);
                         }
                     }
                 }

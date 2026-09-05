@@ -68,6 +68,45 @@ public final class ElementInit {
         EntityElementRegistry.setElement(ModEntities.NOXUS_GENERAL.get(), Element.LIGHT);
         EntityElementRegistry.setElement(ModEntities.NOXUS_PALADIN.get(), Element.LIGHT);
 
+        // Vanilla Passive/Neutral
+        EntityElementRegistry.setElement(EntityType.PIG, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.COW, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.SHEEP, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.CHICKEN, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.HORSE, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.DONKEY, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.MULE, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.SQUID, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.GLOW_SQUID, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.BAT, Element.DARKNESS);
+        EntityElementRegistry.setElement(EntityType.VILLAGER, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.WANDERING_TRADER, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.IRON_GOLEM, Element.EARTH);
+        EntityElementRegistry.setElement(EntityType.SNOW_GOLEM, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.WOLF, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.CAT, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.OCELOT, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.FOX, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.POLAR_BEAR, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.LLAMA, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.TRADER_LLAMA, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.PANDA, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.PARROT, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.RABBIT, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.TURTLE, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.DOLPHIN, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.STRIDER, Element.FIRE);
+        EntityElementRegistry.setElement(EntityType.BEE, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.GOAT, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.AXOLOTL, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.FROG, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.TADPOLE, Element.WATER);
+        EntityElementRegistry.setElement(EntityType.ALLAY, Element.LIGHT);
+        EntityElementRegistry.setElement(EntityType.SNIFFER, Element.EARTH);
+        EntityElementRegistry.setElement(EntityType.CAMEL, Element.NATURE);
+        EntityElementRegistry.setElement(EntityType.ARMADILLO, Element.EARTH);
+        EntityElementRegistry.setElement(EntityType.PUFFERFISH, Element.WATER);
+
 
         // Projectiles
         EntityElementRegistry.setElement(EntityType.SPECTRAL_ARROW, Element.LIGHT);
@@ -95,7 +134,7 @@ public final class ElementInit {
         ItemElementRegistry.setElement(Items.STONE_SWORD, Element.EARTH);
         ItemElementRegistry.setElement(Items.GOLDEN_SWORD, Element.EARTH);
         ItemElementRegistry.setElement(Items.IRON_SWORD, Element.EARTH);
-        ItemElementRegistry.setElement(Items.DIAMOND_SWORD, Element.PHYSICAL);
+        ItemElementRegistry.setElement(Items.DIAMOND_SWORD, Element.WATER);
         ItemElementRegistry.setElement(Items.NETHERITE_SWORD, Element.FIRE);
         ItemElementRegistry.setElement(Items.WOODEN_AXE, Element.NATURE);
         ItemElementRegistry.setElement(Items.STONE_AXE, Element.EARTH);
@@ -146,6 +185,13 @@ public final class ElementInit {
         ItemElementRegistry.setElement(ModItems.DRAGON_IRON_ARROW.get(), Element.TRUE_DAMAGE);
         ItemElementRegistry.setElement(ModItems.FROST_ARROW.get(), Element.WATER);
         ItemElementRegistry.setElement(ModItems.COPPER_ARROW.get(), Element.EARTH);
-        ItemElementRegistry.setElement(ModItems.SONIC_ARROW.get(), Element.DARKNESS);
+        ItemElementRegistry.setElement(ModItems.WOOD_SCYTHE.get(), Element.NATURE);
+        ItemElementRegistry.setElement(ModItems.STONE_SCYTHE.get(), Element.EARTH);
+        ItemElementRegistry.setElement(ModItems.IRON_SCYTHE.get(), Element.EARTH);
+        ItemElementRegistry.setElement(ModItems.GOLD_SCYTHE.get(), Element.EARTH);
+        ItemElementRegistry.setElement(ModItems.DIAMOND_SCYTHE.get(), Element.WATER);
+        ItemElementRegistry.setElement(ModItems.NETHERITE_SCYTHE.get(), Element.FIRE);
+        ItemElementRegistry.setElement(ModItems.ARBITER_CROSSBOW.get(), Element.EARTH);
+        ItemElementRegistry.setElement(ModItems.ORAPHIM_BOW.get(), Element.LIGHT);
     }
 }

@@ -306,21 +306,21 @@ public class ModItems {
                                         ModRarity.GODLY));
 
         public static final DeferredItem<SwordItem> PANDORAS_BLADE = ITEMS.register("pandoras_blade",
-                        () -> new CustomSwordItem(Tiers.DIAMOND,
+                        () -> new net.ganyusbathwater.oririmod.item.custom.PandorasBladeItem(Tiers.DIAMOND,
                                         new Item.Properties().fireResistant()
-                                                        .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F))
+                                                        .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 4, -2.4F))
                                                         .stacksTo(1),
                                         ModRarity.MYTHIC));
         public static final DeferredItem<SwordItem> PIRATE_SABER = ITEMS.register("pirate_saber",
                         () -> new CustomSwordItem(Tiers.IRON,
-                                        new Item.Properties()
-                                                        .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -1F))
+                                        new Item.Properties().durability(300)
+                                                        .attributes(SwordItem.createAttributes(Tiers.IRON, 2, -1.0F))
                                                         .stacksTo(1),
                                         ModRarity.UNCOMMON));
         public static final DeferredItem<SwordItem> ICE_SWORD = ITEMS.register("ice_sword",
-                        () -> new CustomSwordItem(Tiers.DIAMOND,
+                        () -> new net.ganyusbathwater.oririmod.item.custom.IceSwordItem(Tiers.DIAMOND,
                                         new Item.Properties()
-                                                        .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F))
+                                                        .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.8F))
                                                         .stacksTo(1),
                                         ModRarity.RARE));
         public static final DeferredItem<MaceItem> LAW_BREAKER = ITEMS.register("law_breaker",
@@ -331,20 +331,21 @@ public class ModItems {
         public static final DeferredItem<SwordItem> STELLA_PERDITOR = ITEMS.register("stella_perditor",
                         () -> new CustomSwordItem(Tiers.NETHERITE,
                                         new Item.Properties().fireResistant()
-                                                        .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6,
+                                                        .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 8,
                                                                         -1.4F))
                                                         .stacksTo(1)
-                                                        .component(ModDataComponents.COSMIC_TOOLTIP.get(), new CosmicTooltipData(0, true)),
+                                                        .component(ModDataComponents.COSMIC_TOOLTIP.get(), new CosmicTooltipData(0, true))
+                                                        .component(net.minecraft.core.component.DataComponents.UNBREAKABLE, new net.minecraft.world.item.component.Unbreakable(true)),
                                         ModRarity.UNIQUE));
         public static final DeferredItem<SwordItem> QILINS_WRATH = ITEMS.register("qilins_wrath",
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.QilinsWrathItem(Tiers.NETHERITE,
-                                        new Item.Properties().fireResistant()
+                                        new Item.Properties().fireResistant().durability(2048)
                                                         .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6,
                                                                         -1.4F))
                                                         .stacksTo(1),
                                         ModRarity.GODLY));
         public static final DeferredItem<SwordItem> SOLS_EMBRACE = ITEMS.register("sols_embrace",
-                        () -> new CustomSwordItem(Tiers.DIAMOND,
+                        () -> new net.ganyusbathwater.oririmod.item.custom.SolsEmbraceItem(Tiers.DIAMOND,
                                         new Item.Properties().fireResistant()
                                                         .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F))
                                                         .stacksTo(1),
@@ -359,10 +360,10 @@ public class ModItems {
                                         ModRarity.MYTHIC));
 
         public static final DeferredItem<net.minecraft.world.item.CrossbowItem> ARBITER_CROSSBOW = ITEMS.register("arbiter_crossbow",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.CustomCrossbowItem(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.ArbiterCrossbowItem(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
         
         public static final DeferredItem<net.minecraft.world.item.BowItem> ORAPHIM_BOW = ITEMS.register("oraphim_bow",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.CustomBowItemClass(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.OraphimBowItem(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
 
         public static final DeferredItem<net.minecraft.world.item.BowItem> ARCUS_LUCIS = ITEMS.register("arcus_lucis",
                         () -> new net.ganyusbathwater.oririmod.item.custom.ArcusLucisItem(new Item.Properties().stacksTo(1), ModRarity.GODLY));
@@ -400,7 +401,7 @@ public class ModItems {
                         () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(666), MagicBoltAbility.BLAZE, 2, 8,
                                         ModRarity.RARE));
         public static final DeferredItem<MagicBoltItem> STAFF_OF_COSMOS = ITEMS.register("staff_of_cosmos",
-                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(128), MagicBoltAbility.METEOR, 2, 40,
+                        () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(128), MagicBoltAbility.METEOR, 2, 100,
                                         ModRarity.LEGENDARY));
         public static final DeferredItem<MagicBoltItem> STAFF_OF_VOID = ITEMS.register("staff_of_void",
                         () -> new MagicBoltItem(new Item.Properties().stacksTo(1).durability(126), MagicBoltAbility.ENDER, 2, 18,

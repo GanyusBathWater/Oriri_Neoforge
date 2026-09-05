@@ -307,7 +307,7 @@ public class OririClient {
                 net.ganyusbathwater.oririmod.entity.client.DungeonKeeperRenderer::new);
         event.registerEntityRenderer(ModEntities.AIR_SLICE.get(),
                 net.ganyusbathwater.oririmod.entity.client.AirSliceRenderer::new);
-        event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), net.ganyusbathwater.oririmod.client.render.entity.MagicBoltRenderer::new);
         event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
         event.registerEntityRenderer(ModEntities.DEVIARTRAS.get(),
@@ -413,7 +413,7 @@ public class OririClient {
 
     private static net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer choirRenderer;
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled = true)
     public static void onPlayerRenderPre(net.neoforged.neoforge.client.event.RenderPlayerEvent.Pre event) {
         net.minecraft.world.entity.player.Player player = event.getEntity();
         net.minecraft.world.item.ItemStack stack = player.getMainHandItem();

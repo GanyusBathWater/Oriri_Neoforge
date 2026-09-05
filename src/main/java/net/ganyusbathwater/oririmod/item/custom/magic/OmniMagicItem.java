@@ -321,9 +321,9 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
                 if (meteor == null)
                     return;
 
-                meteor.configure(ground.immutable(), 12.0f, 7);
+                meteor.configure(ground.immutable(), 7.0f, 7);
                 meteor.setOwnerId(living.getId());
-
+                
                 double spawnX = ground.getX() + 0.5;
                 double spawnZ = ground.getZ() + 0.5;
                 double spawnY = ground.getY() + 90.0;

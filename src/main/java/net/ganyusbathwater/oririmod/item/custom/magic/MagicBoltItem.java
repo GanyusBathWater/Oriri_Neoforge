@@ -224,7 +224,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             if (meteor == null)
                 return;
 
-            meteor.configure(ground.immutable(), 12.0f, 7);
+            meteor.configure(ground.immutable(), 7.0f, 7);
             meteor.setOwnerId(living.getId());
             meteor.setOwner(living);
             NetworkHandler.sendAoEIndicatorToPlayersAround((ServerLevel) level, ground.immutable(), 13.0f, 40,

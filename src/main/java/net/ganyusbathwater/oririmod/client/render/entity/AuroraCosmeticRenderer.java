@@ -8,6 +8,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class AuroraCosmeticRenderer extends AbstractPlayerCosmeticRenderer<AuroraCosmeticAnimatable> {
 
     public AuroraCosmeticRenderer(EntityRendererProvider.Context renderManager) {
-        super(renderManager, new AuroraCosmeticModel(), AuroraCosmeticAnimatable.INSTANCE);
+        super(renderManager, new AuroraCosmeticModel(), AuroraCosmeticAnimatable.INSTANCE, false);
     }
 }
