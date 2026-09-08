@@ -781,5 +781,10 @@
   "tooltip.oririmod.normal_dragon_fruit.cleanse": "25% Chance to cleanse a negative effect",
   "tooltip.oririmod.arcus_lucis.lore": "You feel an entire nebula soaring through the strings of this cosmic bow",
   "tooltip.oririmod.arcus_lucis.homing": "Arrows shot through this bow have homing abilities",
-  "tooltip.oririmod.arcus_lucis.conversion": "Normal arrows are converted to spectral arrows"
+  "tooltip.oririmod.arcus_lucis.conversion": "Normal arrows are converted to spectral arrows",
+
+  "item.oririmod.lunar_debug_item": "Lunar Skybox Debug",
+  "item.oririmod.lunar_debug_item.tooltip": "[DEV] Right-click to toggle the Lunar Skybox",
+  "item.oririmod.lunar_debug_item.message.on": "✦ Lunar Skybox: ACTIVE",
+  "item.oririmod.lunar_debug_item.message.off": "✦ Lunar Skybox: INACTIVE"
 }

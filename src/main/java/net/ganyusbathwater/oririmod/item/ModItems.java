@@ -34,6 +34,10 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.MagicDebugStickItem(
                                         new Item.Properties().stacksTo(1)));
 
+        public static final DeferredItem<Item> LUNAR_DEBUG_ITEM = ITEMS.register("lunar_debug_item",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.LunarDebugItem(
+                                        new Item.Properties().stacksTo(1)));
+
         public static final DeferredItem<Item> SOL_QUICKSAND_BUCKET = ITEMS.register("sol_quicksand_bucket",
                         () -> new net.minecraft.world.item.SolidBucketItem(net.ganyusbathwater.oririmod.block.ModBlocks.SOL_QUICKSAND.get(),
                                         net.minecraft.sounds.SoundEvents.BUCKET_EMPTY_POWDER_SNOW,

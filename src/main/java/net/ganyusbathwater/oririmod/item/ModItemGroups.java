@@ -408,6 +408,7 @@ public class ModItemGroups {
                         output.accept(ModItems.THE_GODSEEKER);
                         output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
                         output.accept(ModItems.MAGIC_DEBUG_STICK);
+                        output.accept(ModItems.LUNAR_DEBUG_ITEM);
                         output.accept(ModItems.COSMIC_EXAMPLE); // Stage 1 tooltip test item
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.SKELETON_ENCYCLOPEDIA);

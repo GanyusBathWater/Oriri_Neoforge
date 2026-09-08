@@ -47,6 +47,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -299,6 +301,58 @@ public class OririClient {
                 }
             }
         }
+    }
+
+    /**
+     * Forces the fog color to pure black when the Lunar Skybox is active.
+     *
+     * Root cause of the grey-blue sky problem:
+     * FogRenderer runs as a completely separate pass from renderSky and composites
+     * the biome's atmospheric/sky color as fog on top of the framebuffer, regardless
+     * of whether renderSky was cancelled. This is the only correct place to intercept it.
+     *
+     * Without this, even with a cancelled renderSky and black clearColor, the fog
+     * renderer paints a grey-blue layer across the entire view.
+     */
+    @SubscribeEvent
+    public static void onComputeFogColor(ViewportEvent.ComputeFogColor event) {
+        if (!net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState.isEnabled()) return;
+
+        event.setRed(0.0f);
+        event.setGreen(0.0f);
+        event.setBlue(0.0f);
+    }
+
+    /**
+     * Iris/Oculus compatibility path for the Lunar Skybox.
+     *
+     * Problem: Iris runs a deferred sky composite pass AFTER our Mixin renders stars,
+     * overwriting our framebuffer output entirely. The SkyType.NONE flag in
+     * CustomDimensionSpecialEffects tells Iris to skip its sky pass, but we still
+     * need to draw our star geometry somewhere Iris won't touch.
+     *
+     * AFTER_SKY fires after all sky rendering (vanilla AND Iris) is complete.
+     * Drawing here guarantees our stars composite on top of whatever Iris did.
+     *
+     * Without Iris: the Mixin handles rendering and we skip this to avoid double-draw.
+     * With Iris: Mixin still runs (draws stars, cancels vanilla), but Iris overwrites.
+     *            This listener re-draws after Iris finishes.
+     */
+    @SubscribeEvent
+    public static void onRenderLevelAfterSky(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
+        if (!net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState.isEnabled()) return;
+
+        // Only use this path when Oculus (Iris for NeoForge) is loaded.
+        // Without Oculus, the Mixin path is authoritative and sufficient.
+        if (!net.neoforged.fml.ModList.get().isLoaded("oculus")) return;
+
+        com.mojang.blaze3d.vertex.PoseStack poseStack = event.getPoseStack();
+        org.joml.Matrix4f projMatrix = event.getProjectionMatrix();
+
+        net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxRenderer.render(
+            poseStack, projMatrix, event.getPartialTick().getGameTimeDeltaPartialTick(true)
+        );
     }
 
     @SubscribeEvent

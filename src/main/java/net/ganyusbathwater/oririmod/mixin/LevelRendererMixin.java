@@ -2,11 +2,15 @@ package net.ganyusbathwater.oririmod.mixin;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.client.render.world.CustomDimensionSpecialEffects;
+import net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxRenderer;
+import net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState;
 import net.ganyusbathwater.oririmod.events.world.WorldEventManager;
 import net.ganyusbathwater.oririmod.events.world.WorldEventType;
+import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
@@ -78,6 +83,47 @@ public abstract class LevelRendererMixin {
         oririmod$effects.updateTransitionProgress();
     }
 
+    /**
+     * Intercepts sky rendering at HEAD when the Lunar Skybox is active.
+     *
+     * When enabled, we cancel vanilla sky rendering entirely and hand off
+     * to LunarSkyboxRenderer which draws the void + starfield.
+     *
+     * The PoseStack is constructed locally because renderSky in 1.21.1
+     * does not pass one in the signature — we create a fresh one.
+     * The projection matrix comes directly from the Mixin parameter.
+     */
+    @Inject(
+        method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private void oriri_onRenderSkyHead(
+            Matrix4f modelViewMatrix,
+            Matrix4f projectionMatrix,
+            float partialTick,
+            Camera camera,
+            boolean isFoggy,
+            Runnable skyFogSetup,
+            CallbackInfo ci
+    ) {
+        if (!LunarSkyboxState.isEnabled()) return;
+
+        // Build a PoseStack from the modelView matrix so LunarSkyboxRenderer
+        // can use the standard PoseStack API.
+        PoseStack poseStack = new PoseStack();
+        poseStack.last().pose().set(modelViewMatrix);
+
+        LunarSkyboxRenderer.render(poseStack, projectionMatrix, partialTick);
+
+        // Cancel the entire vanilla renderSky — sun, moon, stars, sky dome, all gone.
+        ci.cancel();
+    }
+
+    /**
+     * When the lunar skybox is active, force the sky color seen by other
+     * ModifyVariable targets to pure black so no color bleeds into fog.
+     */
     @ModifyVariable(method = "renderSky", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getSkyColor(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;"), name = "vec3")
     private Vec3 oriri_modifySkyColor(Vec3 skyColor) {
         net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;

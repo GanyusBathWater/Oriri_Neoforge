@@ -1,5 +1,6 @@
 package net.ganyusbathwater.oririmod.client.render.world;
 
+import net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState;
 import net.ganyusbathwater.oririmod.events.world.WorldEventManager;
 import net.ganyusbathwater.oririmod.events.world.WorldEventType;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
@@ -17,6 +18,11 @@ public class CustomDimensionSpecialEffects extends DimensionSpecialEffects {
 
     @Override
     public Vec3 getBrightnessDependentFogColor(Vec3 fogColor, float brightness) {
+        // When lunar skybox is active, force fog contribution to black so Iris's
+        // atmosphere composite doesn't tint the void background.
+        if (LunarSkyboxState.isEnabled()) {
+            return Vec3.ZERO;
+        }
         updateTransitionProgress();
         if (transitionProgress > 0) {
             net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
