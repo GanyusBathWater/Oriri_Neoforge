@@ -14,6 +14,13 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.lwjgl.opengl.GL14;
+import net.minecraft.client.renderer.GameRenderer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.ganyusbathwater.oririmod.client.render.world.AnimeImpactState;
+import net.ganyusbathwater.oririmod.client.render.world.TimestopState;
+import net.ganyusbathwater.oririmod.client.render.world.TimestopWaveRenderer;
 
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents {
@@ -332,6 +339,96 @@ public class ClientEvents {
         if (percent <= 75)
             return TEX_75;
         return TEX_100;
+    }
+
+    @SubscribeEvent
+    public static void onRenderGuiPost(RenderGuiEvent.Post event) {
+        if (AnimeImpactState.isActive()) {
+            Minecraft mc = Minecraft.getInstance();
+            int width = mc.getWindow().getGuiScaledWidth();
+            int height = mc.getWindow().getGuiScaledHeight();
+
+            RenderSystem.disableDepthTest();
+            RenderSystem.enableBlend();
+
+            // Set blend equation to GL_FUNC_SUBTRACT
+            // Result = Source (White) - Destination (Screen)
+            GL14.glBlendEquation(GL14.GL_FUNC_SUBTRACT);
+            RenderSystem.blendFuncSeparate(
+                    com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
+                    com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE,
+                    com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
+                    com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE
+            );
+
+            // Draw solid white full-screen quad
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            com.mojang.blaze3d.vertex.Tesselator tesselator = com.mojang.blaze3d.vertex.Tesselator.getInstance();
+            com.mojang.blaze3d.vertex.BufferBuilder bufferbuilder = tesselator.begin(
+                    com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS,
+                    com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR
+            );
+
+            org.joml.Matrix4f matrix = event.getGuiGraphics().pose().last().pose();
+
+            bufferbuilder.addVertex(matrix, 0, height, 0).setColor(255, 255, 255, 255);
+            bufferbuilder.addVertex(matrix, width, height, 0).setColor(255, 255, 255, 255);
+            bufferbuilder.addVertex(matrix, width, 0, 0).setColor(255, 255, 255, 255);
+            bufferbuilder.addVertex(matrix, 0, 0, 0).setColor(255, 255, 255, 255);
+
+            com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+
+            // Reset blend equation back to normal
+            GL14.glBlendEquation(GL14.GL_FUNC_ADD);
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableDepthTest();
+        }
+
+        if (TimestopState.isActive()) {
+            Minecraft mc = Minecraft.getInstance();
+            int width = mc.getWindow().getGuiScaledWidth();
+            int height = mc.getWindow().getGuiScaledHeight();
+
+            RenderSystem.disableDepthTest();
+            RenderSystem.enableBlend();
+
+            // Dark purple/sepia overlay to wash out colors
+            GL14.glBlendEquation(GL14.GL_FUNC_ADD);
+            RenderSystem.defaultBlendFunc();
+            
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            com.mojang.blaze3d.vertex.Tesselator tesselator = com.mojang.blaze3d.vertex.Tesselator.getInstance();
+            com.mojang.blaze3d.vertex.BufferBuilder bufferbuilder = tesselator.begin(
+                    com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS,
+                    com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR
+            );
+
+            org.joml.Matrix4f matrix = event.getGuiGraphics().pose().last().pose();
+
+            int r = 30;
+            int g = 10;
+            int b = 50;
+            int a = 160; // ~60% opacity
+
+            bufferbuilder.addVertex(matrix, 0, height, 0).setColor(r, g, b, a);
+            bufferbuilder.addVertex(matrix, width, height, 0).setColor(r, g, b, a);
+            bufferbuilder.addVertex(matrix, width, 0, 0).setColor(r, g, b, a);
+            bufferbuilder.addVertex(matrix, 0, 0, 0).setColor(r, g, b, a);
+
+            com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+
+            RenderSystem.disableBlend();
+            RenderSystem.enableDepthTest();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+            if (TimestopState.isActive()) {
+                TimestopWaveRenderer.render(event.getPoseStack(), event.getProjectionMatrix(), event.getCamera());
+            }
+        }
     }
 
     @SubscribeEvent

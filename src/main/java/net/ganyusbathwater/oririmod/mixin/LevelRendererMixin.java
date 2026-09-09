@@ -4,6 +4,8 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.client.render.world.CustomDimensionSpecialEffects;
 import net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxRenderer;
 import net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState;
+import net.ganyusbathwater.oririmod.client.render.world.TimestopState;
+import net.ganyusbathwater.oririmod.client.render.world.TimestopSkyboxRenderer;
 import net.ganyusbathwater.oririmod.events.world.WorldEventManager;
 import net.ganyusbathwater.oririmod.events.world.WorldEventType;
 import net.minecraft.client.Camera;
@@ -107,6 +109,14 @@ public abstract class LevelRendererMixin {
             Runnable skyFogSetup,
             CallbackInfo ci
     ) {
+        if (TimestopState.isActive()) {
+            PoseStack poseStack = new PoseStack();
+            poseStack.last().pose().set(modelViewMatrix);
+            TimestopSkyboxRenderer.render(poseStack, projectionMatrix, partialTick);
+            ci.cancel();
+            return;
+        }
+
         if (!LunarSkyboxState.isEnabled()) return;
 
         // Build a PoseStack from the modelView matrix so LunarSkyboxRenderer

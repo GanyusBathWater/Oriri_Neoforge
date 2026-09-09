@@ -46,6 +46,18 @@ public final class LunarSkyboxRenderer {
     private static final ResourceLocation EARTH_NIGHT_TEXTURE =
         ResourceLocation.fromNamespaceAndPath("oririmod", "textures/skybox/earth_night.png");
 
+    /** Atmospheric glow texture. Additive blend billboard drawn behind the Earth. */
+    private static final ResourceLocation EARTH_ATMOSPHERE_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath("oririmod", "textures/skybox/earth_atmosphere.png");
+
+    /** HDRI Cosmos Dome texture. 360 panoramic equirectangular map. */
+    private static final ResourceLocation COSMOS_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath("oririmod", "textures/skybox/cosmos_hdri.png");
+
+    /** Sun texture. Additive blend billboard. */
+    private static final ResourceLocation SUN_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath("oririmod", "textures/skybox/sun.png");
+
     /**
      * Earth sky position.
      * In MC coordinates: Y = up, -Z = north, +X = east.
@@ -59,10 +71,9 @@ public final class LunarSkyboxRenderer {
 
     /**
      * Angular half-size of the Earth quad in world units.
-     * 75 units at sky radius 100 ≈ 36.9° half-angle ≈ 74° total angular diameter.
-     * Dramatically large — fills a significant portion of the visible sky.
+     * Reduced from 75 to 50. 
      */
-    private static final float EARTH_HALF_SIZE = 75.0f;
+    private static final float EARTH_HALF_SIZE = 50.0f;
 
     /**
      * Earth axial tilt in radians (23.4°), applied to the billboard up-vector.
@@ -120,8 +131,11 @@ public final class LunarSkyboxRenderer {
     // -------------------------------------------------------------------------
     // GPU resources
     // -------------------------------------------------------------------------
-    private static VertexBuffer domeBuffer    = null;
+    private static VertexBuffer domeBuffer      = null;
     private static boolean      domeBufferBuilt = false;
+
+    private static VertexBuffer cosmosBuffer      = null;
+    private static boolean      cosmosBufferBuilt = false;
 
     // =========================================================================
     // Public API
@@ -140,16 +154,26 @@ public final class LunarSkyboxRenderer {
 
         // 2. Ensure one-time initialization
         ensureDomeBuilt();
+        ensureCosmosDomeBuilt();
         ensureStarDataBuilt();
 
         // 3. Opaque black dome — covers Iris's sky composite output
         renderDome(poseStack, projectionMatrix);
 
-        // 4. Stars — render before Earth so Earth correctly occludes them
+        // 4. Cosmos HDRI Dome — render behind stars
+        renderCosmosDome(poseStack, projectionMatrix);
+
+        // 5. Stars — render before Earth so Earth correctly occludes them
         float timeSeconds = (System.nanoTime() - TIME_ORIGIN) / 1_000_000_000.0f;
         renderStars(poseStack, projectionMatrix, timeSeconds);
 
-        // 5. Earth quad on top of stars
+        // 6. The Sun — render exactly aligned with the Earth's day side
+        renderSun(poseStack, projectionMatrix);
+
+        // 5. Atmosphere glow (behind Earth)
+        renderAtmosphere(poseStack, projectionMatrix);
+
+        // 6. Earth quad on top of stars & atmosphere
         renderEarth(poseStack, projectionMatrix, timeSeconds);
     }
 
@@ -159,10 +183,15 @@ public final class LunarSkyboxRenderer {
      */
     public static void invalidate() {
         domeBufferBuilt = false;
+        cosmosBufferBuilt = false;
         starDataReady   = false;
         if (domeBuffer != null) {
             domeBuffer.close();
             domeBuffer = null;
+        }
+        if (cosmosBuffer != null) {
+            cosmosBuffer.close();
+            cosmosBuffer = null;
         }
         // CPU arrays are just garbage-collected; null them to allow GC
         sCx = sCy = sCz = null;
@@ -173,11 +202,159 @@ public final class LunarSkyboxRenderer {
     }
 
     // =========================================================================
-    // Earth rendering (Phase 3c - Day/Night Cycle)
+    // Deep Space Rendering (Phase 5 - Cosmos and Sun)
     // =========================================================================
 
     /**
+     * Renders the static Cosmos HDRI dome.
+     */
+    private static void renderCosmosDome(PoseStack poseStack, Matrix4f projectionMatrix) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        Minecraft.getInstance().getTextureManager().bindForSetup(COSMOS_TEXTURE);
+        
+        // Enable bilinear filtering so the texture looks smooth instead of blocky
+        net.minecraft.client.renderer.texture.AbstractTexture tex = Minecraft.getInstance().getTextureManager().getTexture(COSMOS_TEXTURE);
+        if (tex != null) {
+            tex.setFilter(true, false); // blur=true, mipmap=false
+        }
+        
+        RenderSystem.setShaderTexture(0, COSMOS_TEXTURE);
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        // Enable culling so we only see the inside of the sphere
+        RenderSystem.enableCull();
+
+        cosmosBuffer.bind();
+        cosmosBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, RenderSystem.getShader());
+        VertexBuffer.unbind();
+
+        RenderSystem.disableBlend();
+    }
+
+    /**
+     * Renders the Sun billboard, aligned exactly with the light direction of the Earth.
+     */
+    private static void renderSun(PoseStack poseStack, Matrix4f projectionMatrix) {
+        poseStack.pushPose();
+
+        // First move to the Earth's position in the sky
+        poseStack.translate(EARTH_DX * SKY_RADIUS, EARTH_DY * SKY_RADIUS, EARTH_DZ * SKY_RADIUS);
+        float yaw = (float) Math.atan2(EARTH_DX, EARTH_DZ);
+        float pitch = (float) Math.asin(EARTH_DY);
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotation(yaw));
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotation(-pitch));
+        
+        // The Earth's local sun vector is (1, 0, 0)
+        // We move the Sun out along this vector so it sits 90 degrees to the right of the Earth
+        poseStack.translate(SKY_RADIUS, 0, 0);
+
+        // Now we need the billboard to face the camera. 
+        // We just undo the previous rotations to align back with the camera view, 
+        // but we keep the translation!
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotation(pitch));
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotation(-yaw));
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        Minecraft.getInstance().getTextureManager().bindForSetup(SUN_TEXTURE);
+        RenderSystem.setShaderTexture(0, SUN_TEXTURE);
+
+        RenderSystem.enableBlend();
+        // Additive blending for a blinding star
+        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE, 
+                               com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.disableCull();
+
+        BufferBuilder bb = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        
+        float S = 15.0f; // Sun size
+
+        bb.addVertex(-S, -S, 0).setUv(0f, 1f);
+        bb.addVertex( S, -S, 0).setUv(1f, 1f);
+        bb.addVertex( S,  S, 0).setUv(1f, 0f);
+        bb.addVertex(-S,  S, 0).setUv(0f, 0f);
+
+        MeshData mesh = bb.buildOrThrow();
+        VertexBuffer tempBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+        tempBuffer.bind();
+        tempBuffer.upload(mesh);
+        tempBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, RenderSystem.getShader());
+        VertexBuffer.unbind();
+        tempBuffer.close();
+
+        RenderSystem.enableCull();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        poseStack.popPose();
+    }
+
+    // =========================================================================
+    // Earth rendering (Phase 3c/3d - Atmosphere and Day/Night Cycle)
+    // =========================================================================
+
+    /**
+     * Renders the atmospheric glow behind the Earth.
+     * Drawn as a simple camera-facing billboard quad with additive blending.
+     */
+    private static void renderAtmosphere(PoseStack poseStack, Matrix4f projectionMatrix) {
+        poseStack.pushPose();
+
+        poseStack.translate(EARTH_DX * SKY_RADIUS, EARTH_DY * SKY_RADIUS, EARTH_DZ * SKY_RADIUS);
+        float yaw = (float) Math.atan2(EARTH_DX, EARTH_DZ);
+        float pitch = (float) Math.asin(EARTH_DY);
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotation(yaw));
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotation(-pitch));
+        
+        // No axial tilt applied. The glow is a perfect circle around the planet.
+
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        Minecraft.getInstance().getTextureManager().bindForSetup(EARTH_ATMOSPHERE_TEXTURE);
+        RenderSystem.setShaderTexture(0, EARTH_ATMOSPHERE_TEXTURE);
+
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE, 
+                               com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.disableCull();
+
+        BufferBuilder bb = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        
+        // Atmosphere is slightly larger than the Earth to create the halo.
+        float S = EARTH_HALF_SIZE * 1.35f;
+
+        bb.addVertex(-S, -S, 0).setUv(0f, 1f).setColor(1f, 1f, 1f, 1f);
+        bb.addVertex( S, -S, 0).setUv(1f, 1f).setColor(1f, 1f, 1f, 1f);
+        bb.addVertex( S,  S, 0).setUv(1f, 0f).setColor(1f, 1f, 1f, 1f);
+        bb.addVertex(-S,  S, 0).setUv(0f, 0f).setColor(1f, 1f, 1f, 1f);
+
+        MeshData mesh = bb.buildOrThrow();
+        VertexBuffer tempBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+        tempBuffer.bind();
+        tempBuffer.upload(mesh);
+        tempBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, RenderSystem.getShader());
+        VertexBuffer.unbind();
+        tempBuffer.close();
+
+        RenderSystem.enableCull();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        poseStack.popPose();
+    }
+
+    /**
      * Renders the Earth as a rotating 3D sphere with day/night phases.
+
      * 
      * To maintain Iris compatibility, we do not use custom shaders. Instead, we
      * generate the sphere mesh dynamically on the CPU each frame.
@@ -368,6 +545,64 @@ public final class LunarSkyboxRenderer {
         domeBuffer.upload(bb.buildOrThrow());
         VertexBuffer.unbind();
         domeBufferBuilt = true;
+    }
+
+    /**
+     * Builds the static Cosmos HDRI UV sphere.
+     * Uses equirectangular mapping exactly like the Earth, but normals point inwards (or we just draw the inside).
+     */
+    private static void ensureCosmosDomeBuilt() {
+        if (cosmosBufferBuilt && cosmosBuffer != null) return;
+        if (cosmosBuffer != null) cosmosBuffer.close();
+
+        final int segments = 32;
+        final int rings = 16;
+        final float S = 90.0f; // Radius
+
+        BufferBuilder bb = Tesselator.getInstance().begin(
+            VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX
+        );
+
+        for (int i = 0; i < rings; i++) {
+            float lat0 = (float) Math.PI * (-0.5f + (float) i / rings);
+            float z0  = (float) Math.sin(lat0);
+            float zr0 = (float) Math.cos(lat0);
+            float v0 = 1.0f - (float) i / rings; // Invert V
+
+            float lat1 = (float) Math.PI * (-0.5f + (float) (i + 1) / rings);
+            float z1  = (float) Math.sin(lat1);
+            float zr1 = (float) Math.cos(lat1);
+            float v1 = 1.0f - (float) (i + 1) / rings; // Invert V
+
+            for (int j = 0; j < segments; j++) {
+                float lng0 = 2 * (float) Math.PI * (float) j / segments;
+                float x0 = (float) Math.cos(lng0);
+                float y0 = (float) Math.sin(lng0);
+                float u0 = (float) j / segments;
+
+                float lng1 = 2 * (float) Math.PI * (float) (j + 1) / segments;
+                float x1 = (float) Math.cos(lng1);
+                float y1 = (float) Math.sin(lng1);
+                float u1 = (float) (j + 1) / segments;
+
+                float px00 = x0 * zr0, py00 = y0 * zr0, pz00 = z0;
+                float px10 = x1 * zr0, py10 = y1 * zr0, pz10 = z0;
+                float px01 = x0 * zr1, py01 = y0 * zr1, pz01 = z1;
+                float px11 = x1 * zr1, py11 = y1 * zr1, pz11 = z1;
+
+                // Winding order reversed because we are INSIDE the sphere!
+                bb.addVertex(px00*S, pz00*S, py00*S).setUv(u0, v0);
+                bb.addVertex(px10*S, pz10*S, py10*S).setUv(u1, v0);
+                bb.addVertex(px11*S, pz11*S, py11*S).setUv(u1, v1);
+                bb.addVertex(px01*S, pz01*S, py01*S).setUv(u0, v1);
+            }
+        }
+
+        cosmosBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+        cosmosBuffer.bind();
+        cosmosBuffer.upload(bb.buildOrThrow());
+        VertexBuffer.unbind();
+        cosmosBufferBuilt = true;
     }
 
     /**

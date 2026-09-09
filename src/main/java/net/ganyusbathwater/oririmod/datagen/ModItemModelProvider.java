@@ -379,7 +379,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                                 .texture("layer0", mcLoc("item/stick"));
                 withExistingParent(ModItems.MAGIC_DEBUG_STICK.getId().getPath(), mcLoc("item/handheld"))
                                 .texture("layer0", mcLoc("item/stick"));
-                withExistingParent(ModItems.LUNAR_DEBUG_ITEM.getId().getPath(), mcLoc("item/generated"))
+                withExistingParent(ModItems.VISUAL_DEBUG_ITEM.getId().getPath(), mcLoc("item/generated"))
                                 .texture("layer0", mcLoc("item/ender_eye"));
                 handheldItem(ModItems.ZOMBIE_ENCYCLOPEDIA);
                 handheldItem(ModItems.SKELETON_ENCYCLOPEDIA);

@@ -34,8 +34,8 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.magic.MagicDebugStickItem(
                                         new Item.Properties().stacksTo(1)));
 
-        public static final DeferredItem<Item> LUNAR_DEBUG_ITEM = ITEMS.register("lunar_debug_item",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.LunarDebugItem(
+        public static final DeferredItem<Item> VISUAL_DEBUG_ITEM = ITEMS.register("visual_debug_item",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.VisualDebugItem(
                                         new Item.Properties().stacksTo(1)));
 
         public static final DeferredItem<Item> SOL_QUICKSAND_BUCKET = ITEMS.register("sol_quicksand_bucket",

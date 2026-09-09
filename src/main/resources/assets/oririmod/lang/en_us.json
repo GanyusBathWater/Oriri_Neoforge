@@ -783,8 +783,6 @@
   "tooltip.oririmod.arcus_lucis.homing": "Arrows shot through this bow have homing abilities",
   "tooltip.oririmod.arcus_lucis.conversion": "Normal arrows are converted to spectral arrows",
 
-  "item.oririmod.lunar_debug_item": "Lunar Skybox Debug",
-  "item.oririmod.lunar_debug_item.tooltip": "[DEV] Right-click to toggle the Lunar Skybox",
-  "item.oririmod.lunar_debug_item.message.on": "✦ Lunar Skybox: ACTIVE",
-  "item.oririmod.lunar_debug_item.message.off": "✦ Lunar Skybox: INACTIVE"
+  "item.oririmod.visual_debug_item": "Visual Debug Tool",
+  "item.oririmod.visual_debug_item.tooltip": "[DEV] Right-click to open the Visual Debug Menu"
 }
