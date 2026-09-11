@@ -32,6 +32,7 @@ public class ModTags {
 
     public static class Items {
         public static final TagKey<Item> MANA_WEAPONS = createTag("mana_weapons");
+        public static final TagKey<Item> DUNGEON_ITEMS = createTag("dungeon_items");
 
         private static TagKey<Item> createTag(String name) {
             return ItemTags.create(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, name));

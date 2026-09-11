@@ -28,7 +28,7 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
     }
 
     @Override
-    public void onStart(ServerLevel level, DungeonInstance instance) {
+    protected void doStart(ServerLevel level, DungeonInstance instance) {
         activatedSwitchIds.clear();
         spawnTimer = 0;
 
@@ -39,8 +39,7 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
     }
 
     @Override
-    public void tick(ServerLevel level, DungeonInstance instance) {
-        if (complete) return;
+    protected void doTick(ServerLevel level, DungeonInstance instance) {
 
         // Infinite spawner side-effect
         if (!definition.getSpawnEntries().isEmpty()) {
@@ -56,7 +55,7 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
 
         // Win check
         if (activatedSwitchIds.size() >= requiredCount) {
-            complete = true;
+            this.state = StageState.COMPLETE;
         }
     }
 

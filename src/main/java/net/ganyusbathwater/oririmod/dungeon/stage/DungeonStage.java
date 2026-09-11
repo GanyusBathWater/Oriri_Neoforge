@@ -13,7 +13,16 @@ import net.minecraft.server.level.ServerLevel;
  */
 public interface DungeonStage {
 
-    /** Called once when the stage begins. Should spawn enemies, lock doors, etc. */
+    enum StageState {
+        PENDING,
+        ACTIVE,
+        COMPLETE
+    }
+
+    /** @return the current state of this stage. */
+    StageState getState();
+
+    /** Called once when the stage begins (either PENDING or ACTIVE). */
     void onStart(ServerLevel level, DungeonInstance instance);
 
     /**
@@ -22,8 +31,10 @@ public interface DungeonStage {
      */
     void tick(ServerLevel level, DungeonInstance instance);
 
-    /** @return true when this stage's win condition is satisfied. */
-    boolean isComplete();
+    /** @return true when this stage's win condition is satisfied (i.e. state == COMPLETE). */
+    default boolean isComplete() {
+        return getState() == StageState.COMPLETE;
+    }
 
     /**
      * Called once when isComplete() returns true.

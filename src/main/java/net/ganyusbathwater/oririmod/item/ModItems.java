@@ -549,6 +549,10 @@ public class ModItems {
                         "dungeon_marker_spawn_egg",
                         () -> new net.ganyusbathwater.oririmod.item.custom.DungeonMarkerItem(new Item.Properties()));
 
+        public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.ManaDestabilizerItem> MANA_DESTABILIZER = ITEMS.register(
+                        "mana_destabilizer",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.ManaDestabilizerItem(new Item.Properties().stacksTo(16)));
+
         public static final DeferredItem<DeferredSpawnEggItem> DUNGEON_KEEPER_SPAWN_EGG = ITEMS.register(
                         "dungeon_keeper_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.DUNGEON_KEEPER, 0x4A4A4A, 0xFFD700,

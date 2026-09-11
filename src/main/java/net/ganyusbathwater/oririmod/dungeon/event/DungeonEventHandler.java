@@ -259,6 +259,39 @@ public class DungeonEventHandler {
                 }
                 manager.setDirty();
             }
+
+            // Wipe dungeon items
+            if (!event.getTo().location().getPath().startsWith("dungeon_")) {
+                wipeDungeonItems(sp);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+
+        if (isInDungeon(sp)) {
+            // Option 1 Hardcore: if you log out in a dungeon, you are kicked and sent home.
+            sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.disconnect_kick").withStyle(ChatFormatting.RED), false);
+            net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
+        } else {
+            // Logged in outside a dungeon (e.g. game crashed or vanilla forced them to overworld). Wipe items to prevent smuggling.
+            wipeDungeonItems(sp);
+        }
+    }
+
+    private static void wipeDungeonItems(ServerPlayer sp) {
+        boolean wipedAny = false;
+        for (int i = 0; i < sp.getInventory().getContainerSize(); i++) {
+            ItemStack stack = sp.getInventory().getItem(i);
+            if (!stack.isEmpty() && stack.is(net.ganyusbathwater.oririmod.util.ModTags.Items.DUNGEON_ITEMS)) {
+                sp.getInventory().setItem(i, ItemStack.EMPTY);
+                wipedAny = true;
+            }
+        }
+        if (wipedAny) {
+            sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.items_wiped").withStyle(ChatFormatting.YELLOW), false);
         }
     }
 }

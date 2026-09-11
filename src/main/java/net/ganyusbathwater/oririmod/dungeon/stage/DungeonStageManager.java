@@ -26,6 +26,7 @@ public class DungeonStageManager {
     public static final String ROLE_SWITCH        = "SWITCH";
     public static final String ROLE_DOOR          = "DOOR";
     public static final String ROLE_AREA_MODIFIER = "AREA_MODIFIER";
+    public static final String ROLE_STAGE_TRIGGER = "STAGE_TRIGGER";
     public static final String ROLE_PLAYER_SPAWN  = "PLAYER_SPAWN";
     public static final String ROLE_BOUNDS_MIN    = "BOUNDS_MIN";
     public static final String ROLE_BOUNDS_MAX    = "BOUNDS_MAX";
@@ -97,7 +98,9 @@ public class DungeonStageManager {
                         ResourceLocation entityType = ResourceLocation.parse(entityTypeStr);
                         int count = extra.contains(DungeonMarkerEntity.TAG_COUNT)
                                 ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 1;
-                        builder.addSpawn(entityType, count, pos);
+                        float chance = extra.contains(DungeonMarkerEntity.TAG_SPAWN_CHANCE)
+                                ? extra.getFloat(DungeonMarkerEntity.TAG_SPAWN_CHANCE) : 1.0f;
+                        builder.addSpawn(entityType, count, pos, chance);
                     }
                 }
                 case ROLE_BOSS_SPAWN -> {
@@ -119,11 +122,20 @@ public class DungeonStageManager {
                     builder.addDoor(groupId, required, pos);
                 }
                 case ROLE_AREA_MODIFIER -> {
-                    String action = extra.contains("action") ? extra.getString("action") : "destroy";
-                    int radius = extra.contains("radius") ? extra.getInt("radius") : 3;
-                    String filterStr = extra.contains("filter") ? extra.getString("filter") : "";
+                    String action = extra.getString(DungeonMarkerEntity.TAG_SWITCH_ID);
+                    if (action.isBlank()) action = "destroy";
+                    int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 3;
+                    String filterStr = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
                     ResourceLocation filter = filterStr.isBlank() ? null : ResourceLocation.parse(filterStr);
                     builder.addAreaModifier(action, radius, filter, pos);
+                }
+                case ROLE_STAGE_TRIGGER -> {
+                    int radius = extra.contains("radius") ? extra.getInt("radius") : 5;
+                    builder.addTrigger(pos, radius);
+                    String switchId = extra.getString(DungeonMarkerEntity.TAG_SWITCH_ID);
+                    if (!switchId.isBlank()) {
+                        builder.keyDropStageId(switchId);
+                    }
                 }
                 case ROLE_PLAYER_SPAWN -> builder.playerSpawn(pos);
             }
@@ -148,6 +160,7 @@ public class DungeonStageManager {
             case BOSS_FIGHT -> new BossFightStage(definition);
             case FETCH_ITEM -> new FetchItemStage(definition);
             case PUZZLE_SOLVE -> new PuzzleSolveStage(definition);
+            case SPAWN_ONLY -> new PassThroughStage(definition);
         };
     }
 }

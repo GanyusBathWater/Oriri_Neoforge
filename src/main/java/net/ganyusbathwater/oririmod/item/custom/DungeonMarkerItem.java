@@ -11,6 +11,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 public class DungeonMarkerItem extends Item {
+    public static final java.util.Map<java.util.UUID, net.ganyusbathwater.oririmod.network.packet.SyncMarkerDataPayload> LAST_CONFIG = new java.util.HashMap<>();
+
     public DungeonMarkerItem(Properties properties) {
         super(properties);
     }
@@ -31,6 +33,22 @@ public class DungeonMarkerItem extends Item {
             entity.setPos(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5);
             entity.setCustomName(net.minecraft.network.chat.Component.literal("§d[Dungeon Marker]"));
             entity.setCustomNameVisible(true);
+            
+            if (entity instanceof net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity marker) {
+                net.ganyusbathwater.oririmod.network.packet.SyncMarkerDataPayload lastConfig = LAST_CONFIG.get(context.getPlayer().getUUID());
+                if (lastConfig != null) {
+                    marker.setStageId(lastConfig.stageId());
+                    marker.setStageType(lastConfig.stageType());
+                    marker.setRole(lastConfig.role());
+                    
+                    net.minecraft.nbt.CompoundTag extra = marker.getExtraData();
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_ENEMY_TYPE, lastConfig.enemyType());
+                    extra.putInt(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_COUNT, lastConfig.count());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SWITCH_ID, lastConfig.switchId());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_LOOT_TABLE, lastConfig.lootTable());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_BOSS_ID, lastConfig.bossId());
+                }
+            }
             
             serverLevel.addFreshEntity(entity);
             if (!context.getPlayer().isCreative()) {
@@ -61,6 +79,22 @@ public class DungeonMarkerItem extends Item {
             entity.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
             entity.setCustomName(net.minecraft.network.chat.Component.literal("§d[Dungeon Marker]"));
             entity.setCustomNameVisible(true);
+            
+            if (entity instanceof net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity marker) {
+                net.ganyusbathwater.oririmod.network.packet.SyncMarkerDataPayload lastConfig = LAST_CONFIG.get(player.getUUID());
+                if (lastConfig != null) {
+                    marker.setStageId(lastConfig.stageId());
+                    marker.setStageType(lastConfig.stageType());
+                    marker.setRole(lastConfig.role());
+                    
+                    net.minecraft.nbt.CompoundTag extra = marker.getExtraData();
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_ENEMY_TYPE, lastConfig.enemyType());
+                    extra.putInt(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_COUNT, lastConfig.count());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SWITCH_ID, lastConfig.switchId());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_LOOT_TABLE, lastConfig.lootTable());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_BOSS_ID, lastConfig.bossId());
+                }
+            }
             
             serverLevel.addFreshEntity(entity);
             if (!player.isCreative()) {

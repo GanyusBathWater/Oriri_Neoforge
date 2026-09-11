@@ -15,7 +15,8 @@ public record SyncMarkerDataPayload(
         int count,
         String switchId,
         String lootTable,
-        String bossId
+        String bossId,
+        float spawnChance
 ) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<SyncMarkerDataPayload> TYPE =
@@ -32,6 +33,7 @@ public record SyncMarkerDataPayload(
                 ByteBufCodecs.STRING_UTF8.encode(buf, payload.switchId());
                 ByteBufCodecs.STRING_UTF8.encode(buf, payload.lootTable());
                 ByteBufCodecs.STRING_UTF8.encode(buf, payload.bossId());
+                buf.writeFloat(payload.spawnChance());
             },
             buf -> new SyncMarkerDataPayload(
                     buf.readInt(),
@@ -42,7 +44,8 @@ public record SyncMarkerDataPayload(
                     buf.readInt(),
                     ByteBufCodecs.STRING_UTF8.decode(buf),
                     ByteBufCodecs.STRING_UTF8.decode(buf),
-                    ByteBufCodecs.STRING_UTF8.decode(buf)
+                    ByteBufCodecs.STRING_UTF8.decode(buf),
+                    buf.readFloat()
             )
     );
 

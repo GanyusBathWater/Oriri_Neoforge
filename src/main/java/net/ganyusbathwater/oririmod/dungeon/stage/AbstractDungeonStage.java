@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public abstract class AbstractDungeonStage implements DungeonStage {
 
     protected final StageDefinition definition;
-    protected boolean complete = false;
+    protected StageState state = StageState.PENDING;
 
     protected AbstractDungeonStage(StageDefinition definition) {
         this.definition = definition;
@@ -29,8 +29,71 @@ public abstract class AbstractDungeonStage implements DungeonStage {
     }
 
     @Override
-    public boolean isComplete() {
-        return complete;
+    public StageState getState() {
+        return state;
+    }
+
+    @Override
+    public void onStart(ServerLevel level, DungeonInstance instance) {
+        if (definition.getTriggers().isEmpty()) {
+            this.state = StageState.ACTIVE;
+            applyStartEffects(level, instance);
+            doStart(level, instance);
+        } else {
+            this.state = StageState.PENDING;
+        }
+    }
+
+    /** Subclasses must implement this to do their specific start logic (spawning mobs, etc) */
+    protected abstract void doStart(ServerLevel level, DungeonInstance instance);
+
+    @Override
+    public void tick(ServerLevel level, DungeonInstance instance) {
+        if (state == StageState.PENDING) {
+            // Check every 10 ticks for performance
+            if (level.getGameTime() % 10 != 0) return;
+
+            for (StageDefinition.TriggerEntry trigger : definition.getTriggers()) {
+                BlockPos pos = trigger.pos();
+                double r = trigger.radius();
+                net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(
+                    pos.getX() - r, pos.getY() - r, pos.getZ() - r,
+                    pos.getX() + r, pos.getY() + r, pos.getZ() + r
+                );
+                
+                boolean playerInside = level.players().stream().anyMatch(p -> {
+                    return instance.hasPlayer(p.getUUID()) && box.contains(p.position());
+                });
+
+                if (playerInside) {
+                    this.state = StageState.ACTIVE;
+                    applyStartEffects(level, instance);
+                    doStart(level, instance);
+                    break;
+                }
+            }
+        } else if (state == StageState.ACTIVE) {
+            doTick(level, instance);
+        }
+    }
+
+    /** Subclasses must implement this to do their specific tick logic */
+    protected abstract void doTick(ServerLevel level, DungeonInstance instance);
+
+    /**
+     * Executes all door lock effects by placing MAGIC_BARRIER_BLOCK
+     */
+    protected void applyStartEffects(ServerLevel level, DungeonInstance instance) {
+        net.minecraft.world.level.block.Block magicBarrier = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(ResourceLocation.parse("oririmod:magic_barrier_block"));
+        if (magicBarrier == net.minecraft.world.level.block.Blocks.AIR) return; // Fallback if block not found
+        
+        for (StageDefinition.DoorEntry door : definition.getDoors()) {
+            BlockPos pos = door.pos();
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir() || state.canBeReplaced()) {
+                level.setBlock(pos, magicBarrier.defaultBlockState(), 3);
+            }
+        }
     }
 
     /**
@@ -79,7 +142,19 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                 }
             }
             case "fill" -> {
-                // Future: fill area with a specific block
+                if (filter != null) {
+                    net.minecraft.world.level.block.Block fillBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(filter);
+                    if (fillBlock != Blocks.AIR) {
+                        for (int x = -radius; x <= radius; x++) {
+                            for (int y = -radius; y <= radius; y++) {
+                                for (int z = -radius; z <= radius; z++) {
+                                    BlockPos target = center.offset(x, y, z);
+                                    level.setBlock(target, fillBlock.defaultBlockState(), 3);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -474,6 +474,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 // ===== DUNGEON SYSTEM =====
                 basicItem(ModItems.HOMEWARD.get());
+                basicItem(ModItems.MANA_DESTABILIZER.get());
 
                 // Maps the GeoItem Renderer explicitly to the model. We use builtin/entity to trigger it, and inject manual displays.
                 applyGeoItemTransforms(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.getId().getPath());

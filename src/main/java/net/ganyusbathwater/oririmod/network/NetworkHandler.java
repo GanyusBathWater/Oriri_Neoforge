@@ -221,6 +221,9 @@ public final class NetworkHandler {
                             extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SWITCH_ID, payload.switchId());
                             extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_LOOT_TABLE, payload.lootTable());
                             extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_BOSS_ID, payload.bossId());
+                            extra.putFloat(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SPAWN_CHANCE, payload.spawnChance());
+                            
+                            net.ganyusbathwater.oririmod.item.custom.DungeonMarkerItem.LAST_CONFIG.put(sp.getUUID(), payload);
                             
                             sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§aMarker configuration saved!"), true);
                         }

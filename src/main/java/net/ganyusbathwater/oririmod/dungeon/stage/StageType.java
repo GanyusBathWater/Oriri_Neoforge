@@ -10,7 +10,8 @@ public enum StageType {
     SURVIVE_TIMER,
     BOSS_FIGHT,
     FETCH_ITEM,
-    PUZZLE_SOLVE;
+    PUZZLE_SOLVE,
+    SPAWN_ONLY;
 
     public static StageType fromString(String s) {
         try {

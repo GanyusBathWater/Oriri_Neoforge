@@ -29,23 +29,26 @@ public class MagicBarrierCoreBlock extends Block {
             return ItemInteractionResult.sidedSuccess(true);
         }
 
-        boolean hasKeyItem = stack.is(Items.AMETHYST_SHARD);
+        boolean hasKeyItem = stack.getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ManaDestabilizerItem;
 
         if (!hasKeyItem) {
             // NOT correct item - > Default interaction
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        // Destroy Core yourself without dropping block
+        if (!player.isCreative()) {
+            stack.shrink(1);
+        }
+        
+        breakCoreAndConnectedBarriers(level, pos);
+        level.playSound(null, pos, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_BREAK, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+        
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    private static void breakCoreAndConnectedBarriers(Level level, BlockPos pos) {
         level.destroyBlock(pos, false);
-
-        // Then all connected barrier blocks
         breakConnectedBarriers(level, pos);
-
-        // Key is consumed
-        stack.shrink(1);
-
-        return ItemInteractionResult.sidedSuccess(false);
     }
 
     private static void breakConnectedBarriers(Level level, BlockPos start) {

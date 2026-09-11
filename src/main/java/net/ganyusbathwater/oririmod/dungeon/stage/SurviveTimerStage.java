@@ -24,7 +24,7 @@ public class SurviveTimerStage extends AbstractDungeonStage {
     }
 
     @Override
-    public void onStart(ServerLevel level, DungeonInstance instance) {
+    protected void doStart(ServerLevel level, DungeonInstance instance) {
         ticksElapsed = 0;
         spawnTimer = 0;
 
@@ -41,8 +41,7 @@ public class SurviveTimerStage extends AbstractDungeonStage {
     }
 
     @Override
-    public void tick(ServerLevel level, DungeonInstance instance) {
-        if (complete) return;
+    protected void doTick(ServerLevel level, DungeonInstance instance) {
         ticksElapsed++;
 
         if (!definition.getSpawnEntries().isEmpty()) {
@@ -69,7 +68,7 @@ public class SurviveTimerStage extends AbstractDungeonStage {
         }
 
         if (ticksElapsed >= definition.getTimerTicks()) {
-            complete = true;
+            this.state = StageState.COMPLETE;
         }
     }
 

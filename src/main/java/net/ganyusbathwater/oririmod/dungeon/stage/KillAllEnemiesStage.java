@@ -25,7 +25,7 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
     }
 
     @Override
-    public void onStart(ServerLevel level, DungeonInstance instance) {
+    protected void doStart(ServerLevel level, DungeonInstance instance) {
         spawnedEntities.clear();
 
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
@@ -36,21 +36,22 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
             }
             EntityType<?> entityType = typeOpt.get();
             for (int i = 0; i < entry.count(); i++) {
-                var entity = entityType.create(level);
-                if (entity instanceof LivingEntity living) {
-                    living.moveTo(entry.pos().getX() + 0.5, entry.pos().getY(), entry.pos().getZ() + 0.5,
-                            level.getRandom().nextFloat() * 360f, 0f);
-                    level.addFreshEntity(living);
-                    // finalizeSpawn is called via addFreshEntity naturally
-                    spawnedEntities.add(living.getUUID());
+                if (level.getRandom().nextFloat() <= entry.chance()) {
+                    var entity = entityType.create(level);
+                    if (entity instanceof LivingEntity living) {
+                        living.moveTo(entry.pos().getX() + 0.5, entry.pos().getY(), entry.pos().getZ() + 0.5,
+                                level.getRandom().nextFloat() * 360f, 0f);
+                        level.addFreshEntity(living);
+                        // finalizeSpawn is called via addFreshEntity naturally
+                        spawnedEntities.add(living.getUUID());
+                    }
                 }
             }
         }
     }
 
     @Override
-    public void tick(ServerLevel level, DungeonInstance instance) {
-        if (complete) return;
+    protected void doTick(ServerLevel level, DungeonInstance instance) {
 
         // Check every 20 ticks (1 second) for performance
         if (level.getGameTime() % 20 != 0) return;
@@ -58,11 +59,30 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
         // Remove any UUIDs that are no longer in the world (killed / despawned)
         spawnedEntities.removeIf(uuid -> {
             var entity = level.getEntity(uuid);
-            return entity == null || !entity.isAlive();
+            boolean dead = entity == null || !entity.isAlive();
+            if (dead && spawnedEntities.size() == 1) {
+                String keyDrop = definition.getKeyDropStageId();
+                if (keyDrop != null) {
+                    net.minecraft.world.item.ItemStack keyStack = new net.minecraft.world.item.ItemStack(net.ganyusbathwater.oririmod.item.ModItems.MANA_DESTABILIZER.get());
+                    
+                    net.minecraft.world.phys.Vec3 dropPos;
+                    if (entity != null) {
+                        dropPos = entity.position();
+                    } else if (!definition.getTriggers().isEmpty()) {
+                        dropPos = net.minecraft.world.phys.Vec3.atCenterOf(definition.getTriggers().get(0).pos());
+                    } else {
+                        dropPos = net.minecraft.world.phys.Vec3.atCenterOf(instance.getOrigin());
+                    }
+                    
+                    net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, keyStack);
+                    level.addFreshEntity(itemEntity);
+                }
+            }
+            return dead;
         });
 
         if (spawnedEntities.isEmpty()) {
-            complete = true;
+            this.state = StageState.COMPLETE;
         }
     }
 

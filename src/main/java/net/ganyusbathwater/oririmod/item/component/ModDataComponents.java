@@ -36,6 +36,14 @@ public final class ModDataComponents {
                             .build()
             );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> STAGE_ID =
+            COMPONENTS.register("stage_id", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         COMPONENTS.register(eventBus);
     }

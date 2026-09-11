@@ -90,27 +90,25 @@ public class DungeonTickHandler {
             // Start the stage — this spawns enemies, locks doors, etc.
             nextStage.onStart(level, instance);
 
-            // Announce stage start to players
-            announceStage(level, instance, nextDef);
-
-            // Music: Check overrides or play main track
-            var dungeonDef = net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.get(instance.getDungeonId());
-            if (dungeonDef != null) {
-                net.minecraft.resources.ResourceLocation track = dungeonDef.stageTrackOverrides().getOrDefault(nextDef.getStageId(), dungeonDef.dungeonTrack());
-                if (track != null) {
-                    var payload = new net.ganyusbathwater.oririmod.network.packet.PlayDungeonMusicPayload(track, true, true);
-                    for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
-                        ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
-                        if (sp != null) net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, payload);
-                    }
-                }
+            // If it started immediately (no triggers), announce it now
+            if (nextStage.getState() == DungeonStage.StageState.ACTIVE) {
+                announceStage(level, instance, nextDef);
+                playMusic(level, instance, nextDef);
             }
         }
 
         // ── Tick the active stage ──
         DungeonStage activeStage = instance.getActiveStage();
         if (activeStage != null) {
+            DungeonStage.StageState prevState = activeStage.getState();
             activeStage.tick(level, instance);
+            DungeonStage.StageState newState = activeStage.getState();
+
+            // Handle transition from PENDING -> ACTIVE
+            if (prevState == DungeonStage.StageState.PENDING && newState == DungeonStage.StageState.ACTIVE) {
+                announceStage(level, instance, activeStage.getDefinition());
+                playMusic(level, instance, activeStage.getDefinition());
+            }
 
             if (activeStage.isComplete()) {
                 activeStage.onComplete(level, instance);
@@ -136,6 +134,20 @@ public class DungeonTickHandler {
         for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
             ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
             if (sp != null) sp.displayClientMessage(msg, true);
+        }
+    }
+
+    private static void playMusic(ServerLevel level, DungeonInstance instance, StageDefinition def) {
+        var dungeonDef = net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.get(instance.getDungeonId());
+        if (dungeonDef != null) {
+            net.minecraft.resources.ResourceLocation track = dungeonDef.stageTrackOverrides().getOrDefault(def.getStageId(), dungeonDef.dungeonTrack());
+            if (track != null) {
+                var payload = new net.ganyusbathwater.oririmod.network.packet.PlayDungeonMusicPayload(track, true, true);
+                for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
+                    ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+                    if (sp != null) net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, payload);
+                }
+            }
         }
     }
 

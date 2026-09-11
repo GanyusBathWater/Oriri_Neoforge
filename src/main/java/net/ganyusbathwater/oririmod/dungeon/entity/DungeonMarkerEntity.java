@@ -59,6 +59,7 @@ public class DungeonMarkerEntity extends Entity {
     public static final String TAG_SWITCH_ID   = "switch_id";
     public static final String TAG_LOOT_TABLE  = "loot_table";
     public static final String TAG_BOSS_ID     = "boss_id";
+    public static final String TAG_SPAWN_CHANCE = "spawn_chance";
 
     // Extra arbitrary NBT payload (holds enemy_type, count, loot_table, etc.)
     private CompoundTag extraData = new CompoundTag();
@@ -128,6 +129,7 @@ public class DungeonMarkerEntity extends Entity {
         if (tag.contains(TAG_SWITCH_ID))   extraData.putString(TAG_SWITCH_ID,   tag.getString(TAG_SWITCH_ID));
         if (tag.contains(TAG_LOOT_TABLE))  extraData.putString(TAG_LOOT_TABLE,  tag.getString(TAG_LOOT_TABLE));
         if (tag.contains(TAG_BOSS_ID))     extraData.putString(TAG_BOSS_ID,     tag.getString(TAG_BOSS_ID));
+        if (tag.contains(TAG_SPAWN_CHANCE)) extraData.putFloat(TAG_SPAWN_CHANCE, tag.getFloat(TAG_SPAWN_CHANCE));
     }
 
     // -------------------------------------------------------------------------
@@ -150,7 +152,8 @@ public class DungeonMarkerEntity extends Entity {
                         this.extraData.getString(TAG_SWITCH_ID),
                         this.extraData.getString(TAG_LOOT_TABLE),
                         this.extraData.getString(TAG_BOSS_ID),
-                        buildStageSummary()
+                        buildStageSummary(),
+                        this.extraData.contains(TAG_SPAWN_CHANCE) ? this.extraData.getFloat(TAG_SPAWN_CHANCE) : 1.0f
                     );
                 net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, payload);
             }

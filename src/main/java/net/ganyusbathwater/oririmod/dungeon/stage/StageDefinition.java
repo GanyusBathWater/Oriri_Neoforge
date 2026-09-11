@@ -13,10 +13,11 @@ import java.util.List;
  */
 public final class StageDefinition {
 
-    public record SpawnEntry(ResourceLocation entityType, int count, BlockPos pos) {}
+    public record SpawnEntry(ResourceLocation entityType, int count, BlockPos pos, float chance) {}
     public record SwitchEntry(String switchId, BlockPos pos) {}
     public record DoorEntry(String groupId, int requiredSwitches, BlockPos pos) {}
     public record AreaModifierEntry(String action, int radius, @Nullable ResourceLocation blockFilter, BlockPos pos) {}
+    public record TriggerEntry(BlockPos pos, int radius) {}
 
     private final String stageId;
     private final StageType stageType;
@@ -24,10 +25,12 @@ public final class StageDefinition {
     private final List<SwitchEntry> switches;
     private final List<DoorEntry> doors;
     private final List<AreaModifierEntry> areaModifiers;
+    private final List<TriggerEntry> triggers;
     private final int timerTicks;           // For SURVIVE_TIMER stages (in ticks)
     @Nullable private final ResourceLocation bossEntityType; // For BOSS_FIGHT stages
     @Nullable private final BlockPos bossSpawnPos;
     @Nullable private final BlockPos playerSpawnPos; // Where players are positioned at stage start
+    @Nullable private final String keyDropStageId; // The stage ID to assign to the dropped key
 
     private StageDefinition(Builder b) {
         this.stageId = b.stageId;
@@ -36,10 +39,12 @@ public final class StageDefinition {
         this.switches = List.copyOf(b.switches);
         this.doors = List.copyOf(b.doors);
         this.areaModifiers = List.copyOf(b.areaModifiers);
+        this.triggers = List.copyOf(b.triggers);
         this.timerTicks = b.timerTicks;
         this.bossEntityType = b.bossEntityType;
         this.bossSpawnPos = b.bossSpawnPos;
         this.playerSpawnPos = b.playerSpawnPos;
+        this.keyDropStageId = b.keyDropStageId;
     }
 
     public String getStageId() { return stageId; }
@@ -48,10 +53,12 @@ public final class StageDefinition {
     public List<SwitchEntry> getSwitches() { return switches; }
     public List<DoorEntry> getDoors() { return doors; }
     public List<AreaModifierEntry> getAreaModifiers() { return areaModifiers; }
+    public List<TriggerEntry> getTriggers() { return triggers; }
     public int getTimerTicks() { return timerTicks; }
     @Nullable public ResourceLocation getBossEntityType() { return bossEntityType; }
     @Nullable public BlockPos getBossSpawnPos() { return bossSpawnPos; }
     @Nullable public BlockPos getPlayerSpawnPos() { return playerSpawnPos; }
+    @Nullable public String getKeyDropStageId() { return keyDropStageId; }
 
     // -------------------------------------------------------------------------
     //  Builder
@@ -68,18 +75,20 @@ public final class StageDefinition {
         private final List<SwitchEntry> switches = new ArrayList<>();
         private final List<DoorEntry> doors = new ArrayList<>();
         private final List<AreaModifierEntry> areaModifiers = new ArrayList<>();
+        private final List<TriggerEntry> triggers = new ArrayList<>();
         private int timerTicks = 0;
         @Nullable private ResourceLocation bossEntityType;
         @Nullable private BlockPos bossSpawnPos;
         @Nullable private BlockPos playerSpawnPos;
+        @Nullable private String keyDropStageId;
 
         private Builder(String stageId, StageType stageType) {
             this.stageId = stageId;
             this.stageType = stageType;
         }
 
-        public Builder addSpawn(ResourceLocation entityType, int count, BlockPos pos) {
-            spawnEntries.add(new SpawnEntry(entityType, count, pos));
+        public Builder addSpawn(ResourceLocation entityType, int count, BlockPos pos, float chance) {
+            spawnEntries.add(new SpawnEntry(entityType, count, pos, chance));
             return this;
         }
 
@@ -98,6 +107,11 @@ public final class StageDefinition {
             return this;
         }
 
+        public Builder addTrigger(BlockPos pos, int radius) {
+            triggers.add(new TriggerEntry(pos, radius));
+            return this;
+        }
+
         public Builder timerTicks(int ticks) { this.timerTicks = ticks; return this; }
         public Builder boss(ResourceLocation type, BlockPos spawnPos) {
             this.bossEntityType = type;
@@ -105,6 +119,7 @@ public final class StageDefinition {
             return this;
         }
         public Builder playerSpawn(BlockPos pos) { this.playerSpawnPos = pos; return this; }
+        public Builder keyDropStageId(String id) { this.keyDropStageId = id; return this; }
 
         public StageDefinition build() { return new StageDefinition(this); }
     }
