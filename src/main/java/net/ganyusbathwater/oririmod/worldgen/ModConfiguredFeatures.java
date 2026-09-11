@@ -153,7 +153,7 @@ public class ModConfiguredFeatures {
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
                                                                 .simple(ModBlocks.SCARLET_GRASS.get())),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get())));
+                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(), ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
 
                 register(context, ELDERWOODS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
@@ -161,12 +161,12 @@ public class ModConfiguredFeatures {
                                                                 net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
                                                                                 .add(Blocks.SHORT_GRASS.defaultBlockState(), 3)
                                                 )),
-                                                List.of(Blocks.GRASS_BLOCK)));
+                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
                                                                 .simple(ModBlocks.SCARLET_TOOTH_LEAVES.get())),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get())));
+                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(), ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
                 register(context, SCARLET_LILY_PATCH_KEY, Feature.RANDOM_PATCH, new RandomPatchConfiguration(10, 7, 3,
                                 PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(
                                                 BlockStateProvider.simple(ModBlocks.SCARLET_LILY.get())))));

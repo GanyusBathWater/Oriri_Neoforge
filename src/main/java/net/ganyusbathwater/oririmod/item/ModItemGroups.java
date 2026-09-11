@@ -102,6 +102,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
 
                         // Scarlet Block Group
+                        output.accept(ModBlocks.ELDERWOODS_GRASS_BLOCK);
                         output.accept(ModBlocks.SCARLET_GRASS_BLOCK);
                         output.accept(ModBlocks.SCARLET_STONE);
                         output.accept(ModBlocks.SCARLET_STONE_STAIRS);

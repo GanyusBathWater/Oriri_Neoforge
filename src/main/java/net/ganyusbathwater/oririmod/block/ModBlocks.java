@@ -321,6 +321,9 @@ public class ModBlocks {
         public static final DeferredBlock<Block> POTTED_STAR_HERB = registerPottedBlock("potted_star_herb", STAR_HERB);
 
         // ===== NEW SCARLET BLOCKS =====
+        public static final DeferredBlock<Block> ELDERWOODS_GRASS_BLOCK = registerBlock("elderwoods_grass_block",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderwoodsGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
+                        
         public static final DeferredBlock<Block> SCARLET_GRASS_BLOCK = registerBlock("scarlet_grass_block",
                         () -> new ScarletGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
 

@@ -84,6 +84,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 saplingBlock(ModBlocks.ELDER_SAPLING);
                 saplingBlock(ModBlocks.STAR_HERB);
 
+                // Elderwoods Blocks
+                simpleBlockWithItem(ModBlocks.ELDERWOODS_GRASS_BLOCK.get(),
+                                models().cubeBottomTop("elderwoods_grass_block",
+                                                modLoc("block/elderwoods_grass_block_side"),
+                                                mcLoc("block/dirt"),
+                                                modLoc("block/elderwoods_grass_block_top")));
+                
                 // Scarlet Blocks
                 grassBlockWithItem(ModBlocks.SCARLET_GRASS_BLOCK, 1);
                 blockWithItem(ModBlocks.SCARLET_LEAVES, 3); // Cutout Mipped

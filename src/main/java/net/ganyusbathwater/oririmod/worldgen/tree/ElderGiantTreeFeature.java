@@ -96,7 +96,8 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         BlockState ground = level.getBlockState(below);
         if (!UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
             if (!ground.is(Blocks.GRASS_BLOCK) && !ground.is(ModBlocks.SCARLET_MOSS.get())
-                    && !ground.is(ModBlocks.SCARLET_GRASS_BLOCK.get())) {
+                    && !ground.is(ModBlocks.SCARLET_GRASS_BLOCK.get())
+                    && !ground.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())) {
                 return false;
             }
         }
@@ -1391,7 +1392,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         boolean placeInWorld = true;
         if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
             boolean replaceable = existing.isAir() || existing.is(BlockTags.LEAVES) || existing.canBeReplaced()
-                    || existing.is(Blocks.GRASS_BLOCK) || existing.is(Blocks.TALL_GRASS);
+                    || existing.is(Blocks.GRASS_BLOCK) || existing.is(Blocks.TALL_GRASS) || existing.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get());
             if (!replaceable) {
                 placeInWorld = false;
             }
@@ -1517,7 +1518,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         if (!s.getFluidState().isEmpty())
             return true;
         return s.isAir() || s.is(BlockTags.REPLACEABLE) || s.is(BlockTags.LEAVES) || s.is(Blocks.GRASS_BLOCK)
-                || s.is(Blocks.TALL_GRASS) || s.is(Blocks.MUD);
+                || s.is(Blocks.TALL_GRASS) || s.is(Blocks.MUD) || s.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get());
     }
 
     private boolean canReplaceForLeaves(WorldGenLevel level, BlockPos pos) {
@@ -1529,7 +1530,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         if (!s.getFluidState().isEmpty())
             return true;
         return s.isAir() || s.is(BlockTags.REPLACEABLE) || s.is(BlockTags.LEAVES) || s.is(Blocks.GRASS_BLOCK)
-                || s.is(Blocks.TALL_GRASS) || s.is(Blocks.MUD);
+                || s.is(Blocks.TALL_GRASS) || s.is(Blocks.MUD) || s.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get());
     }
 
     private boolean withinBuildHeight(WorldGenLevel level, BlockPos pos) {

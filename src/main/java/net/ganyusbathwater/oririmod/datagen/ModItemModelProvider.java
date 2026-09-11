@@ -88,6 +88,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.ELDER_CHEST_BOAT.get());
 
                 // Scarlet Blocks
+                simpleBlockItem(ModBlocks.ELDERWOODS_GRASS_BLOCK.get());
                 simpleBlockItem(ModBlocks.SCARLET_GRASS_BLOCK.get());
                 simpleBlockItem(ModBlocks.SCARLET_LOG.get());
                 simpleBlockItem(ModBlocks.STRIPPED_SCARLET_LOG.get());

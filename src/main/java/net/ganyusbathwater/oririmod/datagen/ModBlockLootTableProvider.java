@@ -127,6 +127,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.SCARLET_MOSS.get());
         add(ModBlocks.SCARLET_VINE.get(), block -> createShearsOnlyDrop(block));
         dropSelf(ModBlocks.STAR_HERB.get());
+        add(ModBlocks.ELDERWOODS_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
         add(ModBlocks.SCARLET_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
         dropSelf(ModBlocks.SCARLET_STEM.get());
         dropSelf(ModBlocks.STRIPPED_SCARLET_STEM.get());

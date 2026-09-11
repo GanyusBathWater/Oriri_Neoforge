@@ -51,7 +51,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     public static final int WORLD_HEIGHT = MAX_Y - MIN_Y;
 
     // ===== ELDERWOODS BLOCKS =====
-    private static final BlockState GRASS = Blocks.GRASS_BLOCK.defaultBlockState();
+    private static BlockState ELDERWOODS_GRASS;
     private static final BlockState DIRT = Blocks.DIRT.defaultBlockState();
     private static final BlockState STONE = Blocks.STONE.defaultBlockState();
     private static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
@@ -133,6 +133,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
             // Initialize scarlet block states (lazy init to ensure blocks are registered)
             if (SCARLET_GRASS == null) {
+                ELDERWOODS_GRASS = ModBlocks.ELDERWOODS_GRASS_BLOCK.get().defaultBlockState();
                 SCARLET_GRASS = ModBlocks.SCARLET_GRASS_BLOCK.get().defaultBlockState();
                 SCARLET_STONE = ModBlocks.SCARLET_STONE.get().defaultBlockState();
                 SCARLET_DEEPSLATE = ModBlocks.SCARLET_DEEPSLATE.get().defaultBlockState();
@@ -762,7 +763,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             BlockPos.MutableBlockPos surfaceCheckPos = new BlockPos.MutableBlockPos(centerX, surfaceY, centerZ);
             BlockState surfaceBlock = chunk.getBlockState(surfaceCheckPos);
             if (!surfaceBlock.is(Blocks.GRASS_BLOCK) && !surfaceBlock.is(Blocks.DIRT)
-                    && !surfaceBlock.is(ModBlocks.SCARLET_GRASS_BLOCK.get())) {
+                    && !surfaceBlock.is(ModBlocks.SCARLET_GRASS_BLOCK.get())
+                    && !surfaceBlock.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())) {
                 return;
             }
 
@@ -1029,7 +1031,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         boolean isScarletCurrent = isScarletBiome(currentBiome);
                         boolean isDesertCurrent = isGoldenDesertBiome(currentBiome);
 
-                        BlockState grassState = isScarletCurrent ? SCARLET_GRASS : GRASS;
+                        BlockState grassState = isScarletCurrent ? SCARLET_GRASS : ELDERWOODS_GRASS;
 
                         // A. Top Surface Painting
                         if (y >= surfaceY - 5) {
@@ -1260,7 +1262,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             } else if (y <= surfaceY - 3) {
                 states[i] = STONE;
             } else if (y <= surfaceY) {
-                states[i] = (y == surfaceY) ? GRASS : DIRT;
+                states[i] = (y == surfaceY) ? ELDERWOODS_GRASS : DIRT;
             } else {
                 states[i] = AIR;
             }

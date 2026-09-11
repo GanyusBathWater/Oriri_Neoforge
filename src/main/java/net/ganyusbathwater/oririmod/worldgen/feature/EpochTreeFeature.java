@@ -35,7 +35,7 @@ public class EpochTreeFeature extends Feature<EpochTreeFeature.EpochTreeConfig> 
 
         // Need sol sand or dirt/grass beneath to grow
         BlockState belowState = level.getBlockState(origin.below());
-        if (!belowState.is(ModBlocks.SOL_SAND.get()) && !belowState.is(net.minecraft.world.level.block.Blocks.DIRT) && !belowState.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)) {
+        if (!belowState.is(ModBlocks.SOL_SAND.get()) && !belowState.is(net.minecraft.world.level.block.Blocks.DIRT) && !belowState.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK) && !belowState.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())) {
             return false;
         }
 
