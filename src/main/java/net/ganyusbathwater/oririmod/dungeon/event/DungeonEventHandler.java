@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
 
 /**
  * Phase 3 — Dungeon Rules Enforcement.
@@ -50,29 +51,40 @@ public class DungeonEventHandler {
     // -------------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (!(event.getPlayer() instanceof ServerPlayer sp)) return;
-        if (!isInDungeon(sp)) return;
-        if (sp.hasPermissions(4)) return; // Allow server operators for building/debugging
+    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+        Player player = event.getEntity();
+        if (!isInDungeon(player)) return;
+        if (player.isCreative()) return;
 
         event.setCanceled(true);
-        sp.displayClientMessage(
-                Component.translatable("message.oririmod.dungeon.no_break")
-                        .withStyle(ChatFormatting.RED),
-                true);
+        if (player instanceof ServerPlayer sp) {
+            sp.displayClientMessage(
+                    Component.translatable("message.oririmod.dungeon.no_break").withStyle(ChatFormatting.RED),
+                    true);
+        }
     }
 
     @SubscribeEvent
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isInDungeon(sp)) return;
-        if (sp.hasPermissions(4)) return;
+        if (sp.isCreative()) return;
 
         event.setCanceled(true);
         sp.displayClientMessage(
                 Component.translatable("message.oririmod.dungeon.no_place")
                         .withStyle(ChatFormatting.RED),
                 true);
+    }
+
+    // -------------------------------------------------------------------------
+
+    @SubscribeEvent
+    public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
+        if (event.getLevel().dimension().location().getPath().startsWith("dungeon_")) {
+            // Prevent explosions from destroying blocks in the dungeon
+            event.getAffectedBlocks().clear();
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -207,13 +219,28 @@ public class DungeonEventHandler {
     public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
         Player player = event.getEntity();
         if (player.level().isClientSide()) return;
-        if (!isInDungeon(player)) return;
+        
+        boolean inDungeon = isInDungeon(player);
+        boolean shouldFly = player.isCreative() || player.isSpectator();
 
-        // Strip creative flight ability in dungeon — keeps the game mode, just removes the flight
-        if (player.getAbilities().mayfly) {
-            player.getAbilities().mayfly = false;
-            player.getAbilities().flying = false;
-            player.onUpdateAbilities();
+        if (inDungeon) {
+            // Strip flight from non-creative/spectator players
+            if (!shouldFly && player.getAbilities().mayfly) {
+                player.getAbilities().mayfly = false;
+                player.getAbilities().flying = false;
+                player.onUpdateAbilities();
+            } 
+            // Ensure creative/spectator players CAN fly inside
+            else if (shouldFly && !player.getAbilities().mayfly) {
+                player.getAbilities().mayfly = true;
+                player.onUpdateAbilities();
+            }
+        } else {
+            // Outside dungeon: ensure creative/spectator players have flight
+            if (shouldFly && !player.getAbilities().mayfly) {
+                player.getAbilities().mayfly = true;
+                player.onUpdateAbilities();
+            }
         }
     }
 

@@ -24,6 +24,12 @@
           "weight": 5,
           "minCount": 1,
           "maxCount": 1
+        },
+        {
+          "type": "oririmod:noxus_cultist",
+          "weight": 30,
+          "minCount": 1,
+          "maxCount": 2
         }
       ]
     }

@@ -49,7 +49,7 @@ public class DungeonMarkerScreen extends Screen {
     private String currentRole;
 
     private static final List<String> STAGE_TYPES = Arrays.asList(
-            "KILL_ALL_ENEMIES", "ACTIVATE_SWITCHES", "SURVIVE_TIMER", "BOSS_FIGHT", "FETCH_ITEM", "PUZZLE_SOLVE"
+            "KILL_ALL_ENEMIES", "ACTIVATE_SWITCHES", "SURVIVE_TIMER", "BOSS_FIGHT", "MINI_BOSS_FIGHT", "FETCH_ITEM", "PUZZLE_SOLVE", "SPAWN_ONLY"
     );
 
     private static final List<String> ROLES = Arrays.asList(
@@ -60,7 +60,8 @@ public class DungeonMarkerScreen extends Screen {
             DungeonStageManager.ROLE_STAGE_TRIGGER,
             DungeonStageManager.ROLE_AREA_MODIFIER,
             DungeonStageManager.ROLE_BOSS_SPAWN,
-            DungeonStageManager.ROLE_LOOT_CHEST
+            DungeonStageManager.ROLE_LOOT_CHEST,
+            DungeonStageManager.ROLE_PLAYER_SPAWN
     );
 
     public DungeonMarkerScreen(OpenMarkerScreenPayload payload) {
@@ -185,12 +186,19 @@ public class DungeonMarkerScreen extends Screen {
         modifierActionButton.visible = false;
         lootTableBox.visible = false;
         bossIdBox.visible = false;
+
+        boolean isGlobal = DungeonStageManager.ROLE_PLAYER_SPAWN.equals(currentRole) || DungeonStageManager.ROLE_LOOT_CHEST.equals(currentRole);
+        this.stageIdBox.visible = !isGlobal;
+        if (this.stageTypeButton != null) {
+            this.stageTypeButton.visible = !isGlobal;
+        }
         
         java.util.List<String> validRoles = new java.util.ArrayList<>();
         validRoles.add(DungeonStageManager.ROLE_DOOR);
         validRoles.add(DungeonStageManager.ROLE_STAGE_TRIGGER);
         validRoles.add(DungeonStageManager.ROLE_AREA_MODIFIER);
         validRoles.add(DungeonStageManager.ROLE_LOOT_CHEST);
+        validRoles.add(DungeonStageManager.ROLE_PLAYER_SPAWN);
 
         switch (currentStageType) {
             case "KILL_ALL_ENEMIES", "SURVIVE_TIMER" -> {
@@ -204,6 +212,7 @@ public class DungeonMarkerScreen extends Screen {
             }
             case "BOSS_FIGHT" -> {
                 validRoles.add(0, DungeonStageManager.ROLE_BOSS_SPAWN);
+                validRoles.add(1, DungeonStageManager.ROLE_INFINITE_SPAWNER);
             }
             case "PUZZLE_SOLVE" -> {
                 validRoles.add(0, DungeonStageManager.ROLE_SWITCH);
@@ -318,11 +327,17 @@ public class DungeonMarkerScreen extends Screen {
         guiGraphics.drawCenteredString(this.font, Component.literal("In this stage: " + this.stageSummary.replace("\n", " | ")).withStyle(ChatFormatting.DARK_GREEN), this.width / 2, 45, 0xFFFFFF);
 
         // Fixed header labels
-        guiGraphics.drawString(this.font, "Stage ID", this.stageIdBox.getX(), this.stageIdBox.getY() - 10, 0xDDDDDD);
+        if (this.stageIdBox.visible) {
+            guiGraphics.drawString(this.font, "Stage ID", this.stageIdBox.getX(), this.stageIdBox.getY() - 10, 0xDDDDDD);
+        }
+        if (this.stageTypeButton != null && this.stageTypeButton.visible) {
+            guiGraphics.drawString(this.font, "Stage Type", this.stageTypeButton.getX(), this.stageTypeButton.getY() - 10, 0xDDDDDD);
+        }
+        guiGraphics.drawString(this.font, "Marker Role", this.roleButton.getX(), this.roleButton.getY() - 10, 0xDDDDDD);
 
         // Dynamic labels based on role
         if (this.enemyTypeBox.visible) {
-            String label = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? "Block to Place/Destroy (e.g. minecraft:stone)" : "Enemy Type (e.g. minecraft:zombie)";
+            String label = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? "Block to Place/Destroy (e.g. minecraft:stone)" : "Enemy Type (e.g. minecraft:zombie or #cave_mobs)";
             guiGraphics.drawString(this.font, label, this.enemyTypeBox.getX(), this.enemyTypeBox.getY() - 10, 0xDDDDDD);
         }
         if (this.chanceBox.visible) {
@@ -333,9 +348,15 @@ public class DungeonMarkerScreen extends Screen {
         }
         if (this.countBox.visible) {
             String label = "Count";
-            if (DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) || DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole)) label = "Radius (Blocks)";
+            if (DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole)) label = "Radius";
+            else if (DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole)) label = "Radius";
+            else if (DungeonStageManager.ROLE_INFINITE_SPAWNER.equals(currentRole)) label = "Cooldown (s)";
             else if (DungeonStageManager.ROLE_DOOR.equals(currentRole)) label = "Required Switches";
-            else if (currentStageType.equals("SURVIVE_TIMER")) label = "Timer (Seconds)";
+            else if ("SURVIVE_TIMER".equals(currentStageType) && DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole)) {
+                // If it's a survive timer and we are editing the trigger, maybe the count box is repurposed? 
+                // Wait, timer is read from TAG_COUNT? Ah, we use countBox for the timer on the trigger.
+                label = "Timer (Seconds)";
+            }
             guiGraphics.drawString(this.font, label, this.countBox.getX(), this.countBox.getY() - 10, 0xDDDDDD);
         }
         if (this.switchIdBox.visible) {
@@ -354,7 +375,7 @@ public class DungeonMarkerScreen extends Screen {
         if (this.enemyTypeBox.visible && this.enemyTypeBox.isFocused()) {
             String input = this.enemyTypeBox.getValue();
             if (!input.isEmpty()) {
-                String suggestion = getEntitySuggestion(input);
+                String suggestion = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? getBlockSuggestion(input) : getEntitySuggestion(input);
                 if (suggestion != null) {
                     guiGraphics.drawString(this.font, suggestion, this.enemyTypeBox.getX() + 4, this.enemyTypeBox.getY() + 22, ChatFormatting.DARK_GRAY.getColor(), false);
                     guiGraphics.drawString(this.font, "[TAB] to autocomplete", this.enemyTypeBox.getX() + 4, this.enemyTypeBox.getY() + 32, ChatFormatting.YELLOW.getColor(), false);
@@ -372,13 +393,24 @@ public class DungeonMarkerScreen extends Screen {
                 }
             }
         }
+
+        if (this.lootTableBox.visible && this.lootTableBox.isFocused()) {
+            String input = this.lootTableBox.getValue();
+            if (!input.isEmpty()) {
+                String suggestion = getItemSuggestion(input);
+                if (suggestion != null) {
+                    guiGraphics.drawString(this.font, suggestion, this.lootTableBox.getX() + 4, this.lootTableBox.getY() + 22, ChatFormatting.DARK_GRAY.getColor(), false);
+                    guiGraphics.drawString(this.font, "[TAB] to autocomplete", this.lootTableBox.getX() + 4, this.lootTableBox.getY() + 32, ChatFormatting.YELLOW.getColor(), false);
+                }
+            }
+        }
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_TAB) {
             if (this.enemyTypeBox.isFocused()) {
-                String suggestion = getEntitySuggestion(this.enemyTypeBox.getValue());
+                String suggestion = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? getBlockSuggestion(this.enemyTypeBox.getValue()) : getEntitySuggestion(this.enemyTypeBox.getValue());
                 if (suggestion != null) {
                     this.enemyTypeBox.setValue(suggestion);
                     this.enemyTypeBox.setCursorPosition(suggestion.length());
@@ -393,15 +425,71 @@ public class DungeonMarkerScreen extends Screen {
                     return true;
                 }
             }
+            if (this.lootTableBox.isFocused()) {
+                String suggestion = getItemSuggestion(this.lootTableBox.getValue());
+                if (suggestion != null) {
+                    this.lootTableBox.setValue(suggestion);
+                    this.lootTableBox.setCursorPosition(suggestion.length());
+                    return true;
+                }
+            }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private String getEntitySuggestion(String input) {
         if (input.isEmpty()) return null;
-        for (net.minecraft.resources.ResourceLocation rl : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.keySet()) {
+        boolean isTag = input.startsWith("#");
+        String searchInput = isTag ? input.substring(1) : input;
+        
+        if (isTag) {
+            for (net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> tagKey : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getTags().map(com.mojang.datafixers.util.Pair::getFirst).toList()) {
+                String id = "#" + tagKey.location().toString();
+                if (!searchInput.contains(":") && tagKey.location().getNamespace().equals("oririmod")) {
+                    if (tagKey.location().getPath().startsWith(searchInput) && !tagKey.location().getPath().equals(searchInput)) {
+                        return id;
+                    }
+                }
+                if (id.startsWith(input) && !id.equals(input)) {
+                    return id;
+                }
+            }
+        } else {
+            for (net.minecraft.resources.ResourceLocation rl : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.keySet()) {
+                String id = rl.toString();
+                if (!input.contains(":") && rl.getNamespace().equals("minecraft")) {
+                    if (rl.getPath().startsWith(input) && !rl.getPath().equals(input)) {
+                        return id;
+                    }
+                }
+                if (id.startsWith(input) && !id.equals(input)) {
+                    return id;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getBlockSuggestion(String input) {
+        if (input.isEmpty()) return null;
+        for (net.minecraft.resources.ResourceLocation rl : net.minecraft.core.registries.BuiltInRegistries.BLOCK.keySet()) {
             String id = rl.toString();
-            // Automatically prefix with minecraft: if missing to make it easier for the user
+            if (!input.contains(":") && rl.getNamespace().equals("minecraft")) {
+                if (rl.getPath().startsWith(input) && !rl.getPath().equals(input)) {
+                    return id;
+                }
+            }
+            if (id.startsWith(input) && !id.equals(input)) {
+                return id;
+            }
+        }
+        return null;
+    }
+
+    private String getItemSuggestion(String input) {
+        if (input.isEmpty()) return null;
+        for (net.minecraft.resources.ResourceLocation rl : net.minecraft.core.registries.BuiltInRegistries.ITEM.keySet()) {
+            String id = rl.toString();
             if (!input.contains(":") && rl.getNamespace().equals("minecraft")) {
                 if (rl.getPath().startsWith(input) && !rl.getPath().equals(input)) {
                     return id;

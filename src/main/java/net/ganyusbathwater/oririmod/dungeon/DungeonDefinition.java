@@ -15,7 +15,9 @@ import java.util.Map;
 public record DungeonDefinition(
         String id,                        // Unique string ID for lookup (e.g. "volcano_dungeon")
         String displayName,               // Human-readable title shown in the NPC screen
-        String description,               // Lore text shown below the title
+        String description,               // Short one-liner shown in the selection list
+        String loreText,                  // Longer narrative shown on the detail screen
+        @Nullable ResourceLocation previewTexture, // Path to the dungeon preview image texture
         ResourceKey<Level> dimension,     // Target void dimension
         ResourceLocation structureId,     // Path to the .nbt structure file
         @Nullable ResourceLocation rewardLootTable,      // Loot table to spawn upon completion
@@ -25,11 +27,18 @@ public record DungeonDefinition(
 ) {
     /** Short constructor for legacy code or simple dungeons. */
     public DungeonDefinition(String id, ResourceKey<Level> dimension, ResourceLocation structureId) {
-        this(id, id, "", dimension, structureId, null, null, null, Collections.emptyMap());
+        this(id, id, "", "", null, dimension, structureId, null, null, null, Collections.emptyMap());
     }
 
     /** Constructor used by registry for dungeons with display info but no advanced phase 7 features yet. */
     public DungeonDefinition(String id, String displayName, String description, ResourceKey<Level> dimension, ResourceLocation structureId) {
-        this(id, displayName, description, dimension, structureId, null, null, null, Collections.emptyMap());
+        this(id, displayName, description, "", null, dimension, structureId, null, null, null, Collections.emptyMap());
+    }
+
+    /** Constructor with lore and preview. */
+    public DungeonDefinition(String id, String displayName, String description, String loreText,
+                             @Nullable ResourceLocation previewTexture,
+                             ResourceKey<Level> dimension, ResourceLocation structureId) {
+        this(id, displayName, description, loreText, previewTexture, dimension, structureId, null, null, null, Collections.emptyMap());
     }
 }

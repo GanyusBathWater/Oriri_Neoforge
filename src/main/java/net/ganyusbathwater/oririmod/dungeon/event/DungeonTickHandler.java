@@ -55,6 +55,26 @@ public class DungeonTickHandler {
             ejectAll(level, manager, instance, "message.oririmod.dungeon.timeout");
             return;
         }
+        
+        // ── Completion Countdown ──
+        if (instance.isComplete()) {
+            if (instance.getTicksSinceComplete() % 20 == 0) {
+                int secondsLeft = 10 - (instance.getTicksSinceComplete() / 20);
+                if (secondsLeft > 0) {
+                    Component msg = Component.translatable("message.oririmod.dungeon.closing_in", secondsLeft)
+                            .withStyle(ChatFormatting.YELLOW);
+                    for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
+                        ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+                        if (sp != null) sp.displayClientMessage(msg, true);
+                    }
+                }
+            }
+            
+            if (instance.getTicksSinceComplete() >= 200) {
+                ejectAll(level, manager, instance, "message.oririmod.dungeon.closed");
+            }
+            return; // Stop ticking stages if complete
+        }
 
         // ── Lazy stage initialisation ──
         // Stages are built from markers the first tick after the structure is placed.
@@ -112,6 +132,20 @@ public class DungeonTickHandler {
 
             if (activeStage.isComplete()) {
                 activeStage.onComplete(level, instance);
+                
+                // Clear leftover mobs from this stage to improve performance
+                var bounds = instance.getStructureBounds();
+                if (bounds != null) {
+                    net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(
+                        bounds.minX(), bounds.minY(), bounds.minZ(),
+                        bounds.maxX(), bounds.maxY(), bounds.maxZ()
+                    ).inflate(10.0);
+                    
+                    for (net.minecraft.world.entity.Mob mob : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, aabb)) {
+                        mob.discard();
+                    }
+                }
+
                 instance.setActiveStage(null);
                 instance.setCurrentStageIndex(instance.getCurrentStageIndex() + 1);
 
@@ -128,13 +162,7 @@ public class DungeonTickHandler {
     // -------------------------------------------------------------------------
 
     private static void announceStage(ServerLevel level, DungeonInstance instance, StageDefinition def) {
-        String name = def.getStageId().replace("_", " ");
-        Component msg = Component.literal("Stage: " + name)
-                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-        for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
-            ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
-            if (sp != null) sp.displayClientMessage(msg, true);
-        }
+        // Disabled per user request
     }
 
     private static void playMusic(ServerLevel level, DungeonInstance instance, StageDefinition def) {
@@ -181,8 +209,8 @@ public class DungeonTickHandler {
             OririMod.LOGGER.info("[DungeonTickHandler] Spawned Loot Chest for {} at {}", instance.getDungeonId(), chestPos);
         }
         
-        // We do NOT remove the instance here so players can loot and leave via Homeward Item.
-        // Instance will be cleaned up either by timeout or when the last player leaves.
+        // Mark instance as complete to start the countdown
+        instance.setComplete(true);
     }
 
     private static void ejectAll(ServerLevel level, DungeonManager manager, DungeonInstance instance, String langKey) {

@@ -18,9 +18,7 @@ import java.util.Optional;
 
 public class ModDimensions {
 
-    public static final ResourceKey<LevelStem> VOLCANO_STEM = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dungeon_volcano"));
-    public static final ResourceKey<LevelStem> MOUNTAIN_STEM = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dungeon_mountain"));
-    public static final ResourceKey<LevelStem> UNDERWATER_STEM = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dungeon_underwater"));
+    public static final ResourceKey<LevelStem> TUTORIAL_STEM = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dungeon_tutorial"));
 
     public static void bootstrap(BootstrapContext<LevelStem> context) {
         HolderGetter<Biome> biomeRegistry = context.lookup(Registries.BIOME);
@@ -35,8 +33,6 @@ public class ModDimensions {
 
         FlatLevelSource voidSource = new FlatLevelSource(flatSettings);
 
-        context.register(VOLCANO_STEM, new LevelStem(dimTypes.getOrThrow(ModDimensionTypes.DUNGEON), voidSource));
-        context.register(MOUNTAIN_STEM, new LevelStem(dimTypes.getOrThrow(ModDimensionTypes.DUNGEON), voidSource));
-        context.register(UNDERWATER_STEM, new LevelStem(dimTypes.getOrThrow(ModDimensionTypes.DUNGEON), voidSource));
+        context.register(TUTORIAL_STEM, new LevelStem(dimTypes.getOrThrow(ModDimensionTypes.DUNGEON), voidSource));
     }
 }

@@ -465,6 +465,11 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.DEVIARTRAS_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.LOADED_BLAZE_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.FAIRY_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.NOXUS_KNIGHT_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.NOXUS_GENERAL_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.NOXUS_PALADIN_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.NOXUS_CULTIST_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.DUNGEON_KEEPER_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
 
 
 

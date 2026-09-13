@@ -62,7 +62,8 @@ public class QilinsWrathItem extends CustomSwordItem {
                 // Spawn Air Slice
                 AirSliceEntity slice = new AirSliceEntity(pLevel, pPlayer);
                 slice.setHomingEnabled(false);
-                slice.setCanBreakBlocks(true);
+                boolean inDungeon = pLevel.dimension().location().getPath().startsWith("dungeon_");
+                slice.setCanBreakBlocks(!inDungeon);
                 slice.setColor(0xFF0000); // Red
                 slice.setDamage(12.0f);
                 

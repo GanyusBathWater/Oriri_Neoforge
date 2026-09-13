@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 
@@ -21,22 +22,58 @@ public class DungeonDimensionManager {
      * in the target dimension at the instance's allocated origin.
      */
     public static void placeDungeonStructure(ServerLevel dimensionLevel, DungeonDefinition definition, DungeonInstance instance) {
-        Optional<StructureTemplate> templateOpt = dimensionLevel.getStructureManager().get(definition.structureId());
+        BlockPos origin = instance.getOrigin();
+        StructurePlaceSettings settings = new StructurePlaceSettings()
+                // We must NOT ignore entities, because we need our DungeonMarkerEntity instances to spawn!
+                .setIgnoreEntities(false) 
+                .setKnownShape(true);
+
+        // Try single file first
+        Optional<StructureTemplate> single = dimensionLevel.getStructureManager().get(definition.structureId());
+        if (single.isPresent()) {
+            single.get().placeInWorld(dimensionLevel, origin, origin, settings, dimensionLevel.getRandom(), 2);
+            instance.setStructureBounds(single.get().getBoundingBox(settings, origin));
+            return;
+        }
+
+        // Try multi-part grid structure (e.g., name_0_0, name_0_48)
+        int gridSize = 48;
+        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
+        boolean foundAny = false;
+
+        // Arbitrary limits to prevent infinite loops, assuming 10x10 chunks max (480x480)
+        for (int x = 0; x < 20; x++) {
+            for (int z = 0; z < 20; z++) {
+                int offsetX = x * gridSize;
+                int offsetZ = z * gridSize;
+                
+                ResourceLocation partId = ResourceLocation.fromNamespaceAndPath(
+                    definition.structureId().getNamespace(),
+                    definition.structureId().getPath() + "_" + offsetX + "_" + offsetZ
+                );
+                
+                Optional<StructureTemplate> partOpt = dimensionLevel.getStructureManager().get(partId);
+                if (partOpt.isPresent()) {
+                    foundAny = true;
+                    StructureTemplate part = partOpt.get();
+                    BlockPos partOrigin = origin.offset(offsetX, 0, offsetZ);
+                    
+                    part.placeInWorld(dimensionLevel, partOrigin, partOrigin, settings, dimensionLevel.getRandom(), 2);
+                    
+                    var bounds = part.getBoundingBox(settings, partOrigin);
+                    minX = Math.min(minX, bounds.minX());
+                    minY = Math.min(minY, bounds.minY());
+                    minZ = Math.min(minZ, bounds.minZ());
+                    maxX = Math.max(maxX, bounds.maxX());
+                    maxY = Math.max(maxY, bounds.maxY());
+                    maxZ = Math.max(maxZ, bounds.maxZ());
+                }
+            }
+        }
         
-        if (templateOpt.isPresent()) {
-            StructureTemplate template = templateOpt.get();
-            BlockPos origin = instance.getOrigin();
-            
-            StructurePlaceSettings settings = new StructurePlaceSettings()
-                    // We must NOT ignore entities, because we need our DungeonMarkerEntity instances to spawn!
-                    .setIgnoreEntities(false) 
-                    .setKnownShape(true);
-            
-            // Block flags: 2 = send to client
-            template.placeInWorld(dimensionLevel, origin, origin, settings, dimensionLevel.getRandom(), 2);
-            
-            // Save the exact bounding box for chunk cleanup later
-            instance.setStructureBounds(template.getBoundingBox(settings, origin));
+        if (foundAny) {
+            instance.setStructureBounds(new net.minecraft.world.level.levelgen.structure.BoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
         } else {
             System.err.println("[OririMod] CRITICAL: Could not find dungeon structure: " + definition.structureId());
         }
@@ -50,8 +87,10 @@ public class DungeonDimensionManager {
     public static void teleportPlayerToDungeon(ServerPlayer player, ServerLevel dimensionLevel, DungeonInstance instance) {
         BlockPos origin = instance.getOrigin();
         
-        // Fallback spawn position (can be overwritten later by marker scanning)
-        BlockPos spawnPos = origin.offset(5, 1, 5);
+        BlockPos spawnPos = instance.getPlayerSpawnPos();
+        if (spawnPos == null) {
+            spawnPos = origin.offset(5, 1, 5); // Fallback
+        }
         
         player.teleportTo(
                 dimensionLevel, 

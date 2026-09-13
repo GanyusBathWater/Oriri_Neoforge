@@ -1,0 +1,16 @@
+{
+  "type": "neoforge:add_spawns",
+  "structures": [
+    "oririmod:elderwoods_outpost",
+    "oririmod:elderwoods_outpost_ruins",
+    "oririmod:elderwoods_outpost_scarlet_ruins"
+  ],
+  "spawners": [
+    {
+      "type": "oririmod:noxus_cultist",
+      "weight": 30,
+      "minCount": 1,
+      "maxCount": 2
+    }
+  ]
+}

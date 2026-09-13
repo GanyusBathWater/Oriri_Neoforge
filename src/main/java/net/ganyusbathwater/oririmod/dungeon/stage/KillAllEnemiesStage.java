@@ -29,20 +29,21 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
         spawnedEntities.clear();
 
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
-            Optional<EntityType<?>> typeOpt = BuiltInRegistries.ENTITY_TYPE.getOptional(entry.entityType());
-            if (typeOpt.isEmpty()) {
-                System.err.println("[OririMod] KillAllEnemiesStage: unknown entity type " + entry.entityType());
+            EntityType<?> entityType = resolveEntityType(level, entry.entityType(), entry.isTag());
+            if (entityType == null) {
+                System.err.println("[OririMod] KillAllEnemiesStage: unknown entity type or empty tag " + entry.entityType());
                 continue;
             }
-            EntityType<?> entityType = typeOpt.get();
             for (int i = 0; i < entry.count(); i++) {
                 if (level.getRandom().nextFloat() <= entry.chance()) {
                     var entity = entityType.create(level);
                     if (entity instanceof LivingEntity living) {
                         living.moveTo(entry.pos().getX() + 0.5, entry.pos().getY(), entry.pos().getZ() + 0.5,
                                 level.getRandom().nextFloat() * 360f, 0f);
+                        if (living instanceof net.minecraft.world.entity.Mob mob) {
+                            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), net.minecraft.world.entity.MobSpawnType.SPAWNER, null);
+                        }
                         level.addFreshEntity(living);
-                        // finalizeSpawn is called via addFreshEntity naturally
                         spawnedEntities.add(living.getUUID());
                     }
                 }
@@ -63,7 +64,16 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
             if (dead && spawnedEntities.size() == 1) {
                 String keyDrop = definition.getKeyDropStageId();
                 if (keyDrop != null) {
-                    net.minecraft.world.item.ItemStack keyStack = new net.minecraft.world.item.ItemStack(net.ganyusbathwater.oririmod.item.ModItems.MANA_DESTABILIZER.get());
+                    String cleanKeyDrop = keyDrop.toLowerCase().replace(' ', '_');
+                    net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(cleanKeyDrop);
+                    net.minecraft.world.item.Item dropItem = net.minecraft.world.item.Items.AIR;
+                    if (rl != null) {
+                        dropItem = BuiltInRegistries.ITEM.get(rl);
+                    }
+                    if (dropItem == net.minecraft.world.item.Items.AIR) {
+                        dropItem = net.ganyusbathwater.oririmod.item.ModItems.MANA_DESTABILIZER.get();
+                    }
+                    net.minecraft.world.item.ItemStack keyStack = new net.minecraft.world.item.ItemStack(dropItem);
                     
                     net.minecraft.world.phys.Vec3 dropPos;
                     if (entity != null) {

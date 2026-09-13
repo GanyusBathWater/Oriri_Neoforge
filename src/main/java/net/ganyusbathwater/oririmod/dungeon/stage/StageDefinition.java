@@ -13,7 +13,8 @@ import java.util.List;
  */
 public final class StageDefinition {
 
-    public record SpawnEntry(ResourceLocation entityType, int count, BlockPos pos, float chance) {}
+    public record SpawnEntry(ResourceLocation entityType, boolean isTag, int count, BlockPos pos, float chance) {}
+    public record InfiniteSpawnEntry(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance) {}
     public record SwitchEntry(String switchId, BlockPos pos) {}
     public record DoorEntry(String groupId, int requiredSwitches, BlockPos pos) {}
     public record AreaModifierEntry(String action, int radius, @Nullable ResourceLocation blockFilter, BlockPos pos) {}
@@ -22,6 +23,7 @@ public final class StageDefinition {
     private final String stageId;
     private final StageType stageType;
     private final List<SpawnEntry> spawnEntries;
+    private final List<InfiniteSpawnEntry> infiniteSpawns;
     private final List<SwitchEntry> switches;
     private final List<DoorEntry> doors;
     private final List<AreaModifierEntry> areaModifiers;
@@ -36,6 +38,7 @@ public final class StageDefinition {
         this.stageId = b.stageId;
         this.stageType = b.stageType;
         this.spawnEntries = List.copyOf(b.spawnEntries);
+        this.infiniteSpawns = List.copyOf(b.infiniteSpawns);
         this.switches = List.copyOf(b.switches);
         this.doors = List.copyOf(b.doors);
         this.areaModifiers = List.copyOf(b.areaModifiers);
@@ -50,6 +53,7 @@ public final class StageDefinition {
     public String getStageId() { return stageId; }
     public StageType getStageType() { return stageType; }
     public List<SpawnEntry> getSpawnEntries() { return spawnEntries; }
+    public List<InfiniteSpawnEntry> getInfiniteSpawns() { return infiniteSpawns; }
     public List<SwitchEntry> getSwitches() { return switches; }
     public List<DoorEntry> getDoors() { return doors; }
     public List<AreaModifierEntry> getAreaModifiers() { return areaModifiers; }
@@ -72,6 +76,7 @@ public final class StageDefinition {
         private final String stageId;
         private final StageType stageType;
         private final List<SpawnEntry> spawnEntries = new ArrayList<>();
+        private final List<InfiniteSpawnEntry> infiniteSpawns = new ArrayList<>();
         private final List<SwitchEntry> switches = new ArrayList<>();
         private final List<DoorEntry> doors = new ArrayList<>();
         private final List<AreaModifierEntry> areaModifiers = new ArrayList<>();
@@ -87,8 +92,13 @@ public final class StageDefinition {
             this.stageType = stageType;
         }
 
-        public Builder addSpawn(ResourceLocation entityType, int count, BlockPos pos, float chance) {
-            spawnEntries.add(new SpawnEntry(entityType, count, pos, chance));
+        public Builder addSpawn(ResourceLocation entityType, boolean isTag, int count, BlockPos pos, float chance) {
+            spawnEntries.add(new SpawnEntry(entityType, isTag, count, pos, chance));
+            return this;
+        }
+
+        public Builder addInfiniteSpawn(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance) {
+            infiniteSpawns.add(new InfiniteSpawnEntry(entityType, isTag, cooldownTicks, pos, chance));
             return this;
         }
 

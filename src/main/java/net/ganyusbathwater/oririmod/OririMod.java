@@ -139,8 +139,6 @@ public class OririMod {
             event.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
             event.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
             event.accept(ModItems.NOXUS_PALADIN_SPAWN_EGG);
-            event.accept(ModItems.DUNGEON_MARKER_SPAWN_EGG);
-            event.accept(ModItems.DUNGEON_KEEPER_SPAWN_EGG);
             event.accept(ModItems.MANA_DESTABILIZER);
         }
 

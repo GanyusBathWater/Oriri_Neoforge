@@ -176,6 +176,15 @@ public final class NetworkHandler {
                                 .setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonKeeperScreen(payload))
                 ));
 
+        // Dungeon Selection: server → client open selection screen
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonSelectionPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonSelectionPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() ->
+                        net.minecraft.client.Minecraft.getInstance()
+                                .setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonSelectionScreen(payload))
+                ));
+
         // Dungeon Keeper: client → server party actions
         registrar.playToServer(
                 net.ganyusbathwater.oririmod.network.packet.DungeonActionPayload.TYPE,

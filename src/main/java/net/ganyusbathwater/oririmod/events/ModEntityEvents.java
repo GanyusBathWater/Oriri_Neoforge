@@ -34,5 +34,6 @@ public class ModEntityEvents {
             .add(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE, 7.5)
             .add(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED, 0.15)
             .add(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE, 1.5).build());
+        event.put(ModEntities.NOXUS_CULTIST.get(), net.ganyusbathwater.oririmod.entity.custom.NoxusCultistEntity.createAttributes().build());
     }
 }

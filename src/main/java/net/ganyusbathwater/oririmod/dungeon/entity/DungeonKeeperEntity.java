@@ -5,6 +5,7 @@ import net.ganyusbathwater.oririmod.dungeon.party.DungeonParty;
 import net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyManager;
 import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload;
+import net.ganyusbathwater.oririmod.network.packet.OpenDungeonSelectionPayload;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -28,16 +29,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The Dungeon Keeper NPC. When right-clicked, it opens the DungeonKeeperScreen.
- *
- * NBT data:
- *  - "dungeon_id" : String — which DungeonDefinition this keeper manages
- *  - "keeper_name": String — display name (defaults to "Dungeon Keeper")
+ * The Dungeon Keeper NPC. When right-clicked, it opens either the DungeonSelectionScreen
+ * or the Party Management Screen.
  */
 public class DungeonKeeperEntity extends PathfinderMob {
-
-    private static final EntityDataAccessor<String> DATA_DUNGEON_ID =
-            SynchedEntityData.defineId(DungeonKeeperEntity.class, EntityDataSerializers.STRING);
 
     public DungeonKeeperEntity(EntityType<? extends DungeonKeeperEntity> type, Level level) {
         super(type, level);
@@ -50,30 +45,9 @@ public class DungeonKeeperEntity extends PathfinderMob {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DATA_DUNGEON_ID, "");
-    }
-
-    @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0f));
         this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));
-    }
-
-    public String getDungeonId() { return this.entityData.get(DATA_DUNGEON_ID); }
-    public void setDungeonId(String id) { this.entityData.set(DATA_DUNGEON_ID, id); }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        tag.putString("dungeon_id", getDungeonId());
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("dungeon_id")) setDungeonId(tag.getString("dungeon_id"));
     }
 
     @Override
@@ -81,23 +55,36 @@ public class DungeonKeeperEntity extends PathfinderMob {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.SUCCESS; // client side
 
-        String dungeonId = getDungeonId();
-        if (dungeonId.isBlank()) {
-            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("[OririMod] This Dungeon Keeper has no dungeon_id set!"));
-            return InteractionResult.FAIL;
-        }
-
-        // Create or retrieve the party led by this player for this dungeon
         DungeonPartyManager partyManager = DungeonPartyManager.get(sp.serverLevel());
         DungeonParty party = partyManager.getPartyForPlayer(sp.getUUID());
 
-        if (party == null || !party.getDungeonId().equals(dungeonId)) {
-            // Start a fresh party for this dungeon
-            party = partyManager.createParty(sp.getUUID(), dungeonId);
+        if (party == null) {
+            // Player is not in a party. Send Dungeon Selection Screen.
+            sendSelectionScreen(sp);
+        } else {
+            // Player is in a party. Open Party Management Screen.
+            sendOpenScreen(sp, party, party.getDungeonId());
         }
 
-        sendOpenScreen(sp, party, dungeonId);
         return InteractionResult.CONSUME;
+    }
+    
+    private void sendSelectionScreen(ServerPlayer sp) {
+        List<String> ids = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        List<String> descs = new ArrayList<>();
+        List<String> lores = new ArrayList<>();
+        List<String> previews = new ArrayList<>();
+        
+        for (var def : DungeonDefinitionRegistry.all()) {
+            ids.add(def.id());
+            names.add(def.displayName());
+            descs.add(def.description());
+            lores.add(def.loreText());
+            previews.add(def.previewTexture() != null ? def.previewTexture().toString() : "");
+        }
+        
+        PacketDistributor.sendToPlayer(sp, new OpenDungeonSelectionPayload(ids, names, descs, lores, previews));
     }
 
     private void sendOpenScreen(ServerPlayer sp, DungeonParty party, String dungeonId) {

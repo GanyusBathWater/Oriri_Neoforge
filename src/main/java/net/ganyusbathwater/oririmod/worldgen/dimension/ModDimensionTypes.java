@@ -29,7 +29,7 @@ public class ModDimensionTypes {
                 256, // height
                 256, // logicalHeight
                 BlockTags.INFINIBURN_OVERWORLD, // infiniburn
-                ResourceLocation.parse("minecraft:the_end"), // effectsLocation
+                ResourceLocation.parse("minecraft:overworld"), // effectsLocation
                 0.0f, // ambientLight
                 new DimensionType.MonsterSettings(false, false, UniformInt.of(0, 7), 0)
         ));

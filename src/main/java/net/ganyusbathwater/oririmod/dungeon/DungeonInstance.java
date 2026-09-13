@@ -26,6 +26,9 @@ public class DungeonInstance {
     private final Set<UUID> players = new HashSet<>();
     private String currentStage = "stage_0";
     private int ticksActive = 0;
+    
+    private boolean isComplete = false;
+    private int ticksSinceComplete = 0;
 
     // ── Stage runtime state (not persisted — rebuilt from markers on reload) ──
     private List<StageDefinition> stageDefinitions = new ArrayList<>();
@@ -35,6 +38,7 @@ public class DungeonInstance {
     // ── Phase 7 Additions ──
     @Nullable private net.minecraft.world.level.levelgen.structure.BoundingBox structureBounds = null;
     @Nullable private BlockPos lootChestPos = null;
+    @Nullable private BlockPos playerSpawnPos = null;
 
     public DungeonInstance(UUID instanceId, String dungeonId, BlockPos origin) {
         this.instanceId = instanceId;
@@ -64,13 +68,25 @@ public class DungeonInstance {
     public boolean hasMoreStages() { return currentStageIndex < stageDefinitions.size(); }
 
     public int getTicksActive() { return ticksActive; }
-    public void tick() { this.ticksActive++; }
+    public void tick() { 
+        this.ticksActive++; 
+        if (this.isComplete) {
+            this.ticksSinceComplete++;
+        }
+    }
+    
+    public boolean isComplete() { return isComplete; }
+    public void setComplete(boolean complete) { this.isComplete = complete; }
+    public int getTicksSinceComplete() { return ticksSinceComplete; }
     
     @Nullable public net.minecraft.world.level.levelgen.structure.BoundingBox getStructureBounds() { return structureBounds; }
     public void setStructureBounds(@Nullable net.minecraft.world.level.levelgen.structure.BoundingBox bounds) { this.structureBounds = bounds; }
     
     @Nullable public BlockPos getLootChestPos() { return lootChestPos; }
     public void setLootChestPos(@Nullable BlockPos pos) { this.lootChestPos = pos; }
+    
+    @Nullable public BlockPos getPlayerSpawnPos() { return playerSpawnPos; }
+    public void setPlayerSpawnPos(@Nullable BlockPos pos) { this.playerSpawnPos = pos; }
 
     public CompoundTag save(CompoundTag tag) {
         tag.putUUID("InstanceId", instanceId);
@@ -85,6 +101,8 @@ public class DungeonInstance {
         
         tag.putString("CurrentStage", currentStage);
         tag.putInt("TicksActive", ticksActive);
+        tag.putBoolean("IsComplete", isComplete);
+        tag.putInt("TicksSinceComplete", ticksSinceComplete);
 
         if (structureBounds != null) {
             tag.putIntArray("StructureBounds", new int[]{
@@ -94,6 +112,9 @@ public class DungeonInstance {
         }
         if (lootChestPos != null) {
             tag.putLong("LootChestPos", lootChestPos.asLong());
+        }
+        if (playerSpawnPos != null) {
+            tag.putLong("PlayerSpawnPos", playerSpawnPos.asLong());
         }
 
         return tag;
@@ -117,6 +138,12 @@ public class DungeonInstance {
         if (tag.contains("TicksActive")) {
             instance.ticksActive = tag.getInt("TicksActive");
         }
+        if (tag.contains("IsComplete")) {
+            instance.isComplete = tag.getBoolean("IsComplete");
+        }
+        if (tag.contains("TicksSinceComplete")) {
+            instance.ticksSinceComplete = tag.getInt("TicksSinceComplete");
+        }
         if (tag.contains("StructureBounds")) {
             int[] b = tag.getIntArray("StructureBounds");
             if (b.length == 6) {
@@ -125,6 +152,9 @@ public class DungeonInstance {
         }
         if (tag.contains("LootChestPos")) {
             instance.setLootChestPos(BlockPos.of(tag.getLong("LootChestPos")));
+        }
+        if (tag.contains("PlayerSpawnPos")) {
+            instance.setPlayerSpawnPos(BlockPos.of(tag.getLong("PlayerSpawnPos")));
         }
         return instance;
     }

@@ -18,6 +18,7 @@ public class ModEntityClient {
                         net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions event) {
                 event.registerLayerDefinition(MeteorModel.LAYER_LOCATION, MeteorModel::createBodyLayer);
                 event.registerLayerDefinition(IcicleModel.LAYER_LOCATION, IcicleModel::createBodyLayer);
+                event.registerLayerDefinition(net.ganyusbathwater.oririmod.client.model.MagicProjectileModel.LAYER_LOCATION, net.ganyusbathwater.oririmod.client.model.MagicProjectileModel::createBodyLayer);
         }
 
         @net.neoforged.bus.api.SubscribeEvent
@@ -44,7 +45,7 @@ public class ModEntityClient {
                 event.registerEntityRenderer(ModEntities.SPORE_ZOMBIE.get(),
                                 net.ganyusbathwater.oririmod.client.render.SporeZombieRenderer::new);
                 event.registerEntityRenderer(ModEntities.EYE_OF_THE_STORM.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
-                event.registerEntityRenderer(ModEntities.DUNGEON_MARKER.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+                event.registerEntityRenderer(ModEntities.DUNGEON_MARKER.get(), net.ganyusbathwater.oririmod.client.render.DungeonMarkerRenderer::new);
                 event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
                 event.registerEntityRenderer(ModEntities.BLIZZA.get(),
@@ -76,6 +77,7 @@ public class ModEntityClient {
                 event.registerEntityRenderer(ModEntities.NOXUS_KNIGHT.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
                 event.registerEntityRenderer(ModEntities.NOXUS_GENERAL.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
                 event.registerEntityRenderer(ModEntities.NOXUS_PALADIN.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
+                event.registerEntityRenderer(ModEntities.NOXUS_CULTIST.get(), net.ganyusbathwater.oririmod.entity.client.NoxusCultistRenderer::new);
                 event.registerEntityRenderer(ModEntities.LOADED_BLAZE.get(),
                                 net.ganyusbathwater.oririmod.entity.client.LoadedBlazeRenderer::new);
                 event.registerEntityRenderer(ModEntities.REX_ARANEA.get(),

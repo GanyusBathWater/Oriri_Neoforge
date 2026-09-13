@@ -38,76 +38,41 @@ public class MagicProjectileRenderer extends EntityRenderer<MagicProjectileEntit
         ELEMENT_COLORS.put(Element.PHYSICAL, Color.WHITE);
     }
 
+    private final net.ganyusbathwater.oririmod.client.model.MagicProjectileModel model;
+
     public MagicProjectileRenderer(EntityRendererProvider.Context context) {
         super(context);
+        this.model = new net.ganyusbathwater.oririmod.client.model.MagicProjectileModel(context.bakeLayer(net.ganyusbathwater.oririmod.client.model.MagicProjectileModel.LAYER_LOCATION));
     }
 
     @Override
     public void render(MagicProjectileEntity entity, float entityYaw, float partialTicks, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
-        poseStack.pushPose();
-
-        float scale = 1.5f; // Increased scale
-        poseStack.scale(scale, scale, scale);
-
-        // Align rendering to velocity vector
-        net.minecraft.world.phys.Vec3 velocity = entity.getDeltaMovement();
-        double horizontalDistanceSqr = velocity.x * velocity.x + velocity.z * velocity.z;
-        float yaw = (float) (Mth.atan2(velocity.x, velocity.z) * (double) (180F / (float) Math.PI));
-        float pitch = (float) (Mth.atan2(velocity.y, Math.sqrt(horizontalDistanceSqr))
-                * (double) (180F / (float) Math.PI));
-
-        poseStack.mulPose(Axis.YP.rotationDegrees(yaw - 180.0F));
-        poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-
-        // Rotate 45 degrees around Z so the planes form an 'X' shape relative to the travel direction
-        poseStack.mulPose(Axis.ZP.rotationDegrees(45.0F));
-
-        VertexConsumer vc = buffer.getBuffer(RENDER_TYPE);
-        int overlay = OverlayTexture.NO_OVERLAY;
-        int light = 15728880; // Full bright for magic projectile
-
-        // Calculate animation frame (4 frames, 0.5s each = 10 ticks per frame)
-        int frame = (entity.tickCount / 10) % 4;
-        float v0 = frame * 0.25F;
-        float v1 = (frame + 1) * 0.25F;
-
-        float hLength = 0.5F;
-        float hWidth = 0.5F;
-
-        Color color = ELEMENT_COLORS.getOrDefault(entity.getElement(), Color.WHITE);
-
-        // Draw cross plane 1
-        PoseStack.Pose last = poseStack.last();
-        Matrix4f poseMat = last.pose();
-
-        drawVertex(poseMat, last, vc, -hWidth, 0.0F, -hLength, 1.0F, v1, overlay, light, color);
-        drawVertex(poseMat, last, vc, hWidth, 0.0F, -hLength, 0.0F, v1, overlay, light, color);
-        drawVertex(poseMat, last, vc, hWidth, 0.0F, hLength, 0.0F, v0, overlay, light, color);
-        drawVertex(poseMat, last, vc, -hWidth, 0.0F, hLength, 1.0F, v0, overlay, light, color);
-
-        // Draw cross plane 2
-        poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
-        last = poseStack.last();
-        poseMat = last.pose();
-
-        drawVertex(poseMat, last, vc, -hWidth, 0.0F, -hLength, 1.0F, v1, overlay, light, color);
-        drawVertex(poseMat, last, vc, hWidth, 0.0F, -hLength, 0.0F, v1, overlay, light, color);
-        drawVertex(poseMat, last, vc, hWidth, 0.0F, hLength, 0.0F, v0, overlay, light, color);
-        drawVertex(poseMat, last, vc, -hWidth, 0.0F, hLength, 1.0F, v0, overlay, light, color);
-
-        poseStack.popPose();
-        super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
+        if (entity.tickCount >= 2 || !(this.entityRenderDispatcher.camera.getEntity().distanceToSqr(entity) < 12.25D)) {
+            float f = (float)entity.tickCount + partialTicks;
+            
+            Color color = ELEMENT_COLORS.getOrDefault(entity.getElement(), Color.WHITE);
+            float r = color.getRed() / 255.0f;
+            float g = color.getGreen() / 255.0f;
+            float b = color.getBlue() / 255.0f;
+            float a = color.getAlpha() / 255.0f;
+            
+            VertexConsumer vertexconsumer = buffer.getBuffer(RenderType.breezeWind(TEXTURE, this.xOffset(f) % 1.0F, 0.0F));
+            
+            // To apply color to a model rendering, we can change the vertex consumer or renderType.
+            // But breezeWind doesn't take color in its parameters. 
+            // We can use a Translucent or Emissive render type with a tinted vertex consumer, 
+            // or pass color into model.renderToBuffer.
+            
+            this.model.setupAnim(entity, 0.0F, 0.0F, f, 0.0F, 0.0F);
+            this.model.renderToBuffer(poseStack, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, color.getRGB());
+            
+            super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
+        }
     }
 
-    private void drawVertex(Matrix4f poseMat, PoseStack.Pose last, VertexConsumer vc,
-                            float x, float y, float z, float u, float v, int overlay, int light, Color color) {
-        vc.addVertex(poseMat, x, y, z)
-                .setColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha())
-                .setUv(u, v)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(last, 0.0F, 1.0F, 0.0F);
+    protected float xOffset(float tickCount) {
+        return tickCount * 0.03F;
     }
 
     @Override

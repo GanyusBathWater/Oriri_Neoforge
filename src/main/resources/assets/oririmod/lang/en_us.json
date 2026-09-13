@@ -748,7 +748,7 @@
   "message.oririmod.dungeon.no_break": "You cannot break blocks inside a dungeon!",
   "message.oririmod.dungeon.no_place": "You cannot place blocks inside a dungeon!",
   "message.oririmod.dungeon.item_banned": "That item is forbidden inside this dungeon!",
-  "message.oririmod.dungeon.died": "You have been removed from the dungeon. Your progress has been saved.",
+  "message.oririmod.dungeon.died": "You have fallen. The dungeon has collapsed and your run has ended.",
   "message.oririmod.dungeon.timeout": "The dungeon has timed out. You have been removed.",
   "message.oririmod.dungeon.complete": "Dungeon Complete! Well done, heroes!",
 
@@ -789,5 +789,16 @@
   "tooltip.oririmod.arcus_lucis.conversion": "Normal arrows are converted to spectral arrows",
 
   "item.oririmod.visual_debug_item": "Visual Debug Tool",
-  "item.oririmod.visual_debug_item.tooltip": "[DEV] Right-click to open the Visual Debug Menu"
+  "item.oririmod.visual_debug_item.tooltip": "[DEV] Right-click to open the Visual Debug Menu",
+  
+  "entity.oririmod.noxus_cultist": "Noxus Cultist",
+  "item.oririmod.noxus_cultist_spawn_egg": "Noxus Cultist Spawn Egg",
+  "message.oririmod.dungeon.closing_in": "Teleporting back in %s...",
+  "message.oririmod.dungeon.closed": "Dungeon Completed! Returning Home...",
+  "message.oririmod.dungeon.items_wiped": "Your dungeon-specific items have been wiped from your inventory.",
+  "screen.oririmod.dungeon.select_title": "⚔ Select a Dungeon ⚔",
+  "screen.oririmod.dungeon.detail_enter": "Enter ▶",
+  "screen.oririmod.dungeon.detail_back": "← Back",
+  "screen.oririmod.dungeon.no_preview": "No Preview Available",
+  "screen.oririmod.dungeon.close": "Close"
 }

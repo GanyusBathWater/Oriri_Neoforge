@@ -44,6 +44,14 @@ public class SporeZombieEntity extends Zombie {
         this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, Turtle.class, 10, true, false, Turtle.BABY_ON_LAND_SELECTOR));
     }
 
+    @Override
+    public boolean addEffect(MobEffectInstance effectInstance, @javax.annotation.Nullable net.minecraft.world.entity.Entity entity) {
+        if (effectInstance.getEffect() == MobEffects.POISON) {
+            return false; // Immune to poison
+        }
+        return super.addEffect(effectInstance, entity);
+    }
+
     // ─── On death: spawn a lingering poison cloud unless killed by fire ──────────
 
     @Override

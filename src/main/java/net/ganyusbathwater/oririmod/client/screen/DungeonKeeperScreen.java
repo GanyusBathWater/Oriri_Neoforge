@@ -12,54 +12,55 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
- * The Dungeon Keeper NPC screen.
- * Shows dungeon info and a party management panel (leader can invite/kick, start the run).
+ * Screen 3: Party Management screen.
  *
- * Layout (500 × 260 panel):
- * ┌──────────────────────────────────────────────────────┐
- * │  ⚔  [Dungeon Name]                                   │
- * │  [Description line 1]                                │
- * │  [Description line 2]                                │
- * │─────────────────────────────────────────────────────│
- * │  Party                                               │
- * │   ● [Leader name]          (you)                     │
- * │   ● [Member 1]             Accepted / Pending / --   │
- * │   ● [Member 2]             ...                       │
- * │   ● [Member 3]             ...                       │
- * │─────────────────────────────────────────────────────│
- * │  Invite: [_____________] [Invite]                    │
- * │                           [Leave Party]  [Start ▶]   │
- * └──────────────────────────────────────────────────────┘
+ * Strict zone layout (320 × 240 panel):
+ * ┌──────────────────────────────────────────────┐
+ * │  ⚔ [Dungeon Name]                            │  ← Title Zone (y+0 to y+30)
+ * │──────────────────────────────────────────────│
+ * │  Party                                       │  ← Party Zone (y+35 to y+120)
+ * │   ● Leader Name         (Leader)             │     Fixed 4 rows × 14px = 56px
+ * │   ● Member 1            ACCEPTED             │
+ * │   ● (empty slot)                             │
+ * │   ● (empty slot)                             │
+ * │──────────────────────────────────────────────│
+ * │  Invite: [______________] [Invite]           │  ← Invite Zone (y+125 to y+155, leader only)
+ * │──────────────────────────────────────────────│
+ * │  [Accept] [Decline]   [Leave] [Start ▶]     │  ← Button Zone (y+160 to y+190)
+ * └──────────────────────────────────────────────┘
  */
 @OnlyIn(Dist.CLIENT)
 public class DungeonKeeperScreen extends Screen {
 
-    // ── Dimensions ───────────────────────────────────────────────────────────
-    private static final int PANEL_W = 300;
-    private static final int PANEL_H = 240;
+    private static final int PANEL_W = 320;
+    private static final int PANEL_H = 200;
 
-    // ── Colors ───────────────────────────────────────────────────────────────
-    private static final int C_BG         = 0xDD0A0A14; // very dark navy
-    private static final int C_BORDER     = 0xFF6A4A2A; // warm gold-brown
-    private static final int C_TITLE      = 0xFFFFD700; // gold
-    private static final int C_DESC       = 0xFFCCBB99; // parchment
-    private static final int C_DIVIDER    = 0xFF4A3A2A;
-    private static final int C_LABEL      = 0xFFEEDDAA;
-    private static final int C_ACCEPT     = 0xFF55FF55;
-    private static final int C_PENDING    = 0xFFFFAA00;
-    private static final int C_DECLINE    = 0xFFFF5555;
-    private static final int C_MUTED      = 0xFF777766;
+    // Zone Y offsets (relative to panel top)
+    private static final int TITLE_Y   = 10;
+    private static final int DIV1_Y    = 30;
+    private static final int PARTY_Y   = 38;
+    private static final int PARTY_ROW = 14;
+    private static final int DIV2_Y    = 110;
+    private static final int INVITE_Y  = 118;
+    private static final int DIV3_Y    = 145;
+    private static final int BUTTON_Y  = 155;
 
-    // ── Screen data ──────────────────────────────────────────────────────────
+    // Colors
+    private static final int C_BG      = 0xDD0A0A14;
+    private static final int C_BORDER  = 0xFF6A4A2A;
+    private static final int C_TITLE   = 0xFFFFD700;
+    private static final int C_DIVIDER = 0xFF4A3A2A;
+    private static final int C_LABEL   = 0xFFEEDDAA;
+    private static final int C_ACCEPT  = 0xFF55FF55;
+    private static final int C_PENDING = 0xFFFFAA00;
+    private static final int C_DECLINE = 0xFFFF5555;
+    private static final int C_MUTED   = 0xFF777766;
+
     private final OpenDungeonScreenPayload data;
     private final boolean isLeader;
-
-    // ── Widgets ──────────────────────────────────────────────────────────────
     private EditBox inviteBox;
 
     public DungeonKeeperScreen(OpenDungeonScreenPayload data) {
@@ -81,39 +82,40 @@ public class DungeonKeeperScreen extends Screen {
         int left = (width - PANEL_W) / 2;
         int top  = (height - PANEL_H) / 2;
 
-        // ── Invite box (leader only) ─────────────────────────────────────────
-        int inviteY = top + PANEL_H - 55;
+        // ── Invite Zone (leader only) ──
         if (isLeader) {
-            inviteBox = new EditBox(font, left + 12, inviteY, 150, 18,
+            inviteBox = new EditBox(font, left + 65, top + INVITE_Y, 140, 18,
                     Component.literal("Player name"));
             inviteBox.setMaxLength(40);
             inviteBox.setHint(Component.literal("Player name").withStyle(ChatFormatting.DARK_GRAY));
             addRenderableWidget(inviteBox);
 
             addRenderableWidget(Button.builder(Component.literal("Invite"), btn -> invite())
-                    .pos(left + 168, inviteY)
+                    .pos(left + 210, top + INVITE_Y)
                     .size(50, 18)
                     .build());
         }
 
-        // ── Start / Leave buttons ────────────────────────────────────────────
-        int bottomY = top + PANEL_H - 28;
+        // ── Button Zone ──
+        int btnY = top + BUTTON_Y;
+
         if (isLeader) {
             addRenderableWidget(Button.builder(
                     Component.literal("Start ▶").withStyle(ChatFormatting.GREEN),
                     btn -> sendAction("START", ""))
-                    .pos(left + PANEL_W - 80, bottomY)
+                    .pos(left + PANEL_W - 80, btnY)
                     .size(72, 20)
                     .build());
         }
+
         addRenderableWidget(Button.builder(
                 Component.literal("Leave Party").withStyle(ChatFormatting.RED),
                 btn -> { sendAction("LEAVE", ""); onClose(); })
-                .pos(left + (isLeader ? PANEL_W - 160 : PANEL_W - 90), bottomY)
+                .pos(left + (isLeader ? PANEL_W - 160 : PANEL_W - 90), btnY)
                 .size(isLeader ? 74 : 82, 20)
                 .build());
 
-        // ── Accept / Decline (for non-leader invited members) ────────────────
+        // Accept / Decline buttons for non-leader pending members
         UUID myId = net.minecraft.client.Minecraft.getInstance().player != null
                 ? net.minecraft.client.Minecraft.getInstance().player.getUUID() : null;
         if (!isLeader && myId != null) {
@@ -123,13 +125,13 @@ public class DungeonKeeperScreen extends Screen {
                 addRenderableWidget(Button.builder(
                         Component.literal("Accept").withStyle(ChatFormatting.GREEN),
                         btn -> { sendAction("ACCEPT", ""); onClose(); })
-                        .pos(left + 10, bottomY)
+                        .pos(left + 10, btnY)
                         .size(70, 20)
                         .build());
                 addRenderableWidget(Button.builder(
                         Component.literal("Decline").withStyle(ChatFormatting.RED),
                         btn -> { sendAction("DECLINE", ""); onClose(); })
-                        .pos(left + 86, bottomY)
+                        .pos(left + 86, btnY)
                         .size(70, 20)
                         .build());
             }
@@ -145,38 +147,24 @@ public class DungeonKeeperScreen extends Screen {
 
         // Background
         gfx.fill(left, top, left + PANEL_W, top + PANEL_H, C_BG);
-
-        // Border
         drawBorder(gfx, left, top, PANEL_W, PANEL_H, C_BORDER);
 
-        // Title row
-        int titleY = top + 10;
+        // Render widgets on top
+        super.render(gfx, mouseX, mouseY, partial);
+
+        // ── Title Zone ──
         gfx.drawCenteredString(font,
                 Component.literal("⚔  " + data.dungeonDisplayName()).withStyle(ChatFormatting.BOLD),
-                left + PANEL_W / 2, titleY, C_TITLE);
+                left + PANEL_W / 2, top + TITLE_Y, C_TITLE);
+        gfx.hLine(left + 8, left + PANEL_W - 8, top + DIV1_Y, C_DIVIDER);
 
-        // Description
-        int descY = titleY + 16;
-        String desc = data.dungeonDescription();
-        if (!desc.isBlank()) {
-            List<String> lines = wrapText(desc, PANEL_W - 24);
-            for (String line : lines) {
-                gfx.drawString(font, line, left + 12, descY, C_DESC, false);
-                descY += 10;
-            }
-        }
+        // ── Party Zone ──
+        gfx.drawString(font, "Party", left + 12, top + PARTY_Y, C_LABEL, true);
 
-        // Divider
-        int divY = top + 55;
-        gfx.hLine(left + 8, left + PANEL_W - 8, divY, C_DIVIDER);
-
-        // Party header
-        gfx.drawString(font, "Party", left + 12, divY + 6, C_LABEL, false);
-
+        int rowY = top + PARTY_Y + 16;
         // Leader row
-        int rowY = divY + 20;
-        gfx.drawString(font, "● " + getLeaderName() + "  (Leader)", left + 16, rowY, C_ACCEPT, false);
-        rowY += 14;
+        gfx.drawString(font, "● " + getLeaderName() + "  (Leader)", left + 16, rowY, C_ACCEPT, true);
+        rowY += PARTY_ROW;
 
         // Member rows
         for (int i = 0; i < data.memberIds().size(); i++) {
@@ -187,38 +175,35 @@ public class DungeonKeeperScreen extends Screen {
                 case "PENDING"  -> C_PENDING;
                 default         -> C_DECLINE;
             };
-            String label = "● " + name;
-            gfx.drawString(font, label, left + 16, rowY, C_MUTED, false);
-            gfx.drawString(font, status, left + 200, rowY, color, false);
-            rowY += 14;
+            gfx.drawString(font, "● " + name, left + 16, rowY, C_MUTED, true);
+            gfx.drawString(font, status, left + 200, rowY, color, true);
+            rowY += PARTY_ROW;
         }
 
         // Empty slots
         int emptySlots = 3 - data.memberIds().size();
         for (int i = 0; i < emptySlots; i++) {
-            gfx.drawString(font, "● (empty slot)", left + 16, rowY, C_MUTED, false);
-            rowY += 14;
+            gfx.drawString(font, "● (empty slot)", left + 16, rowY, C_MUTED, true);
+            rowY += PARTY_ROW;
         }
 
-        // Divider above buttons
-        int btmDivY = top + PANEL_H - 66;
-        gfx.hLine(left + 8, left + PANEL_W - 8, btmDivY, C_DIVIDER);
+        // ── Dividers ──
+        gfx.hLine(left + 8, left + PANEL_W - 8, top + DIV2_Y, C_DIVIDER);
 
         if (isLeader) {
-            gfx.drawString(font, "Invite:", left + 12, top + PANEL_H - 50, C_LABEL, false);
+            gfx.drawString(font, "Invite:", left + 12, top + INVITE_Y + 4, C_LABEL, true);
         }
 
-        super.render(gfx, mouseX, mouseY, partial);
+        gfx.hLine(left + 8, left + PANEL_W - 8, top + DIV3_Y, C_DIVIDER);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // ── Helpers ──
 
     private String getLeaderName() {
         var player = net.minecraft.client.Minecraft.getInstance().player;
         if (player != null && player.getUUID().equals(data.leaderId())) {
             return player.getName().getString();
         }
-        // Could be cached from a prior packet; fall back to "Party Leader"
         return "Party Leader";
     }
 
@@ -240,22 +225,5 @@ public class DungeonKeeperScreen extends Screen {
         gfx.hLine(x, x + w - 1, y + h - 1, color);
         gfx.vLine(x,         y, y + h - 1, color);
         gfx.vLine(x + w - 1, y, y + h - 1, color);
-    }
-
-    private List<String> wrapText(String text, int maxWidth) {
-        List<String> lines = new ArrayList<>();
-        String[] words = text.split(" ");
-        StringBuilder current = new StringBuilder();
-        for (String word : words) {
-            String test = current.isEmpty() ? word : current + " " + word;
-            if (font.width(test) > maxWidth) {
-                if (!current.isEmpty()) lines.add(current.toString());
-                current = new StringBuilder(word);
-            } else {
-                current = new StringBuilder(test);
-            }
-        }
-        if (!current.isEmpty()) lines.add(current.toString());
-        return lines;
     }
 }

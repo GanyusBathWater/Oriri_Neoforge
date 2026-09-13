@@ -13,10 +13,8 @@ import net.minecraft.world.level.Level;
  */
 public class DungeonDimensions {
     
-    // Example Dungeons
-    public static final ResourceKey<Level> VOLCANO = createKey("dungeon_volcano");
-    public static final ResourceKey<Level> MOUNTAIN = createKey("dungeon_mountain");
-    public static final ResourceKey<Level> UNDERWATER = createKey("dungeon_underwater");
+    // Dungeons
+    public static final ResourceKey<Level> TUTORIAL = createKey("dungeon_tutorial");
 
     public static ResourceKey<Level> createKey(String name) {
         return ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, name));

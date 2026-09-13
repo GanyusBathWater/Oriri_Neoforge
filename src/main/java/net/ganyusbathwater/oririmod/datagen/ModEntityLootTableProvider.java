@@ -134,6 +134,20 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                 .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
                         .add(LootItem.lootTableItem(ModItems.STAFF_OF_ETERNAL_ICE.get()))
                         .when(GodsTrialCondition.godsTrialActive())));
+
+        // Noxus Cultist
+        this.add(ModEntities.NOXUS_CULTIST.get(), LootTable.lootTable()
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(ModItems.MAGIC_UPGRADE_TEMPLATE.get()))
+                        .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.01F, 0.01F)))
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(ModItems.MANA_MANIFESTATION.get())
+                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+                        .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.10F, 0.02F)))
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(Items.EXPERIENCE_BOTTLE)
+                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 6.0F))))
+                        .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.25F, 0.05F))));
     }
 
     @Override
@@ -147,7 +161,8 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                 ModEntities.MERMAID.get(),
                 ModEntities.REX_ARANEA.get(),
                 ModEntities.DEVIARTRAS.get(),
-                ModEntities.BLIZZA.get()
+                ModEntities.BLIZZA.get(),
+                ModEntities.NOXUS_CULTIST.get()
         );
     }
 }

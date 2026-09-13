@@ -74,12 +74,15 @@ public class SurviveTimerStage extends AbstractDungeonStage {
 
     private void spawnWave(ServerLevel level) {
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
-            var typeOpt = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(entry.entityType());
-            if (typeOpt.isEmpty()) continue;
-            var entity = typeOpt.get().create(level);
+            var entityType = resolveEntityType(level, entry.entityType(), entry.isTag());
+            if (entityType == null) continue;
+            var entity = entityType.create(level);
             if (entity instanceof net.minecraft.world.entity.LivingEntity living) {
                 living.moveTo(entry.pos().getX() + 0.5, entry.pos().getY(), entry.pos().getZ() + 0.5,
                         level.getRandom().nextFloat() * 360f, 0f);
+                if (living instanceof net.minecraft.world.entity.Mob mob) {
+                    mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), net.minecraft.world.entity.MobSpawnType.SPAWNER, null);
+                }
                 level.addFreshEntity(living);
             }
         }

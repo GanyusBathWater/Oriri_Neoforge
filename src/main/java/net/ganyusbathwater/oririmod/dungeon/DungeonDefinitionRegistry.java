@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.dungeon;
 
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,25 +36,13 @@ public class DungeonDefinitionRegistry {
     /** Called during FMLCommonSetupEvent to populate built-in definitions. */
     public static void init() {
         register(new DungeonDefinition(
-                "volcano_dungeon",
-                "The Volcanic Forge",
-                "An ancient forge inside a burning volcano. Watch your step.",
-                DungeonDimensions.VOLCANO,
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "dungeon/volcano_dungeon")
-        ));
-        register(new DungeonDefinition(
-                "mountain_dungeon",
-                "The Mountain Citadel",
-                "A fortress carved into the peaks of the Crimson Mountains.",
-                DungeonDimensions.MOUNTAIN,
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "dungeon/mountain_dungeon")
-        ));
-        register(new DungeonDefinition(
-                "underwater_dungeon",
-                "The Sunken Temple",
-                "A flooded temple beneath the ocean floor.",
-                DungeonDimensions.UNDERWATER,
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "dungeon/underwater_dungeon")
+                "tutorial_crawl",
+                "Tutorial Crawl",
+                "Learn the basics of combat and exploration.",
+                "[Placeholder] The old training grounds beneath the Keeper's Watch have been overrun. Clear the halls and prove yourself worthy.",
+                ResourceLocation.fromNamespaceAndPath("oririmod", "textures/gui/dungeon/tutorial_crawl.png"),
+                DungeonDimensions.TUTORIAL,
+                ResourceLocation.fromNamespaceAndPath("oririmod", "tutorial_dungeon")
         ));
     }
 }

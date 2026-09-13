@@ -433,6 +433,9 @@ public class ModItemGroups {
                         output.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
                         output.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
                         output.accept(ModItems.NOXUS_PALADIN_SPAWN_EGG);
+                        output.accept(ModItems.NOXUS_CULTIST_SPAWN_EGG);
+                        output.accept(ModItems.DUNGEON_MARKER_SPAWN_EGG);
+                        output.accept(ModItems.DUNGEON_KEEPER_SPAWN_EGG);
 
                         // ------------Armor---------------
                         output.accept(ModItems.CRYSTAL_HELMET);

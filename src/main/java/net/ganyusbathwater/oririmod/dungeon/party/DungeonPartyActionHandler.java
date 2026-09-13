@@ -21,7 +21,7 @@ public class DungeonPartyActionHandler {
         DungeonPartyManager manager = DungeonPartyManager.get(sender.serverLevel());
         DungeonParty party = manager.getParty(payload.partyId());
 
-        if (party == null && !payload.action().equals("INVITE")) {
+        if (party == null && !payload.action().equals("INVITE") && !payload.action().equals("SELECT")) {
             // Party was dissolved; silently ignore stale actions
             return;
         }
@@ -32,6 +32,7 @@ public class DungeonPartyActionHandler {
             case "ACCEPT" -> handleRespond(sender, manager, party, true);
             case "DECLINE"-> handleRespond(sender, manager, party, false);
             case "START"  -> handleStart(sender, manager, party);
+            case "SELECT" -> handleSelect(sender, manager, payload.targetPlayerName());
         }
     }
 
@@ -128,6 +129,14 @@ public class DungeonPartyActionHandler {
                     Component.literal("Failed to start dungeon. Is the dimension loaded?").withStyle(ChatFormatting.RED), true);
         }
         // Instance started — players are already teleported by DungeonManager.startDungeon
+    }
+
+    // ── SELECT ───────────────────────────────────────────────────────────────
+
+    private static void handleSelect(ServerPlayer sender, DungeonPartyManager manager, String dungeonId) {
+        // Create party and open screen
+        DungeonParty newParty = manager.createParty(sender.getUUID(), dungeonId);
+        refreshScreen(sender, manager, newParty);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────

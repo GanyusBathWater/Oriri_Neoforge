@@ -535,6 +535,11 @@ public class ModItems {
                         () -> new DeferredSpawnEggItem(ModEntities.NOXUS_KNIGHT, 0x4A4A4A, 0xFFFFFF,
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> NOXUS_CULTIST_SPAWN_EGG = ITEMS.register(
+                        "noxus_cultist_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.NOXUS_CULTIST, 0x1A237E, 0xFFD700,
+                                        new Item.Properties()));
+
         public static final DeferredItem<DeferredSpawnEggItem> NOXUS_GENERAL_SPAWN_EGG = ITEMS.register(
                         "noxus_general_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.NOXUS_GENERAL, 0x211A16, 0xFFFFFF,

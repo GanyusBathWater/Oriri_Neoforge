@@ -18,10 +18,6 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
     private final Set<String> activatedSwitchIds = new HashSet<>();
     private final int requiredCount;
 
-    // For infinite spawning side-effect
-    private int spawnTimer = 0;
-    private static final int SPAWN_INTERVAL_TICKS = 100; // Spawn every 5 seconds
-
     public ActivateSwitchesStage(StageDefinition definition) {
         super(definition);
         this.requiredCount = definition.getSwitches().size();
@@ -30,28 +26,14 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
     @Override
     protected void doStart(ServerLevel level, DungeonInstance instance) {
         activatedSwitchIds.clear();
-        spawnTimer = 0;
-
         // Spawn initial wave of enemies if any SPAWN_POINT markers exist
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
-            spawnWave(level, entry, 1);
+            spawnWave(level, entry);
         }
     }
 
     @Override
     protected void doTick(ServerLevel level, DungeonInstance instance) {
-
-        // Infinite spawner side-effect
-        if (!definition.getSpawnEntries().isEmpty()) {
-            spawnTimer++;
-            if (spawnTimer >= SPAWN_INTERVAL_TICKS) {
-                spawnTimer = 0;
-                for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
-                    // Spawn 1 of each type per wave (not 'count', that's for initial burst)
-                    spawnWave(level, entry, 1);
-                }
-            }
-        }
 
         // Win check
         if (activatedSwitchIds.size() >= requiredCount) {
@@ -64,12 +46,11 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
         activatedSwitchIds.add(switchId);
     }
 
-    private void spawnWave(ServerLevel level, StageDefinition.SpawnEntry entry, int countOverride) {
+    private void spawnWave(ServerLevel level, StageDefinition.SpawnEntry entry) {
         var typeOpt = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(entry.entityType());
         if (typeOpt.isEmpty()) return;
         var entityType = typeOpt.get();
-        int count = countOverride > 0 ? countOverride : entry.count();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < entry.count(); i++) {
             var entity = entityType.create(level);
             if (entity instanceof net.minecraft.world.entity.LivingEntity living) {
                 living.moveTo(entry.pos().getX() + 0.5, entry.pos().getY(), entry.pos().getZ() + 0.5,

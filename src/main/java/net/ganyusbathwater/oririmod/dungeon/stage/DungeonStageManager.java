@@ -58,6 +58,10 @@ public class DungeonStageManager {
                 instance.setLootChestPos(marker.blockPosition());
                 continue;
             }
+            if (ROLE_PLAYER_SPAWN.equalsIgnoreCase(marker.getRole())) {
+                instance.setPlayerSpawnPos(marker.blockPosition());
+                continue;
+            }
             String stageId = marker.getStageId();
             if (stageId.isBlank()) continue;
             byStage.computeIfAbsent(stageId, k -> new ArrayList<>()).add(marker);
@@ -90,17 +94,42 @@ public class DungeonStageManager {
             BlockPos pos = marker.blockPosition();
             String role = marker.getRole().toUpperCase();
             var extra = marker.getExtraData();
+            
+            String loot = extra.getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
+            if (!loot.isBlank()) {
+                builder.keyDropStageId(loot);
+            }
 
             switch (role) {
-                case ROLE_SPAWN_POINT, ROLE_INFINITE_SPAWNER -> {
+                case ROLE_SPAWN_POINT -> {
                     String entityTypeStr = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
                     if (!entityTypeStr.isBlank()) {
-                        ResourceLocation entityType = ResourceLocation.parse(entityTypeStr);
+                        boolean isTag = entityTypeStr.startsWith("#");
+                        String cleanType = entityTypeStr.replace("#", "").toLowerCase().replace(' ', '_');
+                        if (!cleanType.contains(":")) cleanType = (isTag ? "oririmod:" : "minecraft:") + cleanType;
+                        ResourceLocation entityType = ResourceLocation.tryParse(cleanType);
+                        if (entityType == null) continue;
                         int count = extra.contains(DungeonMarkerEntity.TAG_COUNT)
                                 ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 1;
                         float chance = extra.contains(DungeonMarkerEntity.TAG_SPAWN_CHANCE)
                                 ? extra.getFloat(DungeonMarkerEntity.TAG_SPAWN_CHANCE) : 1.0f;
-                        builder.addSpawn(entityType, count, pos, chance);
+                        builder.addSpawn(entityType, isTag, count, pos, chance);
+                    }
+                }
+                case ROLE_INFINITE_SPAWNER -> {
+                    String entityTypeStr = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
+                    if (!entityTypeStr.isBlank()) {
+                        boolean isTag = entityTypeStr.startsWith("#");
+                        String cleanType = entityTypeStr.replace("#", "").toLowerCase().replace(' ', '_');
+                        if (!cleanType.contains(":")) cleanType = (isTag ? "oririmod:" : "minecraft:") + cleanType;
+                        ResourceLocation entityType = ResourceLocation.tryParse(cleanType);
+                        if (entityType == null) continue;
+                        int cooldownSecs = extra.contains(DungeonMarkerEntity.TAG_COUNT)
+                                ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 5;
+                        if (cooldownSecs <= 0) cooldownSecs = 5;
+                        float chance = extra.contains(DungeonMarkerEntity.TAG_SPAWN_CHANCE)
+                                ? extra.getFloat(DungeonMarkerEntity.TAG_SPAWN_CHANCE) : 1.0f;
+                        builder.addInfiniteSpawn(entityType, isTag, cooldownSecs * 20, pos, chance);
                     }
                 }
                 case ROLE_BOSS_SPAWN -> {
@@ -126,7 +155,12 @@ public class DungeonStageManager {
                     if (action.isBlank()) action = "destroy";
                     int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 3;
                     String filterStr = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
-                    ResourceLocation filter = filterStr.isBlank() ? null : ResourceLocation.parse(filterStr);
+                    ResourceLocation filter = null;
+                    if (!filterStr.isBlank()) {
+                        String cleanFilter = filterStr.toLowerCase().replace(' ', '_');
+                        if (!cleanFilter.contains(":")) cleanFilter = "minecraft:" + cleanFilter;
+                        filter = ResourceLocation.tryParse(cleanFilter);
+                    }
                     builder.addAreaModifier(action, radius, filter, pos);
                 }
                 case ROLE_STAGE_TRIGGER -> {
@@ -137,7 +171,6 @@ public class DungeonStageManager {
                         builder.keyDropStageId(switchId);
                     }
                 }
-                case ROLE_PLAYER_SPAWN -> builder.playerSpawn(pos);
             }
 
             // Timer (SURVIVE_TIMER type)
@@ -157,7 +190,7 @@ public class DungeonStageManager {
             case KILL_ALL_ENEMIES -> new KillAllEnemiesStage(definition);
             case ACTIVATE_SWITCHES -> new ActivateSwitchesStage(definition);
             case SURVIVE_TIMER -> new SurviveTimerStage(definition);
-            case BOSS_FIGHT -> new BossFightStage(definition);
+            case BOSS_FIGHT, MINI_BOSS_FIGHT -> new BossFightStage(definition);
             case FETCH_ITEM -> new FetchItemStage(definition);
             case PUZZLE_SOLVE -> new PuzzleSolveStage(definition);
             case SPAWN_ONLY -> new PassThroughStage(definition);

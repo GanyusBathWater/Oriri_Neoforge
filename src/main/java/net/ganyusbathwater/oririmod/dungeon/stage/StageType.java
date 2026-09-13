@@ -9,6 +9,7 @@ public enum StageType {
     ACTIVATE_SWITCHES,
     SURVIVE_TIMER,
     BOSS_FIGHT,
+    MINI_BOSS_FIGHT,
     FETCH_ITEM,
     PUZZLE_SOLVE,
     SPAWN_ONLY;

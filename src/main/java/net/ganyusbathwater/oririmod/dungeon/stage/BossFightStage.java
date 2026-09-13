@@ -12,8 +12,8 @@ import java.util.UUID;
  * Spawns the boss entity at the BOSS_SPAWN marker position and tracks its death.
  */
 public class BossFightStage extends AbstractDungeonStage {
-
     private UUID bossEntityUUID = null;
+    private net.minecraft.server.level.ServerBossEvent bossEvent = null;
 
     public BossFightStage(StageDefinition definition) {
         super(definition);
@@ -38,8 +38,21 @@ public class BossFightStage extends AbstractDungeonStage {
         if (entity instanceof LivingEntity boss) {
             var spawnPos = definition.getBossSpawnPos();
             boss.moveTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, 0f, 0f);
+            if (boss instanceof net.minecraft.world.entity.Mob mob) {
+                mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), net.minecraft.world.entity.MobSpawnType.SPAWNER, null);
+            }
             level.addFreshEntity(boss);
             bossEntityUUID = boss.getUUID();
+            
+            bossEvent = new net.minecraft.server.level.ServerBossEvent(
+                    boss.getDisplayName(),
+                    net.minecraft.world.BossEvent.BossBarColor.RED,
+                    net.minecraft.world.BossEvent.BossBarOverlay.PROGRESS
+            );
+            for (UUID playerId : instance.getPlayers()) {
+                net.minecraft.server.level.ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+                if (sp != null) bossEvent.addPlayer(sp);
+            }
         }
     }
 
@@ -47,17 +60,35 @@ public class BossFightStage extends AbstractDungeonStage {
     protected void doTick(ServerLevel level, DungeonInstance instance) {
         if (bossEntityUUID == null) return;
 
-        // Check every 20 ticks
-        if (level.getGameTime() % 20 != 0) return;
-
         var entity = level.getEntity(bossEntityUUID);
-        if (entity == null || !entity.isAlive()) {
+        if (entity instanceof LivingEntity boss) {
+            if (bossEvent != null) {
+                bossEvent.setProgress(boss.getHealth() / boss.getMaxHealth());
+                
+                // Sync players occasionally
+                if (level.getGameTime() % 20 == 0) {
+                    for (UUID playerId : instance.getPlayers()) {
+                        net.minecraft.server.level.ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+                        if (sp != null && !bossEvent.getPlayers().contains(sp)) {
+                            bossEvent.addPlayer(sp);
+                        }
+                    }
+                }
+            }
+            if (!boss.isAlive()) {
+                this.state = StageState.COMPLETE;
+            }
+        } else {
             this.state = StageState.COMPLETE;
         }
     }
 
     @Override
     public void onComplete(ServerLevel level, DungeonInstance instance) {
+        if (bossEvent != null) {
+            bossEvent.removeAllPlayers();
+            bossEvent = null;
+        }
         applyCompletionEffects(level, instance);
     }
 }

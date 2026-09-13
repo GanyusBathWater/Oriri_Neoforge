@@ -18,6 +18,12 @@ public abstract class AbstractDungeonStage implements DungeonStage {
 
     protected final StageDefinition definition;
     protected StageState state = StageState.PENDING;
+    
+    public static class InfiniteSpawnTracker {
+        public int timer = 0;
+        public final java.util.Set<java.util.UUID> activeMobs = new java.util.HashSet<>();
+    }
+    protected final java.util.Map<StageDefinition.InfiniteSpawnEntry, InfiniteSpawnTracker> infiniteSpawners = new java.util.HashMap<>();
 
     protected AbstractDungeonStage(StageDefinition definition) {
         this.definition = definition;
@@ -67,18 +73,79 @@ public abstract class AbstractDungeonStage implements DungeonStage {
 
                 if (playerInside) {
                     this.state = StageState.ACTIVE;
+                    
+                    // Teleport any party members who are outside the trigger into the trigger zone
+                    for (java.util.UUID pId : instance.getPlayers()) {
+                        net.minecraft.server.level.ServerPlayer partyMember = level.getServer().getPlayerList().getPlayer(pId);
+                        if (partyMember != null && !box.contains(partyMember.position())) {
+                            partyMember.teleportTo(level, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, partyMember.getYRot(), partyMember.getXRot());
+                        }
+                    }
+                    
                     applyStartEffects(level, instance);
                     doStart(level, instance);
                     break;
                 }
             }
         } else if (state == StageState.ACTIVE) {
+            tickInfiniteSpawners(level);
             doTick(level, instance);
         }
     }
 
     /** Subclasses must implement this to do their specific tick logic */
     protected abstract void doTick(ServerLevel level, DungeonInstance instance);
+    
+    protected void tickInfiniteSpawners(ServerLevel level) {
+        for (StageDefinition.InfiniteSpawnEntry entry : definition.getInfiniteSpawns()) {
+            InfiniteSpawnTracker tracker = infiniteSpawners.computeIfAbsent(entry, e -> new InfiniteSpawnTracker());
+            
+            // Clean up dead mobs
+            tracker.activeMobs.removeIf(uuid -> {
+                net.minecraft.world.entity.Entity ent = level.getEntity(uuid);
+                return ent == null || !ent.isAlive();
+            });
+            
+            // Cap at 5 active mobs per spawner
+            if (tracker.activeMobs.size() >= 5) continue;
+            
+            tracker.timer++;
+            if (tracker.timer >= entry.cooldownTicks()) {
+                tracker.timer = 0;
+                
+                var type = resolveEntityType(level, entry.entityType(), entry.isTag());
+                if (type == null) continue;
+                
+                if (level.getRandom().nextFloat() <= entry.chance()) {
+                    var entity = type.create(level);
+                    if (entity instanceof net.minecraft.world.entity.LivingEntity living) {
+                        living.moveTo(entry.pos().getX() + 0.5, entry.pos().getY(), entry.pos().getZ() + 0.5,
+                                level.getRandom().nextFloat() * 360f, 0f);
+                        if (living instanceof net.minecraft.world.entity.Mob mob) {
+                            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), net.minecraft.world.entity.MobSpawnType.SPAWNER, null);
+                        }
+                        level.addFreshEntity(living);
+                        tracker.activeMobs.add(living.getUUID());
+                    }
+                }
+            }
+        }
+    }
+
+    @org.jetbrains.annotations.Nullable
+    protected net.minecraft.world.entity.EntityType<?> resolveEntityType(ServerLevel level, ResourceLocation rl, boolean isTag) {
+        if (isTag) {
+            net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> tagKey = net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, rl);
+            var optionalList = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getTag(tagKey);
+            if (optionalList.isPresent() && optionalList.get().size() > 0) {
+                int index = level.getRandom().nextInt(optionalList.get().size());
+                return optionalList.get().get(index).value();
+            }
+            return null;
+        } else {
+            return net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(rl).orElse(null);
+        }
+    }
 
     /**
      * Executes all door lock effects by placing MAGIC_BARRIER_BLOCK

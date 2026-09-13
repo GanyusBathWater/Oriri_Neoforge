@@ -183,7 +183,12 @@ public class DungeonMarkerEntity extends Entity {
     }
 
     @Override
-    public boolean isPickable() { return true; }
+    public boolean isPickable() {
+        // Can only be punched/interacted with outside of dungeon instances
+        return !level().dimension().location().getPath().startsWith("dungeon_");
+    }
+
+
 
     @Override
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
@@ -205,7 +210,11 @@ public class DungeonMarkerEntity extends Entity {
 
     @Override
     public void tick() {
-        // Markers don't tick — they just sit there and hold data.
+        super.tick();
+        if (level().dimension().location().getPath().startsWith("dungeon_")) {
+            // Shrink the bounding box to 0 so F3+B renders absolutely nothing
+            this.setBoundingBox(new net.minecraft.world.phys.AABB(this.position(), this.position()));
+        }
     }
 
     // -------------------------------------------------------------------------

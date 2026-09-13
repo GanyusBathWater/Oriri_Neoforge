@@ -58,6 +58,10 @@ public class DungeonManager extends SavedData {
         // 5. Register Instance in Manager
         this.addInstance(instance);
         
+        // Build stages immediately so we can find PLAYER_SPAWN before teleporting
+        java.util.List<net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition> stages = net.ganyusbathwater.oririmod.dungeon.stage.DungeonStageManager.buildStages(dimensionLevel, instance);
+        instance.setStageDefinitions(stages);
+        
         // 6. Teleport Players
         for (ServerPlayer p : party) {
             net.ganyusbathwater.oririmod.dungeon.dimension.DungeonDimensionManager.teleportPlayerToDungeon(p, dimensionLevel, instance);
