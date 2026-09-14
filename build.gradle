@@ -163,9 +163,6 @@ dependencies {
     runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
 
-    compileOnly "curse.maven:yungs-api-neoforge-1015100:6715463"
-
-    runtimeOnly "curse.maven:yungs-api-neoforge-1015100:6715463"
 
     // Jade (optional for testing/debugging)
     compileOnly "maven.modrinth:jade:15.10.5+neoforge"

@@ -31,6 +31,7 @@ public class DungeonMarkerScreen extends Screen {
     private EditBox lootTableBox;
     private EditBox bossIdBox;
     private EditBox chanceBox;
+    private CustomCycleButton dropsKeyButton;
     private CustomCycleButton modifierActionButton;
 
     private final String initialStageId;
@@ -144,6 +145,19 @@ public class DungeonMarkerScreen extends Screen {
         this.switchIdBox.setMaxLength(64);
         this.addRenderableWidget(this.switchIdBox);
 
+        this.dropsKeyButton = new CustomCycleButton(
+                midX - 160, startY + rowSpacing * 5, 140, 20,
+                "Drops Key", Arrays.asList("Yes", "No"), initialLootTable.isEmpty() ? "No" : "Yes",
+                val -> {
+                    if (val.equals("Yes")) {
+                        this.lootTableBox.setValue("oririmod:mana_destabilizer");
+                    } else {
+                        this.lootTableBox.setValue("");
+                    }
+                }
+        );
+        this.addRenderableWidget(this.dropsKeyButton);
+
         this.modifierActionButton = new CustomCycleButton(
                 midX + 20, startY + rowSpacing, 140, 20,
                 "Action", Arrays.asList("fill", "destroy"), initialSwitchId.isEmpty() ? "fill" : (initialSwitchId.equals("destroy") ? "destroy" : "fill"),
@@ -183,6 +197,7 @@ public class DungeonMarkerScreen extends Screen {
         chanceBox.visible = false;
         countBox.visible = false;
         switchIdBox.visible = false;
+        dropsKeyButton.visible = false;
         modifierActionButton.visible = false;
         lootTableBox.visible = false;
         bossIdBox.visible = false;
@@ -242,6 +257,7 @@ public class DungeonMarkerScreen extends Screen {
             enemyTypeBox.visible = true;
             countBox.visible = true;
             chanceBox.visible = true;
+            dropsKeyButton.visible = true;
         } else if (isModifier) {
             enemyTypeBox.visible = true;
             countBox.visible = true;
@@ -256,6 +272,7 @@ public class DungeonMarkerScreen extends Screen {
             switchIdBox.visible = true;
         } else if (isBoss) {
             bossIdBox.visible = true;
+            dropsKeyButton.visible = true;
         } else if (isChest) {
             lootTableBox.visible = true;
         }
@@ -269,7 +286,7 @@ public class DungeonMarkerScreen extends Screen {
         int startY = 116;
         int rowSpacing = 36;
         
-        net.minecraft.client.gui.components.AbstractWidget[] col1 = { enemyTypeBox, chanceBox, bossIdBox };
+        net.minecraft.client.gui.components.AbstractWidget[] col1 = { enemyTypeBox, chanceBox, bossIdBox, dropsKeyButton };
         net.minecraft.client.gui.components.AbstractWidget[] col2 = { countBox, switchIdBox, modifierActionButton, lootTableBox };
         
         int row1 = 0;
@@ -368,6 +385,9 @@ public class DungeonMarkerScreen extends Screen {
         if (this.modifierActionButton.visible) {
             guiGraphics.drawString(this.font, "Action", this.modifierActionButton.getX(), this.modifierActionButton.getY() - 10, 0xDDDDDD);
         }
+        if (this.dropsKeyButton != null && this.dropsKeyButton.visible) {
+            guiGraphics.drawString(this.font, "Drops Key on Complete", this.dropsKeyButton.getX(), this.dropsKeyButton.getY() - 10, 0xDDDDDD);
+        }
         if (this.lootTableBox.visible) {
             guiGraphics.drawString(this.font, "Loot Table Path", this.lootTableBox.getX(), this.lootTableBox.getY() - 10, 0xDDDDDD);
         }
@@ -397,7 +417,7 @@ public class DungeonMarkerScreen extends Screen {
         if (this.lootTableBox.visible && this.lootTableBox.isFocused()) {
             String input = this.lootTableBox.getValue();
             if (!input.isEmpty()) {
-                String suggestion = getItemSuggestion(input);
+                String suggestion = getLootTableSuggestion(input);
                 if (suggestion != null) {
                     guiGraphics.drawString(this.font, suggestion, this.lootTableBox.getX() + 4, this.lootTableBox.getY() + 22, ChatFormatting.DARK_GRAY.getColor(), false);
                     guiGraphics.drawString(this.font, "[TAB] to autocomplete", this.lootTableBox.getX() + 4, this.lootTableBox.getY() + 32, ChatFormatting.YELLOW.getColor(), false);
@@ -426,7 +446,7 @@ public class DungeonMarkerScreen extends Screen {
                 }
             }
             if (this.lootTableBox.isFocused()) {
-                String suggestion = getItemSuggestion(this.lootTableBox.getValue());
+                String suggestion = getLootTableSuggestion(this.lootTableBox.getValue());
                 if (suggestion != null) {
                     this.lootTableBox.setValue(suggestion);
                     this.lootTableBox.setCursorPosition(suggestion.length());
@@ -482,6 +502,27 @@ public class DungeonMarkerScreen extends Screen {
             if (id.startsWith(input) && !id.equals(input)) {
                 return id;
             }
+        }
+        return null;
+    }
+
+    private String getLootTableSuggestion(String input) {
+        if (input.isEmpty()) return null;
+        try {
+            for (net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> key : net.minecraft.world.level.storage.loot.BuiltInLootTables.all()) {
+                net.minecraft.resources.ResourceLocation rl = key.location();
+                String id = rl.toString();
+                if (!input.contains(":") && rl.getNamespace().equals("minecraft")) {
+                    if (rl.getPath().startsWith(input) && !rl.getPath().equals(input)) {
+                        return id;
+                    }
+                }
+                if (id.startsWith(input) && !id.equals(input)) {
+                    return id;
+                }
+            }
+        } catch (Throwable t) {
+            // Ignore if BuiltInLootTables format is unexpected
         }
         return null;
     }

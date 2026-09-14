@@ -234,9 +234,17 @@ public final class NetworkHandler {
                             
                             net.ganyusbathwater.oririmod.item.custom.DungeonMarkerItem.LAST_CONFIG.put(sp.getUUID(), payload);
                             
-                            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§aMarker configuration saved!"), true);
+                                sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§aMarker configuration saved!"), true);
                         }
                     }
+                }));
+
+        // Sync Dungeon Lives: server -> client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.events.ClientEvents.updateDungeonLives(payload.lives());
                 }));
     }
     

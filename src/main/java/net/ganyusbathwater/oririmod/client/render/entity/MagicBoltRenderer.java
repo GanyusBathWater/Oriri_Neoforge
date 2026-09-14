@@ -22,10 +22,12 @@ import org.joml.Matrix4f;
 public class MagicBoltRenderer extends EntityRenderer<MagicBoltEntity> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("oririmod", "textures/entity/magic_projectile.png");
     private final ItemRenderer itemRenderer;
+    private final net.ganyusbathwater.oririmod.client.model.MagicProjectileModel<MagicBoltEntity> projectileModel;
 
     public MagicBoltRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.itemRenderer = context.getItemRenderer();
+        this.projectileModel = new net.ganyusbathwater.oririmod.client.model.MagicProjectileModel<>(context.bakeLayer(net.ganyusbathwater.oririmod.client.model.MagicProjectileModel.LAYER_LOCATION));
     }
 
     @Override
@@ -46,7 +48,17 @@ public class MagicBoltRenderer extends EntityRenderer<MagicBoltEntity> {
                 return;
             }
             case NORMAL -> {
-                renderCross(entity, partialTicks, poseStack, buffer, packedLight);
+                float f = (float)entity.tickCount + partialTicks;
+                VertexConsumer vertexconsumer = buffer.getBuffer(RenderType.breezeWind(TEXTURE, (f * 0.03F) % 1.0F, 0.0F));
+                
+                int color = java.awt.Color.WHITE.getRGB(); 
+                
+                poseStack.pushPose();
+                // Match the visual height offset that MagicProjectileModel typically uses
+                poseStack.translate(0.0D, 0.15D, 0.0D); 
+                this.projectileModel.setupAnim(entity, 0.0F, 0.0F, f, 0.0F, 0.0F);
+                this.projectileModel.renderToBuffer(poseStack, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
+                poseStack.popPose();
                 return;
             }
             default -> {
@@ -63,51 +75,7 @@ public class MagicBoltRenderer extends EntityRenderer<MagicBoltEntity> {
         poseStack.popPose();
     }
 
-    private void renderCross(MagicBoltEntity entity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-        poseStack.pushPose();
-        float yaw = Mth.lerp(partialTicks, entity.yRotO, entity.getYRot());
-        float pitch = Mth.lerp(partialTicks, entity.xRotO, entity.getXRot());
 
-        // Align with motion
-        poseStack.mulPose(Axis.YP.rotationDegrees(yaw - 90.0F));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(pitch));
-
-        // Rotate X to form an X shape instead of +
-        poseStack.mulPose(Axis.XP.rotationDegrees(45.0F));
-        poseStack.scale(0.1666667F, 0.1666667F, 0.1666667F);
-        
-        VertexConsumer vertexconsumer = buffer.getBuffer(RenderType.entityCutout(TEXTURE));
-        
-        // Manual animation (4 frames, 10 ticks per frame)
-        int frame = (entity.tickCount / 10) % 4;
-        float vOffset = frame * 0.25F;
-
-        PoseStack.Pose posestack$pose = poseStack.last();
-        drawPlane(posestack$pose, vertexconsumer, packedLight, vOffset);
-
-        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        posestack$pose = poseStack.last();
-        drawPlane(posestack$pose, vertexconsumer, packedLight, vOffset);
-
-        poseStack.popPose();
-    }
-
-    private void drawPlane(PoseStack.Pose pose, VertexConsumer vertexConsumer, int packedLight, float vOffset) {
-        float v0 = 0.0F + vOffset;
-        float v1 = 0.25F + vOffset;
-
-        // Front face (normal 0, 0, 1)
-        vertex(pose, vertexConsumer, -8,  8, 0, 0.0F, v0, 0, 0, 1, packedLight);
-        vertex(pose, vertexConsumer, -8, -8, 0, 0.0F, v1, 0, 0, 1, packedLight);
-        vertex(pose, vertexConsumer,  8, -8, 0, 1.0F, v1, 0, 0, 1, packedLight);
-        vertex(pose, vertexConsumer,  8,  8, 0, 1.0F, v0, 0, 0, 1, packedLight);
-        
-        // Back face (normal 0, 0, -1)
-        vertex(pose, vertexConsumer,  8,  8, 0, 1.0F, v0, 0, 0, -1, packedLight);
-        vertex(pose, vertexConsumer,  8, -8, 0, 1.0F, v1, 0, 0, -1, packedLight);
-        vertex(pose, vertexConsumer, -8, -8, 0, 0.0F, v1, 0, 0, -1, packedLight);
-        vertex(pose, vertexConsumer, -8,  8, 0, 0.0F, v0, 0, 0, -1, packedLight);
-    }
 
     public void vertex(PoseStack.Pose pose, VertexConsumer consumer, int x, int y, int z, float u, float v, int nx, int ny, int nz, int packedLight) {
         consumer.addVertex(pose.pose(), (float)x, (float)y, (float)z)

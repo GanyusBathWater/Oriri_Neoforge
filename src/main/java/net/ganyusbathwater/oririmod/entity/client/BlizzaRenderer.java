@@ -28,49 +28,76 @@ public class BlizzaRenderer extends GeoEntityRenderer<BlizzaEntity> {
         return TEXTURE;
     }
 
-    // ── Issue #4: spawn particles on hands during magic animations ─────────
     @Override
     public void render(BlizzaEntity entity, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
 
         int attackType = entity.getAttackType();
-        // Spawn hand particles for magic_1, magic_2, magic_3 (and while storm is active)
         boolean magicActive = (attackType == BlizzaEntity.ATTACK_ICICLE
                 || attackType == BlizzaEntity.ATTACK_STORM
                 || attackType == BlizzaEntity.ATTACK_ILLAGER
                 || entity.isCasting());
 
         if (magicActive) {
-            spawnHandParticles(entity);
+            if (entity.lastParticleRenderTick != entity.tickCount) {
+                entity.lastParticleRenderTick = entity.tickCount;
+                spawnHandParticles(entity);
+                spawnAuraParticles(entity);
+            }
         }
     }
 
     private void spawnHandParticles(BlizzaEntity entity) {
-        double ex  = entity.getX();
-        double ey  = entity.getY() + 1.4; // approx hand height
-        double ez  = entity.getZ();
-        double yaw = Math.toRadians(entity.getYRot());
-        double side = 0.5;
-
-        // Right hand (entity-relative)
-        spawnIceParticle(ex + Math.cos(yaw) * side, ey, ez + Math.sin(yaw) * side, entity);
-        // Left hand (entity-relative)
-        spawnIceParticle(ex - Math.cos(yaw) * side, ey, ez - Math.sin(yaw) * side, entity);
+        var level = Minecraft.getInstance().level;
+        if (level == null) return;
+        
+        net.minecraft.world.phys.Vec3 camPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        
+        software.bernie.geckolib.cache.object.GeoBone rightHand = this.getGeoModel().getAnimationProcessor().getBone("right_arm_ancor");
+        if (rightHand != null) {
+            org.joml.Vector3d pos = rightHand.getWorldPosition();
+            spawnSnowflakes(camPos.x + pos.x(), camPos.y + pos.y(), camPos.z + pos.z(), entity);
+        }
+        
+        software.bernie.geckolib.cache.object.GeoBone leftHand = this.getGeoModel().getAnimationProcessor().getBone("left_arm_ancor");
+        if (leftHand != null) {
+            org.joml.Vector3d pos = leftHand.getWorldPosition();
+            spawnSnowflakes(camPos.x + pos.x(), camPos.y + pos.y(), camPos.z + pos.z(), entity);
+        }
     }
 
-    private void spawnIceParticle(double x, double y, double z, BlizzaEntity entity) {
+    private void spawnSnowflakes(double x, double y, double z, BlizzaEntity entity) {
         var level = Minecraft.getInstance().level;
         if (level == null) return;
 
         RandomSource rng = entity.getRandom();
-        double vx = (rng.nextDouble() - 0.5) * 0.1;
-        double vy = rng.nextDouble() * 0.1;
-        double vz = (rng.nextDouble() - 0.5) * 0.1;
+        // Spawn a set amount of snowflakes per tick (e.g. 3 per hand)
+        for (int i = 0; i < 3; i++) {
+            double vx = (rng.nextDouble() - 0.5) * 0.2;
+            double vy = rng.nextDouble() * 0.1;
+            double vz = (rng.nextDouble() - 0.5) * 0.2;
+            level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, vx, vy, vz);
+        }
+    }
+    
+    private void spawnAuraParticles(BlizzaEntity entity) {
+        var level = Minecraft.getInstance().level;
+        if (level == null) return;
 
-        level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, vx, vy, vz);
-        if (rng.nextInt(3) == 0) {
-            level.addParticle(ParticleTypes.DRIPPING_WATER, x, y + 0.1, z, vx, vy * 0.5, vz);
+        RandomSource rng = entity.getRandom();
+        // Water/Aura particles floating up
+        for (int i = 0; i < 2; i++) {
+            double ox = (rng.nextDouble() - 0.5) * 2.0;
+            double oy = rng.nextDouble() * 2.5;
+            double oz = (rng.nextDouble() - 0.5) * 2.0;
+            
+            double vx = (rng.nextDouble() - 0.5) * 0.05;
+            double vy = 0.05 + rng.nextDouble() * 0.05; // Fly higher
+            double vz = (rng.nextDouble() - 0.5) * 0.05;
+
+            // GLOW particles look magical, float nicely, and despawn smoothly
+            level.addParticle(ParticleTypes.GLOW, entity.getX() + ox, entity.getY() + oy, entity.getZ() + oz, vx, vy, vz);
         }
     }
 }

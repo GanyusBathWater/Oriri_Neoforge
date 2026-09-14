@@ -57,11 +57,6 @@ public class DungeonEventHandler {
         if (player.isCreative()) return;
 
         event.setCanceled(true);
-        if (player instanceof ServerPlayer sp) {
-            sp.displayClientMessage(
-                    Component.translatable("message.oririmod.dungeon.no_break").withStyle(ChatFormatting.RED),
-                    true);
-        }
     }
 
     @SubscribeEvent
@@ -155,32 +150,79 @@ public class DungeonEventHandler {
         // We will handle everything manually.
         event.setCanceled(true);
 
-        // Restore to 1 hp so the death state clears (we can't cancel after full death without side effects)
-        sp.setHealth(1.0f);
-
-        // Remove all harmful effects that caused/accompanied the death
-        sp.removeAllEffects();
-
-        // Eject from dungeon — teleport to home immediately
-        net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
-
-        // Inform the player
-        sp.displayClientMessage(
-                Component.translatable("message.oririmod.dungeon.died")
-                        .withStyle(ChatFormatting.GOLD),
-                false);
-
-        // Remove player from the active instance (progress is saved, they can re-enter later)
         DungeonManager manager = DungeonManager.get(sp.serverLevel());
         var instance = manager.getInstanceForPlayer(sp.getUUID());
         if (instance != null) {
-            instance.removePlayer(sp.getUUID());
-            // If the dungeon is now empty, clean it up
-            if (instance.getPlayers().isEmpty()) {
-                manager.removeInstance(sp.getServer(), instance.getInstanceId(),
-                        instance.getDungeonId()); 
+            int lives = instance.getPlayerLives(sp.getUUID());
+            if (lives > 1) {
+                // Lose a life, respawn in dungeon
+                lives--;
+                instance.setPlayerLives(sp.getUUID(), lives);
+                manager.setDirty();
+                
+                sp.setHealth(sp.getMaxHealth());
+                sp.removeAllEffects();
+                
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, new net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload(lives));
+                sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.life_lost").withStyle(ChatFormatting.GOLD), false);
+                
+                // Teleport to stage start
+                net.minecraft.core.BlockPos respawnPos = instance.getPlayerSpawnPos();
+                if (instance.getActiveStage() != null && instance.getActiveStage().getDefinition().getPlayerSpawnPos() != null) {
+                    respawnPos = instance.getActiveStage().getDefinition().getPlayerSpawnPos();
+                }
+                if (respawnPos != null) {
+                    sp.teleportTo(respawnPos.getX() + 0.5, respawnPos.getY(), respawnPos.getZ() + 0.5);
+                }
+            } else {
+                // No lives left
+                lives = 0;
+                instance.setPlayerLives(sp.getUUID(), lives);
+                
+                if (instance.getAlivePlayers().size() <= 1) { // Current player is the last alive player (or solo)
+                    // Everyone fails
+                    sp.setHealth(sp.getMaxHealth());
+                    sp.removeAllEffects();
+                    sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.died").withStyle(ChatFormatting.RED), false);
+                    net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
+                    instance.removePlayer(sp.getUUID());
+                    
+                    // Eject all spectators too
+                    for (java.util.UUID specId : new java.util.HashSet<>(instance.getSpectators())) {
+                        ServerPlayer spec = (ServerPlayer) sp.serverLevel().getPlayerByUUID(specId);
+                        if (spec != null) {
+                            spec.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                            spec.displayClientMessage(Component.translatable("message.oririmod.dungeon.party_failed").withStyle(ChatFormatting.RED), false);
+                            net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(spec);
+                            instance.removePlayer(specId);
+                        }
+                    }
+                    
+                    if (instance.getPlayers().isEmpty()) {
+                        manager.removeInstance(sp.getServer(), instance.getInstanceId(), instance.getDungeonId()); 
+                    }
+                    manager.setDirty();
+                } else {
+                    // Multiplayer, and there are other alive players. Go to spectator.
+                    sp.setHealth(sp.getMaxHealth());
+                    sp.removeAllEffects();
+                    sp.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+                    instance.addSpectator(sp.getUUID());
+                    manager.setDirty();
+                    
+                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, new net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload(0));
+                    sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.spectating").withStyle(ChatFormatting.GOLD), false);
+                    
+                    // Force spectate first alive player
+                    for (java.util.UUID aliveId : instance.getAlivePlayers()) {
+                        ServerPlayer alive = (ServerPlayer) sp.serverLevel().getPlayerByUUID(aliveId);
+                        if (alive != null) {
+                            sp.setCamera(alive);
+                            break;
+                        }
+                    }
+                }
             }
-            manager.setDirty();
         }
     }
 
@@ -235,6 +277,29 @@ public class DungeonEventHandler {
                 player.getAbilities().mayfly = true;
                 player.onUpdateAbilities();
             }
+            
+            // Phase 8: Spectator Lock (No free-roaming)
+            if (player instanceof ServerPlayer sp && player.isSpectator()) {
+                DungeonManager manager = DungeonManager.get(sp.serverLevel());
+                var instance = manager.getInstanceForPlayer(sp.getUUID());
+                if (instance != null && instance.isSpectator(sp.getUUID())) {
+                    net.minecraft.world.entity.Entity camera = sp.getCamera();
+                    boolean validCamera = (camera instanceof ServerPlayer cp) 
+                            && instance.hasPlayer(cp.getUUID()) 
+                            && !instance.isSpectator(cp.getUUID());
+                            
+                    if (!validCamera) {
+                        // Find a new alive player to spectate
+                        java.util.List<java.util.UUID> alivePlayers = instance.getAlivePlayers();
+                        if (!alivePlayers.isEmpty()) {
+                            ServerPlayer target = (ServerPlayer) sp.serverLevel().getPlayerByUUID(alivePlayers.get(0));
+                            if (target != null) {
+                                sp.setCamera(target);
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             // Outside dungeon: ensure creative/spectator players have flight
             if (shouldFly && !player.getAbilities().mayfly) {
@@ -277,6 +342,9 @@ public class DungeonEventHandler {
 
         // If the player left a dungeon dimension
         if (event.getFrom().location().getPath().startsWith("dungeon_")) {
+            if (sp.isSpectator()) {
+                sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            }
             DungeonManager manager = DungeonManager.get(sp.serverLevel());
             var instance = manager.getInstanceForPlayer(sp.getUUID());
             if (instance != null) {
@@ -301,6 +369,9 @@ public class DungeonEventHandler {
         if (isInDungeon(sp)) {
             // Option 1 Hardcore: if you log out in a dungeon, you are kicked and sent home.
             sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.disconnect_kick").withStyle(ChatFormatting.RED), false);
+            if (sp.isSpectator()) {
+                sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            }
             net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
         } else {
             // Logged in outside a dungeon (e.g. game crashed or vanilla forced them to overworld). Wipe items to prevent smuggling.

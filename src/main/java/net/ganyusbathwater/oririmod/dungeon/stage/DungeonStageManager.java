@@ -56,6 +56,10 @@ public class DungeonStageManager {
         for (DungeonMarkerEntity marker : markers) {
             if (ROLE_LOOT_CHEST.equalsIgnoreCase(marker.getRole())) {
                 instance.setLootChestPos(marker.blockPosition());
+                String table = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
+                if (!table.isBlank()) {
+                    instance.setLootChestTable(table);
+                }
                 continue;
             }
             if (ROLE_PLAYER_SPAWN.equalsIgnoreCase(marker.getRole())) {
@@ -96,7 +100,7 @@ public class DungeonStageManager {
             var extra = marker.getExtraData();
             
             String loot = extra.getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
-            if (!loot.isBlank()) {
+            if (!loot.isBlank() && !ROLE_SPAWN_POINT.equalsIgnoreCase(role) && !ROLE_INFINITE_SPAWNER.equalsIgnoreCase(role) && !ROLE_BOSS_SPAWN.equalsIgnoreCase(role)) {
                 builder.keyDropStageId(loot);
             }
 
@@ -113,7 +117,7 @@ public class DungeonStageManager {
                                 ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 1;
                         float chance = extra.contains(DungeonMarkerEntity.TAG_SPAWN_CHANCE)
                                 ? extra.getFloat(DungeonMarkerEntity.TAG_SPAWN_CHANCE) : 1.0f;
-                        builder.addSpawn(entityType, isTag, count, pos, chance);
+                        builder.addSpawn(entityType, isTag, count, pos, chance, loot.isBlank() ? null : loot);
                     }
                 }
                 case ROLE_INFINITE_SPAWNER -> {
@@ -129,7 +133,7 @@ public class DungeonStageManager {
                         if (cooldownSecs <= 0) cooldownSecs = 5;
                         float chance = extra.contains(DungeonMarkerEntity.TAG_SPAWN_CHANCE)
                                 ? extra.getFloat(DungeonMarkerEntity.TAG_SPAWN_CHANCE) : 1.0f;
-                        builder.addInfiniteSpawn(entityType, isTag, cooldownSecs * 20, pos, chance);
+                        builder.addInfiniteSpawn(entityType, isTag, cooldownSecs * 20, pos, chance, loot.isBlank() ? null : loot);
                     }
                 }
                 case ROLE_BOSS_SPAWN -> {
@@ -137,7 +141,7 @@ public class DungeonStageManager {
                     if (!bossTypeStr.isBlank()) {
                         // boss_id may be short ("blizza") or full ("oririmod:blizza")
                         if (!bossTypeStr.contains(":")) bossTypeStr = "oririmod:" + bossTypeStr;
-                        builder.boss(ResourceLocation.parse(bossTypeStr), pos);
+                        builder.boss(ResourceLocation.parse(bossTypeStr), pos, loot.isBlank() ? null : loot);
                     }
                 }
                 case ROLE_SWITCH -> {

@@ -98,7 +98,8 @@ public class ModItemGroups {
                         output.accept(ModBlocks.MOONSHROOM_BLOCK);
 
                         output.accept(ModBlocks.HANGING_ELDER_MOSS);
-                        // output.accept(ModBlocks.HANGING_ELDER_MOSS_PLANT); // Plant body shouldn't be in creative tab
+                        // output.accept(ModBlocks.HANGING_ELDER_MOSS_PLANT); // Plant body shouldn't be
+                        // in creative tab
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
 
                         // Scarlet Block Group
@@ -289,49 +290,64 @@ public class ModItemGroups {
                         output.accept(ModItems.AETHER_CHARGE);
 
                         // Potions
-                        java.util.List<net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion>> allPotions = java.util.List.of(
-                                net.ganyusbathwater.oririmod.potion.ModPotions.STUNNED_POTION,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION1,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION2,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION3,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION1,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION2,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION1,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION2,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1,
-                                net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2
-                        );
+                        java.util.List<net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion>> allPotions = java.util.List
+                                .of(
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.STUNNED_POTION,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION1,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION2,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.BROKEN_POTION3,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION1,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION2,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION1,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION2,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2);
                         for (var potionHolder : allPotions) {
-                            output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.POTION, potionHolder));
-                            output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, potionHolder));
-                            output.accept(net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.LINGERING_POTION, potionHolder));
+                            output.accept(net.minecraft.world.item.alchemy.PotionContents
+                                    .createItemStack(net.minecraft.world.item.Items.POTION, potionHolder));
+                            output.accept(net.minecraft.world.item.alchemy.PotionContents
+                                    .createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, potionHolder));
+                            output.accept(net.minecraft.world.item.alchemy.PotionContents
+                                    .createItemStack(net.minecraft.world.item.Items.LINGERING_POTION, potionHolder));
                         }
 
                         // Enchanted Books
-                        itemDisplayParameters.holders().lookup(net.minecraft.core.registries.Registries.ENCHANTMENT).ifPresent(reg -> {
-                            java.util.Map<net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> enchs = new java.util.LinkedHashMap<>();
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.SNIPER, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.INVINCIBLE, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.TEACHER, 3);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_REGENERATION, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_CAPACITY, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_SAVINGS, 5);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING, 5);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_FIRE, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_WATER, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_NATURE, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_EARTH, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_LIGHT, 1);
-                            enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_DARKNESS, 1);
-                            
-                            for (var entry : enchs.entrySet()) {
-                                reg.get(entry.getKey()).ifPresent(ench -> {
-                                    for (int lvl = 1; lvl <= entry.getValue(); lvl++) {
-                                        output.accept(net.minecraft.world.item.EnchantedBookItem.createForEnchantment(new net.minecraft.world.item.enchantment.EnchantmentInstance(ench, lvl)));
+                        itemDisplayParameters.holders().lookup(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                                .ifPresent(reg -> {
+                                    java.util.Map<net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> enchs = new java.util.LinkedHashMap<>();
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.SNIPER, 1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.INVINCIBLE, 1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.TEACHER, 3);
+                                    enchs.put(
+                                            net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_REGENERATION,
+                                            1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_CAPACITY,
+                                            1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.MANA_SAVINGS, 5);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING, 5);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_FIRE, 1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_WATER,
+                                            1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_NATURE,
+                                            1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_EARTH,
+                                            1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_LIGHT,
+                                            1);
+                                    enchs.put(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.ELEMENT_DARKNESS,
+                                            1);
+
+                                    for (var entry : enchs.entrySet()) {
+                                        reg.get(entry.getKey()).ifPresent(ench -> {
+                                            for (int lvl = 1; lvl <= entry.getValue(); lvl++) {
+                                                output.accept(
+                                                        net.minecraft.world.item.EnchantedBookItem.createForEnchantment(
+                                                                new net.minecraft.world.item.enchantment.EnchantmentInstance(
+                                                                        ench, lvl)));
+                                            }
+                                        });
                                     }
                                 });
-                            }
-                        });
 
                         // -----------Vestiges-----------
                         acceptAllLevels(output, ModItems.BOUND_OF_THE_CELESTIAL_SISTERS);
@@ -347,11 +363,10 @@ public class ModItemGroups {
                         acceptAllLevels(output, ModItems.SOLIS_BROOCH);
                         acceptAllLevels(output, ModItems.SPRING);
                         acceptAllLevels(output, ModItems.STIGMA_OF_DARKNESS);
-                        output.accept(ModItems.ESSENCE_OF_DARKNESS.get());
-                        
                         acceptAllLevels(output, ModItems.STRANGE_ENDER_EYE);
                         acceptAllLevels(output, ModItems.STRIDER_SCALE);
                         acceptAllLevels(output, ModItems.WITHER_ROSE);
+                        output.accept(ModItems.ESSENCE_OF_DARKNESS.get());
                         output.accept(ModItems.MERMAID_SCALE.get());
 
                         // ------------Weapons------------

@@ -1,0 +1,1 @@
+package net.ganyusbathwater.oririmod.scratch; import software.bernie.geckolib.cache.object.GeoBone; public class TestBone { public void test(GeoBone bone) { org.joml.Vector3d pos = bone.getWorldPosition(); double x = pos.x(); double y = pos.y(); double z = pos.z(); } }

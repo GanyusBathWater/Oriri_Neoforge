@@ -89,6 +89,9 @@ public class BlizzaEntity extends Monster implements GeoEntity {
     // Idle animation inter-play cooldown
     private int idleCooldown         = 0;
     private static final int IDLE_PAUSE = 30; // 1.5 s pause between idle loops
+    
+    // Renderer particle tracking to prevent framerate-dependent spam
+    public int lastParticleRenderTick = -1;
 
     // Anti-camp mechanic tracking
     private int meleeProximityTicks  = 0;
@@ -110,7 +113,7 @@ public class BlizzaEntity extends Monster implements GeoEntity {
                 .add(Attributes.ARMOR,           15.0D)
                 .add(Attributes.MOVEMENT_SPEED,  0.23D)
                 .add(Attributes.FOLLOW_RANGE,    48.0D)
-                .add(Attributes.ATTACK_DAMAGE,   12.0D)
+                .add(Attributes.ATTACK_DAMAGE,   6.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);
     }
 
@@ -264,26 +267,8 @@ public class BlizzaEntity extends Monster implements GeoEntity {
 
         defeatHoldTicks++;
 
-        // Defeat animation runs for ~15 ticks, then we hold and explode for 100 ticks
+        // Defeat animation runs for ~15 ticks, then we hold for 100 ticks
         if (defeatHoldTicks > 15 && defeatHoldTicks <= 115) {
-            if (defeatHoldTicks % 10 == 0) {
-                double rx = this.random.nextGaussian() * 0.8;
-                double ry = this.random.nextDouble() * 2.5;
-                double rz = this.random.nextGaussian() * 0.8;
-                serverLevel.sendParticles(ParticleTypes.EXPLOSION,
-                        this.getX() + rx, this.getY() + ry, this.getZ() + rz,
-                        1, 0, 0, 0, 0);
-                serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
-                        this.getX() + rx, this.getY() + ry, this.getZ() + rz,
-                        1, 0, 0, 0, 0);
-                serverLevel.playSound(null,
-                        this.getX(), this.getY(), this.getZ(),
-                        SoundEvents.GENERIC_EXPLODE,
-                        SoundSource.HOSTILE,
-                        0.6f + this.random.nextFloat() * 0.3f,
-                        0.8f + this.random.nextFloat() * 0.4f);
-            }
-
             if (defeatHoldTicks == 16 && !lootDropped) {
                 lootDropped = true;
                 dropBlizzaLoot(serverLevel);
@@ -357,7 +342,7 @@ public class BlizzaEntity extends Monster implements GeoEntity {
     /** Called by the melee goal to apply damage with the phase 2 multiplier. */
     public void doMeleeHit(LivingEntity target) {
         float base = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        float damage = isPhase2 ? base * 1.25f : base;
+        float damage = isPhase2 ? base * 1.5f : base;
         target.hurt(this.damageSources().mobAttack(this), damage);
 
         // Apply Cold Aura x3 on hit

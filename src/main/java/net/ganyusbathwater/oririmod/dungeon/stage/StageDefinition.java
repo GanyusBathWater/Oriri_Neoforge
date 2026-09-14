@@ -13,8 +13,8 @@ import java.util.List;
  */
 public final class StageDefinition {
 
-    public record SpawnEntry(ResourceLocation entityType, boolean isTag, int count, BlockPos pos, float chance) {}
-    public record InfiniteSpawnEntry(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance) {}
+    public record SpawnEntry(ResourceLocation entityType, boolean isTag, int count, BlockPos pos, float chance, @Nullable String keyDropItem) {}
+    public record InfiniteSpawnEntry(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance, @Nullable String keyDropItem) {}
     public record SwitchEntry(String switchId, BlockPos pos) {}
     public record DoorEntry(String groupId, int requiredSwitches, BlockPos pos) {}
     public record AreaModifierEntry(String action, int radius, @Nullable ResourceLocation blockFilter, BlockPos pos) {}
@@ -32,6 +32,7 @@ public final class StageDefinition {
     @Nullable private final ResourceLocation bossEntityType; // For BOSS_FIGHT stages
     @Nullable private final BlockPos bossSpawnPos;
     @Nullable private final BlockPos playerSpawnPos; // Where players are positioned at stage start
+    @Nullable private final String bossKeyDropItem;
     @Nullable private final String keyDropStageId; // The stage ID to assign to the dropped key
 
     private StageDefinition(Builder b) {
@@ -47,6 +48,7 @@ public final class StageDefinition {
         this.bossEntityType = b.bossEntityType;
         this.bossSpawnPos = b.bossSpawnPos;
         this.playerSpawnPos = b.playerSpawnPos;
+        this.bossKeyDropItem = b.bossKeyDropItem;
         this.keyDropStageId = b.keyDropStageId;
     }
 
@@ -62,6 +64,7 @@ public final class StageDefinition {
     @Nullable public ResourceLocation getBossEntityType() { return bossEntityType; }
     @Nullable public BlockPos getBossSpawnPos() { return bossSpawnPos; }
     @Nullable public BlockPos getPlayerSpawnPos() { return playerSpawnPos; }
+    @Nullable public String getBossKeyDropItem() { return bossKeyDropItem; }
     @Nullable public String getKeyDropStageId() { return keyDropStageId; }
 
     // -------------------------------------------------------------------------
@@ -85,6 +88,7 @@ public final class StageDefinition {
         @Nullable private ResourceLocation bossEntityType;
         @Nullable private BlockPos bossSpawnPos;
         @Nullable private BlockPos playerSpawnPos;
+        @Nullable private String bossKeyDropItem;
         @Nullable private String keyDropStageId;
 
         private Builder(String stageId, StageType stageType) {
@@ -92,13 +96,13 @@ public final class StageDefinition {
             this.stageType = stageType;
         }
 
-        public Builder addSpawn(ResourceLocation entityType, boolean isTag, int count, BlockPos pos, float chance) {
-            spawnEntries.add(new SpawnEntry(entityType, isTag, count, pos, chance));
+        public Builder addSpawn(ResourceLocation entityType, boolean isTag, int count, BlockPos pos, float chance, @Nullable String keyDropItem) {
+            spawnEntries.add(new SpawnEntry(entityType, isTag, count, pos, chance, keyDropItem));
             return this;
         }
 
-        public Builder addInfiniteSpawn(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance) {
-            infiniteSpawns.add(new InfiniteSpawnEntry(entityType, isTag, cooldownTicks, pos, chance));
+        public Builder addInfiniteSpawn(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance, @Nullable String keyDropItem) {
+            infiniteSpawns.add(new InfiniteSpawnEntry(entityType, isTag, cooldownTicks, pos, chance, keyDropItem));
             return this;
         }
 
@@ -123,9 +127,10 @@ public final class StageDefinition {
         }
 
         public Builder timerTicks(int ticks) { this.timerTicks = ticks; return this; }
-        public Builder boss(ResourceLocation type, BlockPos spawnPos) {
+        public Builder boss(ResourceLocation type, BlockPos spawnPos, @Nullable String keyDropItem) {
             this.bossEntityType = type;
             this.bossSpawnPos = spawnPos;
+            this.bossKeyDropItem = keyDropItem;
             return this;
         }
         public Builder playerSpawn(BlockPos pos) { this.playerSpawnPos = pos; return this; }

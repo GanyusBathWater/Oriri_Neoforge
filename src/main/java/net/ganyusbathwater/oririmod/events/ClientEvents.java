@@ -62,6 +62,15 @@ public class ClientEvents {
     public static long deviartrasTitleEndTime = 0;
     private static final long TITLE_TOTAL_MS = 4000;
     private static final long TITLE_FADE_MS  = 500;
+    
+    // ── Dungeon Lives state ───────────────────────────────────────────────
+    public static int clientDungeonLives = -1;
+    private static final ResourceLocation DUNGEON_HEART_TEX = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/dungeon/dungeon_heart.png");
+            
+    public static void updateDungeonLives(int lives) {
+        clientDungeonLives = lives;
+    }
 
     /** Called on the client thread by the BlizzaSpawnTitlePayload handler. */
     public static void triggerBlizzaTitle() {
@@ -156,6 +165,19 @@ public class ClientEvents {
         int nextY = 8;
         nextY = renderBlizzaBossBar(gui, mc, player, nextY);
         nextY = renderDeviartrasBossBar(gui, mc, player, nextY);
+
+        // ── Dungeon Lives Overlay ─────────────────────────────────────────
+        if (player.level().dimension().location().getPath().startsWith("dungeon_") && clientDungeonLives >= 0 && !player.isSpectator()) {
+            int screenW = mc.getWindow().getGuiScaledWidth();
+            int startX = screenW - 10 - (3 * 20); // Top right, 10px padding, 3 hearts max (20px each)
+            int heartY = 10;
+            
+            RenderSystem.enableBlend();
+            for (int i = 0; i < clientDungeonLives; i++) {
+                gui.blit(DUNGEON_HEART_TEX, startX + (i * 20), heartY, 0, 0, 16, 16, 16, 16);
+            }
+            RenderSystem.disableBlend();
+        }
 
         // ── Blizza spawn title overlay ────────────────────────────────────
         renderBlizzaTitle(gui, mc);

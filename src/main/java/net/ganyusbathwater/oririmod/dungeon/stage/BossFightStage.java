@@ -76,6 +76,10 @@ public class BossFightStage extends AbstractDungeonStage {
                 }
             }
             if (!boss.isAlive()) {
+                String keyDrop = definition.getBossKeyDropItem();
+                if (keyDrop != null) {
+                    dropKey(level, boss, instance, keyDrop);
+                }
                 this.state = StageState.COMPLETE;
             }
         } else {
@@ -90,5 +94,28 @@ public class BossFightStage extends AbstractDungeonStage {
             bossEvent = null;
         }
         applyCompletionEffects(level, instance);
+    }
+
+    private void dropKey(ServerLevel level, net.minecraft.world.entity.Entity entity, DungeonInstance instance, String keyDrop) {
+        String cleanKeyDrop = keyDrop.toLowerCase().replace(' ', '_');
+        net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(cleanKeyDrop);
+        net.minecraft.world.item.Item dropItem = net.minecraft.world.item.Items.AIR;
+        if (rl != null) {
+            dropItem = BuiltInRegistries.ITEM.get(rl);
+        }
+        if (dropItem == net.minecraft.world.item.Items.AIR) {
+            dropItem = net.ganyusbathwater.oririmod.item.ModItems.MANA_DESTABILIZER.get();
+        }
+        net.minecraft.world.item.ItemStack keyStack = new net.minecraft.world.item.ItemStack(dropItem);
+        
+        net.minecraft.world.phys.Vec3 dropPos;
+        if (entity != null) {
+            dropPos = entity.position();
+        } else {
+            dropPos = net.minecraft.world.phys.Vec3.atCenterOf(instance.getOrigin());
+        }
+        
+        net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, keyStack);
+        level.addFreshEntity(itemEntity);
     }
 }

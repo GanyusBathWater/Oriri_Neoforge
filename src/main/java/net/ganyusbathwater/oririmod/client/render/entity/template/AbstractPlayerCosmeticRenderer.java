@@ -60,6 +60,11 @@ public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCos
     }
 
     @Override
+    public boolean shouldShowName(AbstractClientPlayer entity) {
+        return false;
+    }
+
+    @Override
     protected void applyRotations(T animatable, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
         if (!isRenderLayer) {
             super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick, nativeScale);

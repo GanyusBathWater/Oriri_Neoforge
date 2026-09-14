@@ -27,17 +27,22 @@ public class PassThroughStage extends AbstractDungeonStage {
     protected void doStart(ServerLevel level, DungeonInstance instance) {
         // Spawn the required entities
         for (StageDefinition.SpawnEntry spawn : definition.getSpawnEntries()) {
-            EntityType<?> type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.get(spawn.entityType());
-            if (type == net.minecraft.world.entity.EntityType.PIG && !spawn.entityType().getPath().equals("pig")) {
+            EntityType<?> type = resolveEntityType(level, spawn.entityType(), spawn.isTag());
+            if (type == null) {
                 continue; // entity not found
             }
 
             for (int i = 0; i < spawn.count(); i++) {
                 if (random.nextFloat() <= spawn.chance()) {
                     BlockPos p = spawn.pos();
-                    Entity entity = type.spawn(level, p, MobSpawnType.SPAWNER);
-                    if (entity instanceof Mob mob) {
-                        mob.setPersistenceRequired(); // Ensure ambient mobs don't despawn naturally
+                    var entity = type.create(level);
+                    if (entity != null) {
+                        entity.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, random.nextFloat() * 360f, 0f);
+                        if (entity instanceof Mob mob) {
+                            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.SPAWNER, null);
+                            mob.setPersistenceRequired(); // Ensure ambient mobs don't despawn naturally
+                        }
+                        level.addFreshEntity(entity);
                     }
                 }
             }
@@ -59,5 +64,10 @@ public class PassThroughStage extends AbstractDungeonStage {
     public void onComplete(ServerLevel level, DungeonInstance instance) {
         // Apply area modifiers (bridge building etc)
         applyCompletionEffects(level, instance);
+    }
+
+    @Override
+    public boolean shouldClearMobsOnComplete() {
+        return false;
     }
 }

@@ -134,15 +134,17 @@ public class DungeonTickHandler {
                 activeStage.onComplete(level, instance);
                 
                 // Clear leftover mobs from this stage to improve performance
-                var bounds = instance.getStructureBounds();
-                if (bounds != null) {
-                    net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(
-                        bounds.minX(), bounds.minY(), bounds.minZ(),
-                        bounds.maxX(), bounds.maxY(), bounds.maxZ()
-                    ).inflate(10.0);
-                    
-                    for (net.minecraft.world.entity.Mob mob : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, aabb)) {
-                        mob.discard();
+                if (activeStage.shouldClearMobsOnComplete()) {
+                    var bounds = instance.getStructureBounds();
+                    if (bounds != null) {
+                        net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(
+                            bounds.minX(), bounds.minY(), bounds.minZ(),
+                            bounds.maxX(), bounds.maxY(), bounds.maxZ()
+                        ).inflate(10.0);
+                        
+                        for (net.minecraft.world.entity.Mob mob : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, aabb)) {
+                            mob.discard();
+                        }
                     }
                 }
 
@@ -197,16 +199,26 @@ public class DungeonTickHandler {
         
         // Spawn Loot Chest if pos is defined
         var def = net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.get(instance.getDungeonId());
-        if (def != null && def.rewardLootTable() != null && instance.getLootChestPos() != null) {
+        
+        net.minecraft.resources.ResourceLocation lootTableId = null;
+        if (instance.getLootChestTable() != null && !instance.getLootChestTable().isBlank()) {
+            String table = instance.getLootChestTable();
+            if (!table.contains(":")) table = "minecraft:" + table;
+            lootTableId = net.minecraft.resources.ResourceLocation.tryParse(table);
+        } else if (def != null && def.rewardLootTable() != null) {
+            lootTableId = def.rewardLootTable();
+        }
+
+        if (lootTableId != null && instance.getLootChestPos() != null) {
             net.minecraft.core.BlockPos chestPos = instance.getLootChestPos();
             level.setBlock(chestPos, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState(), 3);
             net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(chestPos);
             if (be instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE) {
                 net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> lootKey = 
-                        net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, def.rewardLootTable());
+                        net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTableId);
                 chestBE.setLootTable(lootKey, level.getRandom().nextLong());
             }
-            OririMod.LOGGER.info("[DungeonTickHandler] Spawned Loot Chest for {} at {}", instance.getDungeonId(), chestPos);
+            OririMod.LOGGER.info("[DungeonTickHandler] Spawned Loot Chest for {} at {} with table {}", instance.getDungeonId(), chestPos, lootTableId);
         }
         
         // Mark instance as complete to start the countdown

@@ -14,7 +14,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
-public class MagicProjectileModel extends HierarchicalModel<MagicProjectileEntity> {
+public class MagicProjectileModel<T extends net.minecraft.world.entity.Entity> extends HierarchicalModel<T> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "magic_projectile"), "main");
 
     private final ModelPart bone;
@@ -50,7 +50,7 @@ public class MagicProjectileModel extends HierarchicalModel<MagicProjectileEntit
     }
 
     @Override
-    public void setupAnim(MagicProjectileEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.windCharge.yRot = -ageInTicks * 16.0F * (float) (Math.PI / 180.0);
         this.wind.yRot = ageInTicks * 16.0F * (float) (Math.PI / 180.0);
     }

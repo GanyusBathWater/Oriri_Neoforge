@@ -38,6 +38,10 @@ public abstract class AbstractDungeonStage implements DungeonStage {
     public StageState getState() {
         return state;
     }
+    
+    public boolean shouldClearMobsOnComplete() {
+        return true;
+    }
 
     @Override
     public void onStart(ServerLevel level, DungeonInstance instance) {

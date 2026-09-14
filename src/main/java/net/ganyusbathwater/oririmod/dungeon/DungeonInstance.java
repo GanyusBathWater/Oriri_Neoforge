@@ -10,8 +10,10 @@ import net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,6 +26,8 @@ public class DungeonInstance {
     private final String dungeonId; // References DungeonDefinition.id
     private final BlockPos origin; // Slot origin in the dimension
     private final Set<UUID> players = new HashSet<>();
+    private final Map<UUID, Integer> playerLives = new HashMap<>();
+    private final Set<UUID> spectators = new HashSet<>();
     private String currentStage = "stage_0";
     private int ticksActive = 0;
     
@@ -38,6 +42,7 @@ public class DungeonInstance {
     // ── Phase 7 Additions ──
     @Nullable private net.minecraft.world.level.levelgen.structure.BoundingBox structureBounds = null;
     @Nullable private BlockPos lootChestPos = null;
+    @Nullable private String lootChestTable = null;
     @Nullable private BlockPos playerSpawnPos = null;
 
     public DungeonInstance(UUID instanceId, String dungeonId, BlockPos origin) {
@@ -46,10 +51,32 @@ public class DungeonInstance {
         this.origin = origin;
     }
 
-    public void addPlayer(UUID uuid) { this.players.add(uuid); }
-    public void removePlayer(UUID uuid) { this.players.remove(uuid); }
+    public void addPlayer(UUID uuid) { 
+        this.players.add(uuid); 
+        this.playerLives.putIfAbsent(uuid, 3);
+    }
+    public void removePlayer(UUID uuid) { 
+        this.players.remove(uuid); 
+        this.playerLives.remove(uuid);
+        this.spectators.remove(uuid);
+    }
     public boolean hasPlayer(UUID uuid) { return this.players.contains(uuid); }
     public Set<UUID> getPlayers() { return this.players; }
+
+    public int getPlayerLives(UUID uuid) { return this.playerLives.getOrDefault(uuid, 0); }
+    public void setPlayerLives(UUID uuid, int lives) { this.playerLives.put(uuid, lives); }
+    
+    public void addSpectator(UUID uuid) { this.spectators.add(uuid); }
+    public boolean isSpectator(UUID uuid) { return this.spectators.contains(uuid); }
+    public Set<UUID> getSpectators() { return this.spectators; }
+    
+    public List<UUID> getAlivePlayers() {
+        List<UUID> alive = new ArrayList<>();
+        for (UUID p : players) {
+            if (!spectators.contains(p)) alive.add(p);
+        }
+        return alive;
+    }
 
     public UUID getInstanceId() { return instanceId; }
     public String getDungeonId() { return dungeonId; }
@@ -85,6 +112,9 @@ public class DungeonInstance {
     @Nullable public BlockPos getLootChestPos() { return lootChestPos; }
     public void setLootChestPos(@Nullable BlockPos pos) { this.lootChestPos = pos; }
     
+    @Nullable public String getLootChestTable() { return lootChestTable; }
+    public void setLootChestTable(@Nullable String table) { this.lootChestTable = table; }
+    
     @Nullable public BlockPos getPlayerSpawnPos() { return playerSpawnPos; }
     public void setPlayerSpawnPos(@Nullable BlockPos pos) { this.playerSpawnPos = pos; }
 
@@ -95,7 +125,11 @@ public class DungeonInstance {
         
         ListTag playersTag = new ListTag();
         for (UUID uuid : players) {
-            playersTag.add(StringTag.valueOf(uuid.toString()));
+            CompoundTag pt = new CompoundTag();
+            pt.putString("UUID", uuid.toString());
+            pt.putInt("Lives", playerLives.getOrDefault(uuid, 3));
+            pt.putBoolean("IsSpectator", spectators.contains(uuid));
+            playersTag.add(pt);
         }
         tag.put("Players", playersTag);
         
@@ -113,6 +147,9 @@ public class DungeonInstance {
         if (lootChestPos != null) {
             tag.putLong("LootChestPos", lootChestPos.asLong());
         }
+        if (lootChestTable != null && !lootChestTable.isBlank()) {
+            tag.putString("LootChestTable", lootChestTable);
+        }
         if (playerSpawnPos != null) {
             tag.putLong("PlayerSpawnPos", playerSpawnPos.asLong());
         }
@@ -127,9 +164,17 @@ public class DungeonInstance {
         
         DungeonInstance instance = new DungeonInstance(instanceId, dungeonId, origin);
         
-        ListTag playersTag = tag.getList("Players", Tag.TAG_STRING);
+        ListTag playersTag = tag.getList("Players", Tag.TAG_COMPOUND);
         for (int i = 0; i < playersTag.size(); i++) {
-            instance.addPlayer(UUID.fromString(playersTag.getString(i)));
+            CompoundTag pt = playersTag.getCompound(i);
+            UUID pUuid = UUID.fromString(pt.getString("UUID"));
+            instance.addPlayer(pUuid);
+            if (pt.contains("Lives")) {
+                instance.setPlayerLives(pUuid, pt.getInt("Lives"));
+            }
+            if (pt.getBoolean("IsSpectator")) {
+                instance.addSpectator(pUuid);
+            }
         }
         
         if (tag.contains("CurrentStage")) {
@@ -152,6 +197,9 @@ public class DungeonInstance {
         }
         if (tag.contains("LootChestPos")) {
             instance.setLootChestPos(BlockPos.of(tag.getLong("LootChestPos")));
+        }
+        if (tag.contains("LootChestTable")) {
+            instance.setLootChestTable(tag.getString("LootChestTable"));
         }
         if (tag.contains("PlayerSpawnPos")) {
             instance.setPlayerSpawnPos(BlockPos.of(tag.getLong("PlayerSpawnPos")));

@@ -44,4 +44,9 @@ public interface DungeonStage {
 
     /** @return the definition this stage was created from. */
     StageDefinition getDefinition();
+    
+    /** @return whether leftover mobs should be discarded when this stage completes. */
+    default boolean shouldClearMobsOnComplete() {
+        return true;
+    }
 }

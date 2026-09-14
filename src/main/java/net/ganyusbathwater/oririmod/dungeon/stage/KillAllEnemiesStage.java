@@ -19,6 +19,7 @@ import java.util.UUID;
 public class KillAllEnemiesStage extends AbstractDungeonStage {
 
     private final Set<UUID> spawnedEntities = new HashSet<>();
+    private final java.util.Map<UUID, String> keyBearers = new java.util.HashMap<>();
 
     public KillAllEnemiesStage(StageDefinition definition) {
         super(definition);
@@ -27,6 +28,7 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
     @Override
     protected void doStart(ServerLevel level, DungeonInstance instance) {
         spawnedEntities.clear();
+        keyBearers.clear();
 
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
             EntityType<?> entityType = resolveEntityType(level, entry.entityType(), entry.isTag());
@@ -45,6 +47,9 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
                         }
                         level.addFreshEntity(living);
                         spawnedEntities.add(living.getUUID());
+                        if (entry.keyDropItem() != null) {
+                            keyBearers.put(living.getUUID(), entry.keyDropItem());
+                        }
                     }
                 }
             }
@@ -61,31 +66,17 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
         spawnedEntities.removeIf(uuid -> {
             var entity = level.getEntity(uuid);
             boolean dead = entity == null || !entity.isAlive();
-            if (dead && spawnedEntities.size() == 1) {
-                String keyDrop = definition.getKeyDropStageId();
-                if (keyDrop != null) {
-                    String cleanKeyDrop = keyDrop.toLowerCase().replace(' ', '_');
-                    net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(cleanKeyDrop);
-                    net.minecraft.world.item.Item dropItem = net.minecraft.world.item.Items.AIR;
-                    if (rl != null) {
-                        dropItem = BuiltInRegistries.ITEM.get(rl);
+            if (dead) {
+                String bearerKey = keyBearers.remove(uuid);
+                if (bearerKey != null) {
+                    dropKey(level, entity, instance, bearerKey);
+                }
+                
+                if (spawnedEntities.size() == 1) {
+                    String globalKey = definition.getKeyDropStageId();
+                    if (globalKey != null) {
+                        dropKey(level, entity, instance, globalKey);
                     }
-                    if (dropItem == net.minecraft.world.item.Items.AIR) {
-                        dropItem = net.ganyusbathwater.oririmod.item.ModItems.MANA_DESTABILIZER.get();
-                    }
-                    net.minecraft.world.item.ItemStack keyStack = new net.minecraft.world.item.ItemStack(dropItem);
-                    
-                    net.minecraft.world.phys.Vec3 dropPos;
-                    if (entity != null) {
-                        dropPos = entity.position();
-                    } else if (!definition.getTriggers().isEmpty()) {
-                        dropPos = net.minecraft.world.phys.Vec3.atCenterOf(definition.getTriggers().get(0).pos());
-                    } else {
-                        dropPos = net.minecraft.world.phys.Vec3.atCenterOf(instance.getOrigin());
-                    }
-                    
-                    net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, keyStack);
-                    level.addFreshEntity(itemEntity);
                 }
             }
             return dead;
@@ -99,5 +90,30 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
     @Override
     public void onComplete(ServerLevel level, DungeonInstance instance) {
         applyCompletionEffects(level, instance);
+    }
+
+    private void dropKey(ServerLevel level, net.minecraft.world.entity.Entity entity, DungeonInstance instance, String keyDrop) {
+        String cleanKeyDrop = keyDrop.toLowerCase().replace(' ', '_');
+        net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(cleanKeyDrop);
+        net.minecraft.world.item.Item dropItem = net.minecraft.world.item.Items.AIR;
+        if (rl != null) {
+            dropItem = BuiltInRegistries.ITEM.get(rl);
+        }
+        if (dropItem == net.minecraft.world.item.Items.AIR) {
+            dropItem = net.ganyusbathwater.oririmod.item.ModItems.MANA_DESTABILIZER.get();
+        }
+        net.minecraft.world.item.ItemStack keyStack = new net.minecraft.world.item.ItemStack(dropItem);
+        
+        net.minecraft.world.phys.Vec3 dropPos;
+        if (entity != null) {
+            dropPos = entity.position();
+        } else if (!definition.getTriggers().isEmpty()) {
+            dropPos = net.minecraft.world.phys.Vec3.atCenterOf(definition.getTriggers().get(0).pos());
+        } else {
+            dropPos = net.minecraft.world.phys.Vec3.atCenterOf(instance.getOrigin());
+        }
+        
+        net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, keyStack);
+        level.addFreshEntity(itemEntity);
     }
 }

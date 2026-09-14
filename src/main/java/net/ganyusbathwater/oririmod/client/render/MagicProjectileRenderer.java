@@ -38,11 +38,11 @@ public class MagicProjectileRenderer extends EntityRenderer<MagicProjectileEntit
         ELEMENT_COLORS.put(Element.PHYSICAL, Color.WHITE);
     }
 
-    private final net.ganyusbathwater.oririmod.client.model.MagicProjectileModel model;
+    private final net.ganyusbathwater.oririmod.client.model.MagicProjectileModel<MagicProjectileEntity> model;
 
     public MagicProjectileRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new net.ganyusbathwater.oririmod.client.model.MagicProjectileModel(context.bakeLayer(net.ganyusbathwater.oririmod.client.model.MagicProjectileModel.LAYER_LOCATION));
+        this.model = new net.ganyusbathwater.oririmod.client.model.MagicProjectileModel<>(context.bakeLayer(net.ganyusbathwater.oririmod.client.model.MagicProjectileModel.LAYER_LOCATION));
     }
 
     @Override

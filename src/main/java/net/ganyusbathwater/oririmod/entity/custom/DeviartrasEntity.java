@@ -49,7 +49,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  *
  * ─── Attack Roster ──────────────────────────────────────────────────────────
  *   Melee         – 10 dmg + Poison 5s  (no global CD gate)
- *   Passive Fairy   – on-hit, own 600-t CD, spawns 1 (+1 in P2) Fairy
+ *   Passive Fairy   – on-hit, own 1200-t CD, spawns 1 (+1 in P2) Fairy
  *   Skill 1 – Overgrowth  : summons plant_turret(s), dirt particles ticks 15-20
  *   Skill 2 – Vine Lock   : placeholder mechanic (see vineLockMechanic())
  *   Skill 3 – Spore Blossom: summons eye_of_desolation(s) at exact tick 20
@@ -112,7 +112,7 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     private boolean lootDropped   = false;
 
     // ── Passive Fairy cooldown ───────────────────────────────────────────────────
-    /** Independent passive cooldown – 600 t (30 s). Does NOT share the global CD. */
+    /** Independent passive cooldown – 1200 t (60 s). Does NOT share the global CD. */
     private int fairyPassiveCooldown = 0;
 
     // ── Hit & Run mechanic ─────────────────────────────────────────────────────
@@ -313,9 +313,9 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
             triggerAnim("hurt_controller", "deviartras_hurt");
 
             // ── Passive: Fairy spawn on any hit ─────────────────────────────────
-            // Independent 600-tick cooldown (30 s), no animation required.
+            // Independent 1200-tick cooldown (60 s), no animation required.
             if (fairyPassiveCooldown <= 0) {
-                fairyPassiveCooldown = 600;
+                fairyPassiveCooldown = 1200;
                 spawnFairy();
             }
         }

@@ -115,6 +115,30 @@ public class ModItemTagProvider extends ItemTagsProvider {
                         net.ganyusbathwater.oririmod.item.ModItems.MJOELNIR.get()
                 );
 
+        this.tag(ItemTags.SWORDS)
+                .add(
+                        net.ganyusbathwater.oririmod.item.ModItems.PANDORAS_BLADE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.PIRATE_SABER.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.ICE_SWORD.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.STELLA_PERDITOR.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.QILINS_WRATH.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.SOLS_EMBRACE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.WOOD_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.STONE_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.IRON_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.GOLD_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.DIAMOND_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.NETHERITE_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.ANCIENT_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.BLACK_ICE_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.CRYSTAL_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.GILDED_NETHERITE_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.PRISMARINE_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.MOLTEN_SCYTHE.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.THE_GODSEEKER.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.THE_HARBINGER.get()
+                );
+
         this.tag(ItemTags.MACE_ENCHANTABLE)
                 .add(
                         net.ganyusbathwater.oririmod.item.ModItems.LAW_BREAKER.get(),
