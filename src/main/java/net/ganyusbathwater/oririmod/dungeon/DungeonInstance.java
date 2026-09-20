@@ -33,6 +33,7 @@ public class DungeonInstance {
     
     private boolean isComplete = false;
     private int ticksSinceComplete = 0;
+    private boolean debugLogging = false;
 
     // ── Stage runtime state (not persisted — rebuilt from markers on reload) ──
     private List<StageDefinition> stageDefinitions = new ArrayList<>();
@@ -105,6 +106,9 @@ public class DungeonInstance {
     public boolean isComplete() { return isComplete; }
     public void setComplete(boolean complete) { this.isComplete = complete; }
     public int getTicksSinceComplete() { return ticksSinceComplete; }
+    
+    public boolean isDebugLoggingEnabled() { return debugLogging; }
+    public void setDebugLoggingEnabled(boolean debugLogging) { this.debugLogging = debugLogging; }
     
     @Nullable public net.minecraft.world.level.levelgen.structure.BoundingBox getStructureBounds() { return structureBounds; }
     public void setStructureBounds(@Nullable net.minecraft.world.level.levelgen.structure.BoundingBox bounds) { this.structureBounds = bounds; }

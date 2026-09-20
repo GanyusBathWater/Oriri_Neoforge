@@ -31,6 +31,8 @@ public class DungeonMarkerItem extends Item {
         Entity entity = ModEntities.DUNGEON_MARKER.get().create(serverLevel);
         if (entity != null) {
             entity.setPos(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5);
+            entity.setYRot(context.getPlayer().getYRot());
+            entity.setXRot(context.getPlayer().getXRot());
             entity.setCustomName(net.minecraft.network.chat.Component.literal("§d[Dungeon Marker]"));
             entity.setCustomNameVisible(true);
             
@@ -77,6 +79,8 @@ public class DungeonMarkerItem extends Item {
         Entity entity = ModEntities.DUNGEON_MARKER.get().create(serverLevel);
         if (entity != null) {
             entity.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            entity.setYRot(player.getYRot());
+            entity.setXRot(player.getXRot());
             entity.setCustomName(net.minecraft.network.chat.Component.literal("§d[Dungeon Marker]"));
             entity.setCustomNameVisible(true);
             

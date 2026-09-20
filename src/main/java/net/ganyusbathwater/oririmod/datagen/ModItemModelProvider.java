@@ -487,6 +487,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 applyGeoItemTransforms(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.getId().getPath());
                 applyGeoItemTransforms(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.getId().getPath());
 
+                withExistingParent(ModBlocks.TELEPORTER_BLOCK.getId().getPath(), mcLoc("block/iron_block"));
+
                 getBuilder(ModBlocks.REVIVAL_SHRINE.getId().getPath())
                                 .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
                                 .transforms()

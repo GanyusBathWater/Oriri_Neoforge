@@ -359,6 +359,14 @@ public class DungeonEventHandler {
             if (!event.getTo().location().getPath().startsWith("dungeon_")) {
                 wipeDungeonItems(sp);
             }
+        } else if (event.getTo().location().getPath().startsWith("dungeon_")) {
+            // Player entered a dungeon dimension, sync their lives!
+            DungeonManager manager = DungeonManager.get(sp.serverLevel());
+            var instance = manager.getInstanceForPlayer(sp.getUUID());
+            if (instance != null) {
+                int lives = instance.getPlayerLives(sp.getUUID());
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, new net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload(lives));
+            }
         }
     }
 

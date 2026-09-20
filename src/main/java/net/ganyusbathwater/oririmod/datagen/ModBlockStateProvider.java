@@ -255,6 +255,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                         .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
                                         .texture("particle", modLoc("block/forcefield_emitter")));
 
+                // ===== TELEPORTER =====
+                simpleBlock(ModBlocks.TELEPORTER_BLOCK.get(),
+                                models().getBuilder("teleporter")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
+                                        .texture("particle", mcLoc("block/iron_block")));
+
                 // ===== JADE BLOCKS =====
                 blockWithItem(ModBlocks.JADE_BLOCK, 1);
                 blockWithItem(ModBlocks.JADE_ORE, 1);

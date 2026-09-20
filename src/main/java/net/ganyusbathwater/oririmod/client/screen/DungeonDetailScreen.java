@@ -59,6 +59,8 @@ public class DungeonDetailScreen extends Screen {
     private final String displayName;
     private final String loreText;
     private final String previewTexturePath;
+    
+    private double scrollOffset = 0;
 
     public DungeonDetailScreen(OpenDungeonSelectionPayload selectionData, int dungeonIndex) {
         super(Component.literal(selectionData.displayNames().get(dungeonIndex)));
@@ -112,8 +114,10 @@ public class DungeonDetailScreen extends Screen {
         gfx.fill(left, top, left + PANEL_W, top + PANEL_H, C_BG);
         drawBorder(gfx, left, top, PANEL_W, PANEL_H, C_BORDER);
 
-        // Render widgets on top
-        super.render(gfx, mouseX, mouseY, partial);
+        // Render widgets (buttons) on top of background
+        for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
+            renderable.render(gfx, mouseX, mouseY, partial);
+        }
 
         // ── Title Zone ──
         gfx.drawCenteredString(font,
@@ -146,13 +150,34 @@ public class DungeonDetailScreen extends Screen {
         // ── Lore Zone ──
         int loreY = imgY + IMG_H + 10;
         int loreMaxWidth = PANEL_W - 30;
-        int maxLoreLines = 5;
+        int maxLoreLines = 8;
+        int visibleHeight = maxLoreLines * 11;
 
         if (!loreText.isBlank()) {
-            List<String> lines = wrapText(loreText, loreMaxWidth);
-            int lineCount = Math.min(lines.size(), maxLoreLines);
-            for (int i = 0; i < lineCount; i++) {
-                gfx.drawString(font, lines.get(i), left + 15, loreY + (i * 11), C_LORE, true);
+            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(loreText), loreMaxWidth);
+            int totalHeight = lines.size() * 11;
+            int maxScroll = Math.max(0, totalHeight - visibleHeight);
+            this.scrollOffset = net.minecraft.util.Mth.clamp(this.scrollOffset, 0, maxScroll);
+            
+            // Enable Scissoring
+            gfx.enableScissor(left + 10, loreY, left + PANEL_W - 10, loreY + visibleHeight);
+            
+            for (int i = 0; i < lines.size(); i++) {
+                int yPos = loreY + (i * 11) - (int) this.scrollOffset;
+                // Only draw if within visible vertical bounds to save performance
+                if (yPos > loreY - 11 && yPos < loreY + visibleHeight) {
+                    gfx.drawString(font, lines.get(i), left + 15, yPos, C_LORE, true);
+                }
+            }
+            
+            gfx.disableScissor();
+            
+            // Draw a subtle scroll indicator if scrolling is possible
+            if (maxScroll > 0) {
+                int scrollbarHeight = Math.max(10, (int)((visibleHeight / (float)totalHeight) * visibleHeight));
+                int scrollbarY = loreY + (int)((this.scrollOffset / maxScroll) * (visibleHeight - scrollbarHeight));
+                gfx.fill(left + PANEL_W - 15, loreY, left + PANEL_W - 13, loreY + visibleHeight, C_IMG_BG);
+                gfx.fill(left + PANEL_W - 15, scrollbarY, left + PANEL_W - 13, scrollbarY + scrollbarHeight, C_BORDER);
             }
         }
 
@@ -165,21 +190,23 @@ public class DungeonDetailScreen extends Screen {
         gfx.drawCenteredString(font, noPreview, imgX + IMG_W / 2, imgY + IMG_H / 2 - 4, C_MUTED);
     }
 
-    private List<String> wrapText(String text, int maxWidth) {
-        List<String> lines = new ArrayList<>();
-        String[] words = text.split(" ");
-        StringBuilder current = new StringBuilder();
-        for (String word : words) {
-            String test = current.isEmpty() ? word : current + " " + word;
-            if (font.width(test) > maxWidth) {
-                if (!current.isEmpty()) lines.add(current.toString());
-                current = new StringBuilder(word);
-            } else {
-                current = new StringBuilder(test);
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (!loreText.isBlank()) {
+            int loreMaxWidth = PANEL_W - 30;
+            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(loreText), loreMaxWidth);
+            int totalHeight = lines.size() * 11;
+            int visibleHeight = 8 * 11;
+            int maxScroll = Math.max(0, totalHeight - visibleHeight);
+            
+            if (maxScroll > 0) {
+                this.scrollOffset -= scrollY * 11;
+                this.scrollOffset = net.minecraft.util.Mth.clamp(this.scrollOffset, 0, maxScroll);
+                return true;
             }
         }
-        if (!current.isEmpty()) lines.add(current.toString());
-        return lines;
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     private void drawBorder(GuiGraphics gfx, int x, int y, int w, int h, int color) {

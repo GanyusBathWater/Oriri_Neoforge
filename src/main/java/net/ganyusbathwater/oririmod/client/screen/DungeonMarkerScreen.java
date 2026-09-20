@@ -50,7 +50,7 @@ public class DungeonMarkerScreen extends Screen {
     private String currentRole;
 
     private static final List<String> STAGE_TYPES = Arrays.asList(
-            "KILL_ALL_ENEMIES", "ACTIVATE_SWITCHES", "SURVIVE_TIMER", "BOSS_FIGHT", "MINI_BOSS_FIGHT", "FETCH_ITEM", "PUZZLE_SOLVE", "SPAWN_ONLY"
+            "KILL_ALL_ENEMIES", "ACTIVATE_SWITCHES", "SURVIVE_TIMER", "BOSS_FIGHT", "MINI_BOSS_FIGHT", "PUZZLE_SOLVE", "REACH_GOAL", "SPAWN_ONLY"
     );
 
     private static final List<String> ROLES = Arrays.asList(
@@ -59,8 +59,11 @@ public class DungeonMarkerScreen extends Screen {
             DungeonStageManager.ROLE_SWITCH,
             DungeonStageManager.ROLE_DOOR,
             DungeonStageManager.ROLE_STAGE_TRIGGER,
+            DungeonStageManager.ROLE_GOAL_AREA,
+            DungeonStageManager.ROLE_BLOCK_MATCH,
             DungeonStageManager.ROLE_AREA_MODIFIER,
             DungeonStageManager.ROLE_BOSS_SPAWN,
+            DungeonStageManager.ROLE_MINI_BOSS_SPAWN,
             DungeonStageManager.ROLE_LOOT_CHEST,
             DungeonStageManager.ROLE_PLAYER_SPAWN
     );
@@ -149,10 +152,12 @@ public class DungeonMarkerScreen extends Screen {
                 midX - 160, startY + rowSpacing * 5, 140, 20,
                 "Drops Key", Arrays.asList("Yes", "No"), initialLootTable.isEmpty() ? "No" : "Yes",
                 val -> {
-                    if (val.equals("Yes")) {
-                        this.lootTableBox.setValue("oririmod:mana_destabilizer");
-                    } else {
-                        this.lootTableBox.setValue("");
+                    if (this.lootTableBox != null) {
+                        if (val.equals("Yes")) {
+                            this.lootTableBox.setValue("oririmod:mana_destabilizer");
+                        } else {
+                            this.lootTableBox.setValue("");
+                        }
                     }
                 }
         );
@@ -160,9 +165,12 @@ public class DungeonMarkerScreen extends Screen {
 
         this.modifierActionButton = new CustomCycleButton(
                 midX + 20, startY + rowSpacing, 140, 20,
-                "Action", Arrays.asList("fill", "destroy"), initialSwitchId.isEmpty() ? "fill" : (initialSwitchId.equals("destroy") ? "destroy" : "fill"),
+                "Action", Arrays.asList("fill", "destroy", "place_teleporter"), 
+                initialSwitchId.isEmpty() ? "fill" : (initialSwitchId.equals("destroy") ? "destroy" : (initialSwitchId.equals("place_teleporter") ? "place_teleporter" : "fill")),
                 val -> {
-                    this.switchIdBox.setValue(val);
+                    if (this.switchIdBox != null) {
+                        this.switchIdBox.setValue(val);
+                    }
                 }
         );
         this.addRenderableWidget(this.modifierActionButton);
@@ -202,7 +210,7 @@ public class DungeonMarkerScreen extends Screen {
         lootTableBox.visible = false;
         bossIdBox.visible = false;
 
-        boolean isGlobal = DungeonStageManager.ROLE_PLAYER_SPAWN.equals(currentRole) || DungeonStageManager.ROLE_LOOT_CHEST.equals(currentRole);
+        boolean isGlobal = DungeonStageManager.ROLE_LOOT_CHEST.equals(currentRole);
         this.stageIdBox.visible = !isGlobal;
         if (this.stageTypeButton != null) {
             this.stageTypeButton.visible = !isGlobal;
@@ -229,8 +237,15 @@ public class DungeonMarkerScreen extends Screen {
                 validRoles.add(0, DungeonStageManager.ROLE_BOSS_SPAWN);
                 validRoles.add(1, DungeonStageManager.ROLE_INFINITE_SPAWNER);
             }
+            case "MINI_BOSS_FIGHT" -> {
+                validRoles.add(0, DungeonStageManager.ROLE_MINI_BOSS_SPAWN);
+                validRoles.add(1, DungeonStageManager.ROLE_INFINITE_SPAWNER);
+            }
             case "PUZZLE_SOLVE" -> {
-                validRoles.add(0, DungeonStageManager.ROLE_SWITCH);
+                validRoles.add(0, DungeonStageManager.ROLE_BLOCK_MATCH);
+            }
+            case "REACH_GOAL" -> {
+                validRoles.add(0, DungeonStageManager.ROLE_GOAL_AREA);
             }
             case "SPAWN_ONLY" -> {
                 validRoles.add(0, DungeonStageManager.ROLE_SPAWN_POINT);
@@ -243,15 +258,25 @@ public class DungeonMarkerScreen extends Screen {
                 currentRole = validRoles.get(0);
             }
         }
+        
+        // Prevent accidental autofill of Switch ID from AREA_MODIFIER actions
+        if ((DungeonStageManager.ROLE_SWITCH.equals(currentRole) || DungeonStageManager.ROLE_DOOR.equals(currentRole) || DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole)) && switchIdBox != null) {
+            String val = switchIdBox.getValue();
+            if ("destroy".equals(val) || "fill".equals(val) || "place_teleporter".equals(val)) {
+                switchIdBox.setValue("");
+            }
+        }
 
         boolean isModifier = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole);
         boolean isDoor = DungeonStageManager.ROLE_DOOR.equals(currentRole);
         boolean isTrigger = DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole);
-        boolean isBoss = DungeonStageManager.ROLE_BOSS_SPAWN.equals(currentRole);
+        boolean isBlockMatch = DungeonStageManager.ROLE_BLOCK_MATCH.equals(currentRole);
+        boolean isBoss = DungeonStageManager.ROLE_BOSS_SPAWN.equals(currentRole) || DungeonStageManager.ROLE_MINI_BOSS_SPAWN.equals(currentRole);
         boolean isChest = DungeonStageManager.ROLE_LOOT_CHEST.equals(currentRole);
         boolean isSwitch = DungeonStageManager.ROLE_SWITCH.equals(currentRole);
         boolean isSpawn = DungeonStageManager.ROLE_SPAWN_POINT.equals(currentRole);
         boolean isSpawner = DungeonStageManager.ROLE_INFINITE_SPAWNER.equals(currentRole);
+        boolean isGoalArea = DungeonStageManager.ROLE_GOAL_AREA.equals(currentRole);
 
         if (isSpawn || isSpawner) {
             enemyTypeBox.visible = true;
@@ -263,11 +288,15 @@ public class DungeonMarkerScreen extends Screen {
             countBox.visible = true;
             modifierActionButton.visible = true;
         } else if (isDoor) {
-            switchIdBox.visible = true;
-            countBox.visible = true;
+            // Doors currently just open on stage completion, no extra config needed.
         } else if (isTrigger) {
             countBox.visible = true;
             switchIdBox.visible = true;
+        } else if (isGoalArea) {
+            countBox.visible = true;
+        } else if (isBlockMatch) {
+            enemyTypeBox.visible = true;
+            countBox.visible = true;
         } else if (isSwitch) {
             switchIdBox.visible = true;
         } else if (isBoss) {
@@ -353,46 +382,48 @@ public class DungeonMarkerScreen extends Screen {
         guiGraphics.drawString(this.font, "Marker Role", this.roleButton.getX(), this.roleButton.getY() - 10, 0xDDDDDD);
 
         // Dynamic labels based on role
-        if (this.enemyTypeBox.visible) {
-            String label = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? "Block to Place/Destroy (e.g. minecraft:stone)" : "Enemy Type (e.g. minecraft:zombie or #cave_mobs)";
+        if (this.enemyTypeBox != null && this.enemyTypeBox.visible) {
+            String label = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? "Target Block ID or Teleporter ID" : 
+                           DungeonStageManager.ROLE_BLOCK_MATCH.equals(currentRole) ? "Target Block ID (e.g. minecraft:redstone_lamp)" :
+                           "Enemy Type (e.g. minecraft:zombie or #cave_mobs)";
             guiGraphics.drawString(this.font, label, this.enemyTypeBox.getX(), this.enemyTypeBox.getY() - 10, 0xDDDDDD);
         }
-        if (this.chanceBox.visible) {
+        if (this.chanceBox != null && this.chanceBox.visible) {
             guiGraphics.drawString(this.font, "Spawn Chance (0.0 to 1.0)", this.chanceBox.getX(), this.chanceBox.getY() - 10, 0xDDDDDD);
         }
-        if (this.bossIdBox.visible) {
+        if (this.bossIdBox != null && this.bossIdBox.visible) {
             guiGraphics.drawString(this.font, "Boss ID (e.g. blizza)", this.bossIdBox.getX(), this.bossIdBox.getY() - 10, 0xDDDDDD);
         }
-        if (this.countBox.visible) {
+        if (this.countBox != null && this.countBox.visible) {
             String label = "Count";
             if (DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole)) label = "Radius";
+            else if (DungeonStageManager.ROLE_GOAL_AREA.equals(currentRole)) label = "Radius";
             else if (DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole)) label = "Radius";
             else if (DungeonStageManager.ROLE_INFINITE_SPAWNER.equals(currentRole)) label = "Cooldown (s)";
             else if (DungeonStageManager.ROLE_DOOR.equals(currentRole)) label = "Required Switches";
+            else if (DungeonStageManager.ROLE_BLOCK_MATCH.equals(currentRole)) label = "State (e.g. lit=true) (Optional)";
             else if ("SURVIVE_TIMER".equals(currentStageType) && DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole)) {
-                // If it's a survive timer and we are editing the trigger, maybe the count box is repurposed? 
-                // Wait, timer is read from TAG_COUNT? Ah, we use countBox for the timer on the trigger.
                 label = "Timer (Seconds)";
             }
             guiGraphics.drawString(this.font, label, this.countBox.getX(), this.countBox.getY() - 10, 0xDDDDDD);
         }
-        if (this.switchIdBox.visible) {
+        if (this.switchIdBox != null && this.switchIdBox.visible) {
             String label = "Switch ID";
             if (DungeonStageManager.ROLE_DOOR.equals(currentRole)) label = "Group ID (optional)";
             else if (DungeonStageManager.ROLE_STAGE_TRIGGER.equals(currentRole)) label = "Key Drop Stage ID (optional)";
             guiGraphics.drawString(this.font, label, this.switchIdBox.getX(), this.switchIdBox.getY() - 10, 0xDDDDDD);
         }
-        if (this.modifierActionButton.visible) {
+        if (this.modifierActionButton != null && this.modifierActionButton.visible) {
             guiGraphics.drawString(this.font, "Action", this.modifierActionButton.getX(), this.modifierActionButton.getY() - 10, 0xDDDDDD);
         }
         if (this.dropsKeyButton != null && this.dropsKeyButton.visible) {
             guiGraphics.drawString(this.font, "Drops Key on Complete", this.dropsKeyButton.getX(), this.dropsKeyButton.getY() - 10, 0xDDDDDD);
         }
-        if (this.lootTableBox.visible) {
+        if (this.lootTableBox != null && this.lootTableBox.visible) {
             guiGraphics.drawString(this.font, "Loot Table Path", this.lootTableBox.getX(), this.lootTableBox.getY() - 10, 0xDDDDDD);
         }
 
-        if (this.enemyTypeBox.visible && this.enemyTypeBox.isFocused()) {
+        if (this.enemyTypeBox != null && this.enemyTypeBox.visible && this.enemyTypeBox.isFocused()) {
             String input = this.enemyTypeBox.getValue();
             if (!input.isEmpty()) {
                 String suggestion = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? getBlockSuggestion(input) : getEntitySuggestion(input);
@@ -403,7 +434,7 @@ public class DungeonMarkerScreen extends Screen {
             }
         }
 
-        if (this.bossIdBox.visible && this.bossIdBox.isFocused()) {
+        if (this.bossIdBox != null && this.bossIdBox.visible && this.bossIdBox.isFocused()) {
             String input = this.bossIdBox.getValue();
             if (!input.isEmpty()) {
                 String suggestion = getEntitySuggestion(input);
@@ -414,7 +445,7 @@ public class DungeonMarkerScreen extends Screen {
             }
         }
 
-        if (this.lootTableBox.visible && this.lootTableBox.isFocused()) {
+        if (this.lootTableBox != null && this.lootTableBox.visible && this.lootTableBox.isFocused()) {
             String input = this.lootTableBox.getValue();
             if (!input.isEmpty()) {
                 String suggestion = getLootTableSuggestion(input);
@@ -429,7 +460,7 @@ public class DungeonMarkerScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_TAB) {
-            if (this.enemyTypeBox.isFocused()) {
+            if (this.enemyTypeBox != null && this.enemyTypeBox.isFocused()) {
                 String suggestion = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? getBlockSuggestion(this.enemyTypeBox.getValue()) : getEntitySuggestion(this.enemyTypeBox.getValue());
                 if (suggestion != null) {
                     this.enemyTypeBox.setValue(suggestion);
@@ -437,7 +468,7 @@ public class DungeonMarkerScreen extends Screen {
                     return true;
                 }
             }
-            if (this.bossIdBox.isFocused()) {
+            if (this.bossIdBox != null && this.bossIdBox.isFocused()) {
                 String suggestion = getEntitySuggestion(this.bossIdBox.getValue());
                 if (suggestion != null) {
                     this.bossIdBox.setValue(suggestion);
@@ -445,7 +476,7 @@ public class DungeonMarkerScreen extends Screen {
                     return true;
                 }
             }
-            if (this.lootTableBox.isFocused()) {
+            if (this.lootTableBox != null && this.lootTableBox.isFocused()) {
                 String suggestion = getLootTableSuggestion(this.lootTableBox.getValue());
                 if (suggestion != null) {
                     this.lootTableBox.setValue(suggestion);

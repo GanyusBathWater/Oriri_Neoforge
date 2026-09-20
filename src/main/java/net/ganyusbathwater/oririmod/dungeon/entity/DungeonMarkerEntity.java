@@ -195,7 +195,6 @@ public class DungeonMarkerEntity extends Entity {
         if (source.getEntity() instanceof net.minecraft.world.entity.player.Player player && player.isCreative()) {
             if (!this.level().isClientSide) {
                 this.discard();
-                player.displayClientMessage(net.minecraft.network.chat.Component.literal("Removed Marker"), true);
             }
             return true;
         }

@@ -48,6 +48,16 @@ public final class NetworkHandler {
             "open_marker_screen");
     public static final ResourceLocation SYNC_MARKER_DATA = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "sync_marker_data");
+    public static final ResourceLocation OPEN_CONVERSATION = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "open_conversation");
+    public static final ResourceLocation CONVERSATION_ACTION = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "conversation_action");
+    public static final ResourceLocation UPDATE_TELEPORTER_ID = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "update_teleporter_id");
+    public static final ResourceLocation OPEN_TELEPORTER_SCREEN = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "open_teleporter_screen");
+    public static final ResourceLocation SYNC_DIALOGUES = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "sync_dialogues");
 
     private NetworkHandler() {
     }
@@ -246,6 +256,82 @@ public final class NetworkHandler {
                 (payload, ctx) -> ctx.enqueueWork(() -> {
                     net.ganyusbathwater.oririmod.events.ClientEvents.updateDungeonLives(payload.lives());
                 }));
+
+        // Conversation: server → client open dialogue screen
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenConversationPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenConversationPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.dialogue.DialogueTree tree =
+                            net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.get(payload.treeId());
+                    if (tree != null) {
+                        net.minecraft.client.Minecraft.getInstance()
+                                .setScreen(new net.ganyusbathwater.oririmod.client.screen.ConversationScreen(
+                                        tree, payload.entityId()));
+                    } else {
+                        OririMod.LOGGER.warn("[Dialogue] Client tried to open unknown dialogue tree: {}", payload.treeId());
+                    }
+                }));
+                
+        // Sync Dialogues: server -> client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncDialoguesPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncDialoguesPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.loadFromJsonSync(payload.dialoguesJson());
+                }));
+
+        // Conversation: client → server dialogue action
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.ConversationActionPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.ConversationActionPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    if (!(ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp)) return;
+                    net.minecraft.world.entity.Entity entity = sp.serverLevel().getEntity(payload.entityId());
+
+                    // Validate entity exists, is conversable, and is within 10 blocks
+                    if (entity == null || !(entity instanceof net.ganyusbathwater.oririmod.dialogue.ConversableEntity)) {
+                        return;
+                    }
+                    if (sp.distanceTo(entity) > 10.0) {
+                        return;
+                    }
+
+                    handleConversationAction(sp, entity, payload.action());
+                }));
+
+        // Teleporter ID Update
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.UpdateTeleporterIDPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.UpdateTeleporterIDPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    if (!(ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp)) return;
+                    net.minecraft.world.level.block.entity.BlockEntity be = sp.level().getBlockEntity(payload.pos());
+                    if (be instanceof net.ganyusbathwater.oririmod.block.entity.TeleporterBlockEntity teleporter) {
+                        // Check if in dungeon
+                        boolean inDungeon = sp.level().dimension().location().getPath().startsWith("dungeon_");
+                        if (inDungeon && !sp.isCreative()) {
+                            sp.displayClientMessage(net.minecraft.network.chat.Component.translatable("gui.oririmod.teleporter.no_modify_dungeon").withStyle(net.minecraft.ChatFormatting.RED), true);
+                            return;
+                        }
+                        
+                        // Check distance
+                        if (sp.blockPosition().distSqr(payload.pos()) > 64) {
+                            return;
+                        }
+                        
+                        teleporter.setTeleporterId(payload.id(), sp);
+                    }
+                }));
+
+        // Open Teleporter Screen (server -> client)
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenTeleporterScreenPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenTeleporterScreenPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.minecraft.client.Minecraft.getInstance()
+                            .setScreen(new net.ganyusbathwater.oririmod.client.screen.TeleporterScreen(payload));
+                }));
     }
     
 
@@ -293,4 +379,47 @@ public final class NetworkHandler {
         PacketDistributor.sendToPlayer(player,
                 new net.ganyusbathwater.oririmod.network.packet.HomewardConfirmRequestPayload());
     }
-}
+
+    public static void sendOpenTeleporterScreen(ServerPlayer player, BlockPos pos, String currentId) {
+        boolean originObstructed = !net.ganyusbathwater.oririmod.block.custom.TeleporterBlock.isClear(player.level(), pos);
+        boolean destObstructed = false;
+        if (currentId != null && !currentId.isEmpty()) {
+            net.ganyusbathwater.oririmod.world.data.TeleporterSavedData data = net.ganyusbathwater.oririmod.world.data.TeleporterSavedData.get(player.serverLevel());
+            BlockPos dest = data.getDestination(currentId, pos);
+            if (dest != null) {
+                destObstructed = !net.ganyusbathwater.oririmod.block.custom.TeleporterBlock.isClear(player.level(), dest);
+            }
+        }
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.OpenTeleporterScreenPayload(pos, currentId, originObstructed, destObstructed));
+    }
+
+    /**
+     * Send a conversation dialogue tree to a player.
+     */
+    public static void sendConversation(ServerPlayer player, int entityId, net.ganyusbathwater.oririmod.dialogue.DialogueTree tree) {
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.OpenConversationPayload(entityId, tree.getId()));
+    }
+
+    /**
+     * Handle a conversation action sent from the client.
+     * Dispatches to the appropriate entity-specific handler.
+     */
+    private static void handleConversationAction(ServerPlayer sp, net.minecraft.world.entity.Entity entity, String actionStr) {
+        if ("CLOSE".equals(actionStr)) {
+            // Nothing to do server-side, client already closed the screen
+            return;
+        }
+        
+        net.ganyusbathwater.oririmod.dialogue.DialogueAction action = net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.getAction(actionStr);
+        if (action == null) {
+            OririMod.LOGGER.warn("[Dialogue] Unknown action '{}' from player {}", actionStr, sp.getName().getString());
+            return;
+        }
+
+        if (entity instanceof net.ganyusbathwater.oririmod.dialogue.ConversableEntity conversableEntity) {
+            action.execute(sp, conversableEntity);
+        }
+    }
+}

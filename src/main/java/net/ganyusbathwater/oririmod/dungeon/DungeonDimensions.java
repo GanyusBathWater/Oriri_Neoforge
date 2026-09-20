@@ -14,7 +14,8 @@ import net.minecraft.world.level.Level;
 public class DungeonDimensions {
     
     // Dungeons
-    public static final ResourceKey<Level> TUTORIAL = createKey("dungeon_tutorial");
+    public static final ResourceKey<Level> OVERWORLD_DAY = createKey("dungeon_overworld_day");
+    public static final ResourceKey<Level> OVERWORLD_NIGHT = createKey("dungeon_overworld_night");
 
     public static ResourceKey<Level> createKey(String name) {
         return ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, name));

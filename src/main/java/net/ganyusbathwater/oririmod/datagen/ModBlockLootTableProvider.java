@@ -209,6 +209,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.get(), block -> createForcefieldEmitterTable(block));
         add(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.get(), block -> createForcefieldEmitterTable(block));
         add(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get(), block -> createForcefieldEmitterTable(block));
+        dropSelf(ModBlocks.TELEPORTER_BLOCK.get());
         dropSelf(ModBlocks.ABYSS_CROWN_LOG.get());
         dropSelf(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get());
         dropSelf(ModBlocks.ABYSS_CROWN_STEM.get());

@@ -7,7 +7,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-
 import java.util.function.Supplier;
 
 public class ModBlockEntities {
@@ -23,6 +22,11 @@ public class ModBlockEntities {
             "revival_shrine",
             () -> BlockEntityType.Builder.of(RevivalShrineBlockEntity::new,
                     ModBlocks.REVIVAL_SHRINE.get()).build(null));
+
+    public static final Supplier<BlockEntityType<TeleporterBlockEntity>> TELEPORTER = BLOCK_ENTITIES.register(
+            "teleporter",
+            () -> BlockEntityType.Builder.of(TeleporterBlockEntity::new,
+                    ModBlocks.TELEPORTER_BLOCK.get()).build(null));
 
     public static final Supplier<BlockEntityType<ForcefieldEmitterBlockEntity>> FORCEFIELD_EMITTER = BLOCK_ENTITIES.register(
             "forcefield_emitter",

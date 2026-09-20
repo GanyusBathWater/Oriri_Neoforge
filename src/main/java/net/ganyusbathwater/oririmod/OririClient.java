@@ -77,6 +77,7 @@ public class OririClient {
         event.registerSpriteSet(ModParticles.ELYSIAN_ABYSS_PARTICLE.get(), ElysianAbyssParticle.Provider::new);
         event.registerSpriteSet(ModParticles.DEVIARTRAS_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.DeviartrasSporeParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELDER_SPORE_BLOSSOM_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.ElderSporeBlossomSporeParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.TELEPORTER_VORTEX_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.TeleporterVortexParticle.Provider::new);
     }
 
     @SubscribeEvent
@@ -382,6 +383,8 @@ public class OririClient {
                 net.minecraft.client.renderer.blockentity.HangingSignRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.FORCEFIELD_EMITTER.get(),
                 net.ganyusbathwater.oririmod.client.render.block.ForcefieldEmitterRenderer::new);
+        event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.TELEPORTER.get(),
+                net.ganyusbathwater.oririmod.client.render.block.TeleporterBlockEntityRenderer::new);
     }
 
     private static float blackHoleShakeIntensity = 0f;

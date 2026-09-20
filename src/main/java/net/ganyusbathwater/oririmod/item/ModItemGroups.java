@@ -70,6 +70,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDERBUSH_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
+                        output.accept(ModBlocks.TELEPORTER_BLOCK);
                         output.accept(ModBlocks.ELDER_LOG_BLOCK);
                         output.accept(ModBlocks.CRACKED_ELDER_LOG_BLOCK);
                         output.accept(ModBlocks.STRIPPED_ELDER_LOG_BLOCK);
@@ -425,6 +426,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BOSS_ATTACK_DEBUG_WAND);
                         output.accept(ModItems.MAGIC_DEBUG_STICK);
                         output.accept(ModItems.VISUAL_DEBUG_ITEM);
+                        output.accept(ModItems.DUNGEON_SKIPPER.get());
                         output.accept(ModItems.COSMIC_EXAMPLE); // Stage 1 tooltip test item
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.SKELETON_ENCYCLOPEDIA);

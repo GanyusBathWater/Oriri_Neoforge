@@ -150,7 +150,9 @@ public class DungeonKeeperScreen extends Screen {
         drawBorder(gfx, left, top, PANEL_W, PANEL_H, C_BORDER);
 
         // Render widgets on top
-        super.render(gfx, mouseX, mouseY, partial);
+        for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
+            renderable.render(gfx, mouseX, mouseY, partial);
+        }
 
         // ── Title Zone ──
         gfx.drawCenteredString(font,

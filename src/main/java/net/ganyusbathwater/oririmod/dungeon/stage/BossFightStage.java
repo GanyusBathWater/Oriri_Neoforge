@@ -22,6 +22,11 @@ public class BossFightStage extends AbstractDungeonStage {
     @Override
     protected void doStart(ServerLevel level, DungeonInstance instance) {
         if (definition.getBossEntityType() == null || definition.getBossSpawnPos() == null) {
+            String msg = "BossFightStage broken: boss_type is " + definition.getBossEntityType() + " and boss_spawn is " + definition.getBossSpawnPos();
+            for (UUID pid : instance.getPlayers()) {
+                net.minecraft.server.level.ServerPlayer sp = level.getServer().getPlayerList().getPlayer(pid);
+                if (sp != null) sp.displayClientMessage(net.minecraft.network.chat.Component.literal(msg).withStyle(net.minecraft.ChatFormatting.RED), false);
+            }
             System.err.println("[OririMod] BossFightStage: missing boss_type or boss_spawn in stage " + definition.getStageId());
             this.state = StageState.COMPLETE; // Skip broken stage
             return;
@@ -29,6 +34,11 @@ public class BossFightStage extends AbstractDungeonStage {
 
         var typeOpt = BuiltInRegistries.ENTITY_TYPE.getOptional(definition.getBossEntityType());
         if (typeOpt.isEmpty()) {
+            String msg = "BossFightStage broken: unknown boss entity type " + definition.getBossEntityType();
+            for (UUID pid : instance.getPlayers()) {
+                net.minecraft.server.level.ServerPlayer sp = level.getServer().getPlayerList().getPlayer(pid);
+                if (sp != null) sp.displayClientMessage(net.minecraft.network.chat.Component.literal(msg).withStyle(net.minecraft.ChatFormatting.RED), false);
+            }
             System.err.println("[OririMod] BossFightStage: unknown boss entity type " + definition.getBossEntityType());
             this.state = StageState.COMPLETE;
             return;

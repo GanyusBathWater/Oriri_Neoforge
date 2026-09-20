@@ -17,7 +17,8 @@ public final class StageDefinition {
     public record InfiniteSpawnEntry(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance, @Nullable String keyDropItem) {}
     public record SwitchEntry(String switchId, BlockPos pos) {}
     public record DoorEntry(String groupId, int requiredSwitches, BlockPos pos) {}
-    public record AreaModifierEntry(String action, int radius, @Nullable ResourceLocation blockFilter, BlockPos pos) {}
+    public record BlockMatchEntry(net.minecraft.resources.ResourceLocation blockId, String stateData, BlockPos pos) {}
+    public record AreaModifierEntry(String action, int radius, @Nullable ResourceLocation blockFilter, String extraString, BlockPos pos, float yRot) {}
     public record TriggerEntry(BlockPos pos, int radius) {}
 
     private final String stageId;
@@ -26,8 +27,10 @@ public final class StageDefinition {
     private final List<InfiniteSpawnEntry> infiniteSpawns;
     private final List<SwitchEntry> switches;
     private final List<DoorEntry> doors;
+    private final List<BlockMatchEntry> blockMatches;
     private final List<AreaModifierEntry> areaModifiers;
     private final List<TriggerEntry> triggers;
+    private final List<TriggerEntry> goals;
     private final int timerTicks;           // For SURVIVE_TIMER stages (in ticks)
     @Nullable private final ResourceLocation bossEntityType; // For BOSS_FIGHT stages
     @Nullable private final BlockPos bossSpawnPos;
@@ -42,8 +45,10 @@ public final class StageDefinition {
         this.infiniteSpawns = List.copyOf(b.infiniteSpawns);
         this.switches = List.copyOf(b.switches);
         this.doors = List.copyOf(b.doors);
+        this.blockMatches = List.copyOf(b.blockMatches);
         this.areaModifiers = List.copyOf(b.areaModifiers);
         this.triggers = List.copyOf(b.triggers);
+        this.goals = List.copyOf(b.goals);
         this.timerTicks = b.timerTicks;
         this.bossEntityType = b.bossEntityType;
         this.bossSpawnPos = b.bossSpawnPos;
@@ -58,8 +63,10 @@ public final class StageDefinition {
     public List<InfiniteSpawnEntry> getInfiniteSpawns() { return infiniteSpawns; }
     public List<SwitchEntry> getSwitches() { return switches; }
     public List<DoorEntry> getDoors() { return doors; }
+    public List<BlockMatchEntry> getBlockMatches() { return blockMatches; }
     public List<AreaModifierEntry> getAreaModifiers() { return areaModifiers; }
     public List<TriggerEntry> getTriggers() { return triggers; }
+    public List<TriggerEntry> getGoals() { return goals; }
     public int getTimerTicks() { return timerTicks; }
     @Nullable public ResourceLocation getBossEntityType() { return bossEntityType; }
     @Nullable public BlockPos getBossSpawnPos() { return bossSpawnPos; }
@@ -82,8 +89,10 @@ public final class StageDefinition {
         private final List<InfiniteSpawnEntry> infiniteSpawns = new ArrayList<>();
         private final List<SwitchEntry> switches = new ArrayList<>();
         private final List<DoorEntry> doors = new ArrayList<>();
+        private final List<BlockMatchEntry> blockMatches = new ArrayList<>();
         private final List<AreaModifierEntry> areaModifiers = new ArrayList<>();
         private final List<TriggerEntry> triggers = new ArrayList<>();
+        private final List<TriggerEntry> goals = new ArrayList<>();
         private int timerTicks = 0;
         @Nullable private ResourceLocation bossEntityType;
         @Nullable private BlockPos bossSpawnPos;
@@ -116,13 +125,23 @@ public final class StageDefinition {
             return this;
         }
 
-        public Builder addAreaModifier(String action, int radius, @Nullable ResourceLocation blockFilter, BlockPos pos) {
-            areaModifiers.add(new AreaModifierEntry(action, radius, blockFilter, pos));
+        public Builder addBlockMatch(net.minecraft.resources.ResourceLocation blockId, String stateData, BlockPos pos) {
+            blockMatches.add(new BlockMatchEntry(blockId, stateData, pos));
+            return this;
+        }
+
+        public Builder addAreaModifier(String action, int radius, @Nullable ResourceLocation blockFilter, String extraString, BlockPos pos, float yRot) {
+            areaModifiers.add(new AreaModifierEntry(action, radius, blockFilter, extraString, pos, yRot));
             return this;
         }
 
         public Builder addTrigger(BlockPos pos, int radius) {
             triggers.add(new TriggerEntry(pos, radius));
+            return this;
+        }
+
+        public Builder addGoal(BlockPos pos, int radius) {
+            goals.add(new TriggerEntry(pos, radius));
             return this;
         }
 

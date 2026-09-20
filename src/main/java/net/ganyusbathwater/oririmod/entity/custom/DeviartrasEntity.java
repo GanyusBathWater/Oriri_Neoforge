@@ -136,6 +136,7 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     public DeviartrasEntity(EntityType<? extends DeviartrasEntity> type, Level level) {
         super(type, level);
         this.xpReward = 150;
+        this.getPersistentData().putBoolean("IsNoxusMob", true);
     }
 
     // ── Attributes ────────────────────────────────────────────────────────────

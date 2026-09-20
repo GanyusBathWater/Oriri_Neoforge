@@ -38,6 +38,10 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.VisualDebugItem(
                                         new Item.Properties().stacksTo(1)));
 
+        public static final DeferredItem<Item> DUNGEON_SKIPPER = ITEMS.register("dungeon_skipper",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.DungeonSkipperItem(
+                                        new Item.Properties().stacksTo(1)));
+
         public static final DeferredItem<Item> SOL_QUICKSAND_BUCKET = ITEMS.register("sol_quicksand_bucket",
                         () -> new net.minecraft.world.item.SolidBucketItem(net.ganyusbathwater.oririmod.block.ModBlocks.SOL_QUICKSAND.get(),
                                         net.minecraft.sounds.SoundEvents.BUCKET_EMPTY_POWDER_SNOW,

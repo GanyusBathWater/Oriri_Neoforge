@@ -40,8 +40,15 @@ public class DungeonTickHandler {
             if (!level.dimension().location().getPath().startsWith("dungeon_")) continue;
 
             DungeonManager manager = DungeonManager.get(level);
+            String thisDimKey = level.dimension().location().toString();
             List<DungeonInstance> activeInstances = new java.util.ArrayList<>(manager.getActiveInstances().values());
             for (DungeonInstance instance : activeInstances) {
+                // Only tick instances that belong to THIS dimension, not all dimensions
+                var def = net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.get(instance.getDungeonId());
+                if (def == null) continue;
+                String instanceDimKey = def.dimension().location().toString();
+                if (!instanceDimKey.equals(thisDimKey)) continue;
+
                 tickInstance(level, manager, instance);
             }
         }
@@ -83,6 +90,15 @@ public class DungeonTickHandler {
         if (instance.getStageDefinitions().isEmpty() && instance.getTicksActive() > 5) {
             List<StageDefinition> defs = DungeonStageManager.buildStages(level, instance);
             instance.setStageDefinitions(defs);
+            
+            // Restore currentStageIndex from saved currentStage string
+            for (int i = 0; i < defs.size(); i++) {
+                if (defs.get(i).getStageId().equals(instance.getCurrentStage())) {
+                    instance.setCurrentStageIndex(i);
+                    break;
+                }
+            }
+            
             if (defs.isEmpty()) {
                 OririMod.LOGGER.warn("[DungeonTickHandler] No stage markers found for instance {} (dungeon: {})",
                         instance.getInstanceId(), instance.getDungeonId());
@@ -95,16 +111,12 @@ public class DungeonTickHandler {
             DungeonStage nextStage = DungeonStageManager.createStage(nextDef);
             instance.setActiveStage(nextStage);
             instance.setCurrentStage(nextDef.getStageId());
+            debugLog(level, instance, "Started Stage: " + nextDef.getStageId() + " (" + nextDef.getStageType() + ")");
 
-            // Teleport players to the stage's designated spawn point if defined
+            // Update the dungeon's respawn point to this stage's designated spawn point if defined.
+            // Players will only be sent here if they die/respawn, avoiding forced teleports mid-dungeon.
             if (nextDef.getPlayerSpawnPos() != null) {
-                var spawnPos = nextDef.getPlayerSpawnPos();
-                for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
-                    ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
-                    if (sp != null) {
-                        sp.teleportTo(level, spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, 0f, 0f);
-                    }
-                }
+                instance.setPlayerSpawnPos(nextDef.getPlayerSpawnPos());
             }
 
             // Start the stage — this spawns enemies, locks doors, etc.
@@ -126,11 +138,13 @@ public class DungeonTickHandler {
 
             // Handle transition from PENDING -> ACTIVE
             if (prevState == DungeonStage.StageState.PENDING && newState == DungeonStage.StageState.ACTIVE) {
+                debugLog(level, instance, "Stage " + activeStage.getDefinition().getStageId() + " became ACTIVE (Trigger tripped).");
                 announceStage(level, instance, activeStage.getDefinition());
                 playMusic(level, instance, activeStage.getDefinition());
             }
 
             if (activeStage.isComplete()) {
+                debugLog(level, instance, "Stage " + activeStage.getDefinition().getStageId() + " is COMPLETE.");
                 activeStage.onComplete(level, instance);
                 
                 // Clear leftover mobs from this stage to improve performance
@@ -162,6 +176,17 @@ public class DungeonTickHandler {
     // -------------------------------------------------------------------------
     //  Helpers
     // -------------------------------------------------------------------------
+
+    private static void debugLog(ServerLevel level, DungeonInstance instance, String message) {
+        if (instance.isDebugLoggingEnabled()) {
+            net.minecraft.network.chat.Component comp = net.minecraft.network.chat.Component.literal("[Dungeon Debug] " + message).withStyle(net.minecraft.ChatFormatting.GRAY);
+            for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
+                ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+                if (sp != null) sp.sendSystemMessage(comp);
+            }
+            OririMod.LOGGER.info("[Dungeon Debug] [{}] {}", instance.getDungeonId(), message);
+        }
+    }
 
     private static void announceStage(ServerLevel level, DungeonInstance instance, StageDefinition def) {
         // Disabled per user request

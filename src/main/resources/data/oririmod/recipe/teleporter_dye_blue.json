@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "oririmod:teleporter"
+    },
+    {
+      "item": "minecraft:blue_dye"
+    }
+  ],
+  "result": {
+    "id": "oririmod:teleporter",
+    "components": {
+      "minecraft:base_color": "blue"
+    }
+  }
+}

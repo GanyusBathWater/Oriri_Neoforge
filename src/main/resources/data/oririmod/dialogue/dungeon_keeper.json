@@ -1,0 +1,57 @@
+{
+  "portrait": "oririmod:textures/gui/portrait/dungeon_keeper.png",
+  "start_node": "greeting",
+  "nodes": {
+    "greeting": {
+      "type": "NPC_LINE",
+      "speaker": "dialogue.oririmod.dungeon_keeper.name",
+      "text": "dialogue.oririmod.dungeon_keeper.greeting",
+      "next": "main_choice"
+    },
+    "main_choice": {
+      "type": "PLAYER_CHOICE",
+      "choices": [
+        {
+          "text": "dialogue.oririmod.dungeon_keeper.choice_dungeon",
+          "next": "dungeon_action"
+        },
+        {
+          "text": "dialogue.oririmod.dungeon_keeper.choice_who",
+          "next": "lore_1"
+        },
+        {
+          "text": "dialogue.oririmod.dungeon_keeper.choice_bye",
+          "next": "goodbye"
+        }
+      ]
+    },
+    "dungeon_action": {
+      "type": "ACTION",
+      "action": "OPEN_DUNGEON_SELECTION"
+    },
+    "lore_1": {
+      "type": "NPC_LINE",
+      "speaker": "dialogue.oririmod.dungeon_keeper.name",
+      "text": "dialogue.oririmod.dungeon_keeper.lore_1",
+      "next": "lore_2"
+    },
+    "lore_2": {
+      "type": "NPC_LINE",
+      "speaker": "dialogue.oririmod.dungeon_keeper.name",
+      "text": "dialogue.oririmod.dungeon_keeper.lore_2",
+      "next": "lore_3"
+    },
+    "lore_3": {
+      "type": "NPC_LINE",
+      "speaker": "dialogue.oririmod.dungeon_keeper.name",
+      "text": "dialogue.oririmod.dungeon_keeper.lore_3",
+      "next": "main_choice"
+    },
+    "goodbye": {
+      "type": "NPC_LINE",
+      "speaker": "dialogue.oririmod.dungeon_keeper.name",
+      "text": "dialogue.oririmod.dungeon_keeper.goodbye",
+      "next": null
+    }
+  }
+}

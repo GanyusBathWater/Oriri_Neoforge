@@ -12,6 +12,7 @@ import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.*;
 import net.ganyusbathwater.oririmod.block.custom.AbyssCrownSaplingBlock;
+import net.ganyusbathwater.oririmod.block.custom.TeleporterBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
@@ -838,6 +839,9 @@ public class ModBlocks {
         public static final DeferredBlock<Block> HANGING_ELDER_MOSS_PLANT = BLOCKS.register("hanging_elder_moss_plant",
                         () -> new net.ganyusbathwater.oririmod.block.custom.HangingElderMossPlantBlock(
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.WEEPING_VINES_PLANT)));
+
+        public static final DeferredBlock<Block> TELEPORTER_BLOCK = registerBlock("teleporter",
+                        () -> new TeleporterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion().strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
 
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);

@@ -169,12 +169,17 @@ public class ClientEvents {
         // ── Dungeon Lives Overlay ─────────────────────────────────────────
         if (player.level().dimension().location().getPath().startsWith("dungeon_") && clientDungeonLives >= 0 && !player.isSpectator()) {
             int screenW = mc.getWindow().getGuiScaledWidth();
-            int startX = screenW - 10 - (3 * 20); // Top right, 10px padding, 3 hearts max (20px each)
-            int heartY = 10;
+            int screenH = mc.getWindow().getGuiScaledHeight();
+            
+            int heartSize = 16;
+            // The food bar is at the bottom right of the crosshair (right edge is at screenW/2 + 91)
+            // It is drawn at Y = screenH - 39. We want it above that, so Y = screenH - 55.
+            int startX = (screenW / 2) + 91 - (clientDungeonLives * heartSize);
+            int heartY = screenH - 55;
             
             RenderSystem.enableBlend();
             for (int i = 0; i < clientDungeonLives; i++) {
-                gui.blit(DUNGEON_HEART_TEX, startX + (i * 20), heartY, 0, 0, 16, 16, 16, 16);
+                gui.blit(DUNGEON_HEART_TEX, startX + (i * heartSize), heartY, 0, 0, heartSize, heartSize, heartSize, heartSize);
             }
             RenderSystem.disableBlend();
         }

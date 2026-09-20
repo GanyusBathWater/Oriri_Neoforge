@@ -1,20 +1,18 @@
 package net.ganyusbathwater.oririmod.dungeon.entity;
 
+import net.ganyusbathwater.oririmod.dialogue.ConversableEntity;
+import net.ganyusbathwater.oririmod.dialogue.DialogueRegistry;
+import net.ganyusbathwater.oririmod.dialogue.DialogueTree;
 import net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry;
 import net.ganyusbathwater.oririmod.dungeon.party.DungeonParty;
 import net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyManager;
-import net.ganyusbathwater.oririmod.entity.ModEntities;
+import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload;
 import net.ganyusbathwater.oririmod.network.packet.OpenDungeonSelectionPayload;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -29,10 +27,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The Dungeon Keeper NPC. When right-clicked, it opens either the DungeonSelectionScreen
- * or the Party Management Screen.
+ * The Dungeon Keeper NPC. When right-clicked, it starts a Gacha-style conversation.
+ * The conversation offers dialogue choices that lead to the Dungeon system.
  */
-public class DungeonKeeperEntity extends PathfinderMob {
+public class DungeonKeeperEntity extends PathfinderMob implements ConversableEntity {
 
     public DungeonKeeperEntity(EntityType<? extends DungeonKeeperEntity> type, Level level) {
         super(type, level);
@@ -51,10 +49,33 @@ public class DungeonKeeperEntity extends PathfinderMob {
     }
 
     @Override
+    public String getDialogueTreeId() {
+        return "dungeon_keeper";
+    }
+
+    @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.SUCCESS; // client side
 
+        // Start conversation instead of directly opening dungeon screens
+        DialogueTree tree = DialogueRegistry.get(getDialogueTreeId());
+        if (tree != null) {
+            NetworkHandler.sendConversation(sp, this.getId(), tree);
+        } else {
+            // Fallback: if dialogue JSON is missing, open dungeon screen directly
+            openDungeonScreenForPlayer(sp);
+        }
+
+        return InteractionResult.CONSUME;
+    }
+
+    /**
+     * Opens the appropriate dungeon screen for the player.
+     * Called by the conversation action handler when the player picks "Go on a Dungeon Quest".
+     * Also used as fallback if dialogue tree is not loaded.
+     */
+    public void openDungeonScreenForPlayer(ServerPlayer sp) {
         DungeonPartyManager partyManager = DungeonPartyManager.get(sp.serverLevel());
         DungeonParty party = partyManager.getPartyForPlayer(sp.getUUID());
 
@@ -65,8 +86,6 @@ public class DungeonKeeperEntity extends PathfinderMob {
             // Player is in a party. Open Party Management Screen.
             sendOpenScreen(sp, party, party.getDungeonId());
         }
-
-        return InteractionResult.CONSUME;
     }
     
     private void sendSelectionScreen(ServerPlayer sp) {

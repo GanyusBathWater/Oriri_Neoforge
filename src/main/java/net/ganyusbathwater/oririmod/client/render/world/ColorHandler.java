@@ -67,6 +67,15 @@ public final class ColorHandler {
             return -1;
         };
         event.register(mermaidScaleItem, net.ganyusbathwater.oririmod.item.ModItems.MERMAID_SCALE.get());
+
+        ItemColor teleporterItem = (stack, tintIndex) -> {
+            if (tintIndex == 0) {
+                net.minecraft.world.item.DyeColor color = stack.get(net.minecraft.core.component.DataComponents.BASE_COLOR);
+                if (color != null) return color.getTextureDiffuseColor();
+            }
+            return -1;
+        };
+        event.register(teleporterItem, net.ganyusbathwater.oririmod.block.ModBlocks.TELEPORTER_BLOCK.get());
     }
 
     // ---------- Helpers ----------

@@ -23,10 +23,13 @@ public class DungeonStageManager {
     // -------------------------------------------------------------------------
     public static final String ROLE_SPAWN_POINT   = "SPAWN_POINT";
     public static final String ROLE_BOSS_SPAWN    = "BOSS_SPAWN";
+    public static final String ROLE_MINI_BOSS_SPAWN = "MINI_BOSS_SPAWN";
     public static final String ROLE_SWITCH        = "SWITCH";
     public static final String ROLE_DOOR          = "DOOR";
     public static final String ROLE_AREA_MODIFIER = "AREA_MODIFIER";
     public static final String ROLE_STAGE_TRIGGER = "STAGE_TRIGGER";
+    public static final String ROLE_GOAL_AREA     = "GOAL_AREA";
+    public static final String ROLE_BLOCK_MATCH   = "BLOCK_MATCH";
     public static final String ROLE_PLAYER_SPAWN  = "PLAYER_SPAWN";
     public static final String ROLE_BOUNDS_MIN    = "BOUNDS_MIN";
     public static final String ROLE_BOUNDS_MAX    = "BOUNDS_MAX";
@@ -63,23 +66,64 @@ public class DungeonStageManager {
                 continue;
             }
             if (ROLE_PLAYER_SPAWN.equalsIgnoreCase(marker.getRole())) {
-                instance.setPlayerSpawnPos(marker.blockPosition());
-                continue;
+                if (instance.getPlayerSpawnPos() == null) {
+                    instance.setPlayerSpawnPos(marker.blockPosition());
+                }
+                // Do NOT continue here; if it has a stage ID, we want it in the stage definition!
             }
             String stageId = marker.getStageId();
             if (stageId.isBlank()) continue;
             byStage.computeIfAbsent(stageId, k -> new ArrayList<>()).add(marker);
         }
 
-        // Build StageDefinitions, sorted by stage ID
+        // Build StageDefinitions, sorted by stage ID (alphanumeric)
         List<String> sortedIds = new ArrayList<>(byStage.keySet());
-        Collections.sort(sortedIds);
+        sortedIds.sort((s1, s2) -> {
+            int i1 = 0, i2 = 0;
+            while (i1 < s1.length() && i2 < s2.length()) {
+                char c1 = s1.charAt(i1);
+                char c2 = s2.charAt(i2);
+                boolean isDigit1 = Character.isDigit(c1);
+                boolean isDigit2 = Character.isDigit(c2);
+                
+                if (isDigit1 && isDigit2) {
+                    int start1 = i1;
+                    while (i1 < s1.length() && Character.isDigit(s1.charAt(i1))) i1++;
+                    int start2 = i2;
+                    while (i2 < s2.length() && Character.isDigit(s2.charAt(i2))) i2++;
+                    
+                    try {
+                        long n1 = Long.parseLong(s1.substring(start1, i1));
+                        long n2 = Long.parseLong(s2.substring(start2, i2));
+                        if (n1 != n2) return Long.compare(n1, n2);
+                    } catch (NumberFormatException e) {
+                        int cmp = s1.substring(start1, i1).compareTo(s2.substring(start2, i2));
+                        if (cmp != 0) return cmp;
+                    }
+                } else {
+                    int start1 = i1;
+                    while (i1 < s1.length() && !Character.isDigit(s1.charAt(i1))) i1++;
+                    int start2 = i2;
+                    while (i2 < s2.length() && !Character.isDigit(s2.charAt(i2))) i2++;
+                    
+                    int cmp = s1.substring(start1, i1).compareTo(s2.substring(start2, i2));
+                    if (cmp != 0) return cmp;
+                }
+            }
+            return s1.length() - s2.length();
+        });
 
         List<StageDefinition> definitions = new ArrayList<>();
         for (String stageId : sortedIds) {
             StageDefinition def = buildStageDefinition(stageId, byStage.get(stageId));
             if (def != null) definitions.add(def);
         }
+        
+        // After building the ordered stages, set the initial dungeon spawn to the first stage's spawn point.
+        if (!definitions.isEmpty() && definitions.get(0).getPlayerSpawnPos() != null) {
+            instance.setPlayerSpawnPos(definitions.get(0).getPlayerSpawnPos());
+        }
+        
         return definitions;
     }
 
@@ -100,17 +144,26 @@ public class DungeonStageManager {
             var extra = marker.getExtraData();
             
             String loot = extra.getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
-            if (!loot.isBlank() && !ROLE_SPAWN_POINT.equalsIgnoreCase(role) && !ROLE_INFINITE_SPAWNER.equalsIgnoreCase(role) && !ROLE_BOSS_SPAWN.equalsIgnoreCase(role)) {
+            if (!loot.isBlank() && !ROLE_SPAWN_POINT.equalsIgnoreCase(role) && !ROLE_INFINITE_SPAWNER.equalsIgnoreCase(role) && !ROLE_BOSS_SPAWN.equalsIgnoreCase(role) && !ROLE_MINI_BOSS_SPAWN.equalsIgnoreCase(role)) {
                 builder.keyDropStageId(loot);
             }
 
             switch (role) {
+                case ROLE_PLAYER_SPAWN -> {
+                    builder.playerSpawn(pos);
+                }
                 case ROLE_SPAWN_POINT -> {
                     String entityTypeStr = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
                     if (!entityTypeStr.isBlank()) {
                         boolean isTag = entityTypeStr.startsWith("#");
                         String cleanType = entityTypeStr.replace("#", "").toLowerCase().replace(' ', '_');
-                        if (!cleanType.contains(":")) cleanType = (isTag ? "oririmod:" : "minecraft:") + cleanType;
+                        if (!cleanType.contains(":")) {
+                            if (!isTag && net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.containsKey(net.minecraft.resources.ResourceLocation.parse("oririmod:" + cleanType))) {
+                                cleanType = "oririmod:" + cleanType;
+                            } else {
+                                cleanType = (isTag ? "oririmod:" : "minecraft:") + cleanType;
+                            }
+                        }
                         ResourceLocation entityType = ResourceLocation.tryParse(cleanType);
                         if (entityType == null) continue;
                         int count = extra.contains(DungeonMarkerEntity.TAG_COUNT)
@@ -125,7 +178,13 @@ public class DungeonStageManager {
                     if (!entityTypeStr.isBlank()) {
                         boolean isTag = entityTypeStr.startsWith("#");
                         String cleanType = entityTypeStr.replace("#", "").toLowerCase().replace(' ', '_');
-                        if (!cleanType.contains(":")) cleanType = (isTag ? "oririmod:" : "minecraft:") + cleanType;
+                        if (!cleanType.contains(":")) {
+                            if (!isTag && net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.containsKey(net.minecraft.resources.ResourceLocation.parse("oririmod:" + cleanType))) {
+                                cleanType = "oririmod:" + cleanType;
+                            } else {
+                                cleanType = (isTag ? "oririmod:" : "minecraft:") + cleanType;
+                            }
+                        }
                         ResourceLocation entityType = ResourceLocation.tryParse(cleanType);
                         if (entityType == null) continue;
                         int cooldownSecs = extra.contains(DungeonMarkerEntity.TAG_COUNT)
@@ -136,7 +195,7 @@ public class DungeonStageManager {
                         builder.addInfiniteSpawn(entityType, isTag, cooldownSecs * 20, pos, chance, loot.isBlank() ? null : loot);
                     }
                 }
-                case ROLE_BOSS_SPAWN -> {
+                case ROLE_BOSS_SPAWN, ROLE_MINI_BOSS_SPAWN -> {
                     String bossTypeStr = extra.getString(DungeonMarkerEntity.TAG_BOSS_ID);
                     if (!bossTypeStr.isBlank()) {
                         // boss_id may be short ("blizza") or full ("oririmod:blizza")
@@ -158,6 +217,7 @@ public class DungeonStageManager {
                     String action = extra.getString(DungeonMarkerEntity.TAG_SWITCH_ID);
                     if (action.isBlank()) action = "destroy";
                     int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 3;
+                    if (radius <= 0) radius = 3;
                     String filterStr = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
                     ResourceLocation filter = null;
                     if (!filterStr.isBlank()) {
@@ -165,14 +225,28 @@ public class DungeonStageManager {
                         if (!cleanFilter.contains(":")) cleanFilter = "minecraft:" + cleanFilter;
                         filter = ResourceLocation.tryParse(cleanFilter);
                     }
-                    builder.addAreaModifier(action, radius, filter, pos);
+                    builder.addAreaModifier(action, radius, filter, filterStr, pos, marker.getYRot());
                 }
                 case ROLE_STAGE_TRIGGER -> {
-                    int radius = extra.contains("radius") ? extra.getInt("radius") : 5;
+                    int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 5;
+                    if (radius <= 0) radius = 5;
                     builder.addTrigger(pos, radius);
                     String switchId = extra.getString(DungeonMarkerEntity.TAG_SWITCH_ID);
                     if (!switchId.isBlank()) {
                         builder.keyDropStageId(switchId);
+                    }
+                }
+                case ROLE_GOAL_AREA -> {
+                    int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 5;
+                    if (radius <= 0) radius = 5;
+                    builder.addGoal(pos, radius);
+                }
+                case ROLE_BLOCK_MATCH -> {
+                    String blockId = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
+                    String blockState = extra.getString(DungeonMarkerEntity.TAG_COUNT);
+                    if (!blockId.isBlank()) {
+                        if (!blockId.contains(":")) blockId = "minecraft:" + blockId;
+                        builder.addBlockMatch(net.minecraft.resources.ResourceLocation.tryParse(blockId), blockState, pos);
                     }
                 }
             }
@@ -195,8 +269,8 @@ public class DungeonStageManager {
             case ACTIVATE_SWITCHES -> new ActivateSwitchesStage(definition);
             case SURVIVE_TIMER -> new SurviveTimerStage(definition);
             case BOSS_FIGHT, MINI_BOSS_FIGHT -> new BossFightStage(definition);
-            case FETCH_ITEM -> new FetchItemStage(definition);
             case PUZZLE_SOLVE -> new PuzzleSolveStage(definition);
+            case REACH_GOAL -> new ReachGoalStage(definition);
             case SPAWN_ONLY -> new PassThroughStage(definition);
         };
     }

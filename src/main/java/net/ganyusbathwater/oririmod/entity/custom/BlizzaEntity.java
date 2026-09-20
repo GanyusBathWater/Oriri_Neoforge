@@ -104,6 +104,7 @@ public class BlizzaEntity extends Monster implements GeoEntity {
     public BlizzaEntity(EntityType<? extends BlizzaEntity> type, Level level) {
         super(type, level);
         this.xpReward = 100;
+        this.getPersistentData().putBoolean("IsNoxusMob", true);
     }
 
     // ── Attributes ────────────────────────────────────────────────────────

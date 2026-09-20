@@ -50,6 +50,14 @@ public class DungeonInstanceGrid {
         occupiedSlots.remove(x + "," + z);
     }
 
+    /**
+     * Clears all occupied slots. Used on server load to prevent stale slot data
+     * from pushing new dungeon instances to unreachable coordinates.
+     */
+    public void clearAll() {
+        occupiedSlots.clear();
+    }
+
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         for (String slot : occupiedSlots) {

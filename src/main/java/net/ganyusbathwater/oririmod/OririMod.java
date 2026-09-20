@@ -33,6 +33,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -122,6 +124,7 @@ public class OririMod {
             TooltipHandler.register();
             ModItems.registerDispenserBehaviors();
             net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.init();
+            net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.init();
             ModBlocks.registerPottedPlants();
         });
     }
@@ -265,9 +268,28 @@ public class OririMod {
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
-    // @net.neoforged.fml.common.EventBusSubscriber(modid = MOD_ID, bus =
-    // net.neoforged.fml.common.EventBusSubscriber.Bus.GAME)
+    // @net.neoforged.fml.common.EventBusSubscriber(modid = MOD_ID, bus = net.neoforged.fml.common.EventBusSubscriber.Bus.GAME)
     public static class GameEvents {
+        
+        @SubscribeEvent
+        public static void onAddReloadListener(AddReloadListenerEvent event) {
+            event.addListener(net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.INSTANCE);
+        }
+
+        @SubscribeEvent
+        public static void onDatapackSync(OnDatapackSyncEvent event) {
+            String json = net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.serializeAllToJson();
+            net.ganyusbathwater.oririmod.network.packet.SyncDialoguesPayload payload = new net.ganyusbathwater.oririmod.network.packet.SyncDialoguesPayload(json);
+            
+            if (event.getPlayer() != null) {
+                // Sync to a specific player joining
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(event.getPlayer(), payload);
+            } else {
+                // Sync to all players on /reload
+                net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(payload);
+            }
+        }
+
         @SubscribeEvent
         public static void onServerStarting(ServerStartingEvent event) {
             OririMod.globalWorldSeed = event.getServer().getWorldData().worldGenOptions().seed();

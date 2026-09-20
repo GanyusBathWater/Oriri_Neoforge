@@ -1,0 +1,17 @@
+{
+  "type": "oririmod:dungeon_night",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "layers": [
+        {
+          "block": "minecraft:air",
+          "height": 1
+        }
+      ],
+      "biome": "minecraft:the_void",
+      "features": false,
+      "lakes": false
+    }
+  }
+}

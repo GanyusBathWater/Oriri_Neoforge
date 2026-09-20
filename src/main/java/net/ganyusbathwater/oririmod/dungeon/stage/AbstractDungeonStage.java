@@ -9,6 +9,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.UUID;
+
 /**
  * Shared base for all stage implementations.
  * Handles the common door-opening and area-modifier logic so each stage
@@ -41,6 +43,10 @@ public abstract class AbstractDungeonStage implements DungeonStage {
     
     public boolean shouldClearMobsOnComplete() {
         return true;
+    }
+    
+    public void forceComplete() {
+        this.state = StageState.COMPLETE;
     }
 
     @Override
@@ -155,7 +161,7 @@ public abstract class AbstractDungeonStage implements DungeonStage {
      * Executes all door lock effects by placing MAGIC_BARRIER_BLOCK
      */
     protected void applyStartEffects(ServerLevel level, DungeonInstance instance) {
-        net.minecraft.world.level.block.Block magicBarrier = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(ResourceLocation.parse("oririmod:magic_barrier_block"));
+        net.minecraft.world.level.block.Block magicBarrier = net.ganyusbathwater.oririmod.block.ModBlocks.MAGIC_BARRIER_BLOCK.get();
         if (magicBarrier == net.minecraft.world.level.block.Blocks.AIR) return; // Fallback if block not found
         
         for (StageDefinition.DoorEntry door : definition.getDoors()) {
@@ -225,6 +231,15 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                             }
                         }
                     }
+                }
+            }
+            case "place_teleporter" -> {
+                int rotation = net.minecraft.util.Mth.floor((double)((modifier.yRot() * 8.0F / 360.0F) + 0.5F)) & 7;
+                BlockState teleporterState = net.ganyusbathwater.oririmod.block.ModBlocks.TELEPORTER_BLOCK.get().defaultBlockState()
+                        .setValue(net.ganyusbathwater.oririmod.block.custom.TeleporterBlock.ROTATION, rotation);
+                level.setBlock(center, teleporterState, 3);
+                if (level.getBlockEntity(center) instanceof net.ganyusbathwater.oririmod.block.entity.TeleporterBlockEntity teleporter) {
+                    teleporter.setTeleporterId(modifier.extraString(), null);
                 }
             }
         }

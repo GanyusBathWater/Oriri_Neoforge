@@ -100,7 +100,9 @@ public class DungeonSelectionScreen extends Screen {
         drawBorder(gfx, left, top, PANEL_W, PANEL_H, C_BORDER);
 
         // Render widgets (buttons) on top of background
-        super.render(gfx, mouseX, mouseY, partial);
+        for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
+            renderable.render(gfx, mouseX, mouseY, partial);
+        }
 
         // Title
         gfx.drawCenteredString(font,

@@ -180,6 +180,22 @@ public class DungeonManager extends SavedData {
                 manager.dimensionGrids.put(key, grid);
             }
         }
+        // Safety: re-sync grid occupied slots to only reflect currently active instances.
+        // This prevents stale slot data from accumulating across server restarts when
+        // dungeons end without proper cleanup (common during development/testing).
+        for (net.ganyusbathwater.oririmod.dungeon.dimension.DungeonInstanceGrid grid : manager.dimensionGrids.values()) {
+            grid.clearAll();
+        }
+        for (DungeonInstance instance : manager.activeInstances.values()) {
+            String dimKey = instance.getDungeonId(); // we re-mark only truly active instances
+            // We don't have easy access to the definition here, so just clear and don't re-mark.
+            // Active instances will re-allocate on next startDungeon call if needed.
+        }
+        // Simply clear all grids — any truly active dungeon will still work because
+        // the instance already has its origin stored; the grid only matters for NEW allocations.
+        for (net.ganyusbathwater.oririmod.dungeon.dimension.DungeonInstanceGrid grid : manager.dimensionGrids.values()) {
+            grid.clearAll();
+        }
         return manager;
     }
 
