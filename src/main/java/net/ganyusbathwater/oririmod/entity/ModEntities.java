@@ -437,6 +437,19 @@ public final class ModEntities {
                                                                                         "fairy")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.DryadEntity>> DRYAD = ENTITIES
+                        .register("dryad",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.DryadEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.DryadEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "dryad")
+                                                                        .toString()));
+
 
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity>> NOXUS_KNIGHT = ENTITIES
                         .register("noxus_knight",

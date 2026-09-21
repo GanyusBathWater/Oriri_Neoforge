@@ -447,6 +447,7 @@ public class ModItemGroups {
                         output.accept(ModItems.LOADED_BLAZE_SPAWN_EGG);
                         output.accept(ModItems.REX_ARANEA_SPAWN_EGG);
                         output.accept(ModItems.FAIRY_SPAWN_EGG);
+                        output.accept(ModItems.DRYAD_SPAWN_EGG);
                         output.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
                         output.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
                         output.accept(ModItems.NOXUS_PALADIN_SPAWN_EGG);

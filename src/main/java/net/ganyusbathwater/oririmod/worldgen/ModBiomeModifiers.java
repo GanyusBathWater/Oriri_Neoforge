@@ -67,6 +67,9 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_COMMON_FORESTS = registerKey("add_spawns_fairy_common_forests");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_FLOWER_FOREST = registerKey("add_spawns_fairy_flower_forest");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_TAIGAS = registerKey("add_spawns_fairy_taigas");
+
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_COMMON_FORESTS = registerKey("add_spawns_dryad_common_forests");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_FLOWER_FOREST = registerKey("add_spawns_dryad_flower_forest");
         // here will be the Features defined and later turned into json files
         public static void bootstrap(BootstrapContext<BiomeModifier> context) {
                 var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -414,6 +417,23 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("grove")))
                         ),
                         List.of(new MobSpawnSettings.SpawnerData(ModEntities.FAIRY.get(), 1, 1, 2))
+                ));
+
+                context.register(ADD_SPAWNS_DRYAD_COMMON_FORESTS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("birch_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("old_growth_birch_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("dark_forest")))
+                        ),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.DRYAD.get(), 15, 1, 2))
+                ));
+
+                context.register(ADD_SPAWNS_DRYAD_FLOWER_FOREST, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("flower_forest")))
+                        ),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.DRYAD.get(), 25, 1, 3))
                 ));
         }
 

@@ -837,5 +837,7 @@
   "message.oririmod.dungeon.timeout": "The dungeon ran out of time!",
   "message.oririmod.dungeon.closing_in": "Dungeon closing in %s seconds...",
   "message.oririmod.dungeon.closed": "The dungeon has closed.",
-  "message.oririmod.dungeon.complete": "Dungeon Completed!"
+  "message.oririmod.dungeon.complete": "Dungeon Completed!",
+  "entity.oririmod.dryad": "Dryad",
+  "item.oririmod.dryad_spawn_egg": "Dryad Spawn Egg"
 }

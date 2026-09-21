@@ -534,6 +534,11 @@ public class ModItems {
                         () -> new DeferredSpawnEggItem(ModEntities.FAIRY, 0xA8E6CF, 0xFF00FF,
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> DRYAD_SPAWN_EGG = ITEMS.register(
+                        "dryad_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.DRYAD, 0x4B3A2C, 0x76B041,
+                                        new Item.Properties()));
+
         public static final DeferredItem<DeferredSpawnEggItem> NOXUS_KNIGHT_SPAWN_EGG = ITEMS.register(
                         "noxus_knight_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.NOXUS_KNIGHT, 0x4A4A4A, 0xFFFFFF,

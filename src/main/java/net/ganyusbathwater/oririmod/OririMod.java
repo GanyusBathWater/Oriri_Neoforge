@@ -138,6 +138,8 @@ public class OririMod {
             event.accept(ModItems.BLIZZA_SPAWN_EGG);
             event.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
             event.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
+            event.accept(ModItems.FAIRY_SPAWN_EGG);
+            event.accept(ModItems.DRYAD_SPAWN_EGG);
             event.accept(ModItems.MERMAID_SPAWN_EGG);
             event.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
             event.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
@@ -250,6 +252,13 @@ public class OririMod {
             net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
             net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.DRYAD.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
     }
 
     private void registerEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
@@ -265,6 +274,8 @@ public class OririMod {
                 net.ganyusbathwater.oririmod.entity.custom.SporeBlossomEntity.createAttributes().build());
         event.put(net.ganyusbathwater.oririmod.entity.ModEntities.DUNGEON_KEEPER.get(),
                 net.ganyusbathwater.oririmod.dungeon.entity.DungeonKeeperEntity.createAttributes().build());
+        event.put(net.ganyusbathwater.oririmod.entity.ModEntities.DRYAD.get(),
+                net.ganyusbathwater.oririmod.entity.custom.DryadEntity.createAttributes().build());
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

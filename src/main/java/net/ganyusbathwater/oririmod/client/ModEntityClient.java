@@ -73,6 +73,8 @@ public class ModEntityClient {
                                 net.ganyusbathwater.oririmod.entity.client.MermaidRenderer::new);
                 event.registerEntityRenderer(ModEntities.FAIRY.get(),
                                 net.ganyusbathwater.oririmod.entity.client.FairyRenderer::new);
+                event.registerEntityRenderer(ModEntities.DRYAD.get(),
+                                net.ganyusbathwater.oririmod.entity.client.DryadRenderer::new);
                 
                 event.registerEntityRenderer(ModEntities.NOXUS_KNIGHT.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
                 event.registerEntityRenderer(ModEntities.NOXUS_GENERAL.get(), net.ganyusbathwater.oririmod.client.render.NoxusKnightRenderer::new);
