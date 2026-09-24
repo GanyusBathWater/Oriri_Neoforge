@@ -20,6 +20,7 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
 
     private final Set<UUID> spawnedEntities = new HashSet<>();
     private final java.util.Map<UUID, String> keyBearers = new java.util.HashMap<>();
+    private int totalEnemies = 0;
 
     public KillAllEnemiesStage(StageDefinition definition) {
         super(definition);
@@ -54,6 +55,7 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
                 }
             }
         }
+        totalEnemies = spawnedEntities.size();
     }
 
     @Override
@@ -115,5 +117,12 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
         
         net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(level, dropPos.x, dropPos.y, dropPos.z, keyStack);
         level.addFreshEntity(itemEntity);
+    }
+
+    @Override
+    public String getProgressText() {
+        if (state != StageState.ACTIVE || totalEnemies == 0) return null;
+        int defeated = totalEnemies - spawnedEntities.size();
+        return "Enemies Defeated: " + defeated + " / " + totalEnemies;
     }
 }

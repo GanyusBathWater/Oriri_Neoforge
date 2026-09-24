@@ -39,20 +39,26 @@ public class DungeonStageManager {
     /**
      * Scans all DungeonMarkerEntity instances within the 2048×2048 grid slot
      * of this instance and returns an ordered list of StageDefinitions.
-     *
-     * Stages are sorted by their stage_id string (stage_0 < stage_1 < stage_2 …).
+     * Used for lazy initialization on server reload.
      */
     public static List<StageDefinition> buildStages(ServerLevel level, DungeonInstance instance) {
         BlockPos origin = instance.getOrigin();
         int slotSize = DungeonInstanceGrid.SLOT_SIZE;
 
-        // Search box covering the entire 2048×2048 slot, full vertical range
         AABB searchBox = new AABB(
                 origin.getX(),       level.getMinBuildHeight(),       origin.getZ(),
                 origin.getX() + slotSize, level.getMaxBuildHeight(), origin.getZ() + slotSize
         );
 
         List<DungeonMarkerEntity> markers = level.getEntitiesOfClass(DungeonMarkerEntity.class, searchBox);
+        return buildStages(markers, instance);
+    }
+    
+    /**
+     * Builds StageDefinitions from a pre-collected list of markers.
+     * Stages are sorted by their stage_id string (stage_0 < stage_1 < stage_2 …).
+     */
+    public static List<StageDefinition> buildStages(List<DungeonMarkerEntity> markers, DungeonInstance instance) {
 
         // Group markers by stage_id
         Map<String, List<DungeonMarkerEntity>> byStage = new LinkedHashMap<>();
@@ -137,6 +143,12 @@ public class DungeonStageManager {
 
         StageType stageType = StageType.fromString(typeStr);
         StageDefinition.Builder builder = StageDefinition.builder(stageId, stageType);
+
+        markers.stream()
+                .map(DungeonMarkerEntity::getExtraData)
+                .filter(extra -> extra.contains(DungeonMarkerEntity.TAG_OBJECTIVE))
+                .findFirst()
+                .ifPresent(extra -> builder.objective(extra.getString(DungeonMarkerEntity.TAG_OBJECTIVE)));
 
         for (DungeonMarkerEntity marker : markers) {
             BlockPos pos = marker.blockPosition();
@@ -230,7 +242,15 @@ public class DungeonStageManager {
                 case ROLE_STAGE_TRIGGER -> {
                     int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 5;
                     if (radius <= 0) radius = 5;
-                    builder.addTrigger(pos, radius);
+                    
+                    StageDefinition.TriggerBehavior behavior = StageDefinition.TriggerBehavior.TELEPORT_PARTY;
+                    if (extra.contains(DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR)) {
+                        try {
+                            behavior = StageDefinition.TriggerBehavior.valueOf(extra.getString(DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR));
+                        } catch (IllegalArgumentException ignored) {}
+                    }
+                    
+                    builder.addTrigger(pos, radius, behavior);
                     String switchId = extra.getString(DungeonMarkerEntity.TAG_SWITCH_ID);
                     if (!switchId.isBlank()) {
                         builder.keyDropStageId(switchId);

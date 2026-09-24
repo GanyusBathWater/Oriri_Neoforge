@@ -33,10 +33,10 @@ public class HomewardConfirmScreen extends Screen {
     private static final int PANEL_HEIGHT = 120;
 
     /** Colors */
-    private static final int COLOR_BACKGROUND = 0xCC0D0D18;  // dark navy, 80 % opaque
-    private static final int COLOR_BORDER      = 0xFF3A3A6A;  // dim purple
-    private static final int COLOR_TITLE       = 0xFFE0D9FF;  // soft lavender
-    private static final int COLOR_BODY        = 0xFFBBB8CC;  // muted grey-purple
+    private static final int COLOR_BACKGROUND = 0xFF101018;  // solid dark navy
+    private static final int COLOR_BORDER      = 0xFF4A4A8A;  // brighter border
+    private static final int COLOR_TITLE       = 0xFFFFFFFF;  // pure white
+    private static final int COLOR_BODY        = 0xFFE0E0E0;  // light grey
 
     public HomewardConfirmScreen() {
         super(Component.translatable("screen.oririmod.homeward.title"));
@@ -89,7 +89,7 @@ public class HomewardConfirmScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        // Dim world behind the screen
+        // Dim and optionally blur the world behind the screen (vanilla behavior)
         this.renderBackground(gfx, mouseX, mouseY, partialTick);
 
         int cx = width  / 2;
@@ -110,7 +110,7 @@ public class HomewardConfirmScreen extends Screen {
 
         // Title
         gfx.drawCenteredString(font,
-                Component.translatable("screen.oririmod.homeward.title").withStyle(net.minecraft.ChatFormatting.BOLD),
+                Component.translatable("screen.oririmod.homeward.title"),
                 cx, panelTop + 10, COLOR_TITLE);
 
         // Body lines
@@ -121,7 +121,9 @@ public class HomewardConfirmScreen extends Screen {
                 Component.translatable("screen.oririmod.homeward.line2"),
                 cx, panelTop + 44, COLOR_BODY);
 
-        // Render buttons on top
-        super.render(gfx, mouseX, mouseY, partialTick);
+        // Render buttons on top without calling super.render (which reapplies the background blur over our panel)
+        for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
+            renderable.render(gfx, mouseX, mouseY, partialTick);
+        }
     }
 }

@@ -841,7 +841,7 @@ public class ModBlocks {
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.WEEPING_VINES_PLANT)));
 
         public static final DeferredBlock<Block> TELEPORTER_BLOCK = registerBlock("teleporter",
-                        () -> new TeleporterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion().strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
+                        () -> new TeleporterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion().noCollission().strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
 
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);

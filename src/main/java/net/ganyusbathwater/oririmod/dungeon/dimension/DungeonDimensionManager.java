@@ -29,7 +29,7 @@ public class DungeonDimensionManager {
      * only searches the world's generated/ folder and not mod jar resources
      * until the template has been previously loaded/cached.
      */
-    private static Optional<StructureTemplate> loadTemplateFromClasspath(ServerLevel level, ResourceLocation id) {
+    public static Optional<StructureTemplate> loadTemplateFromClasspath(ServerLevel level, ResourceLocation id) {
         String path = "/data/" + id.getNamespace() + "/structures/" + id.getPath() + ".nbt";
         try (InputStream stream = DungeonDimensionManager.class.getResourceAsStream(path)) {
             if (stream == null) {
@@ -123,7 +123,7 @@ public class DungeonDimensionManager {
      * Force-loads all chunks covered by the given structure template before placement.
      * Prevents placeInWorld() from silently failing on unloaded chunks.
      */
-    private static void forceLoadChunks(ServerLevel level, BlockPos origin, StructureTemplate template) {
+    public static void forceLoadChunks(ServerLevel level, BlockPos origin, StructureTemplate template) {
         net.minecraft.core.Vec3i size = template.getSize();
         net.minecraft.world.level.ChunkPos start = new net.minecraft.world.level.ChunkPos(origin);
         net.minecraft.world.level.ChunkPos end = new net.minecraft.world.level.ChunkPos(origin.offset(size.getX(), 0, size.getZ()));

@@ -58,8 +58,10 @@ public class DungeonMarkerEntity extends Entity {
     public static final String TAG_COUNT       = "count";
     public static final String TAG_SWITCH_ID   = "switch_id";
     public static final String TAG_LOOT_TABLE  = "loot_table";
+    public static final String TAG_TRIGGER_BEHAVIOR = "trigger_behavior";
     public static final String TAG_BOSS_ID     = "boss_id";
     public static final String TAG_SPAWN_CHANCE = "spawn_chance";
+    public static final String TAG_OBJECTIVE   = "objective";
 
     // Extra arbitrary NBT payload (holds enemy_type, count, loot_table, etc.)
     private CompoundTag extraData = new CompoundTag();
@@ -153,13 +155,31 @@ public class DungeonMarkerEntity extends Entity {
                         this.extraData.getString(TAG_LOOT_TABLE),
                         this.extraData.getString(TAG_BOSS_ID),
                         buildStageSummary(),
-                        this.extraData.contains(TAG_SPAWN_CHANCE) ? this.extraData.getFloat(TAG_SPAWN_CHANCE) : 1.0f
+                        this.extraData.contains(TAG_SPAWN_CHANCE) ? this.extraData.getFloat(TAG_SPAWN_CHANCE) : 1.0f,
+                        this.extraData.getString(TAG_TRIGGER_BEHAVIOR),
+                        getGlobalObjectiveText()
                     );
                 net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, payload);
             }
             return net.minecraft.world.InteractionResult.sidedSuccess(this.level().isClientSide);
         }
         return super.interact(player, hand);
+    }
+
+    private String getGlobalObjectiveText() {
+        if (this.level().isClientSide || this.getStageId().isEmpty()) return this.extraData.getString(TAG_OBJECTIVE);
+        
+        // Scan all markers in this stage group to see if ANY of them have an objective text configured.
+        java.util.List<DungeonMarkerEntity> markers = ((net.minecraft.server.level.ServerLevel)this.level()).getEntitiesOfClass(
+            DungeonMarkerEntity.class, 
+            this.getBoundingBox().inflate(128.0), 
+            m -> m.getStageId().equals(this.getStageId())
+        );
+        for (DungeonMarkerEntity m : markers) {
+            String obj = m.getExtraData().getString(TAG_OBJECTIVE);
+            if (!obj.isBlank()) return obj;
+        }
+        return this.extraData.getString(TAG_OBJECTIVE);
     }
 
     private String buildStageSummary() {

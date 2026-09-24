@@ -18,7 +18,9 @@ public record OpenMarkerScreenPayload(
         String lootTable,
         String bossId,
         String stageSummary,
-        float spawnChance
+        float spawnChance,
+        String triggerBehavior,
+        String objectiveText
 ) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<OpenMarkerScreenPayload> TYPE =
@@ -38,6 +40,8 @@ public record OpenMarkerScreenPayload(
                 ByteBufCodecs.STRING_UTF8.encode(buf, payload.bossId());
                 ByteBufCodecs.STRING_UTF8.encode(buf, payload.stageSummary());
                 buf.writeFloat(payload.spawnChance());
+                ByteBufCodecs.STRING_UTF8.encode(buf, payload.triggerBehavior());
+                ByteBufCodecs.STRING_UTF8.encode(buf, payload.objectiveText());
             },
             buf -> new OpenMarkerScreenPayload(
                     buf.readInt(),
@@ -51,7 +55,9 @@ public record OpenMarkerScreenPayload(
                     ByteBufCodecs.STRING_UTF8.decode(buf),
                     ByteBufCodecs.STRING_UTF8.decode(buf),
                     ByteBufCodecs.STRING_UTF8.decode(buf),
-                    buf.readFloat()
+                    buf.readFloat(),
+                    ByteBufCodecs.STRING_UTF8.decode(buf),
+                    ByteBufCodecs.STRING_UTF8.decode(buf)
             )
     );
 

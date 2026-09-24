@@ -77,18 +77,33 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                     pos.getX() + r, pos.getY() + r, pos.getZ() + r
                 );
                 
-                boolean playerInside = level.players().stream().anyMatch(p -> {
-                    return instance.hasPlayer(p.getUUID()) && box.contains(p.position());
-                });
+                boolean meetsCondition = false;
+                
+                if (trigger.behavior() == StageDefinition.TriggerBehavior.REQUIRE_PARTY) {
+                    meetsCondition = !instance.getAlivePlayers().isEmpty();
+                    for (java.util.UUID pId : instance.getAlivePlayers()) {
+                        net.minecraft.server.level.ServerPlayer p = level.getServer().getPlayerList().getPlayer(pId);
+                        if (p == null || !box.contains(p.position())) {
+                            meetsCondition = false;
+                            break;
+                        }
+                    }
+                } else {
+                    meetsCondition = level.players().stream().anyMatch(p -> {
+                        return instance.getAlivePlayers().contains(p.getUUID()) && box.contains(p.position());
+                    });
+                }
 
-                if (playerInside) {
+                if (meetsCondition) {
                     this.state = StageState.ACTIVE;
                     
-                    // Teleport any party members who are outside the trigger into the trigger zone
-                    for (java.util.UUID pId : instance.getPlayers()) {
-                        net.minecraft.server.level.ServerPlayer partyMember = level.getServer().getPlayerList().getPlayer(pId);
-                        if (partyMember != null && !box.contains(partyMember.position())) {
-                            partyMember.teleportTo(level, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, partyMember.getYRot(), partyMember.getXRot());
+                    if (trigger.behavior() == StageDefinition.TriggerBehavior.TELEPORT_PARTY) {
+                        // Teleport any living party members who are outside the trigger into the trigger zone
+                        for (java.util.UUID pId : instance.getAlivePlayers()) {
+                            net.minecraft.server.level.ServerPlayer partyMember = level.getServer().getPlayerList().getPlayer(pId);
+                            if (partyMember != null && !box.contains(partyMember.position())) {
+                                partyMember.teleportTo(level, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, partyMember.getYRot(), partyMember.getXRot());
+                            }
                         }
                     }
                     

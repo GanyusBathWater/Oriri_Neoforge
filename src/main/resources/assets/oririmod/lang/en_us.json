@@ -827,6 +827,8 @@
   "dialogue.oririmod.dungeon_keeper.goodbye": "Very well. Return when you are ready, adventurer. The dungeons are patient... but their inhabitants are not.",
   "message.oririmod.not_enough_mana": "Not enough Mana!",
   "message.oririmod.dungeon.no_place": "You cannot place or break blocks here!",
+  "message.oririmod.dungeon.no_sleep": "You cannot set your spawn point inside a dungeon!",
+  "message.oririmod.dungeon.revived": "You have been revived!",
   "message.oririmod.dungeon.item_banned": "This item cannot be used in a dungeon!",
   "message.oririmod.dungeon.life_lost": "You died! Respawning...",
   "message.oririmod.dungeon.died": "You have run out of lives and failed the dungeon!",

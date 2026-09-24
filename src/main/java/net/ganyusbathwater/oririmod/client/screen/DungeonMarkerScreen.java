@@ -33,6 +33,8 @@ public class DungeonMarkerScreen extends Screen {
     private EditBox chanceBox;
     private CustomCycleButton dropsKeyButton;
     private CustomCycleButton modifierActionButton;
+    private CustomCycleButton triggerBehaviorButton;
+    private EditBox objectiveBox;
 
     private final String initialStageId;
     private final String initialStageType;
@@ -43,6 +45,8 @@ public class DungeonMarkerScreen extends Screen {
     private final String initialLootTable;
     private final String initialBossId;
     private final float initialChance;
+    private final String initialTriggerBehavior;
+    private final String initialObjective;
     private final net.minecraft.core.BlockPos pos;
     private final String stageSummary;
     
@@ -80,6 +84,8 @@ public class DungeonMarkerScreen extends Screen {
         this.initialLootTable = payload.lootTable();
         this.initialBossId = payload.bossId();
         this.initialChance = payload.spawnChance();
+        this.initialTriggerBehavior = payload.triggerBehavior().isBlank() ? "TELEPORT_PARTY" : payload.triggerBehavior();
+        this.initialObjective = payload.objectiveText();
         this.pos = payload.pos();
         this.stageSummary = payload.stageSummary();
         
@@ -175,6 +181,14 @@ public class DungeonMarkerScreen extends Screen {
         );
         this.addRenderableWidget(this.modifierActionButton);
 
+        this.triggerBehaviorButton = new CustomCycleButton(
+                midX + 20, startY + rowSpacing, 140, 20,
+                "Behavior", Arrays.asList("TELEPORT_PARTY", "NO_TELEPORT", "REQUIRE_PARTY"),
+                initialTriggerBehavior,
+                val -> {}
+        );
+        this.addRenderableWidget(this.triggerBehaviorButton);
+
         this.lootTableBox = new EditBox(this.font, midX + 20, startY + rowSpacing * 2, 140, 20, Component.literal("Loot Table"));
         this.lootTableBox.setValue(initialLootTable);
         this.lootTableBox.setMaxLength(128);
@@ -184,6 +198,11 @@ public class DungeonMarkerScreen extends Screen {
         this.bossIdBox.setValue(initialBossId);
         this.bossIdBox.setMaxLength(64);
         this.addRenderableWidget(this.bossIdBox);
+
+        this.objectiveBox = new EditBox(this.font, midX - 160, startY + rowSpacing * 6, 320, 20, Component.literal("Objective Text"));
+        this.objectiveBox.setValue(initialObjective != null ? initialObjective : "");
+        this.objectiveBox.setMaxLength(256);
+        this.addRenderableWidget(this.objectiveBox);
 
         // Save Button
         this.addRenderableWidget(Button.builder(Component.literal("Save").withStyle(ChatFormatting.GREEN), b -> saveAndClose())
@@ -207,8 +226,10 @@ public class DungeonMarkerScreen extends Screen {
         switchIdBox.visible = false;
         dropsKeyButton.visible = false;
         modifierActionButton.visible = false;
+        triggerBehaviorButton.visible = false;
         lootTableBox.visible = false;
         bossIdBox.visible = false;
+        objectiveBox.visible = false;
 
         boolean isGlobal = DungeonStageManager.ROLE_LOOT_CHEST.equals(currentRole);
         this.stageIdBox.visible = !isGlobal;
@@ -292,6 +313,7 @@ public class DungeonMarkerScreen extends Screen {
         } else if (isTrigger) {
             countBox.visible = true;
             switchIdBox.visible = true;
+            triggerBehaviorButton.visible = true;
         } else if (isGoalArea) {
             countBox.visible = true;
         } else if (isBlockMatch) {
@@ -310,13 +332,18 @@ public class DungeonMarkerScreen extends Screen {
             countBox.visible = true;
         }
 
+        // The objective box spans the bottom row and is visible unless it's a global role.
+        if (!isGlobal) {
+            objectiveBox.visible = true;
+        }
+
         // Layout visible boxes dynamically in two columns to prevent holes
         int midX = this.width / 2;
         int startY = 116;
         int rowSpacing = 36;
         
         net.minecraft.client.gui.components.AbstractWidget[] col1 = { enemyTypeBox, chanceBox, bossIdBox, dropsKeyButton };
-        net.minecraft.client.gui.components.AbstractWidget[] col2 = { countBox, switchIdBox, modifierActionButton, lootTableBox };
+        net.minecraft.client.gui.components.AbstractWidget[] col2 = { countBox, switchIdBox, triggerBehaviorButton, modifierActionButton, lootTableBox };
         
         int row1 = 0;
         for (net.minecraft.client.gui.components.AbstractWidget box : col1) {
@@ -332,6 +359,10 @@ public class DungeonMarkerScreen extends Screen {
                 box.setPosition(midX + 20, startY + (rowSpacing * row2));
                 row2++;
             }
+        }
+        
+        if (objectiveBox.visible) {
+            objectiveBox.setPosition(midX - 160, startY + (rowSpacing * Math.max(row1, row2)));
         }
         
         isUpdatingUI = false;
@@ -354,7 +385,9 @@ public class DungeonMarkerScreen extends Screen {
                 DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? (modifierActionButton.values.get(modifierActionButton.currentIndex)) : switchIdBox.getValue(),
                 lootTableBox.getValue(),
                 bossIdBox.getValue(),
-                chance
+                chance,
+                triggerBehaviorButton.values.get(triggerBehaviorButton.currentIndex),
+                objectiveBox.getValue()
         ));
         this.onClose();
     }
@@ -421,6 +454,9 @@ public class DungeonMarkerScreen extends Screen {
         }
         if (this.lootTableBox != null && this.lootTableBox.visible) {
             guiGraphics.drawString(this.font, "Loot Table Path", this.lootTableBox.getX(), this.lootTableBox.getY() - 10, 0xDDDDDD);
+        }
+        if (this.objectiveBox != null && this.objectiveBox.visible) {
+            guiGraphics.drawString(this.font, "Objective Text (Displayed to players when stage starts)", this.objectiveBox.getX(), this.objectiveBox.getY() - 10, 0xDDDDDD);
         }
 
         if (this.enemyTypeBox != null && this.enemyTypeBox.visible && this.enemyTypeBox.isFocused()) {

@@ -49,6 +49,7 @@ public class DungeonMarkerItem extends Item {
                     extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SWITCH_ID, lastConfig.switchId());
                     extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_LOOT_TABLE, lastConfig.lootTable());
                     extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_BOSS_ID, lastConfig.bossId());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_OBJECTIVE, lastConfig.objectiveText());
                 }
             }
             
@@ -97,6 +98,7 @@ public class DungeonMarkerItem extends Item {
                     extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SWITCH_ID, lastConfig.switchId());
                     extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_LOOT_TABLE, lastConfig.lootTable());
                     extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_BOSS_ID, lastConfig.bossId());
+                    extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_OBJECTIVE, lastConfig.objectiveText());
                 }
             }
             

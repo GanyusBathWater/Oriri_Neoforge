@@ -45,8 +45,12 @@ public interface DungeonStage {
     /** @return the definition this stage was created from. */
     StageDefinition getDefinition();
     
-    /** @return whether leftover mobs should be discarded when this stage completes. */
     default boolean shouldClearMobsOnComplete() {
         return true;
+    }
+
+    /** @return an optional string describing current stage progression (e.g. "0/10 Enemies Defeated"). */
+    default String getProgressText() {
+        return null;
     }
 }

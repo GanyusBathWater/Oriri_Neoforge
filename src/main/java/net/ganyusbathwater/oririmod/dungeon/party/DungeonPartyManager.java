@@ -104,50 +104,52 @@ public class DungeonPartyManager extends SavedData {
         return parties.get(partyId);
     }
 
-    /**
-     * Called by the leader from the NPC screen. Validates readiness and starts the dungeon.
-     * Returns null on failure with a reason logged.
-     */
-    @Nullable
-    public net.ganyusbathwater.oririmod.dungeon.DungeonInstance startDungeon(
-            ServerLevel overworld,
-            DungeonParty party,
-            DungeonDefinition definition) {
 
-        if (party.hasPendingInvites()) return null; // Still waiting on responses
 
-        Set<ServerPlayer> players = new HashSet<>();
-        for (UUID id : party.getAcceptedMembers()) {
-            ServerPlayer sp = overworld.getServer().getPlayerList().getPlayer(id);
-            if (sp != null) players.add(sp);
-        }
+    public void tickParties(ServerLevel overworld) {
+        boolean dirty = false;
+        for (DungeonParty party : parties.values()) {
+            if (party.getStartTicksRemaining() < 0) {
+                party.setStarting(false, party.getStartTicksRemaining() + 1);
+                dirty = true;
+            } else if (party.isStarting()) {
+                party.decrementStartTicks();
+                dirty = true;
 
-        if (players.isEmpty()) return null;
-
-        // Phase 7: Progression Check
-        if (definition.requiredPreviousDungeon() != null && !definition.requiredPreviousDungeon().isBlank()) {
-            net.ganyusbathwater.oririmod.dungeon.data.PlayerDungeonData progressData = net.ganyusbathwater.oririmod.dungeon.data.PlayerDungeonData.get(overworld);
-            for (ServerPlayer sp : players) {
-                if (!progressData.hasCompleted(sp.getUUID(), definition.requiredPreviousDungeon())) {
-                    // Send message to the leader
-                    ServerPlayer leader = overworld.getServer().getPlayerList().getPlayer(party.getLeaderId());
-                    if (leader != null) {
-                        leader.displayClientMessage(
-                                net.minecraft.network.chat.Component.literal("Player " + sp.getName().getString() + " has not completed the required dungeon: " + definition.requiredPreviousDungeon())
-                                        .withStyle(net.minecraft.ChatFormatting.RED), false);
+                // Sync time to clients every 20 ticks
+                if (party.getStartTicksRemaining() % 20 == 0) {
+                    for (UUID memberId : party.getAcceptedMembers()) {
+                        ServerPlayer sp = overworld.getServer().getPlayerList().getPlayer(memberId);
+                        if (sp != null) {
+                            net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyActionHandler.refreshScreen(sp, this, party);
+                        }
                     }
-                    return null;
+                }
+
+                if (party.getStartTicksRemaining() <= 0) {
+                    party.setStarting(false, 0);
+                    DungeonDefinition def = net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.get(party.getDungeonId());
+                    
+                    // Finalize generation: Build stages and teleport players
+                    DungeonManager dungeonManager = DungeonManager.get(overworld);
+                    net.ganyusbathwater.oririmod.dungeon.DungeonInstance instance = dungeonManager.getInstance(party.getAssignedInstanceId());
+                    
+                    if (def != null && instance != null) {
+                        ServerLevel dimensionLevel = overworld.getServer().getLevel(def.dimension());
+                        instance.setStarted(true);
+                        
+                        for (UUID pId : party.getAcceptedMembers()) {
+                            ServerPlayer p = overworld.getServer().getPlayerList().getPlayer(pId);
+                            if (p != null) {
+                                net.ganyusbathwater.oririmod.dungeon.dimension.DungeonDimensionManager.teleportPlayerToDungeon(p, dimensionLevel, instance);
+                            }
+                        }
+                        dissolveParty(party.getPartyId());
+                    }
                 }
             }
         }
-
-        DungeonManager dungeonManager = DungeonManager.get(overworld);
-        var instance = dungeonManager.startDungeon(overworld, definition, players);
-
-        if (instance != null) {
-            dissolveParty(party.getPartyId());
-        }
-        return instance;
+        if (dirty) setDirty();
     }
 
     // -------------------------------------------------------------------------

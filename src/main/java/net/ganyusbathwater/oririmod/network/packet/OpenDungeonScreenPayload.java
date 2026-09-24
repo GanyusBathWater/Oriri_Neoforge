@@ -23,7 +23,9 @@ public record OpenDungeonScreenPayload(
         UUID leaderId,
         List<UUID> memberIds,
         List<String> memberNames,
-        List<String> memberStatuses // "PENDING", "ACCEPTED", "DECLINED"
+        List<String> memberStatuses, // "PENDING", "ACCEPTED", "DECLINED"
+        boolean isStarting,
+        int startTicksRemaining
 ) implements CustomPacketPayload {
 
     public static final Type<OpenDungeonScreenPayload> TYPE =
@@ -43,6 +45,8 @@ public record OpenDungeonScreenPayload(
         for (UUID id : p.memberIds()) buf.writeUUID(id);
         for (String name : p.memberNames()) buf.writeUtf(name);
         for (String status : p.memberStatuses()) buf.writeUtf(status);
+        buf.writeBoolean(p.isStarting());
+        buf.writeInt(p.startTicksRemaining());
     }
 
     private static OpenDungeonScreenPayload decode(FriendlyByteBuf buf) {
@@ -59,7 +63,9 @@ public record OpenDungeonScreenPayload(
         for (int i = 0; i < count; i++) names.add(buf.readUtf());
         List<String> statuses = new ArrayList<>();
         for (int i = 0; i < count; i++) statuses.add(buf.readUtf());
-        return new OpenDungeonScreenPayload(npcId, dungeonId, displayName, description, partyId, leaderId, ids, names, statuses);
+        boolean isStarting = buf.readBoolean();
+        int startTicksRemaining = buf.readInt();
+        return new OpenDungeonScreenPayload(npcId, dungeonId, displayName, description, partyId, leaderId, ids, names, statuses, isStarting, startTicksRemaining);
     }
 
     @Override

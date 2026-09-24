@@ -64,4 +64,11 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
     public void onComplete(ServerLevel level, DungeonInstance instance) {
         applyCompletionEffects(level, instance);
     }
+
+    @Override
+    public String getProgressText() {
+        if (state != StageState.ACTIVE || requiredCount == 0) return null;
+        if (activatedSwitchIds.isEmpty()) return null;
+        return "Switches Activated: " + activatedSwitchIds.size() + " / " + requiredCount;
+    }
 }

@@ -184,6 +184,9 @@ public class ClientEvents {
             RenderSystem.disableBlend();
         }
 
+        // ── Dungeon Run Timer Overlay ─────────────────────────────────────
+        net.ganyusbathwater.oririmod.client.render.DungeonHUDOverlay.render(gui);
+
         // ── Blizza spawn title overlay ────────────────────────────────────
         renderBlizzaTitle(gui, mc);
 

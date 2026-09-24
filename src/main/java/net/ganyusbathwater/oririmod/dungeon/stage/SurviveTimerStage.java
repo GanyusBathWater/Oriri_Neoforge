@@ -92,4 +92,11 @@ public class SurviveTimerStage extends AbstractDungeonStage {
     public void onComplete(ServerLevel level, DungeonInstance instance) {
         applyCompletionEffects(level, instance);
     }
+
+    @Override
+    public String getProgressText() {
+        if (state != StageState.ACTIVE || definition.getTimerTicks() == 0) return null;
+        int secondsLeft = Math.max(0, (definition.getTimerTicks() - ticksElapsed) / 20);
+        return "Time Remaining: " + secondsLeft + "s";
+    }
 }

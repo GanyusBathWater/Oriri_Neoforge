@@ -83,6 +83,23 @@ public class DungeonEventHandler {
     }
 
     // -------------------------------------------------------------------------
+    //  Spawn Point Prevention
+    // -------------------------------------------------------------------------
+    
+    @SubscribeEvent
+    public static void onPlayerSetSpawn(net.neoforged.neoforge.event.entity.player.PlayerSetSpawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            if (isInDungeon(sp)) {
+                event.setCanceled(true);
+                sp.displayClientMessage(
+                        Component.translatable("message.oririmod.dungeon.no_sleep")
+                                .withStyle(ChatFormatting.RED),
+                        true);
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
     //  Banned item use
     // -------------------------------------------------------------------------
 
@@ -174,6 +191,16 @@ public class DungeonEventHandler {
                 if (respawnPos != null) {
                     sp.teleportTo(respawnPos.getX() + 0.5, respawnPos.getY(), respawnPos.getZ() + 0.5);
                 }
+
+                // Apply Stasis Effects to freeze the player while the Death Screen is open
+                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 255, false, false, false));
+                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.JUMP, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 250, false, false, false));
+                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 255, false, false, false));
+                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.INVISIBILITY, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 0, false, false, false));
+                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 0, false, false, false));
+
+                // Send the payload to open the Custom Death Screen
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, new net.ganyusbathwater.oririmod.network.packet.OpenDungeonDeathScreenPayload(lives));
             } else {
                 // No lives left
                 lives = 0;
@@ -398,6 +425,69 @@ public class DungeonEventHandler {
         }
         if (wipedAny) {
             sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.items_wiped").withStyle(ChatFormatting.YELLOW), false);
+        }
+    }
+
+    public static void handleDeathAction(ServerPlayer sp, String action) {
+        if (!isInDungeon(sp)) return;
+        
+        // Remove the stasis effects
+        sp.removeEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
+        sp.removeEffect(net.minecraft.world.effect.MobEffects.JUMP);
+        sp.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE);
+        sp.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+        sp.removeEffect(net.minecraft.world.effect.MobEffects.BLINDNESS);
+        
+        DungeonManager manager = DungeonManager.get(sp.serverLevel());
+        var instance = manager.getInstanceForPlayer(sp.getUUID());
+        if (instance == null) return;
+        
+        if ("GIVE_UP".equals(action)) {
+            // Treat as failure for this player
+            sp.setHealth(sp.getMaxHealth());
+            sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.died").withStyle(ChatFormatting.RED), false);
+            
+            if (instance.getAlivePlayers().isEmpty()) {
+                // Everyone fails
+                net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
+                instance.removePlayer(sp.getUUID());
+                
+                // Eject all spectators too
+                for (java.util.UUID specId : new java.util.HashSet<>(instance.getSpectators())) {
+                    ServerPlayer spec = (ServerPlayer) sp.serverLevel().getPlayerByUUID(specId);
+                    if (spec != null) {
+                        spec.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                        spec.displayClientMessage(Component.translatable("message.oririmod.dungeon.party_failed").withStyle(ChatFormatting.RED), false);
+                        net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(spec);
+                        instance.removePlayer(specId);
+                    }
+                }
+                
+                if (instance.getPlayers().isEmpty()) {
+                    manager.removeInstance(sp.getServer(), instance.getInstanceId(), instance.getDungeonId()); 
+                }
+                manager.setDirty();
+            } else {
+                // Switch to spectator mode since party is still alive
+                sp.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+                instance.addSpectator(sp.getUUID());
+                manager.setDirty();
+                
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, new net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload(0));
+                sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.spectating").withStyle(ChatFormatting.GOLD), false);
+                
+                // Force spectate first alive player
+                for (java.util.UUID aliveId : instance.getAlivePlayers()) {
+                    ServerPlayer alive = (ServerPlayer) sp.serverLevel().getPlayerByUUID(aliveId);
+                    if (alive != null) {
+                        sp.setCamera(alive);
+                        break;
+                    }
+                }
+            }
+        } else if ("RESPAWN".equals(action)) {
+            // Already healed and teleported in onPlayerDeath, just removed effects. We can play a sound.
+            sp.serverLevel().playSound(null, sp.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_BREATH, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
         }
     }
 }

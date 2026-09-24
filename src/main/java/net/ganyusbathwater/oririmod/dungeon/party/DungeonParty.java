@@ -75,11 +75,30 @@ public class DungeonParty {
     public MemberStatus getStatus(UUID playerId) {
         return members.get(playerId);
     }
+    
+    // ── Phase 8 Additions ──
+    private boolean isStarting = false;
+    private int startTicksRemaining = 0;
+    
+    public boolean isStarting() { return isStarting; }
+    public void setStarting(boolean starting, int ticks) {
+        this.isStarting = starting;
+        this.startTicksRemaining = ticks;
+    }
+    public int getStartTicksRemaining() { return startTicksRemaining; }
+    public void decrementStartTicks() { this.startTicksRemaining--; }
+    
+    private UUID assignedInstanceId = null;
+    @Nullable public UUID getAssignedInstanceId() { return assignedInstanceId; }
+    public void setAssignedInstanceId(@Nullable UUID id) { this.assignedInstanceId = id; }
 
     public CompoundTag save(CompoundTag tag) {
         tag.putUUID("PartyId", partyId);
         tag.putUUID("LeaderId", leaderId);
         tag.putString("DungeonId", dungeonId);
+        if (assignedInstanceId != null) {
+            tag.putUUID("AssignedInstanceId", assignedInstanceId);
+        }
         ListTag list = new ListTag();
         for (Map.Entry<UUID, MemberStatus> e : members.entrySet()) {
             CompoundTag entry = new CompoundTag();
@@ -95,6 +114,9 @@ public class DungeonParty {
         UUID leaderId = tag.getUUID("LeaderId");
         String dungeonId = tag.getString("DungeonId");
         DungeonParty party = new DungeonParty(leaderId, dungeonId);
+        if (tag.hasUUID("AssignedInstanceId")) {
+            party.assignedInstanceId = tag.getUUID("AssignedInstanceId");
+        }
         ListTag list = tag.getList("Members", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);

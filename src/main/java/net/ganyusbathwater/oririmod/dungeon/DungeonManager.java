@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.List;
 
 /**
  * Global saved data to track all active dungeon instances across the server.
@@ -28,11 +29,15 @@ public class DungeonManager extends SavedData {
 
     // Tracks allocated 2048x2048 slots per dimension (key: dimension ResourceLocation string)
     private final Map<String, net.ganyusbathwater.oririmod.dungeon.dimension.DungeonInstanceGrid> dimensionGrids = new HashMap<>();
+    
+    // ── Phase 8 Additions ──
+    private final List<net.ganyusbathwater.oririmod.dungeon.dimension.DungeonGeneratorTask> activeTasks = new java.util.ArrayList<>();
+    public List<net.ganyusbathwater.oririmod.dungeon.dimension.DungeonGeneratorTask> getActiveTasks() { return activeTasks; }
 
     /**
-     * Starts a new dungeon instance for a party of players.
+     * Allocates a new dungeon instance for a party of players, but does not paste structures or teleport.
      */
-    public DungeonInstance startDungeon(ServerLevel overworld, DungeonDefinition definition, Set<ServerPlayer> party) {
+    public DungeonInstance allocateDungeon(ServerLevel overworld, DungeonDefinition definition, Set<ServerPlayer> party) {
         // 1. Get the target dimension
         ServerLevel dimensionLevel = overworld.getServer().getLevel(definition.dimension());
         if (dimensionLevel == null) {
@@ -52,23 +57,13 @@ public class DungeonManager extends SavedData {
             instance.addPlayer(p.getUUID());
         }
         
-        // 4. Place Structure
-        net.ganyusbathwater.oririmod.dungeon.dimension.DungeonDimensionManager.placeDungeonStructure(dimensionLevel, definition, instance);
-        
-        // 5. Register Instance in Manager
+        // 4. Register Instance in Manager
         this.addInstance(instance);
-        
-        // Build stages immediately so we can find PLAYER_SPAWN before teleporting
-        java.util.List<net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition> stages = net.ganyusbathwater.oririmod.dungeon.stage.DungeonStageManager.buildStages(dimensionLevel, instance);
-        instance.setStageDefinitions(stages);
-        
-        // 6. Teleport Players
-        for (ServerPlayer p : party) {
-            net.ganyusbathwater.oririmod.dungeon.dimension.DungeonDimensionManager.teleportPlayerToDungeon(p, dimensionLevel, instance);
-        }
         
         return instance;
     }
+        
+
 
     public net.ganyusbathwater.oririmod.dungeon.dimension.DungeonInstanceGrid getGrid(String dimensionKey) {
         return dimensionGrids.computeIfAbsent(dimensionKey, k -> new net.ganyusbathwater.oririmod.dungeon.dimension.DungeonInstanceGrid());
@@ -113,10 +108,13 @@ public class DungeonManager extends SavedData {
                         }
                     }
                     
-                    // Replace all blocks with AIR
+                    // Replace all blocks with AIR, suppressing drops so plants don't leave items behind for the next dungeon
+                    int flags = net.minecraft.world.level.block.Block.UPDATE_CLIENTS 
+                              | net.minecraft.world.level.block.Block.UPDATE_KNOWN_SHAPE 
+                              | net.minecraft.world.level.block.Block.UPDATE_SUPPRESS_DROPS;
                     BlockPos.betweenClosedStream(bounds.minX(), bounds.minY(), bounds.minZ(), 
                                                  bounds.maxX(), bounds.maxY(), bounds.maxZ())
-                            .forEach(pos -> dimLevel.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2));
+                            .forEach(pos -> dimLevel.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), flags));
                 }
             }
             

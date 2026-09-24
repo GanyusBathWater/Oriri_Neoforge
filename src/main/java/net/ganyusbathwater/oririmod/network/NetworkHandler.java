@@ -58,6 +58,12 @@ public final class NetworkHandler {
             "open_teleporter_screen");
     public static final ResourceLocation SYNC_DIALOGUES = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "sync_dialogues");
+    public static final ResourceLocation OPEN_DUNGEON_DEATH_SCREEN = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "open_dungeon_death_screen");
+    public static final ResourceLocation DUNGEON_DEATH_ACTION = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "dungeon_death_action");
+    public static final ResourceLocation SYNC_DUNGEON_TIME = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "sync_dungeon_time");
 
     private NetworkHandler() {
     }
@@ -212,6 +218,15 @@ public final class NetworkHandler {
                         net.ganyusbathwater.oririmod.client.DungeonMusicHandler.handle(payload)
                 ));
 
+        // Dungeon Run Timer & Objective: server → client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncDungeonTimePayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncDungeonTimePayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.client.render.DungeonHUDOverlay.updateTime(payload);
+                    net.ganyusbathwater.oririmod.client.render.DungeonHUDOverlay.updateObjective(payload);
+                }));
+
         // Marker GUI: server -> client
         registrar.playToClient(
                 net.ganyusbathwater.oririmod.network.packet.OpenMarkerScreenPayload.TYPE,
@@ -241,6 +256,18 @@ public final class NetworkHandler {
                             extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_LOOT_TABLE, payload.lootTable());
                             extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_BOSS_ID, payload.bossId());
                             extra.putFloat(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_SPAWN_CHANCE, payload.spawnChance());
+                            extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR, payload.triggerBehavior());
+                            extra.putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_OBJECTIVE, payload.objectiveText());
+
+                            // Broadcast objective text to ALL markers in the same stage group
+                            java.util.List<net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity> sameStageMarkers = sp.serverLevel().getEntitiesOfClass(
+                                net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.class, 
+                                marker.getBoundingBox().inflate(128.0), 
+                                m -> payload.stageId().equals(m.getStageId())
+                            );
+                            for (var m : sameStageMarkers) {
+                                m.getExtraData().putString(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.TAG_OBJECTIVE, payload.objectiveText());
+                            }
                             
                             net.ganyusbathwater.oririmod.item.custom.DungeonMarkerItem.LAST_CONFIG.put(sp.getUUID(), payload);
                             
@@ -331,6 +358,24 @@ public final class NetworkHandler {
                 (payload, ctx) -> ctx.enqueueWork(() -> {
                     net.minecraft.client.Minecraft.getInstance()
                             .setScreen(new net.ganyusbathwater.oririmod.client.screen.TeleporterScreen(payload));
+                }));
+
+        // Dungeon Death Screen (server -> client)
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonDeathScreenPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonDeathScreenPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.minecraft.client.Minecraft.getInstance()
+                            .setScreen(new net.ganyusbathwater.oririmod.client.screen.OririDungeonDeathScreen(payload.livesRemaining()));
+                }));
+
+        // Dungeon Death Action (client -> server)
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.DungeonDeathActionPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.DungeonDeathActionPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    if (!(ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp)) return;
+                    net.ganyusbathwater.oririmod.dungeon.event.DungeonEventHandler.handleDeathAction(sp, payload.action());
                 }));
     }
     

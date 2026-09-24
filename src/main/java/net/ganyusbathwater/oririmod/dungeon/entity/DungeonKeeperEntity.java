@@ -131,7 +131,9 @@ public class DungeonKeeperEntity extends PathfinderMob implements ConversableEnt
                 party.getLeaderId(),
                 memberIds,
                 memberNames,
-                memberStatuses
+                memberStatuses,
+                party.isStarting(),
+                party.getStartTicksRemaining()
         ));
     }
 }

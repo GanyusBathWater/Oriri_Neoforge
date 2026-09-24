@@ -35,25 +35,27 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 public class TeleporterBlock extends BaseEntityBlock {
     public static final MapCodec<TeleporterBlock> CODEC = simpleCodec(TeleporterBlock::new);
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 48, 16);
-    private static final java.util.Map<java.util.UUID, BlockPos> LOCKED_PLAYERS = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.Map<java.util.UUID, Long> TELEPORT_COOLDOWN = new java.util.concurrent.ConcurrentHashMap<>();
     public static final IntegerProperty ROTATION = IntegerProperty.create("rotation", 0, 7);
 
     @Override
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (!level.isClientSide && entity instanceof ServerPlayer player) {
-            BlockPos locked = LOCKED_PLAYERS.get(player.getUUID());
+            long lastTeleport = TELEPORT_COOLDOWN.getOrDefault(player.getUUID(), 0L);
+            long currentTime = level.getGameTime();
+            
+            // 20 ticks = 1 second cooldown
+            if (currentTime - lastTeleport < 20) {
+                return;
+            }
             
             double dx = Math.abs(player.getX() - (pos.getX() + 0.5));
             double dz = Math.abs(player.getZ() - (pos.getZ() + 0.5));
             
-            if (dx < 0.3 && dz < 0.3) {
-                if (locked == null || !locked.equals(pos)) {
-                    executeTeleport((ServerLevel) level, pos, player);
-                }
-            } else if (locked != null && locked.equals(pos)) {
-                if (dx > 0.6 || dz > 0.6) {
-                    LOCKED_PLAYERS.remove(player.getUUID());
-                }
+            // Increased radius from 0.3 to 0.45 so players don't have to be perfectly centered
+            if (dx < 0.45 && dz < 0.45) {
+                // Schedule teleport for the next available safe moment outside the physics loop
+                player.getServer().execute(() -> executeTeleport((ServerLevel) level, pos, player));
             }
         }
     }
@@ -86,7 +88,17 @@ public class TeleporterBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return Shapes.empty();
+    }
+
+    @Override
+    public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
+        return Shapes.empty();
+    }
+
+    @Override
+    public VoxelShape getVisualShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.empty();
     }
 
@@ -140,32 +152,26 @@ public class TeleporterBlock extends BaseEntityBlock {
                 TeleporterSavedData data = TeleporterSavedData.get(level);
                 BlockPos dest = data.getDestination(id, pos);
                 if (dest != null) {
-                    if (!isClear(level, pos)) {
-                        LOCKED_PLAYERS.put(player.getUUID(), pos);
-                        player.displayClientMessage(Component.translatable("gui.oririmod.teleporter.origin_obstructed").withStyle(net.minecraft.ChatFormatting.RED), true);
-                    } else if (level.isLoaded(dest)) {
+                    if (level.isLoaded(dest)) {
                         if (!(level.getBlockState(dest).getBlock() instanceof TeleporterBlock)) {
                             data.removeTeleporter(id, dest);
-                            LOCKED_PLAYERS.put(player.getUUID(), pos);
+                            TELEPORT_COOLDOWN.put(player.getUUID(), level.getGameTime());
                             player.displayClientMessage(Component.translatable("gui.oririmod.teleporter.not_found").withStyle(net.minecraft.ChatFormatting.RED), true);
-                        } else if (!isClear(level, dest)) {
-                            LOCKED_PLAYERS.put(player.getUUID(), pos);
-                            player.displayClientMessage(Component.translatable("gui.oririmod.teleporter.obstructed").withStyle(net.minecraft.ChatFormatting.RED), true);
                         } else {
-                            LOCKED_PLAYERS.put(player.getUUID(), dest);
-                            player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 1.0, dest.getZ() + 0.5, player.getYRot(), player.getXRot());
+                            TELEPORT_COOLDOWN.put(player.getUUID(), level.getGameTime());
+                            player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 0.5, dest.getZ() + 0.5, player.getYRot(), player.getXRot());
                             level.playSound(null, dest, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                             level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                         }
                     } else {
                         // Destination unloaded, force teleport to load it
-                        LOCKED_PLAYERS.put(player.getUUID(), dest);
-                        player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 1.0, dest.getZ() + 0.5, player.getYRot(), player.getXRot());
+                        TELEPORT_COOLDOWN.put(player.getUUID(), level.getGameTime());
+                        player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 0.5, dest.getZ() + 0.5, player.getYRot(), player.getXRot());
                         level.playSound(null, dest, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                         level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                 } else {
-                    LOCKED_PLAYERS.put(player.getUUID(), pos);
+                    TELEPORT_COOLDOWN.put(player.getUUID(), level.getGameTime());
                     player.displayClientMessage(Component.translatable("gui.oririmod.teleporter.not_found").withStyle(net.minecraft.ChatFormatting.RED), true);
                 }
             }
@@ -181,7 +187,7 @@ public class TeleporterBlock extends BaseEntityBlock {
         }
         return true;
     }
-
+    
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {

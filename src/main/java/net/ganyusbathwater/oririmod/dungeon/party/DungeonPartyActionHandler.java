@@ -11,6 +11,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Set;
 
 /**
  * Server-side handler for all DungeonActionPayload messages from the client.
@@ -32,6 +33,7 @@ public class DungeonPartyActionHandler {
             case "ACCEPT" -> handleRespond(sender, manager, party, true);
             case "DECLINE"-> handleRespond(sender, manager, party, false);
             case "START"  -> handleStart(sender, manager, party);
+            case "CANCEL_START" -> handleCancelStart(sender, manager, party);
             case "SELECT" -> handleSelect(sender, manager, payload.targetPlayerName());
         }
     }
@@ -109,6 +111,7 @@ public class DungeonPartyActionHandler {
 
     private static void handleStart(ServerPlayer leader, DungeonPartyManager manager, DungeonParty party) {
         if (!party.isLeader(leader.getUUID())) return;
+        if (party.isStarting()) return;
 
         if (party.hasPendingInvites()) {
             leader.displayClientMessage(
@@ -116,19 +119,89 @@ public class DungeonPartyActionHandler {
             return;
         }
 
-        var definition = DungeonDefinitionRegistry.get(party.getDungeonId());
+        var definition = net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.get(party.getDungeonId());
         if (definition == null) {
             leader.displayClientMessage(
                     Component.literal("Unknown dungeon: " + party.getDungeonId()).withStyle(ChatFormatting.RED), true);
             return;
         }
+        
+        net.ganyusbathwater.oririmod.dungeon.DungeonManager dungeonManager = net.ganyusbathwater.oririmod.dungeon.DungeonManager.get(leader.serverLevel());
 
-        var instance = manager.startDungeon(leader.serverLevel(), party, definition);
-        if (instance == null) {
-            leader.displayClientMessage(
-                    Component.literal("Failed to start dungeon. Is the dimension loaded?").withStyle(ChatFormatting.RED), true);
+        // Check if we have a cached generated instance from a previous cancelled start
+        if (party.getAssignedInstanceId() == null) {
+            Set<ServerPlayer> players = new java.util.HashSet<>();
+            for (UUID id : party.getAcceptedMembers()) {
+                ServerPlayer sp = leader.getServer().getPlayerList().getPlayer(id);
+                if (sp != null) players.add(sp);
+            }
+            
+            // Progression Check
+            if (definition.requiredPreviousDungeon() != null && !definition.requiredPreviousDungeon().isBlank()) {
+                net.ganyusbathwater.oririmod.dungeon.data.PlayerDungeonData progressData = net.ganyusbathwater.oririmod.dungeon.data.PlayerDungeonData.get(leader.serverLevel());
+                for (ServerPlayer sp : players) {
+                    if (!progressData.hasCompleted(sp.getUUID(), definition.requiredPreviousDungeon())) {
+                        leader.displayClientMessage(
+                                Component.literal("Player " + sp.getName().getString() + " has not completed the required dungeon: " + definition.requiredPreviousDungeon())
+                                        .withStyle(ChatFormatting.RED), false);
+                        return;
+                    }
+                }
+            }
+
+            var instance = dungeonManager.allocateDungeon(leader.serverLevel(), definition, players);
+            if (instance == null) {
+                leader.displayClientMessage(
+                        Component.literal("Failed to allocate dungeon grid.").withStyle(ChatFormatting.RED), true);
+                return;
+            }
+            party.setAssignedInstanceId(instance.getInstanceId());
+            
+            // Queue background generation
+            dungeonManager.getActiveTasks().add(new net.ganyusbathwater.oririmod.dungeon.dimension.DungeonGeneratorTask(
+                    leader.serverLevel().getServer().getLevel(definition.dimension()),
+                    definition, instance
+            ));
         }
-        // Instance started — players are already teleported by DungeonManager.startDungeon
+
+        // 10-second countdown (200 ticks)
+        party.setStarting(true, 200);
+        manager.setDirty();
+        
+        // Refresh screens for all members
+        for (UUID memberId : party.getAcceptedMembers()) {
+            ServerPlayer sp = leader.getServer().getPlayerList().getPlayer(memberId);
+            if (sp != null) refreshScreen(sp, manager, party);
+        }
+    }
+
+    // ── CANCEL_START ──────────────────────────────────────────────────────────
+    
+    private static void handleCancelStart(ServerPlayer sender, DungeonPartyManager manager, DungeonParty party) {
+        if (party.isStarting()) {
+            party.setStarting(false, -200); // 10s cooldown
+            manager.setDirty();
+            
+            sender.getServer().getPlayerList().broadcastSystemMessage(
+                    Component.literal(sender.getName().getString() + " cancelled the dungeon start.").withStyle(ChatFormatting.YELLOW), false);
+            
+            // Refresh screens for all members
+            for (UUID memberId : party.getAcceptedMembers()) {
+                ServerPlayer sp = sender.getServer().getPlayerList().getPlayer(memberId);
+                if (sp != null) refreshScreen(sp, manager, party);
+            }
+            
+            // Cancel generator task if running
+            if (party.getAssignedInstanceId() != null) {
+                net.ganyusbathwater.oririmod.dungeon.DungeonManager dungeonManager = net.ganyusbathwater.oririmod.dungeon.DungeonManager.get(sender.serverLevel());
+                for (var task : dungeonManager.getActiveTasks()) {
+                    if (task.getInstance().getInstanceId().equals(party.getAssignedInstanceId())) {
+                        task.cancel();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     // ── SELECT ───────────────────────────────────────────────────────────────
@@ -142,7 +215,7 @@ public class DungeonPartyActionHandler {
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /** Sends a refreshed OpenDungeonScreenPayload to the leader's client. */
-    private static void refreshScreen(ServerPlayer leader, DungeonPartyManager manager, DungeonParty party) {
+    public static void refreshScreen(ServerPlayer leader, DungeonPartyManager manager, DungeonParty party) {
         if (party == null) return;
         var def = DungeonDefinitionRegistry.get(party.getDungeonId());
         String displayName = def != null ? def.displayName() : party.getDungeonId();
@@ -161,7 +234,8 @@ public class DungeonPartyActionHandler {
         PacketDistributor.sendToPlayer(leader, new OpenDungeonScreenPayload(
                 -1, party.getDungeonId(), displayName, description,
                 party.getPartyId(), party.getLeaderId(),
-                memberIds, memberNames, memberStatuses
+                memberIds, memberNames, memberStatuses,
+                party.isStarting(), party.getStartTicksRemaining()
         ));
     }
 }

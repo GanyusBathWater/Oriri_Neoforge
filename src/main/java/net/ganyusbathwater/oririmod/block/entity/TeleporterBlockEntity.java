@@ -160,6 +160,7 @@ public class TeleporterBlockEntity extends BlockEntity implements GeoBlockEntity
 
     public static void tick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, TeleporterBlockEntity entity) {
         if (!level.isClientSide) {
+            
             long timeSinceChange = level.getGameTime() - entity.stateChangeTime;
             if (entity.currentState == TeleporterState.SPAWNING && timeSinceChange >= 5) {
                 entity.currentState = TeleporterState.IDLE;

@@ -62,6 +62,8 @@ public class DungeonKeeperScreen extends Screen {
     private final OpenDungeonScreenPayload data;
     private final boolean isLeader;
     private EditBox inviteBox;
+    private long openClientTick;
+    private String currentSuggestion = "";
 
     public DungeonKeeperScreen(OpenDungeonScreenPayload data) {
         super(Component.literal(data.dungeonDisplayName()));
@@ -70,6 +72,8 @@ public class DungeonKeeperScreen extends Screen {
                 ? net.minecraft.client.Minecraft.getInstance().player.getUUID()
                 : UUID.randomUUID();
         this.isLeader = data.leaderId().equals(myId);
+        this.openClientTick = net.minecraft.client.Minecraft.getInstance().level != null 
+                ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : 0;
     }
 
     @Override
@@ -83,11 +87,29 @@ public class DungeonKeeperScreen extends Screen {
         int top  = (height - PANEL_H) / 2;
 
         // ── Invite Zone (leader only) ──
-        if (isLeader) {
+        if (isLeader && !data.isStarting() && data.startTicksRemaining() >= 0) {
             inviteBox = new EditBox(font, left + 65, top + INVITE_Y, 140, 18,
                     Component.literal("Player name"));
             inviteBox.setMaxLength(40);
             inviteBox.setHint(Component.literal("Player name").withStyle(ChatFormatting.DARK_GRAY));
+            inviteBox.setResponder(text -> {
+                currentSuggestion = "";
+                inviteBox.setSuggestion("");
+                if (!text.isEmpty()) {
+                    var connection = net.minecraft.client.Minecraft.getInstance().getConnection();
+                    if (connection != null) {
+                        String lowerText = text.toLowerCase(java.util.Locale.ROOT);
+                        for (net.minecraft.client.multiplayer.PlayerInfo info : connection.getOnlinePlayers()) {
+                            String name = info.getProfile().getName();
+                            if (name.toLowerCase(java.util.Locale.ROOT).startsWith(lowerText) && !name.equalsIgnoreCase(text)) {
+                                currentSuggestion = name.substring(text.length());
+                                inviteBox.setSuggestion(currentSuggestion);
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
             addRenderableWidget(inviteBox);
 
             addRenderableWidget(Button.builder(Component.literal("Invite"), btn -> invite())
@@ -99,21 +121,31 @@ public class DungeonKeeperScreen extends Screen {
         // ── Button Zone ──
         int btnY = top + BUTTON_Y;
 
-        if (isLeader) {
+        if (data.isStarting()) {
+            // When starting, anyone can cancel
             addRenderableWidget(Button.builder(
-                    Component.literal("Start ▶").withStyle(ChatFormatting.GREEN),
-                    btn -> sendAction("START", ""))
-                    .pos(left + PANEL_W - 80, btnY)
-                    .size(72, 20)
+                    Component.literal("Cancel Start").withStyle(ChatFormatting.RED),
+                    btn -> { sendAction("CANCEL_START", ""); onClose(); })
+                    .pos(left + PANEL_W / 2 - 40, btnY)
+                    .size(80, 20)
+                    .build());
+        } else {
+            if (isLeader) {
+                addRenderableWidget(Button.builder(
+                        Component.literal("Start ▶").withStyle(ChatFormatting.GREEN),
+                        btn -> sendAction("START", ""))
+                        .pos(left + PANEL_W - 80, btnY)
+                        .size(72, 20)
+                        .build());
+            }
+
+            addRenderableWidget(Button.builder(
+                    Component.literal("Leave Party").withStyle(ChatFormatting.RED),
+                    btn -> { sendAction("LEAVE", ""); onClose(); })
+                    .pos(left + (isLeader ? PANEL_W - 160 : PANEL_W - 90), btnY)
+                    .size(isLeader ? 74 : 82, 20)
                     .build());
         }
-
-        addRenderableWidget(Button.builder(
-                Component.literal("Leave Party").withStyle(ChatFormatting.RED),
-                btn -> { sendAction("LEAVE", ""); onClose(); })
-                .pos(left + (isLeader ? PANEL_W - 160 : PANEL_W - 90), btnY)
-                .size(isLeader ? 74 : 82, 20)
-                .build());
 
         // Accept / Decline buttons for non-leader pending members
         UUID myId = net.minecraft.client.Minecraft.getInstance().player != null
@@ -192,7 +224,21 @@ public class DungeonKeeperScreen extends Screen {
         // ── Dividers ──
         gfx.hLine(left + 8, left + PANEL_W - 8, top + DIV2_Y, C_DIVIDER);
 
-        if (isLeader) {
+        if (data.isStarting()) {
+            long currentTick = net.minecraft.client.Minecraft.getInstance().level != null 
+                    ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : openClientTick;
+            long passedTicks = currentTick - openClientTick;
+            int ticksLeft = Math.max(0, data.startTicksRemaining() - (int) passedTicks);
+            int secondsLeft = (int) Math.ceil(ticksLeft / 20.0);
+            gfx.drawString(font, "Starting in " + secondsLeft + "s...", left + 12, top + INVITE_Y + 4, C_PENDING, true);
+        } else if (data.startTicksRemaining() < 0) {
+            long currentTick = net.minecraft.client.Minecraft.getInstance().level != null 
+                    ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : openClientTick;
+            long passedTicks = currentTick - openClientTick;
+            int ticksLeft = Math.min(0, data.startTicksRemaining() + (int) passedTicks);
+            int secondsLeft = Math.abs(ticksLeft) / 20;
+            gfx.drawString(font, "Cooldown: " + secondsLeft + "s...", left + 12, top + INVITE_Y + 4, C_DECLINE, true);
+        } else if (isLeader) {
             gfx.drawString(font, "Invite:", left + 12, top + INVITE_Y + 4, C_LABEL, true);
         }
 
@@ -200,6 +246,20 @@ public class DungeonKeeperScreen extends Screen {
     }
 
     // ── Helpers ──
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (inviteBox != null && inviteBox.isFocused()) {
+            if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_TAB && !currentSuggestion.isEmpty()) {
+                inviteBox.setValue(inviteBox.getValue() + currentSuggestion);
+                return true;
+            } else if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER || keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER) {
+                invite();
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
     private String getLeaderName() {
         var player = net.minecraft.client.Minecraft.getInstance().player;

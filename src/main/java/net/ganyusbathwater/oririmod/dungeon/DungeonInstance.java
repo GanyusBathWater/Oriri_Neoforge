@@ -31,9 +31,13 @@ public class DungeonInstance {
     private String currentStage = "stage_0";
     private int ticksActive = 0;
     
+    private boolean hasStarted = false;
     private boolean isComplete = false;
     private int ticksSinceComplete = 0;
     private boolean debugLogging = false;
+
+    public boolean hasStarted() { return hasStarted; }
+    public void setStarted(boolean s) { this.hasStarted = s; }
 
     // ── Stage runtime state (not persisted — rebuilt from markers on reload) ──
     private List<StageDefinition> stageDefinitions = new ArrayList<>();
@@ -139,6 +143,7 @@ public class DungeonInstance {
         
         tag.putString("CurrentStage", currentStage);
         tag.putInt("TicksActive", ticksActive);
+        tag.putBoolean("HasStarted", hasStarted);
         tag.putBoolean("IsComplete", isComplete);
         tag.putInt("TicksSinceComplete", ticksSinceComplete);
 
@@ -188,7 +193,8 @@ public class DungeonInstance {
             instance.ticksActive = tag.getInt("TicksActive");
         }
         if (tag.contains("IsComplete")) {
-            instance.isComplete = tag.getBoolean("IsComplete");
+            instance.hasStarted = tag.getBoolean("HasStarted");
+        instance.isComplete = tag.getBoolean("IsComplete");
         }
         if (tag.contains("TicksSinceComplete")) {
             instance.ticksSinceComplete = tag.getInt("TicksSinceComplete");

@@ -35,11 +35,26 @@ public class DungeonTickHandler {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        ServerLevel overworld = event.getServer().getLevel(net.minecraft.world.level.Level.OVERWORLD);
+        if (overworld == null) return;
+        
+        DungeonManager manager = DungeonManager.get(overworld);
+        
+        // ── Party Start Countdown ──
+        net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyManager partyManager = net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyManager.get(overworld);
+        partyManager.tickParties(overworld);
+        
+        // Tick background generator tasks
+        var activeTasks = manager.getActiveTasks();
+        activeTasks.removeIf(task -> {
+            task.tick();
+            return task.isFinished() || task.isCancelled();
+        });
+        
         // Iterate every active dungeon instance across all dimensions
         for (ServerLevel level : event.getServer().getAllLevels()) {
             if (!level.dimension().location().getPath().startsWith("dungeon_")) continue;
-
-            DungeonManager manager = DungeonManager.get(level);
+            
             String thisDimKey = level.dimension().location().toString();
             List<DungeonInstance> activeInstances = new java.util.ArrayList<>(manager.getActiveInstances().values());
             for (DungeonInstance instance : activeInstances) {
@@ -55,7 +70,31 @@ public class DungeonTickHandler {
     }
 
     private static void tickInstance(ServerLevel level, DungeonManager manager, DungeonInstance instance) {
+        if (!instance.hasStarted()) return;
+        
         instance.tick();
+
+        // ── Time Sync ──
+        if (instance.getTicksActive() % 20 == 0) {
+            String objText = "";
+            String progText = "";
+            if (instance.getActiveStage() != null) {
+                if (instance.getActiveStage().getDefinition().getObjectiveText() != null) {
+                    objText = instance.getActiveStage().getDefinition().getObjectiveText();
+                }
+                if (instance.getActiveStage().getProgressText() != null) {
+                    progText = instance.getActiveStage().getProgressText();
+                }
+            }
+            net.ganyusbathwater.oririmod.network.packet.SyncDungeonTimePayload payload = 
+                new net.ganyusbathwater.oririmod.network.packet.SyncDungeonTimePayload(instance.getTicksActive(), instance.isComplete(), objText, progText);
+            for (UUID playerId : new java.util.ArrayList<>(instance.getPlayers())) {
+                ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+                if (sp != null) {
+                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, payload);
+                }
+            }
+        }
 
         // ── 30-minute timeout ──
         if (instance.getTicksActive() >= TIMEOUT_TICKS) {
@@ -244,6 +283,29 @@ public class DungeonTickHandler {
                 chestBE.setLootTable(lootKey, level.getRandom().nextLong());
             }
             OririMod.LOGGER.info("[DungeonTickHandler] Spawned Loot Chest for {} at {} with table {}", instance.getDungeonId(), chestPos, lootTableId);
+        }
+        
+        // Revive all spectators so they can collect loot and leave normally
+        for (UUID specId : new java.util.ArrayList<>(instance.getSpectators())) {
+            ServerPlayer spec = level.getServer().getPlayerList().getPlayer(specId);
+            if (spec != null) {
+                spec.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                spec.setCamera(spec);
+                spec.setHealth(spec.getMaxHealth());
+                instance.setPlayerLives(specId, 1);
+                
+                net.minecraft.core.BlockPos respawnPos = instance.getPlayerSpawnPos();
+                if (respawnPos != null) {
+                    spec.teleportTo(level, respawnPos.getX() + 0.5, respawnPos.getY(), respawnPos.getZ() + 0.5, 0f, 0f);
+                } else if (instance.getLootChestPos() != null) {
+                    spec.teleportTo(level, instance.getLootChestPos().getX() + 0.5, instance.getLootChestPos().getY(), instance.getLootChestPos().getZ() + 0.5, 0f, 0f);
+                }
+                
+                spec.displayClientMessage(Component.translatable("message.oririmod.dungeon.revived").withStyle(ChatFormatting.GREEN), false);
+                instance.getSpectators().remove(specId);
+                
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(spec, new net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload(1));
+            }
         }
         
         // Mark instance as complete to start the countdown

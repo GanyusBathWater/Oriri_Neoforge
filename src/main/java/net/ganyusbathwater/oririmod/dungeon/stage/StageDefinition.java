@@ -13,13 +13,17 @@ import java.util.List;
  */
 public final class StageDefinition {
 
+    public enum TriggerBehavior {
+        TELEPORT_PARTY, NO_TELEPORT, REQUIRE_PARTY
+    }
+
     public record SpawnEntry(ResourceLocation entityType, boolean isTag, int count, BlockPos pos, float chance, @Nullable String keyDropItem) {}
     public record InfiniteSpawnEntry(ResourceLocation entityType, boolean isTag, int cooldownTicks, BlockPos pos, float chance, @Nullable String keyDropItem) {}
     public record SwitchEntry(String switchId, BlockPos pos) {}
     public record DoorEntry(String groupId, int requiredSwitches, BlockPos pos) {}
     public record BlockMatchEntry(net.minecraft.resources.ResourceLocation blockId, String stateData, BlockPos pos) {}
     public record AreaModifierEntry(String action, int radius, @Nullable ResourceLocation blockFilter, String extraString, BlockPos pos, float yRot) {}
-    public record TriggerEntry(BlockPos pos, int radius) {}
+    public record TriggerEntry(BlockPos pos, int radius, TriggerBehavior behavior) {}
 
     private final String stageId;
     private final StageType stageType;
@@ -37,6 +41,7 @@ public final class StageDefinition {
     @Nullable private final BlockPos playerSpawnPos; // Where players are positioned at stage start
     @Nullable private final String bossKeyDropItem;
     @Nullable private final String keyDropStageId; // The stage ID to assign to the dropped key
+    @Nullable private final String objectiveText;
 
     private StageDefinition(Builder b) {
         this.stageId = b.stageId;
@@ -55,6 +60,7 @@ public final class StageDefinition {
         this.playerSpawnPos = b.playerSpawnPos;
         this.bossKeyDropItem = b.bossKeyDropItem;
         this.keyDropStageId = b.keyDropStageId;
+        this.objectiveText = b.objectiveText;
     }
 
     public String getStageId() { return stageId; }
@@ -73,6 +79,7 @@ public final class StageDefinition {
     @Nullable public BlockPos getPlayerSpawnPos() { return playerSpawnPos; }
     @Nullable public String getBossKeyDropItem() { return bossKeyDropItem; }
     @Nullable public String getKeyDropStageId() { return keyDropStageId; }
+    @Nullable public String getObjectiveText() { return objectiveText; }
 
     // -------------------------------------------------------------------------
     //  Builder
@@ -99,6 +106,7 @@ public final class StageDefinition {
         @Nullable private BlockPos playerSpawnPos;
         @Nullable private String bossKeyDropItem;
         @Nullable private String keyDropStageId;
+        @Nullable private String objectiveText;
 
         private Builder(String stageId, StageType stageType) {
             this.stageId = stageId;
@@ -135,13 +143,13 @@ public final class StageDefinition {
             return this;
         }
 
-        public Builder addTrigger(BlockPos pos, int radius) {
-            triggers.add(new TriggerEntry(pos, radius));
+        public Builder addTrigger(BlockPos pos, int radius, TriggerBehavior behavior) {
+            triggers.add(new TriggerEntry(pos, radius, behavior));
             return this;
         }
 
         public Builder addGoal(BlockPos pos, int radius) {
-            goals.add(new TriggerEntry(pos, radius));
+            goals.add(new TriggerEntry(pos, radius, TriggerBehavior.TELEPORT_PARTY));
             return this;
         }
 
@@ -154,6 +162,7 @@ public final class StageDefinition {
         }
         public Builder playerSpawn(BlockPos pos) { this.playerSpawnPos = pos; return this; }
         public Builder keyDropStageId(String id) { this.keyDropStageId = id; return this; }
+        public Builder objective(String text) { this.objectiveText = text; return this; }
 
         public StageDefinition build() { return new StageDefinition(this); }
     }
