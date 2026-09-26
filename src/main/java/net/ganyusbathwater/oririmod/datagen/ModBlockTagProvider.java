@@ -55,13 +55,16 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(Blocks.SOUL_LANTERN);
 
                 tag(BlockTags.LEAVES)
-                                .add(ModBlocks.ELDER_LEAVES.get())
-                                .add(ModBlocks.ELDER_LEAVES_FLOWERING.get())
-                                .add(ModBlocks.SCARLET_LEAVES.get())
-                                .add(ModBlocks.ABYSS_CROWN_LEAVES.get())
-                                .add(ModBlocks.EPOCH_CACTUS.get());
+                .add(ModBlocks.ELDER_LEAVES.get())
+                .add(ModBlocks.ELDER_LEAVES_FLOWERING.get())
+                .add(ModBlocks.SCARLET_LEAVES.get())
+                .add(ModBlocks.SCARLET_TOOTH_LEAVES.get())
+                .add(ModBlocks.ABYSS_CROWN_LEAVES.get())
+                .add(ModBlocks.EPOCH_CACTUS.get())
+                .add(ModBlocks.UPGRADED_AZALEA.get())
+                .add(ModBlocks.UPGRADED_FLOWERING_AZALEA.get());
 
-                tag(BlockTags.FENCES)
+        tag(BlockTags.FENCES)
                                 .add(ModBlocks.ELDER_FENCE.get())
                                 .add(ModBlocks.SCARLET_FENCE.get())
                                 .add(ModBlocks.ABYSS_CROWN_FENCE.get())
@@ -147,6 +150,26 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_DOOR.get())
                                 .add(ModBlocks.ABYSS_CROWN_DOOR.get())
                                 .add(ModBlocks.EPOCH_DOOR.get());
+
+                tag(BlockTags.SAPLINGS)
+                                .add(ModBlocks.UPGRADED_OAK_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_SPRUCE_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_BIRCH_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_JUNGLE_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_ACACIA_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_CHERRY_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_AZALEA.get())
+                                .add(ModBlocks.UPGRADED_FLOWERING_AZALEA.get())
+                                .add(ModBlocks.UPGRADED_MANGROVE_PROPAGULE.get())
+                                .add(ModBlocks.ELDER_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_ELDER_SAPLING.get())
+                                .add(ModBlocks.SCARLET_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_SCARLET_SAPLING.get())
+                                .add(ModBlocks.ABYSS_CROWN_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get())
+                                .add(ModBlocks.EPOCH_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_EPOCH_SAPLING.get());
 
                 tag(BlockTags.WOODEN_TRAPDOORS)
                                 .add(ModBlocks.ELDER_TRAPDOOR.get())
@@ -372,6 +395,7 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_STONE_SLAB.get())
                                 .add(ModBlocks.SCARLET_STONE_STAIRS.get())
                                 .add(ModBlocks.AETHER_MAGMA_BLOCK.get())
+                                .add(ModBlocks.TELEPORTER_BLOCK.get())
                                 .add(ModBlocks.REVIVAL_SHRINE.get());
 
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)

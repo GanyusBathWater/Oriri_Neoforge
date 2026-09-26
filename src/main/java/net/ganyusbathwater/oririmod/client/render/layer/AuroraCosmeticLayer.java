@@ -28,6 +28,8 @@ public class AuroraCosmeticLayer extends RenderLayer<AbstractClientPlayer, Playe
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, AbstractClientPlayer player,
             float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw,
             float headPitch) {
+        if (player.isSpectator()) return;
+        
         if (!hasCurioEquipped(player, ModItems.ESSENCE_OF_DARKNESS.get())) {
             return;
         }

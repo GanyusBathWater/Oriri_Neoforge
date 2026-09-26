@@ -188,6 +188,22 @@ public class TeleporterBlockEntity extends BlockEntity implements GeoBlockEntity
                         cx + dx, cy + dy, cz + dz,
                         cx, cy, cz); // Target position
                 }
+            } else if (entity.currentState == TeleporterState.UNLINKED) {
+                if (level.random.nextInt(4) == 0) {
+                    double cx = pos.getX() + 0.5;
+                    double cy = pos.getY() + 1.0;
+                    double cz = pos.getZ() + 0.5;
+                    
+                    double dx = (level.random.nextDouble() - 0.5) * 1.5;
+                    double dy = (level.random.nextDouble() - 0.5) * 1.5;
+                    double dz = (level.random.nextDouble() - 0.5) * 1.5;
+                    
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.PORTAL,
+                        cx + dx, cy + dy, cz + dz,
+                        (level.random.nextDouble() - 0.5) * 0.2,
+                        (level.random.nextDouble() - 0.5) * 0.2,
+                        (level.random.nextDouble() - 0.5) * 0.2);
+                }
             }
         }
     }

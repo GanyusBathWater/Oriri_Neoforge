@@ -35,6 +35,7 @@ public class DungeonStageManager {
     public static final String ROLE_BOUNDS_MAX    = "BOUNDS_MAX";
     public static final String ROLE_INFINITE_SPAWNER = "INFINITE_SPAWNER";
     public static final String ROLE_LOOT_CHEST    = "LOOT_CHEST";
+    public static final String ROLE_DEATH_AREA    = "DEATH_AREA";
 
     /**
      * Scans all DungeonMarkerEntity instances within the 2048×2048 grid slot
@@ -76,6 +77,17 @@ public class DungeonStageManager {
                     instance.setPlayerSpawnPos(marker.blockPosition());
                 }
                 // Do NOT continue here; if it has a stage ID, we want it in the stage definition!
+            }
+            if (ROLE_DEATH_AREA.equalsIgnoreCase(marker.getRole())) {
+                String scope = marker.getExtraData().getString(DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR); // Scope stored in TriggerBehavior
+                if ("GLOBAL".equalsIgnoreCase(scope) || marker.getStageId().isBlank()) {
+                    String shapeStr = marker.getExtraData().getString(DungeonMarkerEntity.TAG_SWITCH_ID);
+                    StageDefinition.DeathAreaShape shape = StageDefinition.DeathAreaShape.BOX;
+                    try { shape = StageDefinition.DeathAreaShape.valueOf(shapeStr.toUpperCase()); } catch (Exception ignored) {}
+                    String dims = marker.getExtraData().getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
+                    instance.addGlobalDeathArea(new StageDefinition.DeathAreaEntry(marker.blockPosition(), shape, dims, "GLOBAL"));
+                    if (marker.getStageId().isBlank()) continue;
+                }
             }
             String stageId = marker.getStageId();
             if (stageId.isBlank()) continue;
@@ -243,7 +255,7 @@ public class DungeonStageManager {
                     int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 5;
                     if (radius <= 0) radius = 5;
                     
-                    StageDefinition.TriggerBehavior behavior = StageDefinition.TriggerBehavior.TELEPORT_PARTY;
+                    StageDefinition.TriggerBehavior behavior = StageDefinition.TriggerBehavior.NO_TELEPORT;
                     if (extra.contains(DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR)) {
                         try {
                             behavior = StageDefinition.TriggerBehavior.valueOf(extra.getString(DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR));
@@ -267,6 +279,16 @@ public class DungeonStageManager {
                     if (!blockId.isBlank()) {
                         if (!blockId.contains(":")) blockId = "minecraft:" + blockId;
                         builder.addBlockMatch(net.minecraft.resources.ResourceLocation.tryParse(blockId), blockState, pos);
+                    }
+                }
+                case ROLE_DEATH_AREA -> {
+                    String scope = extra.getString(DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR);
+                    if (!"GLOBAL".equalsIgnoreCase(scope)) { // global is already parsed in buildStages
+                        String shapeStr = extra.getString(DungeonMarkerEntity.TAG_SWITCH_ID);
+                        StageDefinition.DeathAreaShape shape = StageDefinition.DeathAreaShape.BOX;
+                        try { shape = StageDefinition.DeathAreaShape.valueOf(shapeStr.toUpperCase()); } catch (Exception ignored) {}
+                        String dims = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
+                        builder.addDeathArea(pos, shape, dims, scope);
                     }
                 }
             }

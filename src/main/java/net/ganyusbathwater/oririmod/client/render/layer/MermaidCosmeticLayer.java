@@ -28,6 +28,8 @@ public class MermaidCosmeticLayer extends RenderLayer<AbstractClientPlayer, Play
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, AbstractClientPlayer player,
             float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw,
             float headPitch) {
+        if (player.isSpectator()) return;
+        
         if (!hasCurioEquipped(player, ModItems.MERMAID_SCALE.get())) {
             return;
         }
@@ -35,30 +37,17 @@ public class MermaidCosmeticLayer extends RenderLayer<AbstractClientPlayer, Play
         boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) || player.isVisuallySwimming();
         
         if (CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER != null) {
-            if (inWater) {
-                // TAIL MODEL
-                poseStack.pushPose();
-                
-                this.getParentModel().body.translateAndRotate(poseStack);
-                
-                poseStack.scale(1.0F, -1.0F, 1.0F);
-                poseStack.translate(0.0F, -1.5F, 0.0F);
-                
-                float entityYaw = net.minecraft.util.Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot);
-                CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER.render(player, entityYaw, partialTick, poseStack, buffer, packedLight);
-                
-                poseStack.popPose();
-            } else {
-                // LAND MODEL
-                poseStack.pushPose();
-                
-                poseStack.scale(-1.0F, -1.0F, 1.0F);
-                poseStack.translate(0.0F, -1.5F, 0.0F);
-                
-                CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER.render(player, 180.0F, partialTick, poseStack, buffer, packedLight);
-                
-                poseStack.popPose();
-            }
+            // Both TAIL MODEL and LAND MODEL must be rendered at the root!
+            // If we translate to the body, the arm fins (which are root-level bones) will inherit the body's rotation and detach from the vanilla arms.
+            poseStack.pushPose();
+            
+            poseStack.scale(-1.0F, -1.0F, 1.0F);
+            poseStack.translate(0.0F, -1.5F, 0.0F);
+            
+            float entityYaw = inWater ? net.minecraft.util.Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) : 180.0F;
+            CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER.render(player, entityYaw, partialTick, poseStack, buffer, packedLight);
+            
+            poseStack.popPose();
         }
         
         if (CosmeticPlayerRenderEventHandler.MERMAID_HEADFINS_RENDERER != null) {

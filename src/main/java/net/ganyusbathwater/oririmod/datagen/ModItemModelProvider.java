@@ -266,6 +266,13 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModBlocks.UPGRADED_ACACIA_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/acacia_sapling"));
                 withExistingParent(ModBlocks.UPGRADED_DARK_OAK_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/dark_oak_sapling"));
                 withExistingParent(ModBlocks.UPGRADED_CHERRY_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/cherry_sapling"));
+                withExistingParent(ModBlocks.UPGRADED_AZALEA.getId().getPath(), modLoc("block/upgraded_azalea"));
+                withExistingParent(ModBlocks.UPGRADED_FLOWERING_AZALEA.getId().getPath(), modLoc("block/upgraded_flowering_azalea"));
+                withExistingParent(ModBlocks.UPGRADED_MANGROVE_PROPAGULE.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/mangrove_propagule"));
+                withExistingParent(ModBlocks.UPGRADED_RED_MUSHROOM.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/red_mushroom"));
+                withExistingParent(ModBlocks.UPGRADED_BROWN_MUSHROOM.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/brown_mushroom"));
+                withExistingParent(ModBlocks.UPGRADED_CRIMSON_FUNGUS.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/crimson_fungus"));
+                withExistingParent(ModBlocks.UPGRADED_WARPED_FUNGUS.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/warped_fungus"));
                 withExistingParent(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/abyss_crown_sapling"));
                 withExistingParent(ModBlocks.UPGRADED_EPOCH_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/epoch_sapling"));
                 saplingItem(ModBlocks.SCARLET_GRASS);

@@ -66,7 +66,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  *   hurt_controller     – hurt flash (triggerable)
  *   death_controller    – defeat sequence (triggerable then state-driven)
  */
-public class DeviartrasEntity extends Monster implements GeoEntity {
+public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
 
     // ── Attack-type constants (used by movement/attack controller) ─────────────
     public static final int ATTACK_NONE         = 0;
@@ -74,6 +74,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     public static final int ATTACK_OVERGROWTH   = 2;
     public static final int ATTACK_VINE_LOCK    = 3;
     public static final int ATTACK_SPORE_BLOSSOM = 4;
+    public static final int ATTACK_DEFENSIVE_THORNS = 5;
+    public static final int ATTACK_BURROW       = 6;
 
     // ── Synced data ────────────────────────────────────────────────────────────
     /** Current attack type, synced so client-side animation controller can branch. */
@@ -114,6 +116,15 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     // ── Passive Fairy cooldown ───────────────────────────────────────────────────
     /** Independent passive cooldown – 1200 t (60 s). Does NOT share the global CD. */
     private int fairyPassiveCooldown = 0;
+
+    // ── Natures Apostle Phase ───────────────────────────────────────────────
+    private boolean naturesApostle75Triggered = false;
+    private boolean naturesApostle25Triggered = false;
+    private int naturesApostleTimer = 0;
+
+    // ── Defensive Thorns State ───────────────────────────────────────────────
+    private int defensiveThornsTimer = 0;
+    private int defensiveThornsCooldown = 200;
 
     // ── Hit & Run mechanic ─────────────────────────────────────────────────────
     /**
@@ -210,6 +221,83 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
                 isPhase2 = true;
             }
 
+            // ── Natures Apostle Triggers ──────────────────────────────────────
+            if (!isDefeated) {
+                if (!naturesApostle75Triggered && this.getHealth() <= 450.0f) {
+                    naturesApostle75Triggered = true;
+                    naturesApostleTimer = 320; // 16 seconds
+                    this.setInvisible(true);
+                    if (this.level() instanceof ServerLevel sl) {
+                        sl.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, this.getX(), this.getY(), this.getZ(), 20, 0.5, 0.5, 0.5, 0.05);
+                    }
+                } else if (!naturesApostle25Triggered && this.getHealth() <= 150.0f) {
+                    naturesApostle25Triggered = true;
+                    naturesApostleTimer = 320; // 16 seconds
+                    this.setInvisible(true);
+                    if (this.level() instanceof ServerLevel sl) {
+                        sl.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, this.getX(), this.getY(), this.getZ(), 20, 0.5, 0.5, 0.5, 0.05);
+                    }
+                }
+            }
+
+            if (naturesApostleTimer > 0) {
+                naturesApostleTimer--;
+                
+                // Quadruple the fire rate: Phase 2 is every 1 tick (20/sec), Phase 1 is every 3 ticks (6.6/sec)
+                int fireRate = isPhase2 ? 1 : 3; 
+                if (naturesApostleTimer % fireRate == 0 && this.level() instanceof ServerLevel sl) {
+                    double angle = random.nextDouble() * Math.PI * 2;
+                    double radius = random.nextDouble() * 32.0;
+                    BlockPos targetPos = this.blockPosition().offset(
+                        (int)(Math.cos(angle) * radius),
+                        0,
+                        (int)(Math.sin(angle) * radius)
+                    );
+                    net.ganyusbathwater.oririmod.util.RootAttackUtil.unleash(sl, targetPos, this.getId());
+                }
+
+                this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+                this.setYRot(this.yRotO); // Freeze rotation
+
+                if (naturesApostleTimer == 0) {
+                    // Pop out, restore visibility
+                    this.setInvisible(false);
+                    if (this.level() instanceof ServerLevel sl) {
+                        sl.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, this.getX(), this.getY(), this.getZ(), 20, 0.5, 0.5, 0.5, 0.05);
+                    }
+                }
+                
+                // Skip other AI logic during Natures Apostle
+                return;
+            }
+
+            // ── Defensive Thorns ─────────────────────────────────────────────
+            if (defensiveThornsCooldown > 0) {
+                defensiveThornsCooldown--;
+            } else if (defensiveThornsTimer == 0 && this.getTarget() != null && this.distanceToSqr(this.getTarget()) <= 144.0) {
+                // Trigger thorns if a target is somewhat close
+                defensiveThornsTimer = 100; // 5 seconds
+                defensiveThornsCooldown = 400; // 20 seconds
+                // Spawn the Root Visual directly on her as a "cloak"
+                if (this.level() instanceof ServerLevel sl) {
+                    net.ganyusbathwater.oririmod.entity.RootVisualEntity rootVisual = net.ganyusbathwater.oririmod.entity.ModEntities.ROOT_VISUAL.get().create(sl);
+                    if (rootVisual != null) {
+                        rootVisual.moveTo(this.getX(), this.getY(), this.getZ(), 0, 0);
+                        rootVisual.setTargetId(this.getId());
+                        rootVisual.setLifespan(100);
+                        sl.addFreshEntity(rootVisual);
+                    }
+                }
+            }
+            if (defensiveThornsTimer > 0) {
+                defensiveThornsTimer--;
+                this.setDeltaMovement(0, this.getDeltaMovement().y, 0); // Remain stationary while defending
+                this.setYRot(this.yRotO);
+                if (defensiveThornsTimer == 0 && naturesApostleTimer <= 0) {
+                    this.setAttackType(ATTACK_NONE);
+                }
+            }
+
             // ── Hit & Run mechanic ────────────────────────────────────────────
             // If target camps within 3 blocks for 100 consecutive ticks (5 s)
             // the FleeGoal receives a kick-start signal.
@@ -237,8 +325,21 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
                 meleeAnimTimer--;
                 if (meleeAnimTimer == 15 - 7) { // Hit frame 7 (of 15)
                     if (target != null && target.isAlive() && this.distanceToSqr(target) <= 16.0) {
-                        target.hurt(this.damageSources().mobAttack(this), 10.0f);
-                        target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0, false, true));
+                        net.minecraft.world.phys.AABB sweepBox = target.getBoundingBox().inflate(2.0, 0.25, 2.0);
+                        java.util.List<Player> hitPlayers = this.level().getEntitiesOfClass(Player.class, sweepBox);
+                        boolean targetHit = false;
+                        for (Player hit : hitPlayers) {
+                            if (hit == target) targetHit = true;
+                            hit.hurt(this.damageSources().mobAttack(this), 10.0f);
+                            hit.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0, false, true));
+                            if (this.level() instanceof ServerLevel sl) {
+                                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, hit.getX(), hit.getY() + 1.0, hit.getZ(), 1, 0, 0, 0, 0);
+                            }
+                        }
+                        if (!targetHit) {
+                            target.hurt(this.damageSources().mobAttack(this), 10.0f);
+                            target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0, false, true));
+                        }
                     }
                 }
             } else if (target != null && target.isAlive() && !isDefeated) {
@@ -271,10 +372,18 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     public void onAddedToLevel() {
         super.onAddedToLevel();
         if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel) {
+            long playersCount = 0;
             for (ServerPlayer player : serverLevel.players()) {
                 if (this.distanceTo(player) <= 64.0f) {
                     NetworkHandler.sendDeviartrasTitle(player);
+                    playersCount++;
                 }
+            }
+            if (playersCount > 1) {
+                double baseHp = this.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+                double scalar = 1.0 + (0.1 * (playersCount - 1));
+                this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(baseHp * scalar);
+                this.setHealth((float)(baseHp * scalar));
             }
         }
     }
@@ -293,7 +402,28 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
      */
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (isDefeated) return false; // Block all damage during death sequence
+        if (isDefeated || naturesApostleTimer > 0) return false; // Block all damage during death sequence or Natures Apostle invincibility
+
+        if (defensiveThornsTimer > 0) {
+            // 100% projectile immunity
+            if (source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE)) {
+                return false; 
+            }
+            
+            // Melee reflection & timer reset
+            if (source.getEntity() instanceof LivingEntity attacker) {
+                // Thorns V logic
+                int thornsLevel = 5;
+                if (this.random.nextFloat() < (thornsLevel * 0.15f)) {
+                    int thornsDamage = 1 + this.random.nextInt(thornsLevel);
+                    attacker.hurt(this.damageSources().thorns(this), thornsDamage);
+                }
+                // Reset duration to punish spam
+                defensiveThornsTimer = 100;
+                // 50% damage reduction
+                amount *= 0.5f;
+            }
+        }
 
         // ── Apply weaknesses ──────────────────────────────────────────────────
         boolean isFire   = source.is(DamageTypes.ON_FIRE)
@@ -398,7 +528,14 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
      * of pickups rather than one huge pile.
      */
     private void dropDeviartrasLoot() {
+        if (!(this.level() instanceof ServerLevel sl)) return;
+        
+        long playersCount = sl.players().stream().filter(p -> p.distanceTo(this) <= 64.0).count();
+        if (playersCount < 1) playersCount = 1;
+        
         int drops = 10 + this.random.nextInt(23); // [10, 32]
+        drops *= playersCount; // Multiply loot pool by players
+        
         for (int i = 0; i < drops; i++) {
             this.spawnAtLocation(new ItemStack(ModItems.ANCIENT_INGOT.get()));
         }
@@ -505,7 +642,18 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
     /** Suppress all AI goals while the defeat sequence is running. */
     @Override
     public boolean isNoAi() {
-        return isDefeated || super.isNoAi();
+        return isDefeated || naturesApostleTimer > 0 || defensiveThornsTimer > 0 || super.isNoAi();
+    }
+
+    // ── Multiplayer Boss Scaling ──────────────────────────────────────────
+    @Override
+    public void healFromSoulTithe() {
+        if (this.isAlive() && !isDefeated) {
+            this.heal(this.getMaxHealth() * 0.1f);
+            if (this.level() instanceof ServerLevel sl) {
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + this.getBbHeight() / 2.0, this.getZ(), 30, 0.5, 0.5, 0.5, 0.05);
+            }
+        }
     }
 
     // ── NBT persistence ────────────────────────────────────────────────────────
@@ -520,6 +668,11 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
         tag.putInt("MeleeProximityTicks", meleeProximityTicks);
         tag.putInt("MeleeCooldown",       meleeCooldown);
         tag.putInt("MeleeAnimTimer",      meleeAnimTimer);
+        tag.putBoolean("NaturesApostle75", naturesApostle75Triggered);
+        tag.putBoolean("NaturesApostle25", naturesApostle25Triggered);
+        tag.putInt("NaturesApostleTimer", naturesApostleTimer);
+        tag.putInt("DefensiveThornsTimer", defensiveThornsTimer);
+        tag.putInt("DefensiveThornsCooldown", defensiveThornsCooldown);
     }
 
     @Override
@@ -533,6 +686,11 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
         meleeProximityTicks = tag.getInt("MeleeProximityTicks");
         meleeCooldown      = tag.getInt("MeleeCooldown");
         meleeAnimTimer     = tag.getInt("MeleeAnimTimer");
+        naturesApostle75Triggered = tag.getBoolean("NaturesApostle75");
+        naturesApostle25Triggered = tag.getBoolean("NaturesApostle25");
+        naturesApostleTimer       = tag.getInt("NaturesApostleTimer");
+        defensiveThornsTimer      = tag.getInt("DefensiveThornsTimer");
+        defensiveThornsCooldown   = tag.getInt("DefensiveThornsCooldown");
     }
 
     // ── GeckoLib ──────────────────────────────────────────────────────────────
@@ -568,6 +726,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity {
                         RawAnimation.begin().then("deviartras_overgrowth", Animation.LoopType.PLAY_ONCE))
                 .triggerableAnim("deviartras_vine_lock",
                         RawAnimation.begin().then("deviartras_vine_lock", Animation.LoopType.PLAY_ONCE))
+                .triggerableAnim("deviartras_burrow",
+                        RawAnimation.begin().then("deviartras_burrow", Animation.LoopType.HOLD_ON_LAST_FRAME))
                 .triggerableAnim("deviartras_spore_blossom",
                         RawAnimation.begin().then("deviartras_spore_blossom", Animation.LoopType.PLAY_ONCE)));
 

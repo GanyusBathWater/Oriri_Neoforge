@@ -26,21 +26,24 @@ public class MermaidTailModel extends AbstractPlayerCosmeticModel<MermaidCosmeti
     public void setCustomAnimations(MermaidCosmeticAnimatable animatable, long instanceId, software.bernie.geckolib.animation.AnimationState<MermaidCosmeticAnimatable> animationState) {
         super.setCustomAnimations(animatable, instanceId, animationState);
         
-        // The tail model is physically glued to the Vanilla body bone in the RenderLayer.
-        // It inherits all Vanilla body rotations and movements directly from the PoseStack!
-        // We MUST reset the 'body' and 'torso' bones to 0, otherwise they would be double-rotated
-        // (once by the PoseStack, and once by AbstractPlayerCosmeticModel), causing perpendicular drifting!
-        software.bernie.geckolib.cache.object.GeoBone torso = getAnimationProcessor().getBone("torso");
-        software.bernie.geckolib.cache.object.GeoBone body = getAnimationProcessor().getBone("body");
-        if (torso != null) {
-            torso.setRotX(0);
-            torso.setRotY(0);
-            torso.setRotZ(0);
-        }
-        if (body != null) {
-            body.setRotX(0);
-            body.setRotY(0);
-            body.setRotZ(0);
+        // The tail model is now rendered at the root, which fixes the arm fins.
+        // However, the 'tail_fin' bone needs to follow the vanilla body so it bends when sneaking.
+        software.bernie.geckolib.cache.object.GeoBone tailFin = getAnimationProcessor().getBone("tail_fin");
+        if (tailFin != null) {
+            net.minecraft.world.entity.Entity entity = animationState.getData(software.bernie.geckolib.constant.DataTickets.ENTITY);
+            if (entity instanceof net.minecraft.client.player.AbstractClientPlayer player) {
+                net.minecraft.client.renderer.entity.EntityRenderer<?> renderer = net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+                if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer playerRenderer) {
+                    net.minecraft.client.model.PlayerModel<?> playerModel = playerRenderer.getModel();
+                    tailFin.setRotX(-playerModel.body.xRot);
+                    tailFin.setRotY(-playerModel.body.yRot);
+                    tailFin.setRotZ(-playerModel.body.zRot);
+                    
+                    tailFin.setPosX(playerModel.body.x);
+                    tailFin.setPosY(-playerModel.body.y);
+                    tailFin.setPosZ(playerModel.body.z);
+                }
+            }
         }
     }
 }

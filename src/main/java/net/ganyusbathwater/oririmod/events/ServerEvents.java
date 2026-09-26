@@ -256,7 +256,7 @@ public class ServerEvents {
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
         Entity sourceEntity = event.getSource().getEntity();
-        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !player.level().isClientSide()) {
+        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !player.level().isClientSide() && event.getSource().getDirectEntity() == player) {
             net.minecraft.world.item.ItemStack weapon = player.getMainHandItem();
             if (weapon.getItem() instanceof net.ganyusbathwater.oririmod.item.custom.SolsEmbraceItem) {
                 net.minecraft.world.entity.LivingEntity target = event.getEntity();
@@ -291,6 +291,20 @@ public class ServerEvents {
                         e.hurt(level.damageSources().explosion(target, player), 10.0F);
                         e.setRemainingFireTicks(100);
                     }
+                }
+            }
+        }
+
+        // Soul Tithe: If a player dies, heal nearby bosses
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player deadPlayer && !deadPlayer.level().isClientSide()) {
+            net.minecraft.world.level.Level level = deadPlayer.level();
+            java.util.List<net.minecraft.world.entity.LivingEntity> entities = level.getEntitiesOfClass(
+                net.minecraft.world.entity.LivingEntity.class, 
+                deadPlayer.getBoundingBox().inflate(64.0D)
+            );
+            for (net.minecraft.world.entity.LivingEntity e : entities) {
+                if (e instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss boss) {
+                    boss.healFromSoulTithe();
                 }
             }
         }

@@ -24,6 +24,10 @@ public final class StageDefinition {
     public record BlockMatchEntry(net.minecraft.resources.ResourceLocation blockId, String stateData, BlockPos pos) {}
     public record AreaModifierEntry(String action, int radius, @Nullable ResourceLocation blockFilter, String extraString, BlockPos pos, float yRot) {}
     public record TriggerEntry(BlockPos pos, int radius, TriggerBehavior behavior) {}
+    
+    public enum DeathAreaShape { BOX, SPHERE, CYLINDER }
+    public record DeathAreaEntry(BlockPos center, DeathAreaShape shape, String dimensions, String scope) {}
+
 
     private final String stageId;
     private final StageType stageType;
@@ -35,6 +39,8 @@ public final class StageDefinition {
     private final List<AreaModifierEntry> areaModifiers;
     private final List<TriggerEntry> triggers;
     private final List<TriggerEntry> goals;
+    private final List<DeathAreaEntry> deathAreas;
+
     private final int timerTicks;           // For SURVIVE_TIMER stages (in ticks)
     @Nullable private final ResourceLocation bossEntityType; // For BOSS_FIGHT stages
     @Nullable private final BlockPos bossSpawnPos;
@@ -54,6 +60,7 @@ public final class StageDefinition {
         this.areaModifiers = List.copyOf(b.areaModifiers);
         this.triggers = List.copyOf(b.triggers);
         this.goals = List.copyOf(b.goals);
+        this.deathAreas = List.copyOf(b.deathAreas);
         this.timerTicks = b.timerTicks;
         this.bossEntityType = b.bossEntityType;
         this.bossSpawnPos = b.bossSpawnPos;
@@ -73,6 +80,8 @@ public final class StageDefinition {
     public List<AreaModifierEntry> getAreaModifiers() { return areaModifiers; }
     public List<TriggerEntry> getTriggers() { return triggers; }
     public List<TriggerEntry> getGoals() { return goals; }
+    public List<DeathAreaEntry> getDeathAreas() { return deathAreas; }
+
     public int getTimerTicks() { return timerTicks; }
     @Nullable public ResourceLocation getBossEntityType() { return bossEntityType; }
     @Nullable public BlockPos getBossSpawnPos() { return bossSpawnPos; }
@@ -100,6 +109,7 @@ public final class StageDefinition {
         private final List<AreaModifierEntry> areaModifiers = new ArrayList<>();
         private final List<TriggerEntry> triggers = new ArrayList<>();
         private final List<TriggerEntry> goals = new ArrayList<>();
+        private final List<DeathAreaEntry> deathAreas = new ArrayList<>();
         private int timerTicks = 0;
         @Nullable private ResourceLocation bossEntityType;
         @Nullable private BlockPos bossSpawnPos;
@@ -150,6 +160,11 @@ public final class StageDefinition {
 
         public Builder addGoal(BlockPos pos, int radius) {
             goals.add(new TriggerEntry(pos, radius, TriggerBehavior.TELEPORT_PARTY));
+            return this;
+        }
+
+        public Builder addDeathArea(BlockPos pos, DeathAreaShape shape, String dimensions, String scope) {
+            deathAreas.add(new DeathAreaEntry(pos, shape, dimensions, scope));
             return this;
         }
 

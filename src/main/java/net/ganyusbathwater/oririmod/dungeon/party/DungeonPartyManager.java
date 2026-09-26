@@ -108,7 +108,7 @@ public class DungeonPartyManager extends SavedData {
 
     public void tickParties(ServerLevel overworld) {
         boolean dirty = false;
-        for (DungeonParty party : parties.values()) {
+        for (DungeonParty party : new java.util.ArrayList<>(parties.values())) {
             if (party.getStartTicksRemaining() < 0) {
                 party.setStarting(false, party.getStartTicksRemaining() + 1);
                 dirty = true;

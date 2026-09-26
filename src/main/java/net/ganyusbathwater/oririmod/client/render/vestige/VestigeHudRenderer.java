@@ -40,8 +40,8 @@ public final class VestigeHudRenderer {
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        // Don't render if GUI is hidden (F1)
-        if (mc.options.hideGui)
+        // Don't render if GUI is hidden (F1) or if F3 Debug screen is open
+        if (mc.options.hideGui || mc.getDebugOverlay().showDebugScreen())
             return;
 
         LocalPlayer player = mc.player;
@@ -54,11 +54,13 @@ public final class VestigeHudRenderer {
 
         GuiGraphics gg = event.getGuiGraphics();
         PoseStack pose = gg.pose();
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        int baseX = MARGIN_LEFT;
-        int totalHeight = vestigeStacks.size() * BG_HEIGHT + (vestigeStacks.size() - 1) * ICON_SPACING;
-        int baseY = (screenHeight - totalHeight) / 2;
+        // Anchor to Bottom Right, above the hotbar and food
+        int baseX = screenWidth - BG_WIDTH - MARGIN_LEFT;
+        // Start from bottom, pushing upwards
+        int baseY = screenHeight - 50 - (vestigeStacks.size() * (BG_HEIGHT + ICON_SPACING)); 
 
         pose.pushPose();
         for (int i = 0; i < vestigeStacks.size(); i++) {
@@ -74,17 +76,20 @@ public final class VestigeHudRenderer {
         drawBackground(gg, x, y);
         drawItemCentered(gg, stack, x, y);
 
-        int textX = x + BG_WIDTH + 4;
         int textY = y + (BG_HEIGHT / 2) - 4;
 
         String statusText = getStatusText(player, stack);
         if (!statusText.isEmpty()) {
+            int textWidth = Minecraft.getInstance().font.width(statusText);
+            int textX = x - textWidth - 4; // Align to the left of the icon
             gg.drawString(Minecraft.getInstance().font, statusText, textX, textY, 0xFFFFFF, true);
             textY += 10;
         }
 
         String enemyText = getEnemyCountText(player, stack);
         if (!enemyText.isEmpty()) {
+            int textWidth = Minecraft.getInstance().font.width(enemyText);
+            int textX = x - textWidth - 4;
             gg.drawString(Minecraft.getInstance().font, enemyText, textX, textY, 0xFF5555, true);
         }
     }

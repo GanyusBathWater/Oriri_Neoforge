@@ -56,6 +56,25 @@ public class DungeonEventHandler {
         if (!isInDungeon(player)) return;
         if (player.isCreative()) return;
 
+        net.minecraft.world.level.block.state.BlockState state = event.getLevel().getBlockState(event.getPos());
+        if (state.is(net.minecraft.tags.BlockTags.REPLACEABLE) || state.is(net.minecraft.world.level.block.Blocks.COBWEB) || state.is(net.minecraft.tags.BlockTags.FIRE)) {
+            return; // Allow breaking
+        }
+
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        Player player = event.getPlayer();
+        if (!isInDungeon(player)) return;
+        if (player.isCreative()) return;
+
+        net.minecraft.world.level.block.state.BlockState state = event.getState();
+        if (state.is(net.minecraft.tags.BlockTags.REPLACEABLE) || state.is(net.minecraft.world.level.block.Blocks.COBWEB) || state.is(net.minecraft.tags.BlockTags.FIRE)) {
+            return; // Allow breaking
+        }
+
         event.setCanceled(true);
     }
 
@@ -136,6 +155,8 @@ public class DungeonEventHandler {
         if (stack.is(Items.ELYTRA)) return true;
         if (stack.is(Items.ENDER_PEARL)) return true;
         if (stack.is(Items.TRIDENT)) return true;
+        if (stack.is(Items.FLINT_AND_STEEL)) return true;
+        if (stack.is(Items.FIRE_CHARGE)) return true;
 
         // Custom vestige bans
         if (stack.is(ModItems.SPRING.get())) return true;

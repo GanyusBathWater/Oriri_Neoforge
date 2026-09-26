@@ -69,7 +69,8 @@ public class DungeonMarkerScreen extends Screen {
             DungeonStageManager.ROLE_BOSS_SPAWN,
             DungeonStageManager.ROLE_MINI_BOSS_SPAWN,
             DungeonStageManager.ROLE_LOOT_CHEST,
-            DungeonStageManager.ROLE_PLAYER_SPAWN
+            DungeonStageManager.ROLE_PLAYER_SPAWN,
+            DungeonStageManager.ROLE_DEATH_AREA
     );
 
     public DungeonMarkerScreen(OpenMarkerScreenPayload payload) {
@@ -84,7 +85,7 @@ public class DungeonMarkerScreen extends Screen {
         this.initialLootTable = payload.lootTable();
         this.initialBossId = payload.bossId();
         this.initialChance = payload.spawnChance();
-        this.initialTriggerBehavior = payload.triggerBehavior().isBlank() ? "TELEPORT_PARTY" : payload.triggerBehavior();
+        this.initialTriggerBehavior = payload.triggerBehavior().isBlank() ? "NO_TELEPORT" : payload.triggerBehavior();
         this.initialObjective = payload.objectiveText();
         this.pos = payload.pos();
         this.stageSummary = payload.stageSummary();
@@ -107,8 +108,8 @@ public class DungeonMarkerScreen extends Screen {
 
         // Column 1
         this.stageIdBox = new EditBox(this.font, midX - 160, startY, 140, 20, Component.literal("Stage ID"));
-        this.stageIdBox.setValue(initialStageId);
         this.stageIdBox.setMaxLength(64);
+        this.stageIdBox.setValue(initialStageId);
         this.stageIdBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("The ID grouping all markers in this stage.")));
         this.addRenderableWidget(this.stageIdBox);
 
@@ -135,23 +136,23 @@ public class DungeonMarkerScreen extends Screen {
         this.addRenderableWidget(this.roleButton);
 
         this.enemyTypeBox = new EditBox(this.font, midX - 160, startY + rowSpacing * 3, 140, 20, Component.literal("Enemy Type"));
-        this.enemyTypeBox.setValue(initialEnemyType);
         this.enemyTypeBox.setMaxLength(128);
+        this.enemyTypeBox.setValue(initialEnemyType);
         this.addRenderableWidget(this.enemyTypeBox);
 
         this.chanceBox = new EditBox(this.font, midX - 160, startY + rowSpacing * 4, 140, 20, Component.literal("Spawn Chance"));
-        this.chanceBox.setValue(String.valueOf(initialChance));
         this.chanceBox.setMaxLength(10);
+        this.chanceBox.setValue(String.valueOf(initialChance));
         this.addRenderableWidget(this.chanceBox);
 
         this.countBox = new EditBox(this.font, midX + 20, startY, 140, 20, Component.literal("Count"));
-        this.countBox.setValue(String.valueOf(initialCount));
         this.countBox.setMaxLength(10);
+        this.countBox.setValue(String.valueOf(initialCount));
         this.addRenderableWidget(this.countBox);
 
         this.switchIdBox = new EditBox(this.font, midX + 20, startY + rowSpacing, 140, 20, Component.literal("Switch ID"));
-        this.switchIdBox.setValue(initialSwitchId);
         this.switchIdBox.setMaxLength(64);
+        this.switchIdBox.setValue(initialSwitchId);
         this.addRenderableWidget(this.switchIdBox);
 
         this.dropsKeyButton = new CustomCycleButton(
@@ -183,25 +184,25 @@ public class DungeonMarkerScreen extends Screen {
 
         this.triggerBehaviorButton = new CustomCycleButton(
                 midX + 20, startY + rowSpacing, 140, 20,
-                "Behavior", Arrays.asList("TELEPORT_PARTY", "NO_TELEPORT", "REQUIRE_PARTY"),
+                "Behavior", Arrays.asList("NO_TELEPORT", "TELEPORT_PARTY", "REQUIRE_PARTY"),
                 initialTriggerBehavior,
                 val -> {}
         );
         this.addRenderableWidget(this.triggerBehaviorButton);
 
         this.lootTableBox = new EditBox(this.font, midX + 20, startY + rowSpacing * 2, 140, 20, Component.literal("Loot Table"));
-        this.lootTableBox.setValue(initialLootTable);
         this.lootTableBox.setMaxLength(128);
+        this.lootTableBox.setValue(initialLootTable);
         this.addRenderableWidget(this.lootTableBox);
 
         this.bossIdBox = new EditBox(this.font, midX + 20, startY + rowSpacing * 3, 140, 20, Component.literal("Boss ID"));
-        this.bossIdBox.setValue(initialBossId);
         this.bossIdBox.setMaxLength(64);
+        this.bossIdBox.setValue(initialBossId);
         this.addRenderableWidget(this.bossIdBox);
 
         this.objectiveBox = new EditBox(this.font, midX - 160, startY + rowSpacing * 6, 320, 20, Component.literal("Objective Text"));
+        this.objectiveBox.setMaxLength(1024);
         this.objectiveBox.setValue(initialObjective != null ? initialObjective : "");
-        this.objectiveBox.setMaxLength(256);
         this.addRenderableWidget(this.objectiveBox);
 
         // Save Button
@@ -243,6 +244,7 @@ public class DungeonMarkerScreen extends Screen {
         validRoles.add(DungeonStageManager.ROLE_AREA_MODIFIER);
         validRoles.add(DungeonStageManager.ROLE_LOOT_CHEST);
         validRoles.add(DungeonStageManager.ROLE_PLAYER_SPAWN);
+        validRoles.add(DungeonStageManager.ROLE_DEATH_AREA);
 
         switch (currentStageType) {
             case "KILL_ALL_ENEMIES", "SURVIVE_TIMER" -> {
@@ -298,6 +300,7 @@ public class DungeonMarkerScreen extends Screen {
         boolean isSpawn = DungeonStageManager.ROLE_SPAWN_POINT.equals(currentRole);
         boolean isSpawner = DungeonStageManager.ROLE_INFINITE_SPAWNER.equals(currentRole);
         boolean isGoalArea = DungeonStageManager.ROLE_GOAL_AREA.equals(currentRole);
+        boolean isDeathArea = DungeonStageManager.ROLE_DEATH_AREA.equals(currentRole);
 
         if (isSpawn || isSpawner) {
             enemyTypeBox.visible = true;
@@ -326,6 +329,15 @@ public class DungeonMarkerScreen extends Screen {
             dropsKeyButton.visible = true;
         } else if (isChest) {
             lootTableBox.visible = true;
+        } else if (isDeathArea) {
+            enemyTypeBox.visible = true; // Used for dimensions
+            if (enemyTypeBox.getValue().isBlank()) enemyTypeBox.setValue("10,10,10");
+            
+            ((CustomCycleButton) modifierActionButton).setValues(Arrays.asList("BOX", "SPHERE", "CYLINDER"));
+            modifierActionButton.visible = true;
+            
+            ((CustomCycleButton) triggerBehaviorButton).setValues(Arrays.asList("STAGE", "GLOBAL"));
+            triggerBehaviorButton.visible = true;
         }
 
         if (currentStageType.equals("SURVIVE_TIMER") && !isModifier && !isDoor && !isTrigger) {
@@ -375,6 +387,11 @@ public class DungeonMarkerScreen extends Screen {
         float chance = 1.0f;
         try { chance = Float.parseFloat(chanceBox.getValue()); } catch (NumberFormatException ignored) {}
 
+        String switchIdOrAction = switchIdBox.getValue();
+        if (DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) || DungeonStageManager.ROLE_DEATH_AREA.equals(currentRole)) {
+            switchIdOrAction = modifierActionButton.values.get(modifierActionButton.currentIndex);
+        }
+
         PacketDistributor.sendToServer(new SyncMarkerDataPayload(
                 entityId,
                 stageIdBox.getValue(),
@@ -382,7 +399,7 @@ public class DungeonMarkerScreen extends Screen {
                 currentRole,
                 enemyTypeBox.getValue(),
                 count,
-                DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? (modifierActionButton.values.get(modifierActionButton.currentIndex)) : switchIdBox.getValue(),
+                switchIdOrAction,
                 lootTableBox.getValue(),
                 bossIdBox.getValue(),
                 chance,
@@ -418,6 +435,7 @@ public class DungeonMarkerScreen extends Screen {
         if (this.enemyTypeBox != null && this.enemyTypeBox.visible) {
             String label = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? "Target Block ID or Teleporter ID" : 
                            DungeonStageManager.ROLE_BLOCK_MATCH.equals(currentRole) ? "Target Block ID (e.g. minecraft:redstone_lamp)" :
+                           DungeonStageManager.ROLE_DEATH_AREA.equals(currentRole) ? "Dimensions (e.g. 10,10,10 or 10)" :
                            "Enemy Type (e.g. minecraft:zombie or #cave_mobs)";
             guiGraphics.drawString(this.font, label, this.enemyTypeBox.getX(), this.enemyTypeBox.getY() - 10, 0xDDDDDD);
         }
@@ -447,7 +465,12 @@ public class DungeonMarkerScreen extends Screen {
             guiGraphics.drawString(this.font, label, this.switchIdBox.getX(), this.switchIdBox.getY() - 10, 0xDDDDDD);
         }
         if (this.modifierActionButton != null && this.modifierActionButton.visible) {
-            guiGraphics.drawString(this.font, "Action", this.modifierActionButton.getX(), this.modifierActionButton.getY() - 10, 0xDDDDDD);
+            String label = DungeonStageManager.ROLE_DEATH_AREA.equals(currentRole) ? "Shape" : "Action";
+            guiGraphics.drawString(this.font, label, this.modifierActionButton.getX(), this.modifierActionButton.getY() - 10, 0xDDDDDD);
+        }
+        if (this.triggerBehaviorButton != null && this.triggerBehaviorButton.visible) {
+            String label = DungeonStageManager.ROLE_DEATH_AREA.equals(currentRole) ? "Scope" : "Trigger Behavior";
+            guiGraphics.drawString(this.font, label, this.triggerBehaviorButton.getX(), this.triggerBehaviorButton.getY() - 10, 0xDDDDDD);
         }
         if (this.dropsKeyButton != null && this.dropsKeyButton.visible) {
             guiGraphics.drawString(this.font, "Drops Key on Complete", this.dropsKeyButton.getX(), this.dropsKeyButton.getY() - 10, 0xDDDDDD);

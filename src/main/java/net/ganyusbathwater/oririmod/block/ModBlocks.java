@@ -484,6 +484,34 @@ public class ModBlocks {
         public static final DeferredBlock<Block> POTTED_UPGRADED_CHERRY_SAPLING = registerPottedBlock(
                         "potted_upgraded_cherry_sapling", UPGRADED_CHERRY_SAPLING);
 
+        public static final DeferredBlock<Block> UPGRADED_AZALEA = registerBlock("upgraded_azalea",
+                        () -> new UpgradedSaplingBlock(TreeGrower.AZALEA, BlockBehaviour.Properties.ofFullCopy(Blocks.AZALEA)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_AZALEA = registerPottedBlock("potted_upgraded_azalea", UPGRADED_AZALEA);
+
+        public static final DeferredBlock<Block> UPGRADED_FLOWERING_AZALEA = registerBlock("upgraded_flowering_azalea",
+                        () -> new UpgradedSaplingBlock(TreeGrower.AZALEA, BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_FLOWERING_AZALEA = registerPottedBlock("potted_upgraded_flowering_azalea", UPGRADED_FLOWERING_AZALEA);
+
+        public static final DeferredBlock<Block> UPGRADED_MANGROVE_PROPAGULE = registerBlock("upgraded_mangrove_propagule",
+                        () -> new UpgradedSaplingBlock(TreeGrower.MANGROVE, BlockBehaviour.Properties.ofFullCopy(Blocks.MANGROVE_PROPAGULE)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_MANGROVE_PROPAGULE = registerPottedBlock("potted_upgraded_mangrove_propagule", UPGRADED_MANGROVE_PROPAGULE);
+
+        public static final DeferredBlock<Block> UPGRADED_RED_MUSHROOM = registerBlock("upgraded_red_mushroom",
+                        () -> new UpgradedSaplingBlock(net.ganyusbathwater.oririmod.worldgen.tree.ModTreeGrowers.HUGE_RED_MUSHROOM, BlockBehaviour.Properties.ofFullCopy(Blocks.RED_MUSHROOM)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_RED_MUSHROOM = registerPottedBlock("potted_upgraded_red_mushroom", UPGRADED_RED_MUSHROOM);
+
+        public static final DeferredBlock<Block> UPGRADED_BROWN_MUSHROOM = registerBlock("upgraded_brown_mushroom",
+                        () -> new UpgradedSaplingBlock(net.ganyusbathwater.oririmod.worldgen.tree.ModTreeGrowers.HUGE_BROWN_MUSHROOM, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_BROWN_MUSHROOM = registerPottedBlock("potted_upgraded_brown_mushroom", UPGRADED_BROWN_MUSHROOM);
+
+        public static final DeferredBlock<Block> UPGRADED_CRIMSON_FUNGUS = registerBlock("upgraded_crimson_fungus",
+                        () -> new UpgradedSaplingBlock(net.ganyusbathwater.oririmod.worldgen.tree.ModTreeGrowers.HUGE_CRIMSON_FUNGUS, BlockBehaviour.Properties.ofFullCopy(Blocks.CRIMSON_FUNGUS)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_CRIMSON_FUNGUS = registerPottedBlock("potted_upgraded_crimson_fungus", UPGRADED_CRIMSON_FUNGUS);
+
+        public static final DeferredBlock<Block> UPGRADED_WARPED_FUNGUS = registerBlock("upgraded_warped_fungus",
+                        () -> new UpgradedSaplingBlock(net.ganyusbathwater.oririmod.worldgen.tree.ModTreeGrowers.HUGE_WARPED_FUNGUS, BlockBehaviour.Properties.ofFullCopy(Blocks.WARPED_FUNGUS)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_WARPED_FUNGUS = registerPottedBlock("potted_upgraded_warped_fungus", UPGRADED_WARPED_FUNGUS);
+
         // ===== EQUINOX TABLE =====
         public static final DeferredBlock<Block> EQUINOX_TABLE = registerBlock("equinox_table",
                         () -> new EquinoxTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE)
@@ -898,5 +926,13 @@ public class ModBlocks {
                 pot.addPlant(EPOCH_SAPLING.getId(), POTTED_EPOCH_SAPLING);
                 pot.addPlant(UPGRADED_EPOCH_SAPLING.getId(), POTTED_UPGRADED_EPOCH_SAPLING);
                 pot.addPlant(MYRIAD_CACTUS.getId(), POTTED_MYRIAD_CACTUS);
+                
+                pot.addPlant(UPGRADED_AZALEA.getId(), POTTED_UPGRADED_AZALEA);
+                pot.addPlant(UPGRADED_FLOWERING_AZALEA.getId(), POTTED_UPGRADED_FLOWERING_AZALEA);
+                pot.addPlant(UPGRADED_MANGROVE_PROPAGULE.getId(), POTTED_UPGRADED_MANGROVE_PROPAGULE);
+                pot.addPlant(UPGRADED_RED_MUSHROOM.getId(), POTTED_UPGRADED_RED_MUSHROOM);
+                pot.addPlant(UPGRADED_BROWN_MUSHROOM.getId(), POTTED_UPGRADED_BROWN_MUSHROOM);
+                pot.addPlant(UPGRADED_CRIMSON_FUNGUS.getId(), POTTED_UPGRADED_CRIMSON_FUNGUS);
+                pot.addPlant(UPGRADED_WARPED_FUNGUS.getId(), POTTED_UPGRADED_WARPED_FUNGUS);
         }
 }

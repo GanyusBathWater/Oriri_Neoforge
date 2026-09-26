@@ -184,6 +184,13 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.UPGRADED_ACACIA_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_DARK_OAK_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_CHERRY_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_AZALEA.get());
+        dropSelf(ModBlocks.UPGRADED_FLOWERING_AZALEA.get());
+        dropSelf(ModBlocks.UPGRADED_MANGROVE_PROPAGULE.get());
+        dropSelf(ModBlocks.UPGRADED_RED_MUSHROOM.get());
+        dropSelf(ModBlocks.UPGRADED_BROWN_MUSHROOM.get());
+        dropSelf(ModBlocks.UPGRADED_CRIMSON_FUNGUS.get());
+        dropSelf(ModBlocks.UPGRADED_WARPED_FUNGUS.get());
 
         dropPottedContents(ModBlocks.POTTED_ELDER_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_ELDER_SAPLING.get());
@@ -198,6 +205,13 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropPottedContents(ModBlocks.POTTED_UPGRADED_ACACIA_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_DARK_OAK_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_CHERRY_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_AZALEA.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_FLOWERING_AZALEA.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_MANGROVE_PROPAGULE.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_RED_MUSHROOM.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_BROWN_MUSHROOM.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_CRIMSON_FUNGUS.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_WARPED_FUNGUS.get());
         dropPottedContents(ModBlocks.POTTED_EPOCH_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_EPOCH_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_MYRIAD_CACTUS.get());

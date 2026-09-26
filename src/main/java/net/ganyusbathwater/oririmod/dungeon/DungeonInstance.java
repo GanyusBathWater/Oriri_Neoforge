@@ -30,6 +30,7 @@ public class DungeonInstance {
     private final Set<UUID> spectators = new HashSet<>();
     private String currentStage = "stage_0";
     private int ticksActive = 0;
+    private String lastActiveObjectiveText = "";
     
     private boolean hasStarted = false;
     private boolean isComplete = false;
@@ -49,6 +50,10 @@ public class DungeonInstance {
     @Nullable private BlockPos lootChestPos = null;
     @Nullable private String lootChestTable = null;
     @Nullable private BlockPos playerSpawnPos = null;
+    
+    // ── Death Areas ──
+    private final List<net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition.DeathAreaEntry> globalDeathAreas = new ArrayList<>();
+
 
     public DungeonInstance(UUID instanceId, String dungeonId, BlockPos origin) {
         this.instanceId = instanceId;
@@ -90,6 +95,9 @@ public class DungeonInstance {
     public String getCurrentStage() { return currentStage; }
     public void setCurrentStage(String stage) { this.currentStage = stage; }
 
+    public String getLastActiveObjectiveText() { return lastActiveObjectiveText; }
+    public void setLastActiveObjectiveText(String text) { this.lastActiveObjectiveText = text; }
+
     // Stage runtime accessors
     public List<StageDefinition> getStageDefinitions() { return stageDefinitions; }
     public void setStageDefinitions(List<StageDefinition> defs) { this.stageDefinitions = new ArrayList<>(defs); }
@@ -126,6 +134,9 @@ public class DungeonInstance {
     @Nullable public BlockPos getPlayerSpawnPos() { return playerSpawnPos; }
     public void setPlayerSpawnPos(@Nullable BlockPos pos) { this.playerSpawnPos = pos; }
 
+    public List<net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition.DeathAreaEntry> getGlobalDeathAreas() { return globalDeathAreas; }
+    public void addGlobalDeathArea(net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition.DeathAreaEntry entry) { this.globalDeathAreas.add(entry); }
+
     public CompoundTag save(CompoundTag tag) {
         tag.putUUID("InstanceId", instanceId);
         tag.putString("DungeonId", dungeonId);
@@ -146,6 +157,9 @@ public class DungeonInstance {
         tag.putBoolean("HasStarted", hasStarted);
         tag.putBoolean("IsComplete", isComplete);
         tag.putInt("TicksSinceComplete", ticksSinceComplete);
+        if (lastActiveObjectiveText != null && !lastActiveObjectiveText.isBlank()) {
+            tag.putString("LastObjective", lastActiveObjectiveText);
+        }
 
         if (structureBounds != null) {
             tag.putIntArray("StructureBounds", new int[]{
@@ -188,6 +202,9 @@ public class DungeonInstance {
         
         if (tag.contains("CurrentStage")) {
             instance.setCurrentStage(tag.getString("CurrentStage"));
+        }
+        if (tag.contains("LastObjective")) {
+            instance.setLastActiveObjectiveText(tag.getString("LastObjective"));
         }
         if (tag.contains("TicksActive")) {
             instance.ticksActive = tag.getInt("TicksActive");

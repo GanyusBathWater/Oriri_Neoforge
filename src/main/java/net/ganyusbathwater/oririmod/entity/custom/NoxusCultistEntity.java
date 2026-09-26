@@ -84,8 +84,8 @@ public class NoxusCultistEntity extends Monster implements GeoEntity {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.AvoidEntityGoal<>(this, Player.class, 6.0F, 1.0D, 1.2D)); // Flee if player gets within 6 blocks
-        this.goalSelector.addGoal(2, new CultistRangedAttackGoal(this, 1.0D, 80, 16.0F));
+        this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.AvoidEntityGoal<>(this, Player.class, 4.0F, 0.6D, 0.8D)); // Flee if player gets within 4 blocks
+        this.goalSelector.addGoal(2, new CultistRangedAttackGoal(this, 1.0D, 80, 16.0F)); // 4s cooldown
         this.goalSelector.addGoal(3, new CultistWorkstationStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(5, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));

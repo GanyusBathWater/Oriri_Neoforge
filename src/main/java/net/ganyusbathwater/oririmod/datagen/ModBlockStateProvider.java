@@ -214,6 +214,24 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 models().cross("upgraded_cherry_sapling", mcLoc("block/cherry_sapling"))
                                                 .renderType("cutout"));
 
+                simpleBlockWithItem(ModBlocks.UPGRADED_AZALEA.get(), models().withExistingParent("upgraded_azalea", mcLoc("block/azalea")).renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.UPGRADED_FLOWERING_AZALEA.get(), models().withExistingParent("upgraded_flowering_azalea", mcLoc("block/flowering_azalea")).renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.UPGRADED_MANGROVE_PROPAGULE.get(),
+                                models().cross("upgraded_mangrove_propagule", mcLoc("block/mangrove_propagule"))
+                                                .renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.UPGRADED_RED_MUSHROOM.get(),
+                                models().cross("upgraded_red_mushroom", mcLoc("block/red_mushroom"))
+                                                .renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.UPGRADED_BROWN_MUSHROOM.get(),
+                                models().cross("upgraded_brown_mushroom", mcLoc("block/brown_mushroom"))
+                                                .renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.UPGRADED_CRIMSON_FUNGUS.get(),
+                                models().cross("upgraded_crimson_fungus", mcLoc("block/crimson_fungus"))
+                                                .renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.UPGRADED_WARPED_FUNGUS.get(),
+                                models().cross("upgraded_warped_fungus", mcLoc("block/warped_fungus"))
+                                                .renderType("cutout"));
+
                 // Vegetation
                 simpleBlockWithItem(ModBlocks.SCARLET_GRASS.get(),
                                 models().cross("scarlet_grass", modLoc("block/scarlet_grass")).renderType("cutout"));
@@ -435,6 +453,24 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 simpleBlock(ModBlocks.POTTED_UPGRADED_EPOCH_SAPLING.get(),
                                 models().withExistingParent("potted_upgraded_epoch_sapling", mcLoc("block/flower_pot_cross"))
                                                 .texture("plant", modLoc("block/epoch_sapling")).renderType("cutout"));
+
+                simpleBlock(ModBlocks.POTTED_UPGRADED_AZALEA.get(), models().withExistingParent("potted_upgraded_azalea", mcLoc("block/potted_azalea_bush")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_UPGRADED_FLOWERING_AZALEA.get(), models().withExistingParent("potted_upgraded_flowering_azalea", mcLoc("block/potted_flowering_azalea_bush")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_UPGRADED_MANGROVE_PROPAGULE.get(),
+                                models().withExistingParent("potted_upgraded_mangrove_propagule", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", mcLoc("block/mangrove_propagule")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_UPGRADED_RED_MUSHROOM.get(),
+                                models().withExistingParent("potted_upgraded_red_mushroom", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", mcLoc("block/red_mushroom")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_UPGRADED_BROWN_MUSHROOM.get(),
+                                models().withExistingParent("potted_upgraded_brown_mushroom", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", mcLoc("block/brown_mushroom")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_UPGRADED_CRIMSON_FUNGUS.get(),
+                                models().withExistingParent("potted_upgraded_crimson_fungus", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", mcLoc("block/crimson_fungus")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_UPGRADED_WARPED_FUNGUS.get(),
+                                models().withExistingParent("potted_upgraded_warped_fungus", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", mcLoc("block/warped_fungus")).renderType("cutout"));
 
                 simpleBlock(ModBlocks.POTTED_MYRIAD_CACTUS.get(),
                                 models().withExistingParent("potted_myriad_cactus", mcLoc("block/potted_cactus"))

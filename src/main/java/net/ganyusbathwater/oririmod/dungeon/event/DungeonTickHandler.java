@@ -21,7 +21,6 @@ import java.util.UUID;
 /**
  * Drives the dungeon stage lifecycle each server tick:
  * <ol>
- *   <li>Ticks the dungeon timer (30-minute timeout).</li>
  *   <li>Lazily initialises stages from markers if not yet done.</li>
  *   <li>Starts the next stage if none is active.</li>
  *   <li>Ticks the active stage and advances it when complete.</li>
@@ -30,8 +29,7 @@ import java.util.UUID;
 @EventBusSubscriber(modid = OririMod.MOD_ID)
 public class DungeonTickHandler {
 
-    /** 30 minutes in ticks */
-    private static final int TIMEOUT_TICKS = 30 * 60 * 20;
+    // Timeout removed per user request
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
@@ -76,12 +74,9 @@ public class DungeonTickHandler {
 
         // ── Time Sync ──
         if (instance.getTicksActive() % 20 == 0) {
-            String objText = "";
+            String objText = instance.getLastActiveObjectiveText();
             String progText = "";
-            if (instance.getActiveStage() != null) {
-                if (instance.getActiveStage().getDefinition().getObjectiveText() != null) {
-                    objText = instance.getActiveStage().getDefinition().getObjectiveText();
-                }
+            if (instance.getActiveStage() != null && instance.getActiveStage().getState() == DungeonStage.StageState.ACTIVE) {
                 if (instance.getActiveStage().getProgressText() != null) {
                     progText = instance.getActiveStage().getProgressText();
                 }
@@ -96,11 +91,7 @@ public class DungeonTickHandler {
             }
         }
 
-        // ── 30-minute timeout ──
-        if (instance.getTicksActive() >= TIMEOUT_TICKS) {
-            ejectAll(level, manager, instance, "message.oririmod.dungeon.timeout");
-            return;
-        }
+        // Timeout removed per user request
         
         // ── Completion Countdown ──
         if (instance.isComplete()) {
@@ -165,6 +156,9 @@ public class DungeonTickHandler {
             if (nextStage.getState() == DungeonStage.StageState.ACTIVE) {
                 announceStage(level, instance, nextDef);
                 playMusic(level, instance, nextDef);
+                if (nextDef.getObjectiveText() != null && !nextDef.getObjectiveText().isBlank()) {
+                    instance.setLastActiveObjectiveText(nextDef.getObjectiveText());
+                }
             }
         }
 
@@ -180,6 +174,9 @@ public class DungeonTickHandler {
                 debugLog(level, instance, "Stage " + activeStage.getDefinition().getStageId() + " became ACTIVE (Trigger tripped).");
                 announceStage(level, instance, activeStage.getDefinition());
                 playMusic(level, instance, activeStage.getDefinition());
+                if (activeStage.getDefinition().getObjectiveText() != null && !activeStage.getDefinition().getObjectiveText().isBlank()) {
+                    instance.setLastActiveObjectiveText(activeStage.getDefinition().getObjectiveText());
+                }
             }
 
             if (activeStage.isComplete()) {
@@ -210,11 +207,84 @@ public class DungeonTickHandler {
                 }
             }
         }
+        
+        // ── Process Death Areas ──
+        processDeathAreas(level, instance);
     }
 
     // -------------------------------------------------------------------------
     //  Helpers
     // -------------------------------------------------------------------------
+
+    private static void processDeathAreas(ServerLevel level, DungeonInstance instance) {
+        List<StageDefinition.DeathAreaEntry> areas = new java.util.ArrayList<>(instance.getGlobalDeathAreas());
+        if (instance.getActiveStage() != null) {
+            areas.addAll(instance.getActiveStage().getDefinition().getDeathAreas());
+        }
+        if (areas.isEmpty()) return;
+
+        for (UUID playerId : instance.getAlivePlayers()) {
+            ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+            if (sp != null && !sp.isCreative() && !sp.isSpectator() && sp.isAlive()) {
+                for (StageDefinition.DeathAreaEntry area : areas) {
+                    if (isPlayerInDeathArea(sp, area)) {
+                        sp.hurt(level.damageSources().fellOutOfWorld(), Float.MAX_VALUE);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean isPlayerInDeathArea(ServerPlayer sp, StageDefinition.DeathAreaEntry area) {
+        net.minecraft.core.BlockPos c = area.center();
+        double px = sp.getX();
+        double py = sp.getY();
+        double pz = sp.getZ();
+        
+        switch (area.shape()) {
+            case BOX -> {
+                String[] dims = area.dimensions().split(",");
+                double w = 10, h = 10, d = 10;
+                if (dims.length >= 1) try { w = Double.parseDouble(dims[0].trim()); d = w; } catch(Exception ignored){}
+                if (dims.length >= 2) try { h = Double.parseDouble(dims[1].trim()); } catch(Exception ignored){}
+                if (dims.length >= 3) try { d = Double.parseDouble(dims[2].trim()); } catch(Exception ignored){}
+                
+                double minX = c.getX() + 0.5 - (w / 2.0);
+                double maxX = c.getX() + 0.5 + (w / 2.0);
+                double minY = c.getY() + 0.5 - (h / 2.0);
+                double maxY = c.getY() + 0.5 + (h / 2.0);
+                double minZ = c.getZ() + 0.5 - (d / 2.0);
+                double maxZ = c.getZ() + 0.5 + (d / 2.0);
+                
+                return px >= minX && px <= maxX && py >= minY && py <= maxY && pz >= minZ && pz <= maxZ;
+            }
+            case SPHERE -> {
+                double r = 5;
+                try { r = Double.parseDouble(area.dimensions().trim()); } catch(Exception ignored){}
+                double dx = px - (c.getX() + 0.5);
+                double dy = py - (c.getY() + 0.5);
+                double dz = pz - (c.getZ() + 0.5);
+                return (dx*dx + dy*dy + dz*dz) <= (r*r);
+            }
+            case CYLINDER -> {
+                double r = 5;
+                double h = 10;
+                String[] dims = area.dimensions().split(",");
+                if (dims.length >= 1) try { r = Double.parseDouble(dims[0].trim()); } catch(Exception ignored){}
+                if (dims.length >= 2) try { h = Double.parseDouble(dims[1].trim()); } catch(Exception ignored){}
+                
+                double minY = c.getY() + 0.5 - (h / 2.0);
+                double maxY = c.getY() + 0.5 + (h / 2.0);
+                if (py < minY || py > maxY) return false;
+                
+                double dx = px - (c.getX() + 0.5);
+                double dz = pz - (c.getZ() + 0.5);
+                return (dx*dx + dz*dz) <= (r*r);
+            }
+        }
+        return false;
+    }
 
     private static void debugLog(ServerLevel level, DungeonInstance instance, String message) {
         if (instance.isDebugLoggingEnabled()) {

@@ -41,6 +41,11 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
                 float bodyXRot = 0, bodyYRot = 0, bodyZRot = 0;
                 float bodyDX = 0, bodyDY = 0, bodyDZ = 0;
 
+                GeoBone arms = getAnimationProcessor().getBone("arms");
+                if (arms != null) { arms.updateRotation(0, 0, 0); arms.setRotX(0); arms.setRotY(0); arms.setRotZ(0); }
+                GeoBone legsBone = getAnimationProcessor().getBone("legs");
+                if (legsBone != null) { legsBone.updateRotation(0, 0, 0); legsBone.setRotX(0); legsBone.setRotY(0); legsBone.setRotZ(0); }
+
                 if (mainBody != null) {
                     mainBody.setRotX(-playerModel.body.xRot);
                     mainBody.setRotY(-playerModel.body.yRot);
@@ -143,7 +148,7 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
         }
     }
 
-    private static net.minecraft.client.model.HumanoidModel.ArmPose getArmPose(net.minecraft.client.player.AbstractClientPlayer player, net.minecraft.world.InteractionHand hand) {
+    public static net.minecraft.client.model.HumanoidModel.ArmPose getArmPose(net.minecraft.client.player.AbstractClientPlayer player, net.minecraft.world.InteractionHand hand) {
         net.minecraft.world.item.ItemStack itemstack = player.getItemInHand(hand);
         if (itemstack.isEmpty()) {
             return net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;

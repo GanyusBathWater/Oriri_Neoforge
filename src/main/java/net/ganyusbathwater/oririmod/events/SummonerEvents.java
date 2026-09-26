@@ -26,33 +26,34 @@ public class SummonerEvents {
 
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof Mob mob))
-            return;
-            
-        CompoundTag data = mob.getPersistentData();
-        String ownerUUID = data.getString(OWNER_TAG);
-        
-        if (ownerUUID.isEmpty())
-            return;
-
+        Entity target = event.getEntity();
         Entity attacker = event.getSource().getEntity();
-        if (attacker != null) {
-            // If the attacker is the owner -> cancel the damage to prevent friendly fire
-            // and aggro
-            if (attacker.getStringUUID().equals(ownerUUID)) {
-                event.setCanceled(true);
-                return;
-            }
-
-            // If the attacker is another summoned mob from the exact same owner -> cancel
-            // damage
-            if (attacker instanceof Mob attackingMob) {
-                String attackerOwnerUUID = attackingMob.getPersistentData().getString(OWNER_TAG);
-                if (ownerUUID.equals(attackerOwnerUUID)) {
-                    event.setCanceled(true);
-                }
-            }
+        if (attacker == null) return;
+        
+        String targetOwnerStr = "";
+        if (target instanceof net.minecraft.world.entity.player.Player tp) targetOwnerStr = tp.getStringUUID();
+        else if (target instanceof Mob tm && tm.getPersistentData().getBoolean(SUMMONED_TAG)) targetOwnerStr = tm.getPersistentData().getString(OWNER_TAG);
+        
+        String attackerOwnerStr = "";
+        if (attacker instanceof net.minecraft.world.entity.player.Player ap) attackerOwnerStr = ap.getStringUUID();
+        else if (attacker instanceof Mob am && am.getPersistentData().getBoolean(SUMMONED_TAG)) attackerOwnerStr = am.getPersistentData().getString(OWNER_TAG);
+        
+        if (!targetOwnerStr.isEmpty() && !attackerOwnerStr.isEmpty() && areAllies(targetOwnerStr, attackerOwnerStr, target.level())) {
+            event.setCanceled(true);
         }
+    }
+    
+    private static boolean areAllies(String uuid1, String uuid2, net.minecraft.world.level.Level level) {
+        if (uuid1.equals(uuid2)) return true;
+        if (level instanceof ServerLevel serverLevel) {
+            try {
+                java.util.UUID u1 = java.util.UUID.fromString(uuid1);
+                java.util.UUID u2 = java.util.UUID.fromString(uuid2);
+                net.ganyusbathwater.oririmod.dungeon.DungeonInstance inst = net.ganyusbathwater.oririmod.dungeon.DungeonManager.get(serverLevel).getInstanceForPlayer(u1);
+                return inst != null && inst.getPlayers().contains(u2);
+            } catch (Exception ignored) {}
+        }
+        return false;
     }
 
     @SubscribeEvent

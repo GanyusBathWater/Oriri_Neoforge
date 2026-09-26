@@ -32,7 +32,7 @@ public final class RootAttackUtil {
 
     private static final int DELAY_TICKS = 60; // 3 seconds
     private static final float RADIUS = 2.0f;
-    private static final float DAMAGE = 10.0f; // 5 hearts
+    private static final float DAMAGE = 8.0f; // 4 hearts
 
     private RootAttackUtil() {
     }
@@ -42,6 +42,20 @@ public final class RootAttackUtil {
         currentTick++;
 
         synchronized (PENDING_ROOTS) {
+            // Spawn telegraph particles for pending roots
+            if (currentTick % 3 == 0) {
+                for (PendingRoot root : PENDING_ROOTS) {
+                    if (root.level() != null) {
+                        // Spawn 10 particles with a spread covering the 2.0 block radius
+                        root.level().sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER, 
+                            root.target().getX() + 0.5, 
+                            root.target().getY() + 0.2, 
+                            root.target().getZ() + 0.5, 
+                            10, RADIUS * 0.8, 0.0, RADIUS * 0.8, 0.0);
+                    }
+                }
+            }
+
             while (!PENDING_ROOTS.isEmpty()) {
                 PendingRoot peek = PENDING_ROOTS.peek();
                 if (peek != null && currentTick >= peek.executeTick()) {
@@ -57,12 +71,12 @@ public final class RootAttackUtil {
     }
 
     public static void unleash(ServerLevel level, BlockPos target, int ownerId) {
-        // Find local ground
+        // Find local ground (snap through non-solid blocks like tall grass)
         BlockPos groundPos = target;
-        while (groundPos.getY() > level.getMinBuildHeight() && level.isEmptyBlock(groundPos.below())) {
+        while (groundPos.getY() > level.getMinBuildHeight() && level.getBlockState(groundPos.below()).getCollisionShape(level, groundPos.below()).isEmpty()) {
             groundPos = groundPos.below();
         }
-        while (groundPos.getY() < level.getMaxBuildHeight() && !level.isEmptyBlock(groundPos)) {
+        while (groundPos.getY() < level.getMaxBuildHeight() && !level.getBlockState(groundPos).getCollisionShape(level, groundPos).isEmpty()) {
             groundPos = groundPos.above();
         }
 
@@ -84,14 +98,14 @@ public final class RootAttackUtil {
                 e -> e.distanceToSqr(target.getX(), target.getY(), target.getZ()) <= RADIUS * RADIUS);
 
         // Spawn a center visual entity that just sits there
-        spawnVisualVine(level, target.getX() + 0.5, target.getY(), target.getZ() + 0.5, -1, 80);
+        spawnVisualVine(level, target.getX() + 0.5, target.getY(), target.getZ() + 0.5, -1, 60);
 
         // Spawn a few extra random visual vines within the radius for a denser looking
         // attack
         for (int i = 0; i < 4; i++) {
             double offsetX = (level.random.nextDouble() * 2 - 1) * RADIUS;
             double offsetZ = (level.random.nextDouble() * 2 - 1) * RADIUS;
-            spawnVisualVine(level, target.getX() + 0.5 + offsetX, target.getY(), target.getZ() + 0.5 + offsetZ, -1, 80);
+            spawnVisualVine(level, target.getX() + 0.5 + offsetX, target.getY(), target.getZ() + 0.5 + offsetZ, -1, 60);
         }
 
         for (LivingEntity entity : entities) {
@@ -101,13 +115,13 @@ public final class RootAttackUtil {
             // Apply Damage
             entity.hurt(level.damageSources().generic(), DAMAGE);
 
-            // Apply Stunned MobEffect for 4 seconds (80 ticks)
+            // Apply Stunned MobEffect for 3 seconds (60 ticks)
             if (!entity.hasEffect(ModEffects.STUNNED_EFFECT) && !entity.hasEffect(ModEffects.STUN_IMMUNITY_EFFECT)) {
-                entity.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 80, 0, false, true, true));
+                entity.addEffect(new MobEffectInstance(ModEffects.STUNNED_EFFECT, 60, 0, false, true, true));
             }
 
-            // Spawn Visual Entity locking onto this entity, duration 80 to match stun
-            spawnVisualVine(level, entity.getX(), entity.getY(), entity.getZ(), entity.getId(), 80);
+            // Spawn Visual Entity locking onto this entity, duration 60 to match stun
+            spawnVisualVine(level, entity.getX(), entity.getY(), entity.getZ(), entity.getId(), 60);
         }
     }
 

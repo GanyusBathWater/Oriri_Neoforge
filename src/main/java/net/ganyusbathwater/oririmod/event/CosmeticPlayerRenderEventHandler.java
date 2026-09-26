@@ -31,6 +31,8 @@ public class CosmeticPlayerRenderEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onPlayerRenderPre(RenderPlayerEvent.Pre event) {
         Player player = event.getEntity();
+        if (player.isSpectator()) return;
+        
         if (hasCurioEquipped(player, ModItems.ESSENCE_OF_DARKNESS.get())) {
             // Cancel the Vanilla render event completely to hide Vanilla items and body.
             event.setCanceled(true);
@@ -51,7 +53,25 @@ public class CosmeticPlayerRenderEventHandler {
                 float ageInTicks = player.tickCount + partialTick;
                 
                 // Manually populate vanilla bone rotations so we can copy them
-                event.getRenderer().getModel().setupAnim((net.minecraft.client.player.AbstractClientPlayer) player, f8, f5, ageInTicks, netHeadYaw, headPitch);
+                net.minecraft.client.player.AbstractClientPlayer cp = (net.minecraft.client.player.AbstractClientPlayer) player;
+                net.minecraft.client.model.PlayerModel<net.minecraft.client.player.AbstractClientPlayer> pModel = event.getRenderer().getModel();
+                
+                pModel.attackTime = player.getAttackAnim(partialTick);
+                pModel.riding = player.isPassenger();
+                pModel.young = player.isBaby();
+                pModel.crouching = player.isCrouching();
+                
+                net.minecraft.client.model.HumanoidModel.ArmPose mainPose = net.ganyusbathwater.oririmod.client.render.entity.template.AbstractPlayerCosmeticModel.getArmPose(cp, net.minecraft.world.InteractionHand.MAIN_HAND);
+                net.minecraft.client.model.HumanoidModel.ArmPose offPose = net.ganyusbathwater.oririmod.client.render.entity.template.AbstractPlayerCosmeticModel.getArmPose(cp, net.minecraft.world.InteractionHand.OFF_HAND);
+                if (player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT) {
+                    pModel.rightArmPose = mainPose;
+                    pModel.leftArmPose = offPose;
+                } else {
+                    pModel.rightArmPose = offPose;
+                    pModel.leftArmPose = mainPose;
+                }
+                
+                pModel.setupAnim(cp, f8, f5, ageInTicks, netHeadYaw, headPitch);
                 
                 // Render our cosmetic as the root renderer
                 AURORA_COSMETIC_RENDERER.render((net.minecraft.client.player.AbstractClientPlayer) player, entityYaw, partialTick, event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
@@ -130,6 +150,8 @@ public class CosmeticPlayerRenderEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onRenderArm(net.neoforged.neoforge.client.event.RenderArmEvent event) {
         Player player = event.getPlayer();
+        if (player.isSpectator()) return;
+        
         if (hasCurioEquipped(player, ModItems.ESSENCE_OF_DARKNESS.get())) {
             event.setCanceled(true);
             if (AURORA_COSMETIC_RENDERER != null) {

@@ -47,7 +47,7 @@ import java.util.List;
  * A humanoid ice-sage boss with 4 attacks, a 2-phase system, a dramatic
  * delayed death sequence, and a custom HUD boss bar.
  */
-public class BlizzaEntity extends Monster implements GeoEntity {
+public class BlizzaEntity extends Monster implements GeoEntity, IOririBoss {
 
     // ── Attack type constants ──────────────────────────────────────────────
     public static final int ATTACK_NONE    = 0;
@@ -300,9 +300,15 @@ public class BlizzaEntity extends Monster implements GeoEntity {
                 .withParameter(LootContextParams.DAMAGE_SOURCE, this.damageSources().genericKill())
                 .create(LootContextParamSets.ENTITY);
 
-        List<ItemStack> drops = lootTable.getRandomItems(params);
-        for (ItemStack stack : drops) {
-            this.spawnAtLocation(stack);
+        long playersCount = serverLevel.players().stream().filter(p -> p.distanceTo(this) <= 64.0).count();
+        if (playersCount < 1) playersCount = 1;
+
+        // Roll the loot table multiple times, once for each player
+        for (int i = 0; i < playersCount; i++) {
+            List<ItemStack> drops = lootTable.getRandomItems(params);
+            for (ItemStack stack : drops) {
+                this.spawnAtLocation(stack);
+            }
         }
     }
 
@@ -344,12 +350,41 @@ public class BlizzaEntity extends Monster implements GeoEntity {
     public void doMeleeHit(LivingEntity target) {
         float base = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float damage = isPhase2 ? base * 1.5f : base;
-        target.hurt(this.damageSources().mobAttack(this), damage);
 
-        // Apply Cold Aura x3 on hit
-        MobEffectInstance existing = target.getEffect(ModEffects.COLD_AURA_EFFECT);
-        int nextAmp = (existing == null) ? 2 : existing.getAmplifier() + 3;
-        target.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, true, true));
+        // Sweeping hit: Find players in an expanded box around the primary target
+        net.minecraft.world.phys.AABB sweepBox = target.getBoundingBox().inflate(2.0, 0.25, 2.0);
+        java.util.List<Player> hitPlayers = this.level().getEntitiesOfClass(Player.class, sweepBox);
+        boolean primaryHit = false;
+        
+        for (Player hit : hitPlayers) {
+            if (hit == target) primaryHit = true;
+            hit.hurt(this.damageSources().mobAttack(this), damage);
+            MobEffectInstance existing = hit.getEffect(ModEffects.COLD_AURA_EFFECT);
+            int nextAmp = (existing == null) ? 2 : existing.getAmplifier() + 3;
+            hit.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, true, true));
+            if (this.level() instanceof ServerLevel sl) {
+                sl.sendParticles(ParticleTypes.SWEEP_ATTACK, hit.getX(), hit.getY() + 1.0, hit.getZ(), 1, 0, 0, 0, 0);
+            }
+        }
+        
+        // Ensure primary non-player target still gets hit if sweep didn't catch them
+        if (!primaryHit) {
+            target.hurt(this.damageSources().mobAttack(this), damage);
+            MobEffectInstance existing = target.getEffect(ModEffects.COLD_AURA_EFFECT);
+            int nextAmp = (existing == null) ? 2 : existing.getAmplifier() + 3;
+            target.addEffect(new MobEffectInstance(ModEffects.COLD_AURA_EFFECT, 200, nextAmp, false, true, true));
+        }
+    }
+
+    // ── Multiplayer Boss Scaling ──────────────────────────────────────────
+    @Override
+    public void healFromSoulTithe() {
+        if (this.isAlive() && !isDefeated) {
+            this.heal(this.getMaxHealth() * 0.1f);
+            if (this.level() instanceof ServerLevel sl) {
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + this.getBbHeight() / 2.0, this.getZ(), 30, 0.5, 0.5, 0.5, 0.05);
+            }
+        }
     }
 
     // ── Spawn title ───────────────────────────────────────────────────────
@@ -357,10 +392,18 @@ public class BlizzaEntity extends Monster implements GeoEntity {
     public void onAddedToLevel() {
         super.onAddedToLevel();
         if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel) {
+            long playersCount = 0;
             for (ServerPlayer player : serverLevel.players()) {
                 if (this.distanceTo(player) <= 64.0) {
                     NetworkHandler.sendBlizzaTitleToPlayer(player);
+                    playersCount++;
                 }
+            }
+            if (playersCount > 1) {
+                double baseHp = this.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+                double scalar = 1.0 + (0.1 * (playersCount - 1));
+                this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(baseHp * scalar);
+                this.setHealth((float)(baseHp * scalar));
             }
         }
     }

@@ -272,6 +272,14 @@ public class ModItemGroups {
                         output.accept(ModBlocks.UPGRADED_ACACIA_SAPLING);
                         output.accept(ModBlocks.UPGRADED_DARK_OAK_SAPLING);
                         output.accept(ModBlocks.UPGRADED_CHERRY_SAPLING);
+                        
+                        output.accept(ModBlocks.UPGRADED_AZALEA);
+                        output.accept(ModBlocks.UPGRADED_FLOWERING_AZALEA);
+                        output.accept(ModBlocks.UPGRADED_MANGROVE_PROPAGULE);
+                        output.accept(ModBlocks.UPGRADED_RED_MUSHROOM);
+                        output.accept(ModBlocks.UPGRADED_BROWN_MUSHROOM);
+                        output.accept(ModBlocks.UPGRADED_CRIMSON_FUNGUS);
+                        output.accept(ModBlocks.UPGRADED_WARPED_FUNGUS);
 
                         output.accept(ModBlocks.STAR_HERB);
 

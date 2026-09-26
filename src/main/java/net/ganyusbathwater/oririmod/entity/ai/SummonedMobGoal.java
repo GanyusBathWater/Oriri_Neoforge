@@ -35,6 +35,19 @@ public class SummonedMobGoal extends NearestAttackableTargetGoal<LivingEntity> {
                     return false; // don't attack owner
                 if (target.getPersistentData().getString(OWNER_TAG).equals(ownerStr))
                     return false; // don't attack allied summons
+                
+                // Don't attack dungeon party members or their summons
+                if (mob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                    try {
+                        java.util.UUID oId = java.util.UUID.fromString(ownerStr);
+                        net.ganyusbathwater.oririmod.dungeon.DungeonInstance inst = net.ganyusbathwater.oririmod.dungeon.DungeonManager.get(serverLevel).getInstanceForPlayer(oId);
+                        if (inst != null) {
+                            if (target instanceof Player && inst.getPlayers().contains(target.getUUID())) return false;
+                            String targetOwnerStr = target.getPersistentData().getString(OWNER_TAG);
+                            if (!targetOwnerStr.isEmpty() && inst.getPlayers().contains(java.util.UUID.fromString(targetOwnerStr))) return false;
+                        }
+                    } catch (Exception ignored) {}
+                }
             }
 
             SummonTargetMode mode = OririConfig.COMMON.summoner.targetMode.get();
@@ -67,11 +80,20 @@ public class SummonedMobGoal extends NearestAttackableTargetGoal<LivingEntity> {
         if (ownerUUID != null && target.getUUID().equals(ownerUUID))
             return false;
 
-        // Never attack other mobs summoned by the same owner
+        // Never attack other mobs summoned by the same owner or party members
         if (ownerUUID != null) {
             String targetOwnerStr = target.getPersistentData().getString(OWNER_TAG);
             if (!targetOwnerStr.isEmpty() && targetOwnerStr.equals(ownerUUID.toString())) {
                 return false;
+            }
+            if (this.mob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                try {
+                    net.ganyusbathwater.oririmod.dungeon.DungeonInstance inst = net.ganyusbathwater.oririmod.dungeon.DungeonManager.get(serverLevel).getInstanceForPlayer(ownerUUID);
+                    if (inst != null) {
+                        if (target instanceof Player && inst.getPlayers().contains(target.getUUID())) return false;
+                        if (!targetOwnerStr.isEmpty() && inst.getPlayers().contains(java.util.UUID.fromString(targetOwnerStr))) return false;
+                    }
+                } catch (Exception ignored) {}
             }
         }
 
