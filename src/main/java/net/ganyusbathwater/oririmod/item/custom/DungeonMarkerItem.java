@@ -18,6 +18,11 @@ public class DungeonMarkerItem extends Item {
     }
 
     @Override
+    public boolean isFoil(net.minecraft.world.item.ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         if (!(level instanceof ServerLevel serverLevel)) {

@@ -35,8 +35,8 @@ import java.util.UUID;
 @OnlyIn(Dist.CLIENT)
 public class DungeonKeeperScreen extends Screen {
 
-    private static final int PANEL_W = 320;
-    private static final int PANEL_H = 200;
+    private int getPanelW() { return Math.min(320, this.width - 20); }
+    private int getPanelH() { return Math.min(200, this.height - 20); }
 
     // Zone Y offsets (relative to panel top)
     private static final int TITLE_Y   = 10;
@@ -83,8 +83,8 @@ public class DungeonKeeperScreen extends Screen {
     protected void init() {
         super.init();
 
-        int left = (width - PANEL_W) / 2;
-        int top  = (height - PANEL_H) / 2;
+        int left = (width - getPanelW()) / 2;
+        int top  = (height - getPanelH()) / 2;
 
         // ── Invite Zone (leader only) ──
         if (isLeader && !data.isStarting() && data.startTicksRemaining() >= 0) {
@@ -126,7 +126,7 @@ public class DungeonKeeperScreen extends Screen {
             addRenderableWidget(Button.builder(
                     Component.literal("Cancel Start").withStyle(ChatFormatting.RED),
                     btn -> { sendAction("CANCEL_START", ""); onClose(); })
-                    .pos(left + PANEL_W / 2 - 40, btnY)
+                    .pos(left + getPanelW() / 2 - 40, btnY)
                     .size(80, 20)
                     .build());
         } else {
@@ -134,7 +134,7 @@ public class DungeonKeeperScreen extends Screen {
                 addRenderableWidget(Button.builder(
                         Component.literal("Start ▶").withStyle(ChatFormatting.GREEN),
                         btn -> sendAction("START", ""))
-                        .pos(left + PANEL_W - 80, btnY)
+                        .pos(left + getPanelW() - 80, btnY)
                         .size(72, 20)
                         .build());
             }
@@ -142,7 +142,7 @@ public class DungeonKeeperScreen extends Screen {
             addRenderableWidget(Button.builder(
                     Component.literal("Leave Party").withStyle(ChatFormatting.RED),
                     btn -> { sendAction("LEAVE", ""); onClose(); })
-                    .pos(left + (isLeader ? PANEL_W - 160 : PANEL_W - 90), btnY)
+                    .pos(left + (isLeader ? getPanelW() - 160 : getPanelW() - 90), btnY)
                     .size(isLeader ? 74 : 82, 20)
                     .build());
         }
@@ -174,12 +174,12 @@ public class DungeonKeeperScreen extends Screen {
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partial) {
         renderBackground(gfx, mouseX, mouseY, partial);
 
-        int left = (width - PANEL_W) / 2;
-        int top  = (height - PANEL_H) / 2;
+        int left = (width - getPanelW()) / 2;
+        int top  = (height - getPanelH()) / 2;
 
         // Background
-        gfx.fill(left, top, left + PANEL_W, top + PANEL_H, C_BG);
-        drawBorder(gfx, left, top, PANEL_W, PANEL_H, C_BORDER);
+        gfx.fill(left, top, left + getPanelW(), top + getPanelH(), C_BG);
+        drawBorder(gfx, left, top, getPanelW(), getPanelH(), C_BORDER);
 
         // Render widgets on top
         for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
@@ -189,8 +189,8 @@ public class DungeonKeeperScreen extends Screen {
         // ── Title Zone ──
         gfx.drawCenteredString(font,
                 Component.literal("⚔  " + data.dungeonDisplayName()).withStyle(ChatFormatting.BOLD),
-                left + PANEL_W / 2, top + TITLE_Y, C_TITLE);
-        gfx.hLine(left + 8, left + PANEL_W - 8, top + DIV1_Y, C_DIVIDER);
+                left + getPanelW() / 2, top + TITLE_Y, C_TITLE);
+        gfx.hLine(left + 8, left + getPanelW() - 8, top + DIV1_Y, C_DIVIDER);
 
         // ── Party Zone ──
         gfx.drawString(font, "Party", left + 12, top + PARTY_Y, C_LABEL, true);
@@ -222,7 +222,7 @@ public class DungeonKeeperScreen extends Screen {
         }
 
         // ── Dividers ──
-        gfx.hLine(left + 8, left + PANEL_W - 8, top + DIV2_Y, C_DIVIDER);
+        gfx.hLine(left + 8, left + getPanelW() - 8, top + DIV2_Y, C_DIVIDER);
 
         if (data.isStarting()) {
             long currentTick = net.minecraft.client.Minecraft.getInstance().level != null 
@@ -242,7 +242,7 @@ public class DungeonKeeperScreen extends Screen {
             gfx.drawString(font, "Invite:", left + 12, top + INVITE_Y + 4, C_LABEL, true);
         }
 
-        gfx.hLine(left + 8, left + PANEL_W - 8, top + DIV3_Y, C_DIVIDER);
+        gfx.hLine(left + 8, left + getPanelW() - 8, top + DIV3_Y, C_DIVIDER);
     }
 
     // ── Helpers ──

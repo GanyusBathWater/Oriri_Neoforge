@@ -520,4 +520,9 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
     public int getEnchantmentValue() {
         return 18; // High enchantability for magic weapons
     }
+
+    @Override
+    public boolean isEnchantable(net.minecraft.world.item.ItemStack stack) {
+        return true;
+    }
 }

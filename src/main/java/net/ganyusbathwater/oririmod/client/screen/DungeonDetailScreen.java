@@ -36,8 +36,8 @@ import java.util.UUID;
 @OnlyIn(Dist.CLIENT)
 public class DungeonDetailScreen extends Screen {
 
-    private static final int PANEL_W = 350;
-    private static final int PANEL_H = 280;
+    private int getPanelW() { return Math.min(350, this.width - 20); }
+    private int getPanelH() { return Math.min(280, this.height - 20); }
 
     // Image dimensions (rendered size)
     private static final int IMG_W = 200;
@@ -79,9 +79,9 @@ public class DungeonDetailScreen extends Screen {
     protected void init() {
         super.init();
 
-        int left = (width - PANEL_W) / 2;
-        int top  = (height - PANEL_H) / 2;
-        int bottomY = top + PANEL_H - 30;
+        int left = (width - getPanelW()) / 2;
+        int top  = (height - getPanelH()) / 2;
+        int bottomY = top + getPanelH() - 30;
 
         // ← Back button
         addRenderableWidget(Button.builder(
@@ -98,7 +98,7 @@ public class DungeonDetailScreen extends Screen {
                     PacketDistributor.sendToServer(new DungeonActionPayload("SELECT", UUID.randomUUID(), dungeonId));
                     onClose();
                 })
-                .pos(left + PANEL_W - 80, bottomY)
+                .pos(left + getPanelW() - 80, bottomY)
                 .size(70, 20)
                 .build());
     }
@@ -107,12 +107,12 @@ public class DungeonDetailScreen extends Screen {
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partial) {
         renderBackground(gfx, mouseX, mouseY, partial);
 
-        int left = (width - PANEL_W) / 2;
-        int top  = (height - PANEL_H) / 2;
+        int left = (width - getPanelW()) / 2;
+        int top  = (height - getPanelH()) / 2;
 
         // Background panel
-        gfx.fill(left, top, left + PANEL_W, top + PANEL_H, C_BG);
-        drawBorder(gfx, left, top, PANEL_W, PANEL_H, C_BORDER);
+        gfx.fill(left, top, left + getPanelW(), top + getPanelH(), C_BG);
+        drawBorder(gfx, left, top, getPanelW(), getPanelH(), C_BORDER);
 
         // Render widgets (buttons) on top of background
         for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
@@ -122,11 +122,11 @@ public class DungeonDetailScreen extends Screen {
         // ── Title Zone ──
         gfx.drawCenteredString(font,
                 Component.literal("⚔ " + displayName + " ⚔").withStyle(ChatFormatting.BOLD),
-                left + PANEL_W / 2, top + 10, C_TITLE);
-        gfx.hLine(left + 8, left + PANEL_W - 8, top + 28, C_DIVIDER);
+                left + getPanelW() / 2, top + 10, C_TITLE);
+        gfx.hLine(left + 8, left + getPanelW() - 8, top + 28, C_DIVIDER);
 
         // ── Image Zone ──
-        int imgX = left + (PANEL_W - IMG_W) / 2;
+        int imgX = left + (getPanelW() - IMG_W) / 2;
         int imgY = top + 35;
 
         // Dark background for image area
@@ -149,7 +149,7 @@ public class DungeonDetailScreen extends Screen {
 
         // ── Lore Zone ──
         int loreY = imgY + IMG_H + 10;
-        int loreMaxWidth = PANEL_W - 30;
+        int loreMaxWidth = getPanelW() - 30;
         int maxLoreLines = 8;
         int visibleHeight = maxLoreLines * 11;
 
@@ -160,7 +160,7 @@ public class DungeonDetailScreen extends Screen {
             this.scrollOffset = net.minecraft.util.Mth.clamp(this.scrollOffset, 0, maxScroll);
             
             // Enable Scissoring
-            gfx.enableScissor(left + 10, loreY, left + PANEL_W - 10, loreY + visibleHeight);
+            gfx.enableScissor(left + 10, loreY, left + getPanelW() - 10, loreY + visibleHeight);
             
             for (int i = 0; i < lines.size(); i++) {
                 int yPos = loreY + (i * 11) - (int) this.scrollOffset;
@@ -176,13 +176,13 @@ public class DungeonDetailScreen extends Screen {
             if (maxScroll > 0) {
                 int scrollbarHeight = Math.max(10, (int)((visibleHeight / (float)totalHeight) * visibleHeight));
                 int scrollbarY = loreY + (int)((this.scrollOffset / maxScroll) * (visibleHeight - scrollbarHeight));
-                gfx.fill(left + PANEL_W - 15, loreY, left + PANEL_W - 13, loreY + visibleHeight, C_IMG_BG);
-                gfx.fill(left + PANEL_W - 15, scrollbarY, left + PANEL_W - 13, scrollbarY + scrollbarHeight, C_BORDER);
+                gfx.fill(left + getPanelW() - 15, loreY, left + getPanelW() - 13, loreY + visibleHeight, C_IMG_BG);
+                gfx.fill(left + getPanelW() - 15, scrollbarY, left + getPanelW() - 13, scrollbarY + scrollbarHeight, C_BORDER);
             }
         }
 
         // ── Footer divider ──
-        gfx.hLine(left + 8, left + PANEL_W - 8, top + PANEL_H - 38, C_DIVIDER);
+        gfx.hLine(left + 8, left + getPanelW() - 8, top + getPanelH() - 38, C_DIVIDER);
     }
 
     private void drawNoPreview(GuiGraphics gfx, int imgX, int imgY) {
@@ -194,7 +194,7 @@ public class DungeonDetailScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (!loreText.isBlank()) {
-            int loreMaxWidth = PANEL_W - 30;
+            int loreMaxWidth = getPanelW() - 30;
             List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(loreText), loreMaxWidth);
             int totalHeight = lines.size() * 11;
             int visibleHeight = 8 * 11;

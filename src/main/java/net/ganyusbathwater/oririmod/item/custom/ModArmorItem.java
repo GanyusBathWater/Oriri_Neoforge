@@ -144,6 +144,11 @@ public class ModArmorItem extends ArmorItem implements ModRarityCarrier {
     }
 
     @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
         if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {

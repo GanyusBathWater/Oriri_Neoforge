@@ -241,7 +241,7 @@ public class DungeonStageManager {
                     String action = extra.getString(DungeonMarkerEntity.TAG_SWITCH_ID);
                     if (action.isBlank()) action = "destroy";
                     int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 3;
-                    if (radius <= 0) radius = 3;
+                    if (radius < 0) radius = 0;
                     String filterStr = extra.getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
                     ResourceLocation filter = null;
                     if (!filterStr.isBlank()) {
@@ -253,7 +253,7 @@ public class DungeonStageManager {
                 }
                 case ROLE_STAGE_TRIGGER -> {
                     int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 5;
-                    if (radius <= 0) radius = 5;
+                    if (radius < 0) radius = 0;
                     
                     StageDefinition.TriggerBehavior behavior = StageDefinition.TriggerBehavior.NO_TELEPORT;
                     if (extra.contains(DungeonMarkerEntity.TAG_TRIGGER_BEHAVIOR)) {
@@ -270,7 +270,7 @@ public class DungeonStageManager {
                 }
                 case ROLE_GOAL_AREA -> {
                     int radius = extra.contains(DungeonMarkerEntity.TAG_COUNT) ? extra.getInt(DungeonMarkerEntity.TAG_COUNT) : 5;
-                    if (radius <= 0) radius = 5;
+                    if (radius < 0) radius = 0;
                     builder.addGoal(pos, radius);
                 }
                 case ROLE_BLOCK_MATCH -> {

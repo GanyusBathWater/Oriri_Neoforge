@@ -149,6 +149,7 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                         if (living instanceof net.minecraft.world.entity.Mob mob) {
                             mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), net.minecraft.world.entity.MobSpawnType.SPAWNER, null);
                         }
+                        living.addTag("oriri_infinite_spawn");
                         level.addFreshEntity(living);
                         tracker.activeMobs.add(living.getUUID());
                     }

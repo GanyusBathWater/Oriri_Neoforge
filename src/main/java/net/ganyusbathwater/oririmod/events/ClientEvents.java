@@ -177,6 +177,11 @@ public class ClientEvents {
             int startX = (screenW / 2) + 91 - (clientDungeonLives * heartSize);
             int heartY = screenH - 55;
             
+            // Dynamic adjustment: shift up if air bubbles are rendering
+            if (player.isEyeInFluid(net.minecraft.tags.FluidTags.WATER) || player.getAirSupply() < player.getMaxAirSupply()) {
+                heartY -= 10;
+            }
+            
             RenderSystem.enableBlend();
             for (int i = 0; i < clientDungeonLives; i++) {
                 gui.blit(DUNGEON_HEART_TEX, startX + (i * heartSize), heartY, 0, 0, heartSize, heartSize, heartSize, heartSize);

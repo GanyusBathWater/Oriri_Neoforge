@@ -21,7 +21,7 @@ import java.util.UUID;
  * │  ⚔ Select a Dungeon ⚔                        │  ← Title Zone (fixed 30px)
  * │──────────────────────────────────────────────│
  * │  [Dungeon Name]                        [→]   │  ← Scrollable list entries
- * │  [Short desc, truncated to 1 line]           │     Text maxWidth = PANEL_W - 90
+ * │  [Short desc, truncated to 1 line]           │     Text maxWidth = getPanelW() - 90
  * │──────────────────────────────────────────────│     Arrow button in dedicated column
  * │  [Dungeon Name 2]                      [→]   │
  * │  ...                                         │
@@ -32,8 +32,8 @@ import java.util.UUID;
 @OnlyIn(Dist.CLIENT)
 public class DungeonSelectionScreen extends Screen {
 
-    private static final int PANEL_W = 350;
-    private static final int PANEL_H = 260;
+    private int getPanelW() { return Math.min(350, this.width - 20); }
+    private int getPanelH() { return Math.min(260, this.height - 20); }
     private static final int ITEM_HEIGHT = 50;
 
     // Colors
@@ -58,8 +58,8 @@ public class DungeonSelectionScreen extends Screen {
     protected void init() {
         super.init();
 
-        int left = (width - PANEL_W) / 2;
-        int top  = (height - PANEL_H) / 2;
+        int left = (width - getPanelW()) / 2;
+        int top  = (height - getPanelH()) / 2;
         int listTop = top + 38;
 
         // Dungeon entry buttons — arrow button in the dedicated right column
@@ -71,7 +71,7 @@ public class DungeonSelectionScreen extends Screen {
                 // Open the detail screen for this dungeon
                 minecraft.setScreen(new DungeonDetailScreen(data, index));
             })
-            .pos(left + PANEL_W - 45, itemY)
+            .pos(left + getPanelW() - 45, itemY)
             .size(30, 20)
             .build();
 
@@ -82,7 +82,7 @@ public class DungeonSelectionScreen extends Screen {
         addRenderableWidget(Button.builder(
                 Component.translatable("screen.oririmod.dungeon.close").withStyle(ChatFormatting.GRAY),
                 btn -> onClose())
-                .pos(left + PANEL_W - 70, top + PANEL_H - 30)
+                .pos(left + getPanelW() - 70, top + getPanelH() - 30)
                 .size(60, 20)
                 .build());
     }
@@ -91,13 +91,13 @@ public class DungeonSelectionScreen extends Screen {
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partial) {
         renderBackground(gfx, mouseX, mouseY, partial);
 
-        int left = (width - PANEL_W) / 2;
-        int top  = (height - PANEL_H) / 2;
+        int left = (width - getPanelW()) / 2;
+        int top  = (height - getPanelH()) / 2;
         int listTop = top + 38;
 
         // Background panel
-        gfx.fill(left, top, left + PANEL_W, top + PANEL_H, C_BG);
-        drawBorder(gfx, left, top, PANEL_W, PANEL_H, C_BORDER);
+        gfx.fill(left, top, left + getPanelW(), top + getPanelH(), C_BG);
+        drawBorder(gfx, left, top, getPanelW(), getPanelH(), C_BORDER);
 
         // Render widgets (buttons) on top of background
         for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
@@ -107,11 +107,11 @@ public class DungeonSelectionScreen extends Screen {
         // Title
         gfx.drawCenteredString(font,
                 Component.translatable("screen.oririmod.dungeon.select_title").withStyle(ChatFormatting.BOLD),
-                left + PANEL_W / 2, top + 12, C_TITLE);
-        gfx.hLine(left + 8, left + PANEL_W - 8, top + 30, C_DIVIDER);
+                left + getPanelW() / 2, top + 12, C_TITLE);
+        gfx.hLine(left + 8, left + getPanelW() - 8, top + 30, C_DIVIDER);
 
-        // List items — text is bounded to left column (PANEL_W - 90px to leave room for button)
-        int textMaxWidth = PANEL_W - 90;
+        // List items — text is bounded to left column (getPanelW() - 90px to leave room for button)
+        int textMaxWidth = getPanelW() - 90;
         for (int i = 0; i < data.dungeonIds().size(); i++) {
             int itemY = listTop + (i * ITEM_HEIGHT);
 
@@ -125,7 +125,7 @@ public class DungeonSelectionScreen extends Screen {
             gfx.drawString(font, truncatedDesc, left + 15, itemY + 22, C_DESC, true);
 
             // Divider below each entry
-            gfx.hLine(left + 10, left + PANEL_W - 10, itemY + ITEM_HEIGHT - 3, C_DIVIDER);
+            gfx.hLine(left + 10, left + getPanelW() - 10, itemY + ITEM_HEIGHT - 3, C_DIVIDER);
         }
     }
 

@@ -19,7 +19,7 @@ import java.util.UUID;
 public class KillAllEnemiesStage extends AbstractDungeonStage {
 
     private final Set<UUID> spawnedEntities = new HashSet<>();
-    private final java.util.Map<UUID, String> keyBearers = new java.util.HashMap<>();
+    private final Set<String> stageKeys = new HashSet<>();
     private int totalEnemies = 0;
 
     public KillAllEnemiesStage(StageDefinition definition) {
@@ -29,7 +29,7 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
     @Override
     protected void doStart(ServerLevel level, DungeonInstance instance) {
         spawnedEntities.clear();
-        keyBearers.clear();
+        stageKeys.clear();
 
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
             EntityType<?> entityType = resolveEntityType(level, entry.entityType(), entry.isTag());
@@ -49,7 +49,7 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
                         level.addFreshEntity(living);
                         spawnedEntities.add(living.getUUID());
                         if (entry.keyDropItem() != null) {
-                            keyBearers.put(living.getUUID(), entry.keyDropItem());
+                            stageKeys.add(entry.keyDropItem());
                         }
                     }
                 }
@@ -69,12 +69,11 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
             var entity = level.getEntity(uuid);
             boolean dead = entity == null || !entity.isAlive();
             if (dead) {
-                String bearerKey = keyBearers.remove(uuid);
-                if (bearerKey != null) {
-                    dropKey(level, entity, instance, bearerKey);
-                }
-                
                 if (spawnedEntities.size() == 1) {
+                    for (String key : stageKeys) {
+                        dropKey(level, entity, instance, key);
+                    }
+                    
                     String globalKey = definition.getKeyDropStageId();
                     if (globalKey != null) {
                         dropKey(level, entity, instance, globalKey);

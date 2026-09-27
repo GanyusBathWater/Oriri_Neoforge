@@ -557,14 +557,14 @@
   "oririmod.configuration.targetMode": "Summon Target Mode",
   "entity.oririmod.magic_bolt": "Magic Bolt",
   "entity.oririmod.fireball_projectile": "Fireball",
-  "entity.oririmod.giant_sword": "Giant Sword",
+  "entity.oririmod.giant_sword": "Godslayer Mk III",
   "entity.oririmod.meteor": "Meteor",
   "entity.oririmod.root_visual": "Root",
   "entity.oririmod.icicle": "Icicle",
   "entity.oririmod.sword_projectile": "Sword Projectile",
   "entity.oririmod.magic_projectile": "Magic Projectile",
   "entity.oririmod.eye_of_the_storm": "Eye of the Storm",
-  "entity.oririmod.doom_clock": "Doom Clock",
+  "entity.oririmod.doom_clock": "Judgement Day",
   "entity.oririmod.laser_beam": "Laser Beam",
   "entity.oririmod.magic_wave": "Magic Wave",
   "container.oririmod.equinox_table": "Equinox Table",
@@ -848,5 +848,9 @@
   "message.oririmod.dungeon.closed": "The dungeon has closed.",
   "message.oririmod.dungeon.complete": "Dungeon Completed!",
   "entity.oririmod.dryad": "Dryad",
-  "item.oririmod.dryad_spawn_egg": "Dryad Spawn Egg"
+  "item.oririmod.dryad_spawn_egg": "Dryad Spawn Egg",
+  "entity.oririmod.black_hole": "Blockhole",
+  "entity.oririmod.sword_circle": "Sword Projectile",
+  "entity.oririmod.air_slice": "Air Slice",
+  "entity.oririmod.thorn_projectile": "Thorn Projectile"
 }

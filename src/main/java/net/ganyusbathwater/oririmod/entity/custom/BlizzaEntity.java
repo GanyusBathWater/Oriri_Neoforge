@@ -310,6 +310,10 @@ public class BlizzaEntity extends Monster implements GeoEntity, IOririBoss {
                 this.spawnAtLocation(stack);
             }
         }
+        
+        if (net.ganyusbathwater.oririmod.world.GodsTrialData.get(serverLevel).isActive()) {
+            this.spawnAtLocation(new ItemStack(net.ganyusbathwater.oririmod.item.ModItems.STAFF_OF_ETERNAL_ICE.get()));
+        }
     }
 
     // ── Damage / death overrides ──────────────────────────────────────────

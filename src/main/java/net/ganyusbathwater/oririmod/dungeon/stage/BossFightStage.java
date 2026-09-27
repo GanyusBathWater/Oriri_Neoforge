@@ -14,6 +14,7 @@ import java.util.UUID;
 public class BossFightStage extends AbstractDungeonStage {
     private UUID bossEntityUUID = null;
     private net.minecraft.server.level.ServerBossEvent bossEvent = null;
+    private boolean bossDefeatedHandled = false;
 
     public BossFightStage(StageDefinition definition) {
         super(definition);
@@ -54,14 +55,16 @@ public class BossFightStage extends AbstractDungeonStage {
             level.addFreshEntity(boss);
             bossEntityUUID = boss.getUUID();
             
-            bossEvent = new net.minecraft.server.level.ServerBossEvent(
-                    boss.getDisplayName(),
-                    net.minecraft.world.BossEvent.BossBarColor.RED,
-                    net.minecraft.world.BossEvent.BossBarOverlay.PROGRESS
-            );
-            for (UUID playerId : instance.getPlayers()) {
-                net.minecraft.server.level.ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
-                if (sp != null) bossEvent.addPlayer(sp);
+            if (!(boss instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss)) {
+                bossEvent = new net.minecraft.server.level.ServerBossEvent(
+                        boss.getDisplayName(),
+                        net.minecraft.world.BossEvent.BossBarColor.RED,
+                        net.minecraft.world.BossEvent.BossBarOverlay.PROGRESS
+                );
+                for (UUID playerId : instance.getPlayers()) {
+                    net.minecraft.server.level.ServerPlayer sp = level.getServer().getPlayerList().getPlayer(playerId);
+                    if (sp != null) bossEvent.addPlayer(sp);
+                }
             }
         }
     }
@@ -85,6 +88,30 @@ public class BossFightStage extends AbstractDungeonStage {
                     }
                 }
             }
+
+            if (!bossDefeatedHandled && boss instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss oririBoss) {
+                if (oririBoss.isDefeated()) {
+                    bossDefeatedHandled = true;
+                    instance.setBossDefeated(true);
+                    
+                    var bounds = instance.getStructureBounds();
+                    if (bounds != null) {
+                        net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(
+                                bounds.minX(), bounds.minY(), bounds.minZ(),
+                                bounds.maxX(), bounds.maxY(), bounds.maxZ()
+                        ).inflate(16.0D);
+                        
+                        java.util.List<net.minecraft.world.entity.Mob> mobs = level.getEntitiesOfClass(
+                                net.minecraft.world.entity.Mob.class, aabb, 
+                                m -> m instanceof net.minecraft.world.entity.monster.Enemy && m != boss
+                        );
+                        for (net.minecraft.world.entity.Mob m : mobs) {
+                            m.discard();
+                        }
+                    }
+                }
+            }
+
             if (!boss.isAlive()) {
                 String keyDrop = definition.getBossKeyDropItem();
                 if (keyDrop != null) {

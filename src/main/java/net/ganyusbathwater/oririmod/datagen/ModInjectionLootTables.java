@@ -105,12 +105,12 @@ public class ModInjectionLootTables {
             output.accept(key("one_thousand_screams"), createSimpleTable(registries, ModItems.ONE_THOUSAND_SCREAMS.get(), 0.25f, false));
             output.accept(key("iras_soul"), createSimpleTable(registries, ModItems.IRAS_SOUL_FRAGMENT.get(), 1.0f, false));
 
-            output.accept(key("zombie_encyclopedia"), createSimpleTable(registries, ModItems.ZOMBIE_ENCYCLOPEDIA.get(), 0.05f, false));
-            output.accept(key("skeleton_encyclopedia"), createSimpleTable(registries, ModItems.SKELETON_ENCYCLOPEDIA.get(), 0.05f, false));
-            output.accept(key("iron_golem_manual"), createSimpleTable(registries, ModItems.IRON_GOLEM_MANUAL.get(), 0.05f, false));
-            output.accept(key("blazing_pyromaniac_guide"), createSimpleTable(registries, ModItems.BLAZING_PYROMANIAC_GUIDE.get(), 0.05f, false));
-            output.accept(key("magma_cooking_book"), createSimpleTable(registries, ModItems.MAGMA_COOKING_BOOK.get(), 0.05f, false));
-            output.accept(key("slimy_cooking_book"), createSimpleTable(registries, ModItems.SLIMY_COOKING_BOOK.get(), 0.05f, false));
+            output.accept(key("zombie_encyclopedia"), createSimpleTable(registries, ModItems.ZOMBIE_ENCYCLOPEDIA.get(), 0.01f, false));
+            output.accept(key("skeleton_encyclopedia"), createSimpleTable(registries, ModItems.SKELETON_ENCYCLOPEDIA.get(), 0.01f, false));
+            output.accept(key("iron_golem_manual"), createSimpleTable(registries, ModItems.IRON_GOLEM_MANUAL.get(), 0.01f, false));
+            output.accept(key("blazing_pyromaniac_guide"), createSimpleTable(registries, ModItems.BLAZING_PYROMANIAC_GUIDE.get(), 0.01f, false));
+            output.accept(key("magma_cooking_book"), createSimpleTable(registries, ModItems.MAGMA_COOKING_BOOK.get(), 0.01f, false));
+            output.accept(key("slimy_cooking_book"), createSimpleTable(registries, ModItems.SLIMY_COOKING_BOOK.get(), 0.01f, false));
         }
     }
 

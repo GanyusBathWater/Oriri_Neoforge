@@ -429,4 +429,9 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
     public int getEnchantmentValue() {
         return 18; // High enchantability for magic weapons
     }
+
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return true;
+    }
 }

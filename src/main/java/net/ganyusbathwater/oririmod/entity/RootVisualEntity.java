@@ -24,6 +24,7 @@ public class RootVisualEntity extends Entity {
     public RootVisualEntity(EntityType<?> type, Level level) {
         super(type, level);
         this.noPhysics = true;
+        this.noCulling = true;
     }
 
     public void setTargetId(int id) {
@@ -77,10 +78,10 @@ public class RootVisualEntity extends Entity {
     public void tick() {
         super.tick();
 
-        int currentAge = this.getAgeTicks();
-        this.entityData.set(AGE_TICKS, currentAge + 1);
-
         if (!this.level().isClientSide) {
+            int currentAge = this.getAgeTicks();
+            this.entityData.set(AGE_TICKS, currentAge + 1);
+
             if (currentAge >= this.getLifespan()) {
                 this.discard();
                 return;
@@ -94,6 +95,18 @@ public class RootVisualEntity extends Entity {
                 } else {
                     // Target died or disappeared, stop tracking
                     this.setTargetId(-1);
+                }
+            }
+        } else {
+            // Client-side: lock position exactly to the target to eliminate visual lag or desyncs
+            int targetId = this.getTargetId();
+            if (targetId >= 0) {
+                Entity target = this.level().getEntity(targetId);
+                if (target != null && target.isAlive()) {
+                    this.setPos(target.getX(), target.getY(), target.getZ());
+                    this.xOld = target.xOld;
+                    this.yOld = target.yOld;
+                    this.zOld = target.zOld;
                 }
             }
         }

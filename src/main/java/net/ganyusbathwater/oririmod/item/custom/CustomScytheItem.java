@@ -51,5 +51,10 @@ public class CustomScytheItem extends SwordItem implements net.ganyusbathwater.o
         // User requested approx 2 blocks extension (1.0 + 2.0 = 3.0)
         return target.getBoundingBox().inflate(3.0D, 0.25D, 3.0D);
     }
+
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return true;
+    }
 }
 

@@ -160,6 +160,19 @@ public class DungeonEventHandler {
 
         // Custom vestige bans
         if (stack.is(ModItems.SPRING.get())) return true;
+        
+        // Custom weapon bans
+        if (stack.is(ModItems.STAFF_OF_VOID.get())) return true;
+        
+        // Entity Placement bans
+        net.minecraft.world.item.Item item = stack.getItem();
+        if (item instanceof net.minecraft.world.item.BoatItem) return true;
+        if (item instanceof net.minecraft.world.item.MinecartItem) return true;
+        if (item instanceof net.minecraft.world.item.ArmorStandItem) return true;
+        if (item instanceof net.minecraft.world.item.HangingEntityItem) return true;
+        if (item instanceof net.minecraft.world.item.EndCrystalItem) return true;
+        if (item instanceof net.minecraft.world.item.SpawnEggItem) return true;
+        if (item instanceof net.minecraft.world.item.MobBucketItem) return true;
 
         // Potion bans — ban any potion that grants Leaping or Slow Falling
         if (stack.getItem() instanceof PotionItem) {
@@ -203,21 +216,9 @@ public class DungeonEventHandler {
                 
                 net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, new net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload(lives));
                 sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.life_lost").withStyle(ChatFormatting.GOLD), false);
-                
-                // Teleport to stage start
-                net.minecraft.core.BlockPos respawnPos = instance.getPlayerSpawnPos();
-                if (instance.getActiveStage() != null && instance.getActiveStage().getDefinition().getPlayerSpawnPos() != null) {
-                    respawnPos = instance.getActiveStage().getDefinition().getPlayerSpawnPos();
-                }
-                if (respawnPos != null) {
-                    sp.teleportTo(respawnPos.getX() + 0.5, respawnPos.getY(), respawnPos.getZ() + 0.5);
-                }
-
-                // Apply Stasis Effects to freeze the player while the Death Screen is open
-                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 255, false, false, false));
-                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.JUMP, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 250, false, false, false));
-                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 255, false, false, false));
-                sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.INVISIBILITY, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 0, false, false, false));
+                // Instead of teleporting immediately and applying stasis effects, we put them in Spectator mode.
+                // This makes them untargetable and prevents armor damage while they look at the death screen.
+                sp.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
                 sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 0, false, false, false));
 
                 // Send the payload to open the Custom Death Screen
@@ -231,6 +232,7 @@ public class DungeonEventHandler {
                     // Everyone fails
                     sp.setHealth(sp.getMaxHealth());
                     sp.removeAllEffects();
+                    sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
                     sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.died").withStyle(ChatFormatting.RED), false);
                     net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
                     instance.removePlayer(sp.getUUID());
@@ -453,10 +455,7 @@ public class DungeonEventHandler {
         if (!isInDungeon(sp)) return;
         
         // Remove the stasis effects
-        sp.removeEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
-        sp.removeEffect(net.minecraft.world.effect.MobEffects.JUMP);
-        sp.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE);
-        sp.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+        // Remove blindness
         sp.removeEffect(net.minecraft.world.effect.MobEffects.BLINDNESS);
         
         DungeonManager manager = DungeonManager.get(sp.serverLevel());
@@ -470,6 +469,7 @@ public class DungeonEventHandler {
             
             if (instance.getAlivePlayers().isEmpty()) {
                 // Everyone fails
+                sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
                 net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
                 instance.removePlayer(sp.getUUID());
                 
@@ -507,7 +507,17 @@ public class DungeonEventHandler {
                 }
             }
         } else if ("RESPAWN".equals(action)) {
-            // Already healed and teleported in onPlayerDeath, just removed effects. We can play a sound.
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+
+            // Teleport to stage start NOW
+            net.minecraft.core.BlockPos respawnPos = instance.getPlayerSpawnPos();
+            if (instance.getActiveStage() != null && instance.getActiveStage().getDefinition().getPlayerSpawnPos() != null) {
+                respawnPos = instance.getActiveStage().getDefinition().getPlayerSpawnPos();
+            }
+            if (respawnPos != null) {
+                sp.teleportTo(respawnPos.getX() + 0.5, respawnPos.getY(), respawnPos.getZ() + 0.5);
+            }
+
             sp.serverLevel().playSound(null, sp.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_BREATH, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
         }
     }

@@ -34,6 +34,7 @@ public class DungeonInstance {
     
     private boolean hasStarted = false;
     private boolean isComplete = false;
+    private boolean isBossDefeated = false;
     private int ticksSinceComplete = 0;
     private boolean debugLogging = false;
 
@@ -109,11 +110,16 @@ public class DungeonInstance {
 
     public int getTicksActive() { return ticksActive; }
     public void tick() { 
-        this.ticksActive++; 
+        if (!this.isComplete && !this.isBossDefeated) {
+            this.ticksActive++; 
+        }
         if (this.isComplete) {
             this.ticksSinceComplete++;
         }
     }
+    
+    public boolean isBossDefeated() { return isBossDefeated; }
+    public void setBossDefeated(boolean bossDefeated) { this.isBossDefeated = bossDefeated; }
     
     public boolean isComplete() { return isComplete; }
     public void setComplete(boolean complete) { this.isComplete = complete; }
@@ -157,6 +163,7 @@ public class DungeonInstance {
         tag.putBoolean("HasStarted", hasStarted);
         tag.putBoolean("IsComplete", isComplete);
         tag.putInt("TicksSinceComplete", ticksSinceComplete);
+        tag.putBoolean("IsBossDefeated", isBossDefeated);
         if (lastActiveObjectiveText != null && !lastActiveObjectiveText.isBlank()) {
             tag.putString("LastObjective", lastActiveObjectiveText);
         }
@@ -215,6 +222,9 @@ public class DungeonInstance {
         }
         if (tag.contains("TicksSinceComplete")) {
             instance.ticksSinceComplete = tag.getInt("TicksSinceComplete");
+        }
+        if (tag.contains("IsBossDefeated")) {
+            instance.isBossDefeated = tag.getBoolean("IsBossDefeated");
         }
         if (tag.contains("StructureBounds")) {
             int[] b = tag.getIntArray("StructureBounds");

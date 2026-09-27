@@ -16,4 +16,9 @@ public class CustomBowItemClass extends BowItem implements ModRarityCarrier {
     public ModRarity getModRarity() {
         return rarity;
     }
+
+    @Override
+    public boolean isEnchantable(net.minecraft.world.item.ItemStack stack) {
+        return true;
+    }
 }

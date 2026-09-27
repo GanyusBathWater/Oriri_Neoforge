@@ -596,6 +596,13 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public static void onExperienceDrop(net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent event) {
+        if (event.getEntity() != null && event.getEntity().getTags().contains("oriri_infinite_spawn")) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
     public static void onEntityDrops(LivingDropsEvent event) {
         LivingEntity entity = event.getEntity();
         ServerLevel level = (ServerLevel) entity.level();
@@ -606,6 +613,11 @@ public class ServerEvents {
             return;
         if (!(entity.level() instanceof ServerLevel))
             return;
+            
+        if (entity.getTags().contains("oriri_infinite_spawn")) {
+            event.setCanceled(true);
+            return;
+        }
             
         // ----- Dog Tag Mechanism -----
         if (entity instanceof net.minecraft.world.entity.animal.Wolf wolf) {

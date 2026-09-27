@@ -125,6 +125,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
     // ── Defensive Thorns State ───────────────────────────────────────────────
     private int defensiveThornsTimer = 0;
     private int defensiveThornsCooldown = 200;
+    private int consecutiveMeleeHits = 0;
+    private int hitDecayTimer = 0;
 
     // ── Hit & Run mechanic ─────────────────────────────────────────────────────
     /**
@@ -272,22 +274,13 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
             }
 
             // ── Defensive Thorns ─────────────────────────────────────────────
+            if (hitDecayTimer > 0) {
+                hitDecayTimer--;
+                if (hitDecayTimer == 0) consecutiveMeleeHits = 0;
+            }
+
             if (defensiveThornsCooldown > 0) {
                 defensiveThornsCooldown--;
-            } else if (defensiveThornsTimer == 0 && this.getTarget() != null && this.distanceToSqr(this.getTarget()) <= 144.0) {
-                // Trigger thorns if a target is somewhat close
-                defensiveThornsTimer = 100; // 5 seconds
-                defensiveThornsCooldown = 400; // 20 seconds
-                // Spawn the Root Visual directly on her as a "cloak"
-                if (this.level() instanceof ServerLevel sl) {
-                    net.ganyusbathwater.oririmod.entity.RootVisualEntity rootVisual = net.ganyusbathwater.oririmod.entity.ModEntities.ROOT_VISUAL.get().create(sl);
-                    if (rootVisual != null) {
-                        rootVisual.moveTo(this.getX(), this.getY(), this.getZ(), 0, 0);
-                        rootVisual.setTargetId(this.getId());
-                        rootVisual.setLifespan(100);
-                        sl.addFreshEntity(rootVisual);
-                    }
-                }
             }
             if (defensiveThornsTimer > 0) {
                 defensiveThornsTimer--;
@@ -328,17 +321,27 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
                         net.minecraft.world.phys.AABB sweepBox = target.getBoundingBox().inflate(2.0, 0.25, 2.0);
                         java.util.List<Player> hitPlayers = this.level().getEntitiesOfClass(Player.class, sweepBox);
                         boolean targetHit = false;
+                        boolean isGodsTrial = false;
+                        if (this.level() instanceof ServerLevel sl) {
+                            isGodsTrial = net.ganyusbathwater.oririmod.world.GodsTrialData.get(sl).isActive();
+                        }
+                        float poisonChance = isGodsTrial ? 0.25f : 0.10f;
+                        
                         for (Player hit : hitPlayers) {
                             if (hit == target) targetHit = true;
                             hit.hurt(this.damageSources().mobAttack(this), 10.0f);
-                            hit.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0, false, true));
+                            if (random.nextFloat() < poisonChance) {
+                                hit.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0, false, true));
+                            }
                             if (this.level() instanceof ServerLevel sl) {
                                 sl.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, hit.getX(), hit.getY() + 1.0, hit.getZ(), 1, 0, 0, 0, 0);
                             }
                         }
                         if (!targetHit) {
                             target.hurt(this.damageSources().mobAttack(this), 10.0f);
-                            target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0, false, true));
+                            if (random.nextFloat() < poisonChance) {
+                                target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0, false, true));
+                            }
                         }
                     }
                 }
@@ -440,6 +443,26 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
         boolean result = super.hurt(source, amount);
 
         if (result && !this.level().isClientSide) {
+            // Track consecutive melee hits for Defensive Thorns
+            if (source.getEntity() instanceof LivingEntity && !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() == source.getEntity()) {
+                consecutiveMeleeHits++;
+                hitDecayTimer = 60; // 3 seconds to keep hitting
+                
+                if (consecutiveMeleeHits >= 4 && defensiveThornsCooldown <= 0 && defensiveThornsTimer <= 0) {
+                    consecutiveMeleeHits = 0;
+                    defensiveThornsTimer = 100;
+                    defensiveThornsCooldown = 400;
+                    if (this.level() instanceof ServerLevel sl) {
+                        net.ganyusbathwater.oririmod.entity.RootVisualEntity rootVisual = net.ganyusbathwater.oririmod.entity.ModEntities.ROOT_VISUAL.get().create(sl);
+                        if (rootVisual != null) {
+                            rootVisual.moveTo(this.getX(), this.getY(), this.getZ(), 0, 0);
+                            rootVisual.setTargetId(this.getId());
+                            rootVisual.setLifespan(100);
+                            sl.addFreshEntity(rootVisual);
+                        }
+                    }
+                }
+            }
             // ── Trigger hurt animation ────────────────────────────────────────
             triggerAnim("hurt_controller", "deviartras_hurt");
 
@@ -537,7 +560,11 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
         drops *= playersCount; // Multiply loot pool by players
         
         for (int i = 0; i < drops; i++) {
-            this.spawnAtLocation(new ItemStack(ModItems.ANCIENT_INGOT.get()));
+            this.spawnAtLocation(new ItemStack(net.ganyusbathwater.oririmod.item.ModItems.ANCIENT_INGOT.get()));
+        }
+        
+        if (net.ganyusbathwater.oririmod.world.GodsTrialData.get(sl).isActive()) {
+            this.spawnAtLocation(new ItemStack(net.ganyusbathwater.oririmod.item.ModItems.IVY_BOTANIC_GUIDE.get()));
         }
     }
 

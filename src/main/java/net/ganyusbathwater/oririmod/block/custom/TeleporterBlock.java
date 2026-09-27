@@ -152,21 +152,33 @@ public class TeleporterBlock extends BaseEntityBlock {
                 TeleporterSavedData data = TeleporterSavedData.get(level);
                 BlockPos dest = data.getDestination(id, pos);
                 if (dest != null) {
+                    BlockState sourceState = level.getBlockState(pos);
+                    // If unloaded, we might not get the correct block state yet, but level.getBlockState on unloaded chunks might load it or return air.
+                    // We can just get it, Minecraft will load the chunk if we ask for the state.
+                    BlockState destState = level.getBlockState(dest);
+                    
+                    float newYRot = player.getYRot();
+                    if (sourceState.hasProperty(ROTATION) && destState.hasProperty(ROTATION)) {
+                        int sourceRot = sourceState.getValue(ROTATION);
+                        int destRot = destState.getValue(ROTATION);
+                        newYRot += (destRot - sourceRot) * 45.0F;
+                    }
+
                     if (level.isLoaded(dest)) {
-                        if (!(level.getBlockState(dest).getBlock() instanceof TeleporterBlock)) {
+                        if (!(destState.getBlock() instanceof TeleporterBlock)) {
                             data.removeTeleporter(id, dest);
                             TELEPORT_COOLDOWN.put(player.getUUID(), level.getGameTime());
                             player.displayClientMessage(Component.translatable("gui.oririmod.teleporter.not_found").withStyle(net.minecraft.ChatFormatting.RED), true);
                         } else {
                             TELEPORT_COOLDOWN.put(player.getUUID(), level.getGameTime());
-                            player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 0.5, dest.getZ() + 0.5, player.getYRot(), player.getXRot());
+                            player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 0.5, dest.getZ() + 0.5, newYRot, player.getXRot());
                             level.playSound(null, dest, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                             level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                         }
                     } else {
                         // Destination unloaded, force teleport to load it
                         TELEPORT_COOLDOWN.put(player.getUUID(), level.getGameTime());
-                        player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 0.5, dest.getZ() + 0.5, player.getYRot(), player.getXRot());
+                        player.teleportTo(level, dest.getX() + 0.5, dest.getY() + 0.5, dest.getZ() + 0.5, newYRot, player.getXRot());
                         level.playSound(null, dest, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                         level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
