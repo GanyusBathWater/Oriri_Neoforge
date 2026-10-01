@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:power_soul"
+    },
+    "left": {
+        "item": "oririmod:mana_crystal_block"
+    },
+    "center": {
+        "item": "oririmod:staff_of_cosmos"
+    },
+    "right": {
+        "item": "oririmod:mana_crystal_block"
+    },
+    "bottom": {
+        "item": "oririmod:moon_stone"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:staff_of_cosmos",
+        "count": 1
+    },
+    "mana_cost": 225,
+    "required_level": 2
+}

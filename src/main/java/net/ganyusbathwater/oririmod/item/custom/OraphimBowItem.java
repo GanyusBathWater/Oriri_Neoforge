@@ -17,5 +17,14 @@ public class OraphimBowItem extends CustomBowItemClass {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
         tooltipComponents.add(Component.translatable("tooltip.oririmod.oraphim_bow.ability").withStyle(ChatFormatting.DARK_PURPLE));
         tooltipComponents.add(Component.translatable("tooltip.oririmod.oraphim_bow.lore").withStyle(ChatFormatting.GRAY));
+
+        net.minecraft.world.item.component.CustomData data = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);
+        int currentLevel = data.copyTag().contains("oriri_level") ? data.copyTag().getInt("oriri_level") : 1;
+        
+        if (currentLevel > 1) {
+            tooltipComponents.add(Component.empty());
+            tooltipComponents.add(Component.translatable("item.oririmod.oraphim_bow.level", currentLevel).withStyle(ChatFormatting.YELLOW));
+            tooltipComponents.add(Component.translatable("item.oririmod.oraphim_bow.level." + currentLevel + ".description").withStyle(ChatFormatting.GOLD));
+        }
     }
 }

@@ -1,0 +1,21 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "oririmod:tortured_soul"
+        },
+        {
+            "item": "oririmod:damned_soul"
+        },
+        {
+            "item": "oririmod:hollow_soul"
+        },
+        {
+            "item": "oririmod:void_soul"
+        }
+    ],
+    "result": {
+        "id": "oririmod:power_soul",
+        "count": 1
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:fluorite_crystal"
+    },
+    "left": {
+        "item": "oririmod:crystal_ingot"
+    },
+    "center": {
+        "item": "oririmod:oraphim_bow"
+    },
+    "right": {
+        "item": "oririmod:crystal_ingot"
+    },
+    "bottom": {
+        "item": "oririmod:power_soul"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:oraphim_bow",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 1
+}

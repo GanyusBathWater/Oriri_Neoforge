@@ -201,7 +201,8 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             if (ground == null)
                 return;
 
-            IcicleStormUtil.unleash((ServerLevel) level, ground.immutable(), living);
+            int upgradeLevel = getUnlockedLevel(stack);
+            IcicleStormUtil.unleash((ServerLevel) level, ground.immutable(), living, upgradeLevel);
             NetworkHandler.sendAoEIndicatorToPlayersAround((ServerLevel) level, ground.immutable(), 12.0f, 100,
                     0x8888DDFF);
 
@@ -224,11 +225,14 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             if (meteor == null)
                 return;
 
-            meteor.configure(ground.immutable(), 7.0f, 7);
+            int upgradeLevel = getUnlockedLevel(stack);
+            float explosionRadius = 15.0f; // Level 1
+            if (upgradeLevel == 2) explosionRadius = 25.0f;
+            else if (upgradeLevel >= 3) explosionRadius = 40.0f;
+
+            meteor.configure(ground.immutable(), explosionRadius, 7);
             meteor.setOwnerId(living.getId());
             meteor.setOwner(living);
-            NetworkHandler.sendAoEIndicatorToPlayersAround((ServerLevel) level, ground.immutable(), 13.0f, 40,
-                    0x88FF6600);
 
             double spawnX = ground.getX() + 0.5;
             double spawnZ = ground.getZ() + 0.5;
@@ -269,21 +273,26 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             return;
         }
 
-        MagicBoltEntity bolt = new MagicBoltEntity(level, living);
-        bolt.setAbility(this.ability);
+        if (this.ability == MagicBoltAbility.BLAZE) {
+            int upgradeLevel = getUnlockedLevel(stack);
+            HellStaffBurstUtil.unleash((ServerLevel) level, living, upgradeLevel);
+        } else {
+            MagicBoltEntity bolt = new MagicBoltEntity(level, living);
+            bolt.setAbility(this.ability);
 
-        float speed = switch (this.ability) {
-            case SONIC -> 5.0F;
-            case BLAZE -> 2.2F;
-            case ENDER -> 1.3F;
-            case NORMAL -> 1.6F;
-            case EXPLOSIVE -> 2.0F;
-            case METEOR -> 1.0F;
-            default -> 1.6F; // Should not be reached for fireballs due to check above
-        };
+            float speed = switch (this.ability) {
+                case SONIC -> 5.0F;
+                case BLAZE -> 2.2F;
+                case ENDER -> 1.3F;
+                case NORMAL -> 1.6F;
+                case EXPLOSIVE -> 2.0F;
+                case METEOR -> 1.0F;
+                default -> 1.6F; // Should not be reached for fireballs due to check above
+            };
 
-        bolt.launchStraight(living, speed);
-        level.addFreshEntity(bolt);
+            bolt.launchStraight(living, speed);
+            level.addFreshEntity(bolt);
+        }
 
         if (living instanceof Player p) {
             p.getCooldowns().addCooldown(this, actualCooldown);
@@ -332,7 +341,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         return pos.getY() + shape.max(net.minecraft.core.Direction.Axis.Y);
     }
 
-    private String getDamageTooltip() {
+    private String getDamageTooltip(ItemStack stack) {
         return switch (this.ability) {
             case SONIC -> "10.0";
             case BLAZE -> "5.0";
@@ -342,7 +351,12 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
             case JOURNEYMAN_FIREBALL -> "10.0 (Splash)";
             case WISE_FIREBALL -> "15.0 (Splash)";
             case EXPLOSIVE -> "3.0 (Radius)";
-            case METEOR -> "4.0 (Power)";
+            case METEOR -> {
+                int level = getUnlockedLevel(stack);
+                if (level == 2) yield "52.8 (Impact)";
+                if (level >= 3) yield "84.3 (Impact)";
+                yield "31.8 (Impact)";
+            }
             case ETERNAL_ICE -> "Area Magic";
             case ENDER -> "0.0";
             default -> "0.0";
@@ -363,7 +377,16 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
         // Damage
         if (this.ability != MagicBoltAbility.ENDER) {
-            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip()).withStyle(net.minecraft.ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(stack)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+
+        // Level info if METEOR (Staff of Cosmos) or ETERNAL_ICE (Staff of Eternal Ice) or BLAZE (Staff of Hell)
+        if (this.ability == MagicBoltAbility.METEOR || this.ability == MagicBoltAbility.ETERNAL_ICE || this.ability == MagicBoltAbility.BLAZE) {
+            int unlockedLevel = getUnlockedLevel(stack);
+            tooltipComponents.add(Component.translatable(descriptionId + ".level", unlockedLevel));
+            if (unlockedLevel > 1) {
+                tooltipComponents.add(Component.translatable(descriptionId + ".level." + unlockedLevel + ".description"));
+            }
         }
 
         // Lore
@@ -383,5 +406,16 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
     @Override
     public boolean isEnchantable(ItemStack stack) {
         return true;
+    }
+
+    public static int getUnlockedLevel(ItemStack stack) {
+        if (stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
+            net.minecraft.nbt.CompoundTag customData = stack
+                    .get(net.minecraft.core.component.DataComponents.CUSTOM_DATA).copyTag();
+            if (customData.contains("oriri_level")) {
+                return customData.getInt("oriri_level");
+            }
+        }
+        return 1;
     }
 }

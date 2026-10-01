@@ -24,6 +24,8 @@ public class MeteorEntity extends Projectile {
             EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> METEOR_GRAVITY = SynchedEntityData.defineId(MeteorEntity.class,
             EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> EXPLOSION_POWER = SynchedEntityData.defineId(MeteorEntity.class,
+            EntityDataSerializers.FLOAT);
 
     private BlockPos impactPos = BlockPos.ZERO;
     private float explosionPower = 4.0f;
@@ -39,6 +41,7 @@ public class MeteorEntity extends Projectile {
     public void configure(BlockPos impactPos, float explosionPower, int fireRadius) {
         this.impactPos = impactPos.immutable();
         this.explosionPower = explosionPower;
+        this.entityData.set(EXPLOSION_POWER, explosionPower);
         this.fireRadius = Math.max(0, fireRadius);
     }
 
@@ -80,6 +83,7 @@ public class MeteorEntity extends Projectile {
         builder.define(OWNER_ID, 0);
         builder.define(METEOR_SCALE, 5.5f);
         builder.define(METEOR_GRAVITY, 0.12f);
+        builder.define(EXPLOSION_POWER, 4.0f);
     }
 
     @Override
@@ -117,6 +121,10 @@ public class MeteorEntity extends Projectile {
     @Override
     public void tick() {
         super.tick();
+        Vec3 vel = getDeltaMovement();
+        vel = new Vec3(vel.x * 0.99, vel.y - this.getMeteorGravity(), vel.z * 0.99);
+        setDeltaMovement(vel);
+
         if (!level().isClientSide) {
             if (this.tickCount > maxLife || !level().hasChunkAt(blockPosition())) {
                 discard();
@@ -124,9 +132,23 @@ public class MeteorEntity extends Projectile {
             }
         }
 
-        Vec3 vel = getDeltaMovement();
-        vel = new Vec3(vel.x * 0.99, vel.y - this.getMeteorGravity(), vel.z * 0.99);
-        setDeltaMovement(vel);
+        // Pre-emptively smash through soft blocks in our full movement path for this tick.
+        // This MUST run on both client and server, otherwise the client will predict a collision,
+        // stop the meteor visually (losing velocity), and cause stuttering.
+        if (!level().dimension().location().getPath().startsWith("dungeon_")) {
+            net.minecraft.world.phys.AABB box = this.getBoundingBox().expandTowards(vel);
+            for (BlockPos pos : BlockPos.betweenClosed(
+                    net.minecraft.util.Mth.floor(box.minX), net.minecraft.util.Mth.floor(box.minY), net.minecraft.util.Mth.floor(box.minZ),
+                    net.minecraft.util.Mth.floor(box.maxX), net.minecraft.util.Mth.floor(box.maxY), net.minecraft.util.Mth.floor(box.maxZ))) {
+                net.minecraft.world.level.block.state.BlockState state = level().getBlockState(pos);
+                if (!state.isAir() && state.getBlock().getExplosionResistance() < 3.0f) {
+                    // Client only spawns particles, server actually breaks it and drops items.
+                    // But setting it to air on the client prevents the move() collision engine from stopping the meteor.
+                    level().destroyBlock(pos, !level().isClientSide, this);
+                }
+            }
+        }
+
         move(MoverType.SELF, vel);
 
         if (level() instanceof ServerLevel server) {
@@ -152,7 +174,14 @@ public class MeteorEntity extends Projectile {
 
     private boolean isBlockSolidBelow() {
         BlockPos below = this.blockPosition().below();
-        return !level().getBlockState(below).isAir();
+        net.minecraft.world.level.block.state.BlockState state = level().getBlockState(below);
+        if (state.isAir()) return false;
+        
+        // If resistance is low (like dirt, leaves, wood), we consider it NOT solid enough to stop the meteor
+        if (state.getBlock().getExplosionResistance() < 3.0f) {
+            return false;
+        }
+        return true;
     }
 
     private void doImpact() {
@@ -166,10 +195,23 @@ public class MeteorEntity extends Projectile {
                 4.0f,
                 0.9f + server.random.nextFloat() * 0.2f);
         server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
-        server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX(), getY(), getZ(), 30, 1.8, 0.3, 1.8, 0.02);
+        
+        // Broadcast a custom entity event to all tracking clients.
+        // This tells the clients to spawn the massive shockwave locally, bypassing server particle distance limits.
+        level().broadcastEntityEvent(this, (byte) 100);
 
-        ExplosionInteraction interaction = this.destroysBlocks ? ExplosionInteraction.TNT : ExplosionInteraction.NONE;
-        server.explode(this, getX(), getY(), getZ(), explosionPower, interaction);
+        if (this.destroysBlocks && !level().dimension().location().getPath().startsWith("dungeon_")) {
+            net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity crater = new net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity(net.ganyusbathwater.oririmod.entity.ModEntities.CRATER_WORKER.get(), level());
+            crater.setPos(getX(), getY(), getZ());
+            int durationTicks = Math.max(10, Math.min(40, (int) explosionPower));
+            crater.setCraterData((int) explosionPower, durationTicks); 
+            level().addFreshEntity(crater);
+        }
+        
+        // We ALWAYS trigger a vanilla blockless explosion to apply entity damage and knockback.
+        // We scale down the power by 0.3x so it's not instantly lethal at huge radii.
+        float damagePower = Math.max(4.0f, explosionPower * 0.3f);
+        server.explode(this, getX(), getY(), getZ(), damagePower, ExplosionInteraction.NONE);
         igniteAround(server, this.blockPosition(), fireRadius);
 
         discard();
@@ -203,5 +245,33 @@ public class MeteorEntity extends Projectile {
             p = p.below();
         }
         return null;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (id == 100) {
+            // Client-side execution of the shockwave
+            double surfaceY = Math.max(getY(), impactPos != null ? impactPos.getY() : getY());
+            
+            float power = this.entityData.get(EXPLOSION_POWER);
+            int particleCount = (int) (10 * power); // Scale count by power
+            float speedScale = power / 15.0f; // Baseline 15 radius = 1x speed
+            
+            for (int i = 0; i < particleCount; i++) {
+                double angle = this.random.nextDouble() * 2 * Math.PI;
+                // Scale spread velocity with explosion power
+                double speed = (1.0 + this.random.nextDouble() * 4.0) * speedScale; 
+                double py = surfaceY + this.random.nextDouble() * (3.0 * speedScale);
+                
+                // Massive, lingering dark smoke core
+                this.level().addParticle(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, getX(), py, getZ(), Math.cos(angle)*speed*0.8, 0.1, Math.sin(angle)*speed*0.8);
+                // Faster, medium grey smoke
+                this.level().addParticle(ParticleTypes.LARGE_SMOKE, getX(), py, getZ(), Math.cos(angle)*speed, 0.2, Math.sin(angle)*speed);
+                // Extremely fast, sharp white dust shooting out in front
+                this.level().addParticle(ParticleTypes.POOF, getX(), py, getZ(), Math.cos(angle)*speed*1.4, 0.3, Math.sin(angle)*speed*1.4);
+            }
+        } else {
+            super.handleEntityEvent(id);
+        }
     }
 }

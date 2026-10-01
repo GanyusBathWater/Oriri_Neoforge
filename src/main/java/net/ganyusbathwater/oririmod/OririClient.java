@@ -358,6 +358,7 @@ public class OririClient {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.CRATER_WORKER.get(), net.ganyusbathwater.oririmod.entity.client.CraterWorkerRenderer::new);
         event.registerEntityRenderer(ModEntities.DUNGEON_KEEPER.get(),
                 net.ganyusbathwater.oririmod.entity.client.DungeonKeeperRenderer::new);
         event.registerEntityRenderer(ModEntities.AIR_SLICE.get(),

@@ -25,6 +25,8 @@ public class IcicleEntity extends Projectile {
             EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> FLOATING_TICKS = SynchedEntityData.defineId(IcicleEntity.class,
             EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> FAST_FALL = SynchedEntityData.defineId(IcicleEntity.class,
+            EntityDataSerializers.BOOLEAN);
 
     private BlockPos impactPos = BlockPos.ZERO;
     private int maxLife = 20 * 10; // 10s failsafe
@@ -57,10 +59,19 @@ public class IcicleEntity extends Projectile {
         return this.entityData.get(FLOATING_TICKS);
     }
 
+    public void setFastFall(boolean fastFall) {
+        this.entityData.set(FAST_FALL, fastFall);
+    }
+
+    public boolean isFastFall() {
+        return this.entityData.get(FAST_FALL);
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(OWNER_ID, 0);
         builder.define(FLOATING_TICKS, 30);
+        builder.define(FAST_FALL, false);
     }
 
     @Override
@@ -73,6 +84,9 @@ public class IcicleEntity extends Projectile {
         if (tag.contains("FloatingTicks")) {
             this.setFloatingTicks(tag.getInt("FloatingTicks"));
         }
+        if (tag.contains("FastFall")) {
+            this.setFastFall(tag.getBoolean("FastFall"));
+        }
     }
 
     @Override
@@ -81,6 +95,7 @@ public class IcicleEntity extends Projectile {
         tag.putInt("MaxLife", this.maxLife);
         tag.putInt("OwnerId", this.getOwnerId());
         tag.putInt("FloatingTicks", this.getFloatingTicks());
+        tag.putBoolean("FastFall", this.isFastFall());
     }
 
     @Override
@@ -104,11 +119,13 @@ public class IcicleEntity extends Projectile {
             setDeltaMovement(vel);
         } else if (this.tickCount == floatTicks) {
             // Start falling with an initial velocity
-            vel = new Vec3(0, -0.2, 0);
+            double initialY = isFastFall() ? -0.3 : -0.2;
+            vel = new Vec3(0, initialY, 0);
             setDeltaMovement(vel);
         } else {
             // Accelerate downward (gravity)
-            vel = new Vec3(vel.x * 0.99, vel.y - 0.03, vel.z * 0.99);
+            double gravity = isFastFall() ? -0.045 : -0.03;
+            vel = new Vec3(vel.x * 0.99, vel.y + gravity, vel.z * 0.99);
             setDeltaMovement(vel);
         }
 

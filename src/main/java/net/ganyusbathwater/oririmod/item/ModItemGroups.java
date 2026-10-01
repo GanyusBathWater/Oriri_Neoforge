@@ -394,7 +394,7 @@ public class ModItemGroups {
                         output.accept(ModItems.MOLTEN_SCYTHE);
                         output.accept(ModItems.THE_HARBINGER);
                         output.accept(ModItems.PANDORAS_BLADE);
-                        output.accept(ModItems.ORAPHIM_BOW);
+                        acceptAllLevels(output, ModItems.ORAPHIM_BOW);
                         output.accept(ModItems.ARCUS_LUCIS);
                         output.accept(ModItems.PIRATE_SABER);
 
@@ -405,7 +405,7 @@ public class ModItemGroups {
                         output.accept(ModItems.STELLA_PERDITOR);
                         output.accept(ModItems.QILINS_WRATH);
                         output.accept(ModItems.SOLS_EMBRACE);
-                        output.accept(ModItems.ARBITER_CROSSBOW);
+                        acceptAllLevels(output, ModItems.ARBITER_CROSSBOW);
                         output.accept(ModItems.ELEMENTAL_CHOIR);
 
                         output.accept(ModItems.TNT_ARROW);
@@ -419,9 +419,9 @@ public class ModItemGroups {
                         output.accept(ModItems.STAFF_OF_EARTH);
                         output.accept(ModItems.STAFF_OF_FOREST);
                         output.accept(ModItems.ONE_THOUSAND_SCREAMS);
-                        output.accept(ModItems.STAFF_OF_HELL);
-                        output.accept(ModItems.STAFF_OF_COSMOS);
-                        output.accept(ModItems.STAFF_OF_ETERNAL_ICE);
+                        acceptAllLevels(output, ModItems.STAFF_OF_HELL);
+                        acceptAllLevels(output, ModItems.STAFF_OF_COSMOS);
+                        acceptAllLevels(output, ModItems.STAFF_OF_ETERNAL_ICE);
                         output.accept(ModItems.AOE_TEST_ITEM);
                         output.accept(ModItems.STAFF_OF_VOID);
                         output.accept(ModItems.DODOCO);

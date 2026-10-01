@@ -40,6 +40,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
             EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> LOCKED_PITCH = SynchedEntityData.defineId(MagicBoltEntity.class,
             EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> EXPLODES_ON_HIT = SynchedEntityData.defineId(MagicBoltEntity.class,
+            EntityDataSerializers.BOOLEAN);
 
     public MagicBoltEntity(EntityType<? extends MagicBoltEntity> type, Level level) {
         super(type, level);
@@ -86,6 +88,11 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         builder.define(SPEED, 0.0F);
         builder.define(LOCKED_YAW, 0.0F);
         builder.define(LOCKED_PITCH, 0.0F);
+        builder.define(EXPLODES_ON_HIT, false);
+    }
+
+    public void setExplodesOnHit(boolean explodes) {
+        this.entityData.set(EXPLODES_ON_HIT, explodes);
     }
 
     public void setAbility(MagicBoltAbility ability) {
@@ -193,6 +200,14 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
                 level().playSound(null, loc.x, loc.y, loc.z,
                         SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.8F, 1.0F);
                 level().explode(this, loc.x, loc.y, loc.z, 3.0F, false, Level.ExplosionInteraction.MOB);
+            }
+            case BLAZE -> {
+                if (this.entityData.get(EXPLODES_ON_HIT)) {
+                    level().playSound(null, loc.x, loc.y, loc.z,
+                            SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.8F, 1.0F);
+                    // Ghast fireball explosion radius is 1.0 according to vanilla, but let's use 2.0 to be impactful but smaller than EXPLOSIVE (3.0)
+                    level().explode(this, loc.x, loc.y, loc.z, 2.0F, false, Level.ExplosionInteraction.MOB);
+                }
             }
             case ENDER -> {
                 LivingEntity owner = getOwner() instanceof LivingEntity le ? le : null;
@@ -356,6 +371,7 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         tag.putInt("Ability", getAbility().ordinal());
         tag.putFloat("StoredSpeed", entityData.get(SPEED));
         tag.putInt("LifeTime", lifeTime);
+        tag.putBoolean("ExplodesOnHit", entityData.get(EXPLODES_ON_HIT));
     }
 
     @Override
@@ -369,6 +385,9 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         }
         if (tag.contains("Ability")) {
             setAbility(MagicBoltAbility.fromId(tag.getInt("Ability")));
+        }
+        if (tag.contains("ExplodesOnHit")) {
+            entityData.set(EXPLODES_ON_HIT, tag.getBoolean("ExplodesOnHit"));
         }
     }
 

@@ -25,6 +25,15 @@ public final class ModEntities {
                                                         .updateInterval(1)
                                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "giant_sword").toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity>> CRATER_WORKER = ENTITIES
+                        .register("crater_worker",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity>of(net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity::new, MobCategory.MISC)
+                                                        .sized(1.0F, 1.0F)
+                                                        .clientTrackingRange(128) // Long range so the client can render the overlay
+                                                        .updateInterval(20) // Doesn't need rapid movement updates
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crater_worker").toString()));
+
 
         public static final DeferredHolder<EntityType<?>, EntityType<MagicBoltEntity>> MAGIC_BOLT = ENTITIES.register(
                         "magic_bolt",

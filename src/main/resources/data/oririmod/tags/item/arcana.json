@@ -1,0 +1,27 @@
+{
+  "replace": false,
+  "values": [
+    "oririmod:the_fool",
+    "oririmod:the_magician",
+    "oririmod:the_high_priestess",
+    "oririmod:the_empress",
+    "oririmod:the_emperor",
+    "oririmod:the_hierophant",
+    "oririmod:the_lovers",
+    "oririmod:the_chariot",
+    "oririmod:strength",
+    "oririmod:the_hermit",
+    "oririmod:wheel_of_fortune",
+    "oririmod:justice",
+    "oririmod:the_hanged_man",
+    "oririmod:death",
+    "oririmod:temperance",
+    "oririmod:the_devil",
+    "oririmod:the_tower",
+    "oririmod:the_star",
+    "oririmod:the_moon",
+    "oririmod:the_sun",
+    "oririmod:judgement",
+    "oririmod:the_world"
+  ]
+}

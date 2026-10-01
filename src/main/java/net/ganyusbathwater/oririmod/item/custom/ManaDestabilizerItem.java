@@ -11,4 +11,10 @@ public class ManaDestabilizerItem extends Item {
     public ManaDestabilizerItem(Properties properties) {
         super(properties);
     }
+
+    @Override
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_destabilizer").withStyle(ChatFormatting.GRAY));
+    }
 }

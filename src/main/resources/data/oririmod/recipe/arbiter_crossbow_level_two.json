@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "minecraft:netherite_ingot"
+    },
+    "left": {
+        "item": "minecraft:diamond"
+    },
+    "center": {
+        "item": "oririmod:arbiter_crossbow"
+    },
+    "right": {
+        "item": "minecraft:emerald"
+    },
+    "bottom": {
+        "item": "oririmod:power_soul"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:arbiter_crossbow",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 1
+}

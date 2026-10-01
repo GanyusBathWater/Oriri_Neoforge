@@ -329,6 +329,26 @@ public class ServerEvents {
     public static void onProjectileImpact(ProjectileImpactEvent event) {
         Projectile projectile = event.getProjectile();
 
+        // Arbiter Crossbow: Bypass invulnerability frames so all 3 or 5 arrows deal damage
+        if (projectile instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+            net.minecraft.world.item.ItemStack weapon = null;
+            try {
+                weapon = arrow.getWeaponItem();
+            } catch (Throwable t) {
+            }
+            if (weapon == null && arrow.getOwner() instanceof LivingEntity le) {
+                weapon = le.getMainHandItem();
+            }
+            if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARBITER_CROSSBOW.get())) {
+                if (event.getRayTraceResult() instanceof EntityHitResult entityHit) {
+                    Entity hitEntity = entityHit.getEntity();
+                    if (hitEntity != null) {
+                        hitEntity.invulnerableTime = 0;
+                    }
+                }
+            }
+        }
+
         // Oraphim Bow Whirlwind Ability (Only for fully charged shots)
         if (!projectile.level().isClientSide() && projectile instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
             net.minecraft.world.item.ItemStack weapon = null;
@@ -341,11 +361,21 @@ public class ServerEvents {
                 net.minecraft.world.level.Level level = arrow.level();
                 net.minecraft.world.phys.Vec3 epicenter = arrow.position();
 
+                int weaponLevel = 1;
+                if (weapon.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
+                    net.minecraft.nbt.CompoundTag tag = weapon.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA).copyTag();
+                    if (tag.contains("oriri_level")) weaponLevel = tag.getInt("oriri_level");
+                }
+
+                double effectRadius = weaponLevel >= 2 ? 7.5 : 5.0;
+                double maxPullForce = weaponLevel >= 3 ? 9.0 : 6.0;
+
                 // Spawn visually stunning server-sided math-based vortex particles
                 if (level instanceof ServerLevel serverLevel) {
-                    for (int i = 0; i < 40; i++) {
+                    int particleCount = weaponLevel >= 2 ? 60 : 40;
+                    for (int i = 0; i < particleCount; i++) {
                         double theta = serverLevel.random.nextDouble() * 2 * Math.PI;
-                        double radius = serverLevel.random.nextDouble() * 5.0; // 5 block radius visual
+                        double radius = serverLevel.random.nextDouble() * effectRadius; // visual radius
                         double pX = epicenter.x + radius * Math.cos(theta);
                         double pY = epicenter.y + serverLevel.random.nextDouble() * 2.0;
                         double pZ = epicenter.z + radius * Math.sin(theta);
@@ -364,16 +394,16 @@ public class ServerEvents {
                 }
 
                 // Entity Suction
-                java.util.List<Entity> entities = level.getEntities(arrow, arrow.getBoundingBox().inflate(5.0));
+                java.util.List<Entity> entities = level.getEntities(arrow, arrow.getBoundingBox().inflate(effectRadius));
                 for (Entity entity : entities) {
                     if (entity instanceof LivingEntity living && entity != arrow.getOwner()) {
                         double distSq = epicenter.distanceToSqr(living.position());
-                        if (distSq <= 25.0) { // 5 blocks radius squared
+                        if (distSq <= (effectRadius * effectRadius)) {
                             double dist = Math.sqrt(distSq);
-                            double pullStrength = 1.0 - (dist / 5.0);
+                            double pullStrength = 1.0 - (dist / effectRadius);
                             pullStrength = Math.pow(pullStrength, 1.5);
                             double kbResist = living.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
-                            double actualPull = pullStrength * 6 * (1.0 - kbResist);
+                            double actualPull = pullStrength * maxPullForce * (1.0 - kbResist);
 
                             if (actualPull > 0) {
                                 net.minecraft.world.phys.Vec3 dir = epicenter.subtract(living.position()).normalize();
@@ -500,7 +530,11 @@ public class ServerEvents {
                 // Homing Logic
                 net.minecraft.world.phys.AABB scanBox = arrow.getBoundingBox().inflate(15.0D);
                 java.util.List<LivingEntity> entities = arrow.level().getEntitiesOfClass(LivingEntity.class, scanBox, 
-                        e -> e != arrow.getOwner() && e.isAlive() && !(e instanceof net.minecraft.world.entity.animal.Animal));
+                        e -> {
+                            if (e == arrow.getOwner() || !e.isAlive() || e instanceof net.minecraft.world.entity.animal.Animal) return false;
+                            if (e instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator())) return false;
+                            return true;
+                        });
                 
                 LivingEntity bestTarget = null;
                 double bestScore = Double.MAX_VALUE;

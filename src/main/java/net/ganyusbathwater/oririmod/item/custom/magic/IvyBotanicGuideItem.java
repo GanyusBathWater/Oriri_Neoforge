@@ -44,7 +44,7 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
 
     @Override
     public ModRarity getModRarity() {
-        return ModRarity.UNCOMMON;
+        return ModRarity.LEGENDARY;
     }
 
     public static int getUnlockedLevel(ItemStack stack) {

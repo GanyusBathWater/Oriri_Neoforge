@@ -233,7 +233,7 @@ public class BlizzaMagicAttackGoal extends Goal {
         switch (attack) {
             case BlizzaEntity.ATTACK_ICICLE -> {
                 // Icicle Rain on the target
-                IcicleStormUtil.unleash(serverLevel, target.blockPosition(), blizza);
+                IcicleStormUtil.unleash(serverLevel, target.blockPosition(), blizza, 3);
             }
             case BlizzaEntity.ATTACK_STORM -> {
                 // Issue #6: spawn Eye of the Storm at Blizza's position (not the player's)

@@ -179,6 +179,9 @@ public class CosmeticPlayerRenderEventHandler {
                     armBone.setRotX(0);
                     armBone.setRotY(0);
                     armBone.setRotZ(0);
+                    armBone.setPosX(0);
+                    armBone.setPosY(0);
+                    armBone.setPosZ(0);
 
                     com.mojang.blaze3d.vertex.PoseStack poseStack = event.getPoseStack();
                     poseStack.pushPose();
@@ -233,6 +236,9 @@ public class CosmeticPlayerRenderEventHandler {
                     armBone.setRotX(0);
                     armBone.setRotY(0);
                     armBone.setRotZ(0);
+                    armBone.setPosX(0);
+                    armBone.setPosY(0);
+                    armBone.setPosZ(0);
 
                     com.mojang.blaze3d.vertex.PoseStack poseStack = event.getPoseStack();
                     poseStack.pushPose();

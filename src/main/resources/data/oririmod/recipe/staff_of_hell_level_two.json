@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:tortured_soul"
+    },
+    "left": {
+        "item": "minecraft:fire_charge"
+    },
+    "center": {
+        "item": "oririmod:staff_of_hell"
+    },
+    "right": {
+        "item": "minecraft:fire_charge"
+    },
+    "bottom": {
+        "item": "oririmod:fire_crystal"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:staff_of_hell",
+        "count": 1
+    },
+    "mana_cost": 150,
+    "required_level": 1
+}
