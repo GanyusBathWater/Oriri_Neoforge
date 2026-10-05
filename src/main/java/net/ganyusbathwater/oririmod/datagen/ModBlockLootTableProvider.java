@@ -285,6 +285,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
         dropSelf(ModBlocks.AETHER_MAGMA_BLOCK.get());
         dropSelf(ModBlocks.BLOOD_CAP_BLOCK.get());
+        dropSelf(ModBlocks.EMISSIVE_CLOCKER.get());
+        dropSelf(ModBlocks.SOUL_HARVESTER.get());
         dropSelf(ModBlocks.GLOWLINGS_BLOCK.get());
         this.add(ModBlocks.MOONSHROOM_BLOCK.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable()
                 .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()

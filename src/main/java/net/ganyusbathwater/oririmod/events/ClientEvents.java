@@ -48,6 +48,12 @@ public class ClientEvents {
     private static final ResourceLocation DEVIARTRAS_PROGRESS = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "textures/gui/deviartras_progress.png");
 
+    // ── Patientia boss bar textures ──────────────────────────────────────
+    private static final ResourceLocation PATIENTIA_BAR = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/patientia_boss_bar.png");
+    private static final ResourceLocation PATIENTIA_PROGRESS = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "textures/gui/patientia_progress.png");
+
     // Boss bar dimensions (blizza_boss_bar.png is 200x20)
     private static final int BAR_W  = 200;
     private static final int BAR_H  = 20;
@@ -60,6 +66,8 @@ public class ClientEvents {
     public static long blizzaTitleEndTime = 0;
     /** Stores the end time (ms) for the Deviartras title. */
     public static long deviartrasTitleEndTime = 0;
+    /** Stores the end time (ms) for the Patientia title. */
+    public static long patientiaTitleEndTime = 0;
     private static final long TITLE_TOTAL_MS = 4000;
     private static final long TITLE_FADE_MS  = 500;
     
@@ -80,6 +88,11 @@ public class ClientEvents {
     /** Called on the client thread by the DeviartrasSpawnTitlePayload handler. */
     public static void triggerDeviartrasTitle() {
         deviartrasTitleEndTime = System.currentTimeMillis() + TITLE_TOTAL_MS;
+    }
+
+    /** Called on the client thread by the PatientiaSpawnTitlePayload handler. */
+    public static void triggerPatientiaTitle() {
+        patientiaTitleEndTime = System.currentTimeMillis() + TITLE_TOTAL_MS;
     }
 
     @SubscribeEvent
@@ -165,6 +178,7 @@ public class ClientEvents {
         int nextY = 8;
         nextY = renderBlizzaBossBar(gui, mc, player, nextY);
         nextY = renderDeviartrasBossBar(gui, mc, player, nextY);
+        nextY = renderPatientiaBossBar(gui, mc, player, nextY);
 
         // ── Dungeon Lives Overlay ─────────────────────────────────────────
         if (player.level().dimension().location().getPath().startsWith("dungeon_") && clientDungeonLives >= 0 && !player.isSpectator()) {
@@ -197,6 +211,9 @@ public class ClientEvents {
 
         // ── Deviartras spawn title overlay ────────────────────────────
         renderDeviartrasTitle(gui, mc);
+
+        // ── Patientia spawn title overlay ─────────────────────────────
+        renderPatientiaTitle(gui, mc);
     }
 
     // ── Boss bar renderer ─────────────────────────────────────────────────
@@ -284,6 +301,48 @@ public class ClientEvents {
         return startY + BAR_H + mc.font.lineHeight + 6;
     }
 
+    private static int renderPatientiaBossBar(GuiGraphics gui, Minecraft mc, Player player, int startY) {
+        net.ganyusbathwater.oririmod.entity.custom.PatientiaEntity patientia = null;
+        double closestDist = 200.0 * 200.0;
+        net.minecraft.world.phys.AABB searchBox = player.getBoundingBox().inflate(200.0);
+        for (net.ganyusbathwater.oririmod.entity.custom.PatientiaEntity b : player.level().getEntitiesOfClass(net.ganyusbathwater.oririmod.entity.custom.PatientiaEntity.class, searchBox, e -> e.isAlive())) {
+            double d = player.distanceToSqr(b);
+            if (d < closestDist) {
+                closestDist = d;
+                patientia = b;
+            }
+        }
+        if (patientia == null) return startY;
+
+        float healthFraction = Math.max(0f, Math.min(1f, patientia.getHealthFraction()));
+        int screenW = mc.getWindow().getGuiScaledWidth();
+        int barX = (screenW - BAR_W) / 2;
+        int barY = startY; 
+        int progOffX = (BAR_W - PROG_W) / 2;
+        int progOffY = ((BAR_H - PROG_H) / 2) + 1; // shifted 1 pixel down as requested
+        int filledW = (int) (PROG_W * healthFraction);
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        // Layer 1: background
+        gui.blit(PATIENTIA_BAR, barX, barY, 0, 0, BAR_W, BAR_H, BAR_W, BAR_H);
+        // Layer 2: health fill (clipped)
+        if (filledW > 0) {
+            gui.blit(PATIENTIA_PROGRESS, barX + progOffX, barY + progOffY, 0, 0, filledW, PROG_H, PROG_W, PROG_H);
+        }
+        // Layer 3: frame on top
+        gui.blit(PATIENTIA_BAR, barX, barY, 0, 0, BAR_W, BAR_H, BAR_W, BAR_H);
+
+        RenderSystem.disableBlend();
+
+        String bossName = patientia.getDisplayName().getString();
+        int nameW = mc.font.width(bossName);
+        gui.drawString(mc.font, Component.literal(bossName), (screenW - nameW) / 2, barY + BAR_H + 2, 0xFFFFFF, true);
+        
+        return startY + BAR_H + mc.font.lineHeight + 6;
+    }
+
     // ── Spawn title renderer ──────────────────────────────────────────────
     private static void renderBlizzaTitle(GuiGraphics gui, Minecraft mc) {
         long now = System.currentTimeMillis();
@@ -360,6 +419,47 @@ public class ClientEvents {
 
         // Subtitle in gold
         gui.drawString(mc.font, line2, (screenW - line2W) / 2, centerY + 16, 0xFFD700 | alphaInt, true);
+
+        RenderSystem.disableBlend();
+    }
+
+    // ── Patientia spawn title renderer ────────────────────────────────
+    private static void renderPatientiaTitle(GuiGraphics gui, Minecraft mc) {
+        long now = System.currentTimeMillis();
+        if (now > patientiaTitleEndTime) return;
+
+        long remaining = patientiaTitleEndTime - now;
+        float alpha;
+        if (remaining > TITLE_TOTAL_MS - TITLE_FADE_MS) {
+            alpha = 1f - ((remaining - (TITLE_TOTAL_MS - TITLE_FADE_MS)) / (float) TITLE_FADE_MS);
+        } else if (remaining < TITLE_FADE_MS) {
+            alpha = remaining / (float) TITLE_FADE_MS;
+        } else {
+            alpha = 1f;
+        }
+
+        int screenW  = mc.getWindow().getGuiScaledWidth();
+        int screenH  = mc.getWindow().getGuiScaledHeight();
+        int alphaInt = (int) (alpha * 255) << 24;
+
+        String line1 = "Commandment of Patience";
+        String line2 = "Patientia the Sage of Light";
+        int line1W   = mc.font.width(line1) * 2;
+        int line2W   = mc.font.width(line2);
+        int centerY  = screenH / 3;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        // Large title line in gold
+        gui.pose().pushPose();
+        gui.pose().translate((screenW - line1W) / 2f, centerY - 10f, 0f);
+        gui.pose().scale(2f, 2f, 1f);
+        gui.drawString(mc.font, line1, 0, 0, 0xFFD700 | alphaInt, true);
+        gui.pose().popPose();
+
+        // Subtitle in white
+        gui.drawString(mc.font, line2, (screenW - line2W) / 2, centerY + 16, 0xFFFFFF | alphaInt, true);
 
         RenderSystem.disableBlend();
     }

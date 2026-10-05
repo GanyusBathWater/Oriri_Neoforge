@@ -71,6 +71,20 @@ public class ModItemGroups {
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
                         output.accept(ModBlocks.TELEPORTER_BLOCK);
+                        
+                        // New items and blocks
+                        output.accept(ModBlocks.EMISSIVE_CLOCKER);
+                        output.accept(ModBlocks.SOUL_HARVESTER);
+                        output.accept(ModItems.SOUL_SHARD);
+                        output.accept(ModItems.SOUL_COLLECTOR);
+                        acceptAllLevels(output, ModItems.SOUL_HARVESTER_SPEED_UPGRADE);
+                        output.accept(ModItems.SOUL_HARVESTER_XP_UPGRADE);
+                        output.accept(ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE);
+                        output.accept(ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE);
+                        // Looting is 1-5, so we will manually add them or create an acceptLevels helper up to 5 later
+                        // For now we add a basic version
+                        output.accept(ModItems.SOUL_HARVESTER_LOOTING_UPGRADE);
+
                         output.accept(ModBlocks.ELDER_LOG_BLOCK);
                         output.accept(ModBlocks.CRACKED_ELDER_LOG_BLOCK);
                         output.accept(ModBlocks.STRIPPED_ELDER_LOG_BLOCK);
@@ -452,6 +466,7 @@ public class ModItemGroups {
                         output.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
                         output.accept(ModItems.MERMAID_SPAWN_EGG);
                         output.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
+                        output.accept(ModItems.PATIENTIA_SPAWN_EGG);
                         output.accept(ModItems.LOADED_BLAZE_SPAWN_EGG);
                         output.accept(ModItems.REX_ARANEA_SPAWN_EGG);
                         output.accept(ModItems.FAIRY_SPAWN_EGG);

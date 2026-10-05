@@ -112,6 +112,22 @@ public class ModItems {
         public static final DeferredItem<Item> MAGIC_UPGRADE_TEMPLATE = ITEMS.register("magic_upgrade_template",
                         () -> new Item(new Item.Properties()));
 
+        // ---------------------------------------Soul Harvester---------------------------------------------------------
+        public static final DeferredItem<Item> SOUL_SHARD = ITEMS.register("soul_shard",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.SoulShardItem(new Item.Properties().stacksTo(64)));
+        public static final DeferredItem<Item> SOUL_COLLECTOR = ITEMS.register("soul_collector",
+                        () -> new Item(new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> SOUL_HARVESTER_SPEED_UPGRADE = ITEMS.register("soul_harvester_speed_upgrade",
+                        () -> new Item(new Item.Properties().stacksTo(64)));
+        public static final DeferredItem<Item> SOUL_HARVESTER_LOOTING_UPGRADE = ITEMS.register("soul_harvester_looting_upgrade",
+                        () -> new Item(new Item.Properties().stacksTo(64)));
+        public static final DeferredItem<Item> SOUL_HARVESTER_XP_UPGRADE = ITEMS.register("soul_harvester_xp_upgrade",
+                        () -> new Item(new Item.Properties().stacksTo(64)));
+        public static final DeferredItem<Item> SOUL_HARVESTER_FIRE_ASPECT_UPGRADE = ITEMS.register("soul_harvester_fire_aspect_upgrade",
+                        () -> new Item(new Item.Properties().stacksTo(64)));
+        public static final DeferredItem<Item> SOUL_HARVESTER_PLAYER_KILL_UPGRADE = ITEMS.register("soul_harvester_player_kill_upgrade",
+                        () -> new Item(new Item.Properties().stacksTo(64)));
+
         // ---------------------------------------Vestiges---------------------------------------------------------
 
         public static final DeferredItem<VestigeItem> BOUND_OF_THE_CELESTIAL_SISTERS = ITEMS.register(
@@ -510,6 +526,12 @@ public class ModItems {
                         "deviartras_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.DEVIARTRAS,
                                         0x2C5F2E, 0xA8D5A2, // outer: deep forest green, inner: pale nature green
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> PATIENTIA_SPAWN_EGG = ITEMS.register(
+                        "patientia_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.PATIENTIA,
+                                        0xFFB6C1, 0x8A2BE2, // outer: light pink, inner: purple
                                         new Item.Properties()));
 
         public static final DeferredItem<DeferredSpawnEggItem> MERMAID_SPAWN_EGG = ITEMS.register(

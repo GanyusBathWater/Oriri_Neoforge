@@ -396,7 +396,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_STONE_STAIRS.get())
                                 .add(ModBlocks.AETHER_MAGMA_BLOCK.get())
                                 .add(ModBlocks.TELEPORTER_BLOCK.get())
-                                .add(ModBlocks.REVIVAL_SHRINE.get());
+                                .add(ModBlocks.REVIVAL_SHRINE.get())
+                                .add(ModBlocks.SOUL_HARVESTER.get())
+                                .add(ModBlocks.EMISSIVE_CLOCKER.get());
 
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
                                 .add(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())
@@ -460,7 +462,8 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.REPELLENT_FORCEFIELD_EMITTER.get())
                                 .add(ModBlocks.ATTRACTING_FORCEFIELD_EMITTER.get())
                                 .add(ModBlocks.PROTECTION_FORCEFIELD_EMITTER.get())
-                                .add(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get());
+                                .add(ModBlocks.MODIFIER_FORCEFIELD_EMITTER.get())
+                                .add(ModBlocks.SOUL_HARVESTER.get());
 
                 tag(BlockTags.CLIMBABLE)
                                 .add(ModBlocks.SCARLET_VINE.get());

@@ -43,6 +43,17 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.JADE.get());
                 basicItem(ModItems.RAW_DRAGON_IRON.get());
                 basicItem(ModItems.DRAGON_IRON_INGOT.get());
+                
+                // Soul Harvester Items
+                withExistingParent(ModItems.SOUL_SHARD.getId().getPath(), mcLoc("item/generated"))
+                        .texture("layer0", modLoc("item/soul_shard_base"))
+                        .texture("layer1", modLoc("item/soul_shard_overlay"));
+                basicItem(ModItems.SOUL_COLLECTOR.get());
+                basicItem(ModItems.SOUL_HARVESTER_SPEED_UPGRADE.get());
+                basicItem(ModItems.SOUL_HARVESTER_LOOTING_UPGRADE.get());
+                basicItem(ModItems.SOUL_HARVESTER_XP_UPGRADE.get());
+                basicItem(ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE.get());
+                basicItem(ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE.get());
 
                 // -------------Blocks------------
 

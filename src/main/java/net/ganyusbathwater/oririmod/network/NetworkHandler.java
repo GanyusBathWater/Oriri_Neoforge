@@ -34,6 +34,8 @@ public final class NetworkHandler {
             "blizza_spawn_title");
     public static final ResourceLocation DEVIARTRAS_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "deviartras_spawn_title");
+    public static final ResourceLocation PATIENTIA_SPAWN_TITLE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "patientia_spawn_title");
     public static final ResourceLocation HOMEWARD_CONFIRM_REQUEST = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "homeward_confirm_request");
     public static final ResourceLocation HOMEWARD_CONFIRM = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
@@ -115,6 +117,13 @@ public final class NetworkHandler {
                 net.ganyusbathwater.oririmod.network.packet.DeviartrasSpawnTitlePayload.STREAM_CODEC,
                 (payload, ctx) -> ctx.enqueueWork(() -> {
                     net.ganyusbathwater.oririmod.events.ClientEvents.triggerDeviartrasTitle();
+                }));
+
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.PatientiaSpawnTitlePayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.PatientiaSpawnTitlePayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.events.ClientEvents.triggerPatientiaTitle();
                 }));
 
         // Homeward: server → client open confirm screen
@@ -235,6 +244,31 @@ public final class NetworkHandler {
                         net.minecraft.client.Minecraft.getInstance()
                                 .setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonMarkerScreen(payload))
                 ));
+
+        // Clocker GUI: server -> client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenClockerScreenPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenClockerScreenPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() ->
+                        net.minecraft.client.Minecraft.getInstance()
+                                .setScreen(new net.ganyusbathwater.oririmod.client.screen.EmissiveClockerScreen(payload))
+                ));
+
+        // Clocker GUI: client -> server
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.SyncClockerDataPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncClockerDataPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var player = ctx.player();
+                    if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        net.minecraft.world.level.block.entity.BlockEntity be = sp.level().getBlockEntity(payload.pos());
+                        if (be instanceof net.ganyusbathwater.oririmod.block.entity.EmissiveClockerBlockEntity clocker) {
+                            clocker.setConfig(net.ganyusbathwater.oririmod.block.entity.EmissiveClockerBlockEntity.Mode.values()[payload.mode()], 
+                                payload.delay(), payload.timeOn(), payload.timeOff(), payload.useSeconds());
+                            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§aClocker configuration saved!"), true);
+                        }
+                    }
+                }));
 
         // Marker GUI: client -> server
         registrar.playToServer(
@@ -418,6 +452,11 @@ public final class NetworkHandler {
     public static void sendDeviartrasTitle(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player,
                 new net.ganyusbathwater.oririmod.network.packet.DeviartrasSpawnTitlePayload());
+    }
+
+    public static void sendPatientiaTitle(ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.PatientiaSpawnTitlePayload());
     }
 
     public static void sendHomewardConfirmRequest(ServerPlayer player) {

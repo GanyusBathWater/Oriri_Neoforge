@@ -42,6 +42,26 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
                 blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);
 
+                simpleBlockWithItem(ModBlocks.SOUL_HARVESTER.get(), models().cubeBottomTop("soul_harvester",
+                        modLoc("block/soul_harvester_side_inactive"),
+                        modLoc("block/soul_harvester_bottom"),
+                        modLoc("block/soul_harvester_top")));
+
+                getVariantBuilder(ModBlocks.EMISSIVE_CLOCKER.get()).forAllStates(state -> {
+                        boolean powered = state.getValue(net.ganyusbathwater.oririmod.block.custom.EmissiveClockerBlock.LIT);
+                        String texture = powered ? "block/emissive_clocker_on" : "block/emissive_clocker_off";
+                        net.neoforged.neoforge.client.model.generators.ConfiguredModel.Builder<?> builder = ConfiguredModel.builder().modelFile(
+                                models().getBuilder(powered ? "emissive_clocker_on" : "emissive_clocker_off")
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(mcLoc("block/template_repeater")))
+                                        .texture("top", modLoc(texture))
+                                        .texture("unlit", modLoc("block/emissive_clocker_off"))
+                        );
+
+                        Direction dir = state.getValue(net.ganyusbathwater.oririmod.block.custom.EmissiveClockerBlock.FACING);
+                        return builder.rotationY(((int) dir.toYRot() + 180) % 360).build();
+                });
+                simpleBlockItem(ModBlocks.EMISSIVE_CLOCKER.get(), new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(modLoc("block/emissive_clocker_off")));
+
 
 
                 blockWithItem(ModBlocks.MANA_CRYSTAL_BLOCK, 1);

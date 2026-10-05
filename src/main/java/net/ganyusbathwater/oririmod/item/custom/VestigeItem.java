@@ -50,6 +50,33 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
     }
 
     @Override
+    public boolean canEquip(SlotContext slotContext, ItemStack stack) {
+        if (!(slotContext.entity() instanceof Player player)) {
+            return true;
+        }
+
+        Item itemToEquip = stack.getItem();
+        var curioInventoryOpt = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player);
+        if (curioInventoryOpt.isPresent()) {
+            var inv = curioInventoryOpt.get();
+            for (var entry : inv.getCurios().entrySet()) {
+                String identifier = entry.getKey();
+                var handler = entry.getValue();
+                for (int i = 0; i < handler.getSlots(); i++) {
+                    ItemStack curioStack = handler.getStacks().getStackInSlot(i);
+                    if (!curioStack.isEmpty() && curioStack.getItem() == itemToEquip) {
+                        if (identifier.equals(slotContext.identifier()) && i == slotContext.index()) {
+                            continue;
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
     public void curioTick(SlotContext ctx, ItemStack stack) {
         if (ctx == null)
             return;

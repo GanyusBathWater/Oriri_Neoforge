@@ -1,0 +1,47 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.unknown",
+				"texture_width": 256,
+				"texture_height": 256,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 6,
+				"visible_bounds_offset": [0, 2, 0]
+			},
+			"bones": [
+				{
+					"name": "giant_sword",
+					"pivot": [0, 0, 0],
+					"rotation": [180, 0, 0]
+				},
+				{
+					"name": "blade",
+					"parent": "giant_sword",
+					"pivot": [0, -42, 0],
+					"cubes": [
+						{"origin": [-0.5, -53, -8], "size": [1, 53, 3], "uv": [72, 53]},
+						{"origin": [-1, -53, -5], "size": [2, 53, 10], "uv": [0, 32]},
+						{"origin": [-0.5, -53, 5], "size": [1, 53, 3], "uv": [24, 74]},
+						{"origin": [-0.5, -57, -6], "size": [1, 2, 12], "uv": [68, 17]},
+						{"origin": [-0.5, -59, -4], "size": [1, 2, 8], "uv": [80, 90]},
+						{"origin": [0, -62, -4], "size": [0, 3, 8], "inflate": 0.001, "uv": [96, 55]},
+						{"origin": [0, -64, -2], "size": [0, 2, 4], "inflate": 0.001, "uv": [86, 100]},
+						{"origin": [0, -60, 4], "size": [0, 3, 2], "inflate": 0.001, "uv": [76, 43]},
+						{"origin": [0, -57, 6], "size": [0, 2, 1], "inflate": 0.001, "uv": [70, 74]},
+						{"origin": [0, -55, 7], "size": [0, 2, 1], "inflate": 0.001, "uv": [70, 77]},
+						{"origin": [0, -55, -8], "size": [0, 2, 1], "inflate": 0.001, "uv": [70, 80]},
+						{"origin": [0, -54, -9], "size": [0, 2, 1], "inflate": 0.001, "uv": [70, 86]},
+						{"origin": [0, -54, 8], "size": [0, 2, 1], "inflate": 0.001, "uv": [22, 95]},
+						{"origin": [0, -52, 8], "size": [0, 52, 2], "inflate": 0.001, "uv": [32, 74]},
+						{"origin": [0, -52, -10], "size": [0, 52, 2], "inflate": 0.001, "uv": [36, 74]},
+						{"origin": [0, -57, -7], "size": [0, 2, 1], "inflate": 0.001, "uv": [70, 83]},
+						{"origin": [0, -60, -6], "size": [0, 3, 2], "inflate": 0.001, "uv": [76, 48]},
+						{"origin": [-0.5, -55, -7], "size": [1, 2, 14], "uv": [40, 74]}
+					]
+				}
+			]
+		}
+	]
+}

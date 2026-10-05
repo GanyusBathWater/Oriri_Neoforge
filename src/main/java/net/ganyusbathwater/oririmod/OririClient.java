@@ -368,6 +368,8 @@ public class OririClient {
                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
         event.registerEntityRenderer(ModEntities.DEVIARTRAS.get(),
                 net.ganyusbathwater.oririmod.entity.client.DeviartrasRenderer::new);
+        event.registerEntityRenderer(ModEntities.PATIENTIA.get(),
+                net.ganyusbathwater.oririmod.client.render.entity.PatientiaRenderer::new);
         event.registerEntityRenderer(ModEntities.SPORE_BLOSSOM.get(),
                 net.ganyusbathwater.oririmod.entity.client.SporeBlossomRenderer::new);
         event.registerBlockEntityRenderer(net.ganyusbathwater.oririmod.block.entity.ModBlockEntities.REVIVAL_SHRINE.get(),

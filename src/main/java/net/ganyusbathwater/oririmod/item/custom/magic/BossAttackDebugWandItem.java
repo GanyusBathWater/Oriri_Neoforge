@@ -23,7 +23,8 @@ public class BossAttackDebugWandItem extends Item {
     public enum BossAttackType {
         SWORD_PROJECTILE, SWORD_CIRCLE, METEOR_SHOWER, LASERBEAM_NORMAL, LASERBEAM_CYLINDER, LASERBEAM_CIRCLE,
         LASERBEAM_GROUND, LASERBEAM_STARBURST, INSTA_DEATH, ROOT_ATTACK, GROUND_SLAM,
-        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM, LASERBEAM_GRID, HEAVENLY_EXECUTION;
+        WAVE_CIRCULAR, WAVE_CONE, WAVE_PLAIN, ILLAGER_SPECIAL, EYE_OF_THE_STORM, LASERBEAM_GRID, HEAVENLY_EXECUTION,
+        GIANT_SWORD_SLICE_GRID, GIANT_SWORD_SLICE_CIRCLE;
     }
 
     private static final String NBT_SELECTED = "ActiveAttack";
@@ -234,6 +235,90 @@ public class BossAttackDebugWandItem extends Item {
                 sword.embeddedTicks = 80; // 4 seconds
                 
                 serverLevel.addFreshEntity(sword);
+            } else if (current == BossAttackType.GIANT_SWORD_SLICE_GRID && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                BlockPos centerPos = targetPos != null ? targetPos : player.blockPosition();
+                double radius = 20.0;
+                double gap = 4.0; // 3 block gap + 1 block sword width = 4 block step
+                double yLevel = centerPos.getY();
+                
+                int gridInterval = 60;
+                if (net.ganyusbathwater.oririmod.world.GodsTrialData.get(serverLevel).isActive()) {
+                    gridInterval = 20;
+                } else if (serverLevel.getDifficulty() == net.minecraft.world.Difficulty.HARD) {
+                    gridInterval = 40;
+                }
+                
+                // 4 Rows. North, East, South, West.
+                // Row 1: South to North. (Z is +20, moving to -Z). initialDelay = 0.
+                for (double x = -radius; x <= radius; x += gap) {
+                    net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity sword = new net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity(net.ganyusbathwater.oririmod.entity.ModEntities.GIANT_SWORD_SLICE.get(), serverLevel);
+                    sword.setPos(centerPos.getX() + x + 0.5, yLevel, centerPos.getZ() + radius + 0.5);
+                    sword.ownerId = player.getUUID();
+                    sword.initialDelay = 0;
+                    sword.setDirection(new net.minecraft.world.phys.Vec3(0, 0, -1));
+                    serverLevel.addFreshEntity(sword);
+                }
+                
+                // Row 2: West to East. (X is -20, moving to +X).
+                for (double z = -radius; z <= radius; z += gap) {
+                    net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity sword = new net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity(net.ganyusbathwater.oririmod.entity.ModEntities.GIANT_SWORD_SLICE.get(), serverLevel);
+                    sword.setPos(centerPos.getX() - radius + 0.5, yLevel, centerPos.getZ() + z + 0.5);
+                    sword.ownerId = player.getUUID();
+                    sword.initialDelay = gridInterval;
+                    sword.setDirection(new net.minecraft.world.phys.Vec3(1, 0, 0));
+                    serverLevel.addFreshEntity(sword);
+                }
+                
+                // Row 3: North to South. (Z is -20, moving to +Z).
+                for (double x = -radius; x <= radius; x += gap) {
+                    net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity sword = new net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity(net.ganyusbathwater.oririmod.entity.ModEntities.GIANT_SWORD_SLICE.get(), serverLevel);
+                    sword.setPos(centerPos.getX() + x + 0.5, yLevel, centerPos.getZ() - radius + 0.5);
+                    sword.ownerId = player.getUUID();
+                    sword.initialDelay = gridInterval * 2;
+                    sword.setDirection(new net.minecraft.world.phys.Vec3(0, 0, 1));
+                    serverLevel.addFreshEntity(sword);
+                }
+                
+                // Row 4: East to West. (X is +20, moving to -X).
+                for (double z = -radius; z <= radius; z += gap) {
+                    net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity sword = new net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity(net.ganyusbathwater.oririmod.entity.ModEntities.GIANT_SWORD_SLICE.get(), serverLevel);
+                    sword.setPos(centerPos.getX() + radius + 0.5, yLevel, centerPos.getZ() + z + 0.5);
+                    sword.ownerId = player.getUUID();
+                    sword.initialDelay = gridInterval * 3;
+                    sword.setDirection(new net.minecraft.world.phys.Vec3(-1, 0, 0));
+                    serverLevel.addFreshEntity(sword);
+                }
+            } else if (current == BossAttackType.GIANT_SWORD_SLICE_CIRCLE && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                BlockPos centerPos = targetPos != null ? targetPos : player.blockPosition();
+                double radius = 20.0;
+                double yLevel = centerPos.getY();
+                
+                // 30 Swords, rate depends on difficulty.
+                int swordsPerWave = 2;
+                if (net.ganyusbathwater.oririmod.world.GodsTrialData.get(serverLevel).isActive()) {
+                    swordsPerWave = 4;
+                } else if (serverLevel.getDifficulty() == net.minecraft.world.Difficulty.HARD) {
+                    swordsPerWave = 3;
+                }
+                
+                for (int i = 0; i < 15; i++) {
+                    int delay = i * 20; // 0, 20, 40...
+                    
+                    for (int j = 0; j < swordsPerWave; j++) {
+                        double angle = level.random.nextDouble() * 2 * Math.PI;
+                        double spawnX = centerPos.getX() + 0.5 + Math.cos(angle) * radius;
+                        double spawnZ = centerPos.getZ() + 0.5 + Math.sin(angle) * radius;
+                        
+                        net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity sword = new net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity(net.ganyusbathwater.oririmod.entity.ModEntities.GIANT_SWORD_SLICE.get(), serverLevel);
+                        sword.setPos(spawnX, yLevel, spawnZ);
+                        sword.ownerId = player.getUUID();
+                        sword.initialDelay = delay;
+                        
+                        net.minecraft.world.phys.Vec3 dir = new net.minecraft.world.phys.Vec3(centerPos.getX() + 0.5 - spawnX, 0, centerPos.getZ() + 0.5 - spawnZ);
+                        sword.setDirection(dir);
+                        serverLevel.addFreshEntity(sword);
+                    }
+                }
             }
         }
 
@@ -337,6 +422,8 @@ public class BossAttackDebugWandItem extends Item {
             case EYE_OF_THE_STORM -> "Eye of the Storm";
             case LASERBEAM_GRID -> "Laserbeam Grid";
             case HEAVENLY_EXECUTION -> "Heavenly Execution";
+            case GIANT_SWORD_SLICE_GRID -> "Giant Sword Slice: Grid";
+            case GIANT_SWORD_SLICE_CIRCLE -> "Giant Sword Slice: Circle";
         };
     }
 }

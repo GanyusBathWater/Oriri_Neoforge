@@ -517,6 +517,16 @@ public class ModBlocks {
                         () -> new EquinoxTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE)
                                         .strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
 
+        // ===== REDSTONE BLOCKS =====
+        public static final DeferredBlock<Block> EMISSIVE_CLOCKER = registerBlock("emissive_clocker",
+                        () -> new EmissiveClockerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.REPEATER)
+                                        .strength(0.5f).requiresCorrectToolForDrops()));
+
+        // ===== FUNCTIONAL BLOCKS =====
+        public static final DeferredBlock<Block> SOUL_HARVESTER = registerBlock("soul_harvester",
+                        () -> new SoulHarvesterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                                        .strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
+
         // ===== NEW BLOCKS: Hardened Manashroom & Abyss Crown =====
         public static final DeferredBlock<Block> HARDENED_MANASHROOM = registerBlock("hardened_manashroom",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)));

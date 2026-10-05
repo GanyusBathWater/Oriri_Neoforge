@@ -16,6 +16,15 @@ public final class ModEntities {
         public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE,
                         OririMod.MOD_ID);
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.PatientiaEntity>> PATIENTIA = ENTITIES
+                        .register("patientia",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.PatientiaEntity>of(net.ganyusbathwater.oririmod.entity.custom.PatientiaEntity::new, MobCategory.MONSTER)
+                                                        .sized(0.6f, 1.8f) // Adjusted to a standard player/boss size, she hovers slightly
+                                                        .clientTrackingRange(128)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "patientia").toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.GiantSwordEntity>> GIANT_SWORD = ENTITIES
                         .register("giant_sword",
                                         () -> EntityType.Builder
@@ -24,6 +33,15 @@ public final class ModEntities {
                                                         .clientTrackingRange(128)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "giant_sword").toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity>> GIANT_SWORD_SLICE = ENTITIES
+                        .register("giant_sword_slice",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity>of(net.ganyusbathwater.oririmod.entity.custom.GiantSwordSliceEntity::new, MobCategory.MISC)
+                                                        .sized(1.0F, 1.0F)
+                                                        .clientTrackingRange(128)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "giant_sword_slice").toString()));
 
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity>> CRATER_WORKER = ENTITIES
                         .register("crater_worker",

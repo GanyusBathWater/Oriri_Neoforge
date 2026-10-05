@@ -30,7 +30,7 @@ public class DungeonDimensionManager {
      * until the template has been previously loaded/cached.
      */
     public static Optional<StructureTemplate> loadTemplateFromClasspath(ServerLevel level, ResourceLocation id) {
-        String path = "/data/" + id.getNamespace() + "/structures/" + id.getPath() + ".nbt";
+        String path = "/data/" + id.getNamespace() + "/structure/" + id.getPath() + ".nbt";
         try (InputStream stream = DungeonDimensionManager.class.getResourceAsStream(path)) {
             if (stream == null) {
                 return Optional.empty();

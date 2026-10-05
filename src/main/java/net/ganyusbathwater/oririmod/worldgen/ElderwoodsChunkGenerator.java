@@ -99,6 +99,20 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     // Expose seed and noise offsets for mathematical carver calculations
     public static long lastSeed = 0;
     public static double currentSeedOffsetCave = 0;
+    public static double currentHumOffsetX = 0;
+    public static double currentHumOffsetZ = 0;
+    public static double currentTempOffsetX = 0;
+    public static double currentTempOffsetZ = 0;
+
+    public static double getScarletHumidityNoise(int x, int z) {
+        return net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                (float)((x + currentHumOffsetX) * 0.002), 0f, (float)((z + currentHumOffsetZ) * 0.002), 3);
+    }
+    
+    public static double getDesertTemperatureNoise(int x, int z) {
+        return net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                (float)((x + currentTempOffsetX) * 0.002), 0f, (float)((z + currentTempOffsetZ) * 0.002), 3);
+    }
 
     private final BiomeSource biomeSourceReference;
 
@@ -122,6 +136,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 this.seedOffsetZ = elderwoodsBiomeSource.getSeedOffsetZ();
                 this.seedOffsetCave = elderwoodsBiomeSource.getSeedOffsetCave();
                 this.currentSeedOffsetCave = this.seedOffsetCave;
+                this.currentHumOffsetX = elderwoodsBiomeSource.getHumOffsetX();
+                this.currentHumOffsetZ = elderwoodsBiomeSource.getHumOffsetZ();
+                this.currentTempOffsetX = elderwoodsBiomeSource.getTempOffsetX();
+                this.currentTempOffsetZ = elderwoodsBiomeSource.getTempOffsetZ();
             } else {
                 RandomSource random = RandomSource.create(seed);
                 seedOffsetX = random.nextDouble() * 10000.0;
@@ -474,7 +492,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 if (chunk instanceof net.minecraft.world.level.chunk.ProtoChunk protoChunk) {
                     carvingMask = protoChunk.getOrCreateCarvingMask(step);
                 }
-                net.minecraft.world.level.levelgen.Aquifer aquifer = null;
+                
+                net.minecraft.world.level.levelgen.Aquifer.FluidStatus defaultFluid = new net.minecraft.world.level.levelgen.Aquifer.FluidStatus(BASE_HEIGHT, net.minecraft.world.level.block.Blocks.WATER.defaultBlockState());
+                net.minecraft.world.level.levelgen.Aquifer aquifer = net.minecraft.world.level.levelgen.Aquifer.createDisabled((ax, ay, az) -> defaultFluid);
 
                 // 1. Vanilla Carvers (Properly loaded per origin chunk to allow biome crossing)
                 int vanillaRange = 8;
@@ -501,7 +521,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                         carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, originPos, carvingMask);
                                     }
                                 } catch (Exception ex) {
-                                    // Ignore
+                                    OririMod.LOGGER.error("Error running vanilla carver", ex);
                                 }
                             }
                         }
@@ -1017,54 +1037,49 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     boolean hasScarletBlocks = SCARLET_STONE != null && SCARLET_DEEPSLATE != null;
                     BlockState heightmapState = null;
 
-                    for (int y = surfaceY; y >= MIN_Y; y--) {
+                    // Cache the biome for the column surface
+                    Holder<Biome> surfaceBiome;
+                    if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
+                        surfaceBiome = ebs.getSurfaceBiome(worldX, worldZ);
+                    } else {
+                        surfaceBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, surfaceY / 4, worldZ / 4, random.sampler());
+                    }
+                    boolean isScarletCurrent = isScarletBiome(surfaceBiome);
+                    boolean isDesertCurrent = isGoldenDesertBiome(surfaceBiome);
+                    BlockState grassState = isScarletCurrent ? SCARLET_GRASS : ELDERWOODS_GRASS;
+
+                    for (int y = surfaceY; y >= surfaceY - 5; y--) {
                         mutablePos.set(worldX, y, worldZ);
-                        BlockState current = chunk.getBlockState(mutablePos);
-
-                        // Check biome at THIS exact block coordinate to decide painting rules for pixel-perfect borders!
-                        Holder<Biome> currentBiome;
-                        if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
-                            currentBiome = ebs.getBlockBiome(worldX, y, worldZ);
-                        } else {
-                            currentBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, y / 4, worldZ / 4, random.sampler());
-                        }
-                        boolean isScarletCurrent = isScarletBiome(currentBiome);
-                        boolean isDesertCurrent = isGoldenDesertBiome(currentBiome);
-
-                        BlockState grassState = isScarletCurrent ? SCARLET_GRASS : ELDERWOODS_GRASS;
 
                         // A. Top Surface Painting
-                        if (y >= surfaceY - 5) {
-                            if (isDesertCurrent) {
-                                // Golden Desert: Sol Sand on top, Sol Sandstone beneath
-                                if (y == surfaceY) {
-                                    chunk.setBlockState(mutablePos,
-                                            ModBlocks.SOL_SAND.get().defaultBlockState(), false);
-                                    heightmapState = ModBlocks.SOL_SAND.get().defaultBlockState();
-                                } else if (y >= surfaceY - 4) {
-                                    chunk.setBlockState(mutablePos,
-                                            ModBlocks.SOL_SANDSTONE.get().defaultBlockState(), false);
-                                }
-                                continue;
-                            }
+                        if (isDesertCurrent) {
+                            // Golden Desert: Sol Sand on top, Sol Sandstone beneath
                             if (y == surfaceY) {
-                                if (y < BASE_HEIGHT - 1 && currentBiome.is(SCARLET_SWAMP_KEY)) {
-                                    double mudNoise = Math.sin(worldX * 0.1) * Math.cos(worldZ * 0.1) + 0.5 * Math.sin(worldX * 0.03 + 2.0) * Math.cos(worldZ * 0.04 - 1.0);
-                                    if (mudNoise > 0.3 || y < BASE_HEIGHT - 2) {
-                                        chunk.setBlockState(mutablePos, Blocks.DIRT.defaultBlockState(), false);
-                                        heightmapState = Blocks.DIRT.defaultBlockState();
-                                    } else {
-                                        chunk.setBlockState(mutablePos, grassState, false);
-                                        heightmapState = grassState;
-                                    }
+                                chunk.setBlockState(mutablePos,
+                                        ModBlocks.SOL_SAND.get().defaultBlockState(), false);
+                                heightmapState = ModBlocks.SOL_SAND.get().defaultBlockState();
+                            } else if (y >= surfaceY - 4) {
+                                chunk.setBlockState(mutablePos,
+                                        ModBlocks.SOL_SANDSTONE.get().defaultBlockState(), false);
+                            }
+                            continue;
+                        }
+                        if (y == surfaceY) {
+                            if (y < BASE_HEIGHT - 1 && surfaceBiome.is(SCARLET_SWAMP_KEY)) {
+                                double mudNoise = Math.sin(worldX * 0.1) * Math.cos(worldZ * 0.1) + 0.5 * Math.sin(worldX * 0.03 + 2.0) * Math.cos(worldZ * 0.04 - 1.0);
+                                if (mudNoise > 0.3 || y < BASE_HEIGHT - 2) {
+                                    chunk.setBlockState(mutablePos, Blocks.DIRT.defaultBlockState(), false);
+                                    heightmapState = Blocks.DIRT.defaultBlockState();
                                 } else {
                                     chunk.setBlockState(mutablePos, grassState, false);
                                     heightmapState = grassState;
                                 }
-                            } else if (y >= surfaceY - 3) {
-                                chunk.setBlockState(mutablePos, DIRT, false);
+                            } else {
+                                chunk.setBlockState(mutablePos, grassState, false);
+                                heightmapState = grassState;
                             }
-                            continue;
+                        } else if (y >= surfaceY - 3) {
+                            chunk.setBlockState(mutablePos, DIRT, false);
                         }
                     }
 
@@ -1116,6 +1131,23 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     int limitY = MIN_Y; // Lowest point the ceiling can be pulled down to
 
                     int maxY = Math.max(surfaceY, BASE_HEIGHT - 1);
+                    
+                    // Cache column biome properties
+                    boolean isScarletColumn = false;
+                    boolean isScarletSwampColumn = false;
+                    boolean isDesertColumn = false;
+                    if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
+                        Holder<Biome> surfaceBiome = ebs.getSurfaceBiome(worldX, worldZ);
+                        isScarletColumn = isScarletBiome(surfaceBiome);
+                        isScarletSwampColumn = surfaceBiome.is(SCARLET_SWAMP_KEY);
+                        isDesertColumn = isGoldenDesertBiome(surfaceBiome);
+                    } else {
+                        Holder<Biome> surfaceBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, surfaceY / 4, worldZ / 4, random.sampler());
+                        isScarletColumn = isScarletBiome(surfaceBiome);
+                        isScarletSwampColumn = surfaceBiome.is(SCARLET_SWAMP_KEY);
+                        isDesertColumn = isGoldenDesertBiome(surfaceBiome);
+                    }
+
                     for (int y = MIN_Y; y <= maxY; y++) {
                         pos.set(worldX, y, worldZ);
 
@@ -1125,10 +1157,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         }
 
                         if (y > surfaceY) {
-                            Holder<Biome> currentBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, y / 4, worldZ / 4, random.sampler());
-                            
                             // Swamp Basin Blood Water Fill
-                            if (currentBiome.is(SCARLET_SWAMP_KEY)) {
+                            if (isScarletSwampColumn) {
                                 if (y <= BASE_HEIGHT - 2) {
                                     chunk.setBlockState(pos, BLOOD_WATER, false);
                                     continue;
@@ -1201,19 +1231,22 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 }
                             }
                             
-                            // Get underground biome to decide stone type using 1-block precise biome!
-                            Holder<Biome> currentBiome;
-                            if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
-                                currentBiome = ebs.getBlockBiome(worldX, y, worldZ);
-                            } else {
-                                currentBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, y / 4, worldZ / 4, random.sampler());
-                            }
-                            boolean isScarletCurrent = isScarletBiome(currentBiome);
-
                             BlockState stoneState = STONE;
                             BlockState deepslateState = DEEPSLATE;
 
-                            if (isScarletCurrent && SCARLET_STONE != null && SCARLET_DEEPSLATE != null) {
+                            boolean placeScarlet = isScarletColumn;
+                            if (!isDesertColumn) {
+                                double humNoise = getScarletHumidityNoise(worldX, worldZ);
+                                // Dither the border between humNoise 0.15 and 0.25 to remove straight lines!
+                                if (humNoise > 0.15 && humNoise < 0.25) {
+                                    double dither = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                        (float)worldX * 0.1f, (float)y * 0.1f, (float)worldZ * 0.1f, 2
+                                    ) * 0.05;
+                                    placeScarlet = (humNoise + dither) > 0.2;
+                                }
+                            }
+
+                            if (placeScarlet && SCARLET_STONE != null && SCARLET_DEEPSLATE != null) {
                                 stoneState = SCARLET_STONE;
                                 deepslateState = SCARLET_DEEPSLATE;
                             }

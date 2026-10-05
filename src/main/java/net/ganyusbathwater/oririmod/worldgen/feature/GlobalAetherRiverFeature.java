@@ -43,8 +43,18 @@ public class GlobalAetherRiverFeature extends Feature<NoneFeatureConfiguration> 
             for (int z = 0; z < 16; z++) {
                 int worldX = startX + x;
                 int worldZ = startZ + z;
-
                 double riverIntensity = ElderwoodsChunkGenerator.getRiverIntensity(worldX, worldZ);
+
+                // Smoothly fade out the Aether River before it touches Scarlet Caves
+                // Scarlet Caves begin at humNoise > 0.2 and tempNoise <= 0.15
+                double humNoise = ElderwoodsChunkGenerator.getScarletHumidityNoise(worldX, worldZ);
+                double tempNoise = ElderwoodsChunkGenerator.getDesertTemperatureNoise(worldX, worldZ);
+                
+                if (tempNoise <= 0.15 && humNoise > 0.10) {
+                    // Starts fading at 0.10, completely vanishes at 0.18 (before 0.2)
+                    double fade = 1.0 - Math.max(0.0, Math.min(1.0, (humNoise - 0.10) / 0.08));
+                    riverIntensity *= fade;
+                }
 
                 if (riverIntensity > 0.0) {
                     double caveFloorSmooth = ElderwoodsChunkGenerator.getCaveFloorHeightDouble(worldX, worldZ, -115);

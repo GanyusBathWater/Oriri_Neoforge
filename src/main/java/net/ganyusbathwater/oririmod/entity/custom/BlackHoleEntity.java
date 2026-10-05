@@ -226,7 +226,7 @@ public class BlackHoleEntity extends Entity implements GeoEntity {    // --- COM
             }
             
             // Block Destruction
-            if (this.getDestroysBlocks() && currentRadius > 0.5f && age % 3 == 0) {
+            if (this.getDestroysBlocks() && currentRadius > 0.5f && age % 3 == 0 && !this.level().dimension().location().getPath().startsWith("dungeon_")) {
                 int r = Mth.ceil(currentRadius);
                 BlockPos center = this.blockPosition();
                 for (int x = -r; x <= r; x++) {

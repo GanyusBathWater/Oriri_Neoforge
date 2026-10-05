@@ -251,6 +251,13 @@ public class ServerEvents {
                 }
             }
         }
+        
+        // Global Boss Swarm Punish Damage Multiplier
+        if (event.getSource().getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss) {
+            if (event.getEntity().getPersistentData().getBoolean("OririSummoned")) {
+                event.setNewDamage(event.getOriginalDamage() * 3.0f);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -517,6 +524,25 @@ public class ServerEvents {
                     }
                     arrow.getPersistentData().putBoolean("ArcusLucisHoming", true);
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onBossJoinLevel(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.Mob mob && event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss) {
+            if (!mob.level().isClientSide) {
+                // Global Swarm Punish AoE (Runs concurrently without interrupting standard movement)
+                mob.goalSelector.addGoal(2, new net.ganyusbathwater.oririmod.entity.ai.BossSwarmPunishGoal(mob));
+                
+                // Multitasking: Target summons/random monsters (Priority 3, lower than players)
+                mob.targetSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(mob, LivingEntity.class, 0, true, false, 
+                    (target) -> {
+                        return target instanceof Monster 
+                            && !target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                            && !target.getPersistentData().getBoolean("IsNoxusMob");
+                    }
+                ));
             }
         }
     }

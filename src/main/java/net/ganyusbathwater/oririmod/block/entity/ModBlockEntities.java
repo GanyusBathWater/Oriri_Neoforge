@@ -67,6 +67,16 @@ public class ModBlockEntities {
             () -> BlockEntityType.Builder.of(MoonshroomBlockEntity::new,
                     ModBlocks.MOONSHROOM_BLOCK.get()).build(null));
 
+    public static final Supplier<BlockEntityType<EmissiveClockerBlockEntity>> EMISSIVE_CLOCKER_BE = BLOCK_ENTITIES.register(
+            "emissive_clocker",
+            () -> BlockEntityType.Builder.of(EmissiveClockerBlockEntity::new,
+                    ModBlocks.EMISSIVE_CLOCKER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<SoulHarvesterBlockEntity>> SOUL_HARVESTER_BE = BLOCK_ENTITIES.register(
+            "soul_harvester",
+            () -> BlockEntityType.Builder.of(SoulHarvesterBlockEntity::new,
+                    ModBlocks.SOUL_HARVESTER.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }
