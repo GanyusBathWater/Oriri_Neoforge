@@ -525,7 +525,7 @@ public class ModBlocks {
         // ===== FUNCTIONAL BLOCKS =====
         public static final DeferredBlock<Block> SOUL_HARVESTER = registerBlock("soul_harvester",
                         () -> new SoulHarvesterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
-                                        .strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
+                                        .strength(5.0f, 6.0f).requiresCorrectToolForDrops().noOcclusion()));
 
         // ===== NEW BLOCKS: Hardened Manashroom & Abyss Crown =====
         public static final DeferredBlock<Block> HARDENED_MANASHROOM = registerBlock("hardened_manashroom",

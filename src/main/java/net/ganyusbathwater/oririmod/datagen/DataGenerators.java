@@ -35,8 +35,12 @@ public class DataGenerators {
                                         new LootTableProvider.SubProviderEntry(ModInjectionLootTables.Blocks::new, LootContextParamSets.BLOCK)
                                 ),
                                 lookupProvider));
+                CompletableFuture<HolderLookup.Provider> datapackProvider = generator
+                                .addProvider(event.includeServer(), new ModDatapackProvider(packOutput, lookupProvider))
+                                .getRegistryProvider();
+
                 generator.addProvider(event.includeServer(), new ModGlobalLootModifiersProvider(packOutput, lookupProvider));
-                generator.addProvider(event.includeServer(), new ModRecipeProvider(packOutput, lookupProvider));
+                generator.addProvider(event.includeServer(), new ModRecipeProvider(packOutput, datapackProvider));
 
                 BlockTagsProvider blockTagsProvider = new ModBlockTagProvider(packOutput, lookupProvider,
                                 existingFileHelper);
@@ -45,10 +49,6 @@ public class DataGenerators {
                                 blockTagsProvider.contentsGetter(), existingFileHelper));
                 generator.addProvider(event.includeServer(), new ModFluidTagsProvider(packOutput, lookupProvider, existingFileHelper));
                 generator.addProvider(event.includeServer(), new ModEntityTypeTagsProvider(packOutput, lookupProvider, existingFileHelper));
-
-                CompletableFuture<HolderLookup.Provider> datapackProvider = generator
-                                .addProvider(event.includeServer(), new ModDatapackProvider(packOutput, lookupProvider))
-                                .getRegistryProvider();
 
                 generator.addProvider(event.includeServer(),
                                 new ModDamageTypeTagsProvider(packOutput, datapackProvider, existingFileHelper));

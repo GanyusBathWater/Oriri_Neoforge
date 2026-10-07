@@ -118,15 +118,15 @@ public class ModItems {
         public static final DeferredItem<Item> SOUL_COLLECTOR = ITEMS.register("soul_collector",
                         () -> new Item(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> SOUL_HARVESTER_SPEED_UPGRADE = ITEMS.register("soul_harvester_speed_upgrade",
-                        () -> new Item(new Item.Properties().stacksTo(64)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.UpgradeItem(new Item.Properties().stacksTo(64), "speed", "tooltip.oririmod.soul_harvester_speed_upgrade"));
         public static final DeferredItem<Item> SOUL_HARVESTER_LOOTING_UPGRADE = ITEMS.register("soul_harvester_looting_upgrade",
-                        () -> new Item(new Item.Properties().stacksTo(64)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.UpgradeItem(new Item.Properties().stacksTo(64), "looting", "tooltip.oririmod.soul_harvester_looting_upgrade"));
         public static final DeferredItem<Item> SOUL_HARVESTER_XP_UPGRADE = ITEMS.register("soul_harvester_xp_upgrade",
-                        () -> new Item(new Item.Properties().stacksTo(64)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.UpgradeItem(new Item.Properties().stacksTo(64), "xp", "tooltip.oririmod.soul_harvester_xp_upgrade"));
         public static final DeferredItem<Item> SOUL_HARVESTER_FIRE_ASPECT_UPGRADE = ITEMS.register("soul_harvester_fire_aspect_upgrade",
-                        () -> new Item(new Item.Properties().stacksTo(64)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.UpgradeItem(new Item.Properties().stacksTo(64), "fire_aspect", "tooltip.oririmod.soul_harvester_fire_aspect_upgrade"));
         public static final DeferredItem<Item> SOUL_HARVESTER_PLAYER_KILL_UPGRADE = ITEMS.register("soul_harvester_player_kill_upgrade",
-                        () -> new Item(new Item.Properties().stacksTo(64)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.UpgradeItem(new Item.Properties().stacksTo(64), "player_kill", "tooltip.oririmod.soul_harvester_player_kill_upgrade"));
 
         // ---------------------------------------Vestiges---------------------------------------------------------
 

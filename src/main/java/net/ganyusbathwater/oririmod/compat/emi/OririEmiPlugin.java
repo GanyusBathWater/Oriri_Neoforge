@@ -27,5 +27,7 @@ public class OririEmiPlugin implements EmiPlugin {
         for (RecipeHolder<EquinoxTableRecipe> recipe : registry.getRecipeManager().getAllRecipesFor(ModRecipeTypes.EQUINOX_TABLE.get())) {
             registry.addRecipe(new EquinoxTableEmiRecipe(recipe.id(), recipe.value()));
         }
+
+        // No workaround needed for speed upgrades anymore since it uses Sugar
     }
 }

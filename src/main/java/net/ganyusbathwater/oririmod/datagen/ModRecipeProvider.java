@@ -24,8 +24,11 @@ import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.RecipeOutput;
 
 public class ModRecipeProvider extends RecipeProvider implements IConditionBuilder {
+        private final CompletableFuture<HolderLookup.Provider> lookupProvider;
+
         public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
                 super(output, registries);
+                this.lookupProvider = registries;
         }
 
         @Override
@@ -552,6 +555,160 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 makeStaff(recipeOutput, Ingredient.of(ModItems.IRON_STICK.get()), Ingredient.of(ModItems.MOON_STONE.get()), ModItems.STAFF_OF_COSMOS.get());
                 makeStaff(recipeOutput, Ingredient.of(Items.STICK), Ingredient.of(ModItems.FIRE_CRYSTAL.get()), ModItems.STAFF_OF_HELL.get());
                 
+                // Harvester
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.SOUL_HARVESTER.get())
+                        .pattern("DSD")
+                        .pattern("SCS")
+                        .pattern("GSG")
+                        .define('D', Items.DIAMOND_BLOCK)
+                        .define('S', ModItems.IRON_STICK.get())
+                        .define('C', ModItems.SOUL_COLLECTOR.get())
+                        .define('G', ModItems.GILDED_NETHERRITE_INGOT.get())
+                        .unlockedBy("has_soul_collector", has(ModItems.SOUL_COLLECTOR.get()))
+                        .save(recipeOutput);
+
+                // Emissive Clocker
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModBlocks.EMISSIVE_CLOCKER.get())
+                        .pattern("ILI")
+                        .pattern("LRL")
+                        .pattern("IDI")
+                        .define('I', Items.IRON_INGOT)
+                        .define('L', Items.REDSTONE_LAMP)
+                        .define('R', Items.REPEATER)
+                        .define('D', Items.REDSTONE)
+                        .unlockedBy("has_repeater", has(Items.REPEATER))
+                        .save(recipeOutput);
+
+                // Harvester Upgrades generated via code
+                HolderLookup.Provider lookup = this.lookupProvider.join();
+                var enchantmentRegistry = lookup.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+
+                // Looting (1-5)
+                var lootingHolder = enchantmentRegistry.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.LOOTING);
+                for (int i = 1; i <= 5; i++) {
+                    net.minecraft.world.item.enchantment.ItemEnchantments.Mutable enc = new net.minecraft.world.item.enchantment.ItemEnchantments.Mutable(net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+                    enc.set(lootingHolder, i);
+                    
+                    net.minecraft.world.item.ItemStack out = new net.minecraft.world.item.ItemStack(ModItems.SOUL_HARVESTER_LOOTING_UPGRADE.get());
+                    net.minecraft.nbt.CompoundTag levelTag = new net.minecraft.nbt.CompoundTag();
+                    levelTag.putInt("oriri_level", i);
+                    out.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(levelTag));
+                    
+                    Ingredient bookIngredient = net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(false, net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS, enc.toImmutable(), Items.ENCHANTED_BOOK);
+                    
+                    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, out)
+                            .pattern("ALA")
+                            .pattern("BEB")
+                            .pattern("ACA")
+                            .define('A', ModItems.IRON_STICK.get())
+                            .define('B', Items.ECHO_SHARD)
+                            .define('C', ModItems.MANA_MANIFESTATION.get())
+                            .define('L', Items.LEATHER)
+                            .define('E', bookIngredient)
+                            .unlockedBy("has_echo", has(Items.ECHO_SHARD))
+                            .save(recipeOutput, "oririmod:soul_harvester_looting_upgrade_" + i);
+                }
+
+                // Speed (1-3)
+                var speedHolder = enchantmentRegistry.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.SOUL_SPEED);
+                for (int i = 1; i <= 3; i++) {
+                    net.minecraft.world.item.enchantment.ItemEnchantments.Mutable enc = new net.minecraft.world.item.enchantment.ItemEnchantments.Mutable(net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+                    enc.set(speedHolder, i);
+                    
+                    net.minecraft.world.item.ItemStack out = new net.minecraft.world.item.ItemStack(ModItems.SOUL_HARVESTER_SPEED_UPGRADE.get());
+                    net.minecraft.nbt.CompoundTag levelTag = new net.minecraft.nbt.CompoundTag();
+                    levelTag.putInt("oriri_level", i);
+                    out.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(levelTag));
+                    
+                    Ingredient bookIngredient = net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(false, net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS, enc.toImmutable(), Items.ENCHANTED_BOOK);
+
+                    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, out)
+                            .pattern("APA")
+                            .pattern("BEB")
+                            .pattern("ACA")
+                            .define('A', ModItems.IRON_STICK.get())
+                            .define('B', Items.ECHO_SHARD)
+                            .define('C', ModItems.MANA_MANIFESTATION.get())
+                            .define('P', Items.SUGAR)
+                            .define('E', bookIngredient)
+                            .unlockedBy("has_echo", has(Items.ECHO_SHARD))
+                            .save(recipeOutput, "oririmod:soul_harvester_speed_upgrade_" + i);
+                }
+
+                // Fire Aspect
+                var fireHolder = enchantmentRegistry.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.FIRE_ASPECT);
+                {
+                    net.minecraft.world.item.enchantment.ItemEnchantments.Mutable enc = new net.minecraft.world.item.enchantment.ItemEnchantments.Mutable(net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+                    enc.set(fireHolder, 1);
+                    
+                    net.minecraft.world.item.ItemStack out = new net.minecraft.world.item.ItemStack(ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE.get());
+                    net.minecraft.nbt.CompoundTag levelTag = new net.minecraft.nbt.CompoundTag();
+                    levelTag.putInt("oriri_level", 1);
+                    out.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(levelTag));
+                    
+                    Ingredient bookIngredient = net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(false, net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS, enc.toImmutable(), Items.ENCHANTED_BOOK);
+
+                    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, out)
+                            .pattern("AFA")
+                            .pattern("BEB")
+                            .pattern("ACA")
+                            .define('A', ModItems.IRON_STICK.get())
+                            .define('B', Items.ECHO_SHARD)
+                            .define('C', ModItems.MANA_MANIFESTATION.get())
+                            .define('F', ModItems.FIRE_CRYSTAL.get())
+                            .define('E', bookIngredient)
+                            .unlockedBy("has_echo", has(Items.ECHO_SHARD))
+                            .save(recipeOutput, "oririmod:soul_harvester_fire_aspect_upgrade_1");
+                }
+
+                // XP Upgrade (Teacher)
+                var teacherHolder = enchantmentRegistry.get(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENCHANTMENT, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "teacher")));
+                if (teacherHolder.isPresent()) {
+                    net.minecraft.world.item.enchantment.ItemEnchantments.Mutable enc = new net.minecraft.world.item.enchantment.ItemEnchantments.Mutable(net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+                    enc.set(teacherHolder.get(), 1);
+                    
+                    net.minecraft.world.item.ItemStack out = new net.minecraft.world.item.ItemStack(ModItems.SOUL_HARVESTER_XP_UPGRADE.get());
+                    net.minecraft.nbt.CompoundTag levelTag = new net.minecraft.nbt.CompoundTag();
+                    levelTag.putInt("oriri_level", 1);
+                    out.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(levelTag));
+                    
+                    Ingredient bookIngredient = net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(false, net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS, enc.toImmutable(), Items.ENCHANTED_BOOK);
+
+                    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, out)
+                            .pattern("AGA")
+                            .pattern("BEB")
+                            .pattern("ACA")
+                            .define('A', ModItems.IRON_STICK.get())
+                            .define('B', Items.ECHO_SHARD)
+                            .define('C', ModItems.MANA_MANIFESTATION.get())
+                            .define('G', Items.GLASS_BOTTLE)
+                            .define('E', bookIngredient)
+                            .unlockedBy("has_echo", has(Items.ECHO_SHARD))
+                            .save(recipeOutput, "oririmod:soul_harvester_xp_upgrade_1");
+                } else {
+                    net.ganyusbathwater.oririmod.OririMod.LOGGER.error("TEACHER ENCHANTMENT NOT FOUND DURING DATAGEN!");
+                }
+
+                // Player Kill Upgrade
+                {
+                    net.minecraft.world.item.ItemStack out = new net.minecraft.world.item.ItemStack(ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE.get());
+                    net.minecraft.nbt.CompoundTag levelTag = new net.minecraft.nbt.CompoundTag();
+                    levelTag.putInt("oriri_level", 1);
+                    out.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(levelTag));
+                    
+                    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, out)
+                            .pattern("ASA")
+                            .pattern("BEB")
+                            .pattern("ACA")
+                            .define('A', ModItems.IRON_STICK.get())
+                            .define('B', Items.ECHO_SHARD)
+                            .define('C', ModItems.MANA_MANIFESTATION.get())
+                            .define('S', Items.IRON_SWORD)
+                            .define('E', ModItems.THE_EMPEROR.get())
+                            .unlockedBy("has_echo", has(Items.ECHO_SHARD))
+                            .save(recipeOutput, "oririmod:soul_harvester_player_kill_upgrade_1");
+                }
+
                 makeMermaidScaleDyeRecipes(recipeOutput);
         }
 

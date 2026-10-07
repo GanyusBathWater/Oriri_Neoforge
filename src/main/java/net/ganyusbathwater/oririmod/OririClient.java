@@ -469,6 +469,9 @@ public class OririClient {
         event.register(
                 net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.EQUINOX_TABLE_MENU.get(),
                 net.ganyusbathwater.oririmod.client.screen.EquinoxTableScreen::new);
+        event.register(
+                net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.SOUL_HARVESTER_MENU.get(),
+                net.ganyusbathwater.oririmod.client.screen.SoulHarvesterScreen::new);
     }
 
     private static net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer choirRenderer;

@@ -77,13 +77,11 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SOUL_HARVESTER);
                         output.accept(ModItems.SOUL_SHARD);
                         output.accept(ModItems.SOUL_COLLECTOR);
-                        acceptAllLevels(output, ModItems.SOUL_HARVESTER_SPEED_UPGRADE);
-                        output.accept(ModItems.SOUL_HARVESTER_XP_UPGRADE);
-                        output.accept(ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE);
-                        output.accept(ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE);
-                        // Looting is 1-5, so we will manually add them or create an acceptLevels helper up to 5 later
-                        // For now we add a basic version
-                        output.accept(ModItems.SOUL_HARVESTER_LOOTING_UPGRADE);
+                        acceptLevels(output, ModItems.SOUL_HARVESTER_SPEED_UPGRADE, 3);
+                        acceptLevels(output, ModItems.SOUL_HARVESTER_XP_UPGRADE, 1);
+                        acceptLevels(output, ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE, 1);
+                        acceptLevels(output, ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE, 1);
+                        acceptLevels(output, ModItems.SOUL_HARVESTER_LOOTING_UPGRADE, 5);
 
                         output.accept(ModBlocks.ELDER_LOG_BLOCK);
                         output.accept(ModBlocks.CRACKED_ELDER_LOG_BLOCK);
@@ -550,7 +548,12 @@ public class ModItemGroups {
 
     private static void acceptAllLevels(CreativeModeTab.Output output,
             Supplier<? extends net.minecraft.world.item.Item> itemSupplier) {
-        for (int i = 1; i <= 3; i++) {
+        acceptLevels(output, itemSupplier, 3);
+    }
+
+    private static void acceptLevels(CreativeModeTab.Output output,
+            Supplier<? extends net.minecraft.world.item.Item> itemSupplier, int maxLevel) {
+        for (int i = 1; i <= maxLevel; i++) {
             ItemStack stack = new ItemStack(itemSupplier.get());
             net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
             tag.putInt("oriri_level", i);

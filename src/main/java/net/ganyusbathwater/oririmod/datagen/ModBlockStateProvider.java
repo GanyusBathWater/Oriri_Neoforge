@@ -42,10 +42,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
                 blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);
 
-                simpleBlockWithItem(ModBlocks.SOUL_HARVESTER.get(), models().cubeBottomTop("soul_harvester",
-                        modLoc("block/soul_harvester_side_inactive"),
-                        modLoc("block/soul_harvester_bottom"),
-                        modLoc("block/soul_harvester_top")));
+                simpleBlockWithItem(ModBlocks.SOUL_HARVESTER.get(), models().withExistingParent("soul_harvester", modLoc("block/cube_bottom_top_inner"))
+                        .texture("side", modLoc("block/soul_harvester_side_inactive"))
+                        .texture("bottom", modLoc("block/soul_harvester_bottom"))
+                        .texture("top", modLoc("block/soul_harvester_top")).renderType("minecraft:cutout"));
 
                 getVariantBuilder(ModBlocks.EMISSIVE_CLOCKER.get()).forAllStates(state -> {
                         boolean powered = state.getValue(net.ganyusbathwater.oririmod.block.custom.EmissiveClockerBlock.LIT);

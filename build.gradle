@@ -270,3 +270,7 @@ idea {
         downloadJavadoc = true
     }
 }
+tasks.register('runScratch', JavaExec) {
+    mainClass = 'net.ganyusbathwater.oririmod.scratch.TestIngredientJson'
+    classpath = sourceSets.main.runtimeClasspath
+}

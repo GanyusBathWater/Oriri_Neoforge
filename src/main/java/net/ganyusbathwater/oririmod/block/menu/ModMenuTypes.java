@@ -23,6 +23,17 @@ public class ModMenuTypes {
                 return new EquinoxTableMenu(windowId, inv);
             }));
 
+    public static final Supplier<MenuType<SoulHarvesterMenu>> SOUL_HARVESTER_MENU = MENUS.register("soul_harvester",
+            () -> IMenuTypeExtension.create((windowId, inv, data) -> {
+                var pos = data.readBlockPos();
+                var level = inv.player.level();
+                var be = level.getBlockEntity(pos);
+                if (be instanceof net.ganyusbathwater.oririmod.block.entity.SoulHarvesterBlockEntity harvesterBE) {
+                    return new SoulHarvesterMenu(windowId, inv, harvesterBE);
+                }
+                return new SoulHarvesterMenu(windowId, inv);
+            }));
+
     public static void register(IEventBus eventBus) {
         MENUS.register(eventBus);
     }

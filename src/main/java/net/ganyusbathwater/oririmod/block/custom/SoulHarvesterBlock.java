@@ -60,8 +60,8 @@ public class SoulHarvesterBlock extends BaseEntityBlock {
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide()) {
             BlockEntity entity = level.getBlockEntity(pos);
-            if (entity instanceof SoulHarvesterBlockEntity) {
-                // Open Menu logic goes here
+            if (entity instanceof SoulHarvesterBlockEntity harvester) {
+                player.openMenu(harvester, pos);
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());
