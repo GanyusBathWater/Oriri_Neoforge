@@ -37,13 +37,10 @@ public abstract class VestigeItem extends Item implements ICurioItem, ModRarityC
         int unlockedLevel = Math.max(0, getUnlockedLevel(stack));
 
         // Aktuelles Level (Key: item.oririmod.\<id\>.level -> "Current Level: %s")
-        tooltip.add(Component.translatable(this.getDescriptionId() + ".level", unlockedLevel));
-
-        // Level\-Beschreibungen bis zum aktuellen Level
-        tooltip.add(Component.translatable(this.getDescriptionId() + ".level." + unlockedLevel + ".description"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltip, this.getDescriptionId(), unlockedLevel);
 
         // Lore (Key: item.oririmod.\<id\>.lore)
-        tooltip.add(Component.translatable(this.getDescriptionId() + ".lore"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltip, this.getDescriptionId() + ".lore");
 
         // Rarität am Schluss (kommt aus ModRarityCarrier)
         tooltip.addAll(buildModTooltip(stack, context, flag));

@@ -89,7 +89,7 @@ public class DragonFruit extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.dragon_fruit.lore"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.dragon_fruit.lore");
 
         if (context.level() != null && context.level().isClientSide()) {
             Player player = Minecraft.getInstance().player;
@@ -98,11 +98,7 @@ public class DragonFruit extends Item {
                 AttributeInstance luckAttribute = player.getAttribute(Attributes.LUCK);
                 boolean hasModifier = luckAttribute != null && luckAttribute.getModifier(LUCK_MODIFIER_ID) != null;
 
-                if (hasModifier) {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten").withStyle(ChatFormatting.RED));
-                } else {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.dragon_fruit.uneaten").withStyle(ChatFormatting.GRAY));
-                }
+                net.ganyusbathwater.oririmod.util.TooltipHelper.addConsumableStatus(tooltipComponents, hasModifier, "tooltip.oririmod.dragon_fruit.uneaten");
             }
         }
     }

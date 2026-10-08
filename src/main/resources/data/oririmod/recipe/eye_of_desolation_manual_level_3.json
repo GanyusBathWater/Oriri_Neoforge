@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "P": {
+      "item": "oririmod:power_soul"
+    },
+    "T": {
+      "item": "oririmod:tortured_soul"
+    },
+    "B": {
+      "item": "oririmod:eye_of_desolation_manual"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "TBT",
+    "I I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "oririmod:eye_of_desolation_manual",
+    "components": {
+      "minecraft:custom_data": "{oriri_level:3}"
+    }
+  }
+}

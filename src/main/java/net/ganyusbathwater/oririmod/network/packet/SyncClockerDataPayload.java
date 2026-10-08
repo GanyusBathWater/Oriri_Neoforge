@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record SyncClockerDataPayload(BlockPos pos, int mode, int delay, int timeOn, int timeOff, boolean useSeconds) implements CustomPacketPayload {
+public record SyncClockerDataPayload(BlockPos pos, int mode, int delay, int timeOn, int timeOff, boolean useSeconds, boolean emitLight) implements CustomPacketPayload {
     public static final Type<SyncClockerDataPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "sync_clocker_data"));
 
     public static final StreamCodec<FriendlyByteBuf, SyncClockerDataPayload> STREAM_CODEC = StreamCodec.of(
@@ -18,6 +18,7 @@ public record SyncClockerDataPayload(BlockPos pos, int mode, int delay, int time
                 buf.writeInt(payload.timeOn());
                 buf.writeInt(payload.timeOff());
                 buf.writeBoolean(payload.useSeconds());
+                buf.writeBoolean(payload.emitLight());
             },
             buf -> new SyncClockerDataPayload(
                     buf.readBlockPos(),
@@ -25,6 +26,7 @@ public record SyncClockerDataPayload(BlockPos pos, int mode, int delay, int time
                     buf.readInt(),
                     buf.readInt(),
                     buf.readInt(),
+                    buf.readBoolean(),
                     buf.readBoolean()
             )
     );

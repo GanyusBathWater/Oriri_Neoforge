@@ -39,7 +39,21 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.phys.Vec3;
 
 public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvider {
-    private final SimpleContainer inventory = new SimpleContainer(33) {
+    private final SimpleContainer shardInv = new SimpleContainer(1) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            SoulHarvesterBlockEntity.this.setChanged();
+        }
+    };
+    private final SimpleContainer upgradesInv = new SimpleContainer(5) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            SoulHarvesterBlockEntity.this.setChanged();
+        }
+    };
+    private final SimpleContainer storageInv = new SimpleContainer(27) {
         @Override
         public void setChanged() {
             super.setChanged();
@@ -48,8 +62,6 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
     };
 
     protected final ContainerData data;
-
-    private final IItemHandler itemHandler = new InvWrapper(inventory);
 
     private int progress = 0;
     private int maxProgress = 200; // Base ticks per generation (10 seconds)
@@ -96,32 +108,76 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
     }
 
     public void drops() {
-        SimpleContainer inventoryToDrop = new SimpleContainer(inventory.getContainerSize());
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            inventoryToDrop.setItem(i, inventory.getItem(i));
-        }
-        Containers.dropContents(this.level, this.worldPosition, inventoryToDrop);
+        Containers.dropContents(this.level, this.worldPosition, shardInv);
+        Containers.dropContents(this.level, this.worldPosition, upgradesInv);
+        Containers.dropContents(this.level, this.worldPosition, storageInv);
     }
 
-    public SimpleContainer getInventory() {
-        return inventory;
-    }
-
-    public IItemHandler getItemHandler() {
-        return itemHandler;
-    }
+    public SimpleContainer getShardInv() { return shardInv; }
+    public SimpleContainer getUpgradesInv() { return upgradesInv; }
+    public SimpleContainer getStorageInv() { return storageInv; }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.put("Inventory", inventory.createTag(registries));
+        tag.put("ShardInv", shardInv.createTag(registries));
+        tag.put("UpgradesInv", upgradesInv.createTag(registries));
+        tag.put("StorageInv", storageInv.createTag(registries));
         tag.putInt("Progress", progress);
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        inventory.fromTag(tag.getList("Inventory", 10), registries);
+        if (tag.contains("UpgradesInv")) {
+            // Already migrated
+            shardInv.fromTag(tag.getList("ShardInv", 10), registries);
+            upgradesInv.fromTag(tag.getList("UpgradesInv", 10), registries);
+            storageInv.fromTag(tag.getList("StorageInv", 10), registries);
+        } else if (tag.contains("Inventory")) {
+            // Migration from legacy 33-slot merged inventory
+            SimpleContainer oldInv = new SimpleContainer(33);
+            oldInv.fromTag(tag.getList("Inventory", 10), registries);
+            shardInv.setItem(0, oldInv.getItem(0));
+            for (int i = 0; i < 5; i++) upgradesInv.setItem(i, oldInv.getItem(1 + i));
+            for (int i = 0; i < 27; i++) storageInv.setItem(i, oldInv.getItem(6 + i));
+        }
+
+        // --- BRUTE FORCE NBT SANITATION ---
+        // NBT loading natively bypasses the GUI's "mayPlace" rules.
+        // If the chunk save data is corrupted, we forcefully correct it here.
+        net.minecraft.world.item.Item[] expectedUpgrades = {
+            ModItems.SOUL_HARVESTER_LOOTING_UPGRADE.get(),
+            ModItems.SOUL_HARVESTER_XP_UPGRADE.get(),
+            ModItems.SOUL_HARVESTER_SPEED_UPGRADE.get(),
+            ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE.get(),
+            ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE.get()
+        };
+
+        for (int i = 0; i < 5; i++) {
+            net.minecraft.world.item.ItemStack stack = upgradesInv.getItem(i);
+            if (!stack.isEmpty() && !stack.is(expectedUpgrades[i])) {
+                upgradesInv.setItem(i, net.minecraft.world.item.ItemStack.EMPTY); // Clear wrong slot
+                boolean placed = false;
+                for (int j = 0; j < 5; j++) {
+                    if (stack.is(expectedUpgrades[j])) {
+                        upgradesInv.setItem(j, stack); // Force into correct slot
+                        placed = true;
+                        break;
+                    }
+                }
+                // If it's a completely foreign item (like Gilded Netherite), attempt to push to storage
+                if (!placed) {
+                    for (int s = 0; s < 27; s++) {
+                        if (storageInv.getItem(s).isEmpty()) {
+                            storageInv.setItem(s, stack);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
         if (tag.contains("Progress")) {
             progress = tag.getInt("Progress");
         }
@@ -130,7 +186,7 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
     public void tick(Level level, BlockPos pos, BlockState state) {
         if (level.isClientSide()) return;
 
-        ItemStack shardStack = inventory.getItem(0);
+        ItemStack shardStack = shardInv.getItem(0);
         if (shardStack.isEmpty() || !shardStack.is(ModItems.SOUL_SHARD.get())) {
             if (progress > 0) {
                 progress = 0;
@@ -163,6 +219,19 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
         maxProgress = 200 - (speedLevel * 20); // up to level 3: 200 -> 140 ticks
         if (maxProgress < 20) maxProgress = 20;
 
+        // Check if there is at least one empty slot or if we can stack items
+        boolean hasSpace = false;
+        for (int i = 0; i < 27; i++) {
+            if (storageInv.getItem(i).isEmpty() || storageInv.getItem(i).getCount() < storageInv.getItem(i).getMaxStackSize()) {
+                hasSpace = true;
+                break;
+            }
+        }
+
+        if (!hasSpace) {
+            return; // Pause progress if storage is completely full
+        }
+
         progress++;
         if (progress >= maxProgress) {
             progress = 0;
@@ -173,14 +242,14 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
 
     private int getUpgradeLevel(Item upgradeItem) {
         int slotToCheck = -1;
-        if (upgradeItem == ModItems.SOUL_HARVESTER_LOOTING_UPGRADE.get()) slotToCheck = 1;
-        else if (upgradeItem == ModItems.SOUL_HARVESTER_XP_UPGRADE.get()) slotToCheck = 2;
-        else if (upgradeItem == ModItems.SOUL_HARVESTER_SPEED_UPGRADE.get()) slotToCheck = 3;
-        else if (upgradeItem == ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE.get()) slotToCheck = 4;
-        else if (upgradeItem == ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE.get()) slotToCheck = 5;
+        if (upgradeItem == ModItems.SOUL_HARVESTER_LOOTING_UPGRADE.get()) slotToCheck = 0;
+        else if (upgradeItem == ModItems.SOUL_HARVESTER_XP_UPGRADE.get()) slotToCheck = 1;
+        else if (upgradeItem == ModItems.SOUL_HARVESTER_SPEED_UPGRADE.get()) slotToCheck = 2;
+        else if (upgradeItem == ModItems.SOUL_HARVESTER_FIRE_ASPECT_UPGRADE.get()) slotToCheck = 3;
+        else if (upgradeItem == ModItems.SOUL_HARVESTER_PLAYER_KILL_UPGRADE.get()) slotToCheck = 4;
 
         if (slotToCheck != -1) {
-            ItemStack stack = inventory.getItem(slotToCheck);
+            ItemStack stack = upgradesInv.getItem(slotToCheck);
             if (stack.is(upgradeItem)) {
                 net.minecraft.nbt.CompoundTag tag = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
                 return tag.contains("oriri_level") ? tag.getInt("oriri_level") : 1;
@@ -234,11 +303,11 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
 
         for (ItemStack drop : loot) {
             ItemStack remainder = drop.copy();
-            for (int i = 6; i < 33; i++) {
+            for (int i = 0; i < 27; i++) {
                 if (remainder.isEmpty()) break;
-                ItemStack slotStack = inventory.getItem(i);
+                ItemStack slotStack = storageInv.getItem(i);
                 if (slotStack.isEmpty()) {
-                    inventory.setItem(i, remainder.split(remainder.getCount()));
+                    storageInv.setItem(i, remainder.split(remainder.getCount()));
                 } else if (ItemStack.isSameItemSameComponents(slotStack, remainder)) {
                     int space = slotStack.getMaxStackSize() - slotStack.getCount();
                     if (space > 0) {

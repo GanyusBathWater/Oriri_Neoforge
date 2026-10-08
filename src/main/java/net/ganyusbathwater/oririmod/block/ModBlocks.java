@@ -520,7 +520,8 @@ public class ModBlocks {
         // ===== REDSTONE BLOCKS =====
         public static final DeferredBlock<Block> EMISSIVE_CLOCKER = registerBlock("emissive_clocker",
                         () -> new EmissiveClockerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.REPEATER)
-                                        .strength(0.5f).requiresCorrectToolForDrops()));
+                                        .strength(0.5f).requiresCorrectToolForDrops()
+                                        .lightLevel(state -> state.getValue(EmissiveClockerBlock.LIT) && state.getValue(EmissiveClockerBlock.EMIT_LIGHT) ? 15 : 0)));
 
         // ===== FUNCTIONAL BLOCKS =====
         public static final DeferredBlock<Block> SOUL_HARVESTER = registerBlock("soul_harvester",

@@ -41,7 +41,7 @@ public class SoulHarvesterScreen extends AbstractContainerScreen<SoulHarvesterMe
 
         int progress = this.menu.getScaledProgress();
         if (progress > 0) {
-            guiGraphics.blit(TEXTURE, x + 70, y + 32, 0, 222, progress, 24);
+            guiGraphics.blit(TEXTURE, x + 102, y + 36, 0, 240, progress, 15);
         }
 
         net.minecraft.world.item.ItemStack shardStack = this.menu.getSlot(0).getItem();
@@ -74,10 +74,10 @@ public class SoulHarvesterScreen extends AbstractContainerScreen<SoulHarvesterMe
 
         if (renderedEntity != null) {
             int boxX = x + 16;
-            int boxY = y + 20;
+            int boxY = y + 16;
             net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventoryFollowsMouse(
-                guiGraphics, boxX, boxY, boxX + 48, boxY + 48, 20, 
-                mouseX, mouseY, 0f, renderedEntity
+                guiGraphics, boxX, boxY, boxX + 54, boxY + 54, 24, 
+                0f, mouseX, mouseY, renderedEntity
             );
         }
     }

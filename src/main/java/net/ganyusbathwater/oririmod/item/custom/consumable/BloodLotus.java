@@ -74,7 +74,7 @@ public class BloodLotus extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.blood_lotus.lore"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.blood_lotus.lore");
 
         // Greift nur auf dem Client auf den Spieler zu.
         // context.level() ist auf dem Client nicht null.

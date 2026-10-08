@@ -49,12 +49,16 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
                 getVariantBuilder(ModBlocks.EMISSIVE_CLOCKER.get()).forAllStates(state -> {
                         boolean powered = state.getValue(net.ganyusbathwater.oririmod.block.custom.EmissiveClockerBlock.LIT);
-                        String texture = powered ? "block/emissive_clocker_on" : "block/emissive_clocker_off";
+                        String textureMain = powered ? "block/emissive_clocker_on" : "block/emissive_clocker_off";
+                        String textureBack = powered ? "block/emissive_clocker_back_on" : "block/emissive_clocker_back_off";
                         net.neoforged.neoforge.client.model.generators.ConfiguredModel.Builder<?> builder = ConfiguredModel.builder().modelFile(
                                 models().getBuilder(powered ? "emissive_clocker_on" : "emissive_clocker_off")
-                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(mcLoc("block/template_repeater")))
-                                        .texture("top", modLoc(texture))
-                                        .texture("unlit", modLoc("block/emissive_clocker_off"))
+                                        .parent(new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(modLoc("block/emissive_clocker_full_template")))
+                                        .texture("top", modLoc(textureMain))
+                                        .texture("back", modLoc(textureBack))
+                                        .texture("front", modLoc(textureMain))
+                                        .texture("side", modLoc(textureMain))
+                                        .texture("bottom", modLoc(textureMain))
                         );
 
                         Direction dir = state.getValue(net.ganyusbathwater.oririmod.block.custom.EmissiveClockerBlock.FACING);

@@ -373,7 +373,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
         // Mana Cost
         int actualManaCost = ModManaUtil.getActualManaCost(this.manaCost, stack, context);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", actualManaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
 
         // Damage
         if (this.ability != MagicBoltAbility.ENDER) {
@@ -391,7 +391,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
         // Lore
         String loreKey = descriptionId + ".lore";
-        tooltipComponents.add(Component.translatable(loreKey).withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, loreKey);
 
         tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
 

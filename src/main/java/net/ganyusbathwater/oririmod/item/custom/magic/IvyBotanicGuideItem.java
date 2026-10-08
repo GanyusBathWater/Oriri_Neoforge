@@ -62,22 +62,21 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
         int unlockedLevel = Math.max(1, getUnlockedLevel(stack));
         String descriptionId = this.getDescriptionId();
 
-        tooltip.add(Component.translatable(descriptionId + ".level", unlockedLevel));
-        tooltip.add(Component.translatable(descriptionId + ".level." + Math.min(3, unlockedLevel) + ".description"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltip, descriptionId, Math.min(3, unlockedLevel));
 
         // Element
         String elementKey = descriptionId + ".element";
         // Element is handled by TooltipHandler
 
         // Mana Cost
-        tooltip.add(Component.translatable("tooltip.oririmod.mana_cost", MANA_COST).withStyle(net.minecraft.ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltip, MANA_COST);
 
         // Damage
-        tooltip.add(Component.translatable("tooltip.oririmod.damage", "5.0").withStyle(net.minecraft.ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addStat(tooltip, "tooltip.oririmod.damage", "5.0");
 
         // Lore
         String loreKey = descriptionId + ".lore";
-        tooltip.add(Component.translatable(loreKey).withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltip, loreKey);
         tooltip.addAll(buildModTooltip(stack, context, flag));
     }
 

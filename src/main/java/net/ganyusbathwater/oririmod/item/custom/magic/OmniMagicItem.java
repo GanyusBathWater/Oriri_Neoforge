@@ -504,7 +504,7 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
 
         // Mana Cost
         int actualManaCost = net.ganyusbathwater.oririmod.mana.ModManaUtil.getActualManaCost(ab.getManaCost(), stack, context);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", actualManaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
 
         // Damage (only if it's a bolt and not ENDER)
         if (ab.isBolt() && ab.toBolt() != MagicBoltAbility.ENDER) {

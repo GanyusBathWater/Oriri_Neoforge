@@ -174,6 +174,7 @@ public final class ElementInit {
         ItemElementRegistry.setElement(ModItems.BOOK_OF_WISE.get(), Element.FIRE);
         ItemElementRegistry.setElement(ModItems.DODOCO.get(), Element.FIRE);
         ItemElementRegistry.setElement(ModItems.ZOMBIE_ENCYCLOPEDIA.get(), Element.NATURE);
+        ItemElementRegistry.setElement(ModItems.EYE_OF_DESOLATION_MANUAL.get(), Element.DARKNESS);
         ItemElementRegistry.setElement(ModItems.SKELETON_ENCYCLOPEDIA.get(), Element.NATURE);
         ItemElementRegistry.setElement(ModItems.IRON_GOLEM_MANUAL.get(), Element.EARTH);
         ItemElementRegistry.setElement(ModItems.BLAZING_PYROMANIAC_GUIDE.get(), Element.FIRE);

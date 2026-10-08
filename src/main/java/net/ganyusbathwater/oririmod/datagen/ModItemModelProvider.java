@@ -401,6 +401,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.VISUAL_DEBUG_ITEM.getId().getPath(), mcLoc("item/generated"))
                                 .texture("layer0", mcLoc("item/ender_eye"));
                 handheldItem(ModItems.ZOMBIE_ENCYCLOPEDIA);
+                handheldItem(ModItems.EYE_OF_DESOLATION_MANUAL);
                 handheldItem(ModItems.SKELETON_ENCYCLOPEDIA);
                 handheldItem(ModItems.IRON_GOLEM_MANUAL);
                 handheldItem(ModItems.BLAZING_PYROMANIAC_GUIDE);

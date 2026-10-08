@@ -39,7 +39,7 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
     public int getTimeOff() { return timeOff; }
     public boolean isUseSeconds() { return useSeconds; }
 
-    public void setConfig(Mode mode, int delay, int timeOn, int timeOff, boolean useSeconds) {
+    public void setConfig(Mode mode, int delay, int timeOn, int timeOff, boolean useSeconds, boolean emitLight) {
         this.mode = mode;
         this.delay = Math.max(1, delay);
         this.timeOn = Math.max(1, timeOn);
@@ -48,7 +48,12 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
         resetState();
         setChanged();
         if (level != null && !level.isClientSide()) {
-            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+            BlockState currentState = getBlockState();
+            if (currentState.getValue(EmissiveClockerBlock.EMIT_LIGHT) != emitLight) {
+                level.setBlock(getBlockPos(), currentState.setValue(EmissiveClockerBlock.EMIT_LIGHT, emitLight), 3);
+            } else {
+                level.sendBlockUpdated(getBlockPos(), currentState, currentState, 3);
+            }
         }
     }
 
@@ -133,9 +138,10 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
         }
     }
 
-    private void scheduleNextTick(int delayTicks) {
+    private void scheduleNextTick(int delayValue) {
         if (level != null) {
-            level.scheduleTick(getBlockPos(), getBlockState().getBlock(), delayTicks);
+            int actualTicks = useSeconds ? (delayValue * 20) : delayValue;
+            level.scheduleTick(getBlockPos(), getBlockState().getBlock(), actualTicks);
         }
     }
 

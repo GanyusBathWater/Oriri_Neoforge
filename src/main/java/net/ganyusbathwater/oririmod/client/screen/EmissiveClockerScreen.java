@@ -26,12 +26,14 @@ public class EmissiveClockerScreen extends Screen {
     private EditBox timeOnBox;
     private EditBox timeOffBox;
     private CustomCycleButton useSecondsButton;
+    private CustomCycleButton emitLightButton;
 
     private String currentMode;
     private final int initialDelay;
     private final int initialTimeOn;
     private final int initialTimeOff;
     private final boolean initialUseSeconds;
+    private final boolean initialEmitLight;
 
     private static final List<String> MODES = Arrays.asList("REPEATER", "PULSE", "CLOCK");
 
@@ -43,6 +45,7 @@ public class EmissiveClockerScreen extends Screen {
         this.initialTimeOn = payload.timeOn();
         this.initialTimeOff = payload.timeOff();
         this.initialUseSeconds = payload.useSeconds();
+        this.initialEmitLight = payload.emitLight();
     }
 
     @Override
@@ -65,21 +68,25 @@ public class EmissiveClockerScreen extends Screen {
                     this.updateUIState();
                 }
         );
+        this.modeButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Select the redstone behavior mode")));
         this.addRenderableWidget(this.modeButton);
 
         this.delayBox = new EditBox(this.font, midX - 70, startY + rowSpacing, 140, 20, Component.literal("Delay"));
         this.delayBox.setMaxLength(10);
         this.delayBox.setValue(String.valueOf(initialDelay));
+        this.delayBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Initial delay on power")));
         this.addRenderableWidget(this.delayBox);
 
         this.timeOnBox = new EditBox(this.font, midX - 70, startY + rowSpacing * 2, 140, 20, Component.literal("Time On"));
         this.timeOnBox.setMaxLength(10);
         this.timeOnBox.setValue(String.valueOf(initialTimeOn));
+        this.timeOnBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Duration ON")));
         this.addRenderableWidget(this.timeOnBox);
 
         this.timeOffBox = new EditBox(this.font, midX - 70, startY + rowSpacing * 3, 140, 20, Component.literal("Time Off"));
         this.timeOffBox.setMaxLength(10);
         this.timeOffBox.setValue(String.valueOf(initialTimeOff));
+        this.timeOffBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Duration OFF")));
         this.addRenderableWidget(this.timeOffBox);
 
         this.useSecondsButton = new CustomCycleButton(
@@ -87,7 +94,16 @@ public class EmissiveClockerScreen extends Screen {
                 "Unit", Arrays.asList("Ticks", "Seconds"), initialUseSeconds ? "Seconds" : "Ticks",
                 val -> {}
         );
+        this.useSecondsButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Time unit for the input fields")));
         this.addRenderableWidget(this.useSecondsButton);
+
+        this.emitLightButton = new CustomCycleButton(
+                midX - 70, startY + rowSpacing * 5, 140, 20,
+                "Emit Light", Arrays.asList("Yes", "No"), initialEmitLight ? "Yes" : "No",
+                val -> {}
+        );
+        this.emitLightButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Whether this block visually emits real block light")));
+        this.addRenderableWidget(this.emitLightButton);
 
         this.addRenderableWidget(Button.builder(Component.literal("Save").withStyle(ChatFormatting.GREEN), b -> saveAndClose())
                 .bounds(this.width / 2 - 70, this.height - 40, 140, 20).build());
@@ -127,11 +143,12 @@ public class EmissiveClockerScreen extends Screen {
         try { timeOff = Integer.parseInt(timeOffBox.getValue()); } catch (NumberFormatException ignored) {}
 
         boolean useSeconds = this.useSecondsButton.values.get(this.useSecondsButton.currentIndex).equals("Seconds");
+        boolean emitLight = this.emitLightButton.values.get(this.emitLightButton.currentIndex).equals("Yes");
         int modeIndex = MODES.indexOf(currentMode);
         if (modeIndex < 0) modeIndex = 0;
 
         PacketDistributor.sendToServer(new SyncClockerDataPayload(
-                pos, modeIndex, delay, timeOn, timeOff, useSeconds
+                pos, modeIndex, delay, timeOn, timeOff, useSeconds, emitLight
         ));
         this.onClose();
     }
@@ -160,6 +177,9 @@ public class EmissiveClockerScreen extends Screen {
         }
         if (this.useSecondsButton.visible) {
             guiGraphics.drawString(this.font, "Time Unit", this.useSecondsButton.getX(), this.useSecondsButton.getY() - 10, 0xDDDDDD);
+        }
+        if (this.emitLightButton.visible) {
+            guiGraphics.drawString(this.font, "Lighting", this.emitLightButton.getX(), this.emitLightButton.getY() - 10, 0xDDDDDD);
         }
     }
 

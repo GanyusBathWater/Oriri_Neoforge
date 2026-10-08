@@ -40,10 +40,12 @@ public class SoulHarvesterMenu extends AbstractContainerMenu {
         this.levelAccess = (entity == null) ? ContainerLevelAccess.NULL : ContainerLevelAccess.create(entity.getLevel(), entity.getBlockPos());
         this.data = data;
 
-        IItemHandler itemHandler = (entity == null) ? new ItemStackHandler(33) : entity.getItemHandler();
+        net.neoforged.neoforge.items.IItemHandler shardHandler = entity == null ? new net.neoforged.neoforge.items.wrapper.InvWrapper(new net.minecraft.world.SimpleContainer(1)) : new net.neoforged.neoforge.items.wrapper.InvWrapper(this.blockEntity.getShardInv());
+        net.neoforged.neoforge.items.IItemHandler upgradesHandler = entity == null ? new net.neoforged.neoforge.items.wrapper.InvWrapper(new net.minecraft.world.SimpleContainer(5)) : new net.neoforged.neoforge.items.wrapper.InvWrapper(this.blockEntity.getUpgradesInv());
+        net.neoforged.neoforge.items.IItemHandler storageHandler = entity == null ? new net.neoforged.neoforge.items.wrapper.InvWrapper(new net.minecraft.world.SimpleContainer(27)) : new net.neoforged.neoforge.items.wrapper.InvWrapper(this.blockEntity.getStorageInv());
 
         // Shard slot (0)
-        this.addSlot(new SlotItemHandler(itemHandler, 0, 80, 36) {
+        this.addSlot(new SlotItemHandler(shardHandler, 0, 80, 36) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return stack.is(ModItems.SOUL_SHARD.get());
@@ -51,7 +53,7 @@ public class SoulHarvesterMenu extends AbstractContainerMenu {
         });
 
         // Upgrade slots (1 to 5)
-        // 1 = Looting, 2 = XP, 3 = Speed, 4 = Fire Aspect, 5 = Player Kill
+        // 0 = Looting, 1 = XP, 2 = Speed, 3 = Fire Aspect, 4 = Player Kill
         Item[] expectedUpgrades = {
             ModItems.SOUL_HARVESTER_LOOTING_UPGRADE.get(),
             ModItems.SOUL_HARVESTER_XP_UPGRADE.get(),
@@ -62,7 +64,7 @@ public class SoulHarvesterMenu extends AbstractContainerMenu {
 
         for (int i = 0; i < 5; i++) {
             final int upgradeIndex = i;
-            this.addSlot(new SlotItemHandler(itemHandler, 1 + i, 182, 20 + (i * 18)) {
+            this.addSlot(new SlotItemHandler(upgradesHandler, i, 182, 20 + (i * 18)) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return stack.is(expectedUpgrades[upgradeIndex]);
@@ -73,7 +75,7 @@ public class SoulHarvesterMenu extends AbstractContainerMenu {
         // Storage slots (6 to 32)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new SlotItemHandler(itemHandler, 6 + (row * 9) + col, 8 + col * 18, 72 + row * 18) {
+                this.addSlot(new SlotItemHandler(storageHandler, (row * 9) + col, 8 + col * 18, 72 + row * 18) {
                     @Override
                     public boolean mayPlace(ItemStack stack) {
                         return false; // Output only
@@ -104,7 +106,7 @@ public class SoulHarvesterMenu extends AbstractContainerMenu {
     public int getScaledProgress() {
         int progress = this.data.get(0);
         int maxProgress = this.data.get(1);
-        int progressArrowSize = 96; // Scaled to our custom progress bar width
+        int progressArrowSize = 63; // Scaled to our custom progress bar width (165 - 102)
         return maxProgress != 0 && progress != 0 ? progress * progressArrowSize / maxProgress : 0;
     }
 

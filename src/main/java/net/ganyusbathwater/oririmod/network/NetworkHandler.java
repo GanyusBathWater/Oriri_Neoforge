@@ -264,7 +264,7 @@ public final class NetworkHandler {
                         net.minecraft.world.level.block.entity.BlockEntity be = sp.level().getBlockEntity(payload.pos());
                         if (be instanceof net.ganyusbathwater.oririmod.block.entity.EmissiveClockerBlockEntity clocker) {
                             clocker.setConfig(net.ganyusbathwater.oririmod.block.entity.EmissiveClockerBlockEntity.Mode.values()[payload.mode()], 
-                                payload.delay(), payload.timeOn(), payload.timeOff(), payload.useSeconds());
+                                payload.delay(), payload.timeOn(), payload.timeOff(), payload.useSeconds(), payload.emitLight());
                             sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§aClocker configuration saved!"), true);
                         }
                     }

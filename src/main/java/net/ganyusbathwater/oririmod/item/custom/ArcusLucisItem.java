@@ -21,9 +21,9 @@ public class ArcusLucisItem extends CustomBowItemClass {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.arcus_lucis.lore").withStyle(ChatFormatting.DARK_PURPLE));
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.arcus_lucis.homing").withStyle(ChatFormatting.GRAY));
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.arcus_lucis.conversion").withStyle(ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.arcus_lucis.lore");
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.arcus_lucis.homing");
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.arcus_lucis.conversion");
     }
 
 }

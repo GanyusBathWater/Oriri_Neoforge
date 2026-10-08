@@ -53,7 +53,7 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
     private static final String SUMMONED_TAG = "OririSummoned";
     private static final String TICKS_TAG = "OririSummonTicks";
 
-    private final EntityType<? extends Mob> summonType;
+    private final net.ganyusbathwater.oririmod.item.custom.magic.summon.ISummonProfile profile;
     private final ModRarity rarity;
     private final int manaCost;
     private final int cooldownTicks;
@@ -63,10 +63,10 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
     private static final float SUMMON_MID_RADIUS = 3.0f;
     private static final float SUMMON_INNER_RADIUS = 2.0f;
 
-    public SummonerWeaponItem(Properties properties, EntityType<? extends Mob> summonType,
+    public SummonerWeaponItem(Properties properties, net.ganyusbathwater.oririmod.item.custom.magic.summon.ISummonProfile profile,
             ModRarity rarity, int manaCost, int cooldownTicks, int summonDurationTicks, int chargeDurationTicks) {
         super(properties);
-        this.summonType = summonType;
+        this.profile = profile;
         this.rarity = rarity;
         this.manaCost = manaCost;
         this.cooldownTicks = cooldownTicks;
@@ -95,8 +95,7 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
         int unlockedLevel = Math.max(1, getUnlockedLevel(stack));
         String descriptionId = this.getDescriptionId();
 
-        tooltip.add(Component.translatable(descriptionId + ".level", unlockedLevel));
-        tooltip.add(Component.translatable(descriptionId + ".level." + Math.min(3, unlockedLevel) + ".description"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltip, descriptionId, Math.min(3, unlockedLevel));
 
         // Element
         String elementKey = descriptionId + ".element";
@@ -104,32 +103,15 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
 
         // Mana Cost
         int actualManaCost = net.ganyusbathwater.oririmod.mana.ModManaUtil.getActualManaCost(this.manaCost, stack, context);
-        tooltip.add(Component.translatable("tooltip.oririmod.mana_cost", actualManaCost).withStyle(net.minecraft.ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltip, actualManaCost);
 
         // Damage
-        tooltip.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(this.summonType, unlockedLevel)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.oririmod.damage", this.profile.getDamageTooltip(unlockedLevel)).withStyle(net.minecraft.ChatFormatting.GRAY));
 
         // Lore
         String loreKey = descriptionId + ".lore";
-        tooltip.add(Component.translatable(loreKey).withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltip, loreKey);
         tooltip.addAll(buildModTooltip(stack, context, flag));
-    }
-
-    private String getDamageTooltip(EntityType<?> type, int level) {
-        if (type == EntityType.ZOMBIE) {
-            return level >= 2 ? "9.0" : "3.0"; // Iron Sword gives +6 Damage
-        }
-        if (type == EntityType.SKELETON) {
-            return level >= 2 ? "5.0" : "2.0"; // Power II Bow
-        }
-        if (type == EntityType.IRON_GOLEM) {
-            return level >= 2 ? "18.0" : "15.0"; // Strength I adds +3 Damage
-        }
-        if (type == EntityType.BLAZE) return "6.0";
-        if (type == EntityType.MAGMA_CUBE || type == EntityType.SLIME) {
-            return level >= 2 ? "4.0" : "2.0"; // Size 4 vs Size 2 Slime Damage Scaling
-        }
-        return "Unknown";
     }
 
     @Override
@@ -221,28 +203,32 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
 
         // Determine the actual EntityType based on weapon type and level
         int weaponLevel = Math.max(1, getUnlockedLevel(stack));
-        EntityType<? extends Mob> actualType = this.summonType;
-        if (actualType == EntityType.SKELETON) {
-            if (weaponLevel == 2)
-                actualType = (EntityType<? extends Mob>) EntityType.BOGGED;
-            if (weaponLevel >= 3)
-                actualType = (EntityType<? extends Mob>) EntityType.STRAY;
+        EntityType<? extends Mob> actualType = this.profile.getSummonType(weaponLevel);
+
+        // Enforce summon cap using attachment
+        java.util.List<java.util.UUID> activeSummons = player.getData(net.ganyusbathwater.oririmod.attachment.ModAttachments.ACTIVE_SUMMONS.get());
+        activeSummons.removeIf(uuid -> {
+            net.minecraft.world.entity.Entity e = serverLevel.getEntity(uuid);
+            return e == null || !e.isAlive();
+        });
+
+        if (activeSummons.size() >= 3) {
+            player.displayClientMessage(Component.literal("Maximum global summons reached! (3/3)").withStyle(net.minecraft.ChatFormatting.RED), true);
+            return;
         }
 
-        // Enforce summon cap
-        String playerUUID = player.getStringUUID();
-        int currentSummons = 0;
-        for (Mob mob : serverLevel.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(128.0D))) {
-            if (mob.getType() == actualType) {
-                CompoundTag data = mob.getPersistentData();
-                if (data.getBoolean(SUMMONED_TAG) && playerUUID.equals(data.getString(OWNER_TAG))) {
-                    currentSummons++;
-                }
+        String sourceId = this.getDescriptionId();
+        boolean hasThisBookSummon = false;
+        for (java.util.UUID uuid : activeSummons) {
+            net.minecraft.world.entity.Entity e = serverLevel.getEntity(uuid);
+            if (e != null && sourceId.equals(e.getPersistentData().getString("OririSummonSource"))) {
+                hasThisBookSummon = true;
+                break;
             }
         }
 
-        if (currentSummons >= weaponLevel) {
-            player.displayClientMessage(Component.literal("Maximum summons reached!").withStyle(net.minecraft.ChatFormatting.RED), true);
+        if (hasThisBookSummon) {
+            player.displayClientMessage(Component.literal("You already have an active summon from this book!").withStyle(net.minecraft.ChatFormatting.RED), true);
             return;
         }
 
@@ -266,6 +252,7 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
         data.putString(OWNER_TAG, player.getStringUUID());
         data.putBoolean(SUMMONED_TAG, true);
         data.putInt(TICKS_TAG, summonDurationTicks);
+        data.putString("OririSummonSource", sourceId);
 
         // Prevent the summoned mob from despawning naturally
         summoned.setPersistenceRequired();
@@ -274,12 +261,15 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
         rebuildAI(summoned);
 
         // Apply Upgrades based on Level
-        upgradeSummon(summoned, weaponLevel, player);
+        this.profile.applyUpgrades(summoned, weaponLevel, player);
 
         // Glowing effect so the summoner can track the mob
         summoned.addEffect(new MobEffectInstance(MobEffects.GLOWING, summonDurationTicks, 0, false, false));
 
         serverLevel.addFreshEntity(summoned);
+        
+        // Track the new summon
+        activeSummons.add(summoned.getUUID());
 
         int actualCooldown = cooldownTicks;
         if (castingLevel > 0) {
@@ -297,78 +287,7 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
                         .getHolderOrThrow(net.ganyusbathwater.oririmod.enchantment.ModEnchantments.CASTING));
     }
 
-    private void upgradeSummon(Mob summoned, int level, Player player) {
-        if (level <= 1 && summoned.getType() == EntityType.SLIME) {
-            ((Slime) summoned).setSize(2, true);
-        } else if (level <= 1 && summoned.getType() == EntityType.MAGMA_CUBE) {
-            ((Slime) summoned).setSize(2, true);
-        }
-
-        if (level >= 2) {
-            if (summoned.getType() == EntityType.ZOMBIE) {
-                summoned.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-            } else if (summoned.getType() == EntityType.BOGGED || summoned.getType() == EntityType.STRAY) {
-                ItemStack bow = new ItemStack(Items.BOW);
-                bow.enchant(player.level().registryAccess()
-                        .registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
-                        .getHolderOrThrow(Enchantments.POWER), 2);
-                bow.enchant(player.level().registryAccess()
-                        .registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
-                        .getHolderOrThrow(Enchantments.PUNCH), 1);
-                summoned.setItemSlot(EquipmentSlot.MAINHAND, bow);
-            } else if (summoned.getType() == EntityType.IRON_GOLEM) {
-                summoned.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, -1, 0, false, false));
-            } else if (summoned.getType() == EntityType.BLAZE) {
-                AttributeInstance maxHealth = summoned.getAttribute(Attributes.MAX_HEALTH);
-                if (maxHealth != null) {
-                    maxHealth.addPermanentModifier(
-                            new AttributeModifier(ResourceLocation.withDefaultNamespace("blaze_level2_health"), 20.0,
-                                    AttributeModifier.Operation.ADD_VALUE));
-                    summoned.setHealth(summoned.getMaxHealth());
-                }
-            } else if (summoned.getType() == EntityType.SLIME || summoned.getType() == EntityType.MAGMA_CUBE) {
-                ((Slime) summoned).setSize(4, true);
-            }
-        }
-
-        if (level >= 3) {
-            if (summoned.getType() == EntityType.ZOMBIE) {
-                summoned.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-                summoned.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-                summoned.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
-                summoned.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
-            } else if (summoned.getType() == EntityType.STRAY) {
-                summoned.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-                summoned.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-                summoned.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
-                summoned.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
-            } else if (summoned.getType() == EntityType.IRON_GOLEM) {
-                AttributeInstance maxHealth = summoned.getAttribute(Attributes.MAX_HEALTH);
-                if (maxHealth != null) {
-                    maxHealth.addPermanentModifier(
-                            new AttributeModifier(ResourceLocation.withDefaultNamespace("golem_level3_health"), 50.0,
-                                    AttributeModifier.Operation.ADD_VALUE));
-                    summoned.setHealth(summoned.getMaxHealth());
-                }
-            } else if (summoned.getType() == EntityType.BLAZE) {
-                AttributeInstance maxHealth = summoned.getAttribute(Attributes.MAX_HEALTH);
-                if (maxHealth != null) {
-                    maxHealth.addPermanentModifier(
-                            new AttributeModifier(ResourceLocation.withDefaultNamespace("blaze_level3_health"), 40.0,
-                                    AttributeModifier.Operation.ADD_VALUE));
-                    summoned.setHealth(summoned.getMaxHealth());
-                }
-            } else if (summoned.getType() == EntityType.SLIME || summoned.getType() == EntityType.MAGMA_CUBE) {
-                AttributeInstance maxHealth = summoned.getAttribute(Attributes.MAX_HEALTH);
-                if (maxHealth != null) {
-                    maxHealth.addPermanentModifier(
-                            new AttributeModifier(ResourceLocation.withDefaultNamespace("slime_level3_health"), 40.0,
-                                    AttributeModifier.Operation.ADD_VALUE));
-                    summoned.setHealth(summoned.getMaxHealth());
-                }
-            }
-        }
-    }
+    // Upgrades handled by ISummonProfile
 
     public static void rebuildAI(Mob mob) {
         // Clear all existing target goals

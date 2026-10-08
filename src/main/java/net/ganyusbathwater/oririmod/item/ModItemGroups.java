@@ -449,6 +449,7 @@ public class ModItemGroups {
                         output.accept(ModItems.DUNGEON_SKIPPER.get());
                         output.accept(ModItems.COSMIC_EXAMPLE); // Stage 1 tooltip test item
                         acceptAllLevels(output, ModItems.ZOMBIE_ENCYCLOPEDIA);
+                        acceptAllLevels(output, ModItems.EYE_OF_DESOLATION_MANUAL);
                         acceptAllLevels(output, ModItems.SKELETON_ENCYCLOPEDIA);
                         acceptAllLevels(output, ModItems.IRON_GOLEM_MANUAL);
                         acceptAllLevels(output, ModItems.BLAZING_PYROMANIAC_GUIDE);

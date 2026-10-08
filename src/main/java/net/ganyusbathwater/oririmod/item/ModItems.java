@@ -457,24 +457,27 @@ public class ModItems {
 
         public static final DeferredItem<SummonerWeaponItem> ZOMBIE_ENCYCLOPEDIA = ITEMS.register("zombie_encyclopedia",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
-                                        EntityType.ZOMBIE, ModRarity.RARE, 30, 20, 600, 20));
+                                        new net.ganyusbathwater.oririmod.item.custom.magic.summon.ZombieSummonProfile(), ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> SKELETON_ENCYCLOPEDIA = ITEMS.register(
                         "skeleton_encyclopedia",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
-                                        EntityType.SKELETON, ModRarity.RARE, 30, 20, 600, 20));
+                                        new net.ganyusbathwater.oririmod.item.custom.magic.summon.SkeletonSummonProfile(), ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> IRON_GOLEM_MANUAL = ITEMS.register("iron_golem_manual",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
-                                        EntityType.IRON_GOLEM, ModRarity.RARE, 30, 20, 600, 20));
+                                        new net.ganyusbathwater.oririmod.item.custom.magic.summon.IronGolemSummonProfile(), ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> BLAZING_PYROMANIAC_GUIDE = ITEMS.register(
                         "blazing_pyromaniac_guide",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
-                                        EntityType.BLAZE, ModRarity.RARE, 30, 20, 600, 20));
+                                        new net.ganyusbathwater.oririmod.item.custom.magic.summon.BlazeSummonProfile(), ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> MAGMA_COOKING_BOOK = ITEMS.register("magma_cooking_book",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
-                                        EntityType.MAGMA_CUBE, ModRarity.RARE, 30, 20, 600, 20));
+                                        new net.ganyusbathwater.oririmod.item.custom.magic.summon.SlimeSummonProfile(EntityType.MAGMA_CUBE), ModRarity.RARE, 30, 20, 600, 20));
         public static final DeferredItem<SummonerWeaponItem> SLIMY_COOKING_BOOK = ITEMS.register("slimy_cooking_book",
                         () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
-                                        EntityType.SLIME, ModRarity.RARE, 30, 20, 600, 20));
+                                        new net.ganyusbathwater.oririmod.item.custom.magic.summon.SlimeSummonProfile(EntityType.SLIME), ModRarity.RARE, 30, 20, 600, 20));
+        public static final DeferredItem<SummonerWeaponItem> EYE_OF_DESOLATION_MANUAL = ITEMS.register("eye_of_desolation_manual",
+                        () -> new SummonerWeaponItem(new Item.Properties().stacksTo(1).durability(128),
+                                        new net.ganyusbathwater.oririmod.item.custom.magic.summon.EyeOfDesolationSummonProfile(), ModRarity.RARE, 60, 20, 600, 20));
         public static final DeferredItem<IvyBotanicGuideItem> IVY_BOTANIC_GUIDE = ITEMS.register("ivy_botanic_guide",
                         () -> new IvyBotanicGuideItem(new Item.Properties().stacksTo(1).durability(128)));
 

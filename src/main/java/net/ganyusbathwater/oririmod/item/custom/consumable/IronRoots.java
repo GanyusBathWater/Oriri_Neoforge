@@ -76,7 +76,7 @@ public class IronRoots extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.iron_roots.lore"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.iron_roots.lore");
 
         if (context.level() != null && context.level().isClientSide()) {
             Player player = Minecraft.getInstance().player;
@@ -84,11 +84,7 @@ public class IronRoots extends Item {
                 AttributeInstance armorAttribute = player.getAttribute(Attributes.ARMOR);
                 boolean hasModifier = armorAttribute != null && armorAttribute.getModifier(ARMOR_MODIFIER_ID) != null;
 
-                if (hasModifier) {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.consumable.eaten").withStyle(ChatFormatting.RED));
-                } else {
-                    tooltipComponents.add(Component.translatable("tooltip.oririmod.iron_roots.uneaten").withStyle(ChatFormatting.GRAY));
-                }
+                net.ganyusbathwater.oririmod.util.TooltipHelper.addConsumableStatus(tooltipComponents, hasModifier, "tooltip.oririmod.iron_roots.uneaten");
             }
         }
     }

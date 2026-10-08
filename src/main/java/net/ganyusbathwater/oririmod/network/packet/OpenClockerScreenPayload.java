@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record OpenClockerScreenPayload(BlockPos pos, int mode, int delay, int timeOn, int timeOff, boolean useSeconds) implements CustomPacketPayload {
+public record OpenClockerScreenPayload(BlockPos pos, int mode, int delay, int timeOn, int timeOff, boolean useSeconds, boolean emitLight) implements CustomPacketPayload {
     public static final Type<OpenClockerScreenPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "open_clocker_screen"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenClockerScreenPayload> STREAM_CODEC = StreamCodec.of(
@@ -18,6 +18,7 @@ public record OpenClockerScreenPayload(BlockPos pos, int mode, int delay, int ti
                 buf.writeInt(payload.timeOn());
                 buf.writeInt(payload.timeOff());
                 buf.writeBoolean(payload.useSeconds());
+                buf.writeBoolean(payload.emitLight());
             },
             buf -> new OpenClockerScreenPayload(
                     buf.readBlockPos(),
@@ -25,6 +26,7 @@ public record OpenClockerScreenPayload(BlockPos pos, int mode, int delay, int ti
                     buf.readInt(),
                     buf.readInt(),
                     buf.readInt(),
+                    buf.readBoolean(),
                     buf.readBoolean()
             )
     );

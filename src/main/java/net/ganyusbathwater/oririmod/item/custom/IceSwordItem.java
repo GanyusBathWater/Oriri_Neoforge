@@ -19,6 +19,6 @@ public class IceSwordItem extends CustomSwordItem {
     @Override
     public void appendHoverText(ItemStack pStack, net.minecraft.world.item.Item.TooltipContext pContext, java.util.List<net.minecraft.network.chat.Component> pTooltipComponents, net.minecraft.world.item.TooltipFlag pIsAdvanced) {
         super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
-        pTooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.ice_sword").withStyle(net.minecraft.ChatFormatting.AQUA));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(pTooltipComponents, "tooltip.oririmod.ice_sword");
     }
 }

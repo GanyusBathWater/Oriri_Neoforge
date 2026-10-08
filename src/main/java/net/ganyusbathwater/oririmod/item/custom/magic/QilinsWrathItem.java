@@ -87,7 +87,7 @@ public class QilinsWrathItem extends CustomSwordItem {
         super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
         
         int actualManaCost = ModManaUtil.getActualManaCost(MANA_COST, pStack, pContext);
-        pTooltipComponents.add(Component.translatable("tooltip.oririmod.mana_cost", actualManaCost).withStyle(ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(pTooltipComponents, actualManaCost);
         pTooltipComponents.add(Component.translatable("tooltip.oririmod.qilins_wrath.desc").withStyle(ChatFormatting.DARK_RED));
     }
 }

@@ -93,6 +93,7 @@ public class OririMod {
         net.ganyusbathwater.oririmod.loot.ModLootConditionTypes.register(modEventBus);
         net.ganyusbathwater.oririmod.loot.ModLootModifiers.register(modEventBus);
         ModSounds.register(modEventBus);
+        net.ganyusbathwater.oririmod.attachment.ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
 
         // Register entity attributes (required for custom Monster subclasses)
         modEventBus.addListener(this::registerEntityAttributes);

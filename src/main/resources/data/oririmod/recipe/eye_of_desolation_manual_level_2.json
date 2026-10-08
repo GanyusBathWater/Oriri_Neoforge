@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "B": {
+      "item": "oririmod:eye_of_desolation_manual"
+    }
+  },
+  "pattern": [
+    "IRI",
+    "DBD",
+    "I I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "oririmod:eye_of_desolation_manual",
+    "components": {
+      "minecraft:custom_data": "{oriri_level:2}"
+    }
+  }
+}

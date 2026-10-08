@@ -37,6 +37,7 @@ public class ModItemTagProvider extends ItemTagsProvider {
                         net.ganyusbathwater.oririmod.item.ModItems.BOOK_OF_WISE.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.STAFF_OF_ALMIGHTY.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.ZOMBIE_ENCYCLOPEDIA.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.EYE_OF_DESOLATION_MANUAL.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.SKELETON_ENCYCLOPEDIA.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.IRON_GOLEM_MANUAL.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.BLAZING_PYROMANIAC_GUIDE.get(),

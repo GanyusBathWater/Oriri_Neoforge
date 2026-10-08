@@ -46,9 +46,14 @@ public class SoulShardItem extends Item {
         net.minecraft.nbt.CompoundTag tag = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         if (tag.contains("captured_entity")) {
             String entityId = tag.getString("captured_entity");
-            tooltipComponents.add(net.minecraft.network.chat.Component.literal("Entity: " + entityId).withStyle(net.minecraft.ChatFormatting.GRAY));
+            java.util.Optional<net.minecraft.world.entity.EntityType<?>> optType = net.minecraft.world.entity.EntityType.byString(entityId);
+            if (optType.isPresent()) {
+                tooltipComponents.add(net.minecraft.network.chat.Component.literal("Entity: ").withStyle(net.minecraft.ChatFormatting.GRAY).append(optType.get().getDescription().copy().withStyle(net.minecraft.ChatFormatting.WHITE)));
+            } else {
+                tooltipComponents.add(net.minecraft.network.chat.Component.literal("Entity: " + entityId).withStyle(net.minecraft.ChatFormatting.GRAY));
+            }
         } else {
-            tooltipComponents.add(net.minecraft.network.chat.Component.literal("Empty (Right-click a mob to capture)").withStyle(net.minecraft.ChatFormatting.GRAY));
+            tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.soul_shard_empty").withStyle(net.minecraft.ChatFormatting.GRAY));
         }
         super.appendHoverText(stack, tooltipContext, tooltipComponents, tooltipFlag);
     }

@@ -62,20 +62,36 @@ public final class ColorHandler {
         ItemColor mermaidScaleItem = (stack, tintIndex) -> {
             if (tintIndex == 0) {
                 net.minecraft.world.item.DyeColor color = stack.get(net.minecraft.core.component.DataComponents.BASE_COLOR);
-                if (color != null) return color.getTextureDiffuseColor();
+                if (color != null) return color.getTextureDiffuseColor() | 0xFF000000;
             }
-            return -1;
+            return 0xFFFFFFFF;
         };
         event.register(mermaidScaleItem, net.ganyusbathwater.oririmod.item.ModItems.MERMAID_SCALE.get());
 
         ItemColor teleporterItem = (stack, tintIndex) -> {
             if (tintIndex == 0) {
                 net.minecraft.world.item.DyeColor color = stack.get(net.minecraft.core.component.DataComponents.BASE_COLOR);
-                if (color != null) return color.getTextureDiffuseColor();
+                if (color != null) return color.getTextureDiffuseColor() | 0xFF000000;
             }
-            return -1;
+            return 0xFFFFFFFF;
         };
         event.register(teleporterItem, net.ganyusbathwater.oririmod.block.ModBlocks.TELEPORTER_BLOCK.get());
+
+        ItemColor soulShardColor = (stack, tintIndex) -> {
+            net.minecraft.nbt.CompoundTag tag = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+            if (tag.contains("captured_entity")) {
+                String entityId = tag.getString("captured_entity");
+                java.util.Optional<net.minecraft.world.entity.EntityType<?>> optType = net.minecraft.world.entity.EntityType.byString(entityId);
+                if (optType.isPresent()) {
+                    net.minecraft.world.item.SpawnEggItem egg = net.minecraft.world.item.SpawnEggItem.byId(optType.get());
+                    if (egg != null) {
+                        return egg.getColor(tintIndex) | 0xFF000000; // Force opaque alpha for Sodium/Iris
+                    }
+                }
+            }
+            return 0xFFFFFFFF; // Opaque white
+        };
+        event.register(soulShardColor, net.ganyusbathwater.oririmod.item.ModItems.SOUL_SHARD.get());
     }
 
     // ---------- Helpers ----------

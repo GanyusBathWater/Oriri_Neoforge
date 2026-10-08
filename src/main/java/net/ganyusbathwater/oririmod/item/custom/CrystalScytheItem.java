@@ -22,7 +22,7 @@ public class CrystalScytheItem extends CustomScytheItem {
     public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context,
             java.util.List<net.minecraft.network.chat.Component> tooltipComponents,
             net.minecraft.world.item.TooltipFlag tooltipFlag) {
-        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.scythe.anti_heal"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.scythe.anti_heal");
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }

@@ -20,16 +20,15 @@ public class ArbiterCrossbowItem extends CustomCrossbowItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.arbiter_crossbow.ability").withStyle(ChatFormatting.DARK_PURPLE));
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.arbiter_crossbow.lore").withStyle(ChatFormatting.GRAY));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.arbiter_crossbow.ability");
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.arbiter_crossbow.lore");
 
         CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         int currentLevel = data.copyTag().contains("oriri_level") ? data.copyTag().getInt("oriri_level") : 1;
         
         if (currentLevel > 1) {
-            tooltipComponents.add(Component.empty());
-            tooltipComponents.add(Component.translatable("item.oririmod.arbiter_crossbow.level", currentLevel).withStyle(ChatFormatting.YELLOW));
-            tooltipComponents.add(Component.translatable("item.oririmod.arbiter_crossbow.level." + currentLevel + ".description").withStyle(ChatFormatting.GOLD));
+            net.ganyusbathwater.oririmod.util.TooltipHelper.addEmptyLine(tooltipComponents);
+            net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltipComponents, "item.oririmod.arbiter_crossbow", currentLevel);
         }
     }
 

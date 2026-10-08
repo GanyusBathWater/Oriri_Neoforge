@@ -78,7 +78,8 @@ public class EmissiveClockerBlock extends BaseEntityBlock {
                             clocker.getDelay(), 
                             clocker.getTimeOn(), 
                             clocker.getTimeOff(), 
-                            clocker.isUseSeconds()
+                            clocker.isUseSeconds(),
+                            state.getValue(EMIT_LIGHT)
                         )
                     );
                 }
@@ -113,9 +114,9 @@ public class EmissiveClockerBlock extends BaseEntityBlock {
     }
 
     private boolean isReceivingPower(Level level, BlockPos pos, BlockState state) {
-        Direction inputDirection = state.getValue(FACING);
+        Direction inputDirection = state.getValue(FACING).getOpposite();
         BlockPos inputPos = pos.relative(inputDirection);
-        return level.getSignal(inputPos, inputDirection) > 0;
+        return level.getSignal(inputPos, inputDirection) > 0 || level.hasNeighborSignal(pos);
     }
 
     @Override
@@ -130,6 +131,19 @@ public class EmissiveClockerBlock extends BaseEntityBlock {
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             super.onRemove(state, level, pos, newState, isMoving);
+        }
+    }
+
+    @Override
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        if (!state.is(oldState.getBlock())) {
+            if (!level.isClientSide) {
+                boolean isPowered = isReceivingPower(level, pos, state);
+                BlockEntity entity = level.getBlockEntity(pos);
+                if (entity instanceof EmissiveClockerBlockEntity clocker) {
+                    clocker.onNeighborUpdate(isPowered);
+                }
+            }
         }
     }
 }
