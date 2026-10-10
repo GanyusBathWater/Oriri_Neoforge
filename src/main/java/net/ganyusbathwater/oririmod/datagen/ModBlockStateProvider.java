@@ -62,7 +62,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         );
 
                         Direction dir = state.getValue(net.ganyusbathwater.oririmod.block.custom.EmissiveClockerBlock.FACING);
-                        return builder.rotationY(((int) dir.toYRot() + 180) % 360).build();
+                        int rotX = dir == Direction.DOWN ? 90 : dir == Direction.UP ? 270 : 0;
+                        int rotY = dir.getAxis().isVertical() ? 0 : ((int) dir.toYRot() + 180) % 360;
+                        return builder.rotationX(rotX).rotationY(rotY).build();
                 });
                 simpleBlockItem(ModBlocks.EMISSIVE_CLOCKER.get(), new net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile(modLoc("block/emissive_clocker_off")));
 

@@ -366,36 +366,27 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
     @Override
     public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
         String descriptionId = this.getDescriptionId();
-
         // Element
         String elementKey = descriptionId + ".element";
         // Element is handled by TooltipHandler
-
         // Mana Cost
         int actualManaCost = ModManaUtil.getActualManaCost(this.manaCost, stack, context);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
-
-        // Damage
         if (this.ability != MagicBoltAbility.ENDER) {
-            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(stack)).withStyle(net.minecraft.ChatFormatting.GRAY));
         }
-
         // Level info if METEOR (Staff of Cosmos) or ETERNAL_ICE (Staff of Eternal Ice) or BLAZE (Staff of Hell)
-        if (this.ability == MagicBoltAbility.METEOR || this.ability == MagicBoltAbility.ETERNAL_ICE || this.ability == MagicBoltAbility.BLAZE) {
-            int unlockedLevel = getUnlockedLevel(stack);
-            tooltipComponents.add(Component.translatable(descriptionId + ".level", unlockedLevel));
-            if (unlockedLevel > 1) {
-                tooltipComponents.add(Component.translatable(descriptionId + ".level." + unlockedLevel + ".description"));
-            }
-        }
-
         // Lore
         String loreKey = descriptionId + ".lore";
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, loreKey);
-
-        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
-
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        if (this.ability == MagicBoltAbility.METEOR || this.ability == MagicBoltAbility.ETERNAL_ICE || this.ability == MagicBoltAbility.BLAZE) {
+            int unlockedLevel = getUnlockedLevel(stack);
+            net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltipComponents, descriptionId, unlockedLevel);
+        }
+        if (this.ability != MagicBoltAbility.BLAZE && this.ability != MagicBoltAbility.ETERNAL_ICE) {
+            net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, descriptionId.replace("item", "tooltip") + ".ability");
+        }
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, loreKey);
+        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
     }
 
     @Override

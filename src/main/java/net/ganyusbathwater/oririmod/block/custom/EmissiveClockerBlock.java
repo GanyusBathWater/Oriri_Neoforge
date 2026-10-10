@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class EmissiveClockerBlock extends BaseEntityBlock {
     public static final MapCodec<EmissiveClockerBlock> CODEC = simpleCodec(EmissiveClockerBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     public static final BooleanProperty EMIT_LIGHT = BooleanProperty.create("emit_light");
 
@@ -46,7 +46,7 @@ public class EmissiveClockerBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return this.defaultBlockState().setValue(FACING, context.getNearestLookingDirection().getOpposite());
     }
 
     @Override
@@ -98,8 +98,8 @@ public class EmissiveClockerBlock extends BaseEntityBlock {
         if (!state.getValue(LIT)) {
             return 0;
         }
-        // Emits power to all sides EXCEPT the input face (FACING)
-        return direction == state.getValue(FACING) ? 0 : 15;
+        // Emits power to all sides EXCEPT the input face (which is FACING.getOpposite())
+        return direction == state.getValue(FACING).getOpposite() ? 0 : 15;
     }
 
     @Override
@@ -116,7 +116,7 @@ public class EmissiveClockerBlock extends BaseEntityBlock {
     private boolean isReceivingPower(Level level, BlockPos pos, BlockState state) {
         Direction inputDirection = state.getValue(FACING).getOpposite();
         BlockPos inputPos = pos.relative(inputDirection);
-        return level.getSignal(inputPos, inputDirection) > 0 || level.hasNeighborSignal(pos);
+        return level.getSignal(inputPos, inputDirection) > 0;
     }
 
     @Override

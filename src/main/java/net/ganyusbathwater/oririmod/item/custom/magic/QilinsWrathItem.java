@@ -85,9 +85,8 @@ public class QilinsWrathItem extends CustomSwordItem {
     @Override
     public void appendHoverText(ItemStack pStack, net.minecraft.world.item.Item.TooltipContext pContext, java.util.List<Component> pTooltipComponents, net.minecraft.world.item.TooltipFlag pIsAdvanced) {
         super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
-        
         int actualManaCost = ModManaUtil.getActualManaCost(MANA_COST, pStack, pContext);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(pTooltipComponents, actualManaCost);
         pTooltipComponents.add(Component.translatable("tooltip.oririmod.qilins_wrath.desc").withStyle(ChatFormatting.DARK_RED));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(pTooltipComponents, actualManaCost);
     }
 }

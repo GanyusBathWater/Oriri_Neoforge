@@ -74,8 +74,6 @@ public class TheFirstApple extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.the_first_apple.lore");
-
         if (context.level() != null && context.level().isClientSide()) {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
@@ -86,5 +84,6 @@ public class TheFirstApple extends Item {
                 }
             }
         }
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.the_first_apple.lore");
     }
 }

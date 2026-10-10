@@ -496,23 +496,17 @@ public class OmniMagicItem extends Item implements ModRarityCarrier {
     @Override
     public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
         OmniAbility ab = getSelected(stack);
-
         // Active Ability
         tooltipComponents.add(Component.literal("Selected: " + prettyName(ab)).withStyle(net.minecraft.ChatFormatting.GOLD));
-
         // Element is handled by TooltipHandler
-
         // Mana Cost
         int actualManaCost = net.ganyusbathwater.oririmod.mana.ModManaUtil.getActualManaCost(ab.getManaCost(), stack, context);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
-
-        // Damage (only if it's a bolt and not ENDER)
         if (ab.isBolt() && ab.toBolt() != MagicBoltAbility.ENDER) {
-            tooltipComponents.add(Component.translatable("tooltip.oririmod.damage", getDamageTooltip(ab)).withStyle(net.minecraft.ChatFormatting.GRAY));
         }
-
         // We do not append the lore as per the markdown instructions.
-
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.staff_of_almighty.ability");
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.staff_of_almighty.lore");
         tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
     }
 

@@ -46,6 +46,15 @@ public class CustomSwordItem extends SwordItem implements ModRarityCarrier {
         return super.getHighlightTip(item, displayName);
     }
 
+    @Override
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        String descriptionId = this.getDescriptionId();
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, descriptionId.replace("item", "tooltip") + ".ability");
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, descriptionId + ".lore");
+        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    }
+
     /**
      * Einfache HSV->RGB Konvertierung (h,s,v in [0,1]).
      * Gibt eine 0xRRGGBB-Farbe zurück.

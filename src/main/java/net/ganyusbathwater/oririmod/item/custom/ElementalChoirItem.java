@@ -201,6 +201,13 @@ public class ElementalChoirItem extends SwordItem implements GeoItem {
     }
 
     @Override
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<net.minecraft.network.chat.Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("item.oririmod.elemental_choir.element"));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.elemental_choir.ability");
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.elemental_choir.lore");
+    }
+
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return this.cache;
     }

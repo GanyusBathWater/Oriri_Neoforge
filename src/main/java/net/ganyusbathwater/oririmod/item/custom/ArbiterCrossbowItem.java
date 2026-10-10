@@ -20,16 +20,14 @@ public class ArbiterCrossbowItem extends CustomCrossbowItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.arbiter_crossbow.ability");
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.arbiter_crossbow.lore");
-
         CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         int currentLevel = data.copyTag().contains("oriri_level") ? data.copyTag().getInt("oriri_level") : 1;
-        
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.arbiter_crossbow.ability");
         if (currentLevel > 1) {
             net.ganyusbathwater.oririmod.util.TooltipHelper.addEmptyLine(tooltipComponents);
             net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltipComponents, "item.oririmod.arbiter_crossbow", currentLevel);
         }
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, "tooltip.oririmod.arbiter_crossbow.lore");
     }
 
     @Override

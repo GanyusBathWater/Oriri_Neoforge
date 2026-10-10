@@ -46,6 +46,15 @@ public class ForcefieldEmitterBlockItem extends BlockItem implements GeoItem {
     }
 
     @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<net.minecraft.network.chat.Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        String name = this.getDescriptionId();
+        if (name.contains("repellent")) net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.repellent.desc");
+        else if (name.contains("attracting")) net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.attracting.desc");
+        else if (name.contains("protection")) net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.protection.desc");
+        else if (name.contains("modifier")) net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.modifier.desc");
+    }
+
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
     }

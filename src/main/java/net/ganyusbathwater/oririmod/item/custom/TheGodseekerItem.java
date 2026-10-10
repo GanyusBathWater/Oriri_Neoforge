@@ -107,6 +107,7 @@ public class TheGodseekerItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.the_godseeker.ability");
         tooltipComponents.add(Component.translatable("tooltip.oririmod.the_godseeker.lore").withStyle(ChatFormatting.DARK_GRAY));
     }
 }

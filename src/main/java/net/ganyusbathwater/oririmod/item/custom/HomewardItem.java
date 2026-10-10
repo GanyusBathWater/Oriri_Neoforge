@@ -186,9 +186,9 @@ public class HomewardItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltip, "tooltip.oririmod.homeward.lore");
         tooltip.add(Component.translatable("tooltip.oririmod.homeward.desc")
-                .withStyle(ChatFormatting.GRAY));
+                .withStyle(ChatFormatting.LIGHT_PURPLE));
         net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltip, MANA_COST);
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltip, "tooltip.oririmod.homeward.lore");
     }
 }

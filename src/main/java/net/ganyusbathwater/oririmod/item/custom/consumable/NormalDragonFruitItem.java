@@ -43,6 +43,6 @@ public class NormalDragonFruitItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.normal_dragon_fruit.cleanse").withStyle(ChatFormatting.GREEN));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.normal_dragon_fruit.cleanse");
     }
 }

@@ -22,7 +22,7 @@ public class GildedNetheriteScytheItem extends CustomScytheItem {
     public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context,
             java.util.List<net.minecraft.network.chat.Component> tooltipComponents,
             net.minecraft.world.item.TooltipFlag tooltipFlag) {
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.scythe.broken");
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, "tooltip.oririmod.scythe.broken");
     }
 }

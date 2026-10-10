@@ -32,19 +32,16 @@ public class HarbingerScytheItem extends CustomScytheItem {
         target.igniteForSeconds(5.0f);
     }
 
-    @Override
     public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context,
             java.util.List<net.minecraft.network.chat.Component> tooltipComponents,
             net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
         long now = System.currentTimeMillis();
         float phase = (now % 4000L) / 4000.0f;
         int rgb = hsvToRgb(phase, 1.0f, 1.0f);
-
         net.minecraft.network.chat.Component rainbowEffects = net.minecraft.network.chat.Component.translatable("tooltip.oririmod.scythe.harbinger.effects")
                 .withStyle(style -> style.withColor(rgb));
-
-        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.scythe.harbinger", rainbowEffects));
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.scythe.harbinger", rainbowEffects).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
     }
 
     private static int hsvToRgb(float h, float s, float v) {

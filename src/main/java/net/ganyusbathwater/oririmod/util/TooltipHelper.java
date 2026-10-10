@@ -29,7 +29,9 @@ public class TooltipHelper {
      * Description Style: GOLD
      */
     public static void addLevelInfo(List<Component> tooltip, String baseKey, int level) {
-        tooltip.add(Component.translatable(baseKey + ".level", level).withStyle(ChatFormatting.YELLOW));
+        tooltip.add(Component.translatable(baseKey + ".level", 
+            Component.literal(String.valueOf(level)).withStyle(ChatFormatting.YELLOW)
+        ).withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.translatable(baseKey + ".level." + level + ".description").withStyle(ChatFormatting.GOLD));
     }
 

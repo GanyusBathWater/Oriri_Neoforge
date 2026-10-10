@@ -20,7 +20,7 @@ public class DogTagItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("tooltip.oririmod.dog_tag"));
+        tooltipComponents.add(Component.translatable("tooltip.oririmod.dog_tag").withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 }

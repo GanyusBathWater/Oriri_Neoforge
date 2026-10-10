@@ -4,20 +4,33 @@ import net.ganyusbathwater.oririmod.block.custom.EmissiveClockerBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import java.util.PriorityQueue;
 
 public class EmissiveClockerBlockEntity extends BlockEntity {
     public enum Mode {
         REPEATER, PULSE, CLOCK
     }
 
-    private enum Phase {
-        IDLE, WAITING_ON, ON, WAITING_OFF, OFF
+    private static class StateChange implements Comparable<StateChange> {
+        long triggerTime;
+        boolean lit;
+
+        StateChange(long triggerTime, boolean lit) {
+            this.triggerTime = triggerTime;
+            this.lit = lit;
+        }
+
+        @Override
+        public int compareTo(StateChange o) {
+            return Long.compare(this.triggerTime, o.triggerTime);
+        }
     }
 
     private Mode mode = Mode.REPEATER;
@@ -26,8 +39,8 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
     private int timeOff = 20;
     private boolean useSeconds = false;
 
-    private Phase currentPhase = Phase.IDLE;
     private boolean lastInputState = false;
+    private final PriorityQueue<StateChange> queue = new PriorityQueue<>();
 
     public EmissiveClockerBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.EMISSIVE_CLOCKER_BE.get(), pos, blockState);
@@ -58,10 +71,9 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
     }
 
     private void resetState() {
-        currentPhase = Phase.IDLE;
+        queue.clear();
         if (level != null && !level.isClientSide) {
             level.setBlock(getBlockPos(), getBlockState().setValue(EmissiveClockerBlock.LIT, false), 3);
-            // We should ideally read the actual input state here
             lastInputState = false;
         }
     }
@@ -70,78 +82,72 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
         if (isPowered == lastInputState) return;
         lastInputState = isPowered;
 
+        if (level == null || level.isClientSide) return;
+        long currentTime = level.getGameTime();
+
         if (mode == Mode.REPEATER) {
-            if (isPowered && currentPhase != Phase.WAITING_ON && currentPhase != Phase.ON) {
-                currentPhase = Phase.WAITING_ON;
-                scheduleNextTick(delay);
-            } else if (!isPowered && currentPhase != Phase.WAITING_OFF && currentPhase != Phase.OFF && currentPhase != Phase.IDLE) {
-                currentPhase = Phase.WAITING_OFF;
-                scheduleNextTick(delay);
-            }
+            int delayTicks = useSeconds ? delay * 20 : delay;
+            queue.add(new StateChange(currentTime + delayTicks, isPowered));
+            level.scheduleTick(getBlockPos(), getBlockState().getBlock(), delayTicks);
         } else if (mode == Mode.PULSE) {
-            if (isPowered && currentPhase == Phase.IDLE) {
-                currentPhase = Phase.WAITING_ON;
-                scheduleNextTick(delay);
+            if (isPowered) {
+                if (queue.isEmpty() && !getBlockState().getValue(EmissiveClockerBlock.LIT)) {
+                    int delayTicks = useSeconds ? delay * 20 : delay;
+                    int onTicks = useSeconds ? timeOn * 20 : timeOn;
+                    queue.add(new StateChange(currentTime + delayTicks, true));
+                    queue.add(new StateChange(currentTime + delayTicks + onTicks, false));
+                    level.scheduleTick(getBlockPos(), getBlockState().getBlock(), delayTicks);
+                }
             }
         } else if (mode == Mode.CLOCK) {
-            if (isPowered && currentPhase == Phase.IDLE) {
-                currentPhase = Phase.WAITING_ON;
-                scheduleNextTick(delay);
-            } else if (!isPowered) {
-                // When input stops, clock stops immediately or finishes phase?
-                // Plan: finish current phase, then stop. Or stop immediately.
-                // For simplicity, reset to IDLE and turn off.
+            if (isPowered) {
+                if (queue.isEmpty() && !getBlockState().getValue(EmissiveClockerBlock.LIT)) {
+                    int delayTicks = useSeconds ? delay * 20 : delay;
+                    queue.add(new StateChange(currentTime + delayTicks, true));
+                    level.scheduleTick(getBlockPos(), getBlockState().getBlock(), delayTicks);
+                }
+            } else {
                 resetState();
             }
         }
+        setChanged();
     }
 
     public void onScheduledTick() {
         if (level == null || level.isClientSide) return;
 
-        switch (currentPhase) {
-            case WAITING_ON -> {
-                setLitState(true);
-                if (mode == Mode.PULSE) {
-                    currentPhase = Phase.ON;
-                    scheduleNextTick(timeOn);
-                } else if (mode == Mode.CLOCK) {
-                    currentPhase = Phase.ON;
-                    scheduleNextTick(timeOn);
-                } else {
-                    currentPhase = Phase.ON; // Repeater stays ON until input goes off
-                }
-            }
-            case ON -> {
-                setLitState(false);
-                if (mode == Mode.PULSE) {
-                    currentPhase = Phase.IDLE; // Done pulsing
-                } else if (mode == Mode.CLOCK) {
-                    currentPhase = Phase.OFF;
-                    scheduleNextTick(timeOff);
-                }
-            }
-            case WAITING_OFF -> {
-                setLitState(false);
-                currentPhase = Phase.IDLE;
-            }
-            case OFF -> {
-                if (mode == Mode.CLOCK && lastInputState) {
-                    setLitState(true);
-                    currentPhase = Phase.ON;
-                    scheduleNextTick(timeOn);
-                } else {
-                    currentPhase = Phase.IDLE;
-                }
-            }
-            case IDLE -> {}
-        }
-    }
+        long currentTime = level.getGameTime();
+        boolean stateChanged = false;
+        Boolean finalState = null;
 
-    private void scheduleNextTick(int delayValue) {
-        if (level != null) {
-            int actualTicks = useSeconds ? (delayValue * 20) : delayValue;
-            level.scheduleTick(getBlockPos(), getBlockState().getBlock(), actualTicks);
+        while (!queue.isEmpty() && queue.peek().triggerTime <= currentTime) {
+            StateChange sc = queue.poll();
+            finalState = sc.lit;
+            stateChanged = true;
+        }
+
+        if (stateChanged && finalState != null) {
+            setLitState(finalState);
+            
+            if (mode == Mode.CLOCK) {
+                if (finalState) {
+                    int onTicks = useSeconds ? timeOn * 20 : timeOn;
+                    queue.add(new StateChange(currentTime + onTicks, false));
+                    level.scheduleTick(getBlockPos(), getBlockState().getBlock(), onTicks);
+                } else {
+                    if (lastInputState) {
+                        int offTicks = useSeconds ? timeOff * 20 : timeOff;
+                        queue.add(new StateChange(currentTime + offTicks, true));
+                        level.scheduleTick(getBlockPos(), getBlockState().getBlock(), offTicks);
+                    }
+                }
+            }
+            setChanged();
+        }
+
+        if (!queue.isEmpty()) {
+            long nextDelay = queue.peek().triggerTime - currentTime;
+            level.scheduleTick(getBlockPos(), getBlockState().getBlock(), (int) Math.max(1, nextDelay));
         }
     }
 
@@ -162,8 +168,16 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
         tag.putInt("TimeOn", timeOn);
         tag.putInt("TimeOff", timeOff);
         tag.putBoolean("UseSeconds", useSeconds);
-        tag.putInt("Phase", currentPhase.ordinal());
         tag.putBoolean("LastInput", lastInputState);
+        
+        ListTag queueList = new ListTag();
+        for (StateChange sc : queue) {
+            CompoundTag c = new CompoundTag();
+            c.putLong("Time", sc.triggerTime);
+            c.putBoolean("Lit", sc.lit);
+            queueList.add(c);
+        }
+        tag.put("Queue", queueList);
     }
 
     @Override
@@ -174,8 +188,18 @@ public class EmissiveClockerBlockEntity extends BlockEntity {
         if (tag.contains("TimeOn")) timeOn = tag.getInt("TimeOn");
         if (tag.contains("TimeOff")) timeOff = tag.getInt("TimeOff");
         if (tag.contains("UseSeconds")) useSeconds = tag.getBoolean("UseSeconds");
-        if (tag.contains("Phase")) currentPhase = Phase.values()[tag.getInt("Phase")];
         if (tag.contains("LastInput")) lastInputState = tag.getBoolean("LastInput");
+        
+        queue.clear();
+        if (tag.contains("Queue")) {
+            ListTag queueList = (ListTag) tag.get("Queue");
+            if (queueList != null) {
+                for (int i = 0; i < queueList.size(); i++) {
+                    CompoundTag c = queueList.getCompound(i);
+                    queue.add(new StateChange(c.getLong("Time"), c.getBoolean("Lit")));
+                }
+            }
+        }
     }
 
     @Nullable

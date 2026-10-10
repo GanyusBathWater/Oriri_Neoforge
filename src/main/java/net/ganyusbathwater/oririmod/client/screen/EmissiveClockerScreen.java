@@ -57,11 +57,9 @@ public class EmissiveClockerScreen extends Screen {
     protected void init() {
         super.init();
         int midX = this.width / 2;
-        int startY = 60;
-        int rowSpacing = 28;
 
         this.modeButton = new CustomCycleButton(
-                midX - 70, startY, 140, 20,
+                midX - 70, 0, 140, 20,
                 "Mode", MODES, currentMode,
                 val -> {
                     this.currentMode = val;
@@ -71,26 +69,29 @@ public class EmissiveClockerScreen extends Screen {
         this.modeButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Select the redstone behavior mode")));
         this.addRenderableWidget(this.modeButton);
 
-        this.delayBox = new EditBox(this.font, midX - 70, startY + rowSpacing, 140, 20, Component.literal("Delay"));
+        this.delayBox = new EditBox(this.font, midX - 70, 0, 140, 20, Component.literal("Delay"));
         this.delayBox.setMaxLength(10);
+        this.delayBox.setFilter(s -> s.matches("\\d*"));
         this.delayBox.setValue(String.valueOf(initialDelay));
         this.delayBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Initial delay on power")));
         this.addRenderableWidget(this.delayBox);
 
-        this.timeOnBox = new EditBox(this.font, midX - 70, startY + rowSpacing * 2, 140, 20, Component.literal("Time On"));
+        this.timeOnBox = new EditBox(this.font, midX - 70, 0, 140, 20, Component.literal("Time On"));
         this.timeOnBox.setMaxLength(10);
+        this.timeOnBox.setFilter(s -> s.matches("\\d*"));
         this.timeOnBox.setValue(String.valueOf(initialTimeOn));
         this.timeOnBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Duration ON")));
         this.addRenderableWidget(this.timeOnBox);
 
-        this.timeOffBox = new EditBox(this.font, midX - 70, startY + rowSpacing * 3, 140, 20, Component.literal("Time Off"));
+        this.timeOffBox = new EditBox(this.font, midX - 70, 0, 140, 20, Component.literal("Time Off"));
         this.timeOffBox.setMaxLength(10);
+        this.timeOffBox.setFilter(s -> s.matches("\\d*"));
         this.timeOffBox.setValue(String.valueOf(initialTimeOff));
         this.timeOffBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Duration OFF")));
         this.addRenderableWidget(this.timeOffBox);
 
         this.useSecondsButton = new CustomCycleButton(
-                midX - 70, startY + rowSpacing * 4, 140, 20,
+                midX - 70, 0, 140, 20,
                 "Unit", Arrays.asList("Ticks", "Seconds"), initialUseSeconds ? "Seconds" : "Ticks",
                 val -> {}
         );
@@ -98,7 +99,7 @@ public class EmissiveClockerScreen extends Screen {
         this.addRenderableWidget(this.useSecondsButton);
 
         this.emitLightButton = new CustomCycleButton(
-                midX - 70, startY + rowSpacing * 5, 140, 20,
+                midX - 70, 0, 140, 20,
                 "Emit Light", Arrays.asList("Yes", "No"), initialEmitLight ? "Yes" : "No",
                 val -> {}
         );
@@ -106,7 +107,7 @@ public class EmissiveClockerScreen extends Screen {
         this.addRenderableWidget(this.emitLightButton);
 
         this.addRenderableWidget(Button.builder(Component.literal("Save").withStyle(ChatFormatting.GREEN), b -> saveAndClose())
-                .bounds(this.width / 2 - 70, this.height - 40, 140, 20).build());
+                .bounds(this.width / 2 - 70, this.height - 35, 140, 20).build());
 
         updateUIState();
     }
@@ -131,6 +132,33 @@ public class EmissiveClockerScreen extends Screen {
                 timeOnBox.visible = true;
                 timeOffBox.visible = true;
             }
+        }
+
+        java.util.List<net.minecraft.client.gui.components.AbstractWidget> visibleWidgets = new java.util.ArrayList<>();
+        visibleWidgets.add(modeButton);
+        if (delayBox.visible) visibleWidgets.add(delayBox);
+        if (timeOnBox.visible) visibleWidgets.add(timeOnBox);
+        if (timeOffBox.visible) visibleWidgets.add(timeOffBox);
+        visibleWidgets.add(useSecondsButton);
+        visibleWidgets.add(emitLightButton);
+        
+        int topY = 45;
+        int bottomY = this.height - 45;
+        int availableHeight = bottomY - topY;
+        
+        int widgetCount = visibleWidgets.size();
+        int spacing = 36;
+        int totalHeight = widgetCount * 20 + (widgetCount - 1) * (spacing - 20);
+        
+        if (totalHeight > availableHeight) {
+             spacing = (availableHeight - (widgetCount * 20)) / Math.max(1, widgetCount - 1) + 20;
+             totalHeight = widgetCount * 20 + (widgetCount - 1) * (spacing - 20);
+        }
+        
+        int currentY = topY + (availableHeight - totalHeight) / 2;
+        for (net.minecraft.client.gui.components.AbstractWidget w : visibleWidgets) {
+             w.setY(currentY);
+             currentY += spacing;
         }
     }
 
@@ -163,23 +191,49 @@ public class EmissiveClockerScreen extends Screen {
         guiGraphics.drawCenteredString(this.font, Component.literal(coordText).withStyle(ChatFormatting.GRAY), this.width / 2, 30, 0xFFFFFF);
 
         if (this.modeButton.visible) {
-            guiGraphics.drawString(this.font, "Mode", this.modeButton.getX(), this.modeButton.getY() - 10, 0xDDDDDD);
+            renderLabelWithTooltip(guiGraphics, "Mode", this.modeButton.getX(), this.modeButton.getY() - 10, mouseX, mouseY, 
+                "REPEATER: Passes signal through after a delay.",
+                "PULSE: Emits a single pulse of a set duration.",
+                "CLOCK: Alternates ON/OFF repeatedly while powered.");
         }
         if (this.delayBox.visible) {
-            String label = currentMode.equals("REPEATER") ? "Delay before switching state" : "Initial delay on power";
-            guiGraphics.drawString(this.font, label, this.delayBox.getX(), this.delayBox.getY() - 10, 0xDDDDDD);
+            String label = currentMode.equals("REPEATER") ? "Delay" : "Initial Delay";
+            renderLabelWithTooltip(guiGraphics, label, this.delayBox.getX(), this.delayBox.getY() - 10, mouseX, mouseY, 
+                "REPEATER: Time before the output state changes.",
+                "PULSE: Time to wait before emitting the pulse.",
+                "CLOCK: Initial delay before the clock starts ticking.");
         }
         if (this.timeOnBox.visible) {
-            guiGraphics.drawString(this.font, "Duration ON", this.timeOnBox.getX(), this.timeOnBox.getY() - 10, 0xDDDDDD);
+            renderLabelWithTooltip(guiGraphics, "Duration ON", this.timeOnBox.getX(), this.timeOnBox.getY() - 10, mouseX, mouseY, 
+                "The duration the redstone signal remains ON.");
         }
         if (this.timeOffBox.visible) {
-            guiGraphics.drawString(this.font, "Duration OFF", this.timeOffBox.getX(), this.timeOffBox.getY() - 10, 0xDDDDDD);
+            renderLabelWithTooltip(guiGraphics, "Duration OFF", this.timeOffBox.getX(), this.timeOffBox.getY() - 10, mouseX, mouseY, 
+                "The duration the redstone signal remains OFF between ticks.");
         }
         if (this.useSecondsButton.visible) {
-            guiGraphics.drawString(this.font, "Time Unit", this.useSecondsButton.getX(), this.useSecondsButton.getY() - 10, 0xDDDDDD);
+            renderLabelWithTooltip(guiGraphics, "Time Unit", this.useSecondsButton.getX(), this.useSecondsButton.getY() - 10, mouseX, mouseY, 
+                "Ticks: 20 ticks = 1 second. Fast and precise.",
+                "Seconds: Standard real-time seconds.");
         }
         if (this.emitLightButton.visible) {
-            guiGraphics.drawString(this.font, "Lighting", this.emitLightButton.getX(), this.emitLightButton.getY() - 10, 0xDDDDDD);
+            renderLabelWithTooltip(guiGraphics, "Lighting", this.emitLightButton.getX(), this.emitLightButton.getY() - 10, mouseX, mouseY, 
+                "If enabled, the block will visually emit light when powered.",
+                "Purely cosmetic, does not affect redstone.");
+        }
+    }
+
+    private void renderLabelWithTooltip(GuiGraphics guiGraphics, String label, int x, int y, int mouseX, int mouseY, String... tooltipLines) {
+        String fullLabel = label + " (?)";
+        guiGraphics.drawString(this.font, fullLabel, x, y, 0xDDDDDD);
+        
+        int textWidth = this.font.width(fullLabel);
+        if (mouseX >= x && mouseX <= x + textWidth && mouseY >= y && mouseY <= y + 9) {
+            java.util.List<Component> tooltip = new java.util.ArrayList<>();
+            for (String line : tooltipLines) {
+                tooltip.add(Component.literal(line).withStyle(ChatFormatting.GRAY));
+            }
+            guiGraphics.renderTooltip(this.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
         }
     }
 

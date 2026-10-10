@@ -129,20 +129,15 @@ public class MagicStaffItem extends Item implements ModRarityCarrier {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, java.util.List<Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
         String descriptionId = this.getDescriptionId();
-
         // Mana Cost
         int actualManaCost = ModManaUtil.getActualManaCost(this.manaCost, stack, context);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
-
-        // Damage (None for staffs)
-
         // Lore
         String loreKey = descriptionId + ".lore";
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, loreKey);
-
-        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
-
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addAbility(tooltipComponents, descriptionId.replace("item", "tooltip") + ".ability");
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltipComponents, actualManaCost);
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltipComponents, loreKey);
+        tooltipComponents.addAll(buildModTooltip(stack, context, tooltipFlag));
     }
 
     @Override

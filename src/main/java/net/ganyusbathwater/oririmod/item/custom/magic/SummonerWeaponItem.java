@@ -94,22 +94,15 @@ public class SummonerWeaponItem extends Item implements ModRarityCarrier {
             TooltipFlag flag) {
         int unlockedLevel = Math.max(1, getUnlockedLevel(stack));
         String descriptionId = this.getDescriptionId();
-
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltip, descriptionId, Math.min(3, unlockedLevel));
-
         // Element
         String elementKey = descriptionId + ".element";
         // Element is handled by TooltipHandler
-
         // Mana Cost
         int actualManaCost = net.ganyusbathwater.oririmod.mana.ModManaUtil.getActualManaCost(this.manaCost, stack, context);
-        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltip, actualManaCost);
-
-        // Damage
-        tooltip.add(Component.translatable("tooltip.oririmod.damage", this.profile.getDamageTooltip(unlockedLevel)).withStyle(net.minecraft.ChatFormatting.GRAY));
-
         // Lore
         String loreKey = descriptionId + ".lore";
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltip, descriptionId, Math.min(3, unlockedLevel));
+        net.ganyusbathwater.oririmod.util.TooltipHelper.addManaCost(tooltip, actualManaCost);
         net.ganyusbathwater.oririmod.util.TooltipHelper.addLore(tooltip, loreKey);
         tooltip.addAll(buildModTooltip(stack, context, flag));
     }
