@@ -36,6 +36,8 @@ public class DungeonStageManager {
     public static final String ROLE_INFINITE_SPAWNER = "INFINITE_SPAWNER";
     public static final String ROLE_LOOT_CHEST    = "LOOT_CHEST";
     public static final String ROLE_DEATH_AREA    = "DEATH_AREA";
+    public static final String ROLE_SECRET_CHEST_SPAWN = "SECRET_CHEST_SPAWN";
+    public static final String ROLE_SECRET_BUTTON_SPAWN = "SECRET_BUTTON_SPAWN";
 
     /**
      * Scans all DungeonMarkerEntity instances within the 2048×2048 grid slot
@@ -63,9 +65,21 @@ public class DungeonStageManager {
 
         // Group markers by stage_id
         Map<String, List<DungeonMarkerEntity>> byStage = new LinkedHashMap<>();
+        List<DungeonMarkerEntity> secretChests = new ArrayList<>();
+        List<DungeonMarkerEntity> secretButtons = new ArrayList<>();
+        
         for (DungeonMarkerEntity marker : markers) {
+            if (ROLE_SECRET_CHEST_SPAWN.equalsIgnoreCase(marker.getRole())) {
+                secretChests.add(marker);
+                continue;
+            }
+            if (ROLE_SECRET_BUTTON_SPAWN.equalsIgnoreCase(marker.getRole())) {
+                secretButtons.add(marker);
+                continue;
+            }
             if (ROLE_LOOT_CHEST.equalsIgnoreCase(marker.getRole())) {
                 instance.setLootChestPos(marker.blockPosition());
+                instance.setLootChestYRot(marker.getYRot() + 180.0f);
                 String table = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
                 if (!table.isBlank()) {
                     instance.setLootChestTable(table);
@@ -140,6 +154,73 @@ public class DungeonStageManager {
         // After building the ordered stages, set the initial dungeon spawn to the first stage's spawn point.
         if (!definitions.isEmpty() && definitions.get(0).getPlayerSpawnPos() != null) {
             instance.setPlayerSpawnPos(definitions.get(0).getPlayerSpawnPos());
+        }
+        
+        // Spawn random Secret Chests
+        if (!secretChests.isEmpty()) {
+            int chestLimit = instance.isSpawnAllSecrets() ? secretChests.size() : Math.min(3, secretChests.size());
+            java.util.Collections.shuffle(secretChests);
+            for (int i = 0; i < chestLimit; i++) {
+                DungeonMarkerEntity marker = secretChests.get(i);
+                BlockPos pos = marker.blockPosition();
+                ServerLevel sl = (ServerLevel) marker.level();
+                
+                String table = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
+                if (table.isBlank()) table = "minecraft:chests/simple_dungeon";
+                ResourceLocation lootTableId = ResourceLocation.tryParse(table.contains(":") ? table : "minecraft:" + table);
+                
+                net.minecraft.world.level.block.state.BlockState chestState = net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.ChestBlock.FACING, net.minecraft.core.Direction.fromYRot(marker.getYRot() + 180.0f));
+                sl.setBlock(pos, chestState, 3);
+                
+                if (sl.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE && lootTableId != null) {
+                    chestBE.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTableId), sl.getRandom().nextLong());
+                }
+            }
+        }
+        
+        // Spawn random Secret Buttons
+        if (!secretButtons.isEmpty()) {
+            int buttonLimit = instance.isSpawnAllSecrets() ? secretButtons.size() : Math.min(3, secretButtons.size());
+            java.util.Collections.shuffle(secretButtons);
+            for (int i = 0; i < buttonLimit; i++) {
+                DungeonMarkerEntity marker = secretButtons.get(i);
+                BlockPos pos = marker.blockPosition();
+                ServerLevel sl = (ServerLevel) marker.level();
+                
+                String blockId = marker.getExtraData().getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
+                if (blockId.isBlank()) blockId = "minecraft:stone_button";
+                if (!blockId.contains(":")) blockId = "minecraft:" + blockId;
+                
+                net.minecraft.world.level.block.Block buttonBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockId));
+                if (buttonBlock instanceof net.minecraft.world.level.block.ButtonBlock bb) {
+                    net.minecraft.world.level.block.state.BlockState state = bb.defaultBlockState();
+                    net.minecraft.core.Direction facing = net.minecraft.core.Direction.fromYRot(marker.getYRot() + 180.0f);
+                    net.minecraft.world.level.block.state.properties.AttachFace face = net.minecraft.world.level.block.state.properties.AttachFace.WALL;
+                    
+                    if (marker.getXRot() >= 45) {
+                        face = net.minecraft.world.level.block.state.properties.AttachFace.FLOOR;
+                    } else if (marker.getXRot() <= -45) {
+                        face = net.minecraft.world.level.block.state.properties.AttachFace.CEILING;
+                    } else {
+                        // Keep as WALL, use facing
+                    }
+                    
+                    if (state.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACE)) {
+                        state = state.setValue(net.minecraft.world.level.block.ButtonBlock.FACE, face);
+                    }
+                    if (state.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACING)) {
+                        state = state.setValue(net.minecraft.world.level.block.ButtonBlock.FACING, facing);
+                    }
+                    sl.setBlock(pos, state, 3);
+                } else {
+                    sl.setBlock(pos, buttonBlock.defaultBlockState(), 3);
+                }
+                
+                instance.getSecretButtonPositions().add(pos);
+                String lt = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
+                if (!lt.isBlank()) instance.setSecretButtonLootTable(lt);
+            }
         }
         
         return definitions;

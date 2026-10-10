@@ -231,8 +231,9 @@ public class DungeonMarkerEntity extends Entity {
     public void tick() {
         super.tick();
         if (level().dimension().location().getPath().startsWith("dungeon_")) {
-            // Shrink the bounding box to 0 so F3+B renders absolutely nothing
-            this.setBoundingBox(new net.minecraft.world.phys.AABB(this.position(), this.position()));
+            if (level().isClientSide) {
+                this.discard();
+            }
         }
     }
 

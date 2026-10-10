@@ -21,6 +21,8 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
     private final Set<UUID> spawnedEntities = new HashSet<>();
     private final Set<String> stageKeys = new HashSet<>();
     private int totalEnemies = 0;
+    private int ticksSinceLastKill = 0;
+    private int lastSize = -1;
 
     public KillAllEnemiesStage(StageDefinition definition) {
         super(definition);
@@ -82,6 +84,22 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
             }
             return dead;
         });
+
+        int currentSize = spawnedEntities.size();
+        if (currentSize != lastSize) {
+            ticksSinceLastKill = 0;
+            lastSize = currentSize;
+        } else if (currentSize > 0) {
+            ticksSinceLastKill += 20;
+            if (ticksSinceLastKill >= 2400) { // 2 minutes
+                for (UUID uuid : new java.util.ArrayList<>(spawnedEntities)) {
+                    var entity = level.getEntity(uuid);
+                    if (entity instanceof LivingEntity living) {
+                        living.kill();
+                    }
+                }
+            }
+        }
 
         if (spawnedEntities.isEmpty()) {
             this.state = StageState.COMPLETE;

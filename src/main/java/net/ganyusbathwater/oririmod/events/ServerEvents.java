@@ -679,18 +679,23 @@ public class ServerEvents {
             return;
         }
             
-        // ----- Dog Tag Mechanism -----
-        if (entity instanceof net.minecraft.world.entity.animal.Wolf wolf) {
-            if (wolf.isTame() && wolf.hasCustomName()) {
+        // ----- Pet Revival Mechanism -----
+        if (entity instanceof net.minecraft.world.entity.TamableAnimal pet) {
+            if (pet.isTame() && pet.hasCustomName()) {
                 ItemStack dogTag = new ItemStack(net.ganyusbathwater.oririmod.item.ModItems.DOG_TAG.get());
                 net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
-                wolf.saveWithoutId(tag);
+                pet.saveWithoutId(tag);
+                
+                // Save the exact entity type ID so we can recreate it later
+                net.minecraft.resources.ResourceLocation entityId = net.minecraft.world.entity.EntityType.getKey(pet.getType());
+                tag.putString("RevivalEntityType", entityId.toString());
+                
                 tag.remove("active_effects"); // Clear mob effects so they don't persist on revival
                 dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
-                dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, wolf.getCustomName());
+                dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, pet.getCustomName());
                 
                 net.minecraft.world.entity.item.ItemEntity drop = new net.minecraft.world.entity.item.ItemEntity(
-                        wolf.level(), wolf.getX(), wolf.getY(), wolf.getZ(), dogTag);
+                        pet.level(), pet.getX(), pet.getY(), pet.getZ(), dogTag);
                 event.getDrops().add(drop);
             }
         }

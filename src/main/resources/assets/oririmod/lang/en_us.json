@@ -263,7 +263,6 @@
   "item.oririmod.the_sun": "The Sun",
   "item.oririmod.judgement": "Judgement",
   "item.oririmod.the_world": "The World",
-
   "block.oririmod.blood_sludge": "Blood Sludge",
   "block.oririmod.elderbush_block": "Elderbush",
   "block.oririmod.magic_barrier_block": "Magic Barrier",
@@ -293,7 +292,6 @@
   "block.oririmod.elder_leaves_flowering": "Flowering Elder Leaves",
   "block.oririmod.elder_button": "Elder Button",
   "block.oririmod.elder_pressure_plate": "Elder Pressure Plate",
-
   "block.oririmod.hanging_elder_moss": "Hanging Elder Moss",
   "block.oririmod.hanging_elder_moss_plant": "Hanging Elder Moss Plant",
   "block.oririmod.elder_sign": "Elder Sign",
@@ -716,9 +714,9 @@
   "entity.oririmod.thorn_projectile": "Thorn Projectile",
   "item.oririmod.ivy_botanic_guide": "Ivy Botanic Guide",
   "item.oririmod.ivy_botanic_guide.level": "Level %s",
-  "item.oririmod.ivy_botanic_guide.level.1.description": "Summons 1 Venomous Plant",
-  "item.oririmod.ivy_botanic_guide.level.2.description": "Summons 2 Venomous Plants",
-  "item.oririmod.ivy_botanic_guide.level.3.description": "Summons 3 Venomous Plants",
+  "item.oririmod.ivy_botanic_guide.level.1.description": "Summons a Venomous Plant",
+  "item.oririmod.ivy_botanic_guide.level.2.description": "The Venomous Plant Does §9+25%§r Extra Damage",
+  "item.oririmod.ivy_botanic_guide.level.3.description": "The Venomous Plant Does §9+25%§r Extra Damage and Fires a §cTriple Shot§r",
   "item.oririmod.ivy_botanic_guide.lore": "A Botanical Guide with Peculiar, Moving Ivy on Its Cover.",
   "item.oririmod.ivy_botanic_guide.element": "§2Nature§r",
   "item.oririmod.tnt_arrow": "TNT Arrow",
@@ -804,18 +802,14 @@
   "screen.oririmod.homeward.line2": "Your Progress Will Be Saved.",
   "screen.oririmod.homeward.leave": "Leave",
   "screen.oririmod.homeward.cancel": "Cancel",
-
   "entity.oririmod.dungeon_marker": "Dungeon Marker",
-
   "message.oririmod.dungeon.no_break": "You Cannot Break Blocks Inside a Dungeon!",
   "message.oririmod.dungeon.no_place": "You Cannot Place Blocks Inside a Dungeon!",
   "message.oririmod.dungeon.item_banned": "That Item Is Forbidden Inside This Dungeon!",
   "message.oririmod.dungeon.died": "You Have Fallen. The Dungeon Has Collapsed and Your Run Has Ended.",
   "message.oririmod.dungeon.timeout": "The Dungeon Has Timed Out. You Have Been Removed.",
   "message.oririmod.dungeon.complete": "Dungeon Complete! Well Done, Heroes!",
-
   "entity.oririmod.dungeon_keeper": "Dungeon Keeper",
-
   "block.oririmod.epoch_wood_log": "Epoch Wood Log",
   "block.oririmod.stripped_epoch_wood_log": "Stripped Epoch Wood Log",
   "block.oririmod.epoch_wood": "Epoch Wood",
@@ -849,10 +843,8 @@
   "tooltip.oririmod.arcus_lucis.lore": "You Feel an Entire Nebula Soaring Through the Strings of This Cosmic Bow",
   "tooltip.oririmod.arcus_lucis.homing": "Arrows Shot Through This Bow Have Homing Abilities",
   "tooltip.oririmod.arcus_lucis.conversion": "Normal Arrows Are Converted to Spectral Arrows",
-
   "item.oririmod.visual_debug_item": "Visual Debug Tool",
   "item.oririmod.visual_debug_item.tooltip": "[DEV] Right-Click to Open the Visual Debug Menu",
-  
   "entity.oririmod.noxus_cultist": "Noxus Cultist",
   "item.oririmod.noxus_cultist_spawn_egg": "Noxus Cultist Spawn Egg",
   "message.oririmod.dungeon.closing_in": "Teleporting Back in %s...",
@@ -863,7 +855,6 @@
   "screen.oririmod.dungeon.detail_back": "← Back",
   "screen.oririmod.dungeon.no_preview": "No Preview Available",
   "screen.oririmod.dungeon.close": "Close",
-
   "dialogue.oririmod.dungeon_keeper.name": "Dungeon Keeper",
   "dialogue.oririmod.dungeon_keeper.greeting": "Ah, Another Brave Soul Ventures Forth. What Do You Need, Adventurer? The Dungeons Await Those Who Dare to Face Them.",
   "dialogue.oririmod.dungeon_keeper.choice_dungeon": "I Want to Go on a Dungeon Quest.",

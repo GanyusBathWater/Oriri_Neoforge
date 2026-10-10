@@ -33,6 +33,22 @@ public class DungeonManager extends SavedData {
     // ── Phase 8 Additions ──
     private final List<net.ganyusbathwater.oririmod.dungeon.dimension.DungeonGeneratorTask> activeTasks = new java.util.ArrayList<>();
     public List<net.ganyusbathwater.oririmod.dungeon.dimension.DungeonGeneratorTask> getActiveTasks() { return activeTasks; }
+    
+    // ── Debug Additions ──
+    private boolean nextDungeonSpawnAllSecrets = false;
+    public boolean consumeNextDungeonSpawnAllSecrets() {
+        if (nextDungeonSpawnAllSecrets) {
+            nextDungeonSpawnAllSecrets = false;
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+    public void toggleNextDungeonSpawnAllSecrets() {
+        this.nextDungeonSpawnAllSecrets = !this.nextDungeonSpawnAllSecrets;
+        setDirty();
+    }
+    public boolean isNextDungeonSpawnAllSecrets() { return this.nextDungeonSpawnAllSecrets; }
 
     /**
      * Allocates a new dungeon instance for a party of players, but does not paste structures or teleport.
@@ -53,6 +69,7 @@ public class DungeonManager extends SavedData {
         // 3. Create Instance
         UUID instanceId = UUID.randomUUID();
         DungeonInstance instance = new DungeonInstance(instanceId, definition.id().toString(), origin);
+        instance.setSpawnAllSecrets(this.consumeNextDungeonSpawnAllSecrets());
         for (ServerPlayer p : party) {
             instance.addPlayer(p.getUUID());
         }
@@ -157,6 +174,8 @@ public class DungeonManager extends SavedData {
             gridsTag.put(entry.getKey(), entry.getValue().save(new CompoundTag()));
         }
         tag.put("Grids", gridsTag);
+        
+        tag.putBoolean("NextDungeonSpawnAllSecrets", nextDungeonSpawnAllSecrets);
 
         return tag;
     }
@@ -177,6 +196,10 @@ public class DungeonManager extends SavedData {
                 grid.load(gridsTag.getCompound(key));
                 manager.dimensionGrids.put(key, grid);
             }
+        }
+        
+        if (tag.contains("NextDungeonSpawnAllSecrets")) {
+            manager.nextDungeonSpawnAllSecrets = tag.getBoolean("NextDungeonSpawnAllSecrets");
         }
         // Safety: re-sync grid occupied slots to only reflect currently active instances.
         // This prevents stale slot data from accumulating across server restarts when

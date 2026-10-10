@@ -39,7 +39,13 @@ public class DungeonSkipperItem extends Item {
                     }
                 }
             } else {
-                sp.sendSystemMessage(Component.literal("§cYou are not in an active dungeon instance."));
+                if (sp.isShiftKeyDown()) {
+                    DungeonManager manager = DungeonManager.get(sp.serverLevel());
+                    manager.toggleNextDungeonSpawnAllSecrets();
+                    sp.sendSystemMessage(Component.literal(manager.isNextDungeonSpawnAllSecrets() ? "§d[DEBUG] Next dungeon will spawn ALL secret markers!" : "§7[DEBUG] Next dungeon will spawn normal secrets (3)."));
+                } else {
+                    sp.sendSystemMessage(Component.literal("§cYou are not in an active dungeon instance. Shift-click to toggle Debug Secrets Mode."));
+                }
             }
         }
         return InteractionResultHolder.success(pPlayer.getItemInHand(pUsedHand));

@@ -37,9 +37,13 @@ public class DungeonInstance {
     private boolean isBossDefeated = false;
     private int ticksSinceComplete = 0;
     private boolean debugLogging = false;
+    private boolean spawnAllSecrets = false;
 
     public boolean hasStarted() { return hasStarted; }
     public void setStarted(boolean s) { this.hasStarted = s; }
+
+    public boolean isSpawnAllSecrets() { return spawnAllSecrets; }
+    public void setSpawnAllSecrets(boolean b) { this.spawnAllSecrets = b; }
 
     // ── Stage runtime state (not persisted — rebuilt from markers on reload) ──
     private List<StageDefinition> stageDefinitions = new ArrayList<>();
@@ -49,8 +53,14 @@ public class DungeonInstance {
     // ── Phase 7 Additions ──
     @Nullable private net.minecraft.world.level.levelgen.structure.BoundingBox structureBounds = null;
     @Nullable private BlockPos lootChestPos = null;
+    @Nullable private Float lootChestYRot = null;
     @Nullable private String lootChestTable = null;
     @Nullable private BlockPos playerSpawnPos = null;
+    
+    // ── Secret Rooms / Areas ──
+    private final Set<BlockPos> secretButtonPositions = new HashSet<>();
+    private final Set<BlockPos> pressedSecretButtons = new HashSet<>();
+    @Nullable private String secretButtonLootTable = null;
     
     // ── Death Areas ──
     private final List<net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition.DeathAreaEntry> globalDeathAreas = new ArrayList<>();
@@ -134,11 +144,20 @@ public class DungeonInstance {
     @Nullable public BlockPos getLootChestPos() { return lootChestPos; }
     public void setLootChestPos(@Nullable BlockPos pos) { this.lootChestPos = pos; }
     
+    @Nullable public Float getLootChestYRot() { return lootChestYRot; }
+    public void setLootChestYRot(@Nullable Float rot) { this.lootChestYRot = rot; }
+    
     @Nullable public String getLootChestTable() { return lootChestTable; }
     public void setLootChestTable(@Nullable String table) { this.lootChestTable = table; }
     
     @Nullable public BlockPos getPlayerSpawnPos() { return playerSpawnPos; }
     public void setPlayerSpawnPos(@Nullable BlockPos pos) { this.playerSpawnPos = pos; }
+
+    public Set<BlockPos> getSecretButtonPositions() { return secretButtonPositions; }
+    public Set<BlockPos> getPressedSecretButtons() { return pressedSecretButtons; }
+    public void addPressedSecretButton(BlockPos pos) { this.pressedSecretButtons.add(pos); }
+    @Nullable public String getSecretButtonLootTable() { return secretButtonLootTable; }
+    public void setSecretButtonLootTable(@Nullable String table) { this.secretButtonLootTable = table; }
 
     public List<net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition.DeathAreaEntry> getGlobalDeathAreas() { return globalDeathAreas; }
     public void addGlobalDeathArea(net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition.DeathAreaEntry entry) { this.globalDeathAreas.add(entry); }
@@ -177,12 +196,29 @@ public class DungeonInstance {
         if (lootChestPos != null) {
             tag.putLong("LootChestPos", lootChestPos.asLong());
         }
+        if (lootChestYRot != null) {
+            tag.putFloat("LootChestYRot", lootChestYRot);
+        }
         if (lootChestTable != null && !lootChestTable.isBlank()) {
             tag.putString("LootChestTable", lootChestTable);
         }
         if (playerSpawnPos != null) {
             tag.putLong("PlayerSpawnPos", playerSpawnPos.asLong());
         }
+        
+        ListTag secButtons = new ListTag();
+        for (BlockPos p : secretButtonPositions) secButtons.add(net.minecraft.nbt.LongTag.valueOf(p.asLong()));
+        tag.put("SecretButtons", secButtons);
+        
+        ListTag pressedButtons = new ListTag();
+        for (BlockPos p : pressedSecretButtons) pressedButtons.add(net.minecraft.nbt.LongTag.valueOf(p.asLong()));
+        tag.put("PressedSecretButtons", pressedButtons);
+        
+        if (secretButtonLootTable != null) {
+            tag.putString("SecretButtonLoot", secretButtonLootTable);
+        }
+        
+        tag.putBoolean("SpawnAllSecrets", spawnAllSecrets);
 
         return tag;
     }
@@ -235,12 +271,31 @@ public class DungeonInstance {
         if (tag.contains("LootChestPos")) {
             instance.setLootChestPos(BlockPos.of(tag.getLong("LootChestPos")));
         }
+        if (tag.contains("LootChestYRot")) {
+            instance.setLootChestYRot(tag.getFloat("LootChestYRot"));
+        }
         if (tag.contains("LootChestTable")) {
             instance.setLootChestTable(tag.getString("LootChestTable"));
         }
         if (tag.contains("PlayerSpawnPos")) {
             instance.setPlayerSpawnPos(BlockPos.of(tag.getLong("PlayerSpawnPos")));
         }
+        
+        if (tag.contains("SecretButtons")) {
+            ListTag list = tag.getList("SecretButtons", Tag.TAG_LONG);
+            for (int i=0; i<list.size(); i++) instance.getSecretButtonPositions().add(BlockPos.of(((net.minecraft.nbt.LongTag)list.get(i)).getAsLong()));
+        }
+        if (tag.contains("PressedSecretButtons")) {
+            ListTag list = tag.getList("PressedSecretButtons", Tag.TAG_LONG);
+            for (int i=0; i<list.size(); i++) instance.getPressedSecretButtons().add(BlockPos.of(((net.minecraft.nbt.LongTag)list.get(i)).getAsLong()));
+        }
+        if (tag.contains("SecretButtonLoot")) {
+            instance.setSecretButtonLootTable(tag.getString("SecretButtonLoot"));
+        }
+        if (tag.contains("SpawnAllSecrets")) {
+            instance.setSpawnAllSecrets(tag.getBoolean("SpawnAllSecrets"));
+        }
+        
         return instance;
     }
 }

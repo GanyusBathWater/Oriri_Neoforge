@@ -22,6 +22,9 @@ public class PatientiaAttackGoal extends Goal {
     
     // Projectile state
     private int projectileCount = 0;
+    
+    // Cooldown timer
+    private long nextAttackTime = 0;
 
     public PatientiaAttackGoal(PatientiaEntity boss) {
         this.boss = boss;
@@ -31,6 +34,8 @@ public class PatientiaAttackGoal extends Goal {
     @Override
     public boolean canUse() {
         if (boss.isDefeated() || boss.getAttackType() == PatientiaEntity.ATTACK_DEFENSIVE) return false;
+        
+        if (boss.level().getGameTime() < nextAttackTime) return false;
         
         // Wait for global cooldown (stored in boss, managed here for simplicity, but let's just use a local one for now)
         // We will just let the goal tick natively.
@@ -53,25 +58,20 @@ public class PatientiaAttackGoal extends Goal {
         projectileCount = 0;
 
         LivingEntity target = boss.getTarget();
-        double distSq = target != null ? boss.distanceToSqr(target) : 100.0;
         
         // Choose attack
-        if (distSq <= 16.0 && boss.getRandom().nextBoolean()) {
-            chosenAttack = boss.getRandom().nextBoolean() ? PatientiaEntity.ATTACK_MELEE_RIGHT : PatientiaEntity.ATTACK_MELEE_LEFT;
+        int r = boss.getRandom().nextInt(100);
+        if (r < 25) {
+            chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE;
+        } else if (r < 50) {
+            chosenAttack = PatientiaEntity.ATTACK_MAGIC_CIRCLES;
+        } else if (r < 75) {
+            chosenAttack = PatientiaEntity.ATTACK_GIANT_SLICE;
         } else {
-            int r = boss.getRandom().nextInt(100);
-            if (r < 25) {
-                chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE;
-            } else if (r < 50) {
-                chosenAttack = PatientiaEntity.ATTACK_MAGIC_CIRCLES;
-            } else if (r < 75) {
-                chosenAttack = PatientiaEntity.ATTACK_GIANT_SLICE;
+            if (boss.getHealthFraction() <= 0.5f) {
+                chosenAttack = PatientiaEntity.ATTACK_HEAVENLY_EXEC;
             } else {
-                if (boss.getHealthFraction() <= 0.5f) {
-                    chosenAttack = PatientiaEntity.ATTACK_HEAVENLY_EXEC;
-                } else {
-                    chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE; // Fallback
-                }
+                chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE; // Fallback
             }
         }
         
@@ -89,10 +89,6 @@ public class PatientiaAttackGoal extends Goal {
         }
 
         switch (chosenAttack) {
-            case PatientiaEntity.ATTACK_MELEE_RIGHT:
-            case PatientiaEntity.ATTACK_MELEE_LEFT:
-                tickMelee(target);
-                break;
             case PatientiaEntity.ATTACK_MAGIC_PROJECTILE:
                 tickProjectiles(target);
                 break;
@@ -110,38 +106,18 @@ public class PatientiaAttackGoal extends Goal {
 
     @Override
     public void stop() {
-        boss.setAttackType(PatientiaEntity.ATTACK_NONE);
+        if (boss.getAttackType() != PatientiaEntity.ATTACK_DEFENSIVE) {
+            boss.setAttackType(PatientiaEntity.ATTACK_NONE);
+            boss.triggerAnim("attack_controller", "stop");
+        }
         chosenAttack = PatientiaEntity.ATTACK_NONE;
         timer = 0;
         actionFired = false;
-        boss.triggerAnim("attack_controller", "stop");
+        
+        nextAttackTime = boss.level().getGameTime() + boss.getRandom().nextInt(20) + 30; // 1.5 to 2.5 seconds cooldown
     }
     
     // ── Attack Ticks ─────────────────────────────────────────────────────────
-
-    private void tickMelee(LivingEntity target) {
-        // Animation is 10 ticks (0.5s). Hit frame around tick 5.
-        if (!actionFired && timer == 5) {
-            actionFired = true;
-            if (target != null && target.isAlive() && boss.distanceToSqr(target) <= 16.0) {
-                // 120-degree cone sweep using 2D Vector math
-                Vec3 look = boss.getLookAngle();
-                Vec3 look2d = new Vec3(look.x, 0, look.z).normalize();
-                
-                List<Player> hitPlayers = boss.level().getEntitiesOfClass(Player.class, boss.getBoundingBox().inflate(4.0));
-                for (Player p : hitPlayers) {
-                    Vec3 toTarget = p.position().subtract(boss.position());
-                    Vec3 toTarget2d = new Vec3(toTarget.x, 0, toTarget.z).normalize();
-                    double dot = look2d.dot(toTarget2d);
-                    
-                    if (dot >= 0.5D) { // 120 degree cone (cos(60) = 0.5)
-                        p.hurt(boss.damageSources().mobAttack(boss), (float)boss.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE));
-                        p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0, false, true));
-                    }
-                }
-            }
-        }
-    }
 
     private void tickProjectiles(LivingEntity target) {
         // Fire 6 projectiles. 1 every 5 ticks.
@@ -272,7 +248,6 @@ public class PatientiaAttackGoal extends Goal {
 
     private static int animDuration(int attack) {
         return switch (attack) {
-            case PatientiaEntity.ATTACK_MELEE_RIGHT, PatientiaEntity.ATTACK_MELEE_LEFT -> 20; // 1s
             case PatientiaEntity.ATTACK_MAGIC_PROJECTILE -> 40; // 2s
             case PatientiaEntity.ATTACK_MAGIC_CIRCLES -> 30; // 1.5s
             case PatientiaEntity.ATTACK_GIANT_SLICE -> 30; // 1.5s
@@ -283,8 +258,6 @@ public class PatientiaAttackGoal extends Goal {
 
     private void triggerAnimation(int attack) {
         String animName = switch (attack) {
-            case PatientiaEntity.ATTACK_MELEE_RIGHT -> "patientia_normal_attack_right";
-            case PatientiaEntity.ATTACK_MELEE_LEFT -> "patientia_normal_attack_left";
             case PatientiaEntity.ATTACK_MAGIC_PROJECTILE, PatientiaEntity.ATTACK_MAGIC_CIRCLES, 
                  PatientiaEntity.ATTACK_GIANT_SLICE, PatientiaEntity.ATTACK_HEAVENLY_EXEC -> "patientia_defensive";
             default -> "patientia_idle";

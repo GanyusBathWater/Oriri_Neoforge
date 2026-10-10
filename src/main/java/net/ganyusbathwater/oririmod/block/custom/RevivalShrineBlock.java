@@ -81,17 +81,31 @@ public class RevivalShrineBlock extends BaseEntityBlock {
             CustomData customData = itemInHand.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
             if (!customData.isEmpty()) {
                 if (!level.isClientSide()) {
-                    Wolf wolf = EntityType.WOLF.create(level);
-                    if (wolf != null) {
-                        wolf.load(customData.copyTag());
-                        wolf.removeAllEffects(); // Ensure no persistent effects from death (like Wither)
-                        wolf.setRemainingFireTicks(0); // Clear fire if the dog died while burning
-                        wolf.setPos(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D);
+                    net.minecraft.nbt.CompoundTag tag = customData.copyTag();
+                    
+                    // Determine the entity type from the tag, default to WOLF for backwards compatibility
+                    EntityType<?> entityType = EntityType.WOLF;
+                    if (tag.contains("RevivalEntityType")) {
+                        net.minecraft.resources.ResourceLocation typeId = net.minecraft.resources.ResourceLocation.tryParse(tag.getString("RevivalEntityType"));
+                        if (typeId != null) {
+                            java.util.Optional<EntityType<?>> optionalType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(typeId);
+                            if (optionalType.isPresent()) {
+                                entityType = optionalType.get();
+                            }
+                        }
+                    }
+                    
+                    net.minecraft.world.entity.Entity entity = entityType.create(level);
+                    if (entity instanceof net.minecraft.world.entity.TamableAnimal pet) {
+                        pet.load(tag);
+                        pet.removeAllEffects(); // Ensure no persistent effects from death (like Wither)
+                        pet.setRemainingFireTicks(0); // Clear fire if the pet died while burning
+                        pet.setPos(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D);
                         // Make sure the UUID is fresh so it doesn't conflict
-                        wolf.setUUID(java.util.UUID.randomUUID());
-                        wolf.setHealth(wolf.getMaxHealth());
+                        pet.setUUID(java.util.UUID.randomUUID());
+                        pet.setHealth(pet.getMaxHealth());
                         
-                        level.addFreshEntity(wolf);
+                        level.addFreshEntity(pet);
                         
                         // Firework effect
                         ItemStack firework = new ItemStack(net.minecraft.world.item.Items.FIREWORK_ROCKET);

@@ -41,5 +41,4 @@ public abstract class TreeFeatureMixin extends Feature<TreeConfiguration> {
             cir.setReturnValue(true);
         }
     }
-
 }

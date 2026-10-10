@@ -345,7 +345,12 @@ public class DungeonTickHandler {
 
         if (lootTableId != null && instance.getLootChestPos() != null) {
             net.minecraft.core.BlockPos chestPos = instance.getLootChestPos();
-            level.setBlock(chestPos, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState(), 3);
+            net.minecraft.world.level.block.state.BlockState chestState = net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState();
+            if (instance.getLootChestYRot() != null) {
+                net.minecraft.core.Direction dir = net.minecraft.core.Direction.fromYRot(instance.getLootChestYRot());
+                chestState = chestState.setValue(net.minecraft.world.level.block.ChestBlock.FACING, dir);
+            }
+            level.setBlock(chestPos, chestState, 3);
             net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(chestPos);
             if (be instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE) {
                 net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> lootKey = 
@@ -393,5 +398,52 @@ public class DungeonTickHandler {
             }
         }
         manager.removeInstance(level.getServer(), instance.getInstanceId(), instance.getDungeonId());
+    }
+
+    @SubscribeEvent
+    public static void onRightClickBlock(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide) return;
+        ServerLevel level = (ServerLevel) event.getLevel();
+        if (!level.dimension().location().getPath().startsWith("dungeon_")) return;
+        
+        DungeonManager manager = DungeonManager.get(level);
+        DungeonInstance instance = manager.getInstanceForPlayer(event.getEntity().getUUID());
+        if (instance == null) return;
+        
+        net.minecraft.core.BlockPos pos = event.getPos();
+        if (instance.getSecretButtonPositions().contains(pos)) {
+            if (!instance.getPressedSecretButtons().contains(pos)) {
+                instance.addPressedSecretButton(pos);
+                int count = instance.getPressedSecretButtons().size();
+                int totalRequired = instance.getSecretButtonPositions().size();
+                event.getEntity().displayClientMessage(
+                    net.minecraft.network.chat.Component.literal("Secret Buttons Pressed: " + count + " / " + totalRequired).withStyle(net.minecraft.ChatFormatting.GOLD), true
+                );
+                
+                if (count >= totalRequired) {
+                    String table = instance.getSecretButtonLootTable();
+                    if (table == null || table.isBlank()) table = "minecraft:chests/simple_dungeon";
+                    net.minecraft.resources.ResourceLocation lootTableId = net.minecraft.resources.ResourceLocation.tryParse(table.contains(":") ? table : "minecraft:" + table);
+                    
+                    net.minecraft.world.level.block.state.BlockState chestState = net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState();
+                    net.minecraft.world.level.block.state.BlockState buttonState = level.getBlockState(pos);
+                    if (buttonState.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACING)) {
+                        chestState = chestState.setValue(net.minecraft.world.level.block.ChestBlock.FACING, buttonState.getValue(net.minecraft.world.level.block.ButtonBlock.FACING));
+                    }
+                    
+                    level.setBlock(pos, chestState, 3);
+                    if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE && lootTableId != null) {
+                        chestBE.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTableId), level.getRandom().nextLong());
+                    }
+                    
+                    event.getEntity().displayClientMessage(
+                        net.minecraft.network.chat.Component.literal("A secret has been revealed!").withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.BOLD), false
+                    );
+                    level.playSound(null, pos, net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, net.minecraft.sounds.SoundSource.MASTER, 1.0f, 1.0f);
+                } else {
+                    level.playSound(null, pos, net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP, net.minecraft.sounds.SoundSource.MASTER, 1.0f, 1.0f);
+                }
+            }
+        }
     }
 }

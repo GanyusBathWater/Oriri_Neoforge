@@ -97,6 +97,7 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, new net.ganyusbathwater.oririmod.entity.ai.PatientiaMeleeAttackGoal(this));
         this.goalSelector.addGoal(3, new net.ganyusbathwater.oririmod.entity.ai.PatientiaAttackGoal(this));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 20f));
@@ -218,16 +219,21 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
         if (result && !this.level().isClientSide) {
             // Track consecutive melee hits for Defensive Buzzsaw
             if (source.getEntity() instanceof LivingEntity && !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() == source.getEntity()) {
-                consecutiveMeleeHits++;
-                hitDecayTimer = 60; // 3 seconds to keep hitting
-                
-                if (consecutiveMeleeHits >= 4 && defensiveCooldown <= 0 && defensiveTimer <= 0) {
-                    consecutiveMeleeHits = 0;
-                    defensiveTimer = 100; // 5 seconds invincible
-                    defensiveCooldown = 400; // 20 seconds cooldown
-                    buzzsawTickTimer = 0;
-                    this.setAttackType(ATTACK_DEFENSIVE);
-                    triggerAnim("attack_controller", "patientia_defensive");
+                if (!source.is(net.minecraft.world.damagesource.DamageTypes.THORNS)) {
+                    if (consecutiveMeleeHits == 0) {
+                        hitDecayTimer = 60; // 3 seconds to land remaining hits
+                    }
+                    consecutiveMeleeHits++;
+                    
+                    if (consecutiveMeleeHits >= 4 && defensiveCooldown <= 0 && defensiveTimer <= 0) {
+                        consecutiveMeleeHits = 0;
+                        hitDecayTimer = 0;
+                        defensiveTimer = 100; // 5 seconds invincible
+                        defensiveCooldown = 400; // 20 seconds cooldown
+                        buzzsawTickTimer = 0;
+                        this.setAttackType(ATTACK_DEFENSIVE);
+                        triggerAnim("attack_controller", "patientia_defensive");
+                    }
                 }
             }
             // Trigger hurt animation
@@ -344,7 +350,11 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         // Movement controller
         controllers.add(new AnimationController<>(this, "movement_controller", 5, state -> {
-            if (getAttackType() != ATTACK_NONE || isDefeated) return PlayState.STOP;
+            if (isDefeated) {
+                state.getController().stop();
+                return PlayState.STOP;
+            }
+            if (getAttackType() != ATTACK_NONE) return PlayState.STOP;
             if (state.isMoving()) {
                 state.getController().setAnimation(RawAnimation.begin().thenLoop("patientia_moving"));
                 return PlayState.CONTINUE;
@@ -364,13 +374,11 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
         controllers.add(new AnimationController<>(this, "hurt_controller", 2, state -> PlayState.STOP)
                 .triggerableAnim("patientia_hurt", RawAnimation.begin().then("patientia_hurt", Animation.LoopType.PLAY_ONCE)));
 
-        // Death controller
-        controllers.add(new AnimationController<>(this, "death_controller", 0, state -> PlayState.STOP)
-                .triggerableAnim("patientia_defeat", RawAnimation.begin().then("patientia_defeat", Animation.LoopType.HOLD_ON_LAST_FRAME)));
-
         // Weapons controller
         controllers.add(new AnimationController<>(this, "weapons_controller", 0, state -> {
-            if (isDefeated) return PlayState.STOP;
+            if (isDefeated) {
+                return PlayState.STOP;
+            }
             int attack = getAttackType();
             if (attack == ATTACK_MAGIC_PROJECTILE || attack == ATTACK_MAGIC_CIRCLES || attack == ATTACK_GIANT_SLICE || attack == ATTACK_HEAVENLY_EXEC || attack == ATTACK_DEFENSIVE) {
                 state.getController().setAnimation(RawAnimation.begin().thenLoop("patientia_swords_special_attack"));
@@ -380,6 +388,10 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
             return PlayState.CONTINUE;
         })
                 .triggerableAnim("stop", RawAnimation.begin()));
+
+        // Death controller
+        controllers.add(new AnimationController<>(this, "death_controller", 0, state -> PlayState.STOP)
+                .triggerableAnim("patientia_defeat", RawAnimation.begin().then("patientia_defeat", Animation.LoopType.HOLD_ON_LAST_FRAME)));
     }
 
     @Override

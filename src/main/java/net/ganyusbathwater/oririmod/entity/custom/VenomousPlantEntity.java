@@ -245,18 +245,26 @@ public class VenomousPlantEntity extends Monster implements GeoEntity {
         }
     }
 
-    /**
-     * Spawns a ThornProjectileEntity aimed at the target.
-     * Spawn position is approximated at the plant's mouth height (+1.2 blocks).
-     */
     private void spawnThornProjectile(LivingEntity target) {
         Vec3 spawnPos  = this.position().add(0, 1.2, 0);
         Vec3 targetPos = target.position().add(0, target.getBbHeight() * 0.5, 0);
         Vec3 direction = targetPos.subtract(spawnPos).normalize();
 
-        ThornProjectileEntity thorn = new ThornProjectileEntity(this.level(), this, direction);
-        thorn.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
-        this.level().addFreshEntity(thorn);
+        int weaponLevel = this.getPersistentData().getInt("WeaponLevel");
+        int projectileCount = weaponLevel >= 3 ? 3 : 1;
+
+        if (projectileCount == 1) {
+            ThornProjectileEntity thorn = new ThornProjectileEntity(this.level(), this, direction);
+            thorn.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            this.level().addFreshEntity(thorn);
+        } else {
+            for (int i = -1; i <= 1; i++) {
+                Vec3 spreadDir = direction.yRot(i * 0.2f);
+                ThornProjectileEntity thorn = new ThornProjectileEntity(this.level(), this, spreadDir);
+                thorn.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+                this.level().addFreshEntity(thorn);
+            }
+        }
     }
 
     // ─── Damage / death ───────────────────────────────────────────────────────

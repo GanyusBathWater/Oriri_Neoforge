@@ -65,6 +65,25 @@ public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCos
     }
 
     @Override
+    public void render(AbstractClientPlayer entity, float entityYaw, float partialTick, com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.MultiBufferSource bufferSource, int packedLight) {
+        poseStack.pushPose();
+        
+        if (this.isRenderLayer && entity.isSleeping()) {
+            net.minecraft.core.Direction direction = entity.getBedOrientation();
+            if (direction != null) {
+                float eyeHeight = entity.getEyeHeight(net.minecraft.world.entity.Pose.STANDING) - 0.1f;
+                // Apply the inverse of Geckolib's hardcoded sleeping translation to cancel it out,
+                // since Vanilla's LivingEntityRenderer has already translated the poseStack for the bed.
+                poseStack.translate((float)(direction.getStepX()) * eyeHeight, -0.2f, (float)(direction.getStepZ()) * eyeHeight);
+            }
+        }
+        
+        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+        
+        poseStack.popPose();
+    }
+
+    @Override
     protected void applyRotations(T animatable, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
         if (!isRenderLayer) {
             super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick, nativeScale);

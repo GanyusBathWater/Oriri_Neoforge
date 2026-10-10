@@ -24,6 +24,11 @@ public class UpgradedSaplingBlock extends SaplingBlock {
     }
 
     @Override
+    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
+        return true;
+    }
+
+    @Override
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
         // Force the tree to grow immediately on the first bonemeal, bypassing the
         // two-stage growth process

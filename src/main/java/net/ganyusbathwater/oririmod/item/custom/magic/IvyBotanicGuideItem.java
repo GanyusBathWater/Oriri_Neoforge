@@ -160,7 +160,7 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
         BlockPos spawnPos = hitResult.getBlockPos().relative(hitResult.getDirection());
 
         int weaponLevel = Math.max(1, getUnlockedLevel(stack));
-        int maxSummons = Math.min(3, weaponLevel);
+        int maxSummons = 1;
 
         // Find existing summons and enforce cap. Use an infinite range basically, or a very large one, to ensure we catch all of them.
         String playerUUID = player.getStringUUID();
@@ -185,6 +185,14 @@ public class IvyBotanicGuideItem extends Item implements ModRarityCarrier {
             newPlant.getPersistentData().putString(OWNER_TAG, playerUUID);
             newPlant.getPersistentData().putBoolean("OririSummoned", true);
             newPlant.getPersistentData().putInt("OririSummonTicks", 600);
+            newPlant.getPersistentData().putInt("WeaponLevel", weaponLevel);
+            
+            if (weaponLevel >= 2) {
+                var damageAttr = newPlant.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+                if (damageAttr != null) {
+                    damageAttr.setBaseValue(damageAttr.getBaseValue() * 1.25);
+                }
+            }
             
             // Allow the plant to persist in the world
             newPlant.setPersistenceRequired();

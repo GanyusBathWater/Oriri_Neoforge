@@ -69,6 +69,8 @@ public class DungeonMarkerScreen extends Screen {
             DungeonStageManager.ROLE_BOSS_SPAWN,
             DungeonStageManager.ROLE_MINI_BOSS_SPAWN,
             DungeonStageManager.ROLE_LOOT_CHEST,
+            DungeonStageManager.ROLE_SECRET_CHEST_SPAWN,
+            DungeonStageManager.ROLE_SECRET_BUTTON_SPAWN,
             DungeonStageManager.ROLE_PLAYER_SPAWN,
             DungeonStageManager.ROLE_DEATH_AREA
     );
@@ -232,7 +234,9 @@ public class DungeonMarkerScreen extends Screen {
         bossIdBox.visible = false;
         objectiveBox.visible = false;
 
-        boolean isGlobal = DungeonStageManager.ROLE_LOOT_CHEST.equals(currentRole);
+        boolean isGlobal = DungeonStageManager.ROLE_LOOT_CHEST.equals(currentRole) || 
+                           DungeonStageManager.ROLE_SECRET_CHEST_SPAWN.equals(currentRole) || 
+                           DungeonStageManager.ROLE_SECRET_BUTTON_SPAWN.equals(currentRole);
         this.stageIdBox.visible = !isGlobal;
         if (this.stageTypeButton != null) {
             this.stageTypeButton.visible = !isGlobal;
@@ -243,6 +247,8 @@ public class DungeonMarkerScreen extends Screen {
         validRoles.add(DungeonStageManager.ROLE_STAGE_TRIGGER);
         validRoles.add(DungeonStageManager.ROLE_AREA_MODIFIER);
         validRoles.add(DungeonStageManager.ROLE_LOOT_CHEST);
+        validRoles.add(DungeonStageManager.ROLE_SECRET_CHEST_SPAWN);
+        validRoles.add(DungeonStageManager.ROLE_SECRET_BUTTON_SPAWN);
         validRoles.add(DungeonStageManager.ROLE_PLAYER_SPAWN);
         validRoles.add(DungeonStageManager.ROLE_DEATH_AREA);
 
@@ -301,6 +307,8 @@ public class DungeonMarkerScreen extends Screen {
         boolean isSpawner = DungeonStageManager.ROLE_INFINITE_SPAWNER.equals(currentRole);
         boolean isGoalArea = DungeonStageManager.ROLE_GOAL_AREA.equals(currentRole);
         boolean isDeathArea = DungeonStageManager.ROLE_DEATH_AREA.equals(currentRole);
+        boolean isSecretChest = DungeonStageManager.ROLE_SECRET_CHEST_SPAWN.equals(currentRole);
+        boolean isSecretButton = DungeonStageManager.ROLE_SECRET_BUTTON_SPAWN.equals(currentRole);
 
         if (isSpawn || isSpawner) {
             enemyTypeBox.visible = true;
@@ -338,6 +346,11 @@ public class DungeonMarkerScreen extends Screen {
             
             ((CustomCycleButton) triggerBehaviorButton).setValues(Arrays.asList("STAGE", "GLOBAL"));
             triggerBehaviorButton.visible = true;
+        } else if (isSecretChest) {
+            lootTableBox.visible = true;
+        } else if (isSecretButton) {
+            enemyTypeBox.visible = true;
+            lootTableBox.visible = true;
         }
 
         if (currentStageType.equals("SURVIVE_TIMER") && !isModifier && !isDoor && !isTrigger) {
@@ -435,6 +448,7 @@ public class DungeonMarkerScreen extends Screen {
         if (this.enemyTypeBox != null && this.enemyTypeBox.visible) {
             String label = DungeonStageManager.ROLE_AREA_MODIFIER.equals(currentRole) ? "Target Block ID or Teleporter ID" : 
                            DungeonStageManager.ROLE_BLOCK_MATCH.equals(currentRole) ? "Target Block ID (e.g. minecraft:redstone_lamp)" :
+                           DungeonStageManager.ROLE_SECRET_BUTTON_SPAWN.equals(currentRole) ? "Button Block ID (e.g. minecraft:stone_button)" :
                            DungeonStageManager.ROLE_DEATH_AREA.equals(currentRole) ? "Dimensions (e.g. 10,10,10 or 10)" :
                            "Enemy Type (e.g. minecraft:zombie or #cave_mobs)";
             guiGraphics.drawString(this.font, label, this.enemyTypeBox.getX(), this.enemyTypeBox.getY() - 10, 0xDDDDDD);

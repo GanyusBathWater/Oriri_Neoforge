@@ -15,6 +15,8 @@ public class BossFightStage extends AbstractDungeonStage {
     private UUID bossEntityUUID = null;
     private net.minecraft.server.level.ServerBossEvent bossEvent = null;
     private boolean bossDefeatedHandled = false;
+    private int ticksSinceLastHit = 0;
+    private float lastHealth = -1;
 
     public BossFightStage(StageDefinition definition) {
         super(definition);
@@ -109,6 +111,17 @@ public class BossFightStage extends AbstractDungeonStage {
                             m.discard();
                         }
                     }
+                }
+            }
+
+            float currentHealth = boss.getHealth();
+            if (currentHealth != lastHealth) {
+                ticksSinceLastHit = 0;
+                lastHealth = currentHealth;
+            } else {
+                ticksSinceLastHit += 20;
+                if (ticksSinceLastHit >= 12000) { // 10 minutes
+                    boss.kill();
                 }
             }
 
