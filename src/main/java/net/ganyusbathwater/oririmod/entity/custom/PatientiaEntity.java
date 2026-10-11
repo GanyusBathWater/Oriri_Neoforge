@@ -354,7 +354,10 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
                 state.getController().stop();
                 return PlayState.STOP;
             }
-            if (getAttackType() != ATTACK_NONE) return PlayState.STOP;
+            int attack = getAttackType();
+            if (attack == ATTACK_MELEE_RIGHT || attack == ATTACK_MELEE_LEFT || attack == ATTACK_DEFENSIVE) {
+                return PlayState.STOP;
+            }
             if (state.isMoving()) {
                 state.getController().setAnimation(RawAnimation.begin().thenLoop("patientia_moving"));
                 return PlayState.CONTINUE;

@@ -21,6 +21,10 @@ public class ModRecipeSerializers {
                     "magic_equinox_upgrade",
                     MagicEquinoxUpgradeRecipeSerializer::new);
 
+    public static final Supplier<RecipeSerializer<KitsuneDyeRecipe>> KITSUNE_DYE = RECIPE_SERIALIZERS
+            .register("kitsune_dye", () -> new net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer<>(KitsuneDyeRecipe::new));
+
+
     public static void register(IEventBus eventBus) {
         RECIPE_SERIALIZERS.register(eventBus);
     }

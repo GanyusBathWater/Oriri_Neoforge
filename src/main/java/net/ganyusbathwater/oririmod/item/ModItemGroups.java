@@ -389,6 +389,7 @@ public class ModItemGroups {
                         acceptAllLevels(output, ModItems.WITHER_ROSE);
                         output.accept(ModItems.ESSENCE_OF_DARKNESS.get());
                         output.accept(ModItems.MERMAID_SCALE.get());
+                        output.accept(ModItems.KITSUNE_BELL.get());
 
                         // ------------Weapons------------
                         output.accept(ModItems.JADE_SHIELD);

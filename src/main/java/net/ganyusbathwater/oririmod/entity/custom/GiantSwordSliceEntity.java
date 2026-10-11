@@ -31,7 +31,7 @@ public class GiantSwordSliceEntity extends Entity implements GeoEntity {
     public int initialDelay = 0;
     public int chargeDelay = 40; // 2 seconds
     public float sliceSpeed = 2.5f; // Blocks per tick (Increased from 2.0)
-    public float damage = 20.0f; // 10 hearts
+    public float damage = 16.0f; // 8 hearts (reduced by 2 hearts)
     public UUID ownerId;
     
     private int lifeTicks = 0;

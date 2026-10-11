@@ -44,6 +44,15 @@ public final class ModDataComponents {
                             .build()
             );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<KitsuneColors>> KITSUNE_COLORS =
+            COMPONENTS.register("kitsune_colors", () ->
+                    DataComponentType.<KitsuneColors>builder()
+                            .persistent(KitsuneColors.CODEC)
+                            .networkSynchronized(KitsuneColors.STREAM_CODEC)
+                            .build()
+            );
+
+
     public static void register(IEventBus eventBus) {
         COMPONENTS.register(eventBus);
     }

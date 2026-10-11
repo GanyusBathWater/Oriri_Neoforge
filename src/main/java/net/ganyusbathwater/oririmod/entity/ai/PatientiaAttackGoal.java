@@ -23,8 +23,11 @@ public class PatientiaAttackGoal extends Goal {
     // Projectile state
     private int projectileCount = 0;
     
-    // Cooldown timer
+    // Cooldown timers
     private long nextAttackTime = 0;
+    private long nextHeavyAttackTime = 0;
+    private static final int BASE_HEAVY_COOLDOWN = 200; // 10s base cooldown for heavy attacks (Grid & Circle)
+    private static final int HEAVY_COOLDOWN_REDUCTION = 40; // Reduced by 2s (40 ticks) when high difficulty is active
 
     public PatientiaAttackGoal(PatientiaEntity boss) {
         this.boss = boss;
@@ -59,24 +62,44 @@ public class PatientiaAttackGoal extends Goal {
 
         LivingEntity target = boss.getTarget();
         
-        // Choose attack
-        int r = boss.getRandom().nextInt(100);
-        if (r < 25) {
-            chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE;
-        } else if (r < 50) {
-            chosenAttack = PatientiaEntity.ATTACK_MAGIC_CIRCLES;
-        } else if (r < 75) {
-            chosenAttack = PatientiaEntity.ATTACK_GIANT_SLICE;
-        } else {
-            if (boss.getHealthFraction() <= 0.5f) {
-                chosenAttack = PatientiaEntity.ATTACK_HEAVENLY_EXEC;
+        boolean canUseHeavy = boss.level().getGameTime() >= nextHeavyAttackTime;
+        
+        if (canUseHeavy) {
+            int r = boss.getRandom().nextInt(100);
+            if (r < 25) {
+                chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE;
+            } else if (r < 55) {
+                chosenAttack = PatientiaEntity.ATTACK_MAGIC_CIRCLES;
+            } else if (r < 85) {
+                chosenAttack = PatientiaEntity.ATTACK_GIANT_SLICE;
             } else {
-                chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE; // Fallback
+                if (boss.getHealthFraction() <= 0.5f) {
+                    chosenAttack = PatientiaEntity.ATTACK_HEAVENLY_EXEC;
+                } else {
+                    chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE;
+                }
+            }
+        } else {
+            // Heavy attacks (Grid & Circle) on separate cooldown; Patientia casts other attacks
+            if (boss.getHealthFraction() <= 0.5f) {
+                chosenAttack = boss.getRandom().nextBoolean()
+                        ? PatientiaEntity.ATTACK_MAGIC_PROJECTILE
+                        : PatientiaEntity.ATTACK_HEAVENLY_EXEC;
+            } else {
+                chosenAttack = PatientiaEntity.ATTACK_MAGIC_PROJECTILE;
             }
         }
         
+        if (chosenAttack == PatientiaEntity.ATTACK_MAGIC_CIRCLES || chosenAttack == PatientiaEntity.ATTACK_GIANT_SLICE) {
+            boolean isHigherDifficulty = false;
+            if (boss.level() instanceof ServerLevel sl) {
+                isHigherDifficulty = net.ganyusbathwater.oririmod.world.GodsTrialData.get(sl).isActive();
+            }
+            int heavyCooldown = isHigherDifficulty ? (BASE_HEAVY_COOLDOWN - HEAVY_COOLDOWN_REDUCTION) : BASE_HEAVY_COOLDOWN;
+            nextHeavyAttackTime = boss.level().getGameTime() + heavyCooldown;
+        }
+        
         boss.setAttackType(chosenAttack);
-        triggerAnimation(chosenAttack);
     }
 
     @Override
@@ -256,12 +279,5 @@ public class PatientiaAttackGoal extends Goal {
         };
     }
 
-    private void triggerAnimation(int attack) {
-        String animName = switch (attack) {
-            case PatientiaEntity.ATTACK_MAGIC_PROJECTILE, PatientiaEntity.ATTACK_MAGIC_CIRCLES, 
-                 PatientiaEntity.ATTACK_GIANT_SLICE, PatientiaEntity.ATTACK_HEAVENLY_EXEC -> "patientia_defensive";
-            default -> "patientia_idle";
-        };
-        boss.triggerAnim("attack_controller", animName);
-    }
+
 }

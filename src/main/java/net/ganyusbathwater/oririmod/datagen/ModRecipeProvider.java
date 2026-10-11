@@ -710,6 +710,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 }
 
                 makeMermaidScaleDyeRecipes(recipeOutput);
+                net.minecraft.data.recipes.SpecialRecipeBuilder.special(net.ganyusbathwater.oririmod.recipe.KitsuneDyeRecipe::new).save(recipeOutput, "oririmod:kitsune_dye");
         }
 
         private void makeMermaidScaleDyeRecipes(RecipeOutput recipeOutput) {

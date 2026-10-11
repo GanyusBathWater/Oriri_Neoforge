@@ -107,7 +107,7 @@ public class SwordCircleEntity extends Entity {
                         sword.yRotO = targetYRot;
                         sword.xRotO = targetXRot;
 
-                        sword.fireInstantly(shootVec, 15.0f);
+                        sword.fireInstantly(shootVec, 11.0f); // Reduced by 2 hearts (from 15.0f)
                         if (targetOpt.isPresent()) {
                             sword.setTargetId(targetOpt.get());
                         }

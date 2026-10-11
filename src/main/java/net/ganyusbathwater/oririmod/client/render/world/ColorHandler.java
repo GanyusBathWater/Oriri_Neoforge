@@ -68,6 +68,17 @@ public final class ColorHandler {
         };
         event.register(mermaidScaleItem, net.ganyusbathwater.oririmod.item.ModItems.MERMAID_SCALE.get());
 
+        ItemColor kitsuneBellItem = (stack, tintIndex) -> {
+            net.ganyusbathwater.oririmod.item.component.KitsuneColors colors = stack.getOrDefault(
+                    net.ganyusbathwater.oririmod.item.component.ModDataComponents.KITSUNE_COLORS.get(),
+                    net.ganyusbathwater.oririmod.item.component.KitsuneColors.DEFAULT);
+            if (tintIndex == 1) return colors.primary() | 0xFF000000;
+            if (tintIndex == 2) return colors.secondary() | 0xFF000000;
+            return 0xFFFFFFFF;
+        };
+        event.register(kitsuneBellItem, net.ganyusbathwater.oririmod.item.ModItems.KITSUNE_BELL.get());
+
+
         ItemColor teleporterItem = (stack, tintIndex) -> {
             if (tintIndex == 0) {
                 net.minecraft.world.item.DyeColor color = stack.get(net.minecraft.core.component.DataComponents.BASE_COLOR);
