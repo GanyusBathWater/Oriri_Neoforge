@@ -6,9 +6,15 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import net.ganyusbathwater.oririmod.recipe.EquinoxTableRecipe;
+import net.ganyusbathwater.oririmod.recipe.MagicEquinoxUpgradeRecipe;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EquinoxTableEmiRecipe implements EmiRecipe {
@@ -20,15 +26,38 @@ public class EquinoxTableEmiRecipe implements EmiRecipe {
     public EquinoxTableEmiRecipe(ResourceLocation id, EquinoxTableRecipe recipe) {
         this.id = id;
         this.recipe = recipe;
+
+        EmiIngredient centerIngredient = EmiIngredient.of(recipe.getCenter());
+        ItemStack resultStack = recipe.getResult().copy();
+
+        if (recipe instanceof MagicEquinoxUpgradeRecipe magicUpgrade) {
+            ItemStack[] centerItems = recipe.getCenter().getItems();
+            if (centerItems != null && centerItems.length > 0) {
+                List<EmiStack> centerStacks = new ArrayList<>();
+                for (ItemStack base : centerItems) {
+                    ItemStack copy = base.copy();
+                    CompoundTag tag = copy.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+                    tag.putInt("oriri_level", magicUpgrade.getRequiredLevel());
+                    copy.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+                    centerStacks.add(EmiStack.of(copy));
+                }
+                centerIngredient = EmiIngredient.of(centerStacks);
+            }
+
+            CompoundTag resTag = resultStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+            resTag.putInt("oriri_level", magicUpgrade.getRequiredLevel() + 1);
+            resultStack.set(DataComponents.CUSTOM_DATA, CustomData.of(resTag));
+        }
+
         this.inputs = List.of(
             EmiIngredient.of(recipe.getTop()),
             EmiIngredient.of(recipe.getLeft()),
-            EmiIngredient.of(recipe.getCenter()),
+            centerIngredient,
             EmiIngredient.of(recipe.getRight()),
             EmiIngredient.of(recipe.getBottom()),
             EmiIngredient.of(recipe.getTemplate())
         );
-        this.outputs = List.of(EmiStack.of(recipe.getResult()));
+        this.outputs = List.of(EmiStack.of(resultStack));
     }
 
     @Override

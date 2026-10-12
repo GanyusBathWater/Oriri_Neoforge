@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:jade_block"
+    },
+    "left": {
+        "item": "minecraft:wind_charge"
+    },
+    "center": {
+        "item": "oririmod:jade_oath"
+    },
+    "right": {
+        "item": "minecraft:wind_charge"
+    },
+    "bottom": {
+        "item": "oririmod:power_soul"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:jade_oath",
+        "count": 1
+    },
+    "mana_cost": 200,
+    "required_level": 2
+}

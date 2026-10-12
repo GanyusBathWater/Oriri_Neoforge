@@ -3,10 +3,12 @@ package net.ganyusbathwater.oririmod.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -50,7 +52,7 @@ public class AirSliceEntity extends Projectile implements GeoEntity {
     public AirSliceEntity(Level level, LivingEntity owner) {
         super(ModEntities.AIR_SLICE.get(), level);
         this.setOwner(owner);
-        this.setPos(owner.getX(), owner.getEyeY() - 0.1D, owner.getZ());
+        this.setPos(owner.getX(), owner.getEyeY() - 1.0D, owner.getZ());
     }
 
     @Override
@@ -84,6 +86,7 @@ public class AirSliceEntity extends Projectile implements GeoEntity {
         tag.putInt("Lifespan", this.getLifespan());
         tag.putFloat("Damage", this.getDamage());
         tag.putFloat("RollAngle", this.getRollAngle());
+        tag.putInt("Color", this.getColor());
     }
 
     public void setHomingEnabled(boolean homing) { this.entityData.set(HOMING_ENABLED, homing); }
@@ -94,10 +97,57 @@ public class AirSliceEntity extends Projectile implements GeoEntity {
     public int getLifespan() { return this.entityData.get(LIFESPAN); }
     public void setDamage(float damage) { this.entityData.set(DAMAGE, damage); }
     public float getDamage() { return this.entityData.get(DAMAGE); }
-    public void setRollAngle(float angle) { this.entityData.set(ROLL_ANGLE, angle); }
+    public void setRollAngle(float angle) {
+        this.entityData.set(ROLL_ANGLE, angle);
+        this.setBoundingBox(this.makeBoundingBox());
+    }
+
     public float getRollAngle() { return this.entityData.get(ROLL_ANGLE); }
     public int getColor() { return this.entityData.get(COLOR); }
     public void setColor(int color) { this.entityData.set(COLOR, color); }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (ROLL_ANGLE.equals(key)) {
+            this.setBoundingBox(this.makeBoundingBox());
+        }
+    }
+
+    @Override
+    protected AABB makeBoundingBox() {
+        if (this.entityData == null) {
+            return new AABB(-0.125D, 0.0D, -0.125D, 0.125D, 2.0D, 0.125D).move(this.position());
+        }
+        return calculateOrientedBox(this.position());
+    }
+
+    public AABB calculateOrientedBox(Vec3 pos) {
+        float yaw = this.getYRot();
+        float pitch = this.getXRot();
+        float roll = this.getRollAngle();
+
+        org.joml.Quaternionf rot = new org.joml.Quaternionf();
+        rot.rotationY((float) Math.toRadians(yaw + 180.0F));
+        rot.rotateX((float) Math.toRadians(pitch));
+        rot.rotateZ((float) Math.toRadians(roll));
+
+        // Half-extents of the blade in local space:
+        // Height axis: length 2.0m -> half-extent 1.0m along Y
+        // Width axis: thickness 0.25m -> half-extent 0.125m along X
+        // Depth axis: crescent curve ~1.3m -> half-extent 0.65m along Z
+        org.joml.Vector3f sVec = rot.transform(new org.joml.Vector3f(0.0F, 1.0F, 0.0F));
+        org.joml.Vector3f wVec = rot.transform(new org.joml.Vector3f(0.125F, 0.0F, 0.0F));
+        org.joml.Vector3f dVec = rot.transform(new org.joml.Vector3f(0.0F, 0.0F, 0.65F));
+
+        double hx = Math.abs(sVec.x) + Math.abs(wVec.x) + Math.abs(dVec.x);
+        double hy = Math.abs(sVec.y) + Math.abs(wVec.y) + Math.abs(dVec.y);
+        double hz = Math.abs(sVec.z) + Math.abs(wVec.z) + Math.abs(dVec.z);
+
+        Vec3 center = pos.add(0.0D, 1.0D, 0.0D);
+        return new AABB(center.x - hx, center.y - hy, center.z - hz,
+                        center.x + hx, center.y + hy, center.z + hz);
+    }
 
     @Override
     public void tick() {
@@ -124,16 +174,77 @@ public class AirSliceEntity extends Projectile implements GeoEntity {
             }
         }
 
-        // Update Position and Rotation
+        Vec3 startPos = this.position();
         Vec3 vel = this.getDeltaMovement();
-        this.setPos(this.getX() + vel.x, this.getY() + vel.y, this.getZ() + vel.z);
-        this.updateRotation();
+        double speed = vel.length();
 
-        // Projectile Hit Logic
-        net.minecraft.world.phys.HitResult hitResult = net.minecraft.world.entity.projectile.ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-        if (hitResult.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
-            this.onHit(hitResult);
+        // Continuous Collision Detection (CCD) for block destruction and entity hits
+        if (speed > 0.001D) {
+            // Check sub-steps every 0.2 blocks to ensure no high-speed tunneling through blocks
+            int steps = Math.max(1, (int) Math.ceil(speed / 0.2D));
+            Set<BlockPos> brokenBlocks = new HashSet<>();
+
+            for (int i = 1; i <= steps; i++) {
+                double t = (double) i / steps;
+                Vec3 stepPos = startPos.add(vel.scale(t));
+                AABB stepBox = calculateOrientedBox(stepPos).inflate(0.05D);
+
+                // 1. Process Blocks (Server-side)
+                if (!this.level().isClientSide) {
+                    BlockPos minPos = BlockPos.containing(stepBox.minX, stepBox.minY, stepBox.minZ);
+                    BlockPos maxPos = BlockPos.containing(stepBox.maxX, stepBox.maxY, stepBox.maxZ);
+
+                    for (BlockPos pos : BlockPos.betweenClosed(minPos, maxPos)) {
+                        if (brokenBlocks.contains(pos)) continue;
+
+                        net.minecraft.world.level.block.state.BlockState state = this.level().getBlockState(pos);
+                        if (state.isAir() || state.liquid()) continue;
+
+                        AABB blockAABB = new AABB(pos);
+                        if (!stepBox.intersects(blockAABB)) continue;
+
+                        float destroySpeed = state.getDestroySpeed(this.level(), pos);
+                        if (destroySpeed < 0.0F) {
+                            // Unbreakable block (Bedrock, Barrier, End Portal Frame, etc.) -> collide & discard
+                            this.onHitBlock(new BlockHitResult(stepPos, net.minecraft.core.Direction.getNearest(vel.x, vel.y, vel.z).getOpposite(), pos.immutable(), false));
+                            this.discard();
+                            return;
+                        }
+
+                        if (this.canBreakBlocks()) {
+                            brokenBlocks.add(pos.immutable());
+                            this.level().destroyBlock(pos, false);
+                        } else if (state.isSolid()) {
+                            // Cannot break blocks (e.g. inside a dungeon): impact and discard
+                            this.onHitBlock(new BlockHitResult(stepPos, net.minecraft.core.Direction.getNearest(vel.x, vel.y, vel.z).getOpposite(), pos.immutable(), false));
+                            this.discard();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // 2. Process Entities along the swept path
+            AABB sweptBox = calculateOrientedBox(startPos).minmax(calculateOrientedBox(startPos.add(vel))).inflate(0.2D);
+            List<LivingEntity> hitEntities = this.level().getEntitiesOfClass(LivingEntity.class, sweptBox, this::canHitEntity);
+            for (LivingEntity target : hitEntities) {
+                if (target == this.getOwner()) continue;
+                if (!this.piercedEntities.contains(target.getUUID())) {
+                    if (target.getBoundingBox().intersects(sweptBox)) {
+                        this.piercedEntities.add(target.getUUID());
+                        target.hurt(this.damageSources().thrown(this, this.getOwner()), this.getDamage());
+                        if (this.level() instanceof ServerLevel serverLevel) {
+                            serverLevel.sendParticles(ParticleTypes.SWEEP_ATTACK, target.getX(), target.getY() + target.getBbHeight() / 2.0D, target.getZ(), 1, 0, 0, 0, 0);
+                        }
+                    }
+                }
+            }
         }
+
+        // Update Position and Rotation
+        this.setPos(startPos.add(vel));
+        this.updateRotation();
+        this.setBoundingBox(this.makeBoundingBox());
 
         // Spawn particles on client side
         if (this.level().isClientSide && this.tickCount % 2 == 0) {
@@ -144,30 +255,81 @@ public class AirSliceEntity extends Projectile implements GeoEntity {
         this.setNoGravity(true);
     }
 
+    @Override
+    public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
+        super.shoot(x, y, z, velocity, inaccuracy);
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
+        this.setBoundingBox(this.makeBoundingBox());
+    }
+
+    @Override
+    public void shootFromRotation(Entity shooter, float x, float y, float z, float velocity, float inaccuracy) {
+        super.shootFromRotation(shooter, x, y, z, velocity, inaccuracy);
+        Vec3 vel = this.getDeltaMovement();
+        double d0 = vel.horizontalDistance();
+        if (d0 > 0.0001D || Math.abs(vel.y) > 0.0001D) {
+            this.setYRot((float)(Mth.atan2(vel.x, vel.z) * 180.0F / (float)Math.PI));
+            this.setXRot((float)(Mth.atan2(vel.y, d0) * 180.0F / (float)Math.PI));
+        }
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
+        this.setBoundingBox(this.makeBoundingBox());
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
+        this.xRotO = this.getXRot();
+        this.yRotO = this.getYRot();
+        this.setBoundingBox(this.makeBoundingBox());
+    }
+
+    @Override
+    public void lerpMotion(double x, double y, double z) {
+        super.lerpMotion(x, y, z);
+        double d0 = Math.sqrt(x * x + z * z);
+        this.setXRot((float)(Mth.atan2(y, d0) * 180.0F / (float)Math.PI));
+        this.setYRot((float)(Mth.atan2(x, z) * 180.0F / (float)Math.PI));
+        this.xRotO = this.getXRot();
+        this.yRotO = this.getYRot();
+        this.setBoundingBox(this.makeBoundingBox());
+    }
+
+    @Override
+    protected void updateRotation() {
+        Vec3 vec3 = this.getDeltaMovement();
+        double d0 = vec3.horizontalDistance();
+        if (d0 > 0.0001D || Math.abs(vec3.y) > 0.0001D) {
+            this.setXRot((float)(Mth.atan2(vec3.y, d0) * 180.0F / (float)Math.PI));
+            this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
+        }
+    }
+
     private void spawnWindParticles() {
-        Vec3 reverseVel = this.getDeltaMovement().normalize().scale(-0.2); // Move away from travel direction
+        Vec3 reverseVel = this.getDeltaMovement().normalize().scale(-0.2);
 
-        // Locators are defined at [0, 15, 2] and [0, 2, 2] in the geo.json
-        // In block units, this is roughly Y=0.9375, Z=0.125 and Y=0.125, Z=0.125
-        Vec3 topLocator = new Vec3(0, 15.0/16.0, 2.0/16.0);
-        Vec3 bottomLocator = new Vec3(0, 2.0/16.0, 2.0/16.0);
+        org.joml.Quaternionf rot = new org.joml.Quaternionf();
+        rot.rotationY((float) Math.toRadians(this.getYRot() + 180.0F));
+        rot.rotateX((float) Math.toRadians(this.getXRot()));
+        rot.rotateZ((float) Math.toRadians(this.getRollAngle()));
 
-        // Apply roll, pitch, yaw to locators to match the renderer
-        // The renderer applies Yaw -> Pitch -> Roll (around Z).
-        // In vector math (applied right to left), we apply Roll -> Pitch -> Yaw.
-        float pitchRad = this.getXRot() * (float) (Math.PI / 180.0);
-        float yawRad = -this.getYRot() * (float) (Math.PI / 180.0); // Vec3 yRot is negative of yaw
-        float rollRad = this.getRollAngle() * (float) (Math.PI / 180.0);
+        // Local offsets relative to (0, 1.0, 0) center:
+        // Top locator at Y = 29/16, Z = 12/16 -> relative to center: Y = 13/16, Z = 12/16
+        // Bottom locator at Y = 2/16, Z = 2/16 -> relative to center: Y = -14/16, Z = 2/16
+        org.joml.Vector3f topRel = rot.transform(new org.joml.Vector3f(0.0F, (29.0F - 16.0F) / 16.0F, 12.0F / 16.0F));
+        org.joml.Vector3f botRel = rot.transform(new org.joml.Vector3f(0.0F, (2.0F - 16.0F) / 16.0F, 2.0F / 16.0F));
 
-        topLocator = topLocator.zRot(rollRad).xRot(pitchRad).yRot(yawRad);
-        bottomLocator = bottomLocator.zRot(rollRad).xRot(pitchRad).yRot(yawRad);
+        double cx = this.getX();
+        double cy = this.getY() + 1.0D;
+        double cz = this.getZ();
 
         this.level().addParticle(ParticleTypes.CLOUD, 
-            this.getX() + topLocator.x, this.getY() + topLocator.y, this.getZ() + topLocator.z,
+            cx + topRel.x, cy + topRel.y, cz + topRel.z,
             reverseVel.x, reverseVel.y, reverseVel.z);
 
         this.level().addParticle(ParticleTypes.CLOUD, 
-            this.getX() + bottomLocator.x, this.getY() + bottomLocator.y, this.getZ() + bottomLocator.z,
+            cx + botRel.x, cy + botRel.y, cz + botRel.z,
             reverseVel.x, reverseVel.y, reverseVel.z);
     }
 
@@ -217,8 +379,8 @@ public class AirSliceEntity extends Projectile implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "idle", 0, state -> {
-            state.getController().setAnimation(RawAnimation.begin().thenLoop("animation.air_slice.idle"));
+        controllers.add(new AnimationController<>(this, "traveling", 0, state -> {
+            state.getController().setAnimation(RawAnimation.begin().thenLoop("air_slice_traveling"));
             return PlayState.CONTINUE;
         }));
     }

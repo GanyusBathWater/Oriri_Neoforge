@@ -445,6 +445,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 makeSwordRecipe(recipeOutput, ModItems.BLUE_ICE_INGOT.get(), ModItems.ICE_SWORD.get());
                 makeSwordRecipe(recipeOutput, ModItems.ANCIENT_INGOT.get(), ModItems.PANDORAS_BLADE.get());
 
+                ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.JADE_OATH.get(), 1)
+                                .pattern(" W#")
+                                .pattern(" #W")
+                                .pattern("/  ")
+                                .define('W', Items.WIND_CHARGE)
+                                .define('#', ModItems.JADE.get())
+                                .define('/', ModItems.IRON_STICK.get())
+                                .unlockedBy("has_jade", has(ModItems.JADE.get()))
+                                .save(recipeOutput);
+
                 ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.ORAPHIM_BOW.get(), 1)
                                 .pattern(" IS")
                                 .pattern("I S")

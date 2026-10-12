@@ -412,6 +412,7 @@ public class ModItemGroups {
                         output.accept(ModItems.PIRATE_SABER);
 
                         output.accept(ModItems.ICE_SWORD);
+                        acceptAllLevels(output, ModItems.JADE_OATH);
 
                         output.accept(ModItems.MJOELNIR);
                         output.accept(ModItems.LAW_BREAKER);

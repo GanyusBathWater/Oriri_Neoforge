@@ -374,6 +374,14 @@ public class ModItemModelProvider extends ItemModelProvider {
 
                 handheldItem(ModItems.ICE_SWORD);
 
+                withExistingParent(ModItems.JADE_OATH.getId().getPath(), mcLoc("item/handheld"))
+                                .texture("layer0", modLoc("item/jade_oath"))
+                                .override()
+                                .predicate(mcLoc("charged"), 1.0F)
+                                .model(withExistingParent(ModItems.JADE_OATH.getId().getPath() + "_charged", mcLoc("item/handheld"))
+                                                .texture("layer0", modLoc("item/jade_oath_charged")))
+                                .end();
+
                 handheldItem(ModItems.LAW_BREAKER);
                 handheldItem(ModItems.STELLA_PERDITOR);
                 handheldItem(ModItems.QILINS_WRATH);

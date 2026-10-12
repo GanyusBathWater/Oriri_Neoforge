@@ -16,6 +16,12 @@ public class ModItemProperties {
         makeCustomCrossbow(ModItems.ARBITER_CROSSBOW.get());
         makeCustomShield(ModItems.JADE_SHIELD.get());
         makeGodseeker(ModItems.THE_GODSEEKER.get());
+        makeJadeOath(ModItems.JADE_OATH.get());
+    }
+
+    private static void makeJadeOath(Item item) {
+        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("charged"),
+                (stack, level, entity, seed) -> net.ganyusbathwater.oririmod.item.custom.JadeOathItem.isCharged(stack) ? 1.0F : 0.0F);
     }
 
     private static void makeCustomBow(Item item) {

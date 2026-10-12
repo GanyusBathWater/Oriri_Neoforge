@@ -285,7 +285,7 @@ public final class ModEntities {
                                                         .<net.ganyusbathwater.oririmod.entity.AirSliceEntity>of(
                                                                         net.ganyusbathwater.oririmod.entity.AirSliceEntity::new,
                                                                         MobCategory.MISC)
-                                                        .sized(2.5F, 2.5F)
+                                                        .sized(0.25F, 2.0F)
                                                         .clientTrackingRange(64)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
@@ -554,6 +554,18 @@ public final class ModEntities {
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "dungeon_keeper")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<TornadoEntity>> TORNADO = ENTITIES
+                        .register("tornado",
+                                        () -> EntityType.Builder
+                                                        .<TornadoEntity>of(TornadoEntity::new, MobCategory.MISC)
+                                                        .sized(1.0F, 1.8F)
+                                                        .clientTrackingRange(64)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "tornado")
                                                                         .toString()));
 
         public static void register(IEventBus modBus) {

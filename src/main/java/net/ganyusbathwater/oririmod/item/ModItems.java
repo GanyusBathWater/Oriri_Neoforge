@@ -350,6 +350,12 @@ public class ModItems {
                                                         .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.8F))
                                                         .stacksTo(1),
                                         ModRarity.RARE));
+        public static final DeferredItem<JadeOathItem> JADE_OATH = ITEMS.register("jade_oath",
+                        () -> new JadeOathItem(Tiers.DIAMOND,
+                                        new Item.Properties()
+                                                        .attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.6F))
+                                                        .stacksTo(1),
+                                        ModRarity.LEGENDARY));
         public static final DeferredItem<MaceItem> LAW_BREAKER = ITEMS.register("law_breaker",
                         () -> new CustomHammerItem(
                                         new Item.Properties().fireResistant().stacksTo(1)

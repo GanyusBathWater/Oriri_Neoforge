@@ -363,6 +363,8 @@ public class OririClient {
                 net.ganyusbathwater.oririmod.entity.client.DungeonKeeperRenderer::new);
         event.registerEntityRenderer(ModEntities.AIR_SLICE.get(),
                 net.ganyusbathwater.oririmod.entity.client.AirSliceRenderer::new);
+        event.registerEntityRenderer(ModEntities.TORNADO.get(),
+                net.ganyusbathwater.oririmod.entity.client.TornadoRenderer::new);
         event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), net.ganyusbathwater.oririmod.client.render.entity.MagicBoltRenderer::new);
         event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
