@@ -115,6 +115,7 @@ public class OririMod {
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+            modEventBus.addListener(net.ganyusbathwater.oririmod.util.ModItemProperties::onClientSetup);
         }
     }
 

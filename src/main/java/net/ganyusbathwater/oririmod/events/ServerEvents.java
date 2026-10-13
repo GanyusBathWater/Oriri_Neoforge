@@ -261,6 +261,19 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public static void onLivingDamagePost(LivingDamageEvent.Post event) {
+        if (event.getSource().getEntity() instanceof Player player
+                && event.getSource().getDirectEntity() == player
+                && event.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)
+                && !player.level().isClientSide()) {
+            ItemStack mainHand = player.getMainHandItem();
+            if (mainHand.getItem() instanceof net.ganyusbathwater.oririmod.item.custom.JadeOathItem) {
+                net.ganyusbathwater.oririmod.item.custom.JadeOathItem.registerHit(mainHand, player);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
         Entity sourceEntity = event.getSource().getEntity();
         if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !player.level().isClientSide() && event.getSource().getDirectEntity() == player) {

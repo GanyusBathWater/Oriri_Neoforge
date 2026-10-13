@@ -71,7 +71,7 @@ public class TornadoEntity extends Projectile implements GeoEntity {
         // Default pull radius: 2.0 blocks
         builder.define(PULL_RADIUS, 2.0F);
         // Default pull strength
-        builder.define(PULL_STRENGTH, 0.35F);
+        builder.define(PULL_STRENGTH, 0.45F);
         // Damage applied every 10 ticks (0.5s) while inside
         builder.define(DAMAGE_INTERVAL, 10);
         // Whether the owner is pulled (default false, protects player / shooter)
@@ -140,6 +140,13 @@ public class TornadoEntity extends Projectile implements GeoEntity {
     }
 
     @Override
+    public float maxUpStep() {
+        // Can step up obstacles up to 1.1 blocks tall (slabs, stairs, 1 full block).
+        // Fences (1.5 blocks) and taller walls will block the entity and trigger horizontalCollision.
+        return 1.1F;
+    }
+
+    @Override
     public void tick() {
         super.tick();
 
@@ -150,34 +157,32 @@ public class TornadoEntity extends Projectile implements GeoEntity {
 
         Vec3 vel = this.getDeltaMovement();
         if (!this.isNoGravity()) {
-            vel = vel.add(0.0D, -0.03D, 0.0D);
-            this.setDeltaMovement(vel);
-        }
-        Vec3 startPos = this.position();
-
-        // 1. Move and check collision
-        if (vel.lengthSqr() > 0.0001D) {
-            Vec3 nextPos = startPos.add(vel);
-            BlockHitResult hitResult = this.level().clip(new ClipContext(
-                    startPos, nextPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this
-            ));
-
-            if (hitResult.getType() == HitResult.Type.BLOCK) {
-                Direction hitDir = hitResult.getDirection();
-                if (hitDir == Direction.UP) {
-                    // Glide along the floor instead of vanishing instantly
-                    this.setDeltaMovement(vel.x, 0.0D, vel.z);
-                    nextPos = hitResult.getLocation();
-                } else {
-                    // Impact solid wall or ceiling -> discard
-                    this.onHitBlock(hitResult);
-                    if (!this.level().isClientSide) {
-                        this.discard();
-                        return;
-                    }
-                }
+            if (this.onGround()) {
+                vel = new Vec3(vel.x, 0.0D, vel.z);
+            } else {
+                vel = vel.add(0.0D, -0.04D, 0.0D);
             }
-            this.setPos(nextPos);
+        }
+
+        double hSpeed = Math.sqrt(vel.x * vel.x + vel.z * vel.z);
+        if (hSpeed > 0.0001D || Math.abs(vel.y) > 0.0001D) {
+            this.move(net.minecraft.world.entity.MoverType.SELF, vel);
+
+            // Collided with a tall wall or fence (>= 1.5 blocks tall that cannot be stepped over)
+            if (this.horizontalCollision) {
+                if (!this.level().isClientSide) {
+                    this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            net.minecraft.sounds.SoundEvents.WIND_CHARGE_BURST.value(),
+                            net.minecraft.sounds.SoundSource.NEUTRAL, 1.0F, 1.2F);
+                    this.discard();
+                    return;
+                }
+            } else {
+                // Moving forward on flat ground or stepped over a 1-block obstacle.
+                // Maintain horizontal speed so ground friction doesn't halt the vortex.
+                Vec3 postMoveVel = this.getDeltaMovement();
+                this.setDeltaMovement(vel.x, postMoveVel.y, vel.z);
+            }
         }
 
         this.updateRotation();
@@ -263,32 +268,33 @@ public class TornadoEntity extends Projectile implements GeoEntity {
         float angleWhirl3 = (float) Math.toRadians((this.tickCount * 4.5F) % 360.0F);
         float angleWhirl4 = (float) Math.toRadians((-this.tickCount * 4.5F) % 360.0F);
 
-        // 1. Ground locator: [0, 2/16, 0]
-        double groundY = cy + 2.0 / 16.0;
-        lvl.addParticle(ParticleTypes.CLOUD,
-                cx + (this.random.nextDouble() - 0.5) * 0.3,
-                groundY,
-                cz + (this.random.nextDouble() - 0.5) * 0.3,
-                (this.random.nextDouble() - 0.5) * 0.08,
-                0.015,
-                (this.random.nextDouble() - 0.5) * 0.08);
+        // 1. Ground locator: spawn every 3 ticks
+        if (this.tickCount % 3 == 0) {
+            double groundY = cy + 2.0 / 16.0;
+            lvl.addParticle(ParticleTypes.CLOUD,
+                    cx + (this.random.nextDouble() - 0.5) * 0.3,
+                    groundY,
+                    cz + (this.random.nextDouble() - 0.5) * 0.3,
+                    (this.random.nextDouble() - 0.5) * 0.08,
+                    0.015,
+                    (this.random.nextDouble() - 0.5) * 0.08);
+        }
 
-        // 2. Whirl 1 locator: pivot [0, 7, -9] -> Y = 7/16, radius = 9/16
-        spawnWhirlParticle(lvl, cx, cy, cz, 7.0 / 16.0, 9.0 / 16.0, angleWhirl1 + (float) Math.PI, 1.0F);
+        // 2. Whirl locators: alternate 1 locator per tick in a rotating cycle (1 -> 2 -> 3 -> 4)
+        int whirlIndex = this.tickCount % 4;
+        switch (whirlIndex) {
+            case 0 -> spawnWhirlParticle(lvl, cx, cy, cz, 7.0 / 16.0, 9.0 / 16.0, angleWhirl1 + (float) Math.PI, 1.0F);
+            case 1 -> spawnWhirlParticle(lvl, cx, cy, cz, 10.0 / 16.0, 10.0 / 16.0, angleWhirl2, -1.0F);
+            case 2 -> spawnWhirlParticle(lvl, cx, cy, cz, 14.0 / 16.0, 12.0 / 16.0, angleWhirl3 + (float) (Math.PI / 2.0), 1.0F);
+            case 3 -> {
+                float initAngle4 = (float) Math.atan2(-1.0, -14.0);
+                double rad4 = Math.sqrt(1.0 + 196.0) / 16.0;
+                spawnWhirlParticle(lvl, cx, cy, cz, 18.0 / 16.0, rad4, angleWhirl4 + initAngle4, -1.0F);
+            }
+        }
 
-        // 3. Whirl 2 locator: pivot [0, 10, 10] -> Y = 10/16, radius = 10/16
-        spawnWhirlParticle(lvl, cx, cy, cz, 10.0 / 16.0, 10.0 / 16.0, angleWhirl2, -1.0F);
-
-        // 4. Whirl 3 locator: pivot [12, 14, 0] -> Y = 14/16, radius = 12/16
-        spawnWhirlParticle(lvl, cx, cy, cz, 14.0 / 16.0, 12.0 / 16.0, angleWhirl3 + (float) (Math.PI / 2.0), 1.0F);
-
-        // 5. Whirl 4 locator: pivot [-1, 18, -14] -> Y = 18/16, radius ~14/16
-        float initAngle4 = (float) Math.atan2(-1.0, -14.0);
-        double rad4 = Math.sqrt(1.0 + 196.0) / 16.0;
-        spawnWhirlParticle(lvl, cx, cy, cz, 18.0 / 16.0, rad4, angleWhirl4 + initAngle4, -1.0F);
-
-        // Occasional wind gust cloud
-        if (this.tickCount % 5 == 0) {
+        // Occasional wind gust cloud (every 8 ticks)
+        if (this.tickCount % 8 == 0) {
             lvl.addParticle(ParticleTypes.GUST,
                     cx + (this.random.nextDouble() - 0.5) * 0.6,
                     cy + 0.6 + (this.random.nextDouble() - 0.5) * 0.6,
@@ -405,8 +411,8 @@ public class TornadoEntity extends Projectile implements GeoEntity {
     protected void updateRotation() {
         Vec3 vec3 = this.getDeltaMovement();
         double d0 = vec3.horizontalDistance();
-        if (d0 > 0.0001D || Math.abs(vec3.y) > 0.0001D) {
-            this.setXRot((float)(Mth.atan2(vec3.y, d0) * 180.0F / (float)Math.PI));
+        if (d0 > 0.0001D) {
+            this.setXRot(0.0F);
             this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
         }
     }

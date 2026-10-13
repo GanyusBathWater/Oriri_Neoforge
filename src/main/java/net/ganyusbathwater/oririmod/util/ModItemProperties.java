@@ -10,6 +10,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ChargedProjectiles;
 
 public class ModItemProperties {
+    public static void onClientSetup(final net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
+        event.enqueueWork(ModItemProperties::addCustomItemProperties);
+    }
+
     public static void addCustomItemProperties() {
         makeCustomBow(ModItems.ORAPHIM_BOW.get());
         makeCustomBow(ModItems.ARCUS_LUCIS.get());

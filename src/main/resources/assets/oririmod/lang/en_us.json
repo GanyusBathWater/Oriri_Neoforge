@@ -933,5 +933,16 @@
   "item.oririmod.staff_of_eternal_ice.level.1.description": "Level 1: \u00A7eUnleashes a Devastating Ice Storm",
   "tooltip.oririmod.staff_of_cosmos.ability": "Calls Down a Meteor from the Sky",
   "tooltip.oririmod.staff_of_eternal_ice.ability": "Unleashes a Devastating Ice Storm",
-  "tooltip.oririmod.staff_of_hell.ability": "Summons a Burst of Hellfire"
+  "tooltip.oririmod.staff_of_hell.ability": "Summons a Burst of Hellfire",
+  "item.oririmod.jade_oath": "Jade Oath",
+  "entity.oririmod.tornado": "Tornado",
+  "tooltip.oririmod.jade_oath.ability": "Consecutive hits charge the blade. Right-Click to unleash a gravity-bound Tornado pulling in nearby foes.",
+  "tooltip.oririmod.jade_oath.lore": "A blade carved from ancient jade, resonant with the gentle yet unstoppable breath of the wind.",
+  "item.oririmod.jade_oath.level.1.description": "Level 1: Unleashes Tornado after 5 consecutive hits (5s Cooldown)",
+  "item.oririmod.jade_oath.level.2.description": "Level 2: Requires only 3 consecutive hits",
+  "item.oririmod.jade_oath.level.3.description": "Level 3: Tornado deals 4 damage and pull radius increases to 3 blocks",
+  "tooltip.oririmod.jade_oath.hits_actionbar": "\u00A7aJade Oath: %s / %s",
+  "tooltip.oririmod.jade_oath.charged_actionbar": "\u00A7b\u00A7lJade Oath: CHARGED! \u00A7e[Right-Click to Unleash]",
+  "tooltip.oririmod.jade_oath.status_combo": "Combo Hits: %s / %s",
+  "tooltip.oririmod.jade_oath.status_charged": "Blade Charged! (Right-Click to Unleash)"
 }

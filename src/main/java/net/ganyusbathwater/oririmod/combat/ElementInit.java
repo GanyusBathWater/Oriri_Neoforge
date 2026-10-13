@@ -160,7 +160,6 @@ public final class ElementInit {
         ItemElementRegistry.setElement(ModItems.PANDORAS_BLADE.get(), Element.NATURE);
         ItemElementRegistry.setElement(ModItems.PIRATE_SABER.get(), Element.WATER);
         ItemElementRegistry.setElement(ModItems.ICE_SWORD.get(), Element.WATER);
-        ItemElementRegistry.setElement(ModItems.JADE_OATH.get(), Element.NATURE);
         ItemElementRegistry.setElement(ModItems.MJOELNIR.get(), Element.LIGHT);
         ItemElementRegistry.setElement(ModItems.LAW_BREAKER.get(), Element.LIGHT);
         ItemElementRegistry.setElement(ModItems.SOLS_EMBRACE.get(), Element.FIRE);
