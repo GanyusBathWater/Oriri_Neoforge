@@ -12,7 +12,8 @@
   "client": [
     "ClientLevelMixin",
     "LevelRendererMixin",
-    "WolfRendererMixin"
+    "WolfRendererMixin",
+    "HumanoidArmorLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

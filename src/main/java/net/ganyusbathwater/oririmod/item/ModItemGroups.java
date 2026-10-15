@@ -390,6 +390,7 @@ public class ModItemGroups {
                         output.accept(ModItems.ESSENCE_OF_DARKNESS.get());
                         output.accept(ModItems.MERMAID_SCALE.get());
                         output.accept(ModItems.KITSUNE_BELL.get());
+                        output.accept(ModItems.LAMIA_SCALE.get());
 
                         // ------------Weapons------------
                         output.accept(ModItems.JADE_SHIELD);
@@ -466,6 +467,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BLIZZA_SPAWN_EGG);
                         output.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
                         output.accept(ModItems.MERMAID_SPAWN_EGG);
+                        output.accept(ModItems.LAMIA_SPAWN_EGG);
                         output.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
                         output.accept(ModItems.PATIENTIA_SPAWN_EGG);
                         output.accept(ModItems.LOADED_BLAZE_SPAWN_EGG);

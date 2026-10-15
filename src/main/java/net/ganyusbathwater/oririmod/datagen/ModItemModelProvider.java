@@ -487,8 +487,11 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModItems.SPORE_BLOSSOM_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.VENOMOUS_PLANT_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.MERMAID_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+                withExistingParent(ModItems.LAMIA_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.MERMAID_SCALE.getId().getPath(), "item/generated")
                         .texture("layer0", modLoc("item/mermaid_scale"));
+                withExistingParent(ModItems.LAMIA_SCALE.getId().getPath(), "item/generated")
+                        .texture("layer0", modLoc("item/lamia_scale"));
                 withExistingParent(ModItems.KITSUNE_BELL.getId().getPath(), mcLoc("item/generated"))
                         .texture("layer0", modLoc("item/kitsune_bell_main"))
                         .texture("layer1", modLoc("item/kitsune_bell_primary"))

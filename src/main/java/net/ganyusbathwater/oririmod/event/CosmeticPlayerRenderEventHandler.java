@@ -20,6 +20,8 @@ public class CosmeticPlayerRenderEventHandler {
     public static net.ganyusbathwater.oririmod.client.render.entity.MermaidCosmeticRenderer MERMAID_COSMETIC_RENDERER;
     public static net.ganyusbathwater.oririmod.client.render.entity.MermaidHeadfinsRenderer MERMAID_HEADFINS_RENDERER;
     public static net.ganyusbathwater.oririmod.client.render.entity.KitsuneCosmeticRenderer KITSUNE_COSMETIC_RENDERER;
+    public static net.ganyusbathwater.oririmod.client.render.entity.LamiaTailRenderer LAMIA_TAIL_RENDERER;
+    public static net.ganyusbathwater.oririmod.client.render.entity.LamiaEarsRenderer LAMIA_EARS_RENDERER;
 
     private static boolean hasCurioEquipped(Player player, Item item) {
         return CuriosApi.getCuriosInventory(player)
@@ -108,6 +110,14 @@ public class CosmeticPlayerRenderEventHandler {
                 event.getRenderer().getModel().setupAnim((net.minecraft.client.player.AbstractClientPlayer) player, f8, f5, ageInTicks, netHeadYaw, headPitch);
             }
         }
+
+        if (hasCurioEquipped(player, ModItems.LAMIA_SCALE.get())) {
+            // Hide player legs permanently while Lamia essence is equipped
+            event.getRenderer().getModel().rightLeg.visible = false;
+            event.getRenderer().getModel().leftLeg.visible = false;
+            event.getRenderer().getModel().rightPants.visible = false;
+            event.getRenderer().getModel().leftPants.visible = false;
+        }
     }
     
     @SubscribeEvent
@@ -154,11 +164,40 @@ public class CosmeticPlayerRenderEventHandler {
             );
         }
 
+        if (LAMIA_TAIL_RENDERER == null) {
+            LAMIA_TAIL_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.LamiaTailRenderer(
+                new net.minecraft.client.renderer.entity.EntityRendererProvider.Context(
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher(),
+                    net.minecraft.client.Minecraft.getInstance().getItemRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getBlockRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getResourceManager(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityModels(),
+                    net.minecraft.client.Minecraft.getInstance().font
+                )
+            );
+        }
+
+        if (LAMIA_EARS_RENDERER == null) {
+            LAMIA_EARS_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.LamiaEarsRenderer(
+                new net.minecraft.client.renderer.entity.EntityRendererProvider.Context(
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher(),
+                    net.minecraft.client.Minecraft.getInstance().getItemRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getBlockRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getResourceManager(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityModels(),
+                    net.minecraft.client.Minecraft.getInstance().font
+                )
+            );
+        }
+
         for (net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
             net.minecraft.client.renderer.entity.LivingEntityRenderer<net.minecraft.client.player.AbstractClientPlayer, net.minecraft.client.model.PlayerModel<net.minecraft.client.player.AbstractClientPlayer>> renderer = event.getSkin(skin);
             if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer playerRenderer) {
                 playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.MermaidCosmeticLayer(playerRenderer));
                 playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.KitsuneCosmeticLayer(playerRenderer));
+                playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.LamiaCosmeticLayer(playerRenderer));
             }
         }
     }

@@ -261,6 +261,13 @@ public class OririMod {
             net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules,
             net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.LAMIA.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.ganyusbathwater.oririmod.entity.custom.LamiaEntity::checkLamiaSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
     }
 
     private void registerEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {

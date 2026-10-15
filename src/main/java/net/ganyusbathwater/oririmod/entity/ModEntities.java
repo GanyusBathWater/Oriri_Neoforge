@@ -370,6 +370,19 @@ public final class ModEntities {
                                                                                         "mermaid")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.LamiaEntity>> LAMIA = ENTITIES
+                        .register("lamia",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.LamiaEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.LamiaEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
+                                                        .sized(0.8F, 2.2F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "lamia")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.LoadedBlazeEntity>> LOADED_BLAZE = ENTITIES
                         .register("loaded_blaze",
                                         () -> EntityType.Builder

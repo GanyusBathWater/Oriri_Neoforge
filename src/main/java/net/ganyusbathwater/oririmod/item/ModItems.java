@@ -73,6 +73,8 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.MermaidScaleItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.BASE_COLOR, net.minecraft.world.item.DyeColor.CYAN)));
         public static final DeferredItem<Item> KITSUNE_BELL = ITEMS.register("kitsune_bell",
                         () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.KitsuneBellItem(new Item.Properties().stacksTo(1).component(ModDataComponents.KITSUNE_COLORS.get(), net.ganyusbathwater.oririmod.item.component.KitsuneColors.DEFAULT)));
+        public static final DeferredItem<Item> LAMIA_SCALE = ITEMS.register("lamia_scale",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.LamiaScaleItem(new Item.Properties().stacksTo(1)));
 
         public static final DeferredItem<Item> MANA_MANIFESTATION = ITEMS.register("mana_manifestation",
                         () -> new Item(new Item.Properties()));
@@ -550,6 +552,12 @@ public class ModItems {
                         "mermaid_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.MERMAID,
                                         0x00CED1, 0xFF69B4, // outer: dark turquoise, inner: hot pink (Charmed effect)
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> LAMIA_SPAWN_EGG = ITEMS.register(
+                        "lamia_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.LAMIA,
+                                        0x2A4B3A, 0xE6C280, // outer: dark serpent green, inner: sand gold
                                         new Item.Properties()));
 
         public static final DeferredItem<DeferredSpawnEggItem> REX_ARANEA_SPAWN_EGG = ITEMS.register(
