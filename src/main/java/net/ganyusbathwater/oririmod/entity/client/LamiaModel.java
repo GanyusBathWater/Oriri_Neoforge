@@ -52,7 +52,7 @@ public class LamiaModel extends GeoModel<LamiaEntity> {
             tail = getAnimationProcessor().getBone("body");
         }
         if (tail != null) {
-            tail.setRotY((float) Math.PI);
+            tail.setRotY(0.0F);
             tail.setPosZ(0.0F);
         }
 
@@ -71,7 +71,7 @@ public class LamiaModel extends GeoModel<LamiaEntity> {
         boolean isChoking = animatable.getAttackState() == LamiaEntity.ATTACK_CHOKEHOLD;
         boolean isSwimming = animatable.isInWater() || animatable.isVisuallySwimming();
 
-        SnakeTailPhysics.applyTailAnimation(
+        net.ganyusbathwater.oririmod.client.physics.TailPhysicsController.applyTailAnimation(
                 name -> getAnimationProcessor().getBone(name),
                 animatable,
                 partialTick,

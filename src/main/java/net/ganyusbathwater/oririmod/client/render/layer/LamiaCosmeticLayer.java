@@ -47,7 +47,6 @@ public class LamiaCosmeticLayer extends RenderLayer<AbstractClientPlayer, Player
             poseStack.pushPose();
             poseStack.scale(-1.0F, -1.0F, 1.0F);
             poseStack.translate(0.0F, -1.5F, 0.0F);
-            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
 
             CosmeticPlayerRenderEventHandler.LAMIA_TAIL_RENDERER.render(player, 180.0F, partialTick, poseStack, buffer, packedLight);
 

@@ -4,6 +4,7 @@ import net.ganyusbathwater.oririmod.combat.Element;
 import net.ganyusbathwater.oririmod.combat.IElementalEntity;
 import net.ganyusbathwater.oririmod.world.GodsTrialData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -103,6 +104,11 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
             return;
         }
         super.doPush(entity);
+    }
+
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState state) {
+        // Lamia has a serpent body with no bipedal feet; moves completely silently
     }
 
     @Override

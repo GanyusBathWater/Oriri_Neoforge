@@ -14,6 +14,8 @@ public class AngleConstraint {
 
     private final Vector3f v1 = new Vector3f();
     private final Vector3f v2 = new Vector3f();
+    private final Vector3f correctedDir = new Vector3f();
+    private final Vector3f targetPos = new Vector3f();
 
     public AngleConstraint(VerletParticle a, VerletParticle b, VerletParticle c, float maxAngleDegrees) {
         this.a = a;
@@ -38,15 +40,19 @@ public class AngleConstraint {
 
         if (angle > maxAngleRadians && !c.pinned) {
             float factor = (angle - maxAngleRadians) / angle;
-            Vector3f correctedDir = new Vector3f(v2).lerp(v1, factor).normalize();
-            Vector3f targetPos = new Vector3f(b.position).add(correctedDir.mul(l2));
+            correctedDir.set(v2).lerp(v1, factor);
+            float len = correctedDir.length();
+            if (len > 1.0E-6F) {
+                correctedDir.div(len);
+                targetPos.set(b.position).add(correctedDir.mul(l2));
 
-            float dx = targetPos.x - c.position.x;
-            float dy = targetPos.y - c.position.y;
-            float dz = targetPos.z - c.position.z;
+                float dx = targetPos.x - c.position.x;
+                float dy = targetPos.y - c.position.y;
+                float dz = targetPos.z - c.position.z;
 
-            c.position.set(targetPos);
-            c.prevPosition.add(dx, dy, dz); // Prevent kinetic energy explosion
+                c.position.set(targetPos);
+                c.prevPosition.add(dx, dy, dz); // Prevent kinetic energy explosion
+            }
         }
     }
 }

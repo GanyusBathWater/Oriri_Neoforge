@@ -74,15 +74,19 @@ public class LamiaTailModel extends AbstractPlayerCosmeticModel<LamiaTailAnimata
             boolean isFlying = player.getAbilities().flying || player.isFallFlying();
             boolean isSleeping = player.isSleeping();
             boolean isSwimming = player.isVisuallySwimming() || player.isInWater();
+            boolean isPassenger = player.isPassenger();
+            Entity vehicle = player.getVehicle();
 
-            SnakeTailPhysics.applyTailAnimation(
+            net.ganyusbathwater.oririmod.client.physics.TailPhysicsController.applyTailAnimation(
                     name -> getAnimationProcessor().getBone(name),
                     player,
                     partialTick,
                     false, // Player doesn't do mob chokehold
                     isSleeping,
                     isFlying,
-                    isSwimming
+                    isSwimming,
+                    isPassenger,
+                    vehicle
             );
         }
     }

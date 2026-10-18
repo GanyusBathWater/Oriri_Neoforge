@@ -83,6 +83,17 @@ public class VerletChain {
                 }
             }
         }
+
+        // 4. Safety validation: Recover from any NaN / Infinity to guarantee mesh never vanishes
+        for (int i = 1; i < particles.size(); i++) {
+            VerletParticle p = particles.get(i);
+            if (Float.isNaN(p.position.x) || Float.isInfinite(p.position.x) ||
+                Float.isNaN(p.position.y) || Float.isInfinite(p.position.y) ||
+                Float.isNaN(p.position.z) || Float.isInfinite(p.position.z)) {
+                VerletParticle prev = particles.get(i - 1);
+                p.set(prev.position.x, prev.position.y, prev.position.z);
+            }
+        }
     }
 
     /**

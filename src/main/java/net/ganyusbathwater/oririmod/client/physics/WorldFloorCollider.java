@@ -27,17 +27,19 @@ public class WorldFloorCollider implements ICollider {
 
         BlockPos pos = BlockPos.containing(px, py, pz);
 
-        // Check current block and 1 block below
+        // Check 1 block above, current block, and down to 3 blocks below for terrain/slabs/stairs
         double highestFloor = Double.NEGATIVE_INFINITY;
+        double maxSearchY = Math.max(py, particle.prevPosition.y) + 0.35D;
 
-        for (int dy = 0; dy >= -1; dy--) {
+        for (int dy = 1; dy >= -3; dy--) {
             BlockPos check = pos.above(dy);
+            if (!level.hasChunkAt(check)) continue;
             BlockState state = level.getBlockState(check);
             VoxelShape shape = state.getCollisionShape(level, check);
 
             if (!shape.isEmpty()) {
                 double surfaceY = check.getY() + shape.max(Direction.Axis.Y);
-                if (surfaceY > highestFloor && surfaceY <= py + 0.5D) {
+                if (surfaceY > highestFloor && surfaceY <= maxSearchY) {
                     highestFloor = surfaceY;
                 }
             }
@@ -46,9 +48,8 @@ public class WorldFloorCollider implements ICollider {
         if (highestFloor != Double.NEGATIVE_INFINITY) {
             float minAllowedY = (float) highestFloor + particle.radius;
             if (particle.position.y < minAllowedY) {
-                float pen = minAllowedY - particle.position.y;
                 particle.position.y = minAllowedY;
-                particle.prevPosition.y += pen; // Absorb vertical kinetic energy so it rests flat without bouncing
+                particle.prevPosition.y = particle.position.y; // Zero vertical velocity to rest stably on floor
 
                 // Ground friction on horizontal velocity
                 float vx = (particle.position.x - particle.prevPosition.x) * friction;

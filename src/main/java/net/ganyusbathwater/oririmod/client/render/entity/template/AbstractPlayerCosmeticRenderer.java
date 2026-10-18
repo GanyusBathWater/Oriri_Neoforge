@@ -72,14 +72,12 @@ public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCos
             net.minecraft.core.Direction direction = entity.getBedOrientation();
             if (direction != null) {
                 float eyeHeight = entity.getEyeHeight(net.minecraft.world.entity.Pose.STANDING) - 0.1f;
-                // Apply the inverse of Geckolib's hardcoded sleeping translation to cancel it out,
-                // since Vanilla's LivingEntityRenderer has already translated the poseStack for the bed.
-                poseStack.translate((float)(direction.getStepX()) * eyeHeight, -0.2f, (float)(direction.getStepZ()) * eyeHeight);
+                // Cancel out Geckolib's duplicate sleeping translation on X and Z, with ZERO offset on Y!
+                poseStack.translate((float)(direction.getStepX()) * eyeHeight, 0.0F, (float)(direction.getStepZ()) * eyeHeight);
             }
         }
         
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-        
         poseStack.popPose();
     }
 

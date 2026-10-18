@@ -90,6 +90,18 @@ public class SnakeTailPhysics {
                                           boolean isSleeping,
                                           boolean isFlying,
                                           boolean isSwimming) {
+        net.ganyusbathwater.oririmod.client.physics.TailPhysicsController.applyTailAnimation(
+                boneFinder, entity, partialTick, isChoking, isSleeping, isFlying, isSwimming
+        );
+    }
+
+    public static void applyTailAnimationLegacy(Function<String, GeoBone> boneFinder,
+                                                LivingEntity entity,
+                                                float partialTick,
+                                                boolean isChoking,
+                                                boolean isSleeping,
+                                                boolean isFlying,
+                                                boolean isSwimming) {
         TailState state = getOrCreateState(entity);
 
         float limbSwing = entity.walkAnimation.position(partialTick);
@@ -227,7 +239,11 @@ public class SnakeTailPhysics {
             }
 
             if (isFlying) {
-                segment.setRotX(segment.getInitialSnapshot().getRotX());
+                if (i <= 4) {
+                    segment.setRotX(-segment.getInitialSnapshot().getRotX());
+                } else {
+                    segment.setRotX(segment.getInitialSnapshot().getRotX());
+                }
                 segment.setRotY(segment.getInitialSnapshot().getRotY());
                 float flightWave = (float) Math.sin(ageInTicks * 0.3F - (i * 0.15F)) * 1.5F;
                 segment.setRotZ((float) Math.toRadians(flightWave));
@@ -263,7 +279,8 @@ public class SnakeTailPhysics {
             // Normal ground movement & slithering
             if (i <= 4) {
                 // Segments 1 to 4 form the vertical waist pitch curve connecting torso to floor.
-                segment.setRotX(segment.getInitialSnapshot().getRotX());
+                // Invert GeckoLib's negated rotX snapshot so the tail bends by the true -90° from Blockbench (belly down, spine up)
+                segment.setRotX(-segment.getInitialSnapshot().getRotX());
                 segment.setRotY(segment.getInitialSnapshot().getRotY());
                 segment.setPosY(0.0F);
 
@@ -278,8 +295,8 @@ public class SnakeTailPhysics {
             } else {
                 // Ground segments 5 through 40:
                 // Pitch rotX slopes smoothly from waist down to ground, then locks flat on floor.
-                // Inverted sign (- deltaSlope) ensures downward ground slope in the flipped coordinate frame.
-                segment.setRotX(segment.getInitialSnapshot().getRotX() - deltaSlope[i]);
+                // With model right-side up, + deltaSlope slopes downward towards the ground.
+                segment.setRotX(segment.getInitialSnapshot().getRotX() + deltaSlope[i]);
                 segment.setRotY(segment.getInitialSnapshot().getRotY());
 
                 // 2. Yaw counter-rotation and segment tracking:
