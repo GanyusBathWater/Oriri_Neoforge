@@ -19,7 +19,7 @@ public class LamiaTailModel extends AbstractPlayerCosmeticModel<LamiaTailAnimata
     private static final ResourceLocation MODEL =
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "geo/entity/lamia_essence_tail.geo.json");
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/lamia.png");
+            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/lamia_essence_tail.png");
     private static final ResourceLocation ANIMATION =
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "animations/entity/lamia.animation.json");
 

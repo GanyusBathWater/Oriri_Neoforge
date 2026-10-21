@@ -24,6 +24,9 @@ public class ModRecipeSerializers {
     public static final Supplier<RecipeSerializer<KitsuneDyeRecipe>> KITSUNE_DYE = RECIPE_SERIALIZERS
             .register("kitsune_dye", () -> new net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer<>(KitsuneDyeRecipe::new));
 
+    public static final Supplier<RecipeSerializer<LamiaDyeRecipe>> LAMIA_DYE = RECIPE_SERIALIZERS
+            .register("lamia_dye", () -> new net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer<>(LamiaDyeRecipe::new));
+
 
     public static void register(IEventBus eventBus) {
         RECIPE_SERIALIZERS.register(eventBus);

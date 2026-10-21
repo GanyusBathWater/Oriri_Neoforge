@@ -143,6 +143,7 @@ public class OririMod {
             event.accept(ModItems.FAIRY_SPAWN_EGG);
             event.accept(ModItems.DRYAD_SPAWN_EGG);
             event.accept(ModItems.MERMAID_SPAWN_EGG);
+            event.accept(ModItems.LAMIA_SPAWN_EGG);
             event.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
             event.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
             event.accept(ModItems.NOXUS_PALADIN_SPAWN_EGG);

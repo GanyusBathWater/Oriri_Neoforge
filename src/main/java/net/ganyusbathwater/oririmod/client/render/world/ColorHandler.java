@@ -78,6 +78,14 @@ public final class ColorHandler {
         };
         event.register(kitsuneBellItem, net.ganyusbathwater.oririmod.item.ModItems.KITSUNE_BELL.get());
 
+        ItemColor lamiaScaleItem = (stack, tintIndex) -> {
+            if (tintIndex == 0) {
+                return net.ganyusbathwater.oririmod.item.custom.cosmetic.LamiaScaleItem.getColor(stack) | 0xFF000000;
+            }
+            return 0xFFFFFFFF;
+        };
+        event.register(lamiaScaleItem, net.ganyusbathwater.oririmod.item.ModItems.LAMIA_SCALE.get());
+
 
         ItemColor teleporterItem = (stack, tintIndex) -> {
             if (tintIndex == 0) {

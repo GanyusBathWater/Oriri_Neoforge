@@ -74,7 +74,7 @@ public class ModItems {
         public static final DeferredItem<Item> KITSUNE_BELL = ITEMS.register("kitsune_bell",
                         () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.KitsuneBellItem(new Item.Properties().stacksTo(1).component(ModDataComponents.KITSUNE_COLORS.get(), net.ganyusbathwater.oririmod.item.component.KitsuneColors.DEFAULT)));
         public static final DeferredItem<Item> LAMIA_SCALE = ITEMS.register("lamia_scale",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.LamiaScaleItem(new Item.Properties().stacksTo(1)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.LamiaScaleItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(net.ganyusbathwater.oririmod.item.custom.cosmetic.LamiaScaleItem.DEFAULT_COLOR, false))));
 
         public static final DeferredItem<Item> MANA_MANIFESTATION = ITEMS.register("mana_manifestation",
                         () -> new Item(new Item.Properties()));

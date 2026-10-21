@@ -16,7 +16,7 @@ public class LamiaModel extends GeoModel<LamiaEntity> {
     private static final ResourceLocation MODEL =
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "geo/entity/lamia.geo.json");
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/lamia.png");
+            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/lamia_main.png");
     private static final ResourceLocation ANIMATION =
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "animations/entity/lamia.animation.json");
 

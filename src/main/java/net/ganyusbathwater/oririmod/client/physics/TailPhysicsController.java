@@ -761,7 +761,9 @@ public class TailPhysicsController {
                     GeoBone bone = boneFinder.apply("tail" + i);
                     if (bone == null) continue;
                     if (i <= 4) {
-                        bone.setRotX(-bone.getInitialSnapshot().getRotX());
+                        float initRotX = bone.getInitialSnapshot().getRotX();
+                        float rotX = (entity instanceof net.minecraft.world.entity.player.Player) ? -initRotX : initRotX;
+                        bone.setRotX(rotX);
                         bone.setRotY(bone.getInitialSnapshot().getRotY());
                         bone.setRotZ(bone.getInitialSnapshot().getRotZ());
                     } else if (i <= 5) {
@@ -855,9 +857,12 @@ public class TailPhysicsController {
                 GeoBone bone = boneFinder.apply("tail" + i);
                 if (bone == null) continue;
 
-                // Negate GeckoLib snapshot so waist curves -90 degrees right-side up when standing.
+                // Invert snapshot rotation for Player cosmetic (where root/waist was modeled angled backwards -90 deg),
+                // but preserve forward rotation for Lamia mob (where waist was already modeled curving downwards +90 deg).
                 // Multiplying by waistBendFactor dynamically uncurls the waist into a straight spine when crawling.
-                bone.setRotX(-bone.getInitialSnapshot().getRotX() * waistBendFactor);
+                float initRotX = bone.getInitialSnapshot().getRotX();
+                float rotX = (entity instanceof net.minecraft.world.entity.player.Player) ? -initRotX : initRotX;
+                bone.setRotX(rotX * waistBendFactor);
                 bone.setRotY(bone.getInitialSnapshot().getRotY() * waistBendFactor);
                 float waistYaw = (bone.getInitialSnapshot().getRotZ() * waistBendFactor) + (float) Math.toRadians(renderAnchorDeflection * (i / 4.0F));
                 bone.setRotZ(waistYaw);

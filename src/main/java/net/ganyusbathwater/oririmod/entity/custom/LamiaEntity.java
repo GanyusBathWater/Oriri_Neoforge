@@ -50,6 +50,27 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
 
     public static final EntityDataAccessor<Integer> DATA_ATTACK_STATE = SynchedEntityData.defineId(
             LamiaEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> DATA_SCALES_COLOR = SynchedEntityData.defineId(
+            LamiaEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> DATA_HAIR_COLOR = SynchedEntityData.defineId(
+            LamiaEntity.class, EntityDataSerializers.INT);
+
+    public record LamiaColorTheme(int scalesColor, int hairColor) {}
+
+    public static final LamiaColorTheme[] NATURE_THEMES = {
+            new LamiaColorTheme(0x2D7A47, 0x2E1D13), // Emerald green scales, dark chestnut hair
+            new LamiaColorTheme(0x1F5C3B, 0xD8B467), // Deep jungle green scales, honey blonde hair
+            new LamiaColorTheme(0x234F32, 0x53463B), // Pine green scales, ash brown hair
+            new LamiaColorTheme(0x556B2F, 0x3D2817), // Dark olive green scales, walnut hair
+            new LamiaColorTheme(0x6B8E23, 0x733019), // Olive drab scales, auburn hair
+            new LamiaColorTheme(0x7C8A4E, 0x8C7C68), // Willow sage scales, light taupe hair
+            new LamiaColorTheme(0xBA6B24, 0x2E1D13), // Warm amber scales, dark chestnut hair
+            new LamiaColorTheme(0xC28422, 0x733019), // Autumn ochre scales, auburn hair
+            new LamiaColorTheme(0x9E472A, 0x9C4C23), // Terracotta copper scales, cinnamon hair
+            new LamiaColorTheme(0x5C4033, 0xD8B467), // Deep loam earth scales, golden wheat hair
+            new LamiaColorTheme(0x4A2F1B, 0x1A281E), // Bark brown scales, dark forest pine hair
+            new LamiaColorTheme(0x3B2818, 0x733019)  // Dark chestnut scales, auburn hair
+    };
 
     // Multi-part tail hitboxes
     public final LamiaPart tailBase;
@@ -115,6 +136,8 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_ATTACK_STATE, ATTACK_NONE);
+        builder.define(DATA_SCALES_COLOR, NATURE_THEMES[0].scalesColor());
+        builder.define(DATA_HAIR_COLOR, NATURE_THEMES[0].hairColor());
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -130,6 +153,15 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
     public static boolean checkLamiaSpawnRules(EntityType<LamiaEntity> type, ServerLevelAccessor level,
                                                MobSpawnType spawnType, BlockPos pos, RandomSource random) {
         return Monster.checkMonsterSpawnRules(type, level, spawnType, pos, random);
+    }
+
+    @Override
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(ServerLevelAccessor level, net.minecraft.world.DifficultyInstance difficulty,
+                                                                   MobSpawnType spawnType, net.minecraft.world.entity.SpawnGroupData spawnGroupData) {
+        LamiaColorTheme theme = NATURE_THEMES[this.random.nextInt(NATURE_THEMES.length)];
+        this.setScalesColor(theme.scalesColor());
+        this.setHairColor(theme.hairColor());
+        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
     @Override
@@ -349,12 +381,36 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("LeapCooldown", this.leapCooldown);
+        compound.putInt("ScalesColor", this.getScalesColor());
+        compound.putInt("HairColor", this.getHairColor());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.leapCooldown = compound.getInt("LeapCooldown");
+        if (compound.contains("ScalesColor")) {
+            this.setScalesColor(compound.getInt("ScalesColor"));
+        }
+        if (compound.contains("HairColor")) {
+            this.setHairColor(compound.getInt("HairColor"));
+        }
+    }
+
+    public int getScalesColor() {
+        return this.entityData.get(DATA_SCALES_COLOR);
+    }
+
+    public void setScalesColor(int color) {
+        this.entityData.set(DATA_SCALES_COLOR, color);
+    }
+
+    public int getHairColor() {
+        return this.entityData.get(DATA_HAIR_COLOR);
+    }
+
+    public void setHairColor(int color) {
+        this.entityData.set(DATA_HAIR_COLOR, color);
     }
 
     // ── GeckoLib Animations ────────────────────────────────────────────────
