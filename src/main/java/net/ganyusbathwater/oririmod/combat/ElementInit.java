@@ -64,6 +64,7 @@ public final class ElementInit {
         EntityElementRegistry.setElement(ModEntities.REX_ARANEA_WEB.get(), Element.DARKNESS);
         EntityElementRegistry.setElement(ModEntities.REX_ARANEA.get(), Element.DARKNESS);
         EntityElementRegistry.setElement(ModEntities.FAIRY.get(), Element.NATURE);
+        EntityElementRegistry.setElement(ModEntities.LAMIA.get(), Element.EARTH);
         EntityElementRegistry.setElement(ModEntities.NOXUS_KNIGHT.get(), Element.LIGHT);
         EntityElementRegistry.setElement(ModEntities.NOXUS_GENERAL.get(), Element.LIGHT);
         EntityElementRegistry.setElement(ModEntities.NOXUS_PALADIN.get(), Element.LIGHT);

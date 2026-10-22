@@ -44,6 +44,16 @@ public class LamiaTailModel extends AbstractPlayerCosmeticModel<LamiaTailAnimata
         super.setCustomAnimations(animatable, instanceId, animationState);
 
         // 1. Anchor the root tail bone to player body pitch and crouch offset
+        GeoBone root = getAnimationProcessor().getBone("root");
+        if (root != null) {
+            root.setRotX(0.0F);
+            root.setRotY(0.0F);
+            root.setRotZ(0.0F);
+            root.setPosX(0.0F);
+            root.setPosY(0.0F);
+            root.setPosZ(0.0F);
+        }
+
         GeoBone rootBone = getAnimationProcessor().getBone("body");
         if (rootBone == null) {
             rootBone = getAnimationProcessor().getBone("tail");
@@ -58,14 +68,14 @@ public class LamiaTailModel extends AbstractPlayerCosmeticModel<LamiaTailAnimata
                     boolean isCrouching = player.isCrouching();
                     // Tail root acts as legs and must stay upright; do not tilt forward with the leaning torso when crouching
                     rootBone.setRotX(0.0F);
-                    rootBone.setRotY(playerModel.body.yRot);
+                    rootBone.setRotY(-playerModel.body.yRot);
                     rootBone.setRotZ(-playerModel.body.zRot);
 
                     rootBone.setPosX(-playerModel.body.x);
                     rootBone.setPosY(-playerModel.body.y);
-                    // Anchor pelvis cleanly behind torso (shifts back when crouching like vanilla legs)
-                    float crouchZOffset = isCrouching ? 3.5F : 1.5F;
-                    rootBone.setPosZ(-playerModel.body.z - crouchZOffset);
+                    // Anchor pelvis cleanly behind torso (shifts back when crouching like vanilla legs: +4.0 pixels along +Z)
+                    float crouchZOffset = isCrouching ? 4.0F : 0.0F;
+                    rootBone.setPosZ(playerModel.body.z + crouchZOffset);
                 }
             }
 

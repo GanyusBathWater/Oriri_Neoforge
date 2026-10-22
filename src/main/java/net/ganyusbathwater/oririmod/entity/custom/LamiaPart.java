@@ -1,5 +1,7 @@
 package net.ganyusbathwater.oririmod.entity.custom;
 
+import net.ganyusbathwater.oririmod.combat.Element;
+import net.ganyusbathwater.oririmod.combat.IElementalEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSource;
@@ -12,7 +14,7 @@ import net.neoforged.neoforge.entity.PartEntity;
  * Sub-hitbox entity representing a physical segment zone of the Lamia's serpentine tail.
  * Forwards all damage directly to the parent LamiaEntity.
  */
-public class LamiaPart extends PartEntity<LamiaEntity> {
+public class LamiaPart extends PartEntity<LamiaEntity> implements IElementalEntity {
 
     public final String partName;
     private final EntityDimensions dimensions;
@@ -22,6 +24,11 @@ public class LamiaPart extends PartEntity<LamiaEntity> {
         this.partName = partName;
         this.dimensions = EntityDimensions.scalable(width, height);
         this.refreshDimensions();
+    }
+
+    @Override
+    public Element getElement() {
+        return this.getParent() != null ? this.getParent().getElement() : Element.EARTH;
     }
 
     @Override

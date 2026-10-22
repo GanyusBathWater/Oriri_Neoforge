@@ -148,6 +148,16 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                         .add(LootItem.lootTableItem(Items.EXPERIENCE_BOTTLE)
                                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 6.0F))))
                         .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.25F, 0.05F))));
+
+        // Lamia
+        this.add(ModEntities.LAMIA.get(), LootTable.lootTable()
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(Items.STRING)
+                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
+                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries, UniformGenerator.between(0.0F, 1.0F)))))
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(ModItems.LAMIA_SCALE.get()))
+                        .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.10F, 0.05F))));
     }
 
     @Override
@@ -162,7 +172,8 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                 ModEntities.REX_ARANEA.get(),
                 ModEntities.DEVIARTRAS.get(),
                 ModEntities.BLIZZA.get(),
-                ModEntities.NOXUS_CULTIST.get()
+                ModEntities.NOXUS_CULTIST.get(),
+                ModEntities.LAMIA.get()
         );
     }
 }

@@ -4,6 +4,9 @@ import net.ganyusbathwater.oririmod.combat.Element;
 import net.ganyusbathwater.oririmod.combat.IElementalEntity;
 import net.ganyusbathwater.oririmod.world.GodsTrialData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -32,6 +35,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.PartEntity;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -54,6 +58,8 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
             LamiaEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> DATA_HAIR_COLOR = SynchedEntityData.defineId(
             LamiaEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Boolean> DATA_IS_HUNGRY = SynchedEntityData.defineId(
+            LamiaEntity.class, EntityDataSerializers.BOOLEAN);
 
     public record LamiaColorTheme(int scalesColor, int hairColor) {}
 
@@ -72,22 +78,28 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
             new LamiaColorTheme(0x3B2818, 0x733019)  // Dark chestnut scales, auburn hair
     };
 
-    // Multi-part tail hitboxes
+    // Multi-part tail hitboxes (8 segments covering the full ~6.9m tail)
     public final LamiaPart tailBase;
+    public final LamiaPart tail2;
     public final LamiaPart tailMid;
+    public final LamiaPart tail4;
+    public final LamiaPart tail5;
+    public final LamiaPart tail6;
+    public final LamiaPart tail7;
     public final LamiaPart tailEnd;
     private final LamiaPart[] subEntities;
 
     // Breadcrumb ring buffer for multipart position tracking
-    private static final int BUFFER_SIZE = 64;
+    private static final int BUFFER_SIZE = 128;
     private final double[] pastX = new double[BUFFER_SIZE];
     private final double[] pastY = new double[BUFFER_SIZE];
     private final double[] pastZ = new double[BUFFER_SIZE];
     private int bufferIndex = 0;
 
-    // Combat timers
+    // Combat timers & hunger state
     private int attackTicks = 0;
     private int leapCooldown = 0;
+    private int hungerCooldown = 6000; // ~5 minutes initial
     private LivingEntity chokedVictim = null;
     private int chokeholdTicks = 0;
     private float leapLockedYaw = 0.0F;
@@ -99,16 +111,29 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
         super(entityType, level);
         this.xpReward = 15;
 
-        this.tailBase = new LamiaPart(this, "tail_base", 0.75F, 0.6F);
-        this.tailMid = new LamiaPart(this, "tail_mid", 0.65F, 0.5F);
-        this.tailEnd = new LamiaPart(this, "tail_end", 0.55F, 0.4F);
-        this.subEntities = new LamiaPart[]{this.tailBase, this.tailMid, this.tailEnd};
+        this.tailBase = new LamiaPart(this, "tail_1", 0.75F, 0.60F);
+        this.tail2 = new LamiaPart(this, "tail_2", 0.70F, 0.55F);
+        this.tailMid = new LamiaPart(this, "tail_3", 0.65F, 0.50F);
+        this.tail4 = new LamiaPart(this, "tail_4", 0.60F, 0.45F);
+        this.tail5 = new LamiaPart(this, "tail_5", 0.55F, 0.40F);
+        this.tail6 = new LamiaPart(this, "tail_6", 0.50F, 0.35F);
+        this.tail7 = new LamiaPart(this, "tail_7", 0.45F, 0.30F);
+        this.tailEnd = new LamiaPart(this, "tail_8", 0.40F, 0.25F);
+        this.subEntities = new LamiaPart[]{
+                this.tailBase, this.tail2, this.tailMid, this.tail4,
+                this.tail5, this.tail6, this.tail7, this.tailEnd
+        };
+
+        for (int i = 0; i < this.subEntities.length; i++) {
+            this.subEntities[i].setId(this.getId() + i + 1);
+        }
 
         for (int i = 0; i < BUFFER_SIZE; i++) {
             this.pastX[i] = this.getX();
             this.pastY[i] = this.getY();
             this.pastZ[i] = this.getZ();
         }
+        updateTailParts();
     }
 
     @Override
@@ -138,6 +163,7 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
         builder.define(DATA_ATTACK_STATE, ATTACK_NONE);
         builder.define(DATA_SCALES_COLOR, NATURE_THEMES[0].scalesColor());
         builder.define(DATA_HAIR_COLOR, NATURE_THEMES[0].hairColor());
+        builder.define(DATA_IS_HUNGRY, false);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -152,7 +178,16 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
 
     public static boolean checkLamiaSpawnRules(EntityType<LamiaEntity> type, ServerLevelAccessor level,
                                                MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        return Monster.checkMonsterSpawnRules(type, level, spawnType, pos, random);
+        if (level.getDifficulty() == Difficulty.PEACEFUL) return false;
+
+        // In lush caves, allow spawning even with light from glow berries
+        Holder<Biome> biome = level.getBiome(pos);
+        if (biome.is(ResourceLocation.withDefaultNamespace("lush_caves"))) {
+            return checkMobSpawnRules(type, level, spawnType, pos, random);
+        }
+
+        // In surface swamps and moist forests: allow in light level <= 7 (canopies, dusk, night)
+        return level.getRawBrightness(pos, 0) <= 7 && checkMobSpawnRules(type, level, spawnType, pos, random);
     }
 
     @Override
@@ -161,6 +196,7 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
         LamiaColorTheme theme = NATURE_THEMES[this.random.nextInt(NATURE_THEMES.length)];
         this.setScalesColor(theme.scalesColor());
         this.setHairColor(theme.hairColor());
+        this.hungerCooldown = 4000 + this.random.nextInt(4000); // 3.5 to 7 minutes before hungry
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
@@ -172,8 +208,36 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
+        // Neutral mob: only defends if attacked
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+
+        // When hungry: hunts any living entity (with 5% chance on other Lamias)
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
+                this::isValidPrey) {
+            @Override
+            public boolean canUse() {
+                return LamiaEntity.this.isHungry() && super.canUse();
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return LamiaEntity.this.isHungry() && super.canContinueToUse();
+            }
+        });
+    }
+
+    public boolean isHungry() {
+        return this.hungerCooldown <= 0;
+    }
+
+    public boolean isValidPrey(LivingEntity target) {
+        if (target == null || !target.isAlive() || target == this) return false;
+        if (target instanceof Player player && (player.isCreative() || player.isSpectator())) return false;
+        // Cannibalism check: only a very small percentage (5%) to lock onto another Lamia
+        if (target instanceof LamiaEntity) {
+            return this.random.nextFloat() < 0.05F;
+        }
+        return true;
     }
 
     @Override
@@ -189,6 +253,27 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
     @Override
     public PartEntity<?>[] getParts() {
         return this.subEntities;
+    }
+
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (this.subEntities != null) {
+            for (int i = 0; i < this.subEntities.length; i++) {
+                this.subEntities[i].setId(id + i + 1);
+            }
+        }
+    }
+
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        AABB box = this.getBoundingBox();
+        if (this.subEntities != null) {
+            for (LamiaPart part : this.subEntities) {
+                box = box.minmax(part.getBoundingBox());
+            }
+        }
+        return box;
     }
 
     public int getAttackState() {
@@ -216,8 +301,16 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
         // Position sub-hitboxes along the trailing path
         updateTailParts();
 
-        // Handle Active Attack States
+        // Handle Active Attack States & Hunger Countdown
         if (!this.level().isClientSide) {
+            if (this.hungerCooldown > -24000) {
+                this.hungerCooldown--;
+            }
+            boolean hungry = isHungry();
+            if (this.entityData.get(DATA_IS_HUNGRY) != hungry) {
+                this.entityData.set(DATA_IS_HUNGRY, hungry);
+            }
+
             int state = getAttackState();
 
             if (state == ATTACK_CHOKEHOLD) {
@@ -234,19 +327,19 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
                 this.setYRot(this.leapLockedYaw);
                 this.yBodyRot = this.leapLockedYaw;
                 this.yHeadRot = this.leapLockedYaw;
-                this.getNavigation().stop();
 
                 // Check impact mid-air or upon landing
                 if (!this.leapImpacted && this.attackTicks >= 4) {
                     LivingEntity target = this.getTarget();
-                    if (target != null && target.isAlive() && this.distanceToSqr(target) <= 6.25D) {
+                    if (target != null && target.isAlive() && this.distanceToSqr(target) <= 8.0D) {
                         target.hurt(this.damageSources().mobAttack(this), 12.0F);
                         target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0)); // 5s Poison
                         this.leapImpacted = true;
                     }
                 }
 
-                if (this.attackTicks >= 20) { // 1.0s animation
+                // Complete leap when landing or timeout
+                if ((this.attackTicks > 5 && this.onGround()) || this.attackTicks >= 18) {
                     setAttackState(ATTACK_NONE);
                     this.attackTicks = 0;
                 }
@@ -254,11 +347,38 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
         }
     }
 
+    private static final int[] TAIL_TICKS = {5, 11, 18, 26, 35, 45, 56, 68};
+    private static final double[] TAIL_DISTS = {0.88D, 1.63D, 2.56D, 3.50D, 4.44D, 5.19D, 5.94D, 6.88D};
+    private static final int[] SIM_PART_INDICES = {4, 8, 13, 18, 23, 27, 31, 36};
+
     private void updateTailParts() {
-        // Place tailBase ~8 ticks back, tailMid ~16 ticks back, tailEnd ~24 ticks back
-        setPartPosition(this.tailBase, 8, 1.0D);
-        setPartPosition(this.tailMid, 18, 2.2D);
-        setPartPosition(this.tailEnd, 30, 3.5D);
+        if (this.subEntities == null) return;
+        for (int i = 0; i < this.subEntities.length; i++) {
+            setPartPosition(this.subEntities[i], TAIL_TICKS[i], TAIL_DISTS[i]);
+        }
+    }
+
+    /**
+     * Client-side synchronization: aligns sub-hitboxes to the exact physics-simulated tail mesh coordinates.
+     */
+    public void syncPartsFromSimulation(double[] px, double[] py, double[] pz) {
+        if (this.subEntities == null || px == null || py == null || pz == null) return;
+        for (int i = 0; i < this.subEntities.length && i < SIM_PART_INDICES.length; i++) {
+            int pt = SIM_PART_INDICES[i];
+            if (pt < px.length && pt < py.length && pt < pz.length) {
+                double x = px[pt];
+                double y = py[pt];
+                double z = pz[pt];
+                LamiaPart part = this.subEntities[i];
+                part.setPos(x, y, z);
+                part.xo = x;
+                part.yo = y;
+                part.zo = z;
+                part.xOld = x;
+                part.yOld = y;
+                part.zOld = z;
+            }
+        }
     }
 
     private void setPartPosition(LamiaPart part, int ticksBack, double defaultDist) {
@@ -293,30 +413,58 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
 
         this.chokeholdTicks++;
 
-        // Lamia stays completely stationary
-        this.setDeltaMovement(Vec3.ZERO);
-        this.getNavigation().stop();
+        double vx = this.chokedVictim.getX();
+        double vy = this.chokedVictim.getY();
+        double vz = this.chokedVictim.getZ();
 
-        // Lock Lamia's yaw facing the victim
+        // Lock victim in place
+        this.chokedVictim.setDeltaMovement(Vec3.ZERO);
+        this.chokedVictim.fallDistance = 0.0F;
+        this.chokedVictim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 5, false, false));
+        this.chokedVictim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 30, 1, false, false));
+
+        // Lock Lamia closely in front of the victim (0.35m chest-to-chest)
         Vec3 diff = this.chokedVictim.position().subtract(this.position());
         float targetYaw = (float) (Mth.atan2(diff.z, diff.x) * (180.0D / Math.PI)) - 90.0F;
+        if (Float.isNaN(targetYaw)) targetYaw = this.yBodyRot;
+
+        float rad = targetYaw * Mth.DEG_TO_RAD;
+        double lamiaX = vx + Mth.sin(rad) * 0.35D;
+        double lamiaZ = vz - Mth.cos(rad) * 0.35D;
+
+        this.setPos(lamiaX, vy, lamiaZ);
         this.setYRot(targetYaw);
         this.yBodyRot = targetYaw;
         this.yHeadRot = targetYaw;
+        this.setDeltaMovement(Vec3.ZERO);
+        this.getNavigation().stop();
 
-        // Position victim directly in front of the Lamia
-        double frontX = this.getX() - Mth.sin(this.yBodyRot * Mth.DEG_TO_RAD) * 0.85D;
-        double frontZ = this.getZ() + Mth.cos(this.yBodyRot * Mth.DEG_TO_RAD) * 0.85D;
-        this.chokedVictim.setPos(frontX, this.getY(), frontZ);
-        this.chokedVictim.setDeltaMovement(Vec3.ZERO);
-        this.chokedVictim.fallDistance = 0.0F;
-
-        // Apply pinning slowness
-        this.chokedVictim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 5, false, false));
+        // Place tail sub-hitboxes in an upward spiral surrounding the victim
+        if (this.subEntities != null) {
+            for (int k = 0; k < this.subEntities.length; k++) {
+                double h = vy + 0.15D + k * (1.30D / 7.0D); // Ascends from 0.15m up to 1.45m
+                double angle = (targetYaw * Mth.DEG_TO_RAD) + (k * 2.35D); // Spiral angle around victim
+                double r = 0.42D;
+                double px = vx + Math.cos(angle) * r;
+                double pz = vz + Math.sin(angle) * r;
+                LamiaPart part = this.subEntities[k];
+                part.setPos(px, h, pz);
+                part.xo = px;
+                part.yo = h;
+                part.zo = pz;
+            }
+        }
 
         // Crushing damage every 15 ticks (0.75s)
         if (this.chokeholdTicks % 15 == 0) {
             this.chokedVictim.hurt(this.damageSources().mobAttack(this), 2.5F);
+            if (!this.chokedVictim.isAlive() || this.chokedVictim.getHealth() <= 0.0F) {
+                this.heal(8.0F);
+                this.hungerCooldown = 8000 + this.random.nextInt(4000);
+                this.setTarget(null);
+                endChokehold();
+                return;
+            }
         }
 
         if (this.chokeholdTicks >= 100) { // 5.0 seconds
@@ -350,7 +498,7 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
     public void triggerLeapAttack(LivingEntity target) {
         setAttackState(ATTACK_LEAP);
         this.attackTicks = 0;
-        this.leapCooldown = 90; // 4.5s cooldown
+        this.leapCooldown = 80; // 4.0s cooldown
         this.leapImpacted = false;
         this.getNavigation().stop();
 
@@ -363,12 +511,13 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
         this.yBodyRot = this.leapLockedYaw;
         this.yHeadRot = this.leapLockedYaw;
 
-        // Scale horizontal impulse so she lands ~1.0 block in front of target, avoiding overshoot
-        double targetDist = Math.max(0.5D, dist - 1.0D);
-        double horizSpeed = Mth.clamp(targetDist * 0.16D, 0.35D, 0.75D);
+        // Calculate speed to land ~0.8m in front of target
+        double targetDist = Math.max(1.0D, dist - 0.8D);
+        double horizSpeed = Mth.clamp(targetDist / 6.5D, 0.45D, 1.05D);
 
         Vec3 horizontal = new Vec3(diff.x, 0, diff.z).normalize().scale(horizSpeed);
-        this.setDeltaMovement(horizontal.x, 0.38D, horizontal.z);
+        this.setDeltaMovement(horizontal.x, 0.44D, horizontal.z);
+        this.hasImpulse = true;
     }
 
     public void triggerPunchAttack(LivingEntity target) {
@@ -378,9 +527,22 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
     }
 
     @Override
+    public boolean doHurtTarget(Entity target) {
+        boolean hurt = super.doHurtTarget(target);
+        if (hurt && target instanceof LivingEntity living && (!living.isAlive() || living.getHealth() <= 0.0F)) {
+            // Prey killed and consumed
+            this.heal(6.0F);
+            this.hungerCooldown = 6000 + this.random.nextInt(4000);
+            this.setTarget(null);
+        }
+        return hurt;
+    }
+
+    @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("LeapCooldown", this.leapCooldown);
+        compound.putInt("HungerCooldown", this.hungerCooldown);
         compound.putInt("ScalesColor", this.getScalesColor());
         compound.putInt("HairColor", this.getHairColor());
     }
@@ -389,6 +551,9 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.leapCooldown = compound.getInt("LeapCooldown");
+        if (compound.contains("HungerCooldown")) {
+            this.hungerCooldown = compound.getInt("HungerCooldown");
+        }
         if (compound.contains("ScalesColor")) {
             this.setScalesColor(compound.getInt("ScalesColor"));
         }
@@ -470,8 +635,8 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
             this.lamia.getLookControl().setLookAt(target, 30.0F, 30.0F);
             double distSq = this.lamia.distanceToSqr(target);
 
-            if (this.lamia.getAttackState() == ATTACK_CHOKEHOLD) {
-                return; // Stationary during chokehold
+            if (this.lamia.getAttackState() == ATTACK_CHOKEHOLD || this.lamia.getAttackState() == ATTACK_LEAP) {
+                return; // Stationary during chokehold, or airborne during leap
             }
 
             if (this.attackDelay > 0) {

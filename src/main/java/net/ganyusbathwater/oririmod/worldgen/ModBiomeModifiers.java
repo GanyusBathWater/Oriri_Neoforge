@@ -70,6 +70,10 @@ public class ModBiomeModifiers {
 
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_COMMON_FORESTS = registerKey("add_spawns_dryad_common_forests");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_FLOWER_FOREST = registerKey("add_spawns_dryad_flower_forest");
+
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_SWAMPS = registerKey("add_spawns_lamia_swamps");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_FORESTS = registerKey("add_spawns_lamia_forests");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_LUSH_CAVES = registerKey("add_spawns_lamia_lush_caves");
         // here will be the Features defined and later turned into json files
         public static void bootstrap(BootstrapContext<BiomeModifier> context) {
                 var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -434,6 +438,40 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("flower_forest")))
                         ),
                         List.of(new MobSpawnSettings.SpawnerData(ModEntities.DRYAD.get(), 25, 1, 3))
+                ));
+
+                // Lamia Spawns: Swampy / moist environments
+                context.register(ADD_SPAWNS_LAMIA_SWAMPS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("swamp"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("mangrove_swamp"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp")))
+                        ),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.LAMIA.get(), 25, 1, 2))
+                ));
+
+                // Lamia Spawns: Warm/temperate forests (excluding cold taigas)
+                context.register(ADD_SPAWNS_LAMIA_FORESTS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("flower_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("birch_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("old_growth_birch_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("dark_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("jungle"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("sparse_jungle"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest")))
+                        ),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.LAMIA.get(), 15, 1, 2))
+                ));
+
+                // Lamia Spawns: Lush Caves
+                context.register(ADD_SPAWNS_LAMIA_LUSH_CAVES, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("lush_caves")))
+                        ),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.LAMIA.get(), 35, 1, 3))
                 ));
         }
 

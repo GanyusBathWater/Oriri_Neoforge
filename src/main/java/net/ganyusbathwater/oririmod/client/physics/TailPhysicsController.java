@@ -755,29 +755,55 @@ public class TailPhysicsController {
                 return;
             }
 
-            // Scripted override: Mob Chokehold
+            // Scripted override: Mob Chokehold - Upward concentric spiral encasing the victim
             if (isChoking) {
-                for (int i = 1; i <= 40; i++) {
+                float squeeze = (float) Math.sin(ageInTicks * 0.25F) * 1.5F; // Constricting pulse
+
+                // 1. Lower back down to ground transition: sweeps smoothly from waist down along victim's side to feet
+                GeoBone t1 = boneFinder.apply("tail1");
+                if (t1 != null) {
+                    t1.setRotX((float) Math.toRadians(15.0F));
+                    t1.setRotY(0.0F);
+                    t1.setRotZ((float) Math.toRadians(-30.0F));
+                    t1.setPosY(0.0F);
+                }
+                GeoBone t2 = boneFinder.apply("tail2");
+                if (t2 != null) {
+                    t2.setRotX((float) Math.toRadians(15.0F));
+                    t2.setRotY(0.0F);
+                    t2.setRotZ((float) Math.toRadians(15.0F));
+                    t2.setPosY(0.0F);
+                }
+                GeoBone t3 = boneFinder.apply("tail3");
+                if (t3 != null) {
+                    t3.setRotX((float) Math.toRadians(25.0F));
+                    t3.setRotY(0.0F);
+                    t3.setRotZ((float) Math.toRadians(50.0F));
+                    t3.setPosY(0.0F);
+                }
+                GeoBone t4 = boneFinder.apply("tail4");
+                if (t4 != null) {
+                    t4.setRotX((float) Math.toRadians(20.0F));
+                    t4.setRotY(0.0F);
+                    t4.setRotZ((float) Math.toRadians(42.0F));
+                    t4.setPosY(0.0F);
+                }
+
+                // 2. Concentric upward spiral ascending around the victim:
+                // Segments tail5 through tail40 wrap in a smooth upward helix.
+                // Centered directly on the victim (X=0, Z=-0.35m), rising from ground level up to chest.
+                for (int i = 5; i <= 40; i++) {
                     GeoBone bone = boneFinder.apply("tail" + i);
                     if (bone == null) continue;
-                    if (i <= 4) {
-                        float initRotX = bone.getInitialSnapshot().getRotX();
-                        float rotX = (entity instanceof net.minecraft.world.entity.player.Player) ? -initRotX : initRotX;
-                        bone.setRotX(rotX);
-                        bone.setRotY(bone.getInitialSnapshot().getRotY());
-                        bone.setRotZ(bone.getInitialSnapshot().getRotZ());
-                    } else if (i <= 5) {
-                        bone.setRotX((float) Math.toRadians(-8.0F));
-                        bone.setRotZ(0.0F);
-                    } else if (i <= 10) {
-                        bone.setRotZ((float) Math.toRadians(-36.0F));
-                    } else if (i <= 35) {
-                        bone.setRotZ((float) Math.toRadians(-24.0F));
-                        bone.setRotX((float) Math.toRadians(-3.5F));
-                    } else {
-                        float tipTwitch = (float) Math.sin(ageInTicks * 0.5F + i) * 3.5F;
-                        bone.setRotZ((float) Math.toRadians(-18.0F + tipTwitch));
-                    }
+
+                    float tipTwitch = (i >= 35) ? (float) Math.sin(ageInTicks * 0.4F + i * 0.8F) * 3.0F : 0.0F;
+                    float finalYaw = 33.5F + squeeze + tipTwitch;
+                    float climbPitch = 8.0F; // Climbs smoothly upward each step
+
+                    bone.setRotZ((float) Math.toRadians(finalYaw));
+                    bone.setRotX((float) Math.toRadians(climbPitch));
+                    bone.setRotY(0.0F);
+                    bone.setPosY(0.0F);
                 }
                 return;
             }
@@ -857,12 +883,10 @@ public class TailPhysicsController {
                 GeoBone bone = boneFinder.apply("tail" + i);
                 if (bone == null) continue;
 
-                // Invert snapshot rotation for Player cosmetic (where root/waist was modeled angled backwards -90 deg),
-                // but preserve forward rotation for Lamia mob (where waist was already modeled curving downwards +90 deg).
+                // Apply waist initial snapshot rotation (curves downward -90 deg to floor).
                 // Multiplying by waistBendFactor dynamically uncurls the waist into a straight spine when crawling.
                 float initRotX = bone.getInitialSnapshot().getRotX();
-                float rotX = (entity instanceof net.minecraft.world.entity.player.Player) ? -initRotX : initRotX;
-                bone.setRotX(rotX * waistBendFactor);
+                bone.setRotX(initRotX * waistBendFactor);
                 bone.setRotY(bone.getInitialSnapshot().getRotY() * waistBendFactor);
                 float waistYaw = (bone.getInitialSnapshot().getRotZ() * waistBendFactor) + (float) Math.toRadians(renderAnchorDeflection * (i / 4.0F));
                 bone.setRotZ(waistYaw);

@@ -545,7 +545,7 @@ public class ModItems {
         public static final DeferredItem<DeferredSpawnEggItem> PATIENTIA_SPAWN_EGG = ITEMS.register(
                         "patientia_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.PATIENTIA,
-                                        0xFFB6C1, 0x8A2BE2, // outer: light pink, inner: purple
+                                        0x8A2BE2, 0xFFB6C1, // outer: purple, inner: bleak pink
                                         new Item.Properties()));
 
         public static final DeferredItem<DeferredSpawnEggItem> MERMAID_SPAWN_EGG = ITEMS.register(

@@ -80,6 +80,12 @@ public class LamiaModel extends GeoModel<LamiaEntity> {
                 animatable.isFallFlying(),
                 isSwimming
         );
+
+        net.ganyusbathwater.oririmod.client.physics.TailPhysicsController.TailSimulation sim =
+                net.ganyusbathwater.oririmod.client.physics.TailPhysicsController.getOrCreateSimulation(animatable);
+        if (!isChoking && sim != null && sim.initialized) {
+            animatable.syncPartsFromSimulation(sim.px, sim.py, sim.pz);
+        }
     }
 }
 
