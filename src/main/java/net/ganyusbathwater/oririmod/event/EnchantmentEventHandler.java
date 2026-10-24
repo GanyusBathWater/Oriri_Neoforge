@@ -15,7 +15,7 @@ import net.neoforged.neoforge.event.AnvilUpdateEvent;
 
 import java.util.Set;
 
-@EventBusSubscriber(modid = OririMod.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = OririMod.MOD_ID)
 public class EnchantmentEventHandler {
 
     private static final Set<ResourceKey<Enchantment>> ELEMENT_ENCHANTS = Set.of(
