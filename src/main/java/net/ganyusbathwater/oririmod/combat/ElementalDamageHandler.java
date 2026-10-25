@@ -87,43 +87,14 @@ public final class ElementalDamageHandler {
             }
         }
 
-        // --- CUSTOM DAMAGE SOURCE OVERRIDE FOR ELEMENTS ---
-        if (attackerElement != Element.PHYSICAL && attackerElement != Element.TRUE_DAMAGE) {
-            net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> typeToUse = null;
-            if (attackerElement == Element.FIRE)
-                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_FIRE;
-            else if (attackerElement == Element.WATER)
-                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_WATER;
-            else if (attackerElement == Element.NATURE)
-                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_NATURE;
-            else if (attackerElement == Element.EARTH)
-                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_EARTH;
-            else if (attackerElement == Element.LIGHT)
-                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_LIGHT;
-            else if (attackerElement == Element.DARKNESS)
-                typeToUse = net.ganyusbathwater.oririmod.damage.ModDamageTypes.ELEMENT_DARKNESS;
-
-            if (typeToUse != null && !event.getSource().is(typeToUse)) {
-                // To apply the actual damage source type into the event, we basically can't
-                // change the Event's source directly
-                // but we CAN cancel it and fire hurt with new source
-                event.setCanceled(true);
-                target.hurt(net.ganyusbathwater.oririmod.damage.ModDamageTypes.getElementalDamage(target.level(),
-                        owner != null ? owner : direct, typeToUse), event.getAmount());
-                return;
-            }
-        }
-
         // --- TRUE DAMAGE OVERRIDE ---
         if (attackerElement == Element.TRUE_DAMAGE) {
-            // Check if the source is already TRUE_DAMAGE to prevent infinite recurrsion
-            if (!event.getSource().is(net.ganyusbathwater.oririmod.damage.ModDamageTypes.TRUE_DAMAGE)) {
-                event.setCanceled(true);
-                // Re-apply damage using the custom True Damage type
-                target.hurt(net.ganyusbathwater.oririmod.damage.ModDamageTypes.getTrueDamage(target.level(),
-                        owner != null ? owner : direct), event.getAmount());
-                return;
-            }
+            // Bypass armor, enchantments, and resistances natively via NeoForge's reduction modifiers
+            // without canceling the event (canceling aborts Player.attack and prevents weapon durability loss)
+            event.addReductionModifier(net.neoforged.neoforge.common.damagesource.DamageContainer.Reduction.ARMOR, (c, r) -> 0.0F);
+            event.addReductionModifier(net.neoforged.neoforge.common.damagesource.DamageContainer.Reduction.ENCHANTMENTS, (c, r) -> 0.0F);
+            event.addReductionModifier(net.neoforged.neoforge.common.damagesource.DamageContainer.Reduction.INNATE_RESISTANCE, (c, r) -> 0.0F);
+            event.addReductionModifier(net.neoforged.neoforge.common.damagesource.DamageContainer.Reduction.MOB_EFFECTS, (c, r) -> 0.0F);
         }
 
         float baseDamage = event.getAmount();

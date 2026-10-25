@@ -21,7 +21,10 @@ public class SplinterSpiderEntity extends Spider {
         super.die(pDamageSource);
 
         if (!this.level().isClientSide) {
-            boolean isFire = pDamageSource.is(DamageTypeTags.IS_FIRE) || pDamageSource.is(ModDamageTypes.ELEMENT_FIRE);
+            boolean isFire = pDamageSource.is(DamageTypeTags.IS_FIRE)
+                    || pDamageSource.is(ModDamageTypes.ELEMENT_FIRE)
+                    || (pDamageSource.getEntity() instanceof net.minecraft.world.entity.LivingEntity living && net.ganyusbathwater.oririmod.combat.ItemElementRegistry.getElement(living.getMainHandItem()) == net.ganyusbathwater.oririmod.combat.Element.FIRE)
+                    || (pDamageSource.getDirectEntity() != null && net.ganyusbathwater.oririmod.combat.EntityElementRegistry.getElement(pDamageSource.getDirectEntity()) == net.ganyusbathwater.oririmod.combat.Element.FIRE);
 
             if (!isFire) {
                 int count = this.random.nextInt(3); // 0 to 2

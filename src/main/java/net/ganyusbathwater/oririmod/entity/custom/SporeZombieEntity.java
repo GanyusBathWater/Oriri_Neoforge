@@ -60,12 +60,12 @@ public class SporeZombieEntity extends Zombie {
 
         if (this.level().isClientSide) return;
 
-        // Suppress the cloud if killed by vanilla fire damage OR the mod's
-        // elemental-fire damage type (Element.FIRE weapons / enchantment).
-        boolean killedByFire = cause.is(DamageTypeTags.IS_FIRE);
-        boolean killedByElementFire = cause.is(ModDamageTypes.ELEMENT_FIRE); // ResourceKey<DamageType>
+        boolean killedByFire = cause.is(DamageTypeTags.IS_FIRE)
+                || cause.is(ModDamageTypes.ELEMENT_FIRE)
+                || (cause.getEntity() instanceof net.minecraft.world.entity.LivingEntity living && net.ganyusbathwater.oririmod.combat.ItemElementRegistry.getElement(living.getMainHandItem()) == net.ganyusbathwater.oririmod.combat.Element.FIRE)
+                || (cause.getDirectEntity() != null && net.ganyusbathwater.oririmod.combat.EntityElementRegistry.getElement(cause.getDirectEntity()) == net.ganyusbathwater.oririmod.combat.Element.FIRE);
 
-        if (killedByFire || killedByElementFire) return;
+        if (killedByFire) return;
 
         // Spawn a lingering poison area-effect cloud
         AreaEffectCloud cloud = new AreaEffectCloud(this.level(),

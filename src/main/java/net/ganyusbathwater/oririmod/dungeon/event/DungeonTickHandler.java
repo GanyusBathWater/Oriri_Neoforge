@@ -367,6 +367,9 @@ public class DungeonTickHandler {
                 spec.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
                 spec.setCamera(spec);
                 spec.setHealth(spec.getMaxHealth());
+                spec.removeAllEffects();
+                spec.getFoodData().setFoodLevel(20);
+                spec.getFoodData().setSaturation(5.0F);
                 instance.setPlayerLives(specId, 1);
                 
                 net.minecraft.core.BlockPos respawnPos = instance.getPlayerSpawnPos();

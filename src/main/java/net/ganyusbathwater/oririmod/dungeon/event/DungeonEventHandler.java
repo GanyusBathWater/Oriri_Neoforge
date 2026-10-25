@@ -12,8 +12,13 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -122,20 +127,60 @@ public class DungeonEventHandler {
     //  Banned item use
     // -------------------------------------------------------------------------
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onItemRightClick(PlayerInteractEvent.RightClickItem event) {
         Player player = event.getEntity();
-        if (!(player instanceof ServerPlayer sp)) return;
-        if (!isInDungeon(sp)) return;
+        if (!isInDungeon(player)) return;
+        if (player.isCreative()) return;
 
         ItemStack stack = event.getItemStack();
 
         if (isBannedItem(stack)) {
             event.setCanceled(true);
-            sp.displayClientMessage(
-                    Component.translatable("message.oririmod.dungeon.item_banned")
-                            .withStyle(ChatFormatting.RED),
-                    true);
+            if (player instanceof ServerPlayer sp) {
+                sp.displayClientMessage(
+                        Component.translatable("message.oririmod.dungeon.item_banned")
+                                .withStyle(ChatFormatting.RED),
+                        true);
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        Player player = event.getEntity();
+        if (!isInDungeon(player)) return;
+        if (player.isCreative()) return;
+
+        ItemStack stack = event.getItemStack();
+
+        if (isBannedItem(stack)) {
+            event.setCanceled(true);
+            if (player instanceof ServerPlayer sp) {
+                sp.displayClientMessage(
+                        Component.translatable("message.oririmod.dungeon.item_banned")
+                                .withStyle(ChatFormatting.RED),
+                        true);
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onEntityInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
+        Player player = event.getEntity();
+        if (!isInDungeon(player)) return;
+        if (player.isCreative()) return;
+
+        ItemStack stack = event.getItemStack();
+
+        if (isBannedItem(stack)) {
+            event.setCanceled(true);
+            if (player instanceof ServerPlayer sp) {
+                sp.displayClientMessage(
+                        Component.translatable("message.oririmod.dungeon.item_banned")
+                                .withStyle(ChatFormatting.RED),
+                        true);
+            }
         }
     }
 
@@ -146,11 +191,16 @@ public class DungeonEventHandler {
      *   <li>Ender Pearl</li>
      *   <li>Spring vestige</li>
      *   <li>Trident</li>
+     *   <li>Flint and Steel / Fire Charge</li>
+     *   <li>Boats, Minecarts, Armor Stands, End Crystals, Spawn Eggs</li>
+     *   <li>Buckets (Water, Lava, Powder Snow, Mob Buckets, Empty Bucket, modded fluid buckets)</li>
      *   <li>Leaping potions (all variants)</li>
      *   <li>Slow Falling potions (all variants)</li>
      * </ul>
      */
     private static boolean isBannedItem(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+
         // Vanilla bans
         if (stack.is(Items.ELYTRA)) return true;
         if (stack.is(Items.ENDER_PEARL)) return true;
@@ -172,7 +222,16 @@ public class DungeonEventHandler {
         if (item instanceof net.minecraft.world.item.HangingEntityItem) return true;
         if (item instanceof net.minecraft.world.item.EndCrystalItem) return true;
         if (item instanceof net.minecraft.world.item.SpawnEggItem) return true;
-        if (item instanceof net.minecraft.world.item.MobBucketItem) return true;
+
+        // Bucket bans — all fluid/solid buckets and empty bucket
+        if (item instanceof BucketItem) return true;
+        if (item instanceof SolidBucketItem) return true;
+        if (stack.is(Items.WATER_BUCKET) || stack.is(Items.LAVA_BUCKET) || stack.is(Items.POWDER_SNOW_BUCKET) || stack.is(Items.BUCKET)) return true;
+        if (stack.is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "buckets/water")))) return true;
+        if (stack.is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "buckets/lava")))) return true;
+        if (stack.is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "buckets/powder_snow")))) return true;
+        if (stack.is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "buckets/empty")))) return true;
+        if (stack.is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "buckets/entity_water")))) return true;
 
         // Potion bans — ban any potion that grants Leaping or Slow Falling
         if (stack.getItem() instanceof PotionItem) {
@@ -213,6 +272,8 @@ public class DungeonEventHandler {
                 
                 sp.setHealth(sp.getMaxHealth());
                 sp.removeAllEffects();
+                sp.getFoodData().setFoodLevel(20);
+                sp.getFoodData().setSaturation(5.0F);
                 
                 net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp, new net.ganyusbathwater.oririmod.network.packet.SyncDungeonLivesPayload(lives));
                 sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.life_lost").withStyle(ChatFormatting.GOLD), false);
@@ -232,6 +293,8 @@ public class DungeonEventHandler {
                     // Everyone fails
                     sp.setHealth(sp.getMaxHealth());
                     sp.removeAllEffects();
+                    sp.getFoodData().setFoodLevel(20);
+                    sp.getFoodData().setSaturation(5.0F);
                     sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
                     sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.died").withStyle(ChatFormatting.RED), false);
                     net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(sp);
@@ -242,6 +305,10 @@ public class DungeonEventHandler {
                         ServerPlayer spec = (ServerPlayer) sp.serverLevel().getPlayerByUUID(specId);
                         if (spec != null) {
                             spec.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                            spec.setHealth(spec.getMaxHealth());
+                            spec.removeAllEffects();
+                            spec.getFoodData().setFoodLevel(20);
+                            spec.getFoodData().setSaturation(5.0F);
                             spec.displayClientMessage(Component.translatable("message.oririmod.dungeon.party_failed").withStyle(ChatFormatting.RED), false);
                             net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(spec);
                             instance.removePlayer(specId);
@@ -256,6 +323,8 @@ public class DungeonEventHandler {
                     // Multiplayer, and there are other alive players. Go to spectator.
                     sp.setHealth(sp.getMaxHealth());
                     sp.removeAllEffects();
+                    sp.getFoodData().setFoodLevel(20);
+                    sp.getFoodData().setSaturation(5.0F);
                     sp.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
                     instance.addSpectator(sp.getUUID());
                     manager.setDirty();
@@ -327,6 +396,10 @@ public class DungeonEventHandler {
                 player.getAbilities().mayfly = true;
                 player.onUpdateAbilities();
             }
+
+            if (!shouldFly && player.isFallFlying()) {
+                player.stopFallFlying();
+            }
             
             // Phase 8: Spectator Lock (No free-roaming)
             if (player instanceof ServerPlayer sp && player.isSpectator()) {
@@ -363,11 +436,26 @@ public class DungeonEventHandler {
     //  Switch detection (Phase 6)
     // -------------------------------------------------------------------------
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        Player player = event.getEntity();
+        if (!isInDungeon(player)) return;
+        if (player.isCreative()) return;
+
+        ItemStack stack = event.getItemStack();
+        if (isBannedItem(stack)) {
+            event.setCanceled(true);
+            if (player instanceof ServerPlayer sp) {
+                sp.displayClientMessage(
+                        Component.translatable("message.oririmod.dungeon.item_banned")
+                                .withStyle(ChatFormatting.RED),
+                        true);
+            }
+            return;
+        }
+
         if (event.getLevel().isClientSide) return;
-        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        if (!isInDungeon(sp)) return;
+        if (!(player instanceof ServerPlayer sp)) return;
 
         DungeonManager manager = DungeonManager.get(sp.serverLevel());
         var instance = manager.getInstanceForPlayer(sp.getUUID());
@@ -465,6 +553,9 @@ public class DungeonEventHandler {
         if ("GIVE_UP".equals(action)) {
             // Treat as failure for this player
             sp.setHealth(sp.getMaxHealth());
+            sp.removeAllEffects();
+            sp.getFoodData().setFoodLevel(20);
+            sp.getFoodData().setSaturation(5.0F);
             sp.displayClientMessage(Component.translatable("message.oririmod.dungeon.died").withStyle(ChatFormatting.RED), false);
             
             if (instance.getAlivePlayers().isEmpty()) {
@@ -478,6 +569,10 @@ public class DungeonEventHandler {
                     ServerPlayer spec = (ServerPlayer) sp.serverLevel().getPlayerByUUID(specId);
                     if (spec != null) {
                         spec.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                        spec.setHealth(spec.getMaxHealth());
+                        spec.removeAllEffects();
+                        spec.getFoodData().setFoodLevel(20);
+                        spec.getFoodData().setSaturation(5.0F);
                         spec.displayClientMessage(Component.translatable("message.oririmod.dungeon.party_failed").withStyle(ChatFormatting.RED), false);
                         net.ganyusbathwater.oririmod.item.custom.HomewardItem.teleportHome(spec);
                         instance.removePlayer(specId);
@@ -508,6 +603,10 @@ public class DungeonEventHandler {
             }
         } else if ("RESPAWN".equals(action)) {
             sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            sp.setHealth(sp.getMaxHealth());
+            sp.removeAllEffects();
+            sp.getFoodData().setFoodLevel(20);
+            sp.getFoodData().setSaturation(5.0F);
 
             // Teleport to stage start NOW
             net.minecraft.core.BlockPos respawnPos = instance.getPlayerSpawnPos();

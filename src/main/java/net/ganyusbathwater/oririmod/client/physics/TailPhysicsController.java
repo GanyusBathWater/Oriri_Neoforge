@@ -70,6 +70,7 @@ public class TailPhysicsController {
         public double lastEntityZ;
         public boolean initialized = false;
         public boolean wasPassenger = false;
+        public float lastScale = 1.0F;
 
         public TailSimulation() {
             // Segment lengths: tail5 and tail6 are 4 units (0.25m), tail7..tail40 are 3 units (0.1875m)
@@ -89,36 +90,39 @@ public class TailPhysicsController {
         }
 
         public void init(LivingEntity entity) {
+            float scale = entity.getScale();
+            this.lastScale = scale;
+
             double anchorX, anchorY, anchorZ;
             Vec3 initDir;
             if (entity.isFallFlying()) {
                 initDir = entity.getViewVector(1.0F);
-                anchorX = entity.getX() - initDir.x * 0.6D;
-                anchorY = entity.getY() + 0.3D - initDir.y * 0.6D;
-                anchorZ = entity.getZ() - initDir.z * 0.6D;
+                anchorX = entity.getX() - initDir.x * (0.6D * scale);
+                anchorY = entity.getY() + 0.3D * scale - initDir.y * (0.6D * scale);
+                anchorZ = entity.getZ() - initDir.z * (0.6D * scale);
             } else if (entity.isVisuallySwimming() && entity.isInWater()) {
                 initDir = entity.getViewVector(1.0F);
-                anchorX = entity.getX() - initDir.x * 0.6D;
-                anchorY = entity.getY() + 0.3D - initDir.y * 0.6D;
-                anchorZ = entity.getZ() - initDir.z * 0.6D;
+                anchorX = entity.getX() - initDir.x * (0.6D * scale);
+                anchorY = entity.getY() + 0.3D * scale - initDir.y * (0.6D * scale);
+                anchorZ = entity.getZ() - initDir.z * (0.6D * scale);
             } else {
                 float bodyYaw = entity.yBodyRot;
                 float rad = (float) Math.toRadians(bodyYaw);
                 float backX = Mth.sin(rad);
                 float backZ = -Mth.cos(rad);
                 initDir = new Vec3(-backX, 0.0D, -backZ);
-                float crouchOffset = entity.isVisuallySwimming() ? 0.65F : (entity.isCrouching() ? 0.45F : 0.35F);
+                float crouchOffset = (entity.isVisuallySwimming() ? 0.65F : (entity.isCrouching() ? 0.45F : 0.35F)) * scale;
 
                 anchorX = entity.getX() + backX * crouchOffset;
                 anchorZ = entity.getZ() + backZ * crouchOffset;
-                double floorBelow = getFloorHeight(entity.level(), anchorX, entity.getY(), anchorZ);
-                anchorY = (floorBelow > Double.NEGATIVE_INFINITY) ? floorBelow + radii[0] : entity.getY() + radii[0];
+                double floorBelow = getFloorHeight(entity.level(), anchorX, entity.getY(), anchorZ, scale);
+                anchorY = (floorBelow > Double.NEGATIVE_INFINITY) ? floorBelow + radii[0] * scale : entity.getY() + radii[0] * scale;
             }
 
             double accumDist = 0.0D;
             for (int i = 0; i < NUM_POINTS; i++) {
                 if (i > 0) {
-                    accumDist += restLengths[i - 1];
+                    accumDist += restLengths[i - 1] * scale;
                 }
                 double x, y, z;
                 if (entity.isFallFlying() || (entity.isVisuallySwimming() && entity.isInWater())) {
@@ -128,8 +132,8 @@ public class TailPhysicsController {
                 } else {
                     x = anchorX - initDir.x * accumDist;
                     z = anchorZ - initDir.z * accumDist;
-                    double fl = getFloorHeight(entity.level(), x, anchorY, z);
-                    y = (fl > Double.NEGATIVE_INFINITY) ? fl + radii[i] : anchorY;
+                    double fl = getFloorHeight(entity.level(), x, anchorY, z, scale);
+                    y = (fl > Double.NEGATIVE_INFINITY) ? fl + radii[i] * scale : anchorY;
                 }
 
                 px[i] = x;

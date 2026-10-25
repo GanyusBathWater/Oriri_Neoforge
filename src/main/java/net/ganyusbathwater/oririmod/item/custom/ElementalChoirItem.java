@@ -92,10 +92,15 @@ public class ElementalChoirItem extends SwordItem implements GeoItem {
                 net.minecraft.world.phys.AABB bounds = player.getBoundingBox().inflate(3.0D);
                 java.util.List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, bounds);
                 
+                boolean hitAny = false;
                 for (LivingEntity target : targets) {
                     if (target != player && player.distanceTo(target) <= 3.0D) {
                         dealElementalDamage(target, player, level, 2.0f);
+                        hitAny = true;
                     }
+                }
+                if (hitAny) {
+                    stack.hurtAndBreak(1, player, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
                 }
             }
         }
@@ -162,6 +167,7 @@ public class ElementalChoirItem extends SwordItem implements GeoItem {
             
             SERVER_IS_NEXT_RIGHT.put(player, !isNextRight);
             dealConeDamage(player);
+            stack.hurtAndBreak(1, player, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
         }
     }
 

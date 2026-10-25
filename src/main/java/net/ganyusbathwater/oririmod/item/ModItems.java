@@ -360,7 +360,7 @@ public class ModItems {
                                         ModRarity.LEGENDARY));
         public static final DeferredItem<MaceItem> LAW_BREAKER = ITEMS.register("law_breaker",
                         () -> new CustomHammerItem(
-                                        new Item.Properties().fireResistant().stacksTo(1)
+                                        new Item.Properties().fireResistant().durability(1000).stacksTo(1)
                                                         .attributes(MaceItem.createAttributes()),
                                         ModRarity.GODLY));
         public static final DeferredItem<SwordItem> STELLA_PERDITOR = ITEMS.register("stella_perditor",
@@ -391,17 +391,17 @@ public class ModItems {
 
         public static final DeferredItem<MaceItem> MJOELNIR = ITEMS.register("mjoelnir",
                         () -> new CustomHammerItem(
-                                        new Item.Properties().attributes(MaceItem.createAttributes()).stacksTo(1),
+                                        new Item.Properties().durability(800).attributes(MaceItem.createAttributes()).stacksTo(1),
                                         ModRarity.MYTHIC));
 
         public static final DeferredItem<net.minecraft.world.item.CrossbowItem> ARBITER_CROSSBOW = ITEMS.register("arbiter_crossbow",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.ArbiterCrossbowItem(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.ArbiterCrossbowItem(new Item.Properties().durability(650).stacksTo(1), ModRarity.LEGENDARY));
         
         public static final DeferredItem<net.minecraft.world.item.BowItem> ORAPHIM_BOW = ITEMS.register("oraphim_bow",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.OraphimBowItem(new Item.Properties().stacksTo(1), ModRarity.LEGENDARY));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.OraphimBowItem(new Item.Properties().durability(650).stacksTo(1), ModRarity.LEGENDARY));
 
         public static final DeferredItem<net.minecraft.world.item.BowItem> ARCUS_LUCIS = ITEMS.register("arcus_lucis",
-                        () -> new net.ganyusbathwater.oririmod.item.custom.ArcusLucisItem(new Item.Properties().stacksTo(1), ModRarity.GODLY));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.ArcusLucisItem(new Item.Properties().durability(1000).stacksTo(1), ModRarity.GODLY));
 
         public static final DeferredItem<net.ganyusbathwater.oririmod.item.custom.arrow.TntArrowItem> TNT_ARROW = ITEMS.register("tnt_arrow",
                         () -> new net.ganyusbathwater.oririmod.item.custom.arrow.TntArrowItem(new Item.Properties()));
