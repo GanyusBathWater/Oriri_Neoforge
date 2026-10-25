@@ -220,11 +220,11 @@ public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCos
                 } else if (swimAmount > 0.0F) {
                     float targetPitch = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) ? -90.0F - player.getXRot() : -90.0F;
                     float lerpedPitch = net.minecraft.util.Mth.lerp(swimAmount, 0.0F, targetPitch);
-                    poseStack.translate(0.0F, 1.2F, 0.0F);
-                    poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(lerpedPitch));
-                    poseStack.translate(0.0F, -1.2F, 0.0F);
                     
-                    poseStack.translate(0.0F, -1.0F * swimAmount, 0.0F);
+                    // Pivot rotation around the player's waist (Y = 0.75m) and position the crawling body flat inside the 0.6m tunnel
+                    poseStack.translate(0.0F, 0.25F * swimAmount, 0.0F);
+                    poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(lerpedPitch));
+                    poseStack.translate(0.0F, -0.75F * swimAmount, 0.0F);
                 }
             }
         } else {

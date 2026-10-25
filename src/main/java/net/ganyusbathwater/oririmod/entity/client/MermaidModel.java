@@ -48,11 +48,27 @@ public class MermaidModel extends GeoModel<MermaidEntity> {
     @Override
     public void setCustomAnimations(MermaidEntity animatable, long instanceId,
                                     AnimationState<MermaidEntity> animationState) {
+        super.setCustomAnimations(animatable, instanceId, animationState);
         GeoBone head = getAnimationProcessor().getBone("head");
+        float netHeadYaw = 0.0F;
+        float headPitch = 0.0F;
         if (head != null) {
             EntityModelData entityData = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
-            head.setRotX(entityData.headPitch() * Mth.DEG_TO_RAD);
-            head.setRotY(entityData.netHeadYaw() * Mth.DEG_TO_RAD);
+            if (entityData != null) {
+                netHeadYaw = entityData.netHeadYaw();
+                headPitch = entityData.headPitch();
+                head.setRotX(headPitch * Mth.DEG_TO_RAD);
+                head.setRotY(netHeadYaw * Mth.DEG_TO_RAD);
+            }
         }
+
+        float partialTick = animationState.getPartialTick();
+        net.ganyusbathwater.oririmod.client.physics.HairPhysicsController.applyHairPhysics(
+                animatable,
+                name -> getAnimationProcessor().getBone(name),
+                partialTick,
+                netHeadYaw,
+                headPitch
+        );
     }
 }

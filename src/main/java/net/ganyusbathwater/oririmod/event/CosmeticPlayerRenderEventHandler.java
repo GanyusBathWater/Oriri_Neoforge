@@ -62,7 +62,14 @@ public class CosmeticPlayerRenderEventHandler {
                 pModel.attackTime = player.getAttackAnim(partialTick);
                 pModel.riding = player.isPassenger();
                 pModel.young = player.isBaby();
-                pModel.crouching = player.isCrouching();
+                
+                boolean isVisuallySwimming = player.isVisuallySwimming();
+                pModel.crouching = player.isCrouching() && !isVisuallySwimming;
+                float swimAmount = player.getSwimAmount(partialTick);
+                if (isVisuallySwimming && swimAmount < 0.01F) {
+                    swimAmount = 1.0F;
+                }
+                pModel.swimAmount = swimAmount;
                 
                 net.minecraft.client.model.HumanoidModel.ArmPose mainPose = net.ganyusbathwater.oririmod.client.render.entity.template.AbstractPlayerCosmeticModel.getArmPose(cp, net.minecraft.world.InteractionHand.MAIN_HAND);
                 net.minecraft.client.model.HumanoidModel.ArmPose offPose = net.ganyusbathwater.oririmod.client.render.entity.template.AbstractPlayerCosmeticModel.getArmPose(cp, net.minecraft.world.InteractionHand.OFF_HAND);

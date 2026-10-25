@@ -58,11 +58,15 @@ public class LamiaModel extends GeoModel<LamiaEntity> {
 
         // 1. Head tracking
         GeoBone head = getAnimationProcessor().getBone("head");
+        float netHeadYaw = 0.0F;
+        float headPitch = 0.0F;
         if (head != null) {
             EntityModelData entityData = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
             if (entityData != null) {
-                head.setRotX(entityData.headPitch() * Mth.DEG_TO_RAD);
-                head.setRotY(entityData.netHeadYaw() * Mth.DEG_TO_RAD);
+                netHeadYaw = entityData.netHeadYaw();
+                headPitch = entityData.headPitch();
+                head.setRotX(headPitch * Mth.DEG_TO_RAD);
+                head.setRotY(netHeadYaw * Mth.DEG_TO_RAD);
             }
         }
 
@@ -86,6 +90,15 @@ public class LamiaModel extends GeoModel<LamiaEntity> {
         if (!isChoking && sim != null && sim.initialized) {
             animatable.syncPartsFromSimulation(sim.px, sim.py, sim.pz);
         }
+
+        // 3. Dynamic Hair Physics
+        net.ganyusbathwater.oririmod.client.physics.HairPhysicsController.applyHairPhysics(
+                animatable,
+                name -> getAnimationProcessor().getBone(name),
+                partialTick,
+                netHeadYaw,
+                headPitch
+        );
     }
 }
 
