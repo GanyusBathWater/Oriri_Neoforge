@@ -179,13 +179,19 @@ public class TailPhysicsController {
                 init(entity);
             }
 
+            float scale = entity.getScale();
+            if (Math.abs(scale - this.lastScale) > 0.01F) {
+                this.lastScale = scale;
+                init(entity);
+            }
+
             Level level = entity.level();
 
             double distSq = (entity.getX() - lastEntityX) * (entity.getX() - lastEntityX) +
                             (entity.getY() - lastEntityY) * (entity.getY() - lastEntityY) +
                             (entity.getZ() - lastEntityZ) * (entity.getZ() - lastEntityZ);
 
-            if (!initialized || distSq > 64.0D) {
+            if (!initialized || distSq > (64.0D * scale * scale)) {
                 init(entity);
             }
 
@@ -204,27 +210,27 @@ public class TailPhysicsController {
             double anchorX, anchorY, anchorZ;
             if (entity.isFallFlying()) {
                 Vec3 look = entity.getViewVector(1.0F);
-                anchorX = entity.getX() - look.x * 0.6D;
-                anchorY = entity.getY() + 0.3D - look.y * 0.6D;
-                anchorZ = entity.getZ() - look.z * 0.6D;
+                anchorX = entity.getX() - look.x * (0.6D * scale);
+                anchorY = entity.getY() + 0.3D * scale - look.y * (0.6D * scale);
+                anchorZ = entity.getZ() - look.z * (0.6D * scale);
                 this.anchorDeflection = 0.0F;
             } else if (entity.isVisuallySwimming() && entity.isInWater()) {
                 Vec3 look = entity.getViewVector(1.0F);
-                anchorX = entity.getX() - look.x * 0.6D;
-                anchorY = entity.getY() + 0.3D - look.y * 0.6D;
-                anchorZ = entity.getZ() - look.z * 0.6D;
+                anchorX = entity.getX() - look.x * (0.6D * scale);
+                anchorY = entity.getY() + 0.3D * scale - look.y * (0.6D * scale);
+                anchorZ = entity.getZ() - look.z * (0.6D * scale);
                 this.anchorDeflection = 0.0F;
             } else {
-                float crawlOffset = entity.isVisuallySwimming() ? 0.65F : (entity.isCrouching() ? 0.45F : 0.35F);
+                float crawlOffset = (entity.isVisuallySwimming() ? 0.65F : (entity.isCrouching() ? 0.45F : 0.35F)) * scale;
 
                 double uncollidedBackX = backX * crawlOffset;
                 double uncollidedBackZ = backZ * crawlOffset;
                 anchorX = entity.getX() + uncollidedBackX;
                 anchorZ = entity.getZ() + uncollidedBackZ;
-                anchorY = entity.getY() + radii[0];
+                anchorY = entity.getY() + radii[0] * scale;
 
                 float targetDeflection = 0.0F;
-                if (getWallPush(level, anchorX, anchorY, anchorZ, wallRadii[0], wallPushBuf)) {
+                if (getWallPush(level, anchorX, anchorY, anchorZ, wallRadii[0] * scale, wallPushBuf, scale)) {
                     anchorX += wallPushBuf[0];
                     anchorZ += wallPushBuf[1];
 
@@ -274,7 +280,7 @@ public class TailPhysicsController {
             float flank = (this.lastRootYawSign >= 0.0F) ? 1.0F : -1.0F;
             float perpX = -backZ * flank;
             float perpZ = backX * flank;
-            boolean hasCoilClearance = !getWallPush(level, entity.getX() + perpX * 0.7D, entity.getY() + 0.2D, entity.getZ() + perpZ * 0.7D, 0.40F, wallPushBuf);
+            boolean hasCoilClearance = !getWallPush(level, entity.getX() + perpX * (0.7D * scale), entity.getY() + 0.2D * scale, entity.getZ() + perpZ * (0.7D * scale), 0.40F * scale, wallPushBuf, scale);
 
             boolean isCompletelyStillOnGround = limbSpeed <= 0.05F && Math.abs(bodyYawDelta) < 0.5F && !in3DFlightOrWater && hasCoilClearance;
             if (isCompletelyStillOnGround) {
@@ -297,7 +303,7 @@ public class TailPhysicsController {
                         double dx = px[i] - px[i - 1];
                         double dy = py[i] - py[i - 1];
                         double dz = pz[i] - pz[i - 1];
-                        double rest = restLengths[i - 1];
+                        double rest = restLengths[i - 1] * scale;
                         double dist3D = Math.sqrt(dx * dx + dy * dy + dz * dz);
                         if (dist3D > rest) {
                             px[i] = px[i - 1] + (dx / dist3D) * rest;
@@ -325,10 +331,10 @@ public class TailPhysicsController {
                     double dx = px[i] - px[i - 1];
                     double dz = pz[i] - pz[i - 1];
                     double hDist = Math.sqrt(dx * dx + dz * dz);
-                    double rest = restLengths[i - 1];
+                    double rest = restLengths[i - 1] * scale;
 
                     double segX, segZ;
-                    if (hDist < 0.05D) {
+                    if (hDist < 0.05D * scale) {
                         segX = px[i - 1] + backX * rest;
                         segZ = pz[i - 1] + backZ * rest;
                     } else {
@@ -341,7 +347,7 @@ public class TailPhysicsController {
                     float baseYaw = (float) Math.toDegrees(Mth.atan2(-uncollidedDx, uncollidedDz));
 
                     // Smooth wall collision: push out from walls without exceeding joint angle capacity
-                    if (getWallPush(level, segX, py[i], segZ, wallRadii[i], wallPushBuf)) {
+                    if (getWallPush(level, segX, py[i], segZ, wallRadii[i] * scale, wallPushBuf, scale)) {
                         double pushedX = segX + wallPushBuf[0];
                         double pushedZ = segZ + wallPushBuf[1];
 
@@ -362,7 +368,7 @@ public class TailPhysicsController {
                     px[i] = segX;
                     pz[i] = segZ;
 
-                    applyTerrainAnd3D(level, i, rest);
+                    applyTerrainAnd3D(level, i, rest, scale);
                 }
             } else {
                 // Stationary on ground: Supple serpentine angle propagation
@@ -380,7 +386,7 @@ public class TailPhysicsController {
                 float smoothCoilBlend = this.idleCoilBlend * this.idleCoilBlend * (3.0F - 2.0F * this.idleCoilBlend);
 
                 for (int i = 0; i < NUM_SEGMENTS; i++) {
-                    double rest = restLengths[i];
+                    double rest = restLengths[i] * scale;
                     float diff = Mth.wrapDegrees(parentYaw - curSegYaw[i]);
 
                     // Hysteresis on root segment turning to prevent rapid sign alternation near 180 deg
@@ -421,7 +427,7 @@ public class TailPhysicsController {
                     double candZ = pz[i] + Mth.cos(sRad) * rest;
 
                     // Push out from walls with joint-constrained deflection
-                    if (getWallPush(level, candX, py[i + 1], candZ, wallRadii[i + 1], wallPushBuf)) {
+                    if (getWallPush(level, candX, py[i + 1], candZ, wallRadii[i + 1] * scale, wallPushBuf, scale)) {
                         double pushedX = candX + wallPushBuf[0];
                         double pushedZ = candZ + wallPushBuf[1];
 
@@ -445,7 +451,7 @@ public class TailPhysicsController {
                     // Propagate uncollided spine orientation to prevent local wall collisions from accumulating down the spine
                     parentYaw = uncollidedYaw;
 
-                    applyTerrainAnd3D(level, i + 1, rest);
+                    applyTerrainAnd3D(level, i + 1, rest, scale);
                 }
             }
 
@@ -459,14 +465,14 @@ public class TailPhysicsController {
          * Returns true if a horizontal pushout was applied, filling pushOut with (dx, dz).
          * Uses getFloorHeight to guarantee floors are NEVER mistaken for walls.
          */
-        private boolean getWallPush(Level level, double x, double y, double z, float radius, double[] pushOut) {
+        private boolean getWallPush(Level level, double x, double y, double z, float radius, double[] pushOut, float entityScale) {
             pushOut[0] = 0.0D;
             pushOut[1] = 0.0D;
             if (level == null) return false;
 
-            double floorY = getFloorHeight(level, x, y, z);
-            double minWallY = (floorY > Double.NEGATIVE_INFINITY) ? floorY + 0.15D : y - 0.2D;
-            double maxWallY = (floorY > Double.NEGATIVE_INFINITY) ? floorY + 0.35D : y + 0.25D;
+            double floorY = getFloorHeight(level, x, y, z, entityScale);
+            double minWallY = (floorY > Double.NEGATIVE_INFINITY) ? floorY + 0.15D * entityScale : y - 0.2D * entityScale;
+            double maxWallY = (floorY > Double.NEGATIVE_INFINITY) ? floorY + 0.35D * entityScale : y + 0.25D * entityScale;
 
             int bx = Mth.floor(x);
             int by = Mth.floor(y);
@@ -548,12 +554,12 @@ public class TailPhysicsController {
                 double pushLenSq = accPushX * accPushX + accPushZ * accPushZ;
                 if (pushLenSq > 1.0E-6D) {
                     double pushLen = Math.sqrt(pushLenSq);
-                    double maxGive = 0.30D;
+                    double maxGive = 0.30D * entityScale;
                     double actualPush = Math.min(pushLen, maxGive);
-                    double scale = actualPush / pushLen;
+                    double pushFactor = actualPush / pushLen;
 
-                    pushOut[0] = accPushX * scale;
-                    pushOut[1] = accPushZ * scale;
+                    pushOut[0] = accPushX * pushFactor;
+                    pushOut[1] = accPushZ * pushFactor;
                     return true;
                 }
             }
@@ -561,20 +567,24 @@ public class TailPhysicsController {
             return false;
         }
 
-        private void applyTerrainAnd3D(Level level, int i, double rest) {
+        private boolean getWallPush(Level level, double x, double y, double z, float radius, double[] pushOut) {
+            return getWallPush(level, x, y, z, radius, pushOut, 1.0F);
+        }
+
+        private void applyTerrainAnd3D(Level level, int i, double rest, float scale) {
             // Sample terrain height at point (px[i], pz[i])
-            double floorY = getFloorHeight(level, px[i], py[i], pz[i]);
+            double floorY = getFloorHeight(level, px[i], py[i], pz[i], scale);
 
             if (floorY > Double.NEGATIVE_INFINITY) {
                 // Floor detected: smoothly drape to floor height, limited by max segment drop
-                double targetY = floorY + radii[i];
+                double targetY = floorY + radii[i] * scale;
                 double maxDrop = py[i - 1] - (rest * 0.90D);
                 double maxRise = py[i - 1] + (rest * 0.90D);
                 py[i] = Mth.clamp(targetY, maxDrop, maxRise);
             } else {
                 // Off a cliff / in air: drop under gravity, constrained by segment reach
                 double maxDrop = py[i - 1] - (rest * 0.90D);
-                py[i] = Math.max(py[i] - 0.12D, maxDrop);
+                py[i] = Math.max(py[i] - 0.12D * scale, maxDrop);
             }
 
             // Enforce 3D distance limit so tail cannot stretch across cliffs
@@ -844,6 +854,7 @@ public class TailPhysicsController {
             // Add travelling sinusoidal serpentine wave when moving
             if (limbSpeed > 0.05F) {
                 Level level = entity.level();
+                float scale = entity.getScale();
                 float crawlDampen = 1.0F - (crawlAmount * 0.70F);
                 for (int i = 1; i < NUM_POINTS; i++) {
                     double dx = rx[i] - rx[i - 1];
@@ -854,13 +865,13 @@ public class TailPhysicsController {
                         double nz = dx / dist;
 
                         float wave = (float) Math.sin(limbSwing * 0.45F - (i * 0.22F));
-                        float amp = 0.035F * (1.0F + (float) i / (float) NUM_POINTS) * limbSpeed * crawlDampen;
+                        float amp = 0.035F * (1.0F + (float) i / (float) NUM_POINTS) * limbSpeed * crawlDampen * scale;
 
                         double testX = rx[i] + nx * wave * amp;
                         double testZ = rz[i] + nz * wave * amp;
 
                         // If displaced point enters a wall, dampen wave amplitude against wall instead of violently shoving
-                        if (getWallPush(level, testX, ry[i], testZ, wallRadii[i], wallPushBuf)) {
+                        if (getWallPush(level, testX, ry[i], testZ, wallRadii[i] * scale, wallPushBuf, scale)) {
                             amp *= 0.20F;
                             rx[i] += nx * wave * amp;
                             rz[i] += nz * wave * amp;
@@ -1068,26 +1079,31 @@ public class TailPhysicsController {
      * Fast, reliable terrain height query for stairs, slabs, blocks, and cliffs.
      * Returns Double.NEGATIVE_INFINITY when particle is suspended in air.
      */
-    public static double getFloorHeight(Level level, double x, double y, double z) {
+    public static double getFloorHeight(Level level, double x, double y, double z, float scale) {
         if (level == null) return Double.NEGATIVE_INFINITY;
         BlockPos pos = BlockPos.containing(x, y, z);
 
         double highest = Double.NEGATIVE_INFINITY;
-        // Search 1 block above down to 4 blocks below
-        for (int dy = 1; dy >= -4; dy--) {
+        int searchBelow = Math.max(4, (int) Math.ceil(4 * scale));
+        int searchAbove = Math.max(1, (int) Math.ceil(1 * scale));
+        for (int dy = searchAbove; dy >= -searchBelow; dy--) {
             BlockPos check = pos.above(dy);
             if (!level.hasChunkAt(check)) continue;
             BlockState state = level.getBlockState(check);
             VoxelShape shape = state.getCollisionShape(level, check);
             if (!shape.isEmpty()) {
                 double surfaceY = check.getY() + shape.max(Direction.Axis.Y);
-                if (surfaceY > highest && surfaceY <= y + 0.35D) {
+                if (surfaceY > highest && surfaceY <= y + 0.35D * scale) {
                     highest = surfaceY;
                 }
             }
         }
 
         return highest;
+    }
+
+    public static double getFloorHeight(Level level, double x, double y, double z) {
+        return getFloorHeight(level, x, y, z, 1.0F);
     }
 
     private static final Map<Integer, TailSimulation> ENTITY_TAILS = new ConcurrentHashMap<>();
