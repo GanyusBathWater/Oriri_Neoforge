@@ -72,6 +72,25 @@ public class DungeonTickHandler {
         
         instance.tick();
 
+        // ── Initial Stray Item Cleanup ──
+        // Once players enter the dungeon dimension, entity sections become fully tracked/ticking.
+        // Sweep any residual ItemEntities from structure placement or previous uncleaned runs on ticks 1-3.
+        if (instance.getTicksActive() <= 3 && instance.getStructureBounds() != null) {
+            var bounds = instance.getStructureBounds();
+            net.minecraft.world.phys.AABB fullBox = new net.minecraft.world.phys.AABB(
+                bounds.minX() - 4.0, bounds.minY() - 4.0, bounds.minZ() - 4.0,
+                bounds.maxX() + 5.0, bounds.maxY() + 5.0, bounds.maxZ() + 5.0
+            );
+            for (net.minecraft.world.entity.item.ItemEntity strayItem : level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, fullBox)) {
+                strayItem.discard();
+            }
+        }
+
+        // Report secret placement summary on tick 5 if debug logging is enabled or if any placement issue occurred
+        if (instance.getTicksActive() == 5 && (instance.isDebugLoggingEnabled() || instance.getSecretPlacementIssues() > 0)) {
+            debugLog(level, instance, "Secrets Check -> " + net.ganyusbathwater.oririmod.dungeon.DungeonDebugHandler.buildSecretsStatusSummary(level, instance));
+        }
+
         // ── Time Sync ──
         if (instance.getTicksActive() % 20 == 0) {
             String objText = instance.getLastActiveObjectiveText();
@@ -143,22 +162,23 @@ public class DungeonTickHandler {
             instance.setCurrentStage(nextDef.getStageId());
             debugLog(level, instance, "Started Stage: " + nextDef.getStageId() + " (" + nextDef.getStageType() + ")");
 
-            // Update the dungeon's respawn point to this stage's designated spawn point if defined.
-            // Players will only be sent here if they die/respawn, avoiding forced teleports mid-dungeon.
-            if (nextDef.getPlayerSpawnPos() != null) {
-                instance.setPlayerSpawnPos(nextDef.getPlayerSpawnPos());
-            }
-
             // Start the stage — this spawns enemies, locks doors, etc.
             nextStage.onStart(level, instance);
 
-            // If it started immediately (no triggers), announce it now
+            // If it started immediately (no triggers), update respawn point and announce it now.
+            // If it is PENDING (waiting for a trigger), do NOT activate its respawn point yet!
             if (nextStage.getState() == DungeonStage.StageState.ACTIVE) {
+                if (nextDef.getPlayerSpawnPos() != null) {
+                    instance.setPlayerSpawnPos(nextDef.getPlayerSpawnPos());
+                }
                 announceStage(level, instance, nextDef);
                 playMusic(level, instance, nextDef);
                 if (nextDef.getObjectiveText() != null && !nextDef.getObjectiveText().isBlank()) {
                     instance.setLastActiveObjectiveText(nextDef.getObjectiveText());
                 }
+            }
+            if (instance.isShowDebugZones()) {
+                net.ganyusbathwater.oririmod.dungeon.DungeonDebugHandler.syncDebugZonesForInstance(level, instance);
             }
         }
 
@@ -172,10 +192,16 @@ public class DungeonTickHandler {
             // Handle transition from PENDING -> ACTIVE
             if (prevState == DungeonStage.StageState.PENDING && newState == DungeonStage.StageState.ACTIVE) {
                 debugLog(level, instance, "Stage " + activeStage.getDefinition().getStageId() + " became ACTIVE (Trigger tripped).");
+                if (activeStage.getDefinition().getPlayerSpawnPos() != null) {
+                    instance.setPlayerSpawnPos(activeStage.getDefinition().getPlayerSpawnPos());
+                }
                 announceStage(level, instance, activeStage.getDefinition());
                 playMusic(level, instance, activeStage.getDefinition());
                 if (activeStage.getDefinition().getObjectiveText() != null && !activeStage.getDefinition().getObjectiveText().isBlank()) {
                     instance.setLastActiveObjectiveText(activeStage.getDefinition().getObjectiveText());
+                }
+                if (instance.isShowDebugZones()) {
+                    net.ganyusbathwater.oririmod.dungeon.DungeonDebugHandler.syncDebugZonesForInstance(level, instance);
                 }
             }
 

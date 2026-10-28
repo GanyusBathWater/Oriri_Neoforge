@@ -962,5 +962,7 @@
   "tooltip.oririmod.jade_oath.hits_actionbar": "\u00A7aJade Oath: %s / %s",
   "tooltip.oririmod.jade_oath.charged_actionbar": "\u00A7b\u00A7lJade Oath: CHARGED! \u00A7e[Right-Click to Unleash]",
   "tooltip.oririmod.jade_oath.status_combo": "Combo Hits: %s / %s",
-  "tooltip.oririmod.jade_oath.status_charged": "Blade Charged! (Right-Click to Unleash)"
+  "tooltip.oririmod.jade_oath.status_charged": "Blade Charged! (Right-Click to Unleash)",
+  "tooltip.oririmod.dungeon_skipper.desc": "[DEV] Right-Click to Open the Dungeon Debug & Stage Control Menu",
+  "screen.oririmod.dungeon_skipper.title": "⚙ Dungeon Debug & Stage Controller ⚙"
 }

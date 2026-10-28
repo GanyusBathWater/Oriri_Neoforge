@@ -264,9 +264,14 @@ public class DungeonEventHandler {
         var instance = manager.getInstanceForPlayer(sp.getUUID());
         if (instance != null) {
             int lives = instance.getPlayerLives(sp.getUUID());
-            if (lives > 1) {
-                // Lose a life, respawn in dungeon
-                lives--;
+            boolean infiniteLives = instance.isInfiniteLives();
+            if (lives > 1 || infiniteLives) {
+                // Lose a life (unless infinite lives debug mode is enabled), respawn in dungeon
+                if (!infiniteLives) {
+                    lives--;
+                } else if (lives <= 0) {
+                    lives = 3;
+                }
                 instance.setPlayerLives(sp.getUUID(), lives);
                 manager.setDirty();
                 
@@ -608,9 +613,11 @@ public class DungeonEventHandler {
             sp.getFoodData().setFoodLevel(20);
             sp.getFoodData().setSaturation(5.0F);
 
-            // Teleport to stage start NOW
+            // Teleport to stage start NOW (only use activeStage's spawn pos if the stage is actually ACTIVE, not PENDING)
             net.minecraft.core.BlockPos respawnPos = instance.getPlayerSpawnPos();
-            if (instance.getActiveStage() != null && instance.getActiveStage().getDefinition().getPlayerSpawnPos() != null) {
+            if (instance.getActiveStage() != null
+                    && instance.getActiveStage().getState() == net.ganyusbathwater.oririmod.dungeon.stage.DungeonStage.StageState.ACTIVE
+                    && instance.getActiveStage().getDefinition().getPlayerSpawnPos() != null) {
                 respawnPos = instance.getActiveStage().getDefinition().getPlayerSpawnPos();
             }
             if (respawnPos != null) {

@@ -99,4 +99,10 @@ public class SurviveTimerStage extends AbstractDungeonStage {
         int secondsLeft = Math.max(0, (definition.getTimerTicks() - ticksElapsed) / 20);
         return "Time Remaining: " + secondsLeft + "s";
     }
+
+    @Override
+    public java.util.List<String> getDiagnosticLines(ServerLevel level, DungeonInstance instance) {
+        return java.util.List.of(String.format("§7Survive Timer: §e%ds §7/ §f%ds §7(%d / %d ticks)",
+                ticksElapsed / 20, definition.getTimerTicks() / 20, ticksElapsed, definition.getTimerTicks()));
+    }
 }

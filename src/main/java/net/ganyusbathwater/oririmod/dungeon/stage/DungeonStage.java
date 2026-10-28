@@ -3,6 +3,8 @@ package net.ganyusbathwater.oririmod.dungeon.stage;
 import net.ganyusbathwater.oririmod.dungeon.DungeonInstance;
 import net.minecraft.server.level.ServerLevel;
 
+import java.util.List;
+
 /**
  * Interface for an active, running dungeon stage.
  * Each implementation represents one stage type (kill enemies, pull levers, etc.)
@@ -41,6 +43,17 @@ public interface DungeonStage {
      * Should open doors, trigger area modifiers, play sounds, etc.
      */
     void onComplete(ServerLevel level, DungeonInstance instance);
+
+    /**
+     * Called when a stage is aborted or turned back via the Dungeon Skipper debug menu.
+     * Cleans up spawned entities, boss bars, and active effects.
+     */
+    default void cleanup(ServerLevel level, DungeonInstance instance) {}
+
+    /** @return diagnostic lines describing the internal state of this stage for debugging. */
+    default List<String> getDiagnosticLines(ServerLevel level, DungeonInstance instance) {
+        return List.of();
+    }
 
     /** @return the definition this stage was created from. */
     StageDefinition getDefinition();

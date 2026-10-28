@@ -23,15 +23,21 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
     private int totalEnemies = 0;
     private int ticksSinceLastKill = 0;
     private int lastSize = -1;
+    private boolean keysDropped = false;
 
     public KillAllEnemiesStage(StageDefinition definition) {
         super(definition);
+    }
+
+    public Set<UUID> getSpawnedEntities() {
+        return spawnedEntities;
     }
 
     @Override
     protected void doStart(ServerLevel level, DungeonInstance instance) {
         spawnedEntities.clear();
         stageKeys.clear();
+        keysDropped = false;
 
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
             EntityType<?> entityType = resolveEntityType(level, entry.entityType(), entry.isTag());
@@ -71,15 +77,8 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
             var entity = level.getEntity(uuid);
             boolean dead = entity == null || !entity.isAlive();
             if (dead) {
-                if (spawnedEntities.size() == 1) {
-                    for (String key : stageKeys) {
-                        dropKey(level, entity, instance, key);
-                    }
-                    
-                    String globalKey = definition.getKeyDropStageId();
-                    if (globalKey != null) {
-                        dropKey(level, entity, instance, globalKey);
-                    }
+                if (spawnedEntities.size() == 1 && !keysDropped) {
+                    dropAllStageKeys(level, entity, instance);
                 }
             }
             return dead;
@@ -102,13 +101,68 @@ public class KillAllEnemiesStage extends AbstractDungeonStage {
         }
 
         if (spawnedEntities.isEmpty()) {
+            if (!keysDropped) {
+                dropAllStageKeys(level, null, instance);
+            }
             this.state = StageState.COMPLETE;
+        }
+    }
+
+    private void dropAllStageKeys(ServerLevel level, net.minecraft.world.entity.Entity lastEntity, DungeonInstance instance) {
+        if (keysDropped) return;
+        keysDropped = true;
+        for (String key : stageKeys) {
+            dropKey(level, lastEntity, instance, key);
+        }
+        String globalKey = definition.getKeyDropStageId();
+        if (globalKey != null) {
+            dropKey(level, lastEntity, instance, globalKey);
         }
     }
 
     @Override
     public void onComplete(ServerLevel level, DungeonInstance instance) {
+        if (!keysDropped) {
+            // Ensure keys still drop when force-completed via Dungeon Skipper
+            net.minecraft.world.entity.Entity dropTarget = null;
+            for (UUID pId : instance.getPlayers()) {
+                dropTarget = level.getServer().getPlayerList().getPlayer(pId);
+                if (dropTarget != null) break;
+            }
+            dropAllStageKeys(level, dropTarget, instance);
+        }
         applyCompletionEffects(level, instance);
+    }
+
+    @Override
+    public void cleanup(ServerLevel level, DungeonInstance instance) {
+        for (UUID uuid : spawnedEntities) {
+            var ent = level.getEntity(uuid);
+            if (ent != null) ent.discard();
+        }
+        spawnedEntities.clear();
+        super.cleanup(level, instance);
+    }
+
+    @Override
+    public java.util.List<String> getDiagnosticLines(ServerLevel level, DungeonInstance instance) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        lines.add("§7Enemies Remaining: §e" + spawnedEntities.size() + " §7/ §f" + totalEnemies);
+        for (UUID uuid : spawnedEntities) {
+            var ent = level.getEntity(uuid);
+            if (ent != null) {
+                lines.add(String.format("  §c• %s §7at §f[%d, %d, %d] §7(HP: %.1f)",
+                        ent.getType().getDescription().getString(),
+                        ent.blockPosition().getX(), ent.blockPosition().getY(), ent.blockPosition().getZ(),
+                        ent instanceof LivingEntity le ? le.getHealth() : 0f));
+            } else {
+                lines.add("  §8• Unloaded/Missing Entity UUID: " + uuid);
+            }
+        }
+        if (!stageKeys.isEmpty() || definition.getKeyDropStageId() != null) {
+            lines.add("§7Key Drops Configured: §b" + stageKeys + (definition.getKeyDropStageId() != null ? " + " + definition.getKeyDropStageId() : "") + " §7(Dropped: " + keysDropped + ")");
+        }
+        return lines;
     }
 
     private void dropKey(ServerLevel level, net.minecraft.world.entity.Entity entity, DungeonInstance instance, String keyDrop) {

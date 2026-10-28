@@ -15,6 +15,7 @@ public class BossFightStage extends AbstractDungeonStage {
     private UUID bossEntityUUID = null;
     private net.minecraft.server.level.ServerBossEvent bossEvent = null;
     private boolean bossDefeatedHandled = false;
+    private boolean keysDropped = false;
     private int ticksSinceLastHit = 0;
     private float lastHealth = -1;
 
@@ -127,7 +128,8 @@ public class BossFightStage extends AbstractDungeonStage {
 
             if (!boss.isAlive()) {
                 String keyDrop = definition.getBossKeyDropItem();
-                if (keyDrop != null) {
+                if (keyDrop != null && !keysDropped) {
+                    keysDropped = true;
                     dropKey(level, boss, instance, keyDrop);
                 }
                 this.state = StageState.COMPLETE;
@@ -143,7 +145,57 @@ public class BossFightStage extends AbstractDungeonStage {
             bossEvent.removeAllPlayers();
             bossEvent = null;
         }
+        String keyDrop = definition.getBossKeyDropItem();
+        if (keyDrop != null && !keysDropped) {
+            keysDropped = true;
+            net.minecraft.world.entity.Entity dropTarget = bossEntityUUID != null ? level.getEntity(bossEntityUUID) : null;
+            if (dropTarget == null) {
+                for (UUID pId : instance.getPlayers()) {
+                    dropTarget = level.getServer().getPlayerList().getPlayer(pId);
+                    if (dropTarget != null) break;
+                }
+            }
+            dropKey(level, dropTarget, instance, keyDrop);
+        }
+        if (bossEntityUUID != null) {
+            var ent = level.getEntity(bossEntityUUID);
+            if (ent != null && ent.isAlive()) {
+                ent.discard();
+            }
+        }
         applyCompletionEffects(level, instance);
+    }
+
+    @Override
+    public void cleanup(ServerLevel level, DungeonInstance instance) {
+        if (bossEvent != null) {
+            bossEvent.removeAllPlayers();
+            bossEvent = null;
+        }
+        if (bossEntityUUID != null) {
+            var ent = level.getEntity(bossEntityUUID);
+            if (ent != null) ent.discard();
+            bossEntityUUID = null;
+        }
+        instance.setBossDefeated(false);
+        super.cleanup(level, instance);
+    }
+
+    @Override
+    public java.util.List<String> getDiagnosticLines(ServerLevel level, DungeonInstance instance) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        lines.add("§7Boss Type: §e" + definition.getBossEntityType() + " §7Spawn: §f" + (definition.getBossSpawnPos() != null ? definition.getBossSpawnPos().toShortString() : "NONE"));
+        if (bossEntityUUID != null) {
+            var ent = level.getEntity(bossEntityUUID);
+            if (ent instanceof LivingEntity boss) {
+                lines.add(String.format("  §c• Alive Boss at [%d, %d, %d] HP: %.1f / %.1f",
+                        boss.blockPosition().getX(), boss.blockPosition().getY(), boss.blockPosition().getZ(),
+                        boss.getHealth(), boss.getMaxHealth()));
+            } else {
+                lines.add("  §8• Boss entity no longer in world");
+            }
+        }
+        return lines;
     }
 
     private void dropKey(ServerLevel level, net.minecraft.world.entity.Entity entity, DungeonInstance instance, String keyDrop) {

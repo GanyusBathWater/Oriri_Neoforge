@@ -411,6 +411,36 @@ public final class NetworkHandler {
                     if (!(ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp)) return;
                     net.ganyusbathwater.oririmod.dungeon.event.DungeonEventHandler.handleDeathAction(sp, payload.action());
                 }));
+
+        // Dungeon Skipper Debug Screen (server -> client)
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonSkipperScreenPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenDungeonSkipperScreenPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+                    if (mc.screen instanceof net.ganyusbathwater.oririmod.client.screen.DungeonSkipperScreen existing) {
+                        existing.updateState(payload);
+                    } else {
+                        mc.setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonSkipperScreen(payload));
+                    }
+                }));
+
+        // Dungeon Skipper Debug Action (client -> server)
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.DungeonSkipperActionPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.DungeonSkipperActionPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    if (!(ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp)) return;
+                    net.ganyusbathwater.oririmod.dungeon.DungeonDebugHandler.handleAction(sp, payload);
+                }));
+
+        // Dungeon 3D Debug Zones (server -> client)
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncDungeonDebugZonesPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncDungeonDebugZonesPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.client.render.DungeonDebugOverlayRenderer.updateZones(payload);
+                }));
     }
     
 

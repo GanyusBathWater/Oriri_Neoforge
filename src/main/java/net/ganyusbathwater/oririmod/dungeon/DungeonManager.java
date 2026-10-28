@@ -110,14 +110,14 @@ public class DungeonManager extends SavedData {
                 ServerLevel dimLevel = server.getLevel(def.dimension());
                 if (dimLevel != null && instance.getStructureBounds() != null) {
                     var bounds = instance.getStructureBounds();
+                    net.minecraft.world.phys.AABB cleanupBox = new net.minecraft.world.phys.AABB(
+                            bounds.minX() - 4.0, bounds.minY() - 4.0, bounds.minZ() - 4.0,
+                            bounds.maxX() + 5.0, bounds.maxY() + 5.0, bounds.maxZ() + 5.0
+                    );
                     
-                    // Remove all entities
+                    // Remove all entities before block removal
                     java.util.List<net.minecraft.world.entity.Entity> entities = dimLevel.getEntitiesOfClass(
-                            net.minecraft.world.entity.Entity.class, 
-                            new net.minecraft.world.phys.AABB(
-                                    bounds.minX(), bounds.minY(), bounds.minZ(), 
-                                    bounds.maxX(), bounds.maxY(), bounds.maxZ()
-                            )
+                            net.minecraft.world.entity.Entity.class, cleanupBox
                     );
                     for (net.minecraft.world.entity.Entity e : entities) {
                         if (!(e instanceof net.minecraft.world.entity.player.Player)) {
@@ -125,13 +125,31 @@ public class DungeonManager extends SavedData {
                         }
                     }
                     
-                    // Replace all blocks with AIR, suppressing drops so plants don't leave items behind for the next dungeon
+                    // Clear all block entities (chests, barrels, etc.) BEFORE replacing blocks with AIR
+                    // so ChestBlock.onRemove / Containers.dropContentsOnDestroy never unpacks loot tables or spills items!
                     int flags = net.minecraft.world.level.block.Block.UPDATE_CLIENTS 
                               | net.minecraft.world.level.block.Block.UPDATE_KNOWN_SHAPE 
                               | net.minecraft.world.level.block.Block.UPDATE_SUPPRESS_DROPS;
                     BlockPos.betweenClosedStream(bounds.minX(), bounds.minY(), bounds.minZ(), 
                                                  bounds.maxX(), bounds.maxY(), bounds.maxZ())
-                            .forEach(pos -> dimLevel.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), flags));
+                            .forEach(pos -> {
+                                net.minecraft.world.level.block.entity.BlockEntity be = dimLevel.getBlockEntity(pos);
+                                if (be != null) {
+                                    net.minecraft.world.Clearable.tryClear(be);
+                                    dimLevel.removeBlockEntity(pos);
+                                }
+                                dimLevel.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), flags);
+                            });
+
+                    // Second entity pass to catch anything spawned during block updates
+                    java.util.List<net.minecraft.world.entity.Entity> remainingEntities = dimLevel.getEntitiesOfClass(
+                            net.minecraft.world.entity.Entity.class, cleanupBox
+                    );
+                    for (net.minecraft.world.entity.Entity e : remainingEntities) {
+                        if (!(e instanceof net.minecraft.world.entity.player.Player)) {
+                            e.discard();
+                        }
+                    }
                 }
             }
             

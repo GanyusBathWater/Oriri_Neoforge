@@ -191,15 +191,22 @@ public class DungeonPartyActionHandler {
                 if (sp != null) refreshScreen(sp, manager, party);
             }
             
-            // Cancel generator task if running
+            // Cancel generator task if running and clean up the incomplete instance
             if (party.getAssignedInstanceId() != null) {
+                UUID cancelledInstanceId = party.getAssignedInstanceId();
+                party.setAssignedInstanceId(null);
+                manager.setDirty();
+
                 net.ganyusbathwater.oririmod.dungeon.DungeonManager dungeonManager = net.ganyusbathwater.oririmod.dungeon.DungeonManager.get(sender.serverLevel());
                 for (var task : dungeonManager.getActiveTasks()) {
-                    if (task.getInstance().getInstanceId().equals(party.getAssignedInstanceId())) {
+                    if (task.getInstance().getInstanceId().equals(cancelledInstanceId)) {
                         task.cancel();
                         break;
                     }
                 }
+                var def = DungeonDefinitionRegistry.get(party.getDungeonId());
+                String dimKey = def != null ? def.dimension().location().toString() : null;
+                dungeonManager.removeInstance(sender.getServer(), cancelledInstanceId, dimKey);
             }
         }
     }

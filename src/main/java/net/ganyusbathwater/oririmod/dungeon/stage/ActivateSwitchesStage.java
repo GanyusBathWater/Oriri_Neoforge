@@ -71,4 +71,16 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
         if (activatedSwitchIds.isEmpty()) return null;
         return "Switches Activated: " + activatedSwitchIds.size() + " / " + requiredCount;
     }
+
+    @Override
+    public java.util.List<String> getDiagnosticLines(ServerLevel level, DungeonInstance instance) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        lines.add("§7Switches Activated: §e" + activatedSwitchIds.size() + " §7/ §f" + requiredCount);
+        for (StageDefinition.SwitchEntry sw : definition.getSwitches()) {
+            boolean active = activatedSwitchIds.contains(sw.switchId());
+            lines.add(String.format("  %s• Switch '%s' at [%s]: %s",
+                    active ? "§a" : "§c", sw.switchId(), sw.pos().toShortString(), active ? "ACTIVATED" : "MISSING"));
+        }
+        return lines;
+    }
 }

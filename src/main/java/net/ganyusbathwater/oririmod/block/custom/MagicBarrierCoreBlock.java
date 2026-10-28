@@ -39,19 +39,26 @@ public class MagicBarrierCoreBlock extends Block {
         if (!player.isCreative()) {
             stack.shrink(1);
         }
-        
-        breakCoreAndConnectedBarriers(level, pos);
+
+        net.ganyusbathwater.oririmod.dungeon.DungeonInstance instance = null;
+        if (level instanceof net.minecraft.server.level.ServerLevel sl) {
+            instance = net.ganyusbathwater.oririmod.dungeon.DungeonManager.get(sl).getInstanceForPlayer(player.getUUID());
+        }
+        breakCoreAndConnectedBarriers(level, pos, instance);
         level.playSound(null, pos, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_BREAK, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
-        
+
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    private static void breakCoreAndConnectedBarriers(Level level, BlockPos pos) {
+    private static void breakCoreAndConnectedBarriers(Level level, BlockPos pos, net.ganyusbathwater.oririmod.dungeon.DungeonInstance instance) {
+        if (instance != null) {
+            instance.recordStageBlockChange(instance.getCurrentStageIndex(), pos, level.getBlockState(pos));
+        }
         level.destroyBlock(pos, false);
-        breakConnectedBarriers(level, pos);
+        breakConnectedBarriers(level, pos, instance);
     }
 
-    private static void breakConnectedBarriers(Level level, BlockPos start) {
+    private static void breakConnectedBarriers(Level level, BlockPos start, net.ganyusbathwater.oririmod.dungeon.DungeonInstance instance) {
         Deque<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
 
@@ -68,6 +75,9 @@ public class MagicBarrierCoreBlock extends Block {
 
                 BlockState st = level.getBlockState(next);
                 if (st.getBlock() instanceof MagicBarrierBlock) {
+                    if (instance != null) {
+                        instance.recordStageBlockChange(instance.getCurrentStageIndex(), next, st);
+                    }
                     level.destroyBlock(next, false);
                     queue.addLast(next);
                 }

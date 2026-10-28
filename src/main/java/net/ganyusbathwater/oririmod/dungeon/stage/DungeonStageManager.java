@@ -63,18 +63,28 @@ public class DungeonStageManager {
      */
     public static List<StageDefinition> buildStages(List<DungeonMarkerEntity> markers, DungeonInstance instance) {
 
-        // Group markers by stage_id
+        // Group markers by stage_id (deduplicating markers by UUID and secret positions by BlockPos)
         Map<String, List<DungeonMarkerEntity>> byStage = new LinkedHashMap<>();
         List<DungeonMarkerEntity> secretChests = new ArrayList<>();
         List<DungeonMarkerEntity> secretButtons = new ArrayList<>();
+        Set<UUID> seenMarkerIds = new HashSet<>();
+        Set<BlockPos> seenSecretChestPositions = new HashSet<>();
+        Set<BlockPos> seenSecretButtonPositions = new HashSet<>();
         
         for (DungeonMarkerEntity marker : markers) {
+            if (marker == null || !seenMarkerIds.add(marker.getUUID())) {
+                continue;
+            }
             if (ROLE_SECRET_CHEST_SPAWN.equalsIgnoreCase(marker.getRole())) {
-                secretChests.add(marker);
+                if (seenSecretChestPositions.add(marker.blockPosition().immutable())) {
+                    secretChests.add(marker);
+                }
                 continue;
             }
             if (ROLE_SECRET_BUTTON_SPAWN.equalsIgnoreCase(marker.getRole())) {
-                secretButtons.add(marker);
+                if (seenSecretButtonPositions.add(marker.blockPosition().immutable())) {
+                    secretButtons.add(marker);
+                }
                 continue;
             }
             if (ROLE_LOOT_CHEST.equalsIgnoreCase(marker.getRole())) {
@@ -156,70 +166,158 @@ public class DungeonStageManager {
             instance.setPlayerSpawnPos(definitions.get(0).getPlayerSpawnPos());
         }
         
-        // Spawn random Secret Chests
-        if (!secretChests.isEmpty()) {
-            int chestLimit = instance.isSpawnAllSecrets() ? secretChests.size() : Math.min(3, secretChests.size());
-            java.util.Collections.shuffle(secretChests);
-            for (int i = 0; i < chestLimit; i++) {
-                DungeonMarkerEntity marker = secretChests.get(i);
-                BlockPos pos = marker.blockPosition();
-                ServerLevel sl = (ServerLevel) marker.level();
-                
-                String table = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
-                if (table.isBlank()) table = "minecraft:chests/simple_dungeon";
-                ResourceLocation lootTableId = ResourceLocation.tryParse(table.contains(":") ? table : "minecraft:" + table);
-                
-                net.minecraft.world.level.block.state.BlockState chestState = net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState()
-                    .setValue(net.minecraft.world.level.block.ChestBlock.FACING, net.minecraft.core.Direction.fromYRot(marker.getYRot() + 180.0f));
-                sl.setBlock(pos, chestState, 3);
-                
-                if (sl.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE && lootTableId != null) {
-                    chestBE.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTableId), sl.getRandom().nextLong());
+        // Spawn random Secret Chests & Secret Buttons only once per dungeon instance
+        if (!instance.isSecretsInitialized() && (!secretChests.isEmpty() || !secretButtons.isEmpty())) {
+            instance.setSecretsInitialized(true);
+            instance.addSecretPlacementLog(String.format(
+                    "§7Markers scanned: §e%d §7Secret Chest marker(s), §d%d §7Secret Button marker(s) (Mode: §f%s§7)",
+                    secretChests.size(), secretButtons.size(), instance.isSpawnAllSecrets() ? "ALL" : "MAX 3"
+            ));
+
+            if (!secretChests.isEmpty()) {
+                int chestLimit = instance.isSpawnAllSecrets() ? secretChests.size() : Math.min(3, secretChests.size());
+                java.util.Collections.shuffle(secretChests);
+                for (int i = 0; i < chestLimit; i++) {
+                    DungeonMarkerEntity marker = secretChests.get(i);
+                    BlockPos pos = marker.blockPosition().immutable();
+                    ServerLevel sl = (ServerLevel) marker.level();
+                    
+                    String replacedBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(sl.getBlockState(pos).getBlock()).getPath();
+                    String table = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
+                    if (table.isBlank()) table = "minecraft:chests/simple_dungeon";
+                    ResourceLocation lootTableId = ResourceLocation.tryParse(table.contains(":") ? table : "minecraft:" + table);
+                    
+                    net.minecraft.world.level.block.entity.BlockEntity existingBE = sl.getBlockEntity(pos);
+                    if (existingBE != null) {
+                        net.minecraft.world.Clearable.tryClear(existingBE);
+                        sl.removeBlockEntity(pos);
+                    }
+
+                    boolean waterlogged = sl.getFluidState(pos).getType() == net.minecraft.world.level.material.Fluids.WATER;
+                    net.minecraft.core.Direction facing = net.minecraft.core.Direction.fromYRot(marker.getYRot() + 180.0f);
+                    net.minecraft.world.level.block.state.BlockState chestState = net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.ChestBlock.FACING, facing)
+                        .setValue(net.minecraft.world.level.block.ChestBlock.TYPE, net.minecraft.world.level.block.state.properties.ChestType.SINGLE)
+                        .setValue(net.minecraft.world.level.block.ChestBlock.WATERLOGGED, waterlogged);
+                    sl.setBlock(pos, chestState, 3);
+                    instance.getSecretChestPositions().add(pos);
+                    
+                    boolean blockPlaced = sl.getBlockState(pos).is(net.minecraft.world.level.block.Blocks.CHEST);
+                    boolean beOk = false;
+                    if (sl.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE && lootTableId != null) {
+                        chestBE.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTableId), sl.getRandom().nextLong());
+                        beOk = true;
+                    }
+                    boolean blockedAbove = net.minecraft.world.level.block.ChestBlock.isChestBlockedAt(sl, pos);
+
+                    if (!blockPlaced || !beOk || blockedAbove) {
+                        instance.incrementSecretPlacementIssues();
+                        String issue = !blockPlaced ? "Block failed to place!"
+                                : (!beOk ? "Missing ChestBlockEntity or invalid LootTable!" : "Blocked above by " + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(sl.getBlockState(pos.above()).getBlock()).getPath() + " (cannot open)!");
+                        instance.addSecretPlacementLog(String.format(
+                                "  §c⚠ Chest #%d at [%s]: ISSUE (%s) [replaced=%s]",
+                                i + 1, pos.toShortString(), issue, replacedBlock
+                        ));
+                    } else {
+                        instance.addSecretPlacementLog(String.format(
+                                "  §a✔ Chest #%d at [%s]: Placed OK §7(facing=%s, replaced=%s%s, loot=%s)",
+                                i + 1, pos.toShortString(), facing.getName(), replacedBlock,
+                                waterlogged ? ", waterlogged" : "", lootTableId.getPath()
+                        ));
+                    }
                 }
             }
-        }
-        
-        // Spawn random Secret Buttons
-        if (!secretButtons.isEmpty()) {
-            int buttonLimit = instance.isSpawnAllSecrets() ? secretButtons.size() : Math.min(3, secretButtons.size());
-            java.util.Collections.shuffle(secretButtons);
-            for (int i = 0; i < buttonLimit; i++) {
-                DungeonMarkerEntity marker = secretButtons.get(i);
-                BlockPos pos = marker.blockPosition();
-                ServerLevel sl = (ServerLevel) marker.level();
-                
-                String blockId = marker.getExtraData().getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
-                if (blockId.isBlank()) blockId = "minecraft:stone_button";
-                if (!blockId.contains(":")) blockId = "minecraft:" + blockId;
-                
-                net.minecraft.world.level.block.Block buttonBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockId));
-                if (buttonBlock instanceof net.minecraft.world.level.block.ButtonBlock bb) {
-                    net.minecraft.world.level.block.state.BlockState state = bb.defaultBlockState();
-                    net.minecraft.core.Direction facing = net.minecraft.core.Direction.fromYRot(marker.getYRot() + 180.0f);
-                    net.minecraft.world.level.block.state.properties.AttachFace face = net.minecraft.world.level.block.state.properties.AttachFace.WALL;
+            
+            // Spawn random Secret Buttons
+            if (!secretButtons.isEmpty()) {
+                int buttonLimit = instance.isSpawnAllSecrets() ? secretButtons.size() : Math.min(3, secretButtons.size());
+                java.util.Collections.shuffle(secretButtons);
+                for (int i = 0; i < buttonLimit; i++) {
+                    DungeonMarkerEntity marker = secretButtons.get(i);
+                    BlockPos pos = marker.blockPosition().immutable();
+                    ServerLevel sl = (ServerLevel) marker.level();
                     
-                    if (marker.getXRot() >= 45) {
-                        face = net.minecraft.world.level.block.state.properties.AttachFace.FLOOR;
-                    } else if (marker.getXRot() <= -45) {
-                        face = net.minecraft.world.level.block.state.properties.AttachFace.CEILING;
+                    String replacedBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(sl.getBlockState(pos).getBlock()).getPath();
+                    String blockId = marker.getExtraData().getString(DungeonMarkerEntity.TAG_ENEMY_TYPE);
+                    if (blockId.isBlank()) blockId = "minecraft:stone_button";
+                    if (!blockId.contains(":")) blockId = "minecraft:" + blockId;
+                    
+                    net.minecraft.world.level.block.Block buttonBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockId));
+                    boolean initialSupportOk = true;
+                    boolean fallbackUsed = false;
+                    String orientationDesc = "default";
+
+                    if (buttonBlock instanceof net.minecraft.world.level.block.ButtonBlock bb) {
+                        net.minecraft.world.level.block.state.BlockState state = bb.defaultBlockState();
+                        net.minecraft.core.Direction facing = net.minecraft.core.Direction.fromYRot(marker.getYRot() + 180.0f);
+                        net.minecraft.world.level.block.state.properties.AttachFace face = net.minecraft.world.level.block.state.properties.AttachFace.WALL;
+                        
+                        if (marker.getXRot() >= 45) {
+                            face = net.minecraft.world.level.block.state.properties.AttachFace.FLOOR;
+                        } else if (marker.getXRot() <= -45) {
+                            face = net.minecraft.world.level.block.state.properties.AttachFace.CEILING;
+                        }
+                        
+                        if (state.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACE)) {
+                            state = state.setValue(net.minecraft.world.level.block.ButtonBlock.FACE, face);
+                        }
+                        if (state.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACING)) {
+                            state = state.setValue(net.minecraft.world.level.block.ButtonBlock.FACING, facing);
+                        }
+
+                        initialSupportOk = state.canSurvive(sl, pos);
+                        if (!initialSupportOk) {
+                            // Try to find a valid sturdy attachment face at this position so the button does not pop off
+                            outer:
+                            for (net.minecraft.world.level.block.state.properties.AttachFace tryFace : net.minecraft.world.level.block.state.properties.AttachFace.values()) {
+                                for (net.minecraft.core.Direction tryDir : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                                    net.minecraft.world.level.block.state.BlockState candidate = bb.defaultBlockState()
+                                            .setValue(net.minecraft.world.level.block.ButtonBlock.FACE, tryFace)
+                                            .setValue(net.minecraft.world.level.block.ButtonBlock.FACING, tryDir);
+                                    if (candidate.canSurvive(sl, pos)) {
+                                        state = candidate;
+                                        face = tryFace;
+                                        facing = tryDir;
+                                        fallbackUsed = true;
+                                        break outer;
+                                    }
+                                }
+                            }
+                        }
+
+                        orientationDesc = face.getSerializedName() + "/" + facing.getName();
+                        sl.setBlock(pos, state, 3);
                     } else {
-                        // Keep as WALL, use facing
+                        sl.setBlock(pos, buttonBlock.defaultBlockState(), 3);
                     }
                     
-                    if (state.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACE)) {
-                        state = state.setValue(net.minecraft.world.level.block.ButtonBlock.FACE, face);
+                    instance.getSecretButtonPositions().add(pos);
+                    String lt = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
+                    if (!lt.isBlank()) instance.setSecretButtonLootTable(lt);
+
+                    net.minecraft.world.level.block.state.BlockState placedState = sl.getBlockState(pos);
+                    boolean blockPlaced = placedState.is(buttonBlock);
+                    boolean survivesNow = placedState.canSurvive(sl, pos);
+
+                    if (!blockPlaced || !survivesNow || !initialSupportOk) {
+                        instance.incrementSecretPlacementIssues();
+                        String issue = !blockPlaced ? "Block failed to place!"
+                                : (!survivesNow ? "No sturdy support block on any adjacent face (will break on update)!"
+                                : "Marker rotation had no support block; auto-attached to " + orientationDesc);
+                        instance.addSecretPlacementLog(String.format(
+                                "  %s Button #%d at [%s]: %s [replaced=%s]",
+                                (!blockPlaced || !survivesNow) ? "§c⚠" : "§e⚠",
+                                i + 1, pos.toShortString(), issue, replacedBlock
+                        ));
+                    } else {
+                        instance.addSecretPlacementLog(String.format(
+                                "  §a✔ Button #%d at [%s]: Placed OK §7(%s, orient=%s, replaced=%s)",
+                                i + 1, pos.toShortString(),
+                                net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(buttonBlock).getPath(),
+                                orientationDesc, replacedBlock
+                        ));
                     }
-                    if (state.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACING)) {
-                        state = state.setValue(net.minecraft.world.level.block.ButtonBlock.FACING, facing);
-                    }
-                    sl.setBlock(pos, state, 3);
-                } else {
-                    sl.setBlock(pos, buttonBlock.defaultBlockState(), 3);
                 }
-                
-                instance.getSecretButtonPositions().add(pos);
-                String lt = marker.getExtraData().getString(DungeonMarkerEntity.TAG_LOOT_TABLE);
-                if (!lt.isBlank()) instance.setSecretButtonLootTable(lt);
             }
         }
         

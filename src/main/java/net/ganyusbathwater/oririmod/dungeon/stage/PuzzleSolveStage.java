@@ -81,4 +81,21 @@ public class PuzzleSolveStage extends AbstractDungeonStage {
     public void onComplete(ServerLevel level, DungeonInstance instance) {
         applyCompletionEffects(level, instance);
     }
+
+    @Override
+    public java.util.List<String> getDiagnosticLines(ServerLevel level, DungeonInstance instance) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        lines.add("§7Block Matches Configured: §f" + definition.getBlockMatches().size());
+        for (StageDefinition.BlockMatchEntry entry : definition.getBlockMatches()) {
+            BlockPos pos = entry.pos();
+            BlockState actualState = level.getBlockState(pos);
+            net.minecraft.resources.ResourceLocation actualId = BuiltInRegistries.BLOCK.getKey(actualState.getBlock());
+            boolean idMatch = actualId.equals(entry.blockId());
+            lines.add(String.format("  %s• [%s] Expected: %s (%s) | Actual: %s",
+                    idMatch ? "§a" : "§c", pos.toShortString(), entry.blockId(),
+                    (entry.stateData() == null || entry.stateData().isBlank() ? "any" : entry.stateData()),
+                    actualState.toString()));
+        }
+        return lines;
+    }
 }

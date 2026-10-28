@@ -49,6 +49,48 @@ public abstract class AbstractDungeonStage implements DungeonStage {
         this.state = StageState.COMPLETE;
     }
 
+    public void forceStart(ServerLevel level, DungeonInstance instance) {
+        if (this.state == StageState.PENDING) {
+            this.state = StageState.ACTIVE;
+            applyStartEffects(level, instance);
+            doStart(level, instance);
+        }
+    }
+
+    @Override
+    public void cleanup(ServerLevel level, DungeonInstance instance) {
+        // Discard all active infinite spawner mobs
+        for (InfiniteSpawnTracker tracker : infiniteSpawners.values()) {
+            for (UUID uuid : tracker.activeMobs) {
+                var ent = level.getEntity(uuid);
+                if (ent != null) ent.discard();
+            }
+            tracker.activeMobs.clear();
+        }
+        infiniteSpawners.clear();
+
+        // Reset any switches in this stage to unpowered
+        for (StageDefinition.SwitchEntry switchEntry : definition.getSwitches()) {
+            BlockState state = level.getBlockState(switchEntry.pos());
+            if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)
+                    && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                level.setBlock(switchEntry.pos(), state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3);
+            }
+        }
+
+        // Discard remaining mobs in structure bounds
+        var bounds = instance.getStructureBounds();
+        if (bounds != null) {
+            net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(
+                    bounds.minX(), bounds.minY(), bounds.minZ(),
+                    bounds.maxX(), bounds.maxY(), bounds.maxZ()
+            ).inflate(10.0);
+            for (net.minecraft.world.entity.Mob mob : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, aabb)) {
+                mob.discard();
+            }
+        }
+    }
+
     @Override
     public void onStart(ServerLevel level, DungeonInstance instance) {
         if (definition.getTriggers().isEmpty()) {
@@ -180,10 +222,12 @@ public abstract class AbstractDungeonStage implements DungeonStage {
         net.minecraft.world.level.block.Block magicBarrier = net.ganyusbathwater.oririmod.block.ModBlocks.MAGIC_BARRIER_BLOCK.get();
         if (magicBarrier == net.minecraft.world.level.block.Blocks.AIR) return; // Fallback if block not found
         
+        int stageIdx = instance.getCurrentStageIndex();
         for (StageDefinition.DoorEntry door : definition.getDoors()) {
             BlockPos pos = door.pos();
             BlockState state = level.getBlockState(pos);
             if (state.isAir() || state.canBeReplaced()) {
+                instance.recordStageBlockChange(stageIdx, pos, state);
                 level.setBlock(pos, magicBarrier.defaultBlockState(), 3);
             }
         }
@@ -194,6 +238,7 @@ public abstract class AbstractDungeonStage implements DungeonStage {
      * Called by subclasses once they determine their win condition is met.
      */
     protected void applyCompletionEffects(ServerLevel level, DungeonInstance instance) {
+        int stageIdx = instance.getCurrentStageIndex();
         // Open doors / remove barriers
         for (StageDefinition.DoorEntry door : definition.getDoors()) {
             BlockPos pos = door.pos();
@@ -201,13 +246,14 @@ public abstract class AbstractDungeonStage implements DungeonStage {
             // If it's any non-air block acting as a barrier, set it to air.
             // In Phase 5+ we will check for MagicBarrier specifically.
             if (!state.isAir()) {
+                instance.recordStageBlockChange(stageIdx, pos, state);
                 level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             }
         }
 
         // Apply area modifiers (e.g. destroy floor)
         for (StageDefinition.AreaModifierEntry modifier : definition.getAreaModifiers()) {
-            applyAreaModifier(level, modifier);
+            applyAreaModifier(level, instance, stageIdx, modifier);
         }
 
         // Play a triumphant sound at the instance origin
@@ -215,7 +261,7 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                 SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.AMBIENT, 1.0f, 1.0f);
     }
 
-    private void applyAreaModifier(ServerLevel level, StageDefinition.AreaModifierEntry modifier) {
+    private void applyAreaModifier(ServerLevel level, DungeonInstance instance, int stageIdx, StageDefinition.AreaModifierEntry modifier) {
         BlockPos center = modifier.pos();
         int radius = modifier.radius();
         ResourceLocation filter = modifier.blockFilter();
@@ -228,6 +274,7 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                             BlockPos target = center.offset(x, y, z);
                             BlockState state = level.getBlockState(target);
                             if (filter == null || matchesFilter(state, filter)) {
+                                instance.recordStageBlockChange(stageIdx, target, state);
                                 level.setBlock(target, Blocks.AIR.defaultBlockState(), 3);
                             }
                         }
@@ -242,6 +289,7 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                             for (int y = -radius; y <= radius; y++) {
                                 for (int z = -radius; z <= radius; z++) {
                                     BlockPos target = center.offset(x, y, z);
+                                    instance.recordStageBlockChange(stageIdx, target, level.getBlockState(target));
                                     level.setBlock(target, fillBlock.defaultBlockState(), 3);
                                 }
                             }
@@ -250,9 +298,12 @@ public abstract class AbstractDungeonStage implements DungeonStage {
                 }
             }
             case "place_teleporter" -> {
+                instance.recordStageBlockChange(stageIdx, center, level.getBlockState(center));
                 int rotation = net.minecraft.util.Mth.floor((double)((modifier.yRot() * 8.0F / 360.0F) + 0.5F)) & 7;
-                BlockState teleporterState = net.ganyusbathwater.oririmod.block.ModBlocks.TELEPORTER_BLOCK.get().defaultBlockState()
-                        .setValue(net.ganyusbathwater.oririmod.block.custom.TeleporterBlock.ROTATION, rotation);
+                BlockState teleporterState = net.ganyusbathwater.oririmod.block.custom.TeleporterBlock.ROTATION != null
+                        ? net.ganyusbathwater.oririmod.block.ModBlocks.TELEPORTER_BLOCK.get().defaultBlockState()
+                                .setValue(net.ganyusbathwater.oririmod.block.custom.TeleporterBlock.ROTATION, rotation)
+                        : net.ganyusbathwater.oririmod.block.ModBlocks.TELEPORTER_BLOCK.get().defaultBlockState();
                 level.setBlock(center, teleporterState, 3);
                 if (level.getBlockEntity(center) instanceof net.ganyusbathwater.oririmod.block.entity.TeleporterBlockEntity teleporter) {
                     teleporter.setTeleporterId(modifier.extraString(), null);

@@ -25,6 +25,8 @@ public class DungeonGeneratorTask {
     
     private final Queue<PlacementStep> placementQueue = new LinkedList<>();
     private final List<net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity> collectedMarkers = new ArrayList<>();
+    private final java.util.Set<UUID> collectedMarkerIds = new java.util.HashSet<>();
+    private final java.util.Set<net.minecraft.world.level.ChunkPos> forcedChunks = new java.util.HashSet<>();
     private boolean isFinished = false;
     private boolean isCancelled = false;
 
@@ -41,7 +43,9 @@ public class DungeonGeneratorTask {
         // Try single file first
         Optional<StructureTemplate> single = DungeonDimensionManager.loadTemplateFromClasspath(level, definition.structureId());
         if (single.isPresent()) {
-            placementQueue.add(new PlacementStep(single.get(), instance.getOrigin()));
+            PlacementStep step = new PlacementStep(single.get(), instance.getOrigin());
+            placementQueue.add(step);
+            preForceStepChunks(step);
             return;
         }
 
@@ -60,7 +64,9 @@ public class DungeonGeneratorTask {
                 Optional<StructureTemplate> partOpt = DungeonDimensionManager.loadTemplateFromClasspath(level, partId);
                 if (partOpt.isPresent()) {
                     BlockPos partOrigin = instance.getOrigin().offset(offsetX, 0, offsetZ);
-                    placementQueue.add(new PlacementStep(partOpt.get(), partOrigin));
+                    PlacementStep step = new PlacementStep(partOpt.get(), partOrigin);
+                    placementQueue.add(step);
+                    preForceStepChunks(step);
                 }
             }
         }
@@ -71,9 +77,33 @@ public class DungeonGeneratorTask {
         }
     }
 
+    private void preForceStepChunks(PlacementStep step) {
+        var bounds = step.template.getBoundingBox(settings, step.origin);
+        net.minecraft.world.level.ChunkPos startChunk = new net.minecraft.world.level.ChunkPos(new BlockPos(bounds.minX(), 0, bounds.minZ()));
+        net.minecraft.world.level.ChunkPos endChunk = new net.minecraft.world.level.ChunkPos(new BlockPos(bounds.maxX(), 0, bounds.maxZ()));
+        for (int cx = startChunk.x; cx <= endChunk.x; cx++) {
+            for (int cz = startChunk.z; cz <= endChunk.z; cz++) {
+                net.minecraft.world.level.ChunkPos cp = new net.minecraft.world.level.ChunkPos(cx, cz);
+                if (forcedChunks.add(cp)) {
+                    level.setChunkForced(cx, cz, true);
+                }
+            }
+        }
+    }
+
     public boolean isFinished() { return isFinished; }
     public boolean isCancelled() { return isCancelled; }
-    public void cancel() { this.isCancelled = true; }
+    public void cancel() {
+        this.isCancelled = true;
+        releaseForcedChunks();
+    }
+
+    private void releaseForcedChunks() {
+        for (net.minecraft.world.level.ChunkPos cp : forcedChunks) {
+            level.setChunkForced(cp.x, cp.z, false);
+        }
+        forcedChunks.clear();
+    }
     
     public DungeonInstance getInstance() { return instance; }
 
@@ -86,12 +116,56 @@ public class DungeonGeneratorTask {
         // Process 1 piece per tick to heavily reduce lag spike
         PlacementStep step = placementQueue.poll();
         if (step != null) {
-            DungeonDimensionManager.forceLoadChunks(level, step.origin, step.template);
+            var bounds = step.template.getBoundingBox(settings, step.origin);
+
+            // Force-load chunks and clear any stale BlockEntities (e.g. secret chests from an uncleaned session)
+            // BEFORE placeInWorld overwrites them with AIR, preventing ChestBlock.onRemove from spilling loot!
+            net.minecraft.world.level.ChunkPos startChunk = new net.minecraft.world.level.ChunkPos(new BlockPos(bounds.minX(), 0, bounds.minZ()));
+            net.minecraft.world.level.ChunkPos endChunk = new net.minecraft.world.level.ChunkPos(new BlockPos(bounds.maxX(), 0, bounds.maxZ()));
+            for (int cx = startChunk.x; cx <= endChunk.x; cx++) {
+                for (int cz = startChunk.z; cz <= endChunk.z; cz++) {
+                    net.minecraft.world.level.ChunkPos cp = new net.minecraft.world.level.ChunkPos(cx, cz);
+                    if (forcedChunks.add(cp)) {
+                        level.setChunkForced(cx, cz, true);
+                    }
+                    net.minecraft.world.level.chunk.LevelChunk chunk = level.getChunk(cx, cz);
+                    List<BlockPos> existingBEPositions = new ArrayList<>(chunk.getBlockEntities().keySet());
+                    for (BlockPos bePos : existingBEPositions) {
+                        if (bounds.isInside(bePos)) {
+                            net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(bePos);
+                            if (be != null) {
+                                net.minecraft.world.Clearable.tryClear(be);
+                                level.removeBlockEntity(bePos);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Discard any stale entities (old markers, mobs, dropped items) strictly inside this piece's bounds before placement
+            net.minecraft.world.phys.AABB exactPieceBox = new net.minecraft.world.phys.AABB(
+                bounds.minX(), level.getMinBuildHeight(), bounds.minZ(),
+                bounds.maxX() + 1.0, level.getMaxBuildHeight(), bounds.maxZ() + 1.0
+            );
+            for (net.minecraft.world.entity.Entity staleEntity : level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, exactPieceBox)) {
+                if (!(staleEntity instanceof net.minecraft.world.entity.player.Player)) {
+                    staleEntity.discard();
+                }
+            }
+
             int placeFlags = net.minecraft.world.level.block.Block.UPDATE_CLIENTS 
                            | net.minecraft.world.level.block.Block.UPDATE_SUPPRESS_DROPS;
-            step.template.placeInWorld(level, step.origin, step.origin, settings, level.getRandom(), placeFlags);
+            net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.setSpawnCaptureHook(marker -> {
+                if (collectedMarkerIds.add(marker.getUUID())) {
+                    collectedMarkers.add(marker);
+                }
+            });
+            try {
+                step.template.placeInWorld(level, step.origin, step.origin, settings, level.getRandom(), placeFlags);
+            } finally {
+                net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.setSpawnCaptureHook(null);
+            }
             
-            var bounds = step.template.getBoundingBox(settings, step.origin);
             minX = Math.min(minX, bounds.minX());
             minY = Math.min(minY, bounds.minY());
             minZ = Math.min(minZ, bounds.minZ());
@@ -111,7 +185,11 @@ public class DungeonGeneratorTask {
                 item.discard();
             }
 
-            collectedMarkers.addAll(level.getEntitiesOfClass(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.class, pieceBox));
+            for (net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity marker : level.getEntitiesOfClass(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.class, pieceBox)) {
+                if (collectedMarkerIds.add(marker.getUUID())) {
+                    collectedMarkers.add(marker);
+                }
+            }
         }
 
         if (placementQueue.isEmpty()) {
@@ -120,21 +198,28 @@ public class DungeonGeneratorTask {
                 instance.setStructureBounds(new net.minecraft.world.level.levelgen.structure.BoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
                 OririMod.LOGGER.info("[DungeonGeneratorTask] Finished placing multi-part structure for {} at origin {}", definition.structureId(), instance.getOrigin());
                 
+                net.minecraft.world.phys.AABB fullBox = new net.minecraft.world.phys.AABB(
+                    minX - 4.0, level.getMinBuildHeight(), minZ - 4.0,
+                    maxX + 5.0, level.getMaxBuildHeight(), maxZ + 5.0
+                );
+                for (net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity marker : level.getEntitiesOfClass(net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity.class, fullBox)) {
+                    if (collectedMarkerIds.add(marker.getUUID())) {
+                        collectedMarkers.add(marker);
+                    }
+                }
+
                 // Build stages immediately after generation before chunks unload
                 List<net.ganyusbathwater.oririmod.dungeon.stage.StageDefinition> stages = 
                     net.ganyusbathwater.oririmod.dungeon.stage.DungeonStageManager.buildStages(collectedMarkers, instance);
                 instance.setStageDefinitions(stages);
                 
                 // Final sweep: remove any items dropped during generation due to overlapping bounds or block updates
-                net.minecraft.world.phys.AABB fullBox = new net.minecraft.world.phys.AABB(
-                    minX, level.getMinBuildHeight(), minZ,
-                    maxX, level.getMaxBuildHeight(), maxZ
-                );
                 java.util.List<net.minecraft.world.entity.item.ItemEntity> droppedItems = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, fullBox);
                 for (net.minecraft.world.entity.item.ItemEntity item : droppedItems) {
                     item.discard();
                 }
             }
+            releaseForcedChunks();
         }
     }
 

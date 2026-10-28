@@ -66,6 +66,14 @@ public class DungeonMarkerEntity extends Entity {
     // Extra arbitrary NBT payload (holds enemy_type, count, loot_table, etc.)
     private CompoundTag extraData = new CompoundTag();
 
+    // Synchronous capture hook used by DungeonGeneratorTask during StructureTemplate.placeInWorld
+    // so markers in newly-forced chunks (whose EntitySection is still Visibility.HIDDEN) are never missed.
+    private static java.util.function.Consumer<DungeonMarkerEntity> spawnCaptureHook = null;
+
+    public static void setSpawnCaptureHook(java.util.function.Consumer<DungeonMarkerEntity> hook) {
+        spawnCaptureHook = hook;
+    }
+
     // -------------------------------------------------------------------------
     //  Constructor
     // -------------------------------------------------------------------------
@@ -226,6 +234,22 @@ public class DungeonMarkerEntity extends Entity {
 
     @Override
     public boolean isInvulnerable() { return true; }
+
+    @Override
+    public void moveTo(double x, double y, double z, float yRot, float xRot) {
+        super.moveTo(x, y, z, yRot, xRot);
+        if (spawnCaptureHook != null && !this.level().isClientSide) {
+            spawnCaptureHook.accept(this);
+        }
+    }
+
+    @Override
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
+        if (spawnCaptureHook != null && !this.level().isClientSide) {
+            spawnCaptureHook.accept(this);
+        }
+    }
 
     @Override
     public void tick() {
