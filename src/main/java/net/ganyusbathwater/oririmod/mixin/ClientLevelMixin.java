@@ -13,26 +13,47 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ClientLevelMixin {
 
     /**
-     * Nur die Tages\-Skyhelligkeit dämpfen: injiziere am RETURN von getSkyDarken
-     * und erhöhe den Dunkelheitswert nur bei aktivem ECLIPSE, Tageszeit und wenn
-     * keine GUI offen ist.
+     * Nur die Tages-Skyhelligkeit dämpfen: injiziere am RETURN von getSkyDarken
+     * und erhöhe den Dunkelheitswert bei aktivem ECLIPSE oder Naturkatastrophen.
      */
     @Inject(method = "getSkyDarken(F)F", at = @At("RETURN"), cancellable = true)
     private void oriri_modifySkyDarken(float partialTick, CallbackInfoReturnable<Float> cir) {
         float original = cir.getReturnValueF();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level != null && WorldEventManager.isEventActive(mc.level, WorldEventType.ECLIPSE)
-                && mc.level.isDay()) {
-            cir.setReturnValue(Math.min(original + 0.2F, 0.2F));
+        if (mc.level != null) {
+            if (net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.isDisasterActive()) {
+                cir.setReturnValue(Math.min(original + 0.35F, 0.65F));
+                return;
+            }
+            if (WorldEventManager.isEventActive(mc.level, WorldEventType.ECLIPSE) && mc.level.isDay()) {
+                cir.setReturnValue(Math.min(original + 0.2F, 0.2F));
+            }
         }
     }
 
     /**
-     * Override sky color to support shader packs during celestial events.
-     * Iris/Oculus reads the sky color from here and passes it to the shader as a uniform.
+     * Override sky color to support shader packs during celestial events and natural disasters.
+     * Iris/Oculus reads the sky color from here and passes it to the shader as a uniform,
+     * while vanilla sky rendering also queries this directly.
      */
     @Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true)
     private void oriri_overrideSkyColorForShaders(net.minecraft.world.phys.Vec3 pPos, float pPartialTick, CallbackInfoReturnable<net.minecraft.world.phys.Vec3> cir) {
+        // Priority 1: Natural Disasters (Meteor Shower burning amber/orange, Tornado tempest dusk)
+        if (net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.isDisasterActive()
+                || net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getTransitionProgress() > 0.0f) {
+            org.joml.Vector3f disasterColor = net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getSkyColor();
+            if (disasterColor != null) {
+                float prog = net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getTransitionProgress();
+                net.minecraft.world.phys.Vec3 orig = cir.getReturnValue();
+                cir.setReturnValue(new net.minecraft.world.phys.Vec3(
+                        net.minecraft.util.Mth.lerp(prog, orig.x, (double) disasterColor.x),
+                        net.minecraft.util.Mth.lerp(prog, orig.y, (double) disasterColor.y),
+                        net.minecraft.util.Mth.lerp(prog, orig.z, (double) disasterColor.z)
+                ));
+                return;
+            }
+        }
+
         net.ganyusbathwater.oririmod.util.ShaderCompatMode mode = net.ganyusbathwater.oririmod.config.OririConfig.COMMON.worldEvents.overrideVanillaSkyColorForShaders.get();
         boolean shouldOverride = false;
         

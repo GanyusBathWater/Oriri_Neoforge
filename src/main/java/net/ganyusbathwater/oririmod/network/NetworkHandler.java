@@ -441,8 +441,45 @@ public final class NetworkHandler {
                 (payload, ctx) -> ctx.enqueueWork(() -> {
                     net.ganyusbathwater.oririmod.client.render.DungeonDebugOverlayRenderer.updateZones(payload);
                 }));
+
+        // Snowstorm Blizzard HUD overlay sync: server -> client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncNaturalDisasterPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncNaturalDisasterPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.update(
+                            payload.disasterType(), payload.ticksRemaining(), payload.totalDuration());
+                }));
+
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncBlizzardOverlayPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncBlizzardOverlayPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+                    if (mc.player != null) {
+                        long gameTime = mc.player.level().getGameTime();
+                        if (payload.exposed()) {
+                            mc.player.getPersistentData().putLong("LastBlizzardTick", gameTime);
+                        }
+                        if (payload.sheltered()) {
+                            mc.player.getPersistentData().putLong("LastBlizzardSafeZoneTick", gameTime);
+                        }
+                    }
+                }));
     }
     
+
+    public static void sendNaturalDisasterToAll(net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType type, int ticksRemaining, int totalDuration) {
+        net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(new net.ganyusbathwater.oririmod.network.packet.SyncNaturalDisasterPayload(type, ticksRemaining, totalDuration));
+    }
+
+    public static void sendNaturalDisasterToPlayer(ServerPlayer player, net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType type, int ticksRemaining, int totalDuration) {
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new net.ganyusbathwater.oririmod.network.packet.SyncNaturalDisasterPayload(type, ticksRemaining, totalDuration));
+    }
+
+    public static void sendBlizzardOverlayToPlayer(ServerPlayer player, boolean exposed, boolean sheltered) {
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new net.ganyusbathwater.oririmod.network.packet.SyncBlizzardOverlayPayload(exposed, sheltered));
+    }
 
     public static void sendManaToPlayer(ServerPlayer player, int mana, int maxMana) {
         PacketDistributor.sendToPlayer(player, new ManaSyncPayload(new ManaSyncPacket(mana, maxMana)));
@@ -536,4 +573,4 @@ public final class NetworkHandler {
             action.execute(sp, conversableEntity);
         }
     }
-}
+}

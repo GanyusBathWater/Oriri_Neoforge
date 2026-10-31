@@ -23,6 +23,18 @@ public class CustomDimensionSpecialEffects extends DimensionSpecialEffects {
         if (LunarSkyboxState.isEnabled()) {
             return Vec3.ZERO;
         }
+        // Priority 1: Natural Disasters (Meteor Shower apocalyptic orange, Tornado dusty brown-gray)
+        if (net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.isDisasterActive()
+                || net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getTransitionProgress() > 0.0f) {
+            org.joml.Vector3f disasterColor = net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getSkyColor();
+            if (disasterColor != null) {
+                float prog = net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getTransitionProgress();
+                org.joml.Vector3f originalColor = new org.joml.Vector3f((float) fogColor.x, (float) fogColor.y, (float) fogColor.z);
+                originalColor.lerp(disasterColor, prog);
+                return new Vec3(originalColor.x, originalColor.y, originalColor.z);
+            }
+        }
+
         updateTransitionProgress();
         if (transitionProgress > 0) {
             net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;

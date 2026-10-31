@@ -52,7 +52,7 @@ public class BossSwarmPunishGoal extends Goal {
             
             for (LivingEntity e : targets) {
                 // If it's a summon, obliterate it (stacks with the 3.0x global damage multiplier!)
-                float damage = e.getPersistentData().getBoolean("OririSummoned") ? 20.0f : 10.0f;
+                float damage = 10.0f;
                 e.hurt(mob.damageSources().mobAttack(mob), damage);
                 
                 // Add crippling debuffs

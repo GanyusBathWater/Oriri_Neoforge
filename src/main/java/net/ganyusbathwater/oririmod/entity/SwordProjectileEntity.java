@@ -219,7 +219,7 @@ public class SwordProjectileEntity extends ThrowableItemProjectile {
     protected void onHitEntity(EntityHitResult result) {
         if (!this.entityData.get(IS_DEAD)) {
             if (!this.level().isClientSide) {
-                result.getEntity().hurt(this.damageSources().magic(), damageAmount);
+                result.getEntity().hurt(this.getOwner() != null ? this.damageSources().indirectMagic(this, this.getOwner()) : this.damageSources().magic(), damageAmount);
                 this.discard(); // Despawn instantly upon hitting an entity
             }
         }

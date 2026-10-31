@@ -24,11 +24,15 @@ public class MermaidCosmeticRenderer extends AbstractPlayerCosmeticRenderer<Merm
         this.tailModel = new MermaidTailModel();
     }
 
+    public GeoModel<MermaidCosmeticAnimatable> getGeoModel(Player player) {
+        boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) || player.isVisuallySwimming();
+        return inWater ? this.tailModel : this.landModel;
+    }
+
     @Override
     public GeoModel<MermaidCosmeticAnimatable> getGeoModel() {
         if (this.currentEntity instanceof Player player) {
-            boolean inWater = player.isInWater() || player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) || player.isVisuallySwimming();
-            return inWater ? this.tailModel : this.landModel;
+            return getGeoModel(player);
         }
         return super.getGeoModel();
     }

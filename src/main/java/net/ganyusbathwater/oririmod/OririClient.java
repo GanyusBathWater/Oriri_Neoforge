@@ -317,11 +317,26 @@ public class OririClient {
      */
     @SubscribeEvent
     public static void onComputeFogColor(ViewportEvent.ComputeFogColor event) {
-        if (!net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState.isEnabled()) return;
+        if (net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState.isEnabled()) {
+            event.setRed(0.0f);
+            event.setGreen(0.0f);
+            event.setBlue(0.0f);
+            return;
+        }
 
-        event.setRed(0.0f);
-        event.setGreen(0.0f);
-        event.setBlue(0.0f);
+        if (net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.isDisasterActive()
+                || net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getTransitionProgress() > 0.0f) {
+            org.joml.Vector3f disasterColor = net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getSkyColor();
+            if (disasterColor != null) {
+                float prog = net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getTransitionProgress();
+                float r = event.getRed() * (1.0f - prog) + disasterColor.x * prog;
+                float g = event.getGreen() * (1.0f - prog) + disasterColor.y * prog;
+                float b = event.getBlue() * (1.0f - prog) + disasterColor.z * prog;
+                event.setRed(r);
+                event.setGreen(g);
+                event.setBlue(b);
+            }
+        }
     }
 
     /**
@@ -359,12 +374,15 @@ public class OririClient {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.CRATER_WORKER.get(), net.ganyusbathwater.oririmod.entity.client.CraterWorkerRenderer::new);
+        event.registerEntityRenderer(ModEntities.EARTHQUAKE_WORKER.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
         event.registerEntityRenderer(ModEntities.DUNGEON_KEEPER.get(),
                 net.ganyusbathwater.oririmod.entity.client.DungeonKeeperRenderer::new);
         event.registerEntityRenderer(ModEntities.AIR_SLICE.get(),
                 net.ganyusbathwater.oririmod.entity.client.AirSliceRenderer::new);
         event.registerEntityRenderer(ModEntities.TORNADO.get(),
                 net.ganyusbathwater.oririmod.entity.client.TornadoRenderer::new);
+        event.registerEntityRenderer(ModEntities.DISASTER_TORNADO.get(),
+                net.ganyusbathwater.oririmod.client.render.entity.DisasterTornadoRenderer::new);
         event.registerEntityRenderer(ModEntities.MAGIC_BOLT.get(), net.ganyusbathwater.oririmod.client.render.entity.MagicBoltRenderer::new);
         event.registerEntityRenderer(ModEntities.EYE_OF_DESOLATION.get(),
                 net.ganyusbathwater.oririmod.entity.client.EyeOfDesolationRenderer::new);
@@ -396,11 +414,17 @@ public class OririClient {
     private static float blackHoleTimeBase = 0f;
     private static float swordShakeIntensity = 0f;
     private static float swordTimeBase = 0f;
+    private static float earthquakeShakeIntensity = 0f;
+    private static float earthquakeTimeBase = 0f;
+    private static float tornadoShakeIntensity = 0f;
+    private static float tornadoTimeBase = 0f;
 
     @SubscribeEvent
     public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
+        
+        net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.tick();
         
         double maxDist = 64.0;
         
@@ -436,6 +460,80 @@ public class OririClient {
                     swordShakeIntensity = distIntensity * timeIntensity * 3.0f;
                     swordTimeBase = sword.tickCount;
                     break;
+
+                }
+            }
+        }
+
+        // Scan for EarthquakeFaultWorkerEntity
+        java.util.List<net.ganyusbathwater.oririmod.entity.custom.EarthquakeFaultWorkerEntity> faults = mc.level.getEntitiesOfClass(
+                net.ganyusbathwater.oririmod.entity.custom.EarthquakeFaultWorkerEntity.class,
+                mc.player.getBoundingBox().inflate(maxDist));
+
+        earthquakeShakeIntensity = 0f;
+        for (net.ganyusbathwater.oririmod.entity.custom.EarthquakeFaultWorkerEntity fault : faults) {
+            if (fault.isCarving()) {
+                double dist = mc.player.distanceTo(fault);
+                float radius = fault.getShakeRadius();
+                if (dist < radius) {
+                    float distIntensity = 1.0f - (float) (dist / radius);
+                    float cfgMult = (float) (double) net.ganyusbathwater.oririmod.config.OririConfig.COMMON.naturalDisasters.earthquakeShakeIntensity.get();
+                    earthquakeShakeIntensity = Math.max(earthquakeShakeIntensity, distIntensity * distIntensity * 1.5f * cfgMult);
+                    earthquakeTimeBase = fault.tickCount;
+                }
+            }
+        }
+
+        // Scan for DisasterTornadoEntity
+        java.util.List<net.ganyusbathwater.oririmod.entity.custom.DisasterTornadoEntity> tornadoes = mc.level.getEntitiesOfClass(
+                net.ganyusbathwater.oririmod.entity.custom.DisasterTornadoEntity.class,
+                mc.player.getBoundingBox().inflate(64.0));
+
+        tornadoShakeIntensity = 0f;
+        for (net.ganyusbathwater.oririmod.entity.custom.DisasterTornadoEntity tornado : tornadoes) {
+            double dist = mc.player.distanceTo(tornado);
+            float radius = tornado.getSuctionRadius() * 1.5f;
+            if (dist < radius) {
+                float distIntensity = 1.0f - (float) (dist / radius);
+                float cfgMult = (float) (double) net.ganyusbathwater.oririmod.config.OririConfig.COMMON.naturalDisasters.tornadoShakeIntensity.get();
+                tornadoShakeIntensity = Math.max(tornadoShakeIntensity, distIntensity * distIntensity * 1.4f * cfgMult);
+                tornadoTimeBase = tornado.tickCount;
+            }
+
+            // Client-side player suction physics (guarantees local player is whirled up and cannot walk through!)
+            if (!mc.player.isCreative() && !mc.player.isSpectator() && mc.player.isAlive() && !tornado.isDissipating()) {
+                double dx = tornado.getX() - mc.player.getX();
+                double dz = tornado.getZ() - mc.player.getZ();
+                double distSq = dx * dx + dz * dz;
+                float suctionRad = tornado.getSuctionRadius();
+
+                if (distSq <= suctionRad * suctionRad && distSq > 0.05) {
+                    double d = Math.sqrt(distSq);
+                    double kbThreshold = net.ganyusbathwater.oririmod.config.OririConfig.COMMON.naturalDisasters.tornadoKnockbackResistanceThreshold.get();
+                    double kbRes = mc.player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
+                    if (kbRes < kbThreshold) {
+                        double vulnerability = 1.0 - (kbRes / kbThreshold);
+                        double pullFactor = vulnerability * (1.0 - (d / suctionRad));
+
+                        double tx = -dz / d;
+                        double tz = dx / d;
+
+                        net.minecraft.world.phys.Vec3 inward = new net.minecraft.world.phys.Vec3(dx / d, 0, dz / d).scale(0.65 * pullFactor);
+                        net.minecraft.world.phys.Vec3 swirl = new net.minecraft.world.phys.Vec3(tx, 0, tz).scale(0.80 * pullFactor);
+
+                        double lift = 0.0;
+                        if (mc.player.getY() < tornado.getY() + 30.0) {
+                            lift = 0.15 + 0.14 * pullFactor;
+                        } else if (mc.player.getY() < tornado.getY() + tornado.getFunnelHeight() * 0.75) {
+                            lift = 0.08;
+                        } else {
+                            lift = -0.15;
+                        }
+                        mc.player.resetFallDistance();
+
+                        mc.player.push(inward.x + swirl.x, lift, inward.z + swirl.z);
+                        mc.player.hasImpulse = true;
+                    }
                 }
             }
         }
@@ -459,6 +557,28 @@ public class OririClient {
             float shakePitch = (float)(Math.sin(time * 5.0) * Math.cos(time * 3.0)) * swordShakeIntensity;
             float shakeYaw = (float)(Math.cos(time * 6.0) * Math.sin(time * 2.5)) * swordShakeIntensity;
             float shakeRoll = (float)(Math.sin(time * 4.0)) * 0.5f * swordShakeIntensity;
+            
+            event.setPitch(event.getPitch() + shakePitch);
+            event.setYaw(event.getYaw() + shakeYaw);
+            event.setRoll(event.getRoll() + shakeRoll);
+        }
+
+        if (earthquakeShakeIntensity > 0f) {
+            float time = earthquakeTimeBase + (float)event.getPartialTick();
+            float shakePitch = (float)(Math.sin(time * 3.8) * Math.cos(time * 2.1)) * 0.85f * earthquakeShakeIntensity;
+            float shakeYaw = (float)(Math.cos(time * 4.2) * Math.sin(time * 1.7)) * 0.85f * earthquakeShakeIntensity;
+            float shakeRoll = (float)(Math.sin(time * 2.8)) * 0.6f * earthquakeShakeIntensity;
+            
+            event.setPitch(event.getPitch() + shakePitch);
+            event.setYaw(event.getYaw() + shakeYaw);
+            event.setRoll(event.getRoll() + shakeRoll);
+        }
+
+        if (tornadoShakeIntensity > 0f) {
+            float time = tornadoTimeBase + (float)event.getPartialTick();
+            float shakePitch = (float)(Math.sin(time * 4.5) * Math.cos(time * 2.8)) * 0.9f * tornadoShakeIntensity;
+            float shakeYaw = (float)(Math.cos(time * 5.0) * Math.sin(time * 2.2)) * 0.9f * tornadoShakeIntensity;
+            float shakeRoll = (float)(Math.sin(time * 3.5)) * 0.65f * tornadoShakeIntensity;
             
             event.setPitch(event.getPitch() + shakePitch);
             event.setYaw(event.getYaw() + shakeYaw);

@@ -75,21 +75,32 @@ public class ServerEvents {
             long lastBlizz = player.getPersistentData().getLong("LastBlizzardTick");
             long gameTime = player.level().getGameTime();
             
-            // Only defrost if they are safely outside the active blizzard control loop
-            if (gameTime - lastBlizz > 5) {
-                // Is the player near an active light source (ambient light > 11, like lava, torches, lanterns)?
-                boolean fastThaw = player.level().getLightEngine().getRawBrightness(player.blockPosition(), 0) > 11;
+            // Check block light at feet and head
+            int blockLightFeet = player.level().getBrightness(net.minecraft.world.level.LightLayer.BLOCK, player.blockPosition());
+            int blockLightHead = player.level().getBrightness(net.minecraft.world.level.LightLayer.BLOCK, player.blockPosition().above());
+            int maxBlockLight = Math.max(blockLightFeet, blockLightHead);
+            boolean nearHeat = maxBlockLight >= 8 || player.isOnFire();
+            
+            // Defrost if safely outside blizzard exposure OR if standing near a heat source!
+            boolean canDefrost = (gameTime - lastBlizz > 5) || nearHeat;
+            
+            if (canDefrost) {
                 int currentAmp = coldAura.getAmplifier();
                 int defrostProgress = player.getPersistentData().getInt("ColdAuraDefrostProg");
                 
-                // Advanced Math: Base = 200 ticks (10 seconds)
-                // Fast = Roughly 30 ticks (1.5 seconds)
-                defrostProgress += fastThaw ? 6 : 1; 
+                // Fast thaw near heat: ~25 ticks (1.25s) per amplifier. Natural thaw: ~80 ticks (4s).
+                defrostProgress += nearHeat ? 8 : 2;
+                
+                if (nearHeat && player.level() instanceof net.minecraft.server.level.ServerLevel sl && player.tickCount % 6 == 0) {
+                    sl.sendParticles(net.minecraft.core.particles.ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                            player.getX(), player.getY() + 0.8, player.getZ(),
+                            1, 0.15, 0.25, 0.15, 0.01);
+                }
                 
                 if (defrostProgress >= 200) {
                     player.getPersistentData().putInt("ColdAuraDefrostProg", 0);
-                    player.removeEffect(ModEffects.COLD_AURA_EFFECT); // Safely strip current layer
-                    // Re-apply if drops below 0? No, let it organically drop to 0 and disappear.
+                    player.getPersistentData().putInt("ColdAuraExposureTicks", 0);
+                    player.removeEffect(ModEffects.COLD_AURA_EFFECT);
                     if (currentAmp > 0) {
                         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                                 ModEffects.COLD_AURA_EFFECT, 200, currentAmp - 1, false, true, true));
@@ -97,8 +108,8 @@ public class ServerEvents {
                 } else {
                     player.getPersistentData().putInt("ColdAuraDefrostProg", defrostProgress);
                 }
+                return;
             } else {
-                // Trapped in blizzard: Re-freeze/reset any active thaw
                 player.getPersistentData().putInt("ColdAuraDefrostProg", 0);
             }
         }
@@ -111,6 +122,8 @@ public class ServerEvents {
             // Send current world event state to the player who just logged in
             NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
                     WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
+            net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm = net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(sp.serverLevel());
+            NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
         }
     }
 
@@ -128,6 +141,8 @@ public class ServerEvents {
             // Sync world event state to clear/update client state for the new dimension
             NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
                     WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
+            net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm = net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(sp.serverLevel());
+            NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
         }
     }
 
@@ -255,7 +270,7 @@ public class ServerEvents {
         // Global Boss Swarm Punish Damage Multiplier
         if (event.getSource().getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss) {
             if (event.getEntity().getPersistentData().getBoolean("OririSummoned")) {
-                event.setNewDamage(event.getOriginalDamage() * 3.0f);
+                event.setNewDamage(event.getNewDamage() * 2.0f);
             }
         }
     }
@@ -551,7 +566,7 @@ public class ServerEvents {
                 // Multitasking: Target summons/random monsters (Priority 3, lower than players)
                 mob.targetSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(mob, LivingEntity.class, 0, true, false, 
                     (target) -> {
-                        return target instanceof Monster 
+                        return false && target instanceof Monster 
                             && !target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
                             && !target.getPersistentData().getBoolean("IsNoxusMob");
                     }

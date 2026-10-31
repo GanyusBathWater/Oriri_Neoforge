@@ -26,6 +26,13 @@ public class MeteorEntity extends Projectile {
             EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> EXPLOSION_POWER = SynchedEntityData.defineId(MeteorEntity.class,
             EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> VISUAL_OVERHAUL = SynchedEntityData.defineId(MeteorEntity.class,
+            EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<BlockPos> SYNCED_IMPACT_POS = SynchedEntityData.defineId(MeteorEntity.class,
+            EntityDataSerializers.BLOCK_POS);
+    /** Whether the impact triggers the black &amp; white anime impact frame (only relevant with VISUAL_OVERHAUL). */
+    private static final EntityDataAccessor<Boolean> IMPACT_FLASH = SynchedEntityData.defineId(MeteorEntity.class,
+            EntityDataSerializers.BOOLEAN);
 
     private BlockPos impactPos = BlockPos.ZERO;
     private float explosionPower = 4.0f;
@@ -40,9 +47,39 @@ public class MeteorEntity extends Projectile {
 
     public void configure(BlockPos impactPos, float explosionPower, int fireRadius) {
         this.impactPos = impactPos.immutable();
+        this.entityData.set(SYNCED_IMPACT_POS, this.impactPos);
         this.explosionPower = explosionPower;
         this.entityData.set(EXPLOSION_POWER, explosionPower);
         this.fireRadius = Math.max(0, fireRadius);
+    }
+
+    /**
+     * Positions the meteor high in the sky at a random azimuth direction and random diagonal entry angle
+     * (~20 to ~38 degrees off vertical) aimed directly at {@code targetGround}.
+     */
+    public void spawnAtRandomAngle(BlockPos targetGround, double baseHeight) {
+        double angle = this.random.nextDouble() * Math.PI * 2.0;
+        double height = baseHeight + (this.random.nextDouble() - 0.5) * 20.0;
+        // Random slant ratio between 0.36 and 0.78 (~20° to ~38° entry angle)
+        double slantRatio = 0.36 + this.random.nextDouble() * 0.42;
+        double horizDist = height * slantRatio;
+
+        double targetX = targetGround.getX() + 0.5;
+        double targetY = targetGround.getY() + 0.5;
+        double targetZ = targetGround.getZ() + 0.5;
+
+        double spawnX = targetX + Math.cos(angle) * horizDist;
+        double spawnY = targetY + height;
+        double spawnZ = targetZ + Math.sin(angle) * horizDist;
+
+        this.setPos(spawnX, spawnY, spawnZ);
+
+        Vec3 dir = new Vec3(targetX - spawnX, targetY - spawnY, targetZ - spawnZ).normalize();
+        this.setDeltaMovement(dir.scale(0.05));
+    }
+
+    public BlockPos getImpactPos() {
+        return this.entityData.get(SYNCED_IMPACT_POS);
     }
 
     public void setOwnerId(int id) {
@@ -77,6 +114,32 @@ public class MeteorEntity extends Projectile {
         return this.entityData.get(METEOR_GRAVITY);
     }
 
+    /**
+     * Controls whether this meteor displays the full celestial star-flare descent
+     * and triggers the pure black-and-white high-contrast anime impact after-effect.
+     * Enabled by default for standard meteors; disabled for special barrages like Meteor Shower.
+     */
+    public void setVisualOverhaul(boolean enabled) {
+        this.entityData.set(VISUAL_OVERHAUL, enabled);
+    }
+
+    public boolean hasVisualOverhaul() {
+        return this.entityData.get(VISUAL_OVERHAUL);
+    }
+
+    /**
+     * Controls whether the impact triggers the full-screen black &amp; white anime impact frame.
+     * Defaults to true (unchanged behaviour for boss meteors); the Meteor Shower disaster only
+     * enables it for big meteors.
+     */
+    public void setImpactFlash(boolean enabled) {
+        this.entityData.set(IMPACT_FLASH, enabled);
+    }
+
+    public boolean hasImpactFlash() {
+        return this.entityData.get(IMPACT_FLASH);
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         // 1.21+: Synched‑Daten über den Builder registrieren
@@ -84,12 +147,17 @@ public class MeteorEntity extends Projectile {
         builder.define(METEOR_SCALE, 5.5f);
         builder.define(METEOR_GRAVITY, 0.12f);
         builder.define(EXPLOSION_POWER, 4.0f);
+        builder.define(VISUAL_OVERHAUL, true);
+        builder.define(SYNCED_IMPACT_POS, BlockPos.ZERO);
+        builder.define(IMPACT_FLASH, true);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         this.impactPos = BlockPos.of(tag.getLong("ImpactPos"));
+        this.entityData.set(SYNCED_IMPACT_POS, this.impactPos);
         this.explosionPower = tag.getFloat("Power");
+        this.entityData.set(EXPLOSION_POWER, this.explosionPower);
         this.fireRadius = tag.getInt("FireRadius");
         this.maxLife = tag.getInt("MaxLife");
         if (tag.contains("OwnerId")) {
@@ -104,6 +172,12 @@ public class MeteorEntity extends Projectile {
         if (tag.contains("MeteorGravity")) {
             this.setMeteorGravity(tag.getFloat("MeteorGravity"));
         }
+        if (tag.contains("VisualOverhaul")) {
+            this.setVisualOverhaul(tag.getBoolean("VisualOverhaul"));
+        }
+        if (tag.contains("ImpactFlash")) {
+            this.setImpactFlash(tag.getBoolean("ImpactFlash"));
+        }
     }
 
     @Override
@@ -116,13 +190,29 @@ public class MeteorEntity extends Projectile {
         tag.putFloat("MeteorScale", this.getMeteorScale());
         tag.putBoolean("DestroysBlocks", this.destroysBlocks);
         tag.putFloat("MeteorGravity", this.getMeteorGravity());
+        tag.putBoolean("VisualOverhaul", this.hasVisualOverhaul());
+        tag.putBoolean("ImpactFlash", this.hasImpactFlash());
     }
 
     @Override
     public void tick() {
         super.tick();
         Vec3 vel = getDeltaMovement();
-        vel = new Vec3(vel.x * 0.99, vel.y - this.getMeteorGravity(), vel.z * 0.99);
+        BlockPos targetBlock = getImpactPos();
+
+        if (!targetBlock.equals(BlockPos.ZERO)) {
+            Vec3 toTarget = Vec3.atCenterOf(targetBlock).subtract(this.position());
+            // Prevent backward slingshotting: only direct downward toward target if we are above it
+            if (toTarget.y <= 0.5 && toTarget.lengthSqr() > 1e-4) {
+                Vec3 dir = toTarget.normalize();
+                double speed = Math.max(vel.length() * 0.995 + this.getMeteorGravity(), 0.6);
+                vel = dir.scale(speed);
+            } else {
+                vel = new Vec3(vel.x * 0.99, vel.y - this.getMeteorGravity(), vel.z * 0.99);
+            }
+        } else {
+            vel = new Vec3(vel.x * 0.99, vel.y - this.getMeteorGravity(), vel.z * 0.99);
+        }
         setDeltaMovement(vel);
 
         if (!level().isClientSide) {
@@ -154,6 +244,9 @@ public class MeteorEntity extends Projectile {
         if (level() instanceof ServerLevel server) {
             server.sendParticles(ParticleTypes.FLAME, getX(), getY(), getZ(), 6, 0.25, 0.25, 0.25, 0.02);
             server.sendParticles(ParticleTypes.SMOKE, getX(), getY(), getZ(), 4, 0.35, 0.35, 0.35, 0.01);
+            if (this.hasVisualOverhaul()) {
+                server.sendParticles(ParticleTypes.LAVA, getX(), getY(), getZ(), 3, 0.3, 0.3, 0.3, 0.05);
+            }
             if (tickCount % 10 == 0) {
                 server.playSound(
                         null,
@@ -165,23 +258,32 @@ public class MeteorEntity extends Projectile {
             }
         }
 
-        boolean hitY = this.getY() <= impactPos.getY() + 1.0;
-        boolean collide = this.verticalCollision || this.horizontalCollision || isBlockSolidBelow();
-        if (!level().isClientSide && (hitY || collide)) {
-            doImpact();
+        boolean reachedTarget = !targetBlock.equals(BlockPos.ZERO) && (
+                this.getY() <= targetBlock.getY() + 1.5 ||
+                this.position().distanceToSqr(Vec3.atCenterOf(targetBlock)) <= Math.max(16.0, vel.lengthSqr() * 1.5)
+        );
+        boolean anyCollision = this.verticalCollision || this.horizontalCollision || onGround() || isAnyBlockSolidBelow();
+
+        if (!level().isClientSide) {
+            if (reachedTarget || anyCollision) {
+                doImpact();
+                return;
+            }
+            // Surface failsafe: if falling downward and near ground surface, detonate
+            if (this.tickCount > 25 && vel.y < 0) {
+                int groundY = level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int) Math.floor(getX()), (int) Math.floor(getZ()));
+                if (getY() <= groundY + 1.5) {
+                    doImpact();
+                    return;
+                }
+            }
         }
     }
 
-    private boolean isBlockSolidBelow() {
+    private boolean isAnyBlockSolidBelow() {
         BlockPos below = this.blockPosition().below();
         net.minecraft.world.level.block.state.BlockState state = level().getBlockState(below);
-        if (state.isAir()) return false;
-        
-        // If resistance is low (like dirt, leaves, wood), we consider it NOT solid enough to stop the meteor
-        if (state.getBlock().getExplosionResistance() < 3.0f) {
-            return false;
-        }
-        return true;
+        return !state.isAir();
     }
 
     private void doImpact() {
@@ -195,7 +297,7 @@ public class MeteorEntity extends Projectile {
                 4.0f,
                 0.9f + server.random.nextFloat() * 0.2f);
         server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
-        
+
         // Broadcast a custom entity event to all tracking clients.
         // This tells the clients to spawn the massive shockwave locally, bypassing server particle distance limits.
         level().broadcastEntityEvent(this, (byte) 100);
@@ -204,13 +306,12 @@ public class MeteorEntity extends Projectile {
             net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity crater = new net.ganyusbathwater.oririmod.entity.custom.CraterWorkerEntity(net.ganyusbathwater.oririmod.entity.ModEntities.CRATER_WORKER.get(), level());
             crater.setPos(getX(), getY(), getZ());
             int durationTicks = Math.max(10, Math.min(40, (int) explosionPower));
-            crater.setCraterData((int) explosionPower, durationTicks); 
+            crater.setCraterData((int) explosionPower, durationTicks);
             level().addFreshEntity(crater);
         }
-        
+
         // We ALWAYS trigger a vanilla blockless explosion to apply entity damage and knockback.
-        // We scale down the power by 0.3x so it's not instantly lethal at huge radii.
-        float damagePower = Math.max(4.0f, explosionPower * 0.3f);
+        float damagePower = Math.max(6.0f, explosionPower * 0.5f);
         server.explode(this, getX(), getY(), getZ(), damagePower, ExplosionInteraction.NONE);
         igniteAround(server, this.blockPosition(), fireRadius);
 
@@ -251,24 +352,29 @@ public class MeteorEntity extends Projectile {
     public void handleEntityEvent(byte id) {
         if (id == 100) {
             // Client-side execution of the shockwave
-            double surfaceY = Math.max(getY(), impactPos != null ? impactPos.getY() : getY());
-            
+            BlockPos targetBlock = getImpactPos();
+            double surfaceY = Math.max(getY(), !targetBlock.equals(BlockPos.ZERO) ? targetBlock.getY() : getY());
+
             float power = this.entityData.get(EXPLOSION_POWER);
             int particleCount = (int) (10 * power); // Scale count by power
             float speedScale = power / 15.0f; // Baseline 15 radius = 1x speed
-            
+
             for (int i = 0; i < particleCount; i++) {
                 double angle = this.random.nextDouble() * 2 * Math.PI;
                 // Scale spread velocity with explosion power
-                double speed = (1.0 + this.random.nextDouble() * 4.0) * speedScale; 
+                double speed = (1.0 + this.random.nextDouble() * 4.0) * speedScale;
                 double py = surfaceY + this.random.nextDouble() * (3.0 * speedScale);
-                
+
                 // Massive, lingering dark smoke core
-                this.level().addParticle(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, getX(), py, getZ(), Math.cos(angle)*speed*0.8, 0.1, Math.sin(angle)*speed*0.8);
+                this.level().addParticle(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, getX(), py, getZ(), Math.cos(angle) * speed * 0.8, 0.1, Math.sin(angle) * speed * 0.8);
                 // Faster, medium grey smoke
-                this.level().addParticle(ParticleTypes.LARGE_SMOKE, getX(), py, getZ(), Math.cos(angle)*speed, 0.2, Math.sin(angle)*speed);
+                this.level().addParticle(ParticleTypes.LARGE_SMOKE, getX(), py, getZ(), Math.cos(angle) * speed, 0.2, Math.sin(angle) * speed);
                 // Extremely fast, sharp white dust shooting out in front
-                this.level().addParticle(ParticleTypes.POOF, getX(), py, getZ(), Math.cos(angle)*speed*1.4, 0.3, Math.sin(angle)*speed*1.4);
+                this.level().addParticle(ParticleTypes.POOF, getX(), py, getZ(), Math.cos(angle) * speed * 1.4, 0.3, Math.sin(angle) * speed * 1.4);
+            }
+
+            if (this.level().isClientSide && this.hasVisualOverhaul()) {
+                net.ganyusbathwater.oririmod.client.render.world.MeteorImpactClientRenderer.spawnImpact(getX(), surfaceY, getZ(), power, this.hasImpactFlash());
             }
         } else {
             super.handleEntityEvent(id);

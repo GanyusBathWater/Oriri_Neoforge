@@ -103,17 +103,16 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 20f));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
-        // Target nearest player OR non-Noxus summoned mobs (Identical to Deviartras)
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 10, true, false,
-                target -> target.getPersistentData().getBoolean("OririSummoned")));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 0, true, false, 
-            (entity) -> {
-                return entity instanceof Monster 
-                    && !entity.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
-                    && !entity.getPersistentData().getBoolean("IsNoxusMob");
-            }
-        ));
+        // Bosses always focus on players; summons are hit by cleaves/AoEs without hijacking boss targeting
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
+    }
+
+    @Override
+    public void setTarget(@org.jetbrains.annotations.Nullable LivingEntity target) {
+        if (target != null && !(target instanceof Player)) {
+            return;
+        }
+        super.setTarget(target);
     }
 
     @Override
@@ -154,8 +153,9 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
                     buzzsawTickTimer = 0;
                     if (this.level() instanceof ServerLevel sl) {
                         net.minecraft.world.phys.AABB sweepBox = this.getBoundingBox().inflate(3.0);
-                        java.util.List<Player> hitPlayers = sl.getEntitiesOfClass(Player.class, sweepBox);
-                        for (Player hit : hitPlayers) {
+                        java.util.List<LivingEntity> hitTargets = sl.getEntitiesOfClass(LivingEntity.class, sweepBox,
+                                e -> e instanceof Player || e.getPersistentData().getBoolean("OririSummoned"));
+                        for (LivingEntity hit : hitTargets) {
                             hit.hurt(this.damageSources().mobAttack(this), 8.0f);
                             hit.invulnerableTime = 0; // Bypass i-frames
                             sl.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, hit.getX(), hit.getY() + 1.0, hit.getZ(), 1, 0, 0, 0, 0);
@@ -217,8 +217,8 @@ public class PatientiaEntity extends Monster implements GeoEntity, IOririBoss {
         boolean result = super.hurt(source, amount);
 
         if (result && !this.level().isClientSide) {
-            // Track consecutive melee hits for Defensive Buzzsaw
-            if (source.getEntity() instanceof LivingEntity && !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() == source.getEntity()) {
+            // Track consecutive player melee hits for Defensive Buzzsaw
+            if (source.getEntity() instanceof Player && !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() == source.getEntity()) {
                 if (!source.is(net.minecraft.world.damagesource.DamageTypes.THORNS)) {
                     if (consecutiveMeleeHits == 0) {
                         hitDecayTimer = 60; // 3 seconds to land remaining hits

@@ -108,6 +108,7 @@ public final class MeteorShowerUtil {
         meteor.setMeteorScale(2.5f);
         meteor.setDestroysBlocks(false);
         meteor.setMeteorGravity(0.015f);
+        meteor.setVisualOverhaul(false);
         if (ownerId > 0) {
             meteor.setOwnerId(ownerId);
         }

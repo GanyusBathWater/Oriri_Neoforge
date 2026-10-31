@@ -146,32 +146,62 @@ public class ClientEvents {
             int width = mc.getWindow().getGuiScaledWidth();
             int height = mc.getWindow().getGuiScaledHeight();
 
-            RenderSystem.enableBlend();
-            
+            com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+            com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
+
+            // 1. Dynamic Frost Vignette along screen borders (Powder Snow Outline)
+            net.minecraft.resources.ResourceLocation FROST_OUTLINE = net.minecraft.resources.ResourceLocation.withDefaultNamespace("textures/misc/powder_snow_outline.png");
+            float frostAlpha = isExp ? 0.85f : 0.20f;
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, frostAlpha);
+            gui.blit(FROST_OUTLINE, 0, 0, 0, 0, width, height, width, height);
+
+            // 2. Peripheral Blizzard Fog Vignette (Soft gradients around borders, leaving center visibility)
             if (isExp) {
-                // Solid Blinding White Fog background (~70% Opacity) exclusively for EXPOSED players
-                gui.fill(0, 0, width, height, 0xB0FFFFFF);
+                float pulse = (float) (Math.sin(gameTime * 0.08) * 0.05 + 0.12);
+                int edgeAlpha = (int) (pulse * 255.0f);
+                int edgeColor = (edgeAlpha << 24) | 0x00EAF4FC;
+                int clearColor = 0x00EAF4FC;
+
+                int borderSize = Math.min(width, height) / 4;
+                gui.fillGradient(0, 0, width, borderSize, edgeColor, clearColor);
+                gui.fillGradient(0, height - borderSize, width, height, clearColor, edgeColor);
             }
 
-            // Falling Snow Cascade Simulator
-            ResourceLocation SNOW_TEX = ResourceLocation.withDefaultNamespace("textures/environment/snow.png");
-            
-            // If strictly inside the magic circle safe zone, just show highly transparent falling snow to establish atmosphere! 
-            float alphaOverlay = isExp ? 0.9f : 0.2f; 
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alphaOverlay);
-            
+            // 3. Dual-Layer Parallax Howling Blizzard Flurries
+            net.minecraft.resources.ResourceLocation SNOW_TEX = net.minecraft.resources.ResourceLocation.withDefaultNamespace("textures/environment/snow.png");
             int texSize = 512;
-            int mult = isExp ? 30 : 5; // Snow falls aggressively if exposed, lightly if safe
-            int vOffset = (int) ((gameTime * mult) % texSize); 
-            float uOffsetBase = isExp ? (float) (Math.sin(gameTime / 20.0) * 16.0) : 0f; // Lateral sway only for exposed players
 
-            for (int screenX = 0; screenX < width; screenX += texSize) {
-                for (int screenY = -texSize; screenY < height; screenY += texSize) {
-                    gui.blit(SNOW_TEX, screenX, screenY + vOffset, (int) uOffsetBase, 0, texSize, texSize, texSize, texSize);
+            // Layer 1: Fast Whipping Diagonal Blizzard Streaks
+            float windAlpha = isExp ? 0.70f : 0.15f;
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, windAlpha);
+            int speedH1 = isExp ? 28 : 6;
+            int speedV1 = isExp ? 22 : 8;
+            int uOffset1 = (int) ((gameTime * speedH1) % texSize);
+            int vOffset1 = (int) ((gameTime * speedV1) % texSize);
+
+            for (int sx = -texSize; sx < width + texSize; sx += texSize) {
+                for (int sy = -texSize; sy < height + texSize; sy += texSize) {
+                    gui.blit(SNOW_TEX, sx + (uOffset1 % texSize), sy + (vOffset1 % texSize), 0, 0, texSize, texSize, texSize, texSize);
                 }
             }
-            RenderSystem.disableBlend();
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset
+
+            // Layer 2: Swirling Depth Flurry with opposite lateral drift
+            if (isExp) {
+                com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.9f, 0.95f, 1.0f, 0.40f);
+                int speedH2 = -16;
+                int speedV2 = 30;
+                int uOffset2 = (int) ((gameTime * speedH2) % texSize);
+                int vOffset2 = (int) ((gameTime * speedV2) % texSize);
+
+                for (int sx = -texSize; sx < width + texSize; sx += texSize) {
+                    for (int sy = -texSize; sy < height + texSize; sy += texSize) {
+                        gui.blit(SNOW_TEX, sx + (uOffset2 % texSize), sy + (vOffset2 % texSize), 0, 0, texSize, texSize, texSize, texSize);
+                    }
+                }
+            }
+
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset
+            com.mojang.blaze3d.systems.RenderSystem.disableBlend();
         }
 
         // ── Custom boss bars ──────────────────────────────────────────────
@@ -479,44 +509,7 @@ public class ClientEvents {
     @SubscribeEvent
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
         if (AnimeImpactState.isActive()) {
-            Minecraft mc = Minecraft.getInstance();
-            int width = mc.getWindow().getGuiScaledWidth();
-            int height = mc.getWindow().getGuiScaledHeight();
-
-            RenderSystem.disableDepthTest();
-            RenderSystem.enableBlend();
-
-            // Set blend equation to GL_FUNC_SUBTRACT
-            // Result = Source (White) - Destination (Screen)
-            GL14.glBlendEquation(GL14.GL_FUNC_SUBTRACT);
-            RenderSystem.blendFuncSeparate(
-                    com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
-                    com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE,
-                    com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
-                    com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE
-            );
-
-            // Draw solid white full-screen quad
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            com.mojang.blaze3d.vertex.Tesselator tesselator = com.mojang.blaze3d.vertex.Tesselator.getInstance();
-            com.mojang.blaze3d.vertex.BufferBuilder bufferbuilder = tesselator.begin(
-                    com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS,
-                    com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR
-            );
-
-            org.joml.Matrix4f matrix = event.getGuiGraphics().pose().last().pose();
-
-            bufferbuilder.addVertex(matrix, 0, height, 0).setColor(255, 255, 255, 255);
-            bufferbuilder.addVertex(matrix, width, height, 0).setColor(255, 255, 255, 255);
-            bufferbuilder.addVertex(matrix, width, 0, 0).setColor(255, 255, 255, 255);
-            bufferbuilder.addVertex(matrix, 0, 0, 0).setColor(255, 255, 255, 255);
-
-            com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
-
-            // Reset blend equation back to normal
-            GL14.glBlendEquation(GL14.GL_FUNC_ADD);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.enableDepthTest();
+            AnimeImpactState.renderOverlay(event.getGuiGraphics());
         }
 
         if (TimestopState.isActive()) {

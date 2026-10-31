@@ -222,6 +222,7 @@ public class CosmeticPlayerRenderEventHandler {
                 
                 net.ganyusbathwater.oririmod.entity.custom.cosmetic.AuroraCosmeticAnimatable animatable = AURORA_COSMETIC_RENDERER.getAnimatable();
                 software.bernie.geckolib.model.GeoModel<net.ganyusbathwater.oririmod.entity.custom.cosmetic.AuroraCosmeticAnimatable> model = AURORA_COSMETIC_RENDERER.getGeoModel();
+                software.bernie.geckolib.cache.object.BakedGeoModel bakedModel = model.getBakedModel(model.getModelResource(animatable));
                 
                 float partialTick = net.minecraft.client.Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
                 long instanceId = player.getId();
@@ -263,7 +264,7 @@ public class CosmeticPlayerRenderEventHandler {
                     net.minecraft.client.renderer.RenderType renderType = AURORA_COSMETIC_RENDERER.getRenderType(animatable, model.getTextureResource(animatable), event.getMultiBufferSource(), partialTick);
                     com.mojang.blaze3d.vertex.VertexConsumer buffer = event.getMultiBufferSource().getBuffer(renderType);
                     
-                    AURORA_COSMETIC_RENDERER.preRender(poseStack, animatable, model.getBakedModel(model.getModelResource(animatable)), event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+                    AURORA_COSMETIC_RENDERER.preRender(poseStack, animatable, bakedModel, event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
                     
                     AURORA_COSMETIC_RENDERER.renderRecursively(poseStack, animatable, armBone, renderType, event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
                     
@@ -278,7 +279,8 @@ public class CosmeticPlayerRenderEventHandler {
                 String boneName = isRightArm ? "right_arm" : "left_arm";
                 
                 net.ganyusbathwater.oririmod.entity.custom.cosmetic.MermaidCosmeticAnimatable animatable = MERMAID_COSMETIC_RENDERER.getAnimatable();
-                software.bernie.geckolib.model.GeoModel<net.ganyusbathwater.oririmod.entity.custom.cosmetic.MermaidCosmeticAnimatable> model = MERMAID_COSMETIC_RENDERER.getGeoModel();
+                software.bernie.geckolib.model.GeoModel<net.ganyusbathwater.oririmod.entity.custom.cosmetic.MermaidCosmeticAnimatable> model = MERMAID_COSMETIC_RENDERER.getGeoModel(player);
+                software.bernie.geckolib.cache.object.BakedGeoModel bakedModel = model.getBakedModel(model.getModelResource(animatable));
                 
                 float partialTick = net.minecraft.client.Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
                 long instanceId = player.getId();
@@ -333,7 +335,7 @@ public class CosmeticPlayerRenderEventHandler {
                     
                     int color = software.bernie.geckolib.util.Color.ofOpaque(rawColor).getColor();
                     
-                    MERMAID_COSMETIC_RENDERER.preRender(poseStack, animatable, model.getBakedModel(model.getModelResource(animatable)), event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
+                    MERMAID_COSMETIC_RENDERER.preRender(poseStack, animatable, bakedModel, event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
                     MERMAID_COSMETIC_RENDERER.renderRecursively(poseStack, animatable, armBone, renderType, event.getMultiBufferSource(), buffer, false, partialTick, event.getPackedLight(), net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
                     
                     poseStack.popPose();

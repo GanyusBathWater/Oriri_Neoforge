@@ -49,10 +49,6 @@ public class CraterWorkerRenderer extends EntityRenderer<CraterWorkerEntity> {
         int a = (int) (alpha * 255.0f);
 
         poseStack.pushPose();
-        
-        VertexConsumer consumerBase = buffer.getBuffer(RENDER_TYPE_BASE);
-        VertexConsumer consumerGlow = buffer.getBuffer(RENDER_TYPE_GLOW);
-        VertexConsumer consumerSmoke = buffer.getBuffer(RENDER_TYPE_SMOKE);
 
         // --- 1. RENDER MAIN MUSHROOM CLOUD ---
         poseStack.pushPose();
@@ -62,9 +58,11 @@ public class CraterWorkerRenderer extends EntityRenderer<CraterWorkerEntity> {
         poseStack.scale(scale, scale, scale);
 
         // Render rigid symmetric planes for the main mushroom texture
+        VertexConsumer consumerBase = buffer.getBuffer(RENDER_TYPE_BASE);
         renderCrossPlanes(poseStack, consumerBase, packedLight, 255, 255, 255, a);
 
         // Render glow layer cleanly (static brightness) so it fades out smoothly without popping
+        VertexConsumer consumerGlow = buffer.getBuffer(RENDER_TYPE_GLOW);
         renderCrossPlanes(poseStack, consumerGlow, LightTexture.FULL_BRIGHT, 255, 255, 255, a);
         
         poseStack.popPose();
@@ -77,6 +75,7 @@ public class CraterWorkerRenderer extends EntityRenderer<CraterWorkerEntity> {
         java.util.Random random = new java.util.Random(entity.getId() * 31L);
         // Scale number of smoke clouds directly by the size of the crater
         int numPuffs = (int)(entity.getRadius() * 1.5f);
+        VertexConsumer consumerSmoke = buffer.getBuffer(RENDER_TYPE_SMOKE);
         
         for (int i = 0; i < numPuffs; i++) {
             poseStack.pushPose();

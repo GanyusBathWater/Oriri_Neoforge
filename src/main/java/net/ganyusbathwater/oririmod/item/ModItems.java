@@ -38,6 +38,10 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.VisualDebugItem(
                                         new Item.Properties().stacksTo(1)));
 
+        public static final DeferredItem<Item> NATURAL_DISASTER_DEBUG_ITEM = ITEMS.register("natural_disaster_debug_item",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.NaturalDisasterDebugItem(
+                                        new Item.Properties().stacksTo(1)));
+
         public static final DeferredItem<Item> DUNGEON_SKIPPER = ITEMS.register("dungeon_skipper",
                         () -> new net.ganyusbathwater.oririmod.item.custom.DungeonSkipperItem(
                                         new Item.Properties().stacksTo(1)));

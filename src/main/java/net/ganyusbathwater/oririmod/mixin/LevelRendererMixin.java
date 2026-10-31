@@ -2,10 +2,13 @@ package net.ganyusbathwater.oririmod.mixin;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.client.render.world.CustomDimensionSpecialEffects;
+import net.ganyusbathwater.oririmod.client.render.world.TimestopSkyboxRenderer;
+import net.ganyusbathwater.oririmod.client.render.world.TimestopState;
+import net.ganyusbathwater.oririmod.client.render.world.TornadoSkyboxRenderer;
 import net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxRenderer;
 import net.ganyusbathwater.oririmod.client.skybox.LunarSkyboxState;
-import net.ganyusbathwater.oririmod.client.render.world.TimestopState;
-import net.ganyusbathwater.oririmod.client.render.world.TimestopSkyboxRenderer;
+import net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState;
+import net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType;
 import net.ganyusbathwater.oririmod.events.world.WorldEventManager;
 import net.ganyusbathwater.oririmod.events.world.WorldEventType;
 import net.minecraft.client.Camera;
@@ -86,14 +89,7 @@ public abstract class LevelRendererMixin {
     }
 
     /**
-     * Intercepts sky rendering at HEAD when the Lunar Skybox is active.
-     *
-     * When enabled, we cancel vanilla sky rendering entirely and hand off
-     * to LunarSkyboxRenderer which draws the void + starfield.
-     *
-     * The PoseStack is constructed locally because renderSky in 1.21.1
-     * does not pass one in the signature — we create a fresh one.
-     * The projection matrix comes directly from the Mixin parameter.
+     * Intercepts sky rendering at HEAD when the Lunar Skybox or Timestop is active.
      */
     @Inject(
         method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V",
@@ -131,11 +127,48 @@ public abstract class LevelRendererMixin {
     }
 
     /**
-     * When the lunar skybox is active, force the sky color seen by other
-     * ModifyVariable targets to pure black so no color bleeds into fog.
+     * Renders the separate Tornado tempest supercell sky layer across the entire sky.
+     */
+    @Inject(
+        method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V",
+        at = @At("TAIL")
+    )
+    private void oriri_onRenderSkyTail(
+            Matrix4f modelViewMatrix,
+            Matrix4f projectionMatrix,
+            float partialTick,
+            Camera camera,
+            boolean isFoggy,
+            Runnable skyFogSetup,
+            CallbackInfo ci
+    ) {
+        NaturalDisasterType typeToUse = ClientDisasterState.isDisasterActive()
+                ? ClientDisasterState.getActiveType()
+                : ClientDisasterState.getLastActiveType();
+        if (typeToUse == NaturalDisasterType.TORNADO && ClientDisasterState.getTransitionProgress() > 0.0f) {
+            PoseStack poseStack = new PoseStack();
+            poseStack.last().pose().set(modelViewMatrix);
+            TornadoSkyboxRenderer.render(poseStack, projectionMatrix, partialTick,
+                    ClientDisasterState.getTransitionProgress());
+        }
+    }
+
+    /**
+     * Modifies the sky color during celestial events and natural disasters (Blood Moon, Meteor Shower, etc.).
      */
     @ModifyVariable(method = "renderSky", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getSkyColor(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;"), name = "vec3")
     private Vec3 oriri_modifySkyColor(Vec3 skyColor) {
+        if (ClientDisasterState.isDisasterActive() || ClientDisasterState.getTransitionProgress() > 0.0f) {
+            Vector3f disasterSky = ClientDisasterState.getSkyColor();
+            if (disasterSky != null) {
+                float prog = ClientDisasterState.getTransitionProgress();
+                return new Vec3(
+                        net.minecraft.util.Mth.lerp(prog, skyColor.x, (double) disasterSky.x),
+                        net.minecraft.util.Mth.lerp(prog, skyColor.y, (double) disasterSky.y),
+                        net.minecraft.util.Mth.lerp(prog, skyColor.z, (double) disasterSky.z)
+                );
+            }
+        }
         net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
         if (level != null && WorldEventManager.isEventActive(level, WorldEventType.ECLIPSE)) {
             return new Vec3(0.1, 0.1, 0.15);
@@ -145,6 +178,17 @@ public abstract class LevelRendererMixin {
 
     @ModifyVariable(method = "renderSky", at = @At(value = "STORE"), name = "vec32", ordinal = 0)
     private Vec3 oriri_modifySkyColorVector(Vec3 skyColor) {
+        if (ClientDisasterState.isDisasterActive() || ClientDisasterState.getTransitionProgress() > 0.0f) {
+            Vector3f disasterSky = ClientDisasterState.getSkyColor();
+            if (disasterSky != null) {
+                float prog = ClientDisasterState.getTransitionProgress();
+                return new Vec3(
+                        net.minecraft.util.Mth.lerp(prog, skyColor.x, (double) disasterSky.x),
+                        net.minecraft.util.Mth.lerp(prog, skyColor.y, (double) disasterSky.y),
+                        net.minecraft.util.Mth.lerp(prog, skyColor.z, (double) disasterSky.z)
+                );
+            }
+        }
         net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
         if (level != null && WorldEventManager.isEventActive(level, WorldEventType.ECLIPSE)) {
             return new Vec3(0.1, 0.1, 0.15);
@@ -154,6 +198,17 @@ public abstract class LevelRendererMixin {
 
     @ModifyVariable(method = "renderClouds", at = @At(value = "STORE"), name = "vec32", ordinal = 0)
     private Vec3 oriri_modifyCloudColor(Vec3 originalCloudColor) {
+        if (ClientDisasterState.isDisasterActive() || ClientDisasterState.getTransitionProgress() > 0.0f) {
+            Vector3f disasterSky = ClientDisasterState.getSkyColor();
+            if (disasterSky != null) {
+                float prog = ClientDisasterState.getTransitionProgress();
+                Vector3f originalColorVec = new Vector3f((float) originalCloudColor.x, (float) originalCloudColor.y,
+                        (float) originalCloudColor.z);
+                originalColorVec.lerp(disasterSky, prog);
+                return new Vec3(originalColorVec.x, originalColorVec.y, originalColorVec.z);
+            }
+        }
+
         float transitionProgress = oririmod$effects.getTransitionProgress();
         if (transitionProgress > 0) {
             net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;

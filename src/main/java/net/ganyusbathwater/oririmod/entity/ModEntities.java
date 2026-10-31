@@ -53,11 +53,20 @@ public final class ModEntities {
                                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crater_worker").toString()));
 
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.EarthquakeFaultWorkerEntity>> EARTHQUAKE_WORKER = ENTITIES
+                        .register("earthquake_worker",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.EarthquakeFaultWorkerEntity>of(net.ganyusbathwater.oririmod.entity.custom.EarthquakeFaultWorkerEntity::new, MobCategory.MISC)
+                                                        .sized(1.0F, 1.0F)
+                                                        .clientTrackingRange(128)
+                                                        .updateInterval(5)
+                                                        .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "earthquake_worker").toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<MagicBoltEntity>> MAGIC_BOLT = ENTITIES.register(
                         "magic_bolt",
                         () -> EntityType.Builder.<MagicBoltEntity>of(MagicBoltEntity::new, MobCategory.MISC)
                                         .sized(0.25F, 0.25F)
-                                        .clientTrackingRange(64)
+                                        .clientTrackingRange(192)
                                         .updateInterval(1)
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "magic_bolt")
                                                         .toString()));
@@ -69,7 +78,7 @@ public final class ModEntities {
                                                         .<FireballProjectileEntity>of(FireballProjectileEntity::new,
                                                                         MobCategory.MISC)
                                                         .sized(0.25F, 0.25F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -79,8 +88,8 @@ public final class ModEntities {
         public static final DeferredHolder<EntityType<?>, EntityType<MeteorEntity>> METEOR = ENTITIES.register("meteor",
                         () -> EntityType.Builder.<MeteorEntity>of(MeteorEntity::new, MobCategory.MISC)
                                         .sized(1.0F, 1.0F)
-                                        .clientTrackingRange(64)
-                                        .updateInterval(10)
+                                        .clientTrackingRange(192)
+                                        .updateInterval(1)
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "meteor")
                                                         .toString()));
 
@@ -88,7 +97,7 @@ public final class ModEntities {
                         "magic_projectile",
                         () -> EntityType.Builder.<MagicProjectileEntity>of(MagicProjectileEntity::new, MobCategory.MISC)
                                         .sized(0.5F, 0.5F)
-                                        .clientTrackingRange(64)
+                                        .clientTrackingRange(192)
                                         .updateInterval(1)
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "magic_projectile")
                                                         .toString()));
@@ -111,7 +120,7 @@ public final class ModEntities {
                                                         net.ganyusbathwater.oririmod.entity.EyeOfTheStormEntity::new,
                                                         MobCategory.MISC)
                                                         .sized(1f, 1f)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "eye_of_the_storm")
@@ -120,7 +129,7 @@ public final class ModEntities {
         public static final DeferredHolder<EntityType<?>, EntityType<IcicleEntity>> ICICLE = ENTITIES.register("icicle",
                         () -> EntityType.Builder.<IcicleEntity>of(IcicleEntity::new, MobCategory.MISC)
                                         .sized(0.5F, 1.0F)
-                                        .clientTrackingRange(64)
+                                        .clientTrackingRange(192)
                                         .updateInterval(1)
                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "icicle")
                                                         .toString()));
@@ -131,7 +140,7 @@ public final class ModEntities {
                                                         .<SwordProjectileEntity>of(SwordProjectileEntity::new,
                                                                         MobCategory.MISC)
                                                         .sized(0.5F, 0.5F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -144,7 +153,7 @@ public final class ModEntities {
                                                         .<net.ganyusbathwater.oririmod.entity.SwordCircleEntity>of(net.ganyusbathwater.oririmod.entity.SwordCircleEntity::new,
                                                                         MobCategory.MISC)
                                                         .sized(0.5F, 0.5F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -156,7 +165,7 @@ public final class ModEntities {
                                         () -> EntityType.Builder
                                                         .<DoomClockEntity>of(DoomClockEntity::new, MobCategory.MISC)
                                                         .sized(2.0f, 2.0f)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -183,7 +192,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.MagicWaveEntity::new,
                                                                         MobCategory.MISC)
                                                         .sized(1.5f, 0.5f)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -219,7 +228,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.custom.SporeBlossomEntity::new,
                                                                         MobCategory.MONSTER)
                                                         .sized(1.0F, 1.0F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(3)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -247,7 +256,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.custom.BlizzaEntity::new,
                                                                         MobCategory.MONSTER)
                                                         .sized(0.8F, 2.5F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "blizza")
@@ -286,7 +295,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.AirSliceEntity::new,
                                                                         MobCategory.MISC)
                                                         .sized(0.25F, 2.0F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -300,7 +309,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.ThornProjectileEntity::new,
                                                                         MobCategory.MISC)
                                                         .sized(0.3F, 0.3F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -341,7 +350,7 @@ public final class ModEntities {
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity>> BLACK_HOLE = ENTITIES
                         .register("black_hole",
                                         () -> EntityType.Builder.<net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity>of(net.ganyusbathwater.oririmod.entity.custom.BlackHoleEntity::new, MobCategory.MISC)
-                                                        .sized(1.0F, 1.0F).clientTrackingRange(64).updateInterval(1)
+                                                        .sized(1.0F, 1.0F).clientTrackingRange(192).updateInterval(1)
                                                         .build(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "black_hole").toString()));
 
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.DeviartrasEntity>> DEVIARTRAS = ENTITIES
@@ -351,7 +360,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.custom.DeviartrasEntity::new,
                                                                         MobCategory.MONSTER)
                                                         .sized(0.8F, 2.5F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "deviartras")
@@ -405,7 +414,7 @@ public final class ModEntities {
                                                                         net.minecraft.world.entity.MobCategory.MISC)
                                                         .sized(0.3125F, 0.3125F)
                                                         .clientTrackingRange(4)
-                                                        .updateInterval(10)
+                                                        .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "aether_charge_entity")
@@ -418,7 +427,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.custom.projectile.RexAraneaWebEntity::new,
                                                                         net.minecraft.world.entity.MobCategory.MISC)
                                                         .sized(0.25F, 0.25F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
@@ -432,7 +441,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.entity.custom.RexAraneaEntity::new,
                                                                         net.minecraft.world.entity.MobCategory.MONSTER)
                                                         .sized(1.4F, 2.25F) // adjusted for wall distance and human body height
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "rex_aranea")
@@ -550,7 +559,7 @@ public final class ModEntities {
                                                                         net.ganyusbathwater.oririmod.dungeon.entity.DungeonMarkerEntity::new,
                                                                         MobCategory.MISC)
                                                         .sized(0.5F, 0.5F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "dungeon_marker")
@@ -574,11 +583,23 @@ public final class ModEntities {
                                         () -> EntityType.Builder
                                                         .<TornadoEntity>of(TornadoEntity::new, MobCategory.MISC)
                                                         .sized(1.0F, 1.8F)
-                                                        .clientTrackingRange(64)
+                                                        .clientTrackingRange(192)
                                                         .updateInterval(1)
                                                         .build(ResourceLocation
                                                                         .fromNamespaceAndPath(OririMod.MOD_ID,
                                                                                         "tornado")
+                                                                        .toString()));
+
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.DisasterTornadoEntity>> DISASTER_TORNADO = ENTITIES
+                        .register("disaster_tornado",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.DisasterTornadoEntity>of(net.ganyusbathwater.oririmod.entity.custom.DisasterTornadoEntity::new, MobCategory.MISC)
+                                                        .sized(14.0F, 120.0F)
+                                                        .clientTrackingRange(256)
+                                                        .updateInterval(1)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "disaster_tornado")
                                                                         .toString()));
 
         public static void register(IEventBus modBus) {
@@ -586,4 +607,4 @@ public final class ModEntities {
                 ENTITIES.register(modBus);
         }
 }
-
+

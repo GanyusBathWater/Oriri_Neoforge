@@ -139,17 +139,16 @@ public class BlizzaEntity extends Monster implements GeoEntity, IOririBoss {
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 16f));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        // Issue #6: target player summons too (identified by OririSummoned NBT flag)
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 10, true, false, 
-                (target) -> target.getPersistentData().getBoolean("OririSummoned")));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 0, true, false, 
-            (entity) -> {
-                return entity instanceof net.minecraft.world.entity.monster.Monster 
-                    && !entity.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
-                    && !entity.getPersistentData().getBoolean("IsNoxusMob");
-            }
-        ));
+        // Bosses always focus on players; summons are hit by cleaves/AoEs without hijacking boss targeting
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
+    }
+
+    @Override
+    public void setTarget(@org.jetbrains.annotations.Nullable LivingEntity target) {
+        if (target != null && !(target instanceof Player)) {
+            return;
+        }
+        super.setTarget(target);
     }
 
     // ── Tick ──────────────────────────────────────────────────────────────
@@ -355,12 +354,14 @@ public class BlizzaEntity extends Monster implements GeoEntity, IOririBoss {
         float base = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float damage = isPhase2 ? base * 1.5f : base;
 
-        // Sweeping hit: Find players in an expanded box around the primary target
-        net.minecraft.world.phys.AABB sweepBox = target.getBoundingBox().inflate(2.0, 0.25, 2.0);
-        java.util.List<Player> hitPlayers = this.level().getEntitiesOfClass(Player.class, sweepBox);
+        // Sweeping hit: Find players and player-summoned mobs in an expanded box around Blizza and the primary target
+        net.minecraft.world.phys.AABB sweepBox = target.getBoundingBox().inflate(2.0, 0.25, 2.0)
+                .minmax(this.getBoundingBox().inflate(3.0, 0.5, 3.0));
+        java.util.List<LivingEntity> hitTargets = this.level().getEntitiesOfClass(LivingEntity.class, sweepBox,
+                e -> e instanceof Player || e.getPersistentData().getBoolean("OririSummoned"));
         boolean primaryHit = false;
         
-        for (Player hit : hitPlayers) {
+        for (LivingEntity hit : hitTargets) {
             if (hit == target) primaryHit = true;
             hit.hurt(this.damageSources().mobAttack(this), damage);
             MobEffectInstance existing = hit.getEffect(ModEffects.COLD_AURA_EFFECT);

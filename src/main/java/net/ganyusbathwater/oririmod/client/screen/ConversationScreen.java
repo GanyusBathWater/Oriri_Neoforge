@@ -53,9 +53,10 @@ public class ConversationScreen extends Screen {
     // ── Layout Constants ──
     private static final int SPEECH_BOX_HEIGHT = 90;
     private static final int SPEECH_BOX_MARGIN = 30;
-    private static final int PORTRAIT_SIZE = 128;
-    private static final int PORTRAIT_MARGIN_LEFT = 40;
-    private static final int PORTRAIT_MARGIN_BOTTOM = 20;
+    private static final int PORTRAIT_WIDTH = 340;
+    private static final int PORTRAIT_HEIGHT = 510;
+    private static final int PORTRAIT_MARGIN_LEFT = 44;
+    private static final int PORTRAIT_TOP_MARGIN = 4;
     private static final int CHOICE_BTN_WIDTH = 220;
     private static final int CHOICE_BTN_HEIGHT = 24;
     private static final int CHOICE_BTN_GAP = 6;
@@ -387,24 +388,36 @@ public class ConversationScreen extends Screen {
     private void renderPortrait(GuiGraphics gfx, int alpha) {
         if (portraitTexture == null) return;
 
-        int portraitX = PORTRAIT_MARGIN_LEFT;
-        int portraitY = height - SPEECH_BOX_HEIGHT - SPEECH_BOX_MARGIN - PORTRAIT_SIZE - PORTRAIT_MARGIN_BOTTOM;
+        int boxY = height - SPEECH_BOX_HEIGHT - SPEECH_BOX_MARGIN;
+        int visibleAboveBox = Math.max(80, boxY - PORTRAIT_TOP_MARGIN);
 
-        // Portrait background/frame
+        // Scale the 2:3 portrait a little smaller (~1.85x visible height) and anchor it at the top
+        // so ~55% (head, torso, and waist) is visible above the speech box and ~45% (legs) clips behind it.
+        int targetHeight = Math.min(PORTRAIT_HEIGHT, (int) (visibleAboveBox * 1.85f));
+        int portraitH = Math.max(150, (targetHeight / 3) * 3);
+        int portraitW = (portraitH * 2) / 3;
+
+        int portraitX = PORTRAIT_MARGIN_LEFT;
+        int portraitY = PORTRAIT_TOP_MARGIN;
+
+        // Clip at the top of the speech box so the legs and lower frame stay behind the text box
+        gfx.enableScissor(0, 0, width, boxY);
+
         int frameMargin = 4;
         gfx.fill(
                 portraitX - frameMargin, portraitY - frameMargin,
-                portraitX + PORTRAIT_SIZE + frameMargin, portraitY + PORTRAIT_SIZE + frameMargin,
+                portraitX + portraitW + frameMargin, boxY,
                 (Math.min(alpha, 200) << 24) | 0x1A1A2E
         );
-        // Border
         drawBorder(gfx, portraitX - frameMargin, portraitY - frameMargin,
-                PORTRAIT_SIZE + frameMargin * 2, PORTRAIT_SIZE + frameMargin * 2,
+                portraitW + frameMargin * 2, portraitH + frameMargin * 2,
                 ((int)(alpha * 0.7f) << 24) | 0x3A2A5A);
 
-        // Portrait image (rendered at full alpha once faded in)
+        // Portrait image (2:3 aspect ratio, lower body clipped behind speech box)
         gfx.blit(portraitTexture, portraitX, portraitY, 0, 0,
-                PORTRAIT_SIZE, PORTRAIT_SIZE, PORTRAIT_SIZE, PORTRAIT_SIZE);
+                portraitW, portraitH, portraitW, portraitH);
+
+        gfx.disableScissor();
     }
 
     private void renderSpeechBox(GuiGraphics gfx, int alpha) {

@@ -227,18 +227,20 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
             int upgradeLevel = getUnlockedLevel(stack);
             float explosionRadius = 15.0f; // Level 1
-            if (upgradeLevel == 2) explosionRadius = 25.0f;
-            else if (upgradeLevel >= 3) explosionRadius = 40.0f;
+            float visualScale = 4.5f;
+            if (upgradeLevel == 2) {
+                explosionRadius = 25.0f;
+                visualScale = 6.0f;
+            } else if (upgradeLevel >= 3) {
+                explosionRadius = 40.0f;
+                visualScale = 8.0f;
+            }
 
             meteor.configure(ground.immutable(), explosionRadius, 7);
+            meteor.setMeteorScale(visualScale);
             meteor.setOwnerId(living.getId());
             meteor.setOwner(living);
-
-            double spawnX = ground.getX() + 0.5;
-            double spawnZ = ground.getZ() + 0.5;
-            double spawnY = ground.getY() + 90.0;
-            meteor.setPos(spawnX, spawnY, spawnZ);
-            meteor.setDeltaMovement(0.0, -0.01, 0.0);
+            meteor.spawnAtRandomAngle(ground, 90.0);
 
             level.addFreshEntity(meteor);
 

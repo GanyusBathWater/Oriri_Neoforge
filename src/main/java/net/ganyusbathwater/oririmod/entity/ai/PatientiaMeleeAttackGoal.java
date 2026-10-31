@@ -69,12 +69,13 @@ public class PatientiaMeleeAttackGoal extends Goal {
         if (!actionFired && timer == 5) {
             actionFired = true;
             if (target != null && target.isAlive() && boss.distanceToSqr(target) <= 100.0) {
-                // Wide sweep, hit everyone nearby
-                List<Player> hitPlayers = boss.level().getEntitiesOfClass(Player.class, boss.getBoundingBox().inflate(6.0));
-                for (Player p : hitPlayers) {
-                    if (boss.distanceToSqr(p) <= 64.0) { 
-                        p.hurt(boss.damageSources().mobAttack(boss), (float)boss.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE));
-                        p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0, false, true));
+                // Wide sweep, hit nearby players and player-summoned mobs
+                List<LivingEntity> hitTargets = boss.level().getEntitiesOfClass(LivingEntity.class, boss.getBoundingBox().inflate(6.0),
+                        e -> e instanceof Player || e.getPersistentData().getBoolean("OririSummoned"));
+                for (LivingEntity hit : hitTargets) {
+                    if (boss.distanceToSqr(hit) <= 64.0) { 
+                        hit.hurt(boss.damageSources().mobAttack(boss), (float)boss.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE));
+                        hit.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0, false, true));
                     }
                 }
             }

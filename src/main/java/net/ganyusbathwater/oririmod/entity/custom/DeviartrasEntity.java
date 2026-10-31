@@ -186,17 +186,16 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 20f));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
-        // Target nearest player OR OririSummoned allies
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 10, true, false,
-                target -> target.getPersistentData().getBoolean("OririSummoned")));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 0, true, false, 
-            (entity) -> {
-                return entity instanceof net.minecraft.world.entity.monster.Monster 
-                    && !entity.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
-                    && !entity.getPersistentData().getBoolean("IsNoxusMob");
-            }
-        ));
+        // Bosses always focus on players; summons are hit by cleaves/AoEs without hijacking boss targeting
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
+    }
+
+    @Override
+    public void setTarget(@org.jetbrains.annotations.Nullable LivingEntity target) {
+        if (target != null && !(target instanceof Player)) {
+            return;
+        }
+        super.setTarget(target);
     }
 
 
@@ -318,8 +317,10 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
                 meleeAnimTimer--;
                 if (meleeAnimTimer == 15 - 7) { // Hit frame 7 (of 15)
                     if (target != null && target.isAlive() && this.distanceToSqr(target) <= 16.0) {
-                        net.minecraft.world.phys.AABB sweepBox = target.getBoundingBox().inflate(2.0, 0.25, 2.0);
-                        java.util.List<Player> hitPlayers = this.level().getEntitiesOfClass(Player.class, sweepBox);
+                        net.minecraft.world.phys.AABB sweepBox = target.getBoundingBox().inflate(2.0, 0.25, 2.0)
+                                .minmax(this.getBoundingBox().inflate(3.0, 0.5, 3.0));
+                        java.util.List<LivingEntity> hitTargets = this.level().getEntitiesOfClass(LivingEntity.class, sweepBox,
+                                e -> e instanceof Player || e.getPersistentData().getBoolean("OririSummoned"));
                         boolean targetHit = false;
                         boolean isGodsTrial = false;
                         if (this.level() instanceof ServerLevel sl) {
@@ -327,7 +328,7 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
                         }
                         float poisonChance = isGodsTrial ? 0.25f : 0.10f;
                         
-                        for (Player hit : hitPlayers) {
+                        for (LivingEntity hit : hitTargets) {
                             if (hit == target) targetHit = true;
                             hit.hurt(this.damageSources().mobAttack(this), 10.0f);
                             if (random.nextFloat() < poisonChance) {
@@ -421,8 +422,10 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
                     int thornsDamage = 1 + this.random.nextInt(thornsLevel);
                     attacker.hurt(this.damageSources().thorns(this), thornsDamage);
                 }
-                // Reset duration to punish spam
-                defensiveThornsTimer = 100;
+                // Reset duration to punish player spam (do not reset on summon hits or AI locks forever)
+                if (attacker instanceof Player) {
+                    defensiveThornsTimer = 100;
+                }
                 // 50% damage reduction
                 amount *= 0.5f;
             }
@@ -443,8 +446,8 @@ public class DeviartrasEntity extends Monster implements GeoEntity, IOririBoss {
         boolean result = super.hurt(source, amount);
 
         if (result && !this.level().isClientSide) {
-            // Track consecutive melee hits for Defensive Thorns
-            if (source.getEntity() instanceof LivingEntity && !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() == source.getEntity()) {
+            // Track consecutive player melee hits for Defensive Thorns
+            if (source.getEntity() instanceof Player && !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE) && source.getDirectEntity() == source.getEntity()) {
                 consecutiveMeleeHits++;
                 hitDecayTimer = 60; // 3 seconds to keep hitting
                 
