@@ -25,6 +25,16 @@ public final class DisasterSafetyUtil {
     }
 
     /**
+     * Checks whether natural disasters are permitted to occur (physically and visually) in the given dimension.
+     * Allowed dimensions: Overworld and Elderwoods. All other dimensions (Nether, End, Dungeons, etc.) are disabled.
+     */
+    public static boolean isDisasterDimension(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension) {
+        if (dimension == null) return false;
+        return dimension == net.minecraft.world.level.Level.OVERWORLD
+                || dimension == net.ganyusbathwater.oririmod.worldgen.ModDimensions.ELDERWOODS_LEVEL_KEY;
+    }
+
+    /**
      * Result of an area scan.
      *
      * @param maxInhabitedTicks highest inhabited time of all loaded chunks in the radius

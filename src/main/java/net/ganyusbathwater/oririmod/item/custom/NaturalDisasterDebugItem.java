@@ -84,16 +84,17 @@ public class NaturalDisasterDebugItem extends Item {
             return InteractionResultHolder.success(stack);
         }
 
-        ServerLevel overworld = serverPlayer.server.overworld();
-        if (level.dimension() != Level.OVERWORLD) {
+        ServerLevel currentLevel = serverPlayer.serverLevel();
+        if (!DisasterSafetyUtil.isDisasterDimension(currentLevel.dimension())) {
             player.sendSystemMessage(Component.translatable("message.oririmod.disaster_debug.overworld_only").withStyle(ChatFormatting.RED));
             return InteractionResultHolder.fail(stack);
         }
 
+        ServerLevel overworld = serverPlayer.server.overworld();
         NaturalDisasterManager manager = NaturalDisasterManager.get(overworld);
         if (manager.isActive()) {
             NaturalDisasterType running = manager.getActiveType();
-            manager.stop(overworld);
+            manager.stop(currentLevel);
             player.sendSystemMessage(Component.translatable("message.oririmod.disaster_debug.stopped", running.displayName())
                     .withStyle(ChatFormatting.YELLOW));
             return InteractionResultHolder.success(stack);
@@ -109,10 +110,10 @@ public class NaturalDisasterDebugItem extends Item {
         boolean force = isForced(stack);
         if (selected == NaturalDisasterType.METEOR_SHOWER || selected == NaturalDisasterType.EARTHQUAKE || selected == NaturalDisasterType.LIGHTNING_STORM || selected == NaturalDisasterType.TORNADO) {
             DisasterSafetyUtil.AreaScan scan = switch (selected) {
-                case METEOR_SHOWER -> MeteorShowerDisaster.scanAround(overworld, serverPlayer);
-                case EARTHQUAKE -> EarthquakeDisaster.scanAround(overworld, serverPlayer);
-                case LIGHTNING_STORM -> LightningStormDisaster.scanAround(overworld, serverPlayer);
-                case TORNADO -> TornadoDisaster.scanAround(overworld, serverPlayer);
+                case METEOR_SHOWER -> MeteorShowerDisaster.scanAround(currentLevel, serverPlayer);
+                case EARTHQUAKE -> EarthquakeDisaster.scanAround(currentLevel, serverPlayer);
+                case LIGHTNING_STORM -> LightningStormDisaster.scanAround(currentLevel, serverPlayer);
+                case TORNADO -> TornadoDisaster.scanAround(currentLevel, serverPlayer);
                 default -> null;
             };
             if (scan != null) {
@@ -128,13 +129,13 @@ public class NaturalDisasterDebugItem extends Item {
         }
 
         if (selected == NaturalDisasterType.SNOWSTORM) {
-            boolean inCold = SnowstormShelterEvaluator.isColdBiome(overworld, serverPlayer.blockPosition());
-            boolean sheltered = SnowstormShelterEvaluator.isSheltered(overworld, serverPlayer.blockPosition());
+            boolean inCold = SnowstormShelterEvaluator.isColdBiome(currentLevel, serverPlayer.blockPosition());
+            boolean sheltered = SnowstormShelterEvaluator.isSheltered(currentLevel, serverPlayer.blockPosition());
             player.sendSystemMessage(Component.literal("§7[Snowstorm Diagnostic] In Cold Biome: " + (inCold ? "§aYes" : "§cNo") + "§7 | Sheltered: " + (sheltered ? "§aYes" : "§cNo")));
         }
 
         int duration = selected.settings().duration.get();
-        if (manager.start(overworld, selected, duration, force)) {
+        if (manager.start(currentLevel, selected, duration, force)) {
             player.sendSystemMessage(Component.translatable("message.oririmod.disaster_debug.started",
                     selected.displayName(), duration / 20).withStyle(ChatFormatting.GREEN));
         } else {

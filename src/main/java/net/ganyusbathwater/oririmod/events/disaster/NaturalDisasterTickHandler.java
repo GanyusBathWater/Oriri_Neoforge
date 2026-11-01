@@ -33,7 +33,7 @@ public final class NaturalDisasterTickHandler {
             return;
         }
         NaturalDisasterManager manager = NaturalDisasterManager.get(overworld);
-        manager.tick(overworld);
+        manager.tick(event.getServer());
         tryNaturalRoll(overworld, manager);
     }
 

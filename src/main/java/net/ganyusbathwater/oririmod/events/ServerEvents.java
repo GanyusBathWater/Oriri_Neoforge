@@ -122,8 +122,16 @@ public class ServerEvents {
             // Send current world event state to the player who just logged in
             NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
                     WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
-            net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm = net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(sp.serverLevel());
-            NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
+            ServerLevel overworld = sp.server.overworld();
+            if (overworld != null) {
+                net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm =
+                        net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(overworld);
+                if (net.ganyusbathwater.oririmod.events.disaster.DisasterSafetyUtil.isDisasterDimension(sp.level().dimension())) {
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
+                } else {
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp, net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType.NONE, 0, 0);
+                }
+            }
         }
     }
 
@@ -141,8 +149,16 @@ public class ServerEvents {
             // Sync world event state to clear/update client state for the new dimension
             NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
                     WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
-            net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm = net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(sp.serverLevel());
-            NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
+            ServerLevel overworld = sp.server.overworld();
+            if (overworld != null) {
+                net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm =
+                        net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(overworld);
+                if (net.ganyusbathwater.oririmod.events.disaster.DisasterSafetyUtil.isDisasterDimension(sp.level().dimension())) {
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
+                } else {
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp, net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType.NONE, 0, 0);
+                }
+            }
         }
     }
 

@@ -33,19 +33,19 @@ public final class SnowstormDisaster {
     private SnowstormDisaster() {}
 
     public static void onStart(ServerLevel level, int duration) {
-        if (level.dimension() != Level.OVERWORLD) return;
+        if (!DisasterSafetyUtil.isDisasterDimension(level.dimension())) return;
 
         level.setWeatherParameters(0, duration, true, true);
 
-        level.getServer().getPlayerList().broadcastSystemMessage(
-                Component.translatable("message.oririmod.disaster.snowstorm.start")
-                        .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
-                false
-        );
+        Component msg = Component.translatable("message.oririmod.disaster.snowstorm.start")
+                .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD);
+        for (ServerPlayer player : level.players()) {
+            player.sendSystemMessage(msg);
+        }
     }
 
     public static void onStop(ServerLevel level) {
-        if (level.dimension() != Level.OVERWORLD) return;
+        if (!DisasterSafetyUtil.isDisasterDimension(level.dimension())) return;
 
         level.setWeatherParameters(6000, 0, false, false);
 
@@ -57,7 +57,7 @@ public final class SnowstormDisaster {
     }
 
     public static void tick(ServerLevel level, int ticksRemaining, int totalDuration) {
-        if (level.dimension() != Level.OVERWORLD) return;
+        if (!DisasterSafetyUtil.isDisasterDimension(level.dimension())) return;
 
         List<ServerPlayer> players = level.players();
         if (players.isEmpty()) return;

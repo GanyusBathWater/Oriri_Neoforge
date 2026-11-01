@@ -34,6 +34,10 @@ public final class ClientDisasterState {
     }
 
     public static boolean isDisasterActive() {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level != null && !DisasterSafetyUtil.isDisasterDimension(mc.level.dimension())) {
+            return false;
+        }
         return activeType != null && activeType != NaturalDisasterType.NONE && ticksRemaining > 0;
     }
 
@@ -46,6 +50,10 @@ public final class ClientDisasterState {
     }
 
     public static float getTransitionProgress() {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level != null && !DisasterSafetyUtil.isDisasterDimension(mc.level.dimension())) {
+            return 0.0f;
+        }
         return transitionProgress;
     }
 

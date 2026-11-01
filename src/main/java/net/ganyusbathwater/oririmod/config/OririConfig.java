@@ -143,7 +143,7 @@ public class OririConfig {
 
             b.comment("Meteor Shower: meteors rain down around players who are travelling through freshly explored land.")
                     .push("meteor_shower");
-            meteorShower = new DisasterSettings(b, "meteorShower", 0.05, 1800);
+            meteorShower = new DisasterSettings(b, "meteorShower", 0.025, 1800);
             meteorShowerFreshAreaRadius = b
                     .comment("Radius (in blocks) around a player that must consist of freshly explored chunks for meteors to fall.",
                             "Vanilla only accumulates a chunk's 'inhabited time' within 128 blocks of a player, so 128 matches vanilla exactly.")
@@ -170,7 +170,7 @@ public class OririConfig {
             b.pop();
 
             b.comment("Earthquake: tears natural-looking cracks into the surface.").push("earthquake");
-            earthquake = new DisasterSettings(b, "earthquake", 0.04, 1200);
+            earthquake = new DisasterSettings(b, "earthquake", 0.02, 1200);
             earthquakeFreshAreaRadius = b
                     .comment("Radius (in blocks) around a player that must consist of freshly explored chunks for earthquakes to trigger.",
                             "Default is 128 blocks to match vanilla player chunk loading.")
@@ -194,7 +194,7 @@ public class OririConfig {
             b.pop();
 
             b.comment("Lightning Storm: a heavy amount of lightning strikes the surrounding area.").push("lightning_storm");
-            lightningStorm = new DisasterSettings(b, "lightningStorm", 0.05, 2400);
+            lightningStorm = new DisasterSettings(b, "lightningStorm", 0.025, 2400);
             lightningStormFreshAreaRadius = b
                     .comment("Radius (in blocks) around a player that must consist of freshly explored chunks for ground strikes to target them.",
                             "Default is 128 blocks to match vanilla player chunk loading.")
@@ -215,7 +215,7 @@ public class OririConfig {
             b.pop();
 
             b.comment("Tornado: wanders through the world, tears out soft blocks and lifts light entities.").push("tornado");
-            tornado = new DisasterSettings(b, "tornado", 0.03, 2400);
+            tornado = new DisasterSettings(b, "tornado", 0.015, 2400);
             tornadoFreshAreaRadius = b
                     .comment("Radius (in blocks) around a player that must consist of freshly explored chunks for tornadoes to spawn near them.",
                             "Default is 128 blocks to match vanilla player chunk loading.")
@@ -242,7 +242,7 @@ public class OririConfig {
             b.pop();
 
             b.comment("Snowstorm: a freezing blizzard covering cold biomes.").push("snowstorm");
-            snowstorm = new DisasterSettings(b, "snowstorm", 0.08, 3600);
+            snowstorm = new DisasterSettings(b, "snowstorm", 0.04, 3600);
             snowstormExposureSpeed = b
                     .comment("Multiplier for how fast Cold Aura exposure stacks build up when exposed to the snowstorm.")
                     .defineInRange("snowstormExposureSpeed", 1.0, 0.2, 5.0);

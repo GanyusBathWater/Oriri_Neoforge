@@ -60,10 +60,21 @@ public class NaturalDisasterManager extends SavedData {
         setDirty();
     }
 
+    public static java.util.List<ServerLevel> getDisasterLevels(net.minecraft.server.MinecraftServer server) {
+        java.util.List<ServerLevel> levels = new java.util.ArrayList<>();
+        if (server == null) return levels;
+        ServerLevel overworld = server.overworld();
+        if (overworld != null) levels.add(overworld);
+        ServerLevel elderwoods = server.getLevel(net.ganyusbathwater.oririmod.worldgen.ModDimensions.ELDERWOODS_LEVEL_KEY);
+        if (elderwoods != null) levels.add(elderwoods);
+        return levels;
+    }
+
     /**
-     * Starts a disaster. Fails if another disaster is running or the type is not implemented.
+     * Starts a disaster across all disaster-eligible dimensions (Overworld and Elderwoods).
+     * Fails if another disaster is running or the type is not implemented.
      */
-    public boolean start(ServerLevel level, NaturalDisasterType type, int durationTicks, boolean forced) {
+    public boolean start(ServerLevel originLevel, NaturalDisasterType type, int durationTicks, boolean forced) {
         if (isActive() || type == NaturalDisasterType.NONE || !type.isImplemented()) {
             return false;
         }
@@ -73,70 +84,104 @@ public class NaturalDisasterManager extends SavedData {
         this.forced = forced;
         setDirty();
 
-        switch (type) {
-            case METEOR_SHOWER -> MeteorShowerDisaster.onStart(level, this);
-            case EARTHQUAKE -> EarthquakeDisaster.onStart(level, this);
-            case LIGHTNING_STORM -> LightningStormDisaster.onStart(level, this);
-            case TORNADO -> TornadoDisaster.onStart(level, this);
-            case SNOWSTORM -> SnowstormDisaster.onStart(level, durationTicks);
-            default -> {
+        java.util.List<ServerLevel> levels = originLevel.getServer() != null
+                ? getDisasterLevels(originLevel.getServer())
+                : java.util.List.of(originLevel);
+
+        for (ServerLevel level : levels) {
+            switch (type) {
+                case METEOR_SHOWER -> MeteorShowerDisaster.onStart(level, this);
+                case EARTHQUAKE -> EarthquakeDisaster.onStart(level, this);
+                case LIGHTNING_STORM -> LightningStormDisaster.onStart(level, this);
+                case TORNADO -> TornadoDisaster.onStart(level, this);
+                case SNOWSTORM -> SnowstormDisaster.onStart(level, durationTicks);
+                default -> {
+                }
+            }
+            for (ServerPlayer player : level.players()) {
+                net.ganyusbathwater.oririmod.network.NetworkHandler.sendNaturalDisasterToPlayer(
+                        player, this.activeType, this.ticksRemaining, this.duration);
             }
         }
-        net.ganyusbathwater.oririmod.network.NetworkHandler.sendNaturalDisasterToAll(this.activeType, this.ticksRemaining, this.duration);
         return true;
     }
 
-    public void stop(ServerLevel level) {
+    public void stop(ServerLevel originLevel) {
         NaturalDisasterType ended = this.activeType;
         this.activeType = NaturalDisasterType.NONE;
         this.ticksRemaining = 0;
         this.duration = 0;
         this.forced = false;
         setDirty();
-        net.ganyusbathwater.oririmod.network.NetworkHandler.sendNaturalDisasterToAll(NaturalDisasterType.NONE, 0, 0);
 
-        if (ended != NaturalDisasterType.NONE) {
-            switch (ended) {
-                case METEOR_SHOWER -> MeteorShowerDisaster.onStop(level);
-                case EARTHQUAKE -> EarthquakeDisaster.onStop(level);
-                case LIGHTNING_STORM -> LightningStormDisaster.onStop(level);
-                case TORNADO -> TornadoDisaster.onStop(level);
-                case SNOWSTORM -> SnowstormDisaster.onStop(level);
-                default -> {
+        java.util.List<ServerLevel> levels = originLevel != null && originLevel.getServer() != null
+                ? getDisasterLevels(originLevel.getServer())
+                : (originLevel != null ? java.util.List.of(originLevel) : java.util.List.of());
+
+        for (ServerLevel level : levels) {
+            for (ServerPlayer player : level.players()) {
+                net.ganyusbathwater.oririmod.network.NetworkHandler.sendNaturalDisasterToPlayer(
+                        player, NaturalDisasterType.NONE, 0, 0);
+            }
+
+            if (ended != NaturalDisasterType.NONE) {
+                switch (ended) {
+                    case METEOR_SHOWER -> MeteorShowerDisaster.onStop(level);
+                    case EARTHQUAKE -> EarthquakeDisaster.onStop(level);
+                    case LIGHTNING_STORM -> LightningStormDisaster.onStop(level);
+                    case TORNADO -> TornadoDisaster.onStop(level);
+                    case SNOWSTORM -> SnowstormDisaster.onStop(level);
+                    default -> {
+                    }
+                }
+                if (OririConfig.COMMON.naturalDisasters.disasterAnnouncements.get()) {
+                    Component msg = Component.translatable("message.oririmod.disaster.end", ended.displayName())
+                            .withStyle(ChatFormatting.GRAY);
+                    for (ServerPlayer player : level.players()) {
+                        player.sendSystemMessage(msg);
+                    }
                 }
             }
-            if (OririConfig.COMMON.naturalDisasters.disasterAnnouncements.get()) {
-                Component msg = Component.translatable("message.oririmod.disaster.end", ended.displayName())
-                        .withStyle(ChatFormatting.GRAY);
+        }
+    }
+
+    public void tick(net.minecraft.server.MinecraftServer server) {
+        if (server == null || activeType == NaturalDisasterType.NONE) {
+            return;
+        }
+        if (ticksRemaining <= 0) {
+            stop(server.overworld());
+            return;
+        }
+        ticksRemaining--;
+        java.util.List<ServerLevel> levels = getDisasterLevels(server);
+
+        if (ticksRemaining % 100 == 0) {
+            setDirty();
+            for (ServerLevel level : levels) {
                 for (ServerPlayer player : level.players()) {
-                    player.sendSystemMessage(msg);
+                    net.ganyusbathwater.oririmod.network.NetworkHandler.sendNaturalDisasterToPlayer(
+                            player, this.activeType, this.ticksRemaining, this.duration);
+                }
+            }
+        }
+
+        for (ServerLevel level : levels) {
+            switch (activeType) {
+                case METEOR_SHOWER -> MeteorShowerDisaster.tick(level, this);
+                case EARTHQUAKE -> EarthquakeDisaster.tick(level, this);
+                case LIGHTNING_STORM -> LightningStormDisaster.tick(level, this);
+                case TORNADO -> TornadoDisaster.tick(level, this);
+                case SNOWSTORM -> SnowstormDisaster.tick(level, ticksRemaining, duration);
+                default -> {
                 }
             }
         }
     }
 
     void tick(ServerLevel level) {
-        if (activeType == NaturalDisasterType.NONE) {
-            return;
-        }
-        if (ticksRemaining <= 0) {
-            stop(level);
-            return;
-        }
-        ticksRemaining--;
-        if (ticksRemaining % 100 == 0) {
-            setDirty();
-            net.ganyusbathwater.oririmod.network.NetworkHandler.sendNaturalDisasterToAll(this.activeType, this.ticksRemaining, this.duration);
-        }
-
-        switch (activeType) {
-            case METEOR_SHOWER -> MeteorShowerDisaster.tick(level, this);
-            case EARTHQUAKE -> EarthquakeDisaster.tick(level, this);
-            case LIGHTNING_STORM -> LightningStormDisaster.tick(level, this);
-            case TORNADO -> TornadoDisaster.tick(level, this);
-            case SNOWSTORM -> SnowstormDisaster.tick(level, ticksRemaining, duration);
-            default -> {
-            }
+        if (level != null && level.getServer() != null) {
+            tick(level.getServer());
         }
     }
 
