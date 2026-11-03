@@ -38,7 +38,11 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.EPOCH_WOOD_LOG.get())
                                 .add(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get())
                                 .add(ModBlocks.EPOCH_WOOD.get())
-                                .add(ModBlocks.STRIPPED_EPOCH_WOOD.get());
+                                .add(ModBlocks.STRIPPED_EPOCH_WOOD.get())
+                                .add(ModBlocks.ELDER_PINE_LOG.get())
+                                .add(ModBlocks.STRIPPED_ELDER_PINE_LOG.get())
+                                .add(ModBlocks.ELDER_PINE_WOOD.get())
+                                .add(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get());
 
                 tag(ModTags.Blocks.ELDERWOODS_PROTECTED_STRUCTURE_BLOCKS)
                                 .add(Blocks.STONE_BRICKS)
@@ -68,13 +72,15 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ELDER_FENCE.get())
                                 .add(ModBlocks.SCARLET_FENCE.get())
                                 .add(ModBlocks.ABYSS_CROWN_FENCE.get())
-                                .add(ModBlocks.EPOCH_FENCE.get());
+                                .add(ModBlocks.EPOCH_FENCE.get())
+                                .add(ModBlocks.ELDER_PINE_FENCE.get());
 
                 tag(BlockTags.FENCE_GATES)
                                 .add(ModBlocks.ELDER_GATE.get())
                                 .add(ModBlocks.SCARLET_GATE.get())
                                 .add(ModBlocks.ABYSS_CROWN_GATE.get())
-                                .add(ModBlocks.EPOCH_GATE.get());
+                                .add(ModBlocks.EPOCH_GATE.get())
+                                .add(ModBlocks.ELDER_PINE_GATE.get());
 
                 tag(BlockTags.WALLS)
                                 .add(ModBlocks.JADE_WALL.get())
@@ -86,7 +92,12 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_COBBLESTONE_WALL.get())
                                 .add(ModBlocks.SCARLET_DEEPSLATE_BRICK_WALL.get())
                                 .add(ModBlocks.SCARLET_DEEPSLATE_TILE_WALL.get())
-                                .add(ModBlocks.SCARLET_DEEPSLATE_WALL.get());
+                                .add(ModBlocks.SCARLET_DEEPSLATE_WALL.get())
+                                .add(ModBlocks.CALICHE_WALL.get())
+                                .add(ModBlocks.POLISHED_CALICHE_WALL.get())
+                                .add(ModBlocks.CALICHE_BRICK_WALL.get())
+                                .add(ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get())
+                                .add(ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get());
 
                 tag(BlockTags.STAIRS)
                                 .add(ModBlocks.SCARLET_STONE_STAIRS.get())
@@ -125,31 +136,36 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ELDER_STAIRS.get())
                                 .add(ModBlocks.SCARLET_STAIRS.get())
                                 .add(ModBlocks.ABYSS_CROWN_STAIRS.get())
-                                .add(ModBlocks.EPOCH_STAIRS.get());
+                                .add(ModBlocks.EPOCH_STAIRS.get())
+                                .add(ModBlocks.ELDER_PINE_STAIRS.get());
 
                 tag(BlockTags.WOODEN_SLABS)
                                 .add(ModBlocks.ELDER_SLAB.get())
                                 .add(ModBlocks.SCARLET_SLAB.get())
                                 .add(ModBlocks.ABYSS_CROWN_SLAB.get())
-                                .add(ModBlocks.EPOCH_SLAB.get());
+                                .add(ModBlocks.EPOCH_SLAB.get())
+                                .add(ModBlocks.ELDER_PINE_SLAB.get());
 
                 tag(BlockTags.WOODEN_FENCES)
                                 .add(ModBlocks.ELDER_FENCE.get())
                                 .add(ModBlocks.SCARLET_FENCE.get())
                                 .add(ModBlocks.ABYSS_CROWN_FENCE.get())
-                                .add(ModBlocks.EPOCH_FENCE.get());
+                                .add(ModBlocks.EPOCH_FENCE.get())
+                                .add(ModBlocks.ELDER_PINE_FENCE.get());
 
                 tag(BlockTags.WOODEN_BUTTONS)
                                 .add(ModBlocks.ELDER_BUTTON.get())
                                 .add(ModBlocks.SCARLET_BUTTON.get())
                                 .add(ModBlocks.ABYSS_CROWN_BUTTON.get())
-                                .add(ModBlocks.EPOCH_BUTTON.get());
+                                .add(ModBlocks.EPOCH_BUTTON.get())
+                                .add(ModBlocks.ELDER_PINE_BUTTON.get());
 
                 tag(BlockTags.WOODEN_DOORS)
                                 .add(ModBlocks.ELDER_DOOR.get())
                                 .add(ModBlocks.SCARLET_DOOR.get())
                                 .add(ModBlocks.ABYSS_CROWN_DOOR.get())
-                                .add(ModBlocks.EPOCH_DOOR.get());
+                                .add(ModBlocks.EPOCH_DOOR.get())
+                                .add(ModBlocks.ELDER_PINE_DOOR.get());
 
                 tag(BlockTags.SAPLINGS)
                                 .add(ModBlocks.UPGRADED_OAK_SAPLING.get())
@@ -175,13 +191,15 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ELDER_TRAPDOOR.get())
                                 .add(ModBlocks.SCARLET_TRAPDOOR.get())
                                 .add(ModBlocks.ABYSS_CROWN_TRAPDOOR.get())
-                                .add(ModBlocks.EPOCH_TRAPDOOR.get());
+                                .add(ModBlocks.EPOCH_TRAPDOOR.get())
+                                .add(ModBlocks.ELDER_PINE_TRAPDOOR.get());
 
                 tag(BlockTags.WOODEN_PRESSURE_PLATES)
                                 .add(ModBlocks.ELDER_PRESSURE_PLATE.get())
                                 .add(ModBlocks.SCARLET_PRESSURE_PLATE.get())
                                 .add(ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get())
-                                .add(ModBlocks.EPOCH_PRESSURE_PLATE.get());
+                                .add(ModBlocks.EPOCH_PRESSURE_PLATE.get())
+                                .add(ModBlocks.ELDER_PINE_PRESSURE_PLATE.get());
 
                 tag(BlockTags.STANDING_SIGNS)
                                 .add(ModBlocks.ELDER_SIGN.get())
@@ -299,6 +317,10 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get())
                                 .add(ModBlocks.EPOCH_WOOD.get())
                                 .add(ModBlocks.STRIPPED_EPOCH_WOOD.get())
+                                .add(ModBlocks.ELDER_PINE_LOG.get())
+                                .add(ModBlocks.STRIPPED_ELDER_PINE_LOG.get())
+                                .add(ModBlocks.ELDER_PINE_WOOD.get())
+                                .add(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get())
                                 .add(ModBlocks.EPOCH_WOOD_PLANKS.get())
                                 .add(ModBlocks.EPOCH_STAIRS.get())
                                 .add(ModBlocks.EPOCH_SLAB.get())
@@ -396,6 +418,47 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_STONE_STAIRS.get())
                                 .add(ModBlocks.AETHER_MAGMA_BLOCK.get())
                                 .add(ModBlocks.TELEPORTER_BLOCK.get())
+                                .add(ModBlocks.CALICHE.get())
+                                .add(ModBlocks.CALICHE_STAIRS.get())
+                                .add(ModBlocks.CALICHE_SLAB.get())
+                                .add(ModBlocks.CALICHE_WALL.get())
+                                .add(ModBlocks.POLISHED_CALICHE.get())
+                                .add(ModBlocks.POLISHED_CALICHE_STAIRS.get())
+                                .add(ModBlocks.POLISHED_CALICHE_SLAB.get())
+                                .add(ModBlocks.POLISHED_CALICHE_WALL.get())
+                                .add(ModBlocks.CALICHE_BRICKS.get())
+                                .add(ModBlocks.CALICHE_BRICK_STAIRS.get())
+                                .add(ModBlocks.CALICHE_BRICK_SLAB.get())
+                                .add(ModBlocks.CALICHE_BRICK_WALL.get())
+                                .add(ModBlocks.CHISELED_CALICHE.get())
+                                .add(ModBlocks.ABYSSAL_BASALT.get())
+                                .add(ModBlocks.ABYSSAL_BASALT_STAIRS.get())
+                                .add(ModBlocks.ABYSSAL_BASALT_SLAB.get())
+                                .add(ModBlocks.POLISHED_ABYSSAL_BASALT.get())
+                                .add(ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS.get())
+                                .add(ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get())
+                                .add(ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get())
+                                .add(ModBlocks.ABYSSAL_BASALT_BRICKS.get())
+                                .add(ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get())
+                                .add(ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get())
+                                .add(ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get())
+                                .add(ModBlocks.HYDROTHERMAL_CHIMNEY.get())
+                                .add(ModBlocks.PETRIFIED_ELDER_CORAL_BLOCK.get())
+                                .add(ModBlocks.PETRIFIED_ELDER_CORAL.get())
+                                .add(ModBlocks.PETRIFIED_ELDER_CORAL_FAN.get())
+                                .add(ModBlocks.PETRIFIED_ELDER_CORAL_WALL_FAN.get())
+                                .add(ModBlocks.ELDER_CORAL_BLOCK.get())
+                                .add(ModBlocks.ELDER_CORAL.get())
+                                .add(ModBlocks.ELDER_CORAL_FAN.get())
+                                .add(ModBlocks.ELDER_CORAL_WALL_FAN.get())
+                                .add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK.get())
+                                .add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN.get())
+                                .add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.get())
+                                .add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_WALL_FAN.get())
+                                .add(ModBlocks.ABYSSAL_CORAL_CROWN_BLOCK.get())
+                                .add(ModBlocks.ABYSSAL_CORAL_CROWN.get())
+                                .add(ModBlocks.ABYSSAL_CORAL_CROWN_FAN.get())
+                                .add(ModBlocks.ABYSSAL_CORAL_CROWN_WALL_FAN.get())
                                 .add(ModBlocks.REVIVAL_SHRINE.get())
                                 .add(ModBlocks.SOUL_HARVESTER.get())
                                 .add(ModBlocks.EMISSIVE_CLOCKER.get());

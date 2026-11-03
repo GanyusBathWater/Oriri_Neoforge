@@ -71,6 +71,77 @@ public class ModItemGroups {
                         output.accept(ModBlocks.MAGIC_BARRIER_BLOCK);
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
                         output.accept(ModBlocks.TELEPORTER_BLOCK);
+
+                        // ===== ELDER PINE =====
+                        output.accept(ModBlocks.ELDER_PINE_LOG);
+                        output.accept(ModBlocks.STRIPPED_ELDER_PINE_LOG);
+                        output.accept(ModBlocks.ELDER_PINE_WOOD);
+                        output.accept(ModBlocks.STRIPPED_ELDER_PINE_WOOD);
+                        output.accept(ModBlocks.ELDER_PINE_PLANKS);
+                        output.accept(ModBlocks.ELDER_PINE_STAIRS);
+                        output.accept(ModBlocks.ELDER_PINE_SLAB);
+                        output.accept(ModBlocks.ELDER_PINE_FENCE);
+                        output.accept(ModBlocks.ELDER_PINE_GATE);
+                        output.accept(ModBlocks.ELDER_PINE_DOOR);
+                        output.accept(ModBlocks.ELDER_PINE_TRAPDOOR);
+                        output.accept(ModBlocks.ELDER_PINE_PRESSURE_PLATE);
+                        output.accept(ModBlocks.ELDER_PINE_BUTTON);
+                        output.accept(ModItems.ELDER_PINE_SIGN);
+                        output.accept(ModItems.ELDER_PINE_HANGING_SIGN);
+                        output.accept(ModBlocks.ELDER_PINE_LEAVES);
+                        output.accept(ModBlocks.ELDER_PINE_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_ELDER_PINE_SAPLING);
+                        output.accept(ModItems.ELDER_PINE_BOAT);
+                        output.accept(ModItems.ELDER_PINE_CHEST_BOAT);
+
+                        // ===== ELDER VALLEYS =====
+                        output.accept(ModBlocks.CATTAIL);
+
+                        // ===== GOLDEN SAVANNA =====
+                        output.accept(ModBlocks.CALICHE);
+                        output.accept(ModBlocks.CALICHE_STAIRS);
+                        output.accept(ModBlocks.CALICHE_SLAB);
+                        output.accept(ModBlocks.CALICHE_WALL);
+                        output.accept(ModBlocks.POLISHED_CALICHE);
+                        output.accept(ModBlocks.POLISHED_CALICHE_STAIRS);
+                        output.accept(ModBlocks.POLISHED_CALICHE_SLAB);
+                        output.accept(ModBlocks.POLISHED_CALICHE_WALL);
+                        output.accept(ModBlocks.CALICHE_BRICKS);
+                        output.accept(ModBlocks.CALICHE_BRICK_STAIRS);
+                        output.accept(ModBlocks.CALICHE_BRICK_SLAB);
+                        output.accept(ModBlocks.CALICHE_BRICK_WALL);
+                        output.accept(ModBlocks.CHISELED_CALICHE);
+                        output.accept(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK);
+                        output.accept(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS);
+                        output.accept(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS);
+
+                        // ===== THE SILENT DEPTHS =====
+                        output.accept(ModBlocks.ABYSSAL_BASALT);
+                        output.accept(ModBlocks.ABYSSAL_BASALT_STAIRS);
+                        output.accept(ModBlocks.ABYSSAL_BASALT_SLAB);
+                        output.accept(ModBlocks.POLISHED_ABYSSAL_BASALT);
+                        output.accept(ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS);
+                        output.accept(ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB);
+                        output.accept(ModBlocks.POLISHED_ABYSSAL_BASALT_WALL);
+                        output.accept(ModBlocks.ABYSSAL_BASALT_BRICKS);
+                        output.accept(ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS);
+                        output.accept(ModBlocks.ABYSSAL_BASALT_BRICK_SLAB);
+                        output.accept(ModBlocks.ABYSSAL_BASALT_BRICK_WALL);
+                        output.accept(ModBlocks.BENTHIC_SPONGE);
+                        output.accept(ModBlocks.WET_BENTHIC_SPONGE);
+                        output.accept(ModBlocks.HYDROTHERMAL_CHIMNEY);
+                        output.accept(ModBlocks.PETRIFIED_ELDER_CORAL_BLOCK);
+                        output.accept(ModBlocks.PETRIFIED_ELDER_CORAL);
+                        output.accept(ModBlocks.PETRIFIED_ELDER_CORAL_FAN);
+                        output.accept(ModBlocks.ELDER_CORAL_BLOCK);
+                        output.accept(ModBlocks.ELDER_CORAL);
+                        output.accept(ModBlocks.ELDER_CORAL_FAN);
+                        output.accept(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK);
+                        output.accept(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN);
+                        output.accept(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN);
+                        output.accept(ModBlocks.ABYSSAL_CORAL_CROWN_BLOCK);
+                        output.accept(ModBlocks.ABYSSAL_CORAL_CROWN);
+                        output.accept(ModBlocks.ABYSSAL_CORAL_CROWN_FAN);
                         
                         // New items and blocks
                         output.accept(ModBlocks.EMISSIVE_CLOCKER);

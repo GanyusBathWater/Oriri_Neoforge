@@ -879,6 +879,166 @@ public class ModBlocks {
                         () -> new net.ganyusbathwater.oririmod.block.custom.HangingElderMossPlantBlock(
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.WEEPING_VINES_PLANT)));
 
+
+        // ===== ELDER PINE WOODSET =====
+        public static final DeferredBlock<Block> ELDER_PINE_LOG = registerBlock("elder_pine_log",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)));
+        public static final DeferredBlock<Block> STRIPPED_ELDER_PINE_LOG = registerBlock("stripped_elder_pine_log",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG)));
+        public static final DeferredBlock<Block> ELDER_PINE_WOOD = registerBlock("elder_pine_wood",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD)));
+        public static final DeferredBlock<Block> STRIPPED_ELDER_PINE_WOOD = registerBlock("stripped_elder_pine_wood",
+                        () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD)));
+        public static final DeferredBlock<Block> ELDER_PINE_PLANKS = registerBlock("elder_pine_planks",
+                        () -> new ModFlammableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)));
+        public static final DeferredBlock<StairBlock> ELDER_PINE_STAIRS = registerBlock("elder_pine_stairs",
+                        () -> new StairBlock(ModBlocks.ELDER_PINE_PLANKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS)));
+        public static final DeferredBlock<SlabBlock> ELDER_PINE_SLAB = registerBlock("elder_pine_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB)));
+        public static final DeferredBlock<FenceBlock> ELDER_PINE_FENCE = registerBlock("elder_pine_fence",
+                        () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE)));
+        public static final DeferredBlock<FenceGateBlock> ELDER_PINE_GATE = registerBlock("elder_pine_gate",
+                        () -> new FenceGateBlock(ModWoodTypes.ELDER_PINE_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)));
+        public static final DeferredBlock<DoorBlock> ELDER_PINE_DOOR = registerBlock("elder_pine_door",
+                        () -> new DoorBlock(ModWoodTypes.ELDER_PINE_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)));
+        public static final DeferredBlock<TrapDoorBlock> ELDER_PINE_TRAPDOOR = registerBlock("elder_pine_trapdoor",
+                        () -> new TrapDoorBlock(ModWoodTypes.ELDER_PINE_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)));
+        public static final DeferredBlock<PressurePlateBlock> ELDER_PINE_PRESSURE_PLATE = registerBlock("elder_pine_pressure_plate",
+                        () -> new PressurePlateBlock(ModWoodTypes.ELDER_PINE_BLOCK_SET_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)));
+        public static final DeferredBlock<ButtonBlock> ELDER_PINE_BUTTON = registerBlock("elder_pine_button",
+                        () -> new ButtonBlock(ModWoodTypes.ELDER_PINE_BLOCK_SET_TYPE, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+
+        public static final DeferredBlock<StandingSignBlock> ELDER_PINE_SIGN = BLOCKS.register("elder_pine_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.ELDER_PINE_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> ELDER_PINE_WALL_SIGN = BLOCKS.register("elder_pine_wall_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.ELDER_PINE_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(ELDER_PINE_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> ELDER_PINE_HANGING_SIGN = BLOCKS.register("elder_pine_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.ELDER_PINE_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> ELDER_PINE_WALL_HANGING_SIGN = BLOCKS.register("elder_pine_wall_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.ELDER_PINE_WOOD_TYPE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(ELDER_PINE_HANGING_SIGN)));
+
+        public static final DeferredBlock<Block> ELDER_PINE_LEAVES = registerBlock("elder_pine_leaves",
+                        () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)));
+        public static final DeferredBlock<Block> ELDER_PINE_SAPLING = registerBlock("elder_pine_sapling",
+                        () -> new SaplingBlock(ModTreeGrowers.ELDER_PINE_TREE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_ELDER_PINE_SAPLING = registerPottedBlock("potted_elder_pine_sapling", ELDER_PINE_SAPLING);
+        public static final DeferredBlock<Block> UPGRADED_ELDER_PINE_SAPLING = registerBlock("upgraded_elder_pine_sapling",
+                        () -> new UpgradedSaplingBlock(ModTreeGrowers.ELDER_PINE_TREE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_ELDER_PINE_SAPLING = registerPottedBlock("potted_upgraded_elder_pine_sapling", UPGRADED_ELDER_PINE_SAPLING);
+
+        // ===== ELDER VALLEYS VEGETATION =====
+        public static final DeferredBlock<Block> CATTAIL = registerBlock("cattail",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.CattailBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS).lightLevel(state -> 4)));
+
+        // ===== GOLDEN SAVANNA & MESAS =====
+        public static final DeferredBlock<Block> CALICHE = registerBlock("caliche",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
+        public static final DeferredBlock<StairBlock> CALICHE_STAIRS = registerBlock("caliche_stairs",
+                        () -> new StairBlock(CALICHE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> CALICHE_SLAB = registerBlock("caliche_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_SLAB)));
+        public static final DeferredBlock<WallBlock> CALICHE_WALL = registerBlock("caliche_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLESTONE_WALL)));
+
+        public static final DeferredBlock<Block> POLISHED_CALICHE = registerBlock("polished_caliche",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_ANDESITE)));
+        public static final DeferredBlock<StairBlock> POLISHED_CALICHE_STAIRS = registerBlock("polished_caliche_stairs",
+                        () -> new StairBlock(POLISHED_CALICHE.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_ANDESITE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> POLISHED_CALICHE_SLAB = registerBlock("polished_caliche_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_ANDESITE_SLAB)));
+        public static final DeferredBlock<WallBlock> POLISHED_CALICHE_WALL = registerBlock("polished_caliche_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COBBLESTONE_WALL)));
+
+        public static final DeferredBlock<Block> CALICHE_BRICKS = registerBlock("caliche_bricks",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICKS)));
+        public static final DeferredBlock<StairBlock> CALICHE_BRICK_STAIRS = registerBlock("caliche_brick_stairs",
+                        () -> new StairBlock(CALICHE_BRICKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_STAIRS)));
+        public static final DeferredBlock<SlabBlock> CALICHE_BRICK_SLAB = registerBlock("caliche_brick_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_SLAB)));
+        public static final DeferredBlock<WallBlock> CALICHE_BRICK_WALL = registerBlock("caliche_brick_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_WALL)));
+        public static final DeferredBlock<Block> CHISELED_CALICHE = registerBlock("chiseled_caliche",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CHISELED_STONE_BRICKS)));
+
+        public static final DeferredBlock<Block> GOLDEN_SAVANNA_GRASS_BLOCK = registerBlock("golden_savanna_grass_block",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderwoodsGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
+        public static final DeferredBlock<Block> GOLDEN_SAVANNA_SHORT_GRASS = registerBlock("golden_savanna_short_grass",
+                        () -> new net.minecraft.world.level.block.TallGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)));
+        public static final DeferredBlock<Block> GOLDEN_SAVANNA_TALL_GRASS = registerBlock("golden_savanna_tall_grass",
+                        () -> new DoublePlantBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)));
+
+        // ===== THE SILENT DEPTHS (DEEP OCEANS) =====
+        public static final DeferredBlock<Block> ABYSSAL_BASALT = registerBlock("abyssal_basalt",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.BASALT).strength(3.0F, 8.0F)));
+        public static final DeferredBlock<StairBlock> ABYSSAL_BASALT_STAIRS = registerBlock("abyssal_basalt_stairs",
+                        () -> new StairBlock(ABYSSAL_BASALT.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> ABYSSAL_BASALT_SLAB = registerBlock("abyssal_basalt_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_SLAB)));
+
+        public static final DeferredBlock<Block> POLISHED_ABYSSAL_BASALT = registerBlock("polished_abyssal_basalt",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BASALT).strength(3.0F, 8.0F)));
+        public static final DeferredBlock<StairBlock> POLISHED_ABYSSAL_BASALT_STAIRS = registerBlock("polished_abyssal_basalt_stairs",
+                        () -> new StairBlock(POLISHED_ABYSSAL_BASALT.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_STAIRS)));
+        public static final DeferredBlock<SlabBlock> POLISHED_ABYSSAL_BASALT_SLAB = registerBlock("polished_abyssal_basalt_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_SLAB)));
+        public static final DeferredBlock<WallBlock> POLISHED_ABYSSAL_BASALT_WALL = registerBlock("polished_abyssal_basalt_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_WALL)));
+
+        public static final DeferredBlock<Block> ABYSSAL_BASALT_BRICKS = registerBlock("abyssal_basalt_bricks",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_BRICKS).strength(3.5F, 9.0F).lightLevel(state -> 5)));
+        public static final DeferredBlock<StairBlock> ABYSSAL_BASALT_BRICK_STAIRS = registerBlock("abyssal_basalt_brick_stairs",
+                        () -> new StairBlock(ABYSSAL_BASALT_BRICKS.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS)));
+        public static final DeferredBlock<SlabBlock> ABYSSAL_BASALT_BRICK_SLAB = registerBlock("abyssal_basalt_brick_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB)));
+        public static final DeferredBlock<WallBlock> ABYSSAL_BASALT_BRICK_WALL = registerBlock("abyssal_basalt_brick_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_BRICK_WALL)));
+
+        public static final DeferredBlock<Block> BENTHIC_SPONGE = registerBlock("benthic_sponge",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.BenthicSpongeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SPONGE).lightLevel(state -> 7)));
+        public static final DeferredBlock<Block> WET_BENTHIC_SPONGE = registerBlock("wet_benthic_sponge",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.WetBenthicSpongeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WET_SPONGE).lightLevel(state -> 5)));
+
+        public static final DeferredBlock<Block> HYDROTHERMAL_CHIMNEY = registerBlock("hydrothermal_chimney",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.HydrothermalChimneyBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POINTED_DRIPSTONE).lightLevel(state -> 6).noOcclusion()));
+
+        // --- CORALS: ELDER CORAL & PETRIFIED ELDER CORAL ---
+        public static final DeferredBlock<Block> PETRIFIED_ELDER_CORAL_BLOCK = registerBlock("petrified_elder_coral_block",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL_BLOCK)));
+        public static final DeferredBlock<Block> PETRIFIED_ELDER_CORAL = registerBlock("petrified_elder_coral",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralPlantBlock(null, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> PETRIFIED_ELDER_CORAL_FAN = registerBlock("petrified_elder_coral_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralFanBlock(null, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL_FAN).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> PETRIFIED_ELDER_CORAL_WALL_FAN = BLOCKS.register("petrified_elder_coral_wall_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralWallFanBlock(null, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL_WALL_FAN).noOcclusion().noCollission()));
+
+        public static final DeferredBlock<Block> ELDER_CORAL_BLOCK = registerBlock("elder_coral_block",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralBlock(PETRIFIED_ELDER_CORAL_BLOCK, BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL_BLOCK).lightLevel(state -> 6)));
+        public static final DeferredBlock<Block> ELDER_CORAL = registerBlock("elder_coral",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralPlantBlock(PETRIFIED_ELDER_CORAL, BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL).lightLevel(state -> 8).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> ELDER_CORAL_FAN = registerBlock("elder_coral_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralFanBlock(PETRIFIED_ELDER_CORAL_FAN, BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL_FAN).lightLevel(state -> 8).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> ELDER_CORAL_WALL_FAN = BLOCKS.register("elder_coral_wall_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralWallFanBlock(PETRIFIED_ELDER_CORAL_WALL_FAN, BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL_WALL_FAN).lightLevel(state -> 8).noOcclusion().noCollission()));
+
+        // --- CORALS: ABYSSAL CORAL CROWN & PETRIFIED ABYSSAL CORAL CROWN ---
+        public static final DeferredBlock<Block> PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK = registerBlock("petrified_abyssal_coral_crown_block",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_BRAIN_CORAL_BLOCK)));
+        public static final DeferredBlock<Block> PETRIFIED_ABYSSAL_CORAL_CROWN = registerBlock("petrified_abyssal_coral_crown",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralPlantBlock(null, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_BRAIN_CORAL).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> PETRIFIED_ABYSSAL_CORAL_CROWN_FAN = registerBlock("petrified_abyssal_coral_crown_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralFanBlock(null, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_BRAIN_CORAL_FAN).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> PETRIFIED_ABYSSAL_CORAL_CROWN_WALL_FAN = BLOCKS.register("petrified_abyssal_coral_crown_wall_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralWallFanBlock(null, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_BRAIN_CORAL_WALL_FAN).noOcclusion().noCollission()));
+
+        public static final DeferredBlock<Block> ABYSSAL_CORAL_CROWN_BLOCK = registerBlock("abyssal_coral_crown_block",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralBlock(PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK, BlockBehaviour.Properties.ofFullCopy(Blocks.BRAIN_CORAL_BLOCK).lightLevel(state -> 6)));
+        public static final DeferredBlock<Block> ABYSSAL_CORAL_CROWN = registerBlock("abyssal_coral_crown",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralPlantBlock(PETRIFIED_ABYSSAL_CORAL_CROWN, BlockBehaviour.Properties.ofFullCopy(Blocks.BRAIN_CORAL).lightLevel(state -> 8).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> ABYSSAL_CORAL_CROWN_FAN = registerBlock("abyssal_coral_crown_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralFanBlock(PETRIFIED_ABYSSAL_CORAL_CROWN_FAN, BlockBehaviour.Properties.ofFullCopy(Blocks.BRAIN_CORAL_FAN).lightLevel(state -> 8).noOcclusion().noCollission()));
+        public static final DeferredBlock<Block> ABYSSAL_CORAL_CROWN_WALL_FAN = BLOCKS.register("abyssal_coral_crown_wall_fan",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCoralWallFanBlock(PETRIFIED_ABYSSAL_CORAL_CROWN_WALL_FAN, BlockBehaviour.Properties.ofFullCopy(Blocks.BRAIN_CORAL_WALL_FAN).lightLevel(state -> 8).noOcclusion().noCollission()));
+
         public static final DeferredBlock<Block> TELEPORTER_BLOCK = registerBlock("teleporter",
                         () -> new TeleporterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion().noCollission().strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
 
@@ -945,5 +1105,7 @@ public class ModBlocks {
                 pot.addPlant(UPGRADED_BROWN_MUSHROOM.getId(), POTTED_UPGRADED_BROWN_MUSHROOM);
                 pot.addPlant(UPGRADED_CRIMSON_FUNGUS.getId(), POTTED_UPGRADED_CRIMSON_FUNGUS);
                 pot.addPlant(UPGRADED_WARPED_FUNGUS.getId(), POTTED_UPGRADED_WARPED_FUNGUS);
+                pot.addPlant(ELDER_PINE_SAPLING.getId(), POTTED_ELDER_PINE_SAPLING);
+                pot.addPlant(UPGRADED_ELDER_PINE_SAPLING.getId(), POTTED_UPGRADED_ELDER_PINE_SAPLING);
         }
 }

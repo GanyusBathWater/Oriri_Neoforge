@@ -60,6 +60,7 @@ public class ModBoatEntity extends Boat {
             case SCARLET -> ModItems.SCARLET_BOAT.get();
             case ABYSS_CROWN -> ModItems.ABYSS_CROWN_BOAT.get();
             case EPOCH -> ModItems.EPOCH_BOAT.get();
+            case ELDER_PINE -> ModItems.ELDER_PINE_BOAT.get();
             default -> ModItems.ELDER_BOAT.get();
         };
     }
@@ -68,7 +69,8 @@ public class ModBoatEntity extends Boat {
         ELDER("elder"),
         SCARLET("scarlet"),
         ABYSS_CROWN("abyss_crown"),
-        EPOCH("epoch");
+        EPOCH("epoch"),
+        ELDER_PINE("elder_pine");
 
         private final String name;
 

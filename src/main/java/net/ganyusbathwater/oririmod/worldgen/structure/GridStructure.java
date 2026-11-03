@@ -4,8 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
@@ -21,6 +23,9 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class GridStructure extends Structure {
@@ -56,14 +61,55 @@ public class GridStructure extends Structure {
         ChunkPos chunkPos = context.chunkPos();
         int x = chunkPos.getMinBlockX();
         int z = chunkPos.getMinBlockZ();
-        int y = context.chunkGenerator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState());
-        
-        // Add the startHeight offset
-        y += this.startHeight.sample(context.random(), new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor()));
-        
-        BlockPos startPos = new BlockPos(x, y, z);
         
         Rotation rotation = Rotation.getRandom(context.random());
+        int totalWidth = this.widthChunks * this.gridSize;
+        int totalDepth = this.depthChunks * this.gridSize;
+
+        // Sample a 5x5 grid across the rotated footprint of the structure
+        List<Integer> heights = new ArrayList<>(25);
+        int sampleGridPoints = 5;
+        for (int i = 0; i < sampleGridPoints; i++) {
+            for (int j = 0; j < sampleGridPoints; j++) {
+                int localX = (i * totalWidth) / (sampleGridPoints - 1);
+                int localZ = (j * totalDepth) / (sampleGridPoints - 1);
+                BlockPos rotatedOffset = new BlockPos(localX, 0, localZ).rotate(rotation);
+                int sampleX = x + rotatedOffset.getX();
+                int sampleZ = z + rotatedOffset.getZ();
+
+                int sampleY = context.chunkGenerator().getBaseHeight(
+                    sampleX, sampleZ, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()
+                );
+
+                // Reject if structure footprint crosses outside allowed biomes
+                Holder<Biome> biome = context.biomeSource().getNoiseBiome(
+                    sampleX >> 2, sampleY >> 2, sampleZ >> 2, context.randomState().sampler()
+                );
+                if (!this.biomes().contains(biome)) {
+                    return Optional.empty();
+                }
+
+                heights.add(sampleY);
+            }
+        }
+
+        int minY = Collections.min(heights);
+        int maxY = Collections.max(heights);
+        int delta = maxY - minY;
+
+        // If slope variation exceeds 10 blocks, reject generation to prevent floating/buried outposts
+        if (delta > 10) {
+            return Optional.empty();
+        }
+
+        // Align anchor Y to the median sampled height
+        Collections.sort(heights);
+        int medianY = heights.get(heights.size() / 2);
+        
+        // Add the startHeight offset
+        int y = medianY + this.startHeight.sample(context.random(), new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor()));
+        
+        BlockPos startPos = new BlockPos(x, y, z);
 
         return Optional.of(new GenerationStub(startPos, builder -> this.generatePieces(builder, context, startPos, rotation)));
     }

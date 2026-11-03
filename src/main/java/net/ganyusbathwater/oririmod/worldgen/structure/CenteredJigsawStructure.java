@@ -45,6 +45,9 @@ public class CenteredJigsawStructure extends Structure {
         int z = chunkPos.getMiddleBlockZ();
         int radius = 32; // strict 2 chunk radius check
         
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+
         int step = 8;
         for (int checkX = x - radius; checkX <= x + radius; checkX += step) {
             for (int checkZ = z - radius; checkZ <= z + radius; checkZ += step) {
@@ -53,7 +56,14 @@ public class CenteredJigsawStructure extends Structure {
                 if (!this.biomes().contains(biome)) {
                     return Optional.empty(); // Cancel generation if too close to border on the surface
                 }
+                minY = Math.min(minY, height);
+                maxY = Math.max(maxY, height);
             }
+        }
+        
+        // Cancel generation if slope variation is too steep
+        if ((maxY - minY) > 10) {
+            return Optional.empty();
         }
         
         return this.jigsawStructure.findGenerationPoint(context);

@@ -31,6 +31,7 @@ import java.util.List;
 public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> OVERWORLD_MANA_GEODE_KEY = registerKey("mana_geode");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_KEY = registerKey("elder_tree");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_PINE_TREE_KEY = registerKey("elder_pine_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_TREE_KEY = registerKey("scarlet_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ABYSS_CROWN_TREE_KEY = registerKey("abyss_crown_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> EPOCH_TREE_KEY = registerKey("epoch_tree");

@@ -869,6 +869,11 @@ public class ModItems {
                         () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
         public static final DeferredItem<Item> ABYSS_CROWN_SIGN = ITEMS.register("abyss_crown_sign",
                         () -> new SignItem(new Item.Properties().stacksTo(16), net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_WALL_SIGN.get()));
+        public static final DeferredItem<Item> ELDER_PINE_SIGN = ITEMS.register("elder_pine_sign",
+                        () -> new SignItem(new Item.Properties().stacksTo(16), net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_PINE_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_PINE_WALL_SIGN.get()));
+        public static final DeferredItem<Item> ELDER_PINE_HANGING_SIGN = ITEMS.register("elder_pine_hanging_sign",
+                        () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_PINE_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ELDER_PINE_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
+
         public static final DeferredItem<Item> ABYSS_CROWN_HANGING_SIGN = ITEMS.register("abyss_crown_hanging_sign",
                         () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
 
@@ -882,6 +887,11 @@ public class ModItems {
                         () -> new ModBoatItem(true, ModBoatType.SCARLET, new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> ABYSS_CROWN_BOAT = ITEMS.register("abyss_crown_boat",
                         () -> new ModBoatItem(false, ModBoatType.ABYSS_CROWN, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> ELDER_PINE_BOAT = ITEMS.register("elder_pine_boat",
+                        () -> new ModBoatItem(false, ModBoatType.ELDER_PINE, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> ELDER_PINE_CHEST_BOAT = ITEMS.register("elder_pine_chest_boat",
+                        () -> new ModBoatItem(true, ModBoatType.ELDER_PINE, new Item.Properties().stacksTo(1)));
+
         public static final DeferredItem<Item> ABYSS_CROWN_CHEST_BOAT = ITEMS.register("abyss_crown_chest_boat",
                         () -> new ModBoatItem(true, ModBoatType.ABYSS_CROWN, new Item.Properties().stacksTo(1)));
 

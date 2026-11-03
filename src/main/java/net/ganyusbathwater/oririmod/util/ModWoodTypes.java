@@ -16,4 +16,7 @@ public class ModWoodTypes {
 
     public static final BlockSetType EPOCH_BLOCK_SET_TYPE = BlockSetType.register(new BlockSetType(OririMod.MOD_ID + ":epoch"));
     public static final WoodType EPOCH_WOOD_TYPE = WoodType.register(new WoodType(OririMod.MOD_ID + ":epoch", EPOCH_BLOCK_SET_TYPE));
+
+    public static final BlockSetType ELDER_PINE_BLOCK_SET_TYPE = BlockSetType.register(new BlockSetType(OririMod.MOD_ID + ":elder_pine"));
+    public static final WoodType ELDER_PINE_WOOD_TYPE = WoodType.register(new WoodType(OririMod.MOD_ID + ":elder_pine", ELDER_PINE_BLOCK_SET_TYPE));
 }

@@ -215,6 +215,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropPottedContents(ModBlocks.POTTED_EPOCH_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_EPOCH_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_MYRIAD_CACTUS.get());
+        dropPottedContents(ModBlocks.POTTED_ELDER_PINE_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_ELDER_PINE_SAPLING.get());
 
         dropSelf(ModBlocks.EQUINOX_TABLE.get());
 
@@ -301,6 +303,92 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
         dropSelf(ModBlocks.HANGING_ELDER_MOSS.get());
         dropOther(ModBlocks.HANGING_ELDER_MOSS_PLANT.get(), ModBlocks.HANGING_ELDER_MOSS.get());
+
+        // ===== ELDER PINE =====
+        dropSelf(ModBlocks.ELDER_PINE_LOG.get());
+        dropSelf(ModBlocks.STRIPPED_ELDER_PINE_LOG.get());
+        dropSelf(ModBlocks.ELDER_PINE_WOOD.get());
+        dropSelf(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get());
+        dropSelf(ModBlocks.ELDER_PINE_PLANKS.get());
+        dropSelf(ModBlocks.ELDER_PINE_STAIRS.get());
+        add(ModBlocks.ELDER_PINE_SLAB.get(), block -> createSlabItemTable(ModBlocks.ELDER_PINE_SLAB.get()));
+        dropSelf(ModBlocks.ELDER_PINE_FENCE.get());
+        dropSelf(ModBlocks.ELDER_PINE_GATE.get());
+        add(ModBlocks.ELDER_PINE_DOOR.get(), block -> createDoorTable(block));
+        dropSelf(ModBlocks.ELDER_PINE_TRAPDOOR.get());
+        dropSelf(ModBlocks.ELDER_PINE_BUTTON.get());
+        dropSelf(ModBlocks.ELDER_PINE_PRESSURE_PLATE.get());
+        dropOther(ModBlocks.ELDER_PINE_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_SIGN.get());
+        dropOther(ModBlocks.ELDER_PINE_WALL_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_SIGN.get());
+        dropOther(ModBlocks.ELDER_PINE_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_HANGING_SIGN.get());
+        dropOther(ModBlocks.ELDER_PINE_WALL_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_HANGING_SIGN.get());
+        add(ModBlocks.ELDER_PINE_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ELDER_PINE_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
+        dropSelf(ModBlocks.ELDER_PINE_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.get());
+
+        // ===== ELDER VALLEYS =====
+        add(ModBlocks.CATTAIL.get(), block -> createSinglePropConditionTable(block, net.minecraft.world.level.block.DoublePlantBlock.HALF, net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER));
+
+        // ===== GOLDEN SAVANNA =====
+        dropSelf(ModBlocks.CALICHE.get());
+        dropSelf(ModBlocks.CALICHE_STAIRS.get());
+        add(ModBlocks.CALICHE_SLAB.get(), block -> createSlabItemTable(ModBlocks.CALICHE_SLAB.get()));
+        dropSelf(ModBlocks.CALICHE_WALL.get());
+
+        dropSelf(ModBlocks.POLISHED_CALICHE.get());
+        dropSelf(ModBlocks.POLISHED_CALICHE_STAIRS.get());
+        add(ModBlocks.POLISHED_CALICHE_SLAB.get(), block -> createSlabItemTable(ModBlocks.POLISHED_CALICHE_SLAB.get()));
+        dropSelf(ModBlocks.POLISHED_CALICHE_WALL.get());
+
+        dropSelf(ModBlocks.CALICHE_BRICKS.get());
+        dropSelf(ModBlocks.CALICHE_BRICK_STAIRS.get());
+        add(ModBlocks.CALICHE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.CALICHE_BRICK_SLAB.get()));
+        dropSelf(ModBlocks.CALICHE_BRICK_WALL.get());
+        dropSelf(ModBlocks.CHISELED_CALICHE.get());
+
+        add(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
+        add(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get(), block -> createShearsDispatchTable(block, applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.WHEAT_SEEDS).when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.125F)))));
+        add(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.get(), block -> createDoublePlantWithSeedDrops(block, ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get()));
+
+        // ===== THE SILENT DEPTHS =====
+        dropSelf(ModBlocks.ABYSSAL_BASALT.get());
+        dropSelf(ModBlocks.ABYSSAL_BASALT_STAIRS.get());
+        add(ModBlocks.ABYSSAL_BASALT_SLAB.get(), block -> createSlabItemTable(ModBlocks.ABYSSAL_BASALT_SLAB.get()));
+
+        dropSelf(ModBlocks.POLISHED_ABYSSAL_BASALT.get());
+        dropSelf(ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS.get());
+        add(ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get(), block -> createSlabItemTable(ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get()));
+        dropSelf(ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get());
+
+        dropSelf(ModBlocks.ABYSSAL_BASALT_BRICKS.get());
+        dropSelf(ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get());
+        add(ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get()));
+        dropSelf(ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get());
+
+        dropSelf(ModBlocks.BENTHIC_SPONGE.get());
+        dropSelf(ModBlocks.WET_BENTHIC_SPONGE.get());
+        dropSelf(ModBlocks.HYDROTHERMAL_CHIMNEY.get());
+
+        // Corals (Silk touch or drop petrified)
+        add(ModBlocks.PETRIFIED_ELDER_CORAL_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, block));
+        add(ModBlocks.PETRIFIED_ELDER_CORAL.get(), block -> createSingleItemTableWithSilkTouch(block, block));
+        add(ModBlocks.PETRIFIED_ELDER_CORAL_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, block));
+        add(ModBlocks.PETRIFIED_ELDER_CORAL_WALL_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ELDER_CORAL_FAN.get()));
+
+        add(ModBlocks.ELDER_CORAL_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ELDER_CORAL_BLOCK.get()));
+        add(ModBlocks.ELDER_CORAL.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ELDER_CORAL.get()));
+        add(ModBlocks.ELDER_CORAL_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ELDER_CORAL_FAN.get()));
+        add(ModBlocks.ELDER_CORAL_WALL_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ELDER_CORAL_FAN.get()));
+
+        add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, block));
+        add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN.get(), block -> createSingleItemTableWithSilkTouch(block, block));
+        add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, block));
+        add(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_WALL_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.get()));
+
+        add(ModBlocks.ABYSSAL_CORAL_CROWN_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK.get()));
+        add(ModBlocks.ABYSSAL_CORAL_CROWN.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN.get()));
+        add(ModBlocks.ABYSSAL_CORAL_CROWN_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.get()));
+        add(ModBlocks.ABYSSAL_CORAL_CROWN_WALL_FAN.get(), block -> createSingleItemTableWithSilkTouch(block, ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.get()));
     }
 
     protected net.minecraft.world.level.storage.loot.LootTable.Builder createForcefieldEmitterTable(net.minecraft.world.level.block.Block block) {

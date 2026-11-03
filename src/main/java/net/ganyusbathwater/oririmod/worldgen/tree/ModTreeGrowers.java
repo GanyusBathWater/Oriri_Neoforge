@@ -10,6 +10,9 @@ public class ModTreeGrowers {
     public static final TreeGrower ELDER_TREE = new TreeGrower(OririMod.MOD_ID + ":elder_tree",
             Optional.empty(), Optional.of(ModConfiguredFeatures.ELDER_TREE_KEY), Optional.empty());
 
+    public static final TreeGrower ELDER_PINE_TREE = new TreeGrower(OririMod.MOD_ID + ":elder_pine_tree",
+            Optional.empty(), Optional.of(ModConfiguredFeatures.ELDER_PINE_TREE_KEY), Optional.empty());
+
     public static final TreeGrower SCARLET_TREE = new TreeGrower(OririMod.MOD_ID + ":scarlet_tree",
             Optional.empty(), Optional.of(ModConfiguredFeatures.SCARLET_TREE_KEY), Optional.empty());
 

@@ -227,6 +227,88 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.ABYSS_CROWN_HANGING_SIGN.get());
                 basicItem(ModItems.ABYSS_CROWN_BOAT.get());
                 basicItem(ModItems.ABYSS_CROWN_CHEST_BOAT.get());
+
+                // ===== ELDER PINE ITEMS =====
+                simpleBlockItem(ModBlocks.ELDER_PINE_LOG.get());
+                simpleBlockItem(ModBlocks.STRIPPED_ELDER_PINE_LOG.get());
+                simpleBlockItem(ModBlocks.ELDER_PINE_WOOD.get());
+                simpleBlockItem(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get());
+                simpleBlockItem(ModBlocks.ELDER_PINE_PLANKS.get());
+                simpleBlockItem(ModBlocks.ELDER_PINE_STAIRS.get());
+                simpleBlockItem(ModBlocks.ELDER_PINE_SLAB.get());
+                simpleBlockItem(ModBlocks.ELDER_PINE_GATE.get());
+                fenceItem(ModBlocks.ELDER_PINE_FENCE, ModBlocks.ELDER_PINE_PLANKS);
+                doorItem(ModBlocks.ELDER_PINE_DOOR);
+                trapdoorItem(ModBlocks.ELDER_PINE_TRAPDOOR);
+                buttonItem(ModBlocks.ELDER_PINE_BUTTON, ModBlocks.ELDER_PINE_PLANKS);
+                withExistingParent(ModBlocks.ELDER_PINE_PRESSURE_PLATE.getId().getPath(), modLoc("block/elder_pine_pressure_plate"));
+                basicItem(ModItems.ELDER_PINE_SIGN.get());
+                basicItem(ModItems.ELDER_PINE_HANGING_SIGN.get());
+                basicItem(ModItems.ELDER_PINE_BOAT.get());
+                basicItem(ModItems.ELDER_PINE_CHEST_BOAT.get());
+                simpleBlockItem(ModBlocks.ELDER_PINE_LEAVES.get());
+                saplingItem(ModBlocks.ELDER_PINE_SAPLING);
+                withExistingParent(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/elder_pine_sapling"));
+
+                // ===== ELDER VALLEYS =====
+                withExistingParent(ModBlocks.CATTAIL.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("item/cattail"));
+
+                // ===== GOLDEN SAVANNA =====
+                simpleBlockItem(ModBlocks.CALICHE.get());
+                simpleBlockItem(ModBlocks.CALICHE_STAIRS.get());
+                simpleBlockItem(ModBlocks.CALICHE_SLAB.get());
+                wallItem(ModBlocks.CALICHE_WALL, ModBlocks.CALICHE);
+
+                simpleBlockItem(ModBlocks.POLISHED_CALICHE.get());
+                simpleBlockItem(ModBlocks.POLISHED_CALICHE_STAIRS.get());
+                simpleBlockItem(ModBlocks.POLISHED_CALICHE_SLAB.get());
+                wallItem(ModBlocks.POLISHED_CALICHE_WALL, ModBlocks.POLISHED_CALICHE);
+
+                simpleBlockItem(ModBlocks.CALICHE_BRICKS.get());
+                simpleBlockItem(ModBlocks.CALICHE_BRICK_STAIRS.get());
+                simpleBlockItem(ModBlocks.CALICHE_BRICK_SLAB.get());
+                wallItem(ModBlocks.CALICHE_BRICK_WALL, ModBlocks.CALICHE_BRICKS);
+                simpleBlockItem(ModBlocks.CHISELED_CALICHE.get());
+
+                simpleBlockItem(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get());
+                withExistingParent(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/golden_savanna_short_grass"));
+                withExistingParent(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/golden_savanna_tall_grass_top"));
+
+                // ===== THE SILENT DEPTHS =====
+                simpleBlockItem(ModBlocks.ABYSSAL_BASALT.get());
+                simpleBlockItem(ModBlocks.ABYSSAL_BASALT_STAIRS.get());
+                simpleBlockItem(ModBlocks.ABYSSAL_BASALT_SLAB.get());
+
+                simpleBlockItem(ModBlocks.POLISHED_ABYSSAL_BASALT.get());
+                simpleBlockItem(ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS.get());
+                simpleBlockItem(ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get());
+                this.withExistingParent(ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.getId().getPath(), mcLoc("block/wall_inventory"))
+                        .texture("wall", modLoc("block/polished_abyssal_basalt_side"));
+
+                simpleBlockItem(ModBlocks.ABYSSAL_BASALT_BRICKS.get());
+                simpleBlockItem(ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get());
+                simpleBlockItem(ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get());
+                wallItem(ModBlocks.ABYSSAL_BASALT_BRICK_WALL, ModBlocks.ABYSSAL_BASALT_BRICKS);
+
+                simpleBlockItem(ModBlocks.BENTHIC_SPONGE.get());
+                simpleBlockItem(ModBlocks.WET_BENTHIC_SPONGE.get());
+                withExistingParent(ModBlocks.HYDROTHERMAL_CHIMNEY.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/hydrothermal_chimney_tip"));
+
+                simpleBlockItem(ModBlocks.PETRIFIED_ELDER_CORAL_BLOCK.get());
+                withExistingParent(ModBlocks.PETRIFIED_ELDER_CORAL.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/petrified_elder_coral"));
+                withExistingParent(ModBlocks.PETRIFIED_ELDER_CORAL_FAN.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/petrified_elder_coral_fan"));
+
+                simpleBlockItem(ModBlocks.ELDER_CORAL_BLOCK.get());
+                withExistingParent(ModBlocks.ELDER_CORAL.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/elder_coral"));
+                withExistingParent(ModBlocks.ELDER_CORAL_FAN.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/elder_coral_fan"));
+
+                simpleBlockItem(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK.get());
+                withExistingParent(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/petrified_abyssal_coral_crown"));
+                withExistingParent(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/petrified_abyssal_coral_crown_fan"));
+
+                simpleBlockItem(ModBlocks.ABYSSAL_CORAL_CROWN_BLOCK.get());
+                withExistingParent(ModBlocks.ABYSSAL_CORAL_CROWN.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/abyssal_coral_crown"));
+                withExistingParent(ModBlocks.ABYSSAL_CORAL_CROWN_FAN.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/abyssal_coral_crown_fan"));
                 simpleBlockItem(ModBlocks.ABYSS_CROWN_LEAVES.get());
                 saplingItem(ModBlocks.ABYSS_CROWN_SAPLING);
 

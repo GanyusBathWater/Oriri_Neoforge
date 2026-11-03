@@ -324,6 +324,109 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 // Pointed Scarlet Dripstone — direction × thickness variants
                 pointedDripstoneBlock();
 
+                // ===== ELDER PINE =====
+                axisBlock(((RotatedPillarBlock) ModBlocks.ELDER_PINE_LOG.get()),
+                                modLoc("block/elder_pine_log"),
+                                modLoc("block/elder_pine_log_top"));
+                axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_ELDER_PINE_LOG.get()),
+                                modLoc("block/stripped_elder_pine_log"),
+                                modLoc("block/stripped_elder_pine_log_top"));
+                axisBlock(((RotatedPillarBlock) ModBlocks.ELDER_PINE_WOOD.get()),
+                                modLoc("block/elder_pine_log"),
+                                modLoc("block/elder_pine_log"));
+                axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_ELDER_PINE_WOOD.get()),
+                                modLoc("block/stripped_elder_pine_log"),
+                                modLoc("block/stripped_elder_pine_log"));
+
+                blockWithItem(ModBlocks.ELDER_PINE_PLANKS, 1);
+                stairsBlock(ModBlocks.ELDER_PINE_STAIRS.get(), blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()));
+                slabBlock(ModBlocks.ELDER_PINE_SLAB.get(), blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()),
+                                blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()));
+                fenceBlock(ModBlocks.ELDER_PINE_FENCE.get(), blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()));
+                fenceGateBlock(ModBlocks.ELDER_PINE_GATE.get(), blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()));
+
+                doorBlockWithRenderType((DoorBlock) ModBlocks.ELDER_PINE_DOOR.get(), modLoc("block/elder_pine_door_bottom"), modLoc("block/elder_pine_door_top"), "cutout");
+                trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.ELDER_PINE_TRAPDOOR.get(), modLoc("block/elder_pine_trapdoor"), true, "cutout");
+
+                buttonBlock((net.minecraft.world.level.block.ButtonBlock) ModBlocks.ELDER_PINE_BUTTON.get(), blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()));
+                pressurePlateBlock((net.minecraft.world.level.block.PressurePlateBlock) ModBlocks.ELDER_PINE_PRESSURE_PLATE.get(), blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()));
+
+                signBlock((net.minecraft.world.level.block.StandingSignBlock) ModBlocks.ELDER_PINE_SIGN.get(), (net.minecraft.world.level.block.WallSignBlock) ModBlocks.ELDER_PINE_WALL_SIGN.get(), blockTexture(ModBlocks.ELDER_PINE_PLANKS.get()));
+                hangingSignBlock(ModBlocks.ELDER_PINE_HANGING_SIGN.get(), ModBlocks.ELDER_PINE_WALL_HANGING_SIGN.get(), modLoc("block/elder_pine_log"));
+
+                blockWithItem(ModBlocks.ELDER_PINE_LEAVES, 3);
+                saplingBlock(ModBlocks.ELDER_PINE_SAPLING);
+                simpleBlockWithItem(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.get(), models().cross("upgraded_elder_pine_sapling", modLoc("block/elder_pine_sapling")).renderType("cutout"));
+
+                // ===== ELDER VALLEYS =====
+                cattailBlock();
+
+                // ===== GOLDEN SAVANNA =====
+                blockWithItem(ModBlocks.CALICHE, 1);
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.CALICHE_STAIRS.get(), modLoc("block/caliche"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.CALICHE_SLAB.get(), modLoc("block/caliche"), modLoc("block/caliche"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.CALICHE_WALL.get(), modLoc("block/caliche"));
+
+                blockWithItem(ModBlocks.POLISHED_CALICHE, 1);
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.POLISHED_CALICHE_STAIRS.get(), modLoc("block/polished_caliche"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.POLISHED_CALICHE_SLAB.get(), modLoc("block/polished_caliche"), modLoc("block/polished_caliche"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.POLISHED_CALICHE_WALL.get(), modLoc("block/polished_caliche"));
+
+                blockWithItem(ModBlocks.CALICHE_BRICKS, 1);
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.CALICHE_BRICK_STAIRS.get(), modLoc("block/caliche_bricks"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.CALICHE_BRICK_SLAB.get(), modLoc("block/caliche_bricks"), modLoc("block/caliche_bricks"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.CALICHE_BRICK_WALL.get(), modLoc("block/caliche_bricks"));
+                blockWithItem(ModBlocks.CHISELED_CALICHE, 1);
+
+                simpleBlockWithItem(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get(),
+                                models().cubeBottomTop("golden_savanna_grass_block",
+                                                modLoc("block/golden_savanna_grass_block_side"),
+                                                mcLoc("block/dirt"),
+                                                modLoc("block/golden_savanna_grass_block_top")));
+                simpleBlockWithItem(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get(), models().cross("golden_savanna_short_grass", modLoc("block/golden_savanna_short_grass")).renderType("cutout"));
+                goldenSavannaTallGrassBlock();
+
+                // ===== THE SILENT DEPTHS =====
+                simpleBlockWithItem(ModBlocks.ABYSSAL_BASALT.get(), models().cubeBottomTop("abyssal_basalt", modLoc("block/abyssal_basalt_side"), modLoc("block/abyssal_basalt_top"), modLoc("block/abyssal_basalt_top")));
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.ABYSSAL_BASALT_STAIRS.get(), modLoc("block/abyssal_basalt_side"), modLoc("block/abyssal_basalt_top"), modLoc("block/abyssal_basalt_top"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.ABYSSAL_BASALT_SLAB.get(), modLoc("block/abyssal_basalt"), modLoc("block/abyssal_basalt_side"), modLoc("block/abyssal_basalt_top"), modLoc("block/abyssal_basalt_top"));
+
+                simpleBlockWithItem(ModBlocks.POLISHED_ABYSSAL_BASALT.get(), models().cubeBottomTop("polished_abyssal_basalt", modLoc("block/polished_abyssal_basalt_side"), modLoc("block/polished_abyssal_basalt_top"), modLoc("block/polished_abyssal_basalt_top")));
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS.get(), modLoc("block/polished_abyssal_basalt_side"), modLoc("block/polished_abyssal_basalt_top"), modLoc("block/polished_abyssal_basalt_top"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get(), modLoc("block/polished_abyssal_basalt"), modLoc("block/polished_abyssal_basalt_side"), modLoc("block/polished_abyssal_basalt_top"), modLoc("block/polished_abyssal_basalt_top"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get(), modLoc("block/polished_abyssal_basalt_side"));
+
+                blockWithItem(ModBlocks.ABYSSAL_BASALT_BRICKS, 1);
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get(), modLoc("block/abyssal_basalt_bricks"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), modLoc("block/abyssal_basalt_bricks"), modLoc("block/abyssal_basalt_bricks"));
+                wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get(), modLoc("block/abyssal_basalt_bricks"));
+
+                blockWithItem(ModBlocks.BENTHIC_SPONGE, 1);
+                blockWithItem(ModBlocks.WET_BENTHIC_SPONGE, 1);
+                hydrothermalChimneyBlock();
+
+                // Petrified Corals
+                blockWithItem(ModBlocks.PETRIFIED_ELDER_CORAL_BLOCK, 1);
+                simpleBlockWithItem(ModBlocks.PETRIFIED_ELDER_CORAL.get(), models().cross("petrified_elder_coral", modLoc("block/petrified_elder_coral")).renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.PETRIFIED_ELDER_CORAL_FAN.get(), models().withExistingParent("petrified_elder_coral_fan", mcLoc("block/coral_fan")).texture("fan", modLoc("block/petrified_elder_coral_fan")).renderType("cutout"));
+                horizontalBlock(ModBlocks.PETRIFIED_ELDER_CORAL_WALL_FAN.get(), models().withExistingParent("petrified_elder_coral_wall_fan", mcLoc("block/coral_wall_fan")).texture("fan", modLoc("block/petrified_elder_coral_fan")).renderType("cutout"));
+
+                blockWithItem(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_BLOCK, 1);
+                simpleBlockWithItem(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN.get(), models().cross("petrified_abyssal_coral_crown", modLoc("block/petrified_abyssal_coral_crown")).renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.get(), models().withExistingParent("petrified_abyssal_coral_crown_fan", mcLoc("block/coral_fan")).texture("fan", modLoc("block/petrified_abyssal_coral_crown_fan")).renderType("cutout"));
+                horizontalBlock(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_WALL_FAN.get(), models().withExistingParent("petrified_abyssal_coral_crown_wall_fan", mcLoc("block/coral_wall_fan")).texture("fan", modLoc("block/petrified_abyssal_coral_crown_fan")).renderType("cutout"));
+
+                // Living Corals
+                blockWithItem(ModBlocks.ELDER_CORAL_BLOCK, 1);
+                simpleBlockWithItem(ModBlocks.ELDER_CORAL.get(), models().cross("elder_coral", modLoc("block/elder_coral")).renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.ELDER_CORAL_FAN.get(), models().withExistingParent("elder_coral_fan", mcLoc("block/coral_fan")).texture("fan", modLoc("block/elder_coral_fan")).renderType("cutout"));
+                horizontalBlock(ModBlocks.ELDER_CORAL_WALL_FAN.get(), models().withExistingParent("elder_coral_wall_fan", mcLoc("block/coral_wall_fan")).texture("fan", modLoc("block/elder_coral_fan")).renderType("cutout"));
+
+                blockWithItem(ModBlocks.ABYSSAL_CORAL_CROWN_BLOCK, 1);
+                simpleBlockWithItem(ModBlocks.ABYSSAL_CORAL_CROWN.get(), models().cross("abyssal_coral_crown", modLoc("block/abyssal_coral_crown")).renderType("cutout"));
+                simpleBlockWithItem(ModBlocks.ABYSSAL_CORAL_CROWN_FAN.get(), models().withExistingParent("abyssal_coral_crown_fan", mcLoc("block/coral_fan")).texture("fan", modLoc("block/abyssal_coral_crown_fan")).renderType("cutout"));
+                horizontalBlock(ModBlocks.ABYSSAL_CORAL_CROWN_WALL_FAN.get(), models().withExistingParent("abyssal_coral_crown_wall_fan", mcLoc("block/coral_wall_fan")).texture("fan", modLoc("block/abyssal_coral_crown_fan")).renderType("cutout"));
+
                 // ===== SOL SAND BLOCKS =====
                 blockWithItem(ModBlocks.SOL_SAND, 1);
                 
@@ -905,4 +1008,78 @@ public class ModBlockStateProvider extends BlockStateProvider {
         }
     }
 
+
+        private void hydrothermalChimneyBlock() {
+                Block block = ModBlocks.HYDROTHERMAL_CHIMNEY.get();
+                getVariantBuilder(block).forAllStates(state -> {
+                        String thickness = state.getValue(BlockStateProperties.DRIPSTONE_THICKNESS).getSerializedName();
+                        String texture = thickness.equals("tip_merge") ? "hydrothermal_chimney_tip" : ("hydrothermal_chimney_" + thickness);
+                        String modelName = "hydrothermal_chimney_" + thickness;
+
+                        return ConfiguredModel.builder()
+                                        .modelFile(models().cross(modelName, modLoc("block/" + texture))
+                                                        .renderType("cutout"))
+                                        .build();
+                });
+        }
+
+        private void cattailBlock() {
+                Block block = ModBlocks.CATTAIL.get();
+                getVariantBuilder(block).forAllStates(state -> {
+                        net.minecraft.world.level.block.state.properties.DoubleBlockHalf half = state.getValue(net.minecraft.world.level.block.DoublePlantBlock.HALF);
+                        String halfTexture = half == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER ? "cattail_bottom" : "cattail_top";
+                        String modelName = "cattail_" + half.getSerializedName();
+
+                        BlockModelBuilder model = models().withExistingParent(modelName, mcLoc("block/tinted_cross"))
+                                        .texture("cross", modLoc("block/" + halfTexture))
+                                        .renderType("cutout");
+
+                        return ConfiguredModel.builder().modelFile(model).build();
+                });
+        }
+
+        private void goldenSavannaTallGrassBlock() {
+                Block block = ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.get();
+                getVariantBuilder(block).forAllStates(state -> {
+                        net.minecraft.world.level.block.state.properties.DoubleBlockHalf half = state.getValue(net.minecraft.world.level.block.DoublePlantBlock.HALF);
+                        String halfTexture = half == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER ? "golden_savanna_tall_grass_bottom" : "golden_savanna_tall_grass_top";
+                        String modelName = "golden_savanna_tall_grass_" + half.getSerializedName();
+
+                        BlockModelBuilder model = models().withExistingParent(modelName, mcLoc("block/tinted_cross"))
+                                        .texture("cross", modLoc("block/" + halfTexture))
+                                        .renderType("cutout");
+
+                        return ConfiguredModel.builder().modelFile(model).build();
+                });
+        }
+
+        private void coralBlockWithEmissive(DeferredBlock<?> block, String name, String texture, String emissiveTexture) {
+                BlockModelBuilder model = models().withExistingParent(name, mcLoc("block/block"))
+                                .texture("particle", modLoc("block/" + texture));
+
+                // Layer 0: normal
+                model.element()
+                                .from(0, 0, 0).to(16, 16, 16)
+                                .face(Direction.DOWN).texture("#diffuse").cullface(Direction.DOWN).end()
+                                .face(Direction.UP).texture("#diffuse").cullface(Direction.UP).end()
+                                .face(Direction.NORTH).texture("#diffuse").cullface(Direction.NORTH).end()
+                                .face(Direction.SOUTH).texture("#diffuse").cullface(Direction.SOUTH).end()
+                                .face(Direction.WEST).texture("#diffuse").cullface(Direction.WEST).end()
+                                .face(Direction.EAST).texture("#diffuse").cullface(Direction.EAST).end();
+
+                // Layer 1: emissive
+                model.element()
+                                .from(0, 0, 0).to(16, 16, 16)
+                                .face(Direction.DOWN).texture("#emissive").cullface(Direction.DOWN).end()
+                                .face(Direction.UP).texture("#emissive").cullface(Direction.UP).end()
+                                .face(Direction.NORTH).texture("#emissive").cullface(Direction.NORTH).end()
+                                .face(Direction.SOUTH).texture("#emissive").cullface(Direction.SOUTH).end()
+                                .face(Direction.WEST).texture("#emissive").cullface(Direction.WEST).end()
+                                .face(Direction.EAST).texture("#emissive").cullface(Direction.EAST).end();
+
+                model.texture("diffuse", modLoc("block/" + texture));
+                model.texture("emissive", modLoc("block/" + emissiveTexture));
+
+                simpleBlockWithItem(block.get(), model);
+        }
 }

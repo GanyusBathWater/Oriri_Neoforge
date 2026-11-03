@@ -238,6 +238,55 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 fenceGateBuilder(ModBlocks.EPOCH_GATE.get(), Ingredient.of(ModBlocks.EPOCH_WOOD_PLANKS))
                                 .unlockedBy("has_epoch_wood_planks", has(ModBlocks.EPOCH_WOOD_PLANKS)).save(recipeOutput);
 
+                // ===== ELDER PINE RECIPES =====
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_PLANKS.get(), 4).requires(ModBlocks.ELDER_PINE_LOG.get()).unlockedBy("has_log", has(ModBlocks.ELDER_PINE_LOG.get())).save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_WOOD.get(), 3).define('#', ModBlocks.ELDER_PINE_LOG.get()).pattern("##").pattern("##").unlockedBy("has_log", has(ModBlocks.ELDER_PINE_LOG.get())).save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.STRIPPED_ELDER_PINE_WOOD.get(), 3).define('#', ModBlocks.STRIPPED_ELDER_PINE_LOG.get()).pattern("##").pattern("##").unlockedBy("has_log", has(ModBlocks.STRIPPED_ELDER_PINE_LOG.get())).save(recipeOutput);
+                stairBuilder(ModBlocks.ELDER_PINE_STAIRS.get(), Ingredient.of(ModBlocks.ELDER_PINE_PLANKS))
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_SLAB.get(), ModBlocks.ELDER_PINE_PLANKS.get());
+                fenceBuilder(ModBlocks.ELDER_PINE_FENCE.get(), Ingredient.of(ModBlocks.ELDER_PINE_PLANKS))
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
+                fenceGateBuilder(ModBlocks.ELDER_PINE_GATE.get(), Ingredient.of(ModBlocks.ELDER_PINE_PLANKS))
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
+                doorBuilder(ModBlocks.ELDER_PINE_DOOR.get(), Ingredient.of(ModBlocks.ELDER_PINE_PLANKS))
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
+                trapdoorBuilder(ModBlocks.ELDER_PINE_TRAPDOOR.get(), Ingredient.of(ModBlocks.ELDER_PINE_PLANKS))
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
+                buttonBuilder(ModBlocks.ELDER_PINE_BUTTON.get(), Ingredient.of(ModBlocks.ELDER_PINE_PLANKS))
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
+                pressurePlate(recipeOutput, ModBlocks.ELDER_PINE_PRESSURE_PLATE.get(), ModBlocks.ELDER_PINE_PLANKS.get());
+
+                // ===== CALICHE & BASALT STONECUTTING =====
+                stairBuilder(ModBlocks.CALICHE_STAIRS.get(), Ingredient.of(ModBlocks.CALICHE))
+                                .unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_SLAB.get(), ModBlocks.CALICHE.get());
+                wall(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_WALL.get(), ModBlocks.CALICHE.get());
+
+                stairBuilder(ModBlocks.POLISHED_CALICHE_STAIRS.get(), Ingredient.of(ModBlocks.POLISHED_CALICHE))
+                                .unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_SLAB.get(), ModBlocks.POLISHED_CALICHE.get());
+                wall(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_WALL.get(), ModBlocks.POLISHED_CALICHE.get());
+
+                stairBuilder(ModBlocks.CALICHE_BRICK_STAIRS.get(), Ingredient.of(ModBlocks.CALICHE_BRICKS))
+                                .unlockedBy("has_caliche_bricks", has(ModBlocks.CALICHE_BRICKS)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_SLAB.get(), ModBlocks.CALICHE_BRICKS.get());
+                wall(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_WALL.get(), ModBlocks.CALICHE_BRICKS.get());
+
+                stairBuilder(ModBlocks.ABYSSAL_BASALT_STAIRS.get(), Ingredient.of(ModBlocks.ABYSSAL_BASALT))
+                                .unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_SLAB.get(), ModBlocks.ABYSSAL_BASALT.get());
+
+                stairBuilder(ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS.get(), Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT))
+                                .unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get(), ModBlocks.POLISHED_ABYSSAL_BASALT.get());
+                wall(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get(), ModBlocks.POLISHED_ABYSSAL_BASALT.get());
+
+                stairBuilder(ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get(), Ingredient.of(ModBlocks.ABYSSAL_BASALT_BRICKS))
+                                .unlockedBy("has_abyssal_basalt_bricks", has(ModBlocks.ABYSSAL_BASALT_BRICKS)).save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), ModBlocks.ABYSSAL_BASALT_BRICKS.get());
+                wall(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get(), ModBlocks.ABYSSAL_BASALT_BRICKS.get());
+
                 // --- Scarlet Stone Recipes ---
                 // Scarlet Stone from Cobblestone
                 SimpleCookingRecipeBuilder
