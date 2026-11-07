@@ -23,7 +23,11 @@ import net.minecraft.world.level.levelgen.GeodeLayerSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.*;
+import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 
 import java.util.List;
@@ -115,6 +119,15 @@ public class ModConfiguredFeatures {
                                 BlockStateProvider.simple(ModBlocks.ELDER_LEAVES_FLOWERING.get().defaultBlockState()),
                                 0.2f, true, true);
                 register(context, ELDER_TREE_KEY, ModFeatures.ELDER_GIANT_TREE.get(), elderCfg);
+
+                var elderPineTreeConfig = new TreeConfiguration.TreeConfigurationBuilder(
+                                BlockStateProvider.simple(ModBlocks.ELDER_PINE_LOG.get()),
+                                new StraightTrunkPlacer(7, 3, 3),
+                                BlockStateProvider.simple(ModBlocks.ELDER_PINE_LEAVES.get()),
+                                new PineFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1), UniformInt.of(4, 7)),
+                                new TwoLayersFeatureSize(1, 0, 1))
+                                .ignoreVines().build();
+                register(context, ELDER_PINE_TREE_KEY, Feature.TREE, elderPineTreeConfig);
 
                 var scarletCfg = new ElderGiantTreeConfig(UniformInt.of(8, 15), UniformInt.of(1, 2),
                                 UniformInt.of(2, 4), UniformInt.of(2, 4),

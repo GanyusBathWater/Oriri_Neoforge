@@ -239,9 +239,34 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_epoch_wood_planks", has(ModBlocks.EPOCH_WOOD_PLANKS)).save(recipeOutput);
 
                 // ===== ELDER PINE RECIPES =====
-                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_PLANKS.get(), 4).requires(ModBlocks.ELDER_PINE_LOG.get()).unlockedBy("has_log", has(ModBlocks.ELDER_PINE_LOG.get())).save(recipeOutput);
-                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_WOOD.get(), 3).define('#', ModBlocks.ELDER_PINE_LOG.get()).pattern("##").pattern("##").unlockedBy("has_log", has(ModBlocks.ELDER_PINE_LOG.get())).save(recipeOutput);
-                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.STRIPPED_ELDER_PINE_WOOD.get(), 3).define('#', ModBlocks.STRIPPED_ELDER_PINE_LOG.get()).pattern("##").pattern("##").unlockedBy("has_log", has(ModBlocks.STRIPPED_ELDER_PINE_LOG.get())).save(recipeOutput);
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_PLANKS.get(), 4)
+                                .requires(ModBlocks.ELDER_PINE_LOG.get())
+                                .unlockedBy("has_elder_pine_log", has(ModBlocks.ELDER_PINE_LOG.get()))
+                                .save(recipeOutput, "oririmod:elder_pine_planks_from_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_ELDER_PINE_LOG.get())
+                                .unlockedBy("has_stripped_elder_pine_log", has(ModBlocks.STRIPPED_ELDER_PINE_LOG.get()))
+                                .save(recipeOutput, "oririmod:elder_pine_planks_from_stripped_log");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_PLANKS.get(), 4)
+                                .requires(ModBlocks.ELDER_PINE_WOOD.get())
+                                .unlockedBy("has_elder_pine_wood", has(ModBlocks.ELDER_PINE_WOOD.get()))
+                                .save(recipeOutput, "oririmod:elder_pine_planks_from_wood");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get())
+                                .unlockedBy("has_stripped_elder_pine_wood", has(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get()))
+                                .save(recipeOutput, "oririmod:elder_pine_planks_from_stripped_wood");
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_WOOD.get(), 3)
+                                .define('#', ModBlocks.ELDER_PINE_LOG.get())
+                                .pattern("##").pattern("##")
+                                .unlockedBy("has_elder_pine_log", has(ModBlocks.ELDER_PINE_LOG.get()))
+                                .save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.STRIPPED_ELDER_PINE_WOOD.get(), 3)
+                                .define('#', ModBlocks.STRIPPED_ELDER_PINE_LOG.get())
+                                .pattern("##").pattern("##")
+                                .unlockedBy("has_stripped_elder_pine_log", has(ModBlocks.STRIPPED_ELDER_PINE_LOG.get()))
+                                .save(recipeOutput);
+
                 stairBuilder(ModBlocks.ELDER_PINE_STAIRS.get(), Ingredient.of(ModBlocks.ELDER_PINE_PLANKS))
                                 .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
                 slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ELDER_PINE_SLAB.get(), ModBlocks.ELDER_PINE_PLANKS.get());
@@ -257,7 +282,47 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS)).save(recipeOutput);
                 pressurePlate(recipeOutput, ModBlocks.ELDER_PINE_PRESSURE_PLATE.get(), ModBlocks.ELDER_PINE_PLANKS.get());
 
-                // ===== CALICHE & BASALT STONECUTTING =====
+                ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_SIGN.get(), 3)
+                                .define('#', ModBlocks.ELDER_PINE_PLANKS.get())
+                                .define('X', Items.STICK)
+                                .pattern("###").pattern("###").pattern(" X ")
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS.get()))
+                                .save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_HANGING_SIGN.get(), 6)
+                                .define('#', ModBlocks.STRIPPED_ELDER_PINE_LOG.get())
+                                .define('X', Items.CHAIN)
+                                .pattern("X X").pattern("###").pattern("###")
+                                .unlockedBy("has_stripped_elder_pine_log", has(ModBlocks.STRIPPED_ELDER_PINE_LOG.get()))
+                                .save(recipeOutput);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_BOAT.get())
+                                .define('#', ModBlocks.ELDER_PINE_PLANKS.get())
+                                .pattern("# #").pattern("###")
+                                .unlockedBy("has_elder_pine_planks", has(ModBlocks.ELDER_PINE_PLANKS.get()))
+                                .save(recipeOutput);
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_CHEST_BOAT.get())
+                                .requires(Blocks.CHEST)
+                                .requires(net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_BOAT.get())
+                                .unlockedBy("has_elder_pine_boat", has(net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_BOAT.get()))
+                                .save(recipeOutput);
+
+                // ===== CALICHE RECIPES =====
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE.get(), 4)
+                                .define('#', ModBlocks.CALICHE.get())
+                                .pattern("##").pattern("##")
+                                .unlockedBy("has_caliche", has(ModBlocks.CALICHE.get()))
+                                .save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICKS.get(), 4)
+                                .define('#', ModBlocks.POLISHED_CALICHE.get())
+                                .pattern("##").pattern("##")
+                                .unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE.get()))
+                                .save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_CALICHE.get(), 1)
+                                .define('#', ModBlocks.CALICHE_SLAB.get())
+                                .pattern("#").pattern("#")
+                                .unlockedBy("has_caliche_slab", has(ModBlocks.CALICHE_SLAB.get()))
+                                .save(recipeOutput);
+
                 stairBuilder(ModBlocks.CALICHE_STAIRS.get(), Ingredient.of(ModBlocks.CALICHE))
                                 .unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput);
                 slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_SLAB.get(), ModBlocks.CALICHE.get());
@@ -273,6 +338,45 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_SLAB.get(), ModBlocks.CALICHE_BRICKS.get());
                 wall(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_WALL.get(), ModBlocks.CALICHE_BRICKS.get());
 
+                // Caliche Stonecutting
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_STAIRS.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:caliche_stairs_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_SLAB.get(), 2).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:caliche_slab_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_WALL.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:caliche_wall_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:polished_caliche_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_STAIRS.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:polished_caliche_stairs_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_SLAB.get(), 2).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:polished_caliche_slab_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_WALL.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:polished_caliche_wall_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICKS.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:caliche_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_STAIRS.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:caliche_brick_stairs_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_SLAB.get(), 2).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:caliche_brick_slab_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_WALL.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:caliche_brick_wall_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_CALICHE.get()).unlockedBy("has_caliche", has(ModBlocks.CALICHE)).save(recipeOutput, "oririmod:chiseled_caliche_stonecutting");
+
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_STAIRS.get()).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:polished_caliche_stairs_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_SLAB.get(), 2).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:polished_caliche_slab_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CALICHE_WALL.get()).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:polished_caliche_wall_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICKS.get()).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:caliche_bricks_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_STAIRS.get()).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:caliche_brick_stairs_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_SLAB.get(), 2).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:caliche_brick_slab_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_WALL.get()).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:caliche_brick_wall_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_CALICHE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_CALICHE.get()).unlockedBy("has_polished_caliche", has(ModBlocks.POLISHED_CALICHE)).save(recipeOutput, "oririmod:chiseled_caliche_from_polished_stonecutting");
+
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_STAIRS.get()).unlockedBy("has_caliche_bricks", has(ModBlocks.CALICHE_BRICKS)).save(recipeOutput, "oririmod:caliche_brick_stairs_from_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_SLAB.get(), 2).unlockedBy("has_caliche_bricks", has(ModBlocks.CALICHE_BRICKS)).save(recipeOutput, "oririmod:caliche_brick_slab_from_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_WALL.get()).unlockedBy("has_caliche_bricks", has(ModBlocks.CALICHE_BRICKS)).save(recipeOutput, "oririmod:caliche_brick_wall_from_bricks_stonecutting");
+
+                // ===== ABYSSAL BASALT RECIPES =====
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT.get(), 4)
+                                .define('#', ModBlocks.ABYSSAL_BASALT.get())
+                                .pattern("##").pattern("##")
+                                .unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT.get()))
+                                .save(recipeOutput);
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICKS.get(), 4)
+                                .define('#', ModBlocks.POLISHED_ABYSSAL_BASALT.get())
+                                .pattern("##").pattern("##")
+                                .unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT.get()))
+                                .save(recipeOutput);
+
                 stairBuilder(ModBlocks.ABYSSAL_BASALT_STAIRS.get(), Ingredient.of(ModBlocks.ABYSSAL_BASALT))
                                 .unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput);
                 slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_SLAB.get(), ModBlocks.ABYSSAL_BASALT.get());
@@ -286,6 +390,37 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_abyssal_basalt_bricks", has(ModBlocks.ABYSSAL_BASALT_BRICKS)).save(recipeOutput);
                 slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), ModBlocks.ABYSSAL_BASALT_BRICKS.get());
                 wall(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get(), ModBlocks.ABYSSAL_BASALT_BRICKS.get());
+
+                // Abyssal Basalt Stonecutting
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_STAIRS.get()).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_stairs_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_SLAB.get(), 2).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_slab_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT.get()).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:polished_abyssal_basalt_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS.get()).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:polished_abyssal_basalt_stairs_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get(), 2).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:polished_abyssal_basalt_slab_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get()).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:polished_abyssal_basalt_wall_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICKS.get()).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get()).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_brick_stairs_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), 2).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_brick_slab_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get()).unlockedBy("has_abyssal_basalt", has(ModBlocks.ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_brick_wall_stonecutting");
+
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_STAIRS.get()).unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput, "oririmod:polished_abyssal_basalt_stairs_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get(), 2).unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput, "oririmod:polished_abyssal_basalt_slab_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get()).unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput, "oririmod:polished_abyssal_basalt_wall_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICKS.get()).unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_bricks_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get()).unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_brick_stairs_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), 2).unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_brick_slab_from_polished_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.POLISHED_ABYSSAL_BASALT), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get()).unlockedBy("has_polished_abyssal_basalt", has(ModBlocks.POLISHED_ABYSSAL_BASALT)).save(recipeOutput, "oririmod:abyssal_basalt_brick_wall_from_polished_stonecutting");
+
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get()).unlockedBy("has_abyssal_basalt_bricks", has(ModBlocks.ABYSSAL_BASALT_BRICKS)).save(recipeOutput, "oririmod:abyssal_basalt_brick_stairs_from_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), 2).unlockedBy("has_abyssal_basalt_bricks", has(ModBlocks.ABYSSAL_BASALT_BRICKS)).save(recipeOutput, "oririmod:abyssal_basalt_brick_slab_from_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.ABYSSAL_BASALT_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get()).unlockedBy("has_abyssal_basalt_bricks", has(ModBlocks.ABYSSAL_BASALT_BRICKS)).save(recipeOutput, "oririmod:abyssal_basalt_brick_wall_from_bricks_stonecutting");
+
+                // ===== BENTHIC SPONGE SMELTING =====
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.WET_BENTHIC_SPONGE), RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.BENTHIC_SPONGE.get(), 0.15f, 200)
+                                .unlockedBy("has_wet_benthic_sponge", has(ModBlocks.WET_BENTHIC_SPONGE))
+                                .save(recipeOutput, "oririmod:benthic_sponge_from_smelting");
 
                 // --- Scarlet Stone Recipes ---
                 // Scarlet Stone from Cobblestone

@@ -25,6 +25,7 @@ public class ModPlacedFeatures {
                         "mana_geode_placed");
 
         public static final ResourceKey<PlacedFeature> ELDER_TREE_PLACED_KEY = registerKey("elder_tree_placed");
+        public static final ResourceKey<PlacedFeature> ELDER_PINE_TREE_PLACED_KEY = registerKey("elder_pine_tree_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_TREE_PLACED_KEY = registerKey("scarlet_tree_placed");
         
         // Golden Desert Features
@@ -110,6 +111,14 @@ public class ModPlacedFeatures {
                                 InSquarePlacement.spread(),
                                 HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES));
                 register(context, ELDER_TREE_PLACED_KEY, configuredElderTree, elderTreeModifiers);
+
+                var configuredElderPineTree = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELDER_PINE_TREE_KEY);
+                List<PlacementModifier> elderPineModifiers = List.of(
+                                CountPlacement.of(4),
+                                InSquarePlacement.spread(),
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
+                                BiomeFilter.biome());
+                register(context, ELDER_PINE_TREE_PLACED_KEY, configuredElderPineTree, elderPineModifiers);
 
                 var configuredFallenLogs = configuredFeatures.getOrThrow(ModConfiguredFeatures.FALLEN_LOGS_KEY);
                 register(context, FALLEN_LOGS_PLACED_KEY, configuredFallenLogs, List.of(

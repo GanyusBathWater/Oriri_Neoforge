@@ -53,5 +53,12 @@ public class WetBenthicSpongeBlock extends Block {
             }
         }
     }
+
+    @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<net.minecraft.network.chat.Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.wet_benthic_sponge.desc").withStyle(net.minecraft.ChatFormatting.GRAY));
+        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.wet_benthic_sponge.smelt").withStyle(net.minecraft.ChatFormatting.DARK_AQUA));
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    }
 }
 

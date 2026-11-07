@@ -81,5 +81,12 @@ public class BenthicSpongeBlock extends Block {
 
         return removedCount > 0;
     }
+
+    @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, java.util.List<net.minecraft.network.chat.Component> tooltipComponents, net.minecraft.world.item.TooltipFlag tooltipFlag) {
+        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.benthic_sponge.desc").withStyle(net.minecraft.ChatFormatting.GRAY));
+        tooltipComponents.add(net.minecraft.network.chat.Component.translatable("tooltip.oririmod.benthic_sponge.capacity").withStyle(net.minecraft.ChatFormatting.AQUA));
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    }
 }
 

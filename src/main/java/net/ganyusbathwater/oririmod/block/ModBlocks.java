@@ -928,7 +928,15 @@ public class ModBlocks {
 
         // ===== ELDER VALLEYS VEGETATION =====
         public static final DeferredBlock<Block> CATTAIL = registerBlock("cattail",
-                        () -> new net.ganyusbathwater.oririmod.block.custom.CattailBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS).lightLevel(state -> 4)));
+                        () -> new net.ganyusbathwater.oririmod.block.custom.CattailBlock(BlockBehaviour.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
+                                        .noCollission()
+                                        .instabreak()
+                                        .sound(SoundType.GRASS)
+                                        .offsetType(BlockBehaviour.OffsetType.NONE)
+                                        .noOcclusion()
+                                        .randomTicks()
+                                        .lightLevel(state -> state.getValue(net.ganyusbathwater.oririmod.block.custom.CattailBlock.PART) == net.ganyusbathwater.oririmod.block.custom.CattailBlock.CattailPart.TOP ? 6 : 0)));
 
         // ===== GOLDEN SAVANNA & MESAS =====
         public static final DeferredBlock<Block> CALICHE = registerBlock("caliche",

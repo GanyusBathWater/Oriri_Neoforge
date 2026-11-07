@@ -327,7 +327,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.get());
 
         // ===== ELDER VALLEYS =====
-        add(ModBlocks.CATTAIL.get(), block -> createSinglePropConditionTable(block, net.minecraft.world.level.block.DoublePlantBlock.HALF, net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER));
+        dropSelf(ModBlocks.CATTAIL.get());
 
         // ===== GOLDEN SAVANNA =====
         dropSelf(ModBlocks.CALICHE.get());

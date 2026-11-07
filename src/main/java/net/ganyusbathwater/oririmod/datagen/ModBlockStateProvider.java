@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.datagen;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.block.custom.CattailBlock;
 import net.ganyusbathwater.oririmod.fluid.ModFluids;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -396,7 +397,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.POLISHED_ABYSSAL_BASALT_SLAB.get(), modLoc("block/polished_abyssal_basalt"), modLoc("block/polished_abyssal_basalt_side"), modLoc("block/polished_abyssal_basalt_top"), modLoc("block/polished_abyssal_basalt_top"));
                 wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get(), modLoc("block/polished_abyssal_basalt_side"));
 
-                blockWithItem(ModBlocks.ABYSSAL_BASALT_BRICKS, 1);
+                abyssalBasaltBricksWithEmissive();
                 stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.ABYSSAL_BASALT_BRICK_STAIRS.get(), modLoc("block/abyssal_basalt_bricks"));
                 slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.ABYSSAL_BASALT_BRICK_SLAB.get(), modLoc("block/abyssal_basalt_bricks"), modLoc("block/abyssal_basalt_bricks"));
                 wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get(), modLoc("block/abyssal_basalt_bricks"));
@@ -416,14 +417,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 simpleBlockWithItem(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_FAN.get(), models().withExistingParent("petrified_abyssal_coral_crown_fan", mcLoc("block/coral_fan")).texture("fan", modLoc("block/petrified_abyssal_coral_crown_fan")).renderType("cutout"));
                 horizontalBlock(ModBlocks.PETRIFIED_ABYSSAL_CORAL_CROWN_WALL_FAN.get(), models().withExistingParent("petrified_abyssal_coral_crown_wall_fan", mcLoc("block/coral_wall_fan")).texture("fan", modLoc("block/petrified_abyssal_coral_crown_fan")).renderType("cutout"));
 
-                // Living Corals
+                // Living Corals with Emissive Layer
                 blockWithItem(ModBlocks.ELDER_CORAL_BLOCK, 1);
-                simpleBlockWithItem(ModBlocks.ELDER_CORAL.get(), models().cross("elder_coral", modLoc("block/elder_coral")).renderType("cutout"));
+                livingCoralCross(ModBlocks.ELDER_CORAL, "elder_coral", "elder_coral", "elder_coral_emissive");
                 simpleBlockWithItem(ModBlocks.ELDER_CORAL_FAN.get(), models().withExistingParent("elder_coral_fan", mcLoc("block/coral_fan")).texture("fan", modLoc("block/elder_coral_fan")).renderType("cutout"));
                 horizontalBlock(ModBlocks.ELDER_CORAL_WALL_FAN.get(), models().withExistingParent("elder_coral_wall_fan", mcLoc("block/coral_wall_fan")).texture("fan", modLoc("block/elder_coral_fan")).renderType("cutout"));
 
                 blockWithItem(ModBlocks.ABYSSAL_CORAL_CROWN_BLOCK, 1);
-                simpleBlockWithItem(ModBlocks.ABYSSAL_CORAL_CROWN.get(), models().cross("abyssal_coral_crown", modLoc("block/abyssal_coral_crown")).renderType("cutout"));
+                livingCoralCross(ModBlocks.ABYSSAL_CORAL_CROWN, "abyssal_coral_crown", "abyssal_coral_crown", "abyssal_coral_crown_emissive");
                 simpleBlockWithItem(ModBlocks.ABYSSAL_CORAL_CROWN_FAN.get(), models().withExistingParent("abyssal_coral_crown_fan", mcLoc("block/coral_fan")).texture("fan", modLoc("block/abyssal_coral_crown_fan")).renderType("cutout"));
                 horizontalBlock(ModBlocks.ABYSSAL_CORAL_CROWN_WALL_FAN.get(), models().withExistingParent("abyssal_coral_crown_wall_fan", mcLoc("block/coral_wall_fan")).texture("fan", modLoc("block/abyssal_coral_crown_fan")).renderType("cutout"));
 
@@ -1025,17 +1026,78 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         private void cattailBlock() {
                 Block block = ModBlocks.CATTAIL.get();
+
+                BlockModelBuilder bottomModel = models().withExistingParent("cattail_bottom", mcLoc("block/block"))
+                                .renderType("cutout")
+                                .texture("particle", modLoc("block/cattail_bottom"))
+                                .texture("texture", modLoc("block/cattail_bottom"));
+                addCattailPlanes(bottomModel, "#texture", false, true);
+
+                BlockModelBuilder topModel = models().withExistingParent("cattail_top", mcLoc("block/block"))
+                                .renderType("cutout")
+                                .texture("particle", modLoc("block/cattail_top"))
+                                .texture("texture", modLoc("block/cattail_top"))
+                                .texture("emissive", modLoc("block/cattail_top_emissive"));
+                addCattailPlanes(topModel, "#texture", true, true);
+                addCattailPlanes(topModel, "#emissive", true, false);
+
                 getVariantBuilder(block).forAllStates(state -> {
-                        net.minecraft.world.level.block.state.properties.DoubleBlockHalf half = state.getValue(net.minecraft.world.level.block.DoublePlantBlock.HALF);
-                        String halfTexture = half == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER ? "cattail_bottom" : "cattail_top";
-                        String modelName = "cattail_" + half.getSerializedName();
-
-                        BlockModelBuilder model = models().withExistingParent(modelName, mcLoc("block/tinted_cross"))
-                                        .texture("cross", modLoc("block/" + halfTexture))
-                                        .renderType("cutout");
-
+                        CattailBlock.CattailPart part = state.getValue(CattailBlock.PART);
+                        BlockModelBuilder model = (part == CattailBlock.CattailPart.TOP) ? topModel : bottomModel;
                         return ConfiguredModel.builder().modelFile(model).build();
                 });
+        }
+
+        private void addCattailPlanes(BlockModelBuilder model, String textureKey, boolean isUpper, boolean shade) {
+                // Plane 1: X = 3
+                var el1 = model.element().from(3, 0, 0).to(3, 16, 16);
+                if (!shade) el1.shade(false).emissivity(15, 15).ao(false);
+                el1.face(Direction.WEST).uvs(0, 0, 8, 8).texture(textureKey).end()
+                   .face(Direction.EAST).uvs(0, 0, 8, 8).texture(textureKey).end();
+
+                // Plane 2: X = 13
+                var el2 = model.element().from(13, 0, 0).to(13, 16, 16);
+                if (!shade) el2.shade(false).emissivity(15, 15).ao(false);
+                el2.face(Direction.WEST).uvs(0, 0, 8, 8).texture(textureKey).end()
+                   .face(Direction.EAST).uvs(0, 0, 8, 8).texture(textureKey).end();
+
+                // Plane 3: X = 5
+                var el3 = model.element().from(5, 0, 3).to(5, 16, 13);
+                if (!shade) el3.shade(false).emissivity(15, 15).ao(false);
+                el3.face(Direction.WEST).uvs(0, 0, 5, 8).texture(textureKey).end()
+                   .face(Direction.EAST).uvs(0, 0, 5, 8).texture(textureKey).end();
+
+                // Plane 4: X = 11
+                var el4 = model.element().from(11, 0, 3).to(11, 16, 13);
+                if (!shade) el4.shade(false).emissivity(15, 15).ao(false);
+                el4.face(Direction.WEST).uvs(0, 0, 5, 8).texture(textureKey).end()
+                   .face(Direction.EAST).uvs(0, 0, 5, 8).texture(textureKey).end();
+
+                // Plane 5: Z = 3
+                float uvY1 = isUpper ? 0 : 8;
+                float uvY2 = isUpper ? 8 : 16;
+                var el5 = model.element().from(0, 0, 3).to(16, 16, 3);
+                if (!shade) el5.shade(false).emissivity(15, 15).ao(false);
+                el5.face(Direction.NORTH).uvs(0, uvY1, 8, uvY2).texture(textureKey).end()
+                   .face(Direction.SOUTH).uvs(0, uvY1, 8, uvY2).texture(textureKey).end();
+
+                // Plane 6: Z = 13
+                var el6 = model.element().from(0, 0, 13).to(16, 16, 13);
+                if (!shade) el6.shade(false).emissivity(15, 15).ao(false);
+                el6.face(Direction.NORTH).uvs(0, uvY1, 8, uvY2).texture(textureKey).end()
+                   .face(Direction.SOUTH).uvs(0, uvY1, 8, uvY2).texture(textureKey).end();
+
+                // Plane 7: Z = 5
+                var el7 = model.element().from(3, 0, 5).to(13, 16, 5);
+                if (!shade) el7.shade(false).emissivity(15, 15).ao(false);
+                el7.face(Direction.NORTH).uvs(0, 0, 5, 8).texture(textureKey).end()
+                   .face(Direction.SOUTH).uvs(0, 0, 5, 8).texture(textureKey).end();
+
+                // Plane 8: Z = 11
+                var el8 = model.element().from(3, 0, 11).to(13, 16, 11);
+                if (!shade) el8.shade(false).emissivity(15, 15).ao(false);
+                el8.face(Direction.NORTH).uvs(0, 0, 5, 8).texture(textureKey).end()
+                   .face(Direction.SOUTH).uvs(0, 0, 5, 8).texture(textureKey).end();
         }
 
         private void goldenSavannaTallGrassBlock() {
@@ -1045,7 +1107,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         String halfTexture = half == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER ? "golden_savanna_tall_grass_bottom" : "golden_savanna_tall_grass_top";
                         String modelName = "golden_savanna_tall_grass_" + half.getSerializedName();
 
-                        BlockModelBuilder model = models().withExistingParent(modelName, mcLoc("block/tinted_cross"))
+                        BlockModelBuilder model = models().withExistingParent(modelName, mcLoc("block/cross"))
                                         .texture("cross", modLoc("block/" + halfTexture))
                                         .renderType("cutout");
 
@@ -1053,32 +1115,75 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 });
         }
 
-        private void coralBlockWithEmissive(DeferredBlock<?> block, String name, String texture, String emissiveTexture) {
+        private void abyssalBasaltBricksWithEmissive() {
+                BlockModelBuilder model = models().withExistingParent("abyssal_basalt_bricks", mcLoc("block/block"))
+                                .renderType("cutout")
+                                .texture("particle", modLoc("block/abyssal_basalt_bricks"))
+                                .texture("all", modLoc("block/abyssal_basalt_bricks"))
+                                .texture("emissive", modLoc("block/abyssal_basalt_bricks_emissive"));
+
+                // Base cube
+                model.element()
+                                .from(0, 0, 0).to(16, 16, 16)
+                                .face(Direction.DOWN).uvs(0, 0, 16, 16).texture("#all").cullface(Direction.DOWN).end()
+                                .face(Direction.UP).uvs(0, 0, 16, 16).texture("#all").cullface(Direction.UP).end()
+                                .face(Direction.NORTH).uvs(0, 0, 16, 16).texture("#all").cullface(Direction.NORTH).end()
+                                .face(Direction.SOUTH).uvs(0, 0, 16, 16).texture("#all").cullface(Direction.SOUTH).end()
+                                .face(Direction.WEST).uvs(0, 0, 16, 16).texture("#all").cullface(Direction.WEST).end()
+                                .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#all").cullface(Direction.EAST).end();
+
+                // Emissive overlay (shade: false, emissivity: 15)
+                model.element()
+                                .from(0, 0, 0).to(16, 16, 16)
+                                .shade(false)
+                                .emissivity(15, 15)
+                                .ao(false)
+                                .face(Direction.DOWN).uvs(0, 0, 16, 16).texture("#emissive").cullface(Direction.DOWN).end()
+                                .face(Direction.UP).uvs(0, 0, 16, 16).texture("#emissive").cullface(Direction.UP).end()
+                                .face(Direction.NORTH).uvs(0, 0, 16, 16).texture("#emissive").cullface(Direction.NORTH).end()
+                                .face(Direction.SOUTH).uvs(0, 0, 16, 16).texture("#emissive").cullface(Direction.SOUTH).end()
+                                .face(Direction.WEST).uvs(0, 0, 16, 16).texture("#emissive").cullface(Direction.WEST).end()
+                                .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#emissive").cullface(Direction.EAST).end();
+
+                simpleBlockWithItem(ModBlocks.ABYSSAL_BASALT_BRICKS.get(), model);
+        }
+
+        private void livingCoralCross(DeferredBlock<?> block, String name, String texture, String emissiveTexture) {
                 BlockModelBuilder model = models().withExistingParent(name, mcLoc("block/block"))
-                                .texture("particle", modLoc("block/" + texture));
+                                .renderType("cutout")
+                                .texture("particle", modLoc("block/" + texture))
+                                .texture("cross", modLoc("block/" + texture))
+                                .texture("emissive", modLoc("block/" + emissiveTexture));
 
-                // Layer 0: normal
+                // Diffuse Cross
                 model.element()
-                                .from(0, 0, 0).to(16, 16, 16)
-                                .face(Direction.DOWN).texture("#diffuse").cullface(Direction.DOWN).end()
-                                .face(Direction.UP).texture("#diffuse").cullface(Direction.UP).end()
-                                .face(Direction.NORTH).texture("#diffuse").cullface(Direction.NORTH).end()
-                                .face(Direction.SOUTH).texture("#diffuse").cullface(Direction.SOUTH).end()
-                                .face(Direction.WEST).texture("#diffuse").cullface(Direction.WEST).end()
-                                .face(Direction.EAST).texture("#diffuse").cullface(Direction.EAST).end();
-
-                // Layer 1: emissive
+                                .from(0.8f, 0, 8).to(15.2f, 16, 8)
+                                .rotation().origin(8, 8, 8).axis(Direction.Axis.Y).angle(45).rescale(true).end()
+                                .face(Direction.NORTH).uvs(0, 0, 16, 16).texture("#cross").end()
+                                .face(Direction.SOUTH).uvs(0, 0, 16, 16).texture("#cross").end();
                 model.element()
-                                .from(0, 0, 0).to(16, 16, 16)
-                                .face(Direction.DOWN).texture("#emissive").cullface(Direction.DOWN).end()
-                                .face(Direction.UP).texture("#emissive").cullface(Direction.UP).end()
-                                .face(Direction.NORTH).texture("#emissive").cullface(Direction.NORTH).end()
-                                .face(Direction.SOUTH).texture("#emissive").cullface(Direction.SOUTH).end()
-                                .face(Direction.WEST).texture("#emissive").cullface(Direction.WEST).end()
-                                .face(Direction.EAST).texture("#emissive").cullface(Direction.EAST).end();
+                                .from(8, 0, 0.8f).to(8, 16, 15.2f)
+                                .rotation().origin(8, 8, 8).axis(Direction.Axis.Y).angle(45).rescale(true).end()
+                                .face(Direction.WEST).uvs(0, 0, 16, 16).texture("#cross").end()
+                                .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#cross").end();
 
-                model.texture("diffuse", modLoc("block/" + texture));
-                model.texture("emissive", modLoc("block/" + emissiveTexture));
+                // Emissive Cross (shade: false, emissivity: 15)
+                model.element()
+                                .from(0.8f, 0, 8).to(15.2f, 16, 8)
+                                .rotation().origin(8, 8, 8).axis(Direction.Axis.Y).angle(45).rescale(true).end()
+                                .shade(false)
+                                .emissivity(15, 15)
+                                .ao(false)
+                                .face(Direction.NORTH).uvs(0, 0, 16, 16).texture("#emissive").end()
+                                .face(Direction.SOUTH).uvs(0, 0, 16, 16).texture("#emissive").end();
+                model.element()
+                                .from(8, 0, 0.8f).to(8, 16, 15.2f)
+                                .rotation().origin(8, 8, 8).axis(Direction.Axis.Y).angle(45).rescale(true).end()
+                                .shade(false)
+                                .emissivity(15, 15)
+                                .ao(false)
+                                .face(Direction.WEST).uvs(0, 0, 16, 16).texture("#emissive").end()
+                                .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#emissive").end();
 
                 simpleBlockWithItem(block.get(), model);
         }
