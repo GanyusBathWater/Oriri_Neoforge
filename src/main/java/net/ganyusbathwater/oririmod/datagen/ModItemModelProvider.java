@@ -274,6 +274,11 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/golden_savanna_short_grass"));
                 withExistingParent(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/golden_savanna_tall_grass_top"));
 
+                // ===== ELDER HIGHLANDS =====
+                simpleBlockItem(ModBlocks.HIGHLANDS_GRASS_BLOCK.get());
+                withExistingParent(ModBlocks.HIGHLANDS_SHORT_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/highlands_short_grass"));
+                withExistingParent(ModBlocks.HIGHLANDS_TALL_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/highlands_tall_grass_top"));
+
                 // ===== THE SILENT DEPTHS =====
                 simpleBlockItem(ModBlocks.ABYSSAL_BASALT.get());
                 simpleBlockItem(ModBlocks.ABYSSAL_BASALT_STAIRS.get());

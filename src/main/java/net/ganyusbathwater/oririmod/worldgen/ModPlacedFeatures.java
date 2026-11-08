@@ -26,6 +26,12 @@ public class ModPlacedFeatures {
 
         public static final ResourceKey<PlacedFeature> ELDER_TREE_PLACED_KEY = registerKey("elder_tree_placed");
         public static final ResourceKey<PlacedFeature> ELDER_PINE_TREE_PLACED_KEY = registerKey("elder_pine_tree_placed");
+        public static final ResourceKey<PlacedFeature> ELDER_PINE_DENSE_PLACED_KEY = registerKey("elder_pine_dense_placed");
+        public static final ResourceKey<PlacedFeature> ELDER_PINE_SPARSE_PLACED_KEY = registerKey("elder_pine_sparse_placed");
+        public static final ResourceKey<PlacedFeature> HIGHLANDS_BOULDER_PLACED_KEY = registerKey("highlands_boulder_placed");
+        public static final ResourceKey<PlacedFeature> HIGHLANDS_MEADOW_FLOWERS_PLACED_KEY = registerKey("highlands_meadow_flowers_placed");
+        public static final ResourceKey<PlacedFeature> HIGHLAND_SUMMIT_POWDER_SNOW_PLACED_KEY = registerKey("highland_summit_powder_snow_placed");
+        public static final ResourceKey<PlacedFeature> HIGHLANDS_GRASS_PATCH_PLACED_KEY = registerKey("highlands_grass_patch_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_TREE_PLACED_KEY = registerKey("scarlet_tree_placed");
         
         // Golden Desert Features
@@ -119,6 +125,47 @@ public class ModPlacedFeatures {
                                 HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
                                 BiomeFilter.biome());
                 register(context, ELDER_PINE_TREE_PLACED_KEY, configuredElderPineTree, elderPineModifiers);
+
+                register(context, ELDER_PINE_DENSE_PLACED_KEY, configuredElderPineTree, List.of(
+                                CountPlacement.of(3), // Balanced dense forest density: lush canopy with clear player paths
+                                InSquarePlacement.spread(),
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
+                                BiomeFilter.biome()));
+
+                register(context, ELDER_PINE_SPARSE_PLACED_KEY, configuredElderPineTree, List.of(
+                                RarityFilter.onAverageOnceEvery(7), // Sparse solitary pines in open meadow fields
+                                InSquarePlacement.spread(),
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
+                                BiomeFilter.biome()));
+
+                var configuredHighlandsBoulder = configuredFeatures.getOrThrow(ModConfiguredFeatures.HIGHLANDS_BOULDER_KEY);
+                register(context, HIGHLANDS_BOULDER_PLACED_KEY, configuredHighlandsBoulder, List.of(
+                                CountPlacement.of(1),
+                                RarityFilter.onAverageOnceEvery(10),
+                                InSquarePlacement.spread(),
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
+                                BiomeFilter.biome()));
+
+                var configuredMeadowFlowers = configuredFeatures.getOrThrow(ModConfiguredFeatures.HIGHLANDS_MEADOW_FLOWERS_KEY);
+                register(context, HIGHLANDS_MEADOW_FLOWERS_PLACED_KEY, configuredMeadowFlowers, List.of(
+                                RarityFilter.onAverageOnceEvery(2),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP,
+                                BiomeFilter.biome()));
+
+                var configuredPowderSnow = configuredFeatures.getOrThrow(ModConfiguredFeatures.HIGHLAND_SUMMIT_POWDER_SNOW_KEY);
+                register(context, HIGHLAND_SUMMIT_POWDER_SNOW_PLACED_KEY, configuredPowderSnow, List.of(
+                                CountPlacement.of(2),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                BiomeFilter.biome()));
+
+                var configuredHighlandsGrass = configuredFeatures.getOrThrow(ModConfiguredFeatures.HIGHLANDS_GRASS_PATCH_KEY);
+                register(context, HIGHLANDS_GRASS_PATCH_PLACED_KEY, configuredHighlandsGrass, List.of(
+                                CountPlacement.of(7),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                BiomeFilter.biome()));
 
                 var configuredFallenLogs = configuredFeatures.getOrThrow(ModConfiguredFeatures.FALLEN_LOGS_KEY);
                 register(context, FALLEN_LOGS_PLACED_KEY, configuredFallenLogs, List.of(

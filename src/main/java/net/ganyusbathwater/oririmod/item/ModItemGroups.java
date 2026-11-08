@@ -115,7 +115,13 @@ public class ModItemGroups {
                         output.accept(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS);
                         output.accept(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS);
 
+                        // ===== ELDER HIGHLANDS =====
+                        output.accept(ModBlocks.HIGHLANDS_GRASS_BLOCK);
+                        output.accept(ModBlocks.HIGHLANDS_SHORT_GRASS);
+                        output.accept(ModBlocks.HIGHLANDS_TALL_GRASS);
+
                         // ===== THE SILENT DEPTHS =====
+                        output.accept(ModBlocks.ABYSS_SAND);
                         output.accept(ModBlocks.ABYSSAL_BASALT);
                         output.accept(ModBlocks.ABYSSAL_BASALT_STAIRS);
                         output.accept(ModBlocks.ABYSSAL_BASALT_SLAB);

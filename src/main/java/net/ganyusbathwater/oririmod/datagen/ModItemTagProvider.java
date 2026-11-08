@@ -206,5 +206,8 @@ public class ModItemTagProvider extends ItemTagsProvider {
                 .addTag(ItemTags.CHEST_ARMOR_ENCHANTABLE)
                 .addTag(ItemTags.LEG_ARMOR_ENCHANTABLE)
                 .addTag(ItemTags.FOOT_ARMOR_ENCHANTABLE);
+
+        this.tag(ItemTags.SAND)
+                .add(net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_SAND.get().asItem());
     }
 }

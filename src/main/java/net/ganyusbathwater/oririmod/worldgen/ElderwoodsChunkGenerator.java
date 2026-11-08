@@ -80,6 +80,12 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"));
     private static final ResourceKey<Biome> GOLDEN_DESERT_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_desert"));
+    private static final ResourceKey<Biome> ELDER_HIGHLANDS_MEADOW_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_highlands_meadow"));
+    private static final ResourceKey<Biome> ELDER_HIGHLAND_FOREST_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_forest"));
+    private static final ResourceKey<Biome> ELDER_HIGHLAND_SUMMIT_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_summit"));
 
     private double seedOffsetX = 0;
     private double seedOffsetZ = 0;
@@ -1046,7 +1052,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     }
                     boolean isScarletCurrent = isScarletBiome(surfaceBiome);
                     boolean isDesertCurrent = isGoldenDesertBiome(surfaceBiome);
-                    BlockState grassState = isScarletCurrent ? SCARLET_GRASS : ELDERWOODS_GRASS;
+                    boolean isHighlandCurrent = surfaceBiome.is(ELDER_HIGHLANDS_MEADOW_KEY) || surfaceBiome.is(ELDER_HIGHLAND_FOREST_KEY);
+                    BlockState grassState = isScarletCurrent ? SCARLET_GRASS : (isHighlandCurrent ? ModBlocks.HIGHLANDS_GRASS_BLOCK.get().defaultBlockState() : ELDERWOODS_GRASS);
 
                     for (int y = surfaceY; y >= surfaceY - 5; y--) {
                         mutablePos.set(worldX, y, worldZ);
@@ -1064,6 +1071,67 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             }
                             continue;
                         }
+
+                        // Alpine Mountain Summit: Natural elevation-stratified alpine zones
+                        // Y < 135: Subalpine rocky slopes (Stone, Andesite, Cobblestone, Gravel) - zero snow at tree border!
+                        // Y = 135 to 155: Transitional snowline (Fractal mixture of rock scree and snow drifts)
+                        // Y >= 155: Perpetual high alpine peaks (Snowpack with powder snow drifts and exposed crags)
+                        if (surfaceBiome.is(ELDER_HIGHLAND_SUMMIT_KEY)) {
+                            double rockNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                    (float)(worldX * 0.04f), 0f, (float)(worldZ * 0.04f), 2);
+                            double snowDriftNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                    (float)(worldX * 0.025f), (float)(surfaceY * 0.02f), (float)(worldZ * 0.025f), 3);
+
+                            BlockState rockState;
+                            if (rockNoise > 0.35) {
+                                rockState = Blocks.ANDESITE.defaultBlockState();
+                            } else if (rockNoise < -0.35) {
+                                rockState = Blocks.COBBLESTONE.defaultBlockState();
+                            } else if (Math.abs(rockNoise) < 0.08) {
+                                rockState = Blocks.GRAVEL.defaultBlockState();
+                            } else {
+                                rockState = Blocks.STONE.defaultBlockState();
+                            }
+
+                            BlockState summitTop;
+                            boolean isSnowCovered;
+
+                            if (surfaceY < 135) {
+                                // Lower slopes: purely rocky mountain face, NO snow
+                                summitTop = rockState;
+                                isSnowCovered = false;
+                            } else if (surfaceY < 155) {
+                                // Transitional snowline: patchy snow depending on altitude and noise
+                                double snowFactor = (surfaceY - 135.0) / 20.0;
+                                if (snowDriftNoise + snowFactor > 0.45) {
+                                    summitTop = (snowDriftNoise > 0.35) ? Blocks.POWDER_SNOW.defaultBlockState() : Blocks.SNOW_BLOCK.defaultBlockState();
+                                    isSnowCovered = true;
+                                } else {
+                                    summitTop = rockState;
+                                    isSnowCovered = false;
+                                }
+                            } else {
+                                // Highest peaks: perpetual snowpack with powder snow drifts and rock crags
+                                if (rockNoise > 0.48) {
+                                    summitTop = rockState;
+                                    isSnowCovered = false;
+                                } else if (snowDriftNoise > 0.30) {
+                                    summitTop = Blocks.POWDER_SNOW.defaultBlockState();
+                                    isSnowCovered = true;
+                                } else {
+                                    summitTop = Blocks.SNOW_BLOCK.defaultBlockState();
+                                    isSnowCovered = true;
+                                }
+                            }
+
+                            if (y == surfaceY) {
+                                chunk.setBlockState(mutablePos, summitTop, false);
+                                heightmapState = summitTop;
+                            } else if (y >= surfaceY - 3) {
+                                chunk.setBlockState(mutablePos, isSnowCovered ? Blocks.SNOW_BLOCK.defaultBlockState() : rockState, false);
+                            }
+                            continue;
+                        }
                         if (y == surfaceY) {
                             if (y < BASE_HEIGHT - 1 && surfaceBiome.is(SCARLET_SWAMP_KEY)) {
                                 double mudNoise = Math.sin(worldX * 0.1) * Math.cos(worldZ * 0.1) + 0.5 * Math.sin(worldX * 0.03 + 2.0) * Math.cos(worldZ * 0.04 - 1.0);
@@ -1074,6 +1142,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                     chunk.setBlockState(mutablePos, grassState, false);
                                     heightmapState = grassState;
                                 }
+                            } else if (surfaceBiome.is(ELDER_HIGHLAND_FOREST_KEY)) {
+                                double podzolNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D((float)(worldX * 0.03f), 0f, (float)(worldZ * 0.03f), 2);
+                                BlockState forestFloor = podzolNoise > 0.32 ? Blocks.PODZOL.defaultBlockState() : grassState;
+                                chunk.setBlockState(mutablePos, forestFloor, false);
+                                heightmapState = forestFloor;
                             } else {
                                 chunk.setBlockState(mutablePos, grassState, false);
                                 heightmapState = grassState;

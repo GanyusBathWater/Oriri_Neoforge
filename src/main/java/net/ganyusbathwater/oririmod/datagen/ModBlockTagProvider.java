@@ -466,7 +466,10 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
                                 .add(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())
                                 .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
+                                .add(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get())
+                                .add(ModBlocks.HIGHLANDS_GRASS_BLOCK.get())
                                 .add(ModBlocks.SOL_SAND.get())
+                                .add(ModBlocks.ABYSS_SAND.get())
                                 .add(ModBlocks.BLOOD_SLUDGE.get())
                                 .add(ModBlocks.SOL_QUICKSAND.get());
 
@@ -501,7 +504,8 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.DRAGONFRUIT_PLANT.get());
 
                 tag(BlockTags.SAND)
-                                .add(ModBlocks.SOL_SAND.get());
+                                .add(ModBlocks.SOL_SAND.get())
+                                .add(ModBlocks.ABYSS_SAND.get());
 
                 tag(BlockTags.LOGS_THAT_BURN)
                                 .add(ModBlocks.SCARLET_LOG.get())
@@ -518,6 +522,7 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.EQUINOX_TABLE.get());
 
                 tag(BlockTags.NEEDS_IRON_TOOL)
+                                .add(ModBlocks.ABYSS_SAND.get())
                                 .add(ModBlocks.DRAGON_IRON_ORE.get())
                                 .add(ModBlocks.DEEPSLATE_DRAGON_IRON_ORE.get())
                                 .add(ModBlocks.JADE_ORE.get())
@@ -533,7 +538,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
                 tag(BlockTags.DIRT)
                                 .add(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())
-                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get());
+                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
+                                .add(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get())
+                                .add(ModBlocks.HIGHLANDS_GRASS_BLOCK.get());
 
                 tag(BlockTags.DRIPSTONE_REPLACEABLE)
                                 .add(ModBlocks.SCARLET_STONE.get())

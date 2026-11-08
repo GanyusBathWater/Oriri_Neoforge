@@ -6,6 +6,9 @@
       "type": "oririmod:elderwoods",
       "biomes": [
         "oririmod:elderwoods",
+        "oririmod:elder_highlands_meadow",
+        "oririmod:elder_highland_forest",
+        "oririmod:elder_highland_summit",
         "oririmod:scarlet_swamp",
         "oririmod:scarlet_forest",
         "oririmod:golden_desert",

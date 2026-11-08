@@ -44,6 +44,14 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_SWAMP_FEATURES = registerKey(
                         "add_scarlet_swamp_features");
 
+        // Elder Highlands Features
+        public static final ResourceKey<BiomeModifier> ADD_HIGHLANDS_FOREST_FEATURES = registerKey(
+                        "add_highlands_forest_features");
+        public static final ResourceKey<BiomeModifier> ADD_HIGHLANDS_MEADOW_FEATURES = registerKey(
+                        "add_highlands_meadow_features");
+        public static final ResourceKey<BiomeModifier> ADD_HIGHLANDS_SUMMIT_FEATURES = registerKey(
+                        "add_highlands_summit_features");
+
         // Cave Decorations
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_CAVE_FEATURES = registerKey(
                         "add_scarlet_cave_features");
@@ -195,6 +203,42 @@ public class ModBiomeModifiers {
                 // Scarlet Swamp Features
                 var scarletPlainsBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"))));
+
+                // Elder Highlands Forest Features
+                var highlandsForestBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_forest"))));
+                context.register(ADD_HIGHLANDS_FOREST_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                highlandsForestBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELDER_PINE_DENSE_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.FALLEN_LOGS_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.LEAF_PILE_PATCH_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.HIGHLANDS_GRASS_PATCH_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // Elder Highlands Meadow Features
+                var highlandsMeadowBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_highlands_meadow"))));
+                context.register(ADD_HIGHLANDS_MEADOW_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                highlandsMeadowBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.HIGHLANDS_BOULDER_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELDER_PINE_SPARSE_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.HIGHLANDS_MEADOW_FLOWERS_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.HIGHLANDS_GRASS_PATCH_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // Elder Highland Summit Features
+                var highlandsSummitBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_summit"))));
+                context.register(ADD_HIGHLANDS_SUMMIT_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                highlandsSummitBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.HIGHLAND_SUMMIT_POWDER_SNOW_PLACED_KEY)),
+                                                GenerationStep.Decoration.TOP_LAYER_MODIFICATION));
                 context.register(ADD_SCARLET_SWAMP_FEATURES,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
                                                 scarletPlainsBiomes,

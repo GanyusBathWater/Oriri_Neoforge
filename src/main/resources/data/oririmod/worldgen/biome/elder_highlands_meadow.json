@@ -1,0 +1,34 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.5,
+  "downfall": 0.7,
+  "effects": {
+    "sky_color": 8233727,
+    "fog_color": 13426175,
+    "water_color": 4484080,
+    "water_fog_color": 336630,
+    "foliage_color_override": 12497212,
+    "grass_color_override": 12497212
+  },
+  "carvers": {
+    "air": [
+      "oririmod:scarlet_cave_entrance"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "spawn_costs": {},
+  "spawners": {}
+}
+

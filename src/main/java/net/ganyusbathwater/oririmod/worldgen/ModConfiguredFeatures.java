@@ -46,6 +46,10 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> WAR_GRAVE_KEY = registerKey("war_grave");
         
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_BOULDER_KEY = registerKey("scarlet_boulder");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_BOULDER_KEY = registerKey("highlands_boulder");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_MEADOW_FLOWERS_KEY = registerKey("highlands_meadow_flowers");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLAND_SUMMIT_POWDER_SNOW_KEY = registerKey("highland_summit_powder_snow");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_GRASS_PATCH_KEY = registerKey("highlands_grass_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_GRASS_PATCH_KEY = registerKey(
                         "scarlet_grass_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDERWOODS_GRASS_PATCH_KEY = registerKey(
@@ -120,14 +124,7 @@ public class ModConfiguredFeatures {
                                 0.2f, true, true);
                 register(context, ELDER_TREE_KEY, ModFeatures.ELDER_GIANT_TREE.get(), elderCfg);
 
-                var elderPineTreeConfig = new TreeConfiguration.TreeConfigurationBuilder(
-                                BlockStateProvider.simple(ModBlocks.ELDER_PINE_LOG.get()),
-                                new StraightTrunkPlacer(7, 3, 3),
-                                BlockStateProvider.simple(ModBlocks.ELDER_PINE_LEAVES.get()),
-                                new PineFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1), UniformInt.of(4, 7)),
-                                new TwoLayersFeatureSize(1, 0, 1))
-                                .ignoreVines().build();
-                register(context, ELDER_PINE_TREE_KEY, Feature.TREE, elderPineTreeConfig);
+                register(context, ELDER_PINE_TREE_KEY, ModFeatures.WINDSWEPT_PINE.get(), NoneFeatureConfiguration.INSTANCE);
 
                 var scarletCfg = new ElderGiantTreeConfig(UniformInt.of(8, 15), UniformInt.of(1, 2),
                                 UniformInt.of(2, 4), UniformInt.of(2, 4),
@@ -163,6 +160,24 @@ public class ModConfiguredFeatures {
                 register(context, SCARLET_BOULDER_KEY, ModFeatures.SCARLET_BOULDER.get(),
                                 NoneFeatureConfiguration.INSTANCE);
 
+                register(context, HIGHLANDS_BOULDER_KEY, ModFeatures.HIGHLANDS_BOULDER.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+
+                register(context, HIGHLANDS_MEADOW_FLOWERS_KEY, Feature.FLOWER,
+                                new RandomPatchConfiguration(32, 7, 3, PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
+                                                                net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
+                                                                                .add(Blocks.ALLIUM.defaultBlockState(), 2)
+                                                                                .add(Blocks.CORNFLOWER.defaultBlockState(), 3)
+                                                                                .add(Blocks.OXEYE_DAISY.defaultBlockState(), 2)
+                                                                                .add(Blocks.DANDELION.defaultBlockState(), 2)
+                                                                                .add(Blocks.POPPY.defaultBlockState(), 1))))));
+
+                register(context, HIGHLAND_SUMMIT_POWDER_SNOW_KEY, Feature.RANDOM_PATCH,
+                                FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.POWDER_SNOW)),
+                                                List.of(Blocks.SNOW_BLOCK, Blocks.STONE)));
+
                 register(context, SCARLET_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
@@ -176,6 +191,14 @@ public class ModConfiguredFeatures {
                                                                                 .add(Blocks.SHORT_GRASS.defaultBlockState(), 3)
                                                 )),
                                                 List.of(Blocks.GRASS_BLOCK, ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+
+                register(context, HIGHLANDS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
+                                FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
+                                                                net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
+                                                                                .add(ModBlocks.HIGHLANDS_SHORT_GRASS.get().defaultBlockState(), 5)
+                                                )),
+                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.HIGHLANDS_GRASS_BLOCK.get(), ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider

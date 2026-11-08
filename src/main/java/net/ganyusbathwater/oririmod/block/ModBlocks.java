@@ -975,7 +975,22 @@ public class ModBlocks {
         public static final DeferredBlock<Block> GOLDEN_SAVANNA_TALL_GRASS = registerBlock("golden_savanna_tall_grass",
                         () -> new DoublePlantBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)));
 
+        // ===== ELDER HIGHLANDS VEGETATION =====
+        public static final DeferredBlock<Block> HIGHLANDS_GRASS_BLOCK = registerBlock("highlands_grass_block",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderwoodsGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
+        public static final DeferredBlock<Block> HIGHLANDS_SHORT_GRASS = registerBlock("highlands_short_grass",
+                        () -> new net.minecraft.world.level.block.TallGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)));
+        public static final DeferredBlock<Block> HIGHLANDS_TALL_GRASS = registerBlock("highlands_tall_grass",
+                        () -> new DoublePlantBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)));
+
         // ===== THE SILENT DEPTHS (DEEP OCEANS) =====
+        public static final DeferredBlock<Block> ABYSS_SAND = registerBlock("abyss_sand",
+                        () -> new ColoredFallingBlock(new net.minecraft.util.ColorRGBA(0xFF0B0B1C),
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.SAND)
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+                                                        .strength(1.2F, 1.2F)
+                                                        .sound(SoundType.SAND)
+                                                        .requiresCorrectToolForDrops()));
         public static final DeferredBlock<Block> ABYSSAL_BASALT = registerBlock("abyssal_basalt",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.BASALT).strength(3.0F, 8.0F)));
         public static final DeferredBlock<StairBlock> ABYSSAL_BASALT_STAIRS = registerBlock("abyssal_basalt_stairs",

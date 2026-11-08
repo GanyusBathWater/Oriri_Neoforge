@@ -350,7 +350,13 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get(), block -> createShearsDispatchTable(block, applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.WHEAT_SEEDS).when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.125F)))));
         add(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.get(), block -> createDoublePlantWithSeedDrops(block, ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get()));
 
+        // ===== ELDER HIGHLANDS =====
+        add(ModBlocks.HIGHLANDS_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
+        add(ModBlocks.HIGHLANDS_SHORT_GRASS.get(), block -> createShearsDispatchTable(block, applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.WHEAT_SEEDS).when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.125F)))));
+        add(ModBlocks.HIGHLANDS_TALL_GRASS.get(), block -> createDoublePlantWithSeedDrops(block, ModBlocks.HIGHLANDS_SHORT_GRASS.get()));
+
         // ===== THE SILENT DEPTHS =====
+        dropSelf(ModBlocks.ABYSS_SAND.get());
         dropSelf(ModBlocks.ABYSSAL_BASALT.get());
         dropSelf(ModBlocks.ABYSSAL_BASALT_STAIRS.get());
         add(ModBlocks.ABYSSAL_BASALT_SLAB.get(), block -> createSlabItemTable(ModBlocks.ABYSSAL_BASALT_SLAB.get()));

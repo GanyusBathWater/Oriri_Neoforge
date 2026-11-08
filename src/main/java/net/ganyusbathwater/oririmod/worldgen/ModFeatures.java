@@ -27,6 +27,16 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.ScarletBoulderFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.HighlandsBoulderFeature> HIGHLANDS_BOULDER = FEATURES
+                        .register("highlands_boulder",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.HighlandsBoulderFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.WindsweptPineTreeFeature> WINDSWEPT_PINE = FEATURES
+                        .register("windswept_pine",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.WindsweptPineTreeFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
 
 
         public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.ScarletDripstoneClusterFeature> DRIPSTONE_CLUSTER = FEATURES

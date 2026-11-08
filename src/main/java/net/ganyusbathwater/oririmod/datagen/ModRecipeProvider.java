@@ -365,6 +365,27 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_SLAB.get(), 2).unlockedBy("has_caliche_bricks", has(ModBlocks.CALICHE_BRICKS)).save(recipeOutput, "oririmod:caliche_brick_slab_from_bricks_stonecutting");
                 SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CALICHE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CALICHE_BRICK_WALL.get()).unlockedBy("has_caliche_bricks", has(ModBlocks.CALICHE_BRICKS)).save(recipeOutput, "oririmod:caliche_brick_wall_from_bricks_stonecutting");
 
+                // ===== ABYSS SAND RECIPES =====
+                // 4 Abyss Sand -> 1 Abyssal Basalt
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.ABYSSAL_BASALT.get(), 1)
+                                .define('#', ModBlocks.ABYSS_SAND.get())
+                                .pattern("##")
+                                .pattern("##")
+                                .unlockedBy("has_abyss_sand", has(ModBlocks.ABYSS_SAND.get()))
+                                .save(recipeOutput, "oririmod:abyssal_basalt_from_abyss_sand");
+
+                // Smelting & Blasting Abyss Sand -> Tinted Glass
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.ABYSS_SAND.get()), RecipeCategory.BUILDING_BLOCKS,
+                                                net.minecraft.world.level.block.Blocks.TINTED_GLASS, 0.1f, 200)
+                                .unlockedBy("has_abyss_sand", has(ModBlocks.ABYSS_SAND.get()))
+                                .save(recipeOutput, "oririmod:tinted_glass_from_smelting_abyss_sand");
+                SimpleCookingRecipeBuilder
+                                .blasting(Ingredient.of(ModBlocks.ABYSS_SAND.get()), RecipeCategory.BUILDING_BLOCKS,
+                                                net.minecraft.world.level.block.Blocks.TINTED_GLASS, 0.1f, 100)
+                                .unlockedBy("has_abyss_sand", has(ModBlocks.ABYSS_SAND.get()))
+                                .save(recipeOutput, "oririmod:tinted_glass_from_blasting_abyss_sand");
+
                 // ===== ABYSSAL BASALT RECIPES =====
                 ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_ABYSSAL_BASALT.get(), 4)
                                 .define('#', ModBlocks.ABYSSAL_BASALT.get())
