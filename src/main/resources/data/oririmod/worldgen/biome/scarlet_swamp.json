@@ -14,7 +14,11 @@
     "category": "swamp",
     "depth": 0.125,
     "scale": 0.05,
-    "carvers": {},
+    "carvers": {
+        "air": [
+            "oririmod:scarlet_cave_entrance"
+        ]
+    },
     "features": [
         [],
         [],

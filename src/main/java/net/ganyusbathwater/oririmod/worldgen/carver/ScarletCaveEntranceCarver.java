@@ -20,8 +20,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.CaveCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.slf4j.Logger;
 
 import java.util.function.Function;
 
@@ -32,10 +30,11 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"));
     private static final ResourceKey<Biome> SCARLET_FOREST_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"));
+    private static final ResourceKey<Biome> SCARLET_CAVES_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"));
 
     public ScarletCaveEntranceCarver(Codec<CaveCarverConfiguration> codec) {
         super(codec);
-        net.ganyusbathwater.oririmod.OririMod.LOGGER.info("ScarletCaveEntranceCarver Constructed!");
     }
 
     @Override
@@ -52,46 +51,43 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
     public boolean carve(CarvingContext context, CaveCarverConfiguration config, ChunkAccess chunk,
             Function<BlockPos, Holder<Biome>> biomeAccessor, RandomSource random, Aquifer aquifer,
             net.minecraft.world.level.ChunkPos chunkPos, CarvingMask carvingMask) {
-        net.ganyusbathwater.oririmod.OririMod.LOGGER
-                .info("ScarletCaveEntranceCarver carving chunk at " + chunk.getPos() + " from origin " + chunkPos);
                 
-        // Use the origin chunk position so all target chunks agree on the exact same entrance geometry
+        // 1. Origin Chunk Strict Biome Verification:
+        // Scarlet Cave Entrances MUST strictly originate in mainland Scarlet biomes!
         BlockPos pos = chunkPos.getMiddleBlockPosition(0);
-        
+        Holder<Biome> originBiome = biomeAccessor.apply(pos);
+        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)) {
+            return false;
+        }
+
+        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, pos.getX() & 15, pos.getZ() & 15);
+        if (surfaceY < 58) {
+            return false; // Protect water bodies, swamps, and oceans from flooding
+        }
+
         long originSeed = (chunkPos.x * 341873128712L) ^ (chunkPos.z * 132897987541L);
         RandomSource originRandom = RandomSource.create(originSeed);
 
-        int maxRadius = 14; // Increased from 8 to give much more reach
-        int minRadius = 6;  // Increased from 4
-        int entranceTop = 150; // High enough to cut through any surface terrain
-        int entranceBottom = -16 + originRandom.nextInt(32); // Deterministic bottom
-
-        net.ganyusbathwater.oririmod.OririMod.LOGGER
-                .info("DEBUG_SCARLET: Carving from Y=" + entranceTop + " down to Y=" + entranceBottom);
+        int maxRadius = 10;
+        int minRadius = 5;
+        // Start flush with the actual surface terrain (never punch a void into the sky at Y=150!)
+        int entranceTop = surfaceY + 1;
+        int entranceBottom = -16 + originRandom.nextInt(24);
 
         int centerX = pos.getX();
         int centerZ = pos.getZ();
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos neighborPos = new BlockPos.MutableBlockPos();
-        // Removed rimBlockState and rimUnderBlockState as they are no longer used
-
-        // Iterate bounding box
-        // Check winding offset to ensure we cover enough area
-        // Removed maxCheckRad because it caused chunk cutoffs by limiting iteration bounds
 
         boolean hit = false;
-        int carvedCount = 0;
-
-        // This loop structure is complex for a carver. Usually carvers iterate XYZ.
-        // But here we iterate Y then XZ to shape the vertical hole.
 
         for (int y = entranceTop; y >= entranceBottom; y--) {
             double depthProgress = (double) (entranceTop - y) / (entranceTop - entranceBottom);
 
             // Winding (Curve)
-            double windingX = Math.sin(depthProgress * 4.0 + centerX * 0.1) * 8.0; // Increased winding
-            double windingZ = Math.cos(depthProgress * 3.5 + centerZ * 0.1) * 8.0;
+            double windingX = Math.sin(depthProgress * 4.0 + centerX * 0.1) * 6.0;
+            double windingZ = Math.cos(depthProgress * 3.5 + centerZ * 0.1) * 6.0;
 
             double radiusAtY = Mth.lerp(depthProgress, maxRadius, minRadius);
 
@@ -108,24 +104,33 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
 
                     mutablePos.set(worldX, y, worldZ);
 
+                    // Strictly verify that the target position is within Scarlet territory!
+                    // Prohibits cutting into beaches, oceans, islands, elderwoods, or highlands!
+                    Holder<Biome> targetBiome = biomeAccessor.apply(mutablePos);
+                    if (!targetBiome.is(SCARLET_SWAMP_KEY) && !targetBiome.is(SCARLET_FOREST_KEY) && !targetBiome.is(SCARLET_CAVES_KEY)) {
+                        continue;
+                    }
+
                     double offsetX = x - windingX;
                     double offsetZ = z - windingZ;
                     double dist = Math.sqrt(offsetX * offsetX + offsetZ * offsetZ);
 
                     if (dist < radiusAtY) {
-                        // Carve Air
                         BlockState blockState = chunk.getBlockState(mutablePos);
+                        if (blockState.is(Blocks.WATER)) {
+                            continue; // Never breach or carve open ocean or river water
+                        }
+
                         if (this.canReplaceBlock(config, blockState)) {
                             if (y < -105) {
                                 continue; // Protect aether rivers
                             }
-                            // Manual carving to avoid using the context (which has a null generator)
                             chunk.setBlockState(mutablePos, Blocks.CAVE_AIR.defaultBlockState(), false);
                             if (carvingMask != null) {
                                 carvingMask.set(mutablePos.getX() & 15, mutablePos.getY(), mutablePos.getZ() & 15);
                             }
                             
-                            // Check if adjacent to liquid inside this chunk to schedule block update (post-processing)
+                            // Check if adjacent to liquid inside this chunk to schedule fluid update
                             for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.values()) {
                                 int nx = mutablePos.getX() + dir.getStepX();
                                 int ny = mutablePos.getY() + dir.getStepY();
@@ -145,7 +150,6 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
                             }
                             
                             hit = true;
-                            carvedCount++;
                         }
                     }
                 }

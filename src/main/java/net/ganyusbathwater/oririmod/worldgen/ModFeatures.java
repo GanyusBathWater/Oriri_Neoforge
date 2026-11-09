@@ -107,6 +107,22 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.QuicksandPondFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        // Ocean Features: Flora & Benthic Floor
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.BenthicOceanFeature> BENTHIC_OCEAN_FEATURE = FEATURES
+                        .register("benthic_ocean_feature",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.BenthicOceanFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.SilentOceanFloraFeature> SILENT_OCEAN_FLORA_FEATURE = FEATURES
+                        .register("silent_ocean_flora_feature",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.SilentOceanFloraFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.BeachUnderwaterReefFeature> BEACH_UNDERWATER_REEF_FEATURE = FEATURES
+                        .register("beach_underwater_reef_feature",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.BeachUnderwaterReefFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);
         }

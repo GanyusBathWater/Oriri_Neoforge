@@ -58,6 +58,14 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_CAVE_FEATURES = registerKey(
                         "add_elderwoods_cave_features");
 
+        // Deep Ocean & Abyssal Features
+        public static final ResourceKey<BiomeModifier> ADD_SILENT_OCEAN_FLORA = registerKey(
+                        "add_silent_ocean_flora");
+        public static final ResourceKey<BiomeModifier> ADD_OCEAN_BENTHIC_FEATURES = registerKey(
+                        "add_ocean_benthic_features");
+        public static final ResourceKey<BiomeModifier> ADD_BEACH_FEATURES = registerKey(
+                        "add_beach_features");
+
         public static final ResourceKey<BiomeModifier> ADD_GLOWLINGS = registerKey("add_glowlings");
 
         // Spawns
@@ -332,6 +340,39 @@ public class ModBiomeModifiers {
                                                 crystalCaveBiomes,
                                                 HolderSet.direct(placedFeatures
                                                                 .getOrThrow(ModPlacedFeatures.GLOWLINGS_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // Photic Ocean Features (the_silent_oceans flora: seagrass, kelp, sea pickles)
+                var silentOceanBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_oceans"))));
+                context.register(ADD_SILENT_OCEAN_FLORA,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                silentOceanBiomes,
+                                                HolderSet.direct(placedFeatures
+                                                                .getOrThrow(ModPlacedFeatures.SILENT_OCEAN_FLORA_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // Deep Ocean & Abyssal Floor Features (Strictly restricted to Silent Depths & Sunken Trenches - ZERO in Silent Oceans)
+                var oceanBiomes = HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_depths"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_sunken_trenches"))));
+                context.register(ADD_OCEAN_BENTHIC_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                oceanBiomes,
+                                                HolderSet.direct(placedFeatures
+                                                                .getOrThrow(ModPlacedFeatures.BENTHIC_OCEAN_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // Beach Features (Stone Reef Mounds & Branching Corals/Seagrass Under Water)
+                var beachBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_beach"))));
+                context.register(ADD_BEACH_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                beachBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.BEACH_UNDERWATER_REEF_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
                 // Custom Mob Spawns

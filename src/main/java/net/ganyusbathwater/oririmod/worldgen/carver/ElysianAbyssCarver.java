@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.CaveCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
@@ -107,19 +108,19 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
 
             
             // Spawn standard winding cave systems (Worms & Rooms)
-            hit |= carveWorms(config, chunk, ox, oz, originRandom);
+            hit |= carveWorms(config, chunk, ox, oz, originRandom, biomeAccessor);
             
             // Spawn massive, localized Cheese Chambers
-            hit |= carveCheeseChambers(config, chunk, ox, oz, originRandom);
+            hit |= carveCheeseChambers(config, chunk, ox, oz, originRandom, biomeAccessor);
             
             // Spawn erratic Noodle tunnels for vertical connections
-            hit |= carveNoodles(config, chunk, ox, oz, originRandom);
+            hit |= carveNoodles(config, chunk, ox, oz, originRandom, biomeAccessor);
         }
 
         return hit;
     }
 
-    private boolean carveWorms(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+    private boolean carveWorms(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random, Function<BlockPos, Holder<Biome>> biomeAccessor) {
         boolean hit = false;
         
         // Decreased from 1/8 to 1/10
@@ -203,10 +204,14 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                     pos.set(bx, by, bz);
                                     BlockState state = chunk.getBlockState(pos);
                                     if (this.canReplaceBlock(config, state)) {
-                                        if (by < -105) {
-                                            continue; // Protect aether rivers
+                                        if (by < -105 || by >= 60) {
+                                            continue; // Protect aether rivers and islands/beaches
                                         }
-                                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, bx & 15, bz & 15);
+                                        if (by >= surfaceY - 12) {
+                                            continue; // Leave solid 12-block seabed crust so caves never breach open ocean water!
+                                        }
+                                        chunk.setBlockState(pos, Blocks.CAVE_AIR.defaultBlockState(), false);
                                         hit = true;
                                     }
                                 }
@@ -221,7 +226,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
 
 
 
-    private boolean carveCheeseChambers(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+    private boolean carveCheeseChambers(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random, Function<BlockPos, Holder<Biome>> biomeAccessor) {
         boolean hit = false;
         
         // Decreased from 1/45 to 1/50
@@ -280,10 +285,14 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                             BlockState state = chunk.getBlockState(pos);
                             
                             if (this.canReplaceBlock(config, state)) {
-                                if (by < -105) {
-                                    continue; // Protect aether rivers
+                                if (by < -105 || by >= 60) {
+                                    continue; // Protect aether rivers and islands/beaches
                                 }
-                                chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, bx & 15, bz & 15);
+                                if (by >= surfaceY - 12) {
+                                    continue; // Leave solid 12-block seabed crust so caves never breach open ocean water!
+                                }
+                                chunk.setBlockState(pos, Blocks.CAVE_AIR.defaultBlockState(), false);
                                 hit = true;
                             }
                         }
@@ -294,7 +303,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         return hit;
     }
 
-    private boolean carveNoodles(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random) {
+    private boolean carveNoodles(CaveCarverConfiguration config, ChunkAccess chunk, int originX, int originZ, RandomSource random, Function<BlockPos, Holder<Biome>> biomeAccessor) {
         boolean hit = false;
         
         // Decreased from 1/25 to 1/30
@@ -358,10 +367,14 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                     pos.set(bx, by, bz);
                                     BlockState state = chunk.getBlockState(pos);
                                     if (this.canReplaceBlock(config, state)) {
-                                        if (by < -105) {
-                                            continue; // Protect aether rivers
+                                        if (by < -105 || by >= 60) {
+                                            continue; // Protect aether rivers and islands/beaches
                                         }
-                                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                                        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, bx & 15, bz & 15);
+                                        if (by >= surfaceY - 12) {
+                                            continue; // Leave solid 12-block seabed crust so caves never breach open ocean water!
+                                        }
+                                        chunk.setBlockState(pos, Blocks.CAVE_AIR.defaultBlockState(), false);
                                         hit = true;
                                     }
                                 }

@@ -75,16 +75,16 @@ public class WindsweptPineTreeFeature extends Feature<NoneFeatureConfiguration> 
         int height = 12 + random.nextInt(8);
         Direction windLean = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 
-        // 3. Basal Flare Roots (anchor into mountain slopes)
+        // 3. Basal Flare Roots (anchor into mountain slopes, all-bark so roots never show raw cut rings)
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             if (random.nextFloat() < 0.75f) {
                 BlockPos root = origin.relative(dir);
                 if (level.isEmptyBlock(root) || level.getBlockState(root).canBeReplaced()) {
-                    setBlock(level, root, logState);
+                    setBlock(level, root, woodState.setValue(RotatedPillarBlock.AXIS, dir.getAxis()));
                 }
                 BlockPos subRoot = root.below();
                 if (level.isEmptyBlock(subRoot) || level.getBlockState(subRoot).canBeReplaced()) {
-                    setBlock(level, subRoot, logState);
+                    setBlock(level, subRoot, woodState.setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y));
                 }
             }
         }
@@ -108,10 +108,10 @@ public class WindsweptPineTreeFeature extends Feature<NoneFeatureConfiguration> 
             if ((y == height / 3 || y == (2 * height) / 3) && random.nextFloat() < 0.65f) {
                 curX += windLean.getStepX();
                 curZ += windLean.getStepZ();
-                // Place connector log so there is never an air gap
+                // Place connector wood (all-bark) so raw cut rings never face horizontally outwards
                 BlockPos conn = new BlockPos(origin.getX() + curX, origin.getY() + y, origin.getZ() + curZ);
                 if (level.isEmptyBlock(conn) || level.getBlockState(conn).canBeReplaced()) {
-                    setBlock(level, conn, logState.setValue(RotatedPillarBlock.AXIS, windLean.getAxis()));
+                    setBlock(level, conn, woodState.setValue(RotatedPillarBlock.AXIS, windLean.getAxis()));
                     trunkLogs.add(conn);
                 }
             }

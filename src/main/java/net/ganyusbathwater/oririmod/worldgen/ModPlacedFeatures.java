@@ -93,6 +93,10 @@ public class ModPlacedFeatures {
 
 
         public static final ResourceKey<PlacedFeature> SEA_URCHIN_PLACED_KEY = registerKey("sea_urchin_placed");
+        public static final ResourceKey<PlacedFeature> BENTHIC_OCEAN_PLACED_KEY = registerKey("benthic_ocean_placed");
+        public static final ResourceKey<PlacedFeature> SILENT_OCEAN_FLORA_PLACED_KEY = registerKey("silent_ocean_flora_placed");
+        public static final ResourceKey<PlacedFeature> BEACH_MANGROVE_PLACED_KEY = registerKey("beach_mangrove_placed");
+        public static final ResourceKey<PlacedFeature> BEACH_UNDERWATER_REEF_PLACED_KEY = registerKey("beach_underwater_reef_placed");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<PlacedFeature> context) {
@@ -418,6 +422,43 @@ public class ModPlacedFeatures {
                                                 RarityFilter.onAverageOnceEvery(3),
                                                 InSquarePlacement.spread(),
                                                 HeightRangePlacement.uniform(absolute(-64), absolute(64)),
+                                                BiomeFilter.biome()));
+
+                register(context, BENTHIC_OCEAN_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.BENTHIC_OCEAN_KEY),
+                                List.of(
+                                                CountPlacement.of(8),
+                                                InSquarePlacement.spread(),
+                                                HeightRangePlacement.uniform(absolute(-120), absolute(20)),
+                                                BiomeFilter.biome()));
+
+                register(context, SILENT_OCEAN_FLORA_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.SILENT_OCEAN_FLORA_KEY),
+                                List.of(
+                                                CountPlacement.of(12),
+                                                InSquarePlacement.spread(),
+                                                HeightRangePlacement.uniform(absolute(25), absolute(70)),
+                                                BiomeFilter.biome()));
+
+                register(context, BEACH_MANGROVE_PLACED_KEY,
+                                configuredFeatures.getOrThrow(net.minecraft.data.worldgen.features.TreeFeatures.MANGROVE),
+                                List.of(
+                                                RarityFilter.onAverageOnceEvery(4),
+                                                InSquarePlacement.spread(),
+                                                SurfaceWaterDepthFilter.forMaxDepth(2),
+                                                PlacementUtils.HEIGHTMAP_TOP_SOLID,
+                                                BlockPredicateFilter.forPredicate(net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.matchesBlocks(
+                                                                net.minecraft.core.Direction.DOWN.getNormal(),
+                                                                net.minecraft.world.level.block.Blocks.SAND,
+                                                                net.minecraft.world.level.block.Blocks.MUD)),
+                                                BiomeFilter.biome()));
+
+                register(context, BEACH_UNDERWATER_REEF_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.BEACH_UNDERWATER_REEF_KEY),
+                                List.of(
+                                                CountPlacement.of(6),
+                                                InSquarePlacement.spread(),
+                                                HeightRangePlacement.uniform(absolute(30), absolute(71)),
                                                 BiomeFilter.biome()));
         }
 

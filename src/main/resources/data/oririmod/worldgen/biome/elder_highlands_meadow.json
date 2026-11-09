@@ -10,11 +10,7 @@
     "foliage_color_override": 12497212,
     "grass_color_override": 12497212
   },
-  "carvers": {
-    "air": [
-      "oririmod:scarlet_cave_entrance"
-    ]
-  },
+  "carvers": {},
   "features": [
     [],
     [],

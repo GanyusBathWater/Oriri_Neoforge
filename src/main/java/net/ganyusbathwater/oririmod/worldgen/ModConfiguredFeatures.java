@@ -39,17 +39,22 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_TREE_KEY = registerKey("scarlet_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ABYSS_CROWN_TREE_KEY = registerKey("abyss_crown_tree");
         public static final ResourceKey<ConfiguredFeature<?, ?>> EPOCH_TREE_KEY = registerKey("epoch_tree");
-        public static final ResourceKey<ConfiguredFeature<?, ?>> EPOCH_TREE_FRUITFUL_KEY = registerKey("epoch_tree_fruitful");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> EPOCH_TREE_FRUITFUL_KEY = registerKey(
+                        "epoch_tree_fruitful");
         public static final ResourceKey<ConfiguredFeature<?, ?>> MYRIAD_CACTUS_KEY = registerKey("myriad_cactus");
         public static final ResourceKey<ConfiguredFeature<?, ?>> OASIS_KEY = registerKey("oasis");
         public static final ResourceKey<ConfiguredFeature<?, ?>> QUICKSAND_POND_KEY = registerKey("quicksand_pond");
         public static final ResourceKey<ConfiguredFeature<?, ?>> WAR_GRAVE_KEY = registerKey("war_grave");
-        
+
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_BOULDER_KEY = registerKey("scarlet_boulder");
-        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_BOULDER_KEY = registerKey("highlands_boulder");
-        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_MEADOW_FLOWERS_KEY = registerKey("highlands_meadow_flowers");
-        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLAND_SUMMIT_POWDER_SNOW_KEY = registerKey("highland_summit_powder_snow");
-        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_GRASS_PATCH_KEY = registerKey("highlands_grass_patch");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_BOULDER_KEY = registerKey(
+                        "highlands_boulder");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_MEADOW_FLOWERS_KEY = registerKey(
+                        "highlands_meadow_flowers");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLAND_SUMMIT_POWDER_SNOW_KEY = registerKey(
+                        "highland_summit_powder_snow");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_GRASS_PATCH_KEY = registerKey(
+                        "highlands_grass_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_GRASS_PATCH_KEY = registerKey(
                         "scarlet_grass_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDERWOODS_GRASS_PATCH_KEY = registerKey(
@@ -92,9 +97,10 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> GLOBAL_AETHER_RIVER_KEY = registerKey(
                         "global_aether_river");
 
-
-
         public static final ResourceKey<ConfiguredFeature<?, ?>> SEA_URCHIN_KEY = registerKey("sea_urchin");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> BENTHIC_OCEAN_KEY = registerKey("benthic_ocean");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> SILENT_OCEAN_FLORA_KEY = registerKey("silent_ocean_flora");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> BEACH_UNDERWATER_REEF_KEY = registerKey("beach_underwater_reef");
 
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
                 GeodeBlockSettings layerConfig = new GeodeBlockSettings(
@@ -124,7 +130,8 @@ public class ModConfiguredFeatures {
                                 0.2f, true, true);
                 register(context, ELDER_TREE_KEY, ModFeatures.ELDER_GIANT_TREE.get(), elderCfg);
 
-                register(context, ELDER_PINE_TREE_KEY, ModFeatures.WINDSWEPT_PINE.get(), NoneFeatureConfiguration.INSTANCE);
+                register(context, ELDER_PINE_TREE_KEY, ModFeatures.WINDSWEPT_PINE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
 
                 var scarletCfg = new ElderGiantTreeConfig(UniformInt.of(8, 15), UniformInt.of(1, 2),
                                 UniformInt.of(2, 4), UniformInt.of(2, 4),
@@ -145,9 +152,11 @@ public class ModConfiguredFeatures {
 
                 // Golden Desert Features
                 register(context, EPOCH_TREE_KEY, ModFeatures.EPOCH_TREE_FEATURE.get(),
-                                new net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature.EpochTreeConfig(false));
+                                new net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature.EpochTreeConfig(
+                                                false));
                 register(context, EPOCH_TREE_FRUITFUL_KEY, ModFeatures.EPOCH_TREE_FEATURE.get(),
-                                new net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature.EpochTreeConfig(true));
+                                new net.ganyusbathwater.oririmod.worldgen.feature.EpochTreeFeature.EpochTreeConfig(
+                                                true));
                 register(context, MYRIAD_CACTUS_KEY, ModFeatures.MYRIAD_CACTUS_FEATURE.get(),
                                 NoneFeatureConfiguration.INSTANCE);
                 register(context, OASIS_KEY, ModFeatures.OASIS_FEATURE.get(),
@@ -164,60 +173,84 @@ public class ModConfiguredFeatures {
                                 NoneFeatureConfiguration.INSTANCE);
 
                 register(context, HIGHLANDS_MEADOW_FLOWERS_KEY, Feature.FLOWER,
-                                new RandomPatchConfiguration(32, 7, 3, PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK,
-                                                new SimpleBlockConfiguration(new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
-                                                                net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
-                                                                                .add(Blocks.ALLIUM.defaultBlockState(), 2)
-                                                                                .add(Blocks.CORNFLOWER.defaultBlockState(), 3)
-                                                                                .add(Blocks.OXEYE_DAISY.defaultBlockState(), 2)
-                                                                                .add(Blocks.DANDELION.defaultBlockState(), 2)
-                                                                                .add(Blocks.POPPY.defaultBlockState(), 1))))));
+                                new RandomPatchConfiguration(32, 7, 3, PlacementUtils.onlyWhenEmpty(
+                                                Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(
+                                                                new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
+                                                                                net.minecraft.util.random.SimpleWeightedRandomList
+                                                                                                .<BlockState>builder()
+                                                                                                .add(Blocks.ALLIUM
+                                                                                                                .defaultBlockState(),
+                                                                                                                2)
+                                                                                                .add(Blocks.CORNFLOWER
+                                                                                                                .defaultBlockState(),
+                                                                                                                3)
+                                                                                                .add(Blocks.OXEYE_DAISY
+                                                                                                                .defaultBlockState(),
+                                                                                                                2)
+                                                                                                .add(Blocks.DANDELION
+                                                                                                                .defaultBlockState(),
+                                                                                                                2)
+                                                                                                .add(Blocks.POPPY
+                                                                                                                .defaultBlockState(),
+                                                                                                                1))))));
 
                 register(context, HIGHLAND_SUMMIT_POWDER_SNOW_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
-                                                new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.POWDER_SNOW)),
+                                                new SimpleBlockConfiguration(
+                                                                BlockStateProvider.simple(Blocks.POWDER_SNOW)),
                                                 List.of(Blocks.SNOW_BLOCK, Blocks.STONE)));
 
                 register(context, SCARLET_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
                                                                 .simple(ModBlocks.SCARLET_GRASS.get())),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(), ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(),
+                                                                ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
 
                 register(context, ELDERWOODS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
-                                                new SimpleBlockConfiguration(new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
-                                                                net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
-                                                                                .add(Blocks.SHORT_GRASS.defaultBlockState(), 3)
-                                                )),
+                                                new SimpleBlockConfiguration(
+                                                                new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
+                                                                                net.minecraft.util.random.SimpleWeightedRandomList
+                                                                                                .<BlockState>builder()
+                                                                                                .add(Blocks.SHORT_GRASS
+                                                                                                                .defaultBlockState(),
+                                                                                                                3))),
                                                 List.of(Blocks.GRASS_BLOCK, ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
 
                 register(context, HIGHLANDS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
-                                                new SimpleBlockConfiguration(new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
-                                                                net.minecraft.util.random.SimpleWeightedRandomList.<BlockState>builder()
-                                                                                .add(ModBlocks.HIGHLANDS_SHORT_GRASS.get().defaultBlockState(), 5)
-                                                )),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.HIGHLANDS_GRASS_BLOCK.get(), ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+                                                new SimpleBlockConfiguration(
+                                                                new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
+                                                                                net.minecraft.util.random.SimpleWeightedRandomList
+                                                                                                .<BlockState>builder()
+                                                                                                .add(ModBlocks.HIGHLANDS_SHORT_GRASS
+                                                                                                                .get()
+                                                                                                                .defaultBlockState(),
+                                                                                                                5))),
+                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.HIGHLANDS_GRASS_BLOCK.get(),
+                                                                ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
                                                                 .simple(ModBlocks.SCARLET_TOOTH_LEAVES.get())),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(), ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(),
+                                                                ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
                 register(context, SCARLET_LILY_PATCH_KEY, Feature.RANDOM_PATCH, new RandomPatchConfiguration(10, 7, 3,
                                 PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(
                                                 BlockStateProvider.simple(ModBlocks.SCARLET_LILY.get())))));
                 register(context, STAR_HERB_PATCH_KEY, Feature.FLOWER,
-                                new RandomPatchConfiguration(16, 6, 2, PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK,
-                                                new SimpleBlockConfiguration(BlockStateProvider.simple(ModBlocks.STAR_HERB.get())))));
+                                new RandomPatchConfiguration(16, 6, 2,
+                                                PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK,
+                                                                new SimpleBlockConfiguration(BlockStateProvider
+                                                                                .simple(ModBlocks.STAR_HERB.get())))));
 
                 register(context, FALLEN_LOGS_KEY, ModFeatures.FALLEN_LOGS.get(),
                                 new BlockStateConfiguration(ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()));
 
                 register(context, LEAF_PILE_KEY, ModFeatures.ELDER_LEAF_PILE.get(),
                                 net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.NONE);
-
-
 
                 register(context, ELDERWOODS_DRIPSTONE_CLUSTER_KEY, ModFeatures.DRIPSTONE_CLUSTER.get(),
                                 new ScarletDripstoneClusterConfig(UniformInt.of(5, 10), 3, 3, 12, false));
@@ -243,12 +276,15 @@ public class ModConfiguredFeatures {
 
                 register(context, BLOOD_CAP_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
-                                                new SimpleBlockConfiguration(BlockStateProvider.simple(ModBlocks.BLOOD_CAP_BLOCK.get())),
-                                                List.of(ModBlocks.SCARLET_GRASS_BLOCK.get(), ModBlocks.SCARLET_MOSS.get())));
+                                                new SimpleBlockConfiguration(BlockStateProvider
+                                                                .simple(ModBlocks.BLOOD_CAP_BLOCK.get())),
+                                                List.of(ModBlocks.SCARLET_GRASS_BLOCK.get(),
+                                                                ModBlocks.SCARLET_MOSS.get())));
 
                 register(context, GLOWLINGS_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
-                                                new SimpleBlockConfiguration(BlockStateProvider.simple(ModBlocks.GLOWLINGS_BLOCK.get())),
+                                                new SimpleBlockConfiguration(BlockStateProvider
+                                                                .simple(ModBlocks.GLOWLINGS_BLOCK.get())),
                                                 List.of(Blocks.STONE, Blocks.DEEPSLATE)));
 
                 var abyssElysianCfg = new net.ganyusbathwater.oririmod.worldgen.tree.AbyssCrownTreeConfig(
@@ -295,8 +331,13 @@ public class ModConfiguredFeatures {
                 register(context, GLOBAL_AETHER_RIVER_KEY, ModFeatures.GLOBAL_AETHER_RIVER.get(),
                                 FeatureConfiguration.NONE);
 
-
                 register(context, SEA_URCHIN_KEY, ModFeatures.SEA_URCHIN_FEATURE.get(), new NoneFeatureConfiguration());
+                register(context, BENTHIC_OCEAN_KEY, ModFeatures.BENTHIC_OCEAN_FEATURE.get(),
+                                new NoneFeatureConfiguration());
+                register(context, SILENT_OCEAN_FLORA_KEY, ModFeatures.SILENT_OCEAN_FLORA_FEATURE.get(),
+                                new NoneFeatureConfiguration());
+                register(context, BEACH_UNDERWATER_REEF_KEY, ModFeatures.BEACH_UNDERWATER_REEF_FEATURE.get(),
+                                new NoneFeatureConfiguration());
         }
 
         public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
