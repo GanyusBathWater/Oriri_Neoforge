@@ -143,6 +143,7 @@ public class OririMod {
             event.accept(ModItems.FAIRY_SPAWN_EGG);
             event.accept(ModItems.DRYAD_SPAWN_EGG);
             event.accept(ModItems.MERMAID_SPAWN_EGG);
+            event.accept(ModItems.SILENT_NEREID_SPAWN_EGG);
             event.accept(ModItems.LAMIA_SPAWN_EGG);
             event.accept(ModItems.NOXUS_KNIGHT_SPAWN_EGG);
             event.accept(ModItems.NOXUS_GENERAL_SPAWN_EGG);
@@ -190,6 +191,13 @@ public class OririMod {
             net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
             net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
             net.ganyusbathwater.oririmod.entity.custom.MermaidEntity::checkMermaidSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.SILENT_NEREID.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity::checkSilentNereidSpawnRules,
             net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
         event.register(

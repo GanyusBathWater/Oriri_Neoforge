@@ -863,6 +863,8 @@
   "entity.oririmod.giant_sword_slice": "Godslayer Slice",
   "entity.oririmod.mermaid": "Mermaid",
   "item.oririmod.mermaid_spawn_egg": "Mermaid Spawn Egg",
+  "entity.oririmod.silent_nereid": "Silent Nereid",
+  "item.oririmod.silent_nereid_spawn_egg": "Silent Nereid Spawn Egg",
   "block.oririmod.aether_magma_block": "Aether Magma Block",
   "block.oririmod.aether_fire_block": "Aether Fire",
   "entity.oririmod.loaded_blaze": "Loaded Blaze",

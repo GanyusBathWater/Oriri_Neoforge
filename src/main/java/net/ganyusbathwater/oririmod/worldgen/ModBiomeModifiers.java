@@ -90,6 +90,7 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_SWAMPS = registerKey("add_spawns_lamia_swamps");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_FORESTS = registerKey("add_spawns_lamia_forests");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_LUSH_CAVES = registerKey("add_spawns_lamia_lush_caves");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SILENT_NEREID = registerKey("add_spawns_silent_nereid");
         // here will be the Features defined and later turned into json files
         public static void bootstrap(BootstrapContext<BiomeModifier> context) {
                 var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -342,12 +343,17 @@ public class ModBiomeModifiers {
                                                                 .getOrThrow(ModPlacedFeatures.GLOWLINGS_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
-                // Photic Ocean Features (the_silent_oceans flora: seagrass, kelp, sea pickles)
-                var silentOceanBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_oceans"))));
+                // Photic Marine Biomes (Shared Flora & Coral Reefs: the_silent_oceans + elder_beach)
+                var photicMarineBiomes = HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_oceans"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_beach"))));
+
+                // 1. Aquatic Flora (Seagrass meadows, Kelp forests, Sea Pickles) across both Silent Oceans and Beaches
                 context.register(ADD_SILENT_OCEAN_FLORA,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
-                                                silentOceanBiomes,
+                                                photicMarineBiomes,
                                                 HolderSet.direct(placedFeatures
                                                                 .getOrThrow(ModPlacedFeatures.SILENT_OCEAN_FLORA_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
@@ -365,12 +371,10 @@ public class ModBiomeModifiers {
                                                                 .getOrThrow(ModPlacedFeatures.BENTHIC_OCEAN_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
-                // Beach Features (Stone Reef Mounds & Branching Corals/Seagrass Under Water)
-                var beachBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
-                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_beach"))));
+                // 2. Coral Reefs, Stone Spikes & Sea Stacks across both Beaches and Silent Oceans
                 context.register(ADD_BEACH_FEATURES,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
-                                                beachBiomes,
+                                                photicMarineBiomes,
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.BEACH_UNDERWATER_REEF_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
@@ -557,6 +561,14 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("lush_caves")))
                         ),
                         List.of(new MobSpawnSettings.SpawnerData(ModEntities.LAMIA.get(), 35, 1, 3))
+                ));
+
+                // Silent Nereid Spawns: The Silent Depths
+                context.register(ADD_SPAWNS_SILENT_NEREID, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_depths")))
+                        ),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SILENT_NEREID.get(), 1, 1, 1))
                 ));
         }
 

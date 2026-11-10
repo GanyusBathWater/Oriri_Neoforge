@@ -379,6 +379,19 @@ public final class ModEntities {
                                                                                         "mermaid")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity>> SILENT_NEREID = ENTITIES
+                        .register("silent_nereid",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.WATER_CREATURE)
+                                                        .sized(0.6F, 1.95F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "silent_nereid")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.LamiaEntity>> LAMIA = ENTITIES
                         .register("lamia",
                                         () -> EntityType.Builder

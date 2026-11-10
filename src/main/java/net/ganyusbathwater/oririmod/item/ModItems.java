@@ -552,6 +552,12 @@ public class ModItems {
                                         0x8A2BE2, 0xFFB6C1, // outer: purple, inner: bleak pink
                                         new Item.Properties()));
 
+        public static final DeferredItem<DeferredSpawnEggItem> SILENT_NEREID_SPAWN_EGG = ITEMS.register(
+                        "silent_nereid_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.SILENT_NEREID,
+                                        0x1A237E, 0x00E5FF, // outer: deep-sea indigo, inner: bioluminescent blue
+                                        new Item.Properties()));
+
         public static final DeferredItem<DeferredSpawnEggItem> MERMAID_SPAWN_EGG = ITEMS.register(
                         "mermaid_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.MERMAID,

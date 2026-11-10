@@ -78,8 +78,8 @@ public class BeachUnderwaterReefFeature extends Feature<NoneFeatureConfiguration
         BlockState floorState = level.getBlockState(floorPos);
         BlockPos waterPos = floorPos.above();
 
-        // Must be submerged in shallow beach water below sea level (58 <= Y < 71)
-        if (!level.getBlockState(waterPos).is(Blocks.WATER) || floorPos.getY() >= 71 || floorPos.getY() < 58) {
+        // Must be submerged in photic water below sea level (35 <= Y < 71)
+        if (!level.getBlockState(waterPos).is(Blocks.WATER) || floorPos.getY() >= 71 || floorPos.getY() < 35) {
             return false;
         }
 

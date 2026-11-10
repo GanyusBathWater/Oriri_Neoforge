@@ -545,6 +545,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BLIZZA_SPAWN_EGG);
                         output.accept(ModItems.VENOMOUS_PLANT_SPAWN_EGG);
                         output.accept(ModItems.MERMAID_SPAWN_EGG);
+                        output.accept(ModItems.SILENT_NEREID_SPAWN_EGG);
                         output.accept(ModItems.LAMIA_SPAWN_EGG);
                         output.accept(ModItems.DEVIARTRAS_SPAWN_EGG);
                         output.accept(ModItems.PATIENTIA_SPAWN_EGG);

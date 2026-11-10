@@ -53,16 +53,18 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
             net.minecraft.world.level.ChunkPos chunkPos, CarvingMask carvingMask) {
                 
         // 1. Origin Chunk Strict Biome Verification:
-        // Scarlet Cave Entrances MUST strictly originate in mainland Scarlet biomes!
-        BlockPos pos = chunkPos.getMiddleBlockPosition(0);
-        Holder<Biome> originBiome = biomeAccessor.apply(pos);
-        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)) {
-            return false;
+        // Scarlet Cave Entrances MUST strictly originate on mainland Scarlet biomes (never on islands, beaches, or oceans)!
+        int midX = chunkPos.getMiddleBlockX();
+        int midZ = chunkPos.getMiddleBlockZ();
+        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, midX & 15, midZ & 15);
+        if (surfaceY < 65) {
+            return false; // Strictly protect water bodies, beaches, and lowlands from flooding
         }
 
-        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, pos.getX() & 15, pos.getZ() & 15);
-        if (surfaceY < 58) {
-            return false; // Protect water bodies, swamps, and oceans from flooding
+        BlockPos surfacePos = new BlockPos(midX, surfaceY, midZ);
+        Holder<Biome> originBiome = biomeAccessor.apply(surfacePos);
+        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)) {
+            return false;
         }
 
         long originSeed = (chunkPos.x * 341873128712L) ^ (chunkPos.z * 132897987541L);
@@ -74,8 +76,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
         int entranceTop = surfaceY + 1;
         int entranceBottom = -16 + originRandom.nextInt(24);
 
-        int centerX = pos.getX();
-        int centerZ = pos.getZ();
+        int centerX = midX;
+        int centerZ = midZ;
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos neighborPos = new BlockPos.MutableBlockPos();
@@ -117,8 +119,9 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
 
                     if (dist < radiusAtY) {
                         BlockState blockState = chunk.getBlockState(mutablePos);
-                        if (blockState.is(Blocks.WATER)) {
-                            continue; // Never breach or carve open ocean or river water
+                        if (blockState.is(Blocks.WATER) || blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)
+                                || blockState.is(ModBlocks.ABYSSAL_BASALT.get()) || blockState.is(ModBlocks.ABYSS_SAND.get())) {
+                            continue; // Never breach or carve open ocean, beach sand/gravel, or abyssal seabed
                         }
 
                         if (this.canReplaceBlock(config, blockState)) {

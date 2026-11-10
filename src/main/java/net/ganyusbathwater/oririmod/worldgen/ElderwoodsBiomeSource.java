@@ -198,22 +198,16 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         int surfaceY = computeSurfaceHeight(x, z, surfaceBiome);
         boolean isBelowSurfaceLayer = y < surfaceY - 16;
 
-        if (contNoise < 0.02) {
+        if (surfaceY < 58) {
             if (!isBelowSurfaceLayer) {
                 return surfaceBiome;
             }
-            if (contNoise < -0.04) {
-                if (surfaceY <= -116) {
-                    return findBiome(THE_SUNKEN_TRENCHES_KEY);
-                } else if (surfaceY <= -85 && contNoise < -0.42) {
-                    return findBiome(THE_SILENT_DEPTHS_KEY);
-                } else if (surfaceY >= 74) {
-                    return findBiome(ELDERWOODS_CAVE_KEY);
-                } else {
-                    return surfaceBiome;
-                }
+            if (surfaceY <= -112) {
+                return findBiome(THE_SUNKEN_TRENCHES_KEY);
+            } else if (contNoise < getDynamicAbyssThreshold(x, z) && surfaceY < 35) {
+                return findBiome(THE_SILENT_DEPTHS_KEY);
             } else {
-                return findBiome(ELDERWOODS_CAVE_KEY);
+                return surfaceBiome;
             }
         }
 
@@ -262,22 +256,16 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         int surfaceY = computeSurfaceHeight(x, z, surfaceBiome);
         boolean isBelowSurfaceLayer = y < surfaceY - 16;
 
-        if (contNoise < 0.02) {
+        if (surfaceY < 58) {
             if (!isBelowSurfaceLayer) {
                 return surfaceBiome;
             }
-            if (contNoise < -0.04) {
-                if (surfaceY <= -116) {
-                    return findBiome(THE_SUNKEN_TRENCHES_KEY);
-                } else if (surfaceY <= -85 && contNoise < -0.42) {
-                    return findBiome(THE_SILENT_DEPTHS_KEY);
-                } else if (surfaceY >= 74) {
-                    return findBiome(ELDERWOODS_CAVE_KEY);
-                } else {
-                    return surfaceBiome;
-                }
+            if (surfaceY <= -112) {
+                return findBiome(THE_SUNKEN_TRENCHES_KEY);
+            } else if (contNoise < getDynamicAbyssThreshold(x, z) && surfaceY < 35) {
+                return findBiome(THE_SILENT_DEPTHS_KEY);
             } else {
-                return findBiome(ELDERWOODS_CAVE_KEY);
+                return surfaceBiome;
             }
         }
 
@@ -315,49 +303,50 @@ public class ElderwoodsBiomeSource extends BiomeSource {
      * Highland Forest (Cold) -> Highland Summit (Freezing Alpine Crest).
      */
     public Holder<Biome> getSurfaceBiome(int x, int z) {
-        // 0. Master Continentalness Axis: Oceanic Domain vs Coastal Beach vs
-        // Continental Landmass
+        // 0. Master Continentalness Axis: Oceanic Domain vs Coastal Beach vs Continental Landmass
         double rawCont = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
                 (float) ((x + contOffsetX) * 0.00035f), 0f, (float) ((z + contOffsetZ) * 0.00035f), 3);
         double contNoise = rawCont / 0.32;
+        int surfaceY = computeSurfaceHeight(x, z, null);
 
-        // Oceanic Domain (contNoise < -0.04)
-        if (contNoise < -0.04) {
-            int surfaceY = computeSurfaceHeight(x, z, null);
-            if (surfaceY >= 74) {
-                // Island Interior (Lush Elderwoods or Golden Desert)
-                double tempNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                        (float) ((x + tempOffsetX) * 0.002), 0f, (float) ((z + tempOffsetZ) * 0.002), 3);
+        // 1. High Landmass / Island Interiors:
+        if (surfaceY >= 74) {
+            double tempNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + tempOffsetX) * 0.002), 0f, (float) ((z + tempOffsetZ) * 0.002), 3);
+            if (contNoise < 0.02) {
+                // Island Interior or Coastal Peninsula: Lush Elderwoods or Golden Desert
                 return findBiome(tempNoise > 0.15 ? GOLDEN_DESERT_KEY : ELDERWOODS_KEY);
-            } else if (surfaceY >= 66) {
-                // Island Shore / Beach
-                return findBiome(ELDER_BEACH_KEY);
-            } else if (surfaceY >= -20) {
-                // Photic Ocean Shelf / Underwater Mountain Flank / Upper Sea
-                return findBiome(THE_SILENT_OCEANS_KEY);
-            } else {
-                // Deep Abyssal Domain
+            }
+            // Mainland interior biomes handled below
+        }
+
+        // 2. Beach Zone: All shorelines, island perimeters, and shallow water bands (Y=58 to 74)
+        if (surfaceY >= 58 && surfaceY < 74) {
+            return findBiome(ELDER_BEACH_KEY);
+        }
+
+        // 3. Oceanic Domain (Y < 58)
+        if (surfaceY < 58) {
+            double abyssThreshold = getDynamicAbyssThreshold(x, z);
+            boolean isAbyssalDomain = contNoise < abyssThreshold;
+
+            if (isAbyssalDomain && surfaceY < 35) {
+                // Inside the Deep Abyssal Domain:
+                // Valley floor, deep rifts, and all spiked mountains belong to the Silent Depths!
                 double crackNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
                         (float) ((x + trenchOffsetX) * 0.012f), 0f, (float) ((z + trenchOffsetZ) * 0.012f), 2);
                 boolean isCrack = Math.abs(crackNoise) < 0.038;
-                if (isCrack && surfaceY <= -116) {
+                if (isCrack && surfaceY <= -112) {
                     return findBiome(THE_SUNKEN_TRENCHES_KEY);
-                } else if (surfaceY <= -85 && contNoise < -0.42) {
-                    // Strictly deep abyssal floors: reduced size so Silent Ocean has expansive space
-                    return findBiome(THE_SILENT_DEPTHS_KEY);
                 } else {
-                    return findBiome(THE_SILENT_OCEANS_KEY);
+                    return findBiome(THE_SILENT_DEPTHS_KEY);
                 }
+            } else if (surfaceY >= -45) {
+                // Photic Ocean Shelf / Upper Continental Slope / Seamounts
+                return findBiome(THE_SILENT_OCEANS_KEY);
+            } else {
+                return findBiome(THE_SILENT_OCEANS_KEY);
             }
-        } else if (contNoise < 0.02) {
-            int surfaceY = computeSurfaceHeight(x, z, null);
-            if (surfaceY >= 74) {
-                // Peninsula interior connecting island to mainland
-                double tempNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                        (float) ((x + tempOffsetX) * 0.002), 0f, (float) ((z + tempOffsetZ) * 0.002), 3);
-                return findBiome(tempNoise > 0.15 ? GOLDEN_DESERT_KEY : ELDERWOODS_KEY);
-            }
-            return findBiome(ELDER_BEACH_KEY);
         }
 
         double tempNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
@@ -521,180 +510,231 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             finalNoise = net.minecraft.util.Mth.lerp(smoothT, finalNoise, terrainHeight + totalHighlandBonus);
         }
 
-        // 5. Continental Protection & Bathymetric Carving
-        // Dynamic Relative Shoreline: Beach seamlessly inherits the actual incoming inland elevation
-        // and slopes dynamically into shallow water (-5.0, Y=57.0).
-        // Zero hardcoded fixed-height plateau, zero exposed sandstone cliff wall!
-
-        // Sample Island Noise globally
+        // 5. Continental Protection, Coastline Unification & Bathymetric Carving
+        // Sample Island Noise globally with broader wavelength (0.00095) for expansive multi-hundred-block marine domains
         double rawIsland = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                (float) ((x + islandOffsetX) * 0.0014f), 0f, (float) ((z + islandOffsetZ) * 0.0014f), 3);
+                (float) ((x + islandOffsetX) * 0.00095f), 0f, (float) ((z + islandOffsetZ) * 0.00095f), 3);
         double islandNoise = rawIsland / 0.32;
 
-        double islandTargetY = -999.0;
-        if (islandNoise > -0.05) {
-            if (islandNoise > 0.52) {
+        // A. Mainland Coastal Slope & Shoreline (continuous inland elevation to water grade)
+        double mainlandY = ElderwoodsChunkGenerator.BASE_HEIGHT + finalNoise;
+
+        // Inland-to-Coast Smooth Taper (contNoise from 0.10 down to 0.02):
+        double landCoastT = net.minecraft.util.Mth.clamp((contNoise - 0.02) / 0.08, 0.0, 1.0);
+        double smoothLandCoast = landCoastT * landCoastT * (3.0 - 2.0 * landCoastT);
+        double targetCoastY = ElderwoodsChunkGenerator.BASE_HEIGHT + Math.min(finalNoise, 3.5);
+        double taperedMainlandY = net.minecraft.util.Mth.lerp(smoothLandCoast, targetCoastY, mainlandY);
+
+        // Coastal Beach (contNoise from 0.02 down to -0.04):
+        // Slopes smoothly from coastal grade (Y=65.5) through waterline (Y=62) down to shallow water (Y=58.0)
+        double beachT = net.minecraft.util.Mth.clamp((0.02 - contNoise) / 0.06, 0.0, 1.0);
+        double smoothBeach = beachT * beachT * (3.0 - 2.0 * beachT);
+        double mainlandShoreY = net.minecraft.util.Mth.lerp(smoothBeach, taperedMainlandY, ElderwoodsChunkGenerator.BASE_HEIGHT - 4.0);
+
+        // B. Ocean Bathymetry (Shallow photic shelf -> Continental slope -> Deep abyssal plains)
+        // oceanProgress: 0.0 at coast (contNoise = 0.0), 1.0 at deep abyss (contNoise = -0.72)
+        // Scaled to 0.72 (doubled continental span) to ensure vast Silent Ocean expanses before abyssal drop
+        double oceanProgress = net.minecraft.util.Mth.clamp((-contNoise) / 0.72, 0.0, 1.0);
+
+        // Continental Shelf Dynamic Modulation:
+        // Doubled continental shelf length across coasts: from 400 blocks to over 1,500+ blocks of shallow seas!
+        double rawShelfMod = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                (float) ((x + contOffsetX + 4391) * 0.00045f), 0f, (float) ((z + contOffsetZ + 4391) * 0.00045f), 2);
+        double shelfModNoise = rawShelfMod / 0.32;
+        double dynamicShelfEdge = 0.66 + 0.22 * shelfModNoise;
+        double dynamicAbyssEdge = net.minecraft.util.Mth.clamp(dynamicShelfEdge + 0.16, 0.75, 0.96);
+
+        double oceanY;
+        if (oceanProgress < dynamicShelfEdge) {
+            // Photic Continental Shelf (Silent Oceans): slopes gently from shallow water (Y=58) to shelf floor (Y=42)
+            double shelfFrac = oceanProgress / dynamicShelfEdge;
+            double s = shelfFrac * shelfFrac * (3.0 - 2.0 * shelfFrac);
+            oceanY = net.minecraft.util.Mth.lerp(s, ElderwoodsChunkGenerator.BASE_HEIGHT - 4.0, 42.0);
+            // Rolling sandbanks and dunes across the expansive ocean floor
+            oceanY += Math.sin(x * 0.012) * Math.cos(z * 0.012) * 2.5 * (1.0 - shelfFrac);
+        } else if (oceanProgress < dynamicAbyssEdge) {
+            // Continental Slope: descent from photic shelf floor (Y=42) down to abyssal floor (Y=-98)
+            // Added subtle jagged crag roughness and rocky ledges along the descent
+            double slopeFrac = (oceanProgress - dynamicShelfEdge) / (dynamicAbyssEdge - dynamicShelfEdge);
+            double s = slopeFrac * slopeFrac * (3.0 - 2.0 * slopeFrac);
+
+            // Jaggedness envelope: smoothly 0.0 at top (Y=42) and bottom (Y=-98) to ensure zero boundary steps
+            double slopeEnvelope = Math.sin(slopeFrac * Math.PI);
+            double j1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) (x * 0.025f), 0f, (float) (z * 0.025f), 2) * 5.5;
+            double j2 = (1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + 417) * 0.055f), 0f, (float) ((z + 417) * 0.055f), 1))) * 3.5;
+            double slopeJagged = (j1 + j2) * slopeEnvelope;
+
+            oceanY = net.minecraft.util.Mth.lerp(s, 42.0, -98.0) + slopeJagged;
+        } else {
+            // Deep Abyssal Rift Valleys & Spiked Mountain Chains (Silent Depths):
+            // Forms a dramatic underwater valley-shaped biome with deep canyon rifts (Y=-105..-98)
+            // bordered by high-density razor-sharp spiked mountain ridges and needle pinnacles (Y=-50..-32)!
+            double abyssalFrac = (oceanProgress - dynamicAbyssEdge) / Math.max(0.01, 1.0 - dynamicAbyssEdge);
+            abyssalFrac = net.minecraft.util.Mth.clamp(abyssalFrac, 0.0, 1.0);
+            double smoothAbyssal = abyssalFrac * abyssalFrac * (3.0 - 2.0 * abyssalFrac);
+
+            // 1. Deep Rift Valley Basin Axis:
+            double valleyBaseY = -104.0;
+            double vNoise1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + trenchOffsetX + 1983) * 0.0028f), 0f, (float) ((z + trenchOffsetZ + 1983) * 0.0028f), 2);
+            double valleyAxis = Math.abs(vNoise1); // 0 along central rift floor, > 0.18 at valley walls
+
+            // 2. Dense Spiked Mountain Ridges & Needle Pinnacles:
+            double r1 = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + seedOffsetX + 555) * 0.0055f), 0f, (float) ((z + seedOffsetZ + 555) * 0.0055f), 2));
+            double r2 = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + seedOffsetZ + 999) * 0.0110f), 0f, (float) ((z + seedOffsetX + 999) * 0.0110f), 2));
+            double r3 = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + 333) * 0.0180f), 0f, (float) ((z + 333) * 0.0180f), 1));
+            double combinedRidge = r1 * 0.55 + r2 * 0.32 + r3 * 0.13;
+
+            // Power exponent creates needle-sharp mountain crests and steep pyramid flanks
+            double spikeFactor = Math.pow(Math.max(0.0, (combinedRidge - 0.28) / 0.72), 2.8);
+
+            // Spiked mountains flank the rift valleys and rise in high amounts: up to 72 blocks above valley floor!
+            double valleyWallBoost = net.minecraft.util.Mth.clamp(valleyAxis / 0.18, 0.25, 1.0);
+            double spikedMountainLift = spikeFactor * 72.0 * valleyWallBoost;
+
+            // Gentle floor undulation in deep valley troughs
+            double valleyFloorCurve = Math.sin(x * 0.009) * Math.cos(z * 0.009) * 4.0;
+
+            // Combine into full abyssal valley topography
+            double abyssalTerrainY = valleyBaseY + valleyFloorCurve + spikedMountainLift;
+            oceanY = net.minecraft.util.Mth.lerp(smoothAbyssal, -98.0, abyssalTerrainY);
+
+            // Seamounts in the open ocean (Underwater Mountain Ranges rising to photic zone)
+            double m1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) (x * 0.0014f), 0f, (float) (z * 0.0014f), 3) / 0.32;
+            double m2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + 719) * 0.0030f), 0f, (float) ((z + 719) * 0.0030f), 2) / 0.32;
+            double combinedMount = m1 * 0.75 + m2 * 0.25;
+
+            if (combinedMount > -0.22) {
+                double mtT = net.minecraft.util.Mth.clamp((combinedMount - (-0.22)) / 0.85, 0.0, 1.0);
+                double mtCurve = mtT * mtT * (3.0 - 2.0 * mtT);
+                double mtLift = mtCurve * 142.0; // rises up to Y=44!
+                oceanY += mtLift * smoothAbyssal;
+            }
+
+            // Sunken Trenches / Bedrock fault cracks: smooth Hermite drop down to bedrock layer (-118)
+            double crackNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (float) ((x + trenchOffsetX) * 0.012f), 0f, (float) ((z + trenchOffsetZ) * 0.012f), 2);
+            double absCrack = Math.abs(crackNoise);
+            if (absCrack < 0.038) {
+                double crackT = absCrack / 0.038;
+                double dropFactor = (1.0 - crackT) * (1.0 - crackT) * (3.0 - 2.0 * (1.0 - crackT));
+                double depthFade = net.minecraft.util.Mth.clamp((-75.0 - oceanY) / 20.0, 0.0, 1.0);
+                double crackTargetY = -118.0;
+                oceanY = net.minecraft.util.Mth.lerp(dropFactor * depthFade, oceanY, crackTargetY);
+            }
+        }
+
+        // C. Continuous Coastal Blending (Seamless unification of mainland and ocean)
+        // Coastline transition zone: contNoise between -0.04 and 0.04 (centered at contNoise = 0.0, sea level)
+        double coastWeight = net.minecraft.util.Mth.clamp((contNoise - (-0.04)) / 0.08, 0.0, 1.0);
+        double smoothCoast = coastWeight * coastWeight * (3.0 - 2.0 * coastWeight);
+        double baseTerrainY = net.minecraft.util.Mth.lerp(smoothCoast, oceanY, mainlandShoreY);
+
+        // D. Island Seamounts & Dynamic Expansive Island Marine Shelves (Doubled Marine Footprint)
+        // Samples regional marine shelf noise to give each island an expansive Silent Ocean footprint:
+        // Wide lagoon/atoll shelves (hundreds of blocks wide) vs balanced shelves vs compact volcanic slopes!
+        double rawIslandShelfMod = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                (float) ((x + islandOffsetX + 7821) * 0.00065f), 0f, (float) ((z + islandOffsetZ + 7821) * 0.00065f), 2);
+        double islandShelfMod = rawIslandShelfMod / 0.32;
+
+        // Doubled shelf boundaries for each island: spans from vast lagoons (-0.56) to compact shelves (-0.08)
+        double shelfNoiseStart = -0.32 - 0.24 * islandShelfMod;
+        double apronNoiseStart = shelfNoiseStart - (0.28 + 0.10 * net.minecraft.util.Mth.clamp(islandShelfMod, -0.6, 1.0));
+
+        double finalTerrainY = baseTerrainY;
+        if (islandNoise > apronNoiseStart) {
+            double islandTargetY;
+            if (islandNoise > 0.50) {
                 // Island Interior (Y=74 to 88)
-                double t = net.minecraft.util.Mth.clamp((islandNoise - 0.52) / 0.18, 0.0, 1.0);
+                double t = net.minecraft.util.Mth.clamp((islandNoise - 0.50) / 0.20, 0.0, 1.0);
                 double smoothT = t * t * (3.0 - 2.0 * t);
                 double peak = 85.0 + Math.sin(x * 0.02) * Math.cos(z * 0.02) * 3.5;
                 islandTargetY = net.minecraft.util.Mth.lerp(smoothT, 74.0, peak);
-            } else if (islandNoise > 0.42) {
-                // Beach Zone (Y=66 to 74) - wide, gentle sandy shore
-                double t = (islandNoise - 0.42) / 0.10;
+            } else if (islandNoise > 0.38) {
+                // Beach Zone (Y=58 to 74) - gentle sandy shore passing through sea level (Y=62)
+                double t = (islandNoise - 0.38) / 0.12;
                 double smoothT = t * t * (3.0 - 2.0 * t);
-                islandTargetY = net.minecraft.util.Mth.lerp(smoothT, 66.0, 74.0);
-            } else if (islandNoise > 0.15) {
-                // Photic Silent Ocean Shelf (Y=42 to 66) - expansive photic ring around the island
-                double t = (islandNoise - 0.15) / 0.27;
-                double smoothT = t * t * (3.0 - 2.0 * t);
-                islandTargetY = net.minecraft.util.Mth.lerp(smoothT, 42.0, 66.0);
-            }
-        }
-
-        if (contNoise >= -0.04) {
-            // Soft curve: ensures land valleys naturally curve above water level
-            if (finalNoise < 1.0) {
-                finalNoise = 1.0 + Math.exp(finalNoise - 1.0) * 0.5;
-            }
-
-            // Inland-to-Coast Smooth Taper (contNoise from 0.10 down to 0.02):
-            // Gently eases inland elevations toward the coastal grade
-            if (contNoise < 0.10) {
-                double landCoastT = net.minecraft.util.Mth.clamp((contNoise - 0.02) / 0.08, 0.0, 1.0);
-                double smoothLandCoast = landCoastT * landCoastT * (3.0 - 2.0 * landCoastT);
-                double targetCoastalBase = Math.min(finalNoise, 3.0);
-                finalNoise = net.minecraft.util.Mth.lerp(smoothLandCoast, targetCoastalBase, finalNoise);
-            }
-
-            // Coastal Beach (contNoise from 0.02 down to -0.04):
-            // Dynamically slopes from the actual terrain elevation down to shallow water (-5.0, Y=57.0)
-            if (contNoise < 0.02) {
-                double beachT = (0.02 - contNoise) / 0.06;
-                double smoothBeach = beachT * beachT * (3.0 - 2.0 * beachT);
-                finalNoise = net.minecraft.util.Mth.lerp(smoothBeach, finalNoise, -5.0);
-            }
-
-            // Island-Mainland Collision Peninsula Merging:
-            // When an ocean island seamount collides with or approaches the coast,
-            // smoothly blend and elevate the terrain into a natural peninsula, headland, or isthmus!
-            // Prevents unnatural water moats, trenches, or abrupt cliffs along the coastal boundary.
-            if (islandTargetY > -900.0) {
-                double islandDelta = islandTargetY - ElderwoodsChunkGenerator.BASE_HEIGHT;
-                if (islandNoise > 0.42) {
-                    // Island interior or high beach: seamlessly bridges across the water into a solid peninsula!
-                    finalNoise = Math.max(finalNoise, islandDelta);
-                } else if (islandNoise > 0.15) {
-                    // Photic shelf / tombolo: smoothly raises the seabed, creating a shallow sandbar
-                    finalNoise = Math.max(finalNoise, islandDelta);
-                }
-            }
-        } else {
-            // Oceanic Domain (contNoise < -0.04)
-            // 1. Photic Continental Shelf (Silent Oceans): vast majority of the ocean domain (-0.04 to -0.30)
-            // Slopes gently from coast Y=67 down to normal expansive floor Y=40..44.
-            // 2. Continental Slope (contNoise < -0.30): sharp dramatic plunge down to deep abyssal floor Y=-50.
-            double u = net.minecraft.util.Mth.clamp((-contNoise - 0.04) / 0.42, 0.0, 1.0);
-
-            double baseOceanY;
-            if (u < 0.75) {
-                // Photic Continental Shelf (Silent Oceans): vast majority of ocean domain (-0.04 to -0.36)
-                double shelfFrac = u / 0.75;
-                double s = shelfFrac * shelfFrac * (3.0 - 2.0 * shelfFrac);
-                baseOceanY = net.minecraft.util.Mth.lerp(s, 67.0, 40.0);
-                // Rolling sandbanks and dunes across the expansive ocean floor
-                baseOceanY += Math.sin(x * 0.012) * Math.cos(z * 0.012) * 2.8 * (1.0 - shelfFrac);
+                islandTargetY = net.minecraft.util.Mth.lerp(smoothT, 58.0, 74.0);
+            } else if (islandNoise > shelfNoiseStart) {
+                // Photic Silent Ocean Shelf (Y=42 to 58) - vast, doubled-size photic marine shelf around the island!
+                double shelfT = (islandNoise - shelfNoiseStart) / (0.38 - shelfNoiseStart);
+                double smoothShelf = shelfT * shelfT * (3.0 - 2.0 * shelfT);
+                double shelfRoll = Math.sin(x * 0.015) * Math.cos(z * 0.015) * 4.0 * (shelfT * (1.0 - shelfT));
+                islandTargetY = net.minecraft.util.Mth.lerp(smoothShelf, 42.0, 58.0) + shelfRoll;
             } else {
-                // Continental Slope: plunge from Y=40 down to deep abyssal floor Y=-106
-                double slopeFrac = (u - 0.75) / 0.25;
-                double s = slopeFrac * slopeFrac * (3.0 - 2.0 * slopeFrac);
-                baseOceanY = net.minecraft.util.Mth.lerp(s, 40.0, -106.0);
+                // Submarine apron / ramp (sloping smoothly from surrounding seafloor baseTerrainY up to Y=42)
+                double apronT = (islandNoise - apronNoiseStart) / (shelfNoiseStart - apronNoiseStart);
+                double smoothApron = apronT * apronT * (3.0 - 2.0 * apronT);
+                islandTargetY = net.minecraft.util.Mth.lerp(smoothApron, baseTerrainY, 42.0);
             }
 
-            // 3. Deep Abyssal Plains & Underwater Mountain Ranges (Silent Depths):
-            if (u > 0.75) {
-                double abyssalFrac = (u - 0.75) / 0.25;
-                double smoothAbyssal = abyssalFrac * abyssalFrac * (3.0 - 2.0 * abyssalFrac);
-
-                // Gentle rolling curvature of the seabed floor between mountains
-                double valleyCurvature = (Math.sin(x * 0.007) * Math.cos(z * 0.007)
-                        + Math.cos(x * 0.014) * Math.sin(z * 0.014) * 0.4) * 3.5;
-                baseOceanY += valleyCurvature * smoothAbyssal;
-
-                // Underwater Mountain Ranges (seamounts) rising between the deep abyssal floors:
-                // Abundant seamounts rising up to 150 blocks above the floor (reaching Y=35..48 into the photic Silent Ocean)!
-                double m1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                        (float) (x * 0.0022f), 0f, (float) (z * 0.0022f), 3) / 0.32;
-                double m2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                        (float) ((x + 719) * 0.0045f), 0f, (float) ((z + 719) * 0.0045f), 2) / 0.32;
-                double combinedMount = m1 * 0.75 + m2 * 0.25;
-
-                if (combinedMount > -0.15) {
-                    double mtT = net.minecraft.util.Mth.clamp((combinedMount - (-0.15)) / 0.85, 0.0, 1.0);
-                    double mtCurve = Math.pow(mtT, 1.25);
-                    double mtLift = mtCurve * 150.0;
-                    baseOceanY += mtLift * smoothAbyssal;
-                }
-
-                // 4. Dedicated Ocean Fissures & Bedrock Fault Cracks (Sunken Trenches):
-                // Narrow cracks (3-5 blocks wide) cracking the floor open, dropping 10-12 blocks down
-                // to a partially fixed height right above bedrock (-118, bedrock is -124)
-                double crackNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                        (float) ((x + trenchOffsetX) * 0.012f), 0f, (float) ((z + trenchOffsetZ) * 0.012f), 2);
-                double absCrack = Math.abs(crackNoise);
-                if (absCrack < 0.038 && baseOceanY <= -90.0) {
-                    double crackT = absCrack / 0.038;
-                    double dropFactor = Math.pow(1.0 - crackT, 0.25); // steep ravine profile
-                    double crackTargetY = -118.0; // slightly above bedrock layer (-128..-124)
-                    baseOceanY = net.minecraft.util.Mth.lerp(dropFactor, baseOceanY, crackTargetY);
-                }
-            }
-
-            // 5. Ocean Mountain Islands & Expansive Island Shelves:
-            if (islandTargetY > -900.0) {
-                baseOceanY = Math.max(baseOceanY, islandTargetY);
-            } else if (islandNoise > -0.05) {
-                // Gentle Submarine Base Slope (Y=baseOceanY to 42)
-                double t = (islandNoise - (-0.05)) / 0.20;
-                double smoothT = t * t * (3.0 - 2.0 * t);
-                baseOceanY = net.minecraft.util.Mth.lerp(smoothT, baseOceanY, 42.0);
-            }
-
-            double oceanDelta = baseOceanY - ElderwoodsChunkGenerator.BASE_HEIGHT;
-            finalNoise = oceanDelta;
+            // Smooth fillet radius k smoothly fades to 0 at the outer submarine boundary
+            double k = 5.0 * net.minecraft.util.Mth.clamp((islandNoise - apronNoiseStart) / 0.10, 0.0, 1.0);
+            finalTerrainY = smoothMax(baseTerrainY, islandTargetY, k);
         }
 
         // --- DYNAMIC SWAMP SHORELINE (SPILL PREVENTION) ---
-        // Blood water spawns at Y=61 (BASE_HEIGHT - 2) in the Scarlet Swamp.
-        // If an adjacent Desert or Forest dune drops lower than Y=61, the water will
-        // form a sheer vertical cliff.
-        // We dynamically calculate distance to the exact Swamp border and build a
-        // natural retaining ridge!
-        if (contNoise > -0.06) {
-            double distToHumBorder = Math.abs(swampWeight - 0.5) * 2.0; // 0 at Hum border, 1 inside/outside
-            double distToTempBorder = Math.abs(desertWeight - 0.5) * 2.0; // 0 at Temp border, 1 inside/outside
+        // Strictly applies only on deep inland mainland where Scarlet Swamp meets adjacent biomes
+        if (contNoise > 0.05) {
+            double landFade = net.minecraft.util.Mth.clamp((contNoise - 0.05) / 0.08, 0.0, 1.0);
+            double distToHumBorder = Math.abs(swampWeight - 0.5) * 2.0;
+            double distToTempBorder = Math.abs(desertWeight - 0.5) * 2.0;
 
             double ridgeForce = 0.0;
             if (swampWeight > 0.5) {
-                // Inside the Swamp's humidity zone.
-                // The border is either the edge of the humidity zone (Forest) or the edge of
-                // the temperature zone (Desert).
                 double closestEdge = Math.min(distToHumBorder, distToTempBorder);
                 ridgeForce = Math.max(0.0, 1.0 - (closestEdge * closestEdge));
             } else {
-                // Outside the humidity zone, the only relevant border is the hum border.
                 ridgeForce = Math.max(0.0, 1.0 - (distToHumBorder * distToHumBorder));
             }
 
             if (ridgeForce > 0.0) {
-                // Force the surface up to at least -1.0 (Y=62) to physically contain the Y=61
-                // water!
-                double ridgeMinimum = -1.0;
-                finalNoise = net.minecraft.util.Mth.lerp(ridgeForce, finalNoise, Math.max(finalNoise, ridgeMinimum));
+                double ridgeMinimum = ElderwoodsChunkGenerator.BASE_HEIGHT - 1.0;
+                finalTerrainY = net.minecraft.util.Mth.lerp(ridgeForce * landFade, finalTerrainY, Math.max(finalTerrainY, ridgeMinimum));
             }
         }
 
-        return ElderwoodsChunkGenerator.BASE_HEIGHT + (int) Math.round(finalNoise);
+        return (int) Math.round(finalTerrainY);
+    }
+
+    /**
+     * Smooth Polynomial Maximum (smax) using a quadratic fillet.
+     * Guarantees C1 continuity when blending intersecting terrain surfaces,
+     * eliminating hard cut-offs, sharp creases, and stepped cliffs.
+     */
+    public static double smoothMax(double a, double b, double k) {
+        if (k <= 0.0) {
+            return Math.max(a, b);
+        }
+        double diff = a - b;
+        if (diff >= k) {
+            return a;
+        }
+        if (diff <= -k) {
+            return b;
+        }
+        double h = 0.5 + 0.5 * diff / k;
+        return net.minecraft.util.Mth.lerp(h, b, a) + k * h * (1.0 - h);
+    }
+
+    /**
+     * Computes the dynamic continentalness threshold for the deep abyssal floor (Silent Depths),
+     * dynamically varying based on regional continental shelf width.
+     */
+    public double getDynamicAbyssThreshold(int x, int z) {
+        double rawShelfMod = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                (float) ((x + contOffsetX + 4391) * 0.00045f), 0f, (float) ((z + contOffsetZ + 4391) * 0.00045f), 2);
+        double shelfModNoise = rawShelfMod / 0.32;
+        double dynamicShelfEdge = 0.66 + 0.22 * shelfModNoise;
+        double dynamicAbyssEdge = net.minecraft.util.Mth.clamp(dynamicShelfEdge + 0.16, 0.75, 0.96);
+        return -(dynamicAbyssEdge * 0.72);
     }
 
     /**

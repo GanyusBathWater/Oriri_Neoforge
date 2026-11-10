@@ -1101,26 +1101,39 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             continue;
                         }
 
-                        // 2. Elder Beach: Procedural Shoreline Variants (Sand, Sand+Gravel Mix, Gravel-only)
-                        // Beaches strictly consist of sand, gravel, and shallow water stone reefs (no grass!)
-                        if (isBeachCurrent) {
-                            double beachVariant = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                    (float)(worldX * 0.015f), 0f, (float)(worldZ * 0.015f), 2);
-                            double microMix = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                    (float)(worldX * 0.06f), 0f, (float)(worldZ * 0.06f), 2);
+                        // 2. Elder Beach: Natural Macro-Geological Shoreline Sediment Provinces
+                        // Beaches strictly consist of contiguous sand expanses, distinct gravel shores, and shallow stone reefs
+                        if (isBeachCurrent || (surfaceY >= 58 && surfaceY <= 65 && !isDesertCurrent && !isScarletCurrent)) {
+                            // Macro-scale sediment province (scale ~500-800 blocks):
+                            double sedimentProvince = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                    (float)(worldX * 0.0018f), 0f, (float)(worldZ * 0.0018f), 2) / 0.32;
 
                             BlockState beachTop;
-                            if (beachVariant < -0.22) {
-                                beachTop = Blocks.GRAVEL.defaultBlockState();
-                            } else if (beachVariant > 0.22) {
+                            // Real beaches are overwhelmingly contiguous sand, or dedicated gravel shingle shores:
+                            if (sedimentProvince > -0.20) {
+                                // Vast contiguous pure sand beach:
                                 beachTop = Blocks.SAND.defaultBlockState();
+                            } else if (sedimentProvince < -0.55) {
+                                // Dedicated contiguous pure gravel shingle beach:
+                                beachTop = Blocks.GRAVEL.defaultBlockState();
                             } else {
-                                beachTop = (microMix > 0.0) ? Blocks.SAND.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
+                                // Smooth interlocking geological blend between sand and gravel:
+                                double progress = (sedimentProvince - (-0.55)) / 0.35; // 0.0 (gravel) to 1.0 (sand)
+                                double wave1 = Math.sin(worldX * 0.08 + worldZ * 0.05) * 0.15;
+                                double wave2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                        (float)(worldX * 0.025f), 0f, (float)(worldZ * 0.025f), 2) * 0.25;
+                                double blendFactor = net.minecraft.util.Mth.clamp(progress + wave1 + wave2, 0.0, 1.0);
+
+                                double microDither = (net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                        (float)(worldX * 0.12f), 0f, (float)(worldZ * 0.12f), 1) + 1.0) * 0.5;
+                                beachTop = (blendFactor > microDither) ? Blocks.SAND.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
                             }
 
-                            // Underwater shallows of the beach: small stone reef patches
-                            if (surfaceY < BASE_HEIGHT && microMix > 0.45) {
-                                beachTop = (microMix > 0.65) ? Blocks.ANDESITE.defaultBlockState() : Blocks.STONE.defaultBlockState();
+                            // Underwater shallows of the beach: rare natural stone/andesite reefs
+                            double reefNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                    (float)(worldX * 0.025f), 0f, (float)(worldZ * 0.025f), 2);
+                            if (surfaceY < BASE_HEIGHT && reefNoise > 0.48) {
+                                beachTop = (reefNoise > 0.62) ? Blocks.ANDESITE.defaultBlockState() : Blocks.STONE.defaultBlockState();
                             }
 
                             if (y == surfaceY) {
@@ -1149,11 +1162,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             BlockState oceanTop;
                             BlockState oceanSub;
 
-                            // Crack / Fissure Floor (Hadal Magma at bottom of crack Y <= -116):
+                            // Crack / Fissure Floor (Hadal Magma strictly at bottom of Sunken Trench cracks Y <= -112):
                             // "When the space is wide enough a small crack is there cracking the floor a few block open
                             // and 10 blocks below are the magma blocks generated. The bottom of the cracks should be
                             // almost the lowest part of the world slightly above the bedrock layer."
-                            if (surfaceY <= -116) {
+                            if (isTrenchCurrent && surfaceY <= -112) {
                                 double magmaNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
                                         (float)(worldX * 0.08f), 0f, (float)(worldZ * 0.08f), 2);
                                 if (magmaNoise > 0.15) {
@@ -1163,18 +1176,35 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 }
                                 oceanSub = ModBlocks.ABYSSAL_BASALT.get().defaultBlockState();
                             } else if (effectiveAbyss < 0.50) {
-                                // Silent Ocean floor (Sand, Gravel, Stone mixture):
-                                double shelfNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                        (float)(worldX * 0.035f), 0f, (float)(worldZ * 0.035f), 2);
-                                if (shelfNoise > 0.20) {
+                                // Silent Ocean floor: Macro-Scale Geological Sediment Facies with Smooth Wave-Ripple Blend
+                                double sedimentProvince = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                        (float)(worldX * 0.0018f), 0f, (float)(worldZ * 0.0018f), 2) / 0.32;
+
+                                if (sedimentProvince > -0.20) {
+                                    // Vast contiguous pure sand ocean floor (sand sheets, dunes, ripples):
                                     oceanTop = Blocks.SAND.defaultBlockState();
                                     oceanSub = Blocks.SANDSTONE.defaultBlockState();
-                                } else if (shelfNoise < -0.15) {
+                                } else if (sedimentProvince < -0.55) {
+                                    // Dedicated contiguous pure gravel/cobble seabed:
                                     oceanTop = Blocks.GRAVEL.defaultBlockState();
                                     oceanSub = Blocks.STONE.defaultBlockState();
                                 } else {
-                                    oceanTop = (blendDither > 0.0) ? Blocks.SAND.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
-                                    oceanSub = Blocks.STONE.defaultBlockState();
+                                    // Smooth interlocking wave ripple transition:
+                                    double progress = (sedimentProvince - (-0.55)) / 0.35; // 0.0 (gravel) to 1.0 (sand)
+                                    double wave1 = Math.sin(worldX * 0.08 + worldZ * 0.05) * 0.15;
+                                    double wave2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                            (float)(worldX * 0.025f), 0f, (float)(worldZ * 0.025f), 2) * 0.25;
+                                    double blendFactor = net.minecraft.util.Mth.clamp(progress + wave1 + wave2, 0.0, 1.0);
+
+                                    double microDither = (net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                            (float)(worldX * 0.12f), 0f, (float)(worldZ * 0.12f), 1) + 1.0) * 0.5;
+                                    if (blendFactor > microDither) {
+                                        oceanTop = Blocks.SAND.defaultBlockState();
+                                        oceanSub = Blocks.SANDSTONE.defaultBlockState();
+                                    } else {
+                                        oceanTop = Blocks.GRAVEL.defaultBlockState();
+                                        oceanSub = Blocks.STONE.defaultBlockState();
+                                    }
                                 }
                             } else {
                                 // Silent Depths floor (Abyss Sand in valleys, Abyssal Basalt on slopes/crags):
@@ -1182,7 +1212,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 int slopeZ = Math.abs(surfaceY - getSurfaceHeight(worldX, worldZ + 1));
                                 boolean isCrag = Math.max(slopeX, slopeZ) >= 2;
 
-                                if (isCrag || surfaceY > 20) {
+                                if (isCrag || surfaceY > -60) {
                                     oceanTop = ModBlocks.ABYSSAL_BASALT.get().defaultBlockState();
                                     oceanSub = ModBlocks.ABYSSAL_BASALT.get().defaultBlockState();
                                 } else {

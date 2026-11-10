@@ -108,6 +108,25 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                         .add(LootItem.lootTableItem(ModItems.PRISMARINE_IRON_INGOT.get()))
                         .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.1F, 0.05F))));
 
+        // Silent Nereid
+        this.add(ModEntities.SILENT_NEREID.get(), LootTable.lootTable()
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(Items.COD).setWeight(1))
+                        .add(LootItem.lootTableItem(Items.SALMON).setWeight(1))
+                        .add(LootItem.lootTableItem(Items.PUFFERFISH).setWeight(2))
+                        .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+                        .apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries, UniformGenerator.between(0.0F, 1.0F))))
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(Items.GLOWSTONE_DUST).setWeight(2))
+                        .add(LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS).setWeight(1))
+                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(Items.TRIDENT))
+                        .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.06F, 0.02F)))
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(ModItems.PRISMARINE_IRON_INGOT.get()))
+                        .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.15F, 0.05F))));
+
         // Rex Aranea
         this.add(ModEntities.REX_ARANEA.get(), LootTable.lootTable()
                 .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
@@ -169,6 +188,7 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                 ModEntities.FIRE_ZOMBIE.get(),
                 ModEntities.EYE_OF_DESOLATION.get(),
                 ModEntities.MERMAID.get(),
+                ModEntities.SILENT_NEREID.get(),
                 ModEntities.REX_ARANEA.get(),
                 ModEntities.DEVIARTRAS.get(),
                 ModEntities.BLIZZA.get(),
