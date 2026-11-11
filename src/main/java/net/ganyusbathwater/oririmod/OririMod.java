@@ -372,6 +372,35 @@ public class OririMod {
                 entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModEffects.STUN_IMMUNITY_EFFECT, 100, 0, false, false, true));
             }
         }
+
+        if (event.getEffect() == ModEffects.TRUE_VISION_EFFECT) {
+            net.minecraft.world.effect.MobEffectInstance nv = entity.getEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);
+            if (nv != null && nv.isAmbient()) {
+                entity.removeEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onEffectExpired(MobEffectEvent.Expired event) {
+        if (event.getEffectInstance() != null && event.getEffectInstance().getEffect() == ModEffects.TRUE_VISION_EFFECT) {
+            net.minecraft.world.effect.MobEffectInstance nv = event.getEntity().getEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);
+            if (nv != null && nv.isAmbient()) {
+                event.getEntity().removeEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onEffectApplicable(MobEffectEvent.Applicable event) {
+        if (event.getEntity().hasEffect(ModEffects.TRUE_VISION_EFFECT)) {
+            net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect = event.getEffectInstance().getEffect();
+            if (effect.is(net.minecraft.world.effect.MobEffects.DARKNESS)
+                    || effect.is(net.minecraft.world.effect.MobEffects.BLINDNESS)
+                    || effect.is(net.minecraft.world.effect.MobEffects.CONFUSION)) {
+                event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -380,6 +409,15 @@ public class OririMod {
             if (event.getEntity().hasEffect(ModEffects.STUN_IMMUNITY_EFFECT)) {
                 // Remove the effect immediately since we have immunity
                 event.getEntity().removeEffect(ModEffects.STUNNED_EFFECT);
+            }
+        }
+
+        if (event.getEntity().hasEffect(ModEffects.TRUE_VISION_EFFECT)) {
+            net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect = event.getEffectInstance().getEffect();
+            if (effect.is(net.minecraft.world.effect.MobEffects.DARKNESS)
+                    || effect.is(net.minecraft.world.effect.MobEffects.BLINDNESS)
+                    || effect.is(net.minecraft.world.effect.MobEffects.CONFUSION)) {
+                event.getEntity().removeEffect(effect);
             }
         }
     }

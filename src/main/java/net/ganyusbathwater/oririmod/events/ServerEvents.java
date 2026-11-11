@@ -74,29 +74,34 @@ public class ServerEvents {
         if (coldAura != null) {
             long lastBlizz = player.getPersistentData().getLong("LastBlizzardTick");
             long gameTime = player.level().getGameTime();
-            
+
             // Check block light at feet and head
-            int blockLightFeet = player.level().getBrightness(net.minecraft.world.level.LightLayer.BLOCK, player.blockPosition());
-            int blockLightHead = player.level().getBrightness(net.minecraft.world.level.LightLayer.BLOCK, player.blockPosition().above());
+            int blockLightFeet = player.level().getBrightness(net.minecraft.world.level.LightLayer.BLOCK,
+                    player.blockPosition());
+            int blockLightHead = player.level().getBrightness(net.minecraft.world.level.LightLayer.BLOCK,
+                    player.blockPosition().above());
             int maxBlockLight = Math.max(blockLightFeet, blockLightHead);
             boolean nearHeat = maxBlockLight >= 8 || player.isOnFire();
-            
-            // Defrost if safely outside blizzard exposure OR if standing near a heat source!
+
+            // Defrost if safely outside blizzard exposure OR if standing near a heat
+            // source!
             boolean canDefrost = (gameTime - lastBlizz > 5) || nearHeat;
-            
+
             if (canDefrost) {
                 int currentAmp = coldAura.getAmplifier();
                 int defrostProgress = player.getPersistentData().getInt("ColdAuraDefrostProg");
-                
-                // Fast thaw near heat: ~25 ticks (1.25s) per amplifier. Natural thaw: ~80 ticks (4s).
+
+                // Fast thaw near heat: ~25 ticks (1.25s) per amplifier. Natural thaw: ~80 ticks
+                // (4s).
                 defrostProgress += nearHeat ? 8 : 2;
-                
-                if (nearHeat && player.level() instanceof net.minecraft.server.level.ServerLevel sl && player.tickCount % 6 == 0) {
+
+                if (nearHeat && player.level() instanceof net.minecraft.server.level.ServerLevel sl
+                        && player.tickCount % 6 == 0) {
                     sl.sendParticles(net.minecraft.core.particles.ParticleTypes.CAMPFIRE_COSY_SMOKE,
                             player.getX(), player.getY() + 0.8, player.getZ(),
                             1, 0.15, 0.25, 0.15, 0.01);
                 }
-                
+
                 if (defrostProgress >= 200) {
                     player.getPersistentData().putInt("ColdAuraDefrostProg", 0);
                     player.getPersistentData().putInt("ColdAuraExposureTicks", 0);
@@ -124,12 +129,15 @@ public class ServerEvents {
                     WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
             ServerLevel overworld = sp.server.overworld();
             if (overworld != null) {
-                net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm =
-                        net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(overworld);
-                if (net.ganyusbathwater.oririmod.events.disaster.DisasterSafetyUtil.isDisasterDimension(sp.level().dimension())) {
-                    NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
+                net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm = net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager
+                        .get(overworld);
+                if (net.ganyusbathwater.oririmod.events.disaster.DisasterSafetyUtil
+                        .isDisasterDimension(sp.level().dimension())) {
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(),
+                            ndm.getDuration());
                 } else {
-                    NetworkHandler.sendNaturalDisasterToPlayer(sp, net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType.NONE, 0, 0);
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp,
+                            net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType.NONE, 0, 0);
                 }
             }
         }
@@ -151,12 +159,15 @@ public class ServerEvents {
                     WorldEventManager.getTicksRemaining(sp.level()), WorldEventManager.getEventDuration(sp.level()));
             ServerLevel overworld = sp.server.overworld();
             if (overworld != null) {
-                net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm =
-                        net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager.get(overworld);
-                if (net.ganyusbathwater.oririmod.events.disaster.DisasterSafetyUtil.isDisasterDimension(sp.level().dimension())) {
-                    NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(), ndm.getDuration());
+                net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager ndm = net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterManager
+                        .get(overworld);
+                if (net.ganyusbathwater.oririmod.events.disaster.DisasterSafetyUtil
+                        .isDisasterDimension(sp.level().dimension())) {
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp, ndm.getActiveType(), ndm.getTicksRemaining(),
+                            ndm.getDuration());
                 } else {
-                    NetworkHandler.sendNaturalDisasterToPlayer(sp, net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType.NONE, 0, 0);
+                    NetworkHandler.sendNaturalDisasterToPlayer(sp,
+                            net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType.NONE, 0, 0);
                 }
             }
         }
@@ -223,21 +234,29 @@ public class ServerEvents {
             if (WorldEventManager.isEventActive(level, WorldEventType.BLOOD_MOON)) {
                 // 25% Chance für einen "Infused" Gegner mit erhöhten Werten
                 if (serverLevel.random.nextFloat() < 0.25F) {
-                    monster.setCustomName(net.minecraft.network.chat.Component.literal("Infused " + monster.getName().getString()));
+                    monster.setCustomName(
+                            net.minecraft.network.chat.Component.literal("Infused " + monster.getName().getString()));
                     monster.setCustomNameVisible(true);
-                    
-                    var maxHealth = monster.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-                    if (maxHealth != null) maxHealth.setBaseValue(maxHealth.getBaseValue() * 2.0);
-                    
-                    var attackDamage = monster.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
-                    if (attackDamage != null) attackDamage.setBaseValue(attackDamage.getBaseValue() * 1.5);
-                    
-                    var speed = monster.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
-                    if (speed != null) speed.setBaseValue(speed.getBaseValue() * 1.2);
-                    
+
+                    var maxHealth = monster
+                            .getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+                    if (maxHealth != null)
+                        maxHealth.setBaseValue(maxHealth.getBaseValue() * 2.0);
+
+                    var attackDamage = monster
+                            .getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+                    if (attackDamage != null)
+                        attackDamage.setBaseValue(attackDamage.getBaseValue() * 1.5);
+
+                    var speed = monster
+                            .getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+                    if (speed != null)
+                        speed.setBaseValue(speed.getBaseValue() * 1.2);
+
                     monster.setHealth(monster.getMaxHealth());
                 } else if (serverLevel.random.nextFloat() < 0.5F) {
-                    // Verdoppelt die Chance, indem ein zweites Monster mit 50% Wahrscheinlichkeit gespawnt wird
+                    // Verdoppelt die Chance, indem ein zweites Monster mit 50% Wahrscheinlichkeit
+                    // gespawnt wird
                     Monster extraMonster = (Monster) monster.getType().create(serverLevel);
                     if (extraMonster != null) {
                         extraMonster.copyPosition(monster);
@@ -268,21 +287,25 @@ public class ServerEvents {
             }
         }
 
-        // Reduce Meteor damage to prevent it from one-shotting bosses while keeping the huge explosion crater
+        // Reduce Meteor damage to prevent it from one-shotting bosses while keeping the
+        // huge explosion crater
         if (event.getSource().getDirectEntity() instanceof net.ganyusbathwater.oririmod.entity.MeteorEntity) {
             // Cap damage to 20 (10 hearts) and heavily reduce the base multiplier.
             event.setNewDamage(Math.min(event.getNewDamage() * 0.15f, 20.0f));
         }
 
         // Molten Armor Counter-attack
-        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player target && sourceEntity instanceof net.minecraft.world.entity.LivingEntity attacker) {
-            if (!target.level().isClientSide() && target.getInventory().getArmor(0).getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ModArmorItem armorItem) {
-                if (armorItem.hasPlayerCorrectArmorOn(net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, target)) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player target
+                && sourceEntity instanceof net.minecraft.world.entity.LivingEntity attacker) {
+            if (!target.level().isClientSide() && target.getInventory().getArmor(0)
+                    .getItem() instanceof net.ganyusbathwater.oririmod.item.custom.ModArmorItem armorItem) {
+                if (armorItem.hasPlayerCorrectArmorOn(
+                        net.ganyusbathwater.oririmod.item.custom.ModArmorMaterials.MOLTEN_ARMOR_MATERIAL, target)) {
                     attacker.igniteForSeconds(5.0f);
                 }
             }
         }
-        
+
         // Global Boss Swarm Punish Damage Multiplier
         if (event.getSource().getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss) {
             if (event.getEntity().getPersistentData().getBoolean("OririSummoned")) {
@@ -307,37 +330,48 @@ public class ServerEvents {
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
         Entity sourceEntity = event.getSource().getEntity();
-        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !player.level().isClientSide() && event.getSource().getDirectEntity() == player) {
+        if (sourceEntity instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity nereid
+                && nereid.isAlive()) {
+            nereid.heal(nereid.getMaxHealth() * 0.5F);
+            if (nereid.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.HEART,
+                        nereid.getX(), nereid.getY() + 1.0D, nereid.getZ(), 6, 0.3D, 0.3D, 0.3D, 0.05D);
+            }
+        }
+        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !player.level().isClientSide()
+                && event.getSource().getDirectEntity() == player) {
             net.minecraft.world.item.ItemStack weapon = player.getMainHandItem();
             if (weapon.getItem() instanceof net.ganyusbathwater.oririmod.item.custom.SolsEmbraceItem) {
                 net.minecraft.world.entity.LivingEntity target = event.getEntity();
                 net.minecraft.world.level.Level level = target.level();
-                
+
                 if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                     // Visual explosion
-                    serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER, 
-                        target.getX(), target.getY() + target.getBbHeight() / 2.0, target.getZ(), 
-                        1, 0, 0, 0, 0);
-                    level.playSound(null, target.getX(), target.getY(), target.getZ(), 
-                        net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
+                    serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER,
+                            target.getX(), target.getY() + target.getBbHeight() / 2.0, target.getZ(),
+                            1, 0, 0, 0, 0);
+                    level.playSound(null, target.getX(), target.getY(), target.getZ(),
+                            net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(),
+                            net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
                 }
-                
+
                 // AOE Damage
                 java.util.List<net.minecraft.world.entity.LivingEntity> nearbyEntities = level.getEntitiesOfClass(
-                    net.minecraft.world.entity.LivingEntity.class, 
-                    target.getBoundingBox().inflate(4.0D)
-                );
-                
+                        net.minecraft.world.entity.LivingEntity.class,
+                        target.getBoundingBox().inflate(4.0D));
+
                 for (net.minecraft.world.entity.LivingEntity e : nearbyEntities) {
-                    if (e == target || e == player) continue;
-                    
+                    if (e == target || e == player)
+                        continue;
+
                     // Damage if aggressive or neutral in combat
                     boolean isHostile = e instanceof net.minecraft.world.entity.monster.Enemy;
                     boolean inCombat = e.getLastHurtByMob() != null;
                     if (e instanceof net.minecraft.world.entity.Mob mob) {
-                        if (mob.getTarget() != null) inCombat = true;
+                        if (mob.getTarget() != null)
+                            inCombat = true;
                     }
-                    
+
                     if (isHostile || inCombat) {
                         e.hurt(level.damageSources().explosion(target, player), 10.0F);
                         e.setRemainingFireTicks(100);
@@ -347,12 +381,12 @@ public class ServerEvents {
         }
 
         // Soul Tithe: If a player dies, heal nearby bosses
-        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player deadPlayer && !deadPlayer.level().isClientSide()) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player deadPlayer
+                && !deadPlayer.level().isClientSide()) {
             net.minecraft.world.level.Level level = deadPlayer.level();
             java.util.List<net.minecraft.world.entity.LivingEntity> entities = level.getEntitiesOfClass(
-                net.minecraft.world.entity.LivingEntity.class, 
-                deadPlayer.getBoundingBox().inflate(64.0D)
-            );
+                    net.minecraft.world.entity.LivingEntity.class,
+                    deadPlayer.getBoundingBox().inflate(64.0D));
             for (net.minecraft.world.entity.LivingEntity e : entities) {
                 if (e instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss boss) {
                     boss.healFromSoulTithe();
@@ -361,15 +395,19 @@ public class ServerEvents {
         }
     }
 
-
     @SubscribeEvent
-    public static void onLivingIncomingDamage(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
+    public static void onLivingIncomingDamage(
+            net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
         if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.EvokerFangs fangs) {
             LivingEntity owner = fangs.getOwner();
             if (owner != null) {
-                boolean isOwnerNoxus = owner.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || owner.getPersistentData().getBoolean("IsNoxusMob");
+                boolean isOwnerNoxus = owner.getType()
+                        .is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                        || owner.getPersistentData().getBoolean("IsNoxusMob");
                 Entity target = event.getEntity();
-                if (isOwnerNoxus && (target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS) || target.getPersistentData().getBoolean("IsNoxusMob") || target == owner)) {
+                if (isOwnerNoxus
+                        && (target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                                || target.getPersistentData().getBoolean("IsNoxusMob") || target == owner)) {
                     event.setCanceled(true);
                 }
             }
@@ -380,7 +418,8 @@ public class ServerEvents {
     public static void onProjectileImpact(ProjectileImpactEvent event) {
         Projectile projectile = event.getProjectile();
 
-        // Arbiter Crossbow: Bypass invulnerability frames so all 3 or 5 arrows deal damage
+        // Arbiter Crossbow: Bypass invulnerability frames so all 3 or 5 arrows deal
+        // damage
         if (projectile instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
             net.minecraft.world.item.ItemStack weapon = null;
             try {
@@ -401,21 +440,25 @@ public class ServerEvents {
         }
 
         // Oraphim Bow Whirlwind Ability (Only for fully charged shots)
-        if (!projectile.level().isClientSide() && projectile instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+        if (!projectile.level().isClientSide()
+                && projectile instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
             net.minecraft.world.item.ItemStack weapon = null;
             try {
                 weapon = arrow.getWeaponItem();
             } catch (Throwable t) {
                 // Ignore, weapon item might not be accessible
             }
-            if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ORAPHIM_BOW.get()) && arrow.isCritArrow()) {
+            if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ORAPHIM_BOW.get())
+                    && arrow.isCritArrow()) {
                 net.minecraft.world.level.Level level = arrow.level();
                 net.minecraft.world.phys.Vec3 epicenter = arrow.position();
 
                 int weaponLevel = 1;
                 if (weapon.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
-                    net.minecraft.nbt.CompoundTag tag = weapon.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA).copyTag();
-                    if (tag.contains("oriri_level")) weaponLevel = tag.getInt("oriri_level");
+                    net.minecraft.nbt.CompoundTag tag = weapon
+                            .get(net.minecraft.core.component.DataComponents.CUSTOM_DATA).copyTag();
+                    if (tag.contains("oriri_level"))
+                        weaponLevel = tag.getInt("oriri_level");
                 }
 
                 double effectRadius = weaponLevel >= 2 ? 7.5 : 5.0;
@@ -430,22 +473,27 @@ public class ServerEvents {
                         double pX = epicenter.x + radius * Math.cos(theta);
                         double pY = epicenter.y + serverLevel.random.nextDouble() * 2.0;
                         double pZ = epicenter.z + radius * Math.sin(theta);
-                        
+
                         // Calculate swirl velocity
                         double vX = -Math.sin(theta) * 0.5 + (epicenter.x - pX) * 0.1;
                         double vY = 0.1;
                         double vZ = Math.cos(theta) * 0.5 + (epicenter.z - pZ) * 0.1;
-                        
-                        serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, pX, pY, pZ, 0, vX, vY, vZ, 1.0);
+
+                        serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, pX, pY, pZ, 0, vX,
+                                vY, vZ, 1.0);
                         if (i % 4 == 0) {
-                            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, pX, pY, pZ, 1, 0, 0, 0, 0);
+                            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, pX, pY,
+                                    pZ, 1, 0, 0, 0, 0);
                         }
                     }
-                    serverLevel.playSound(null, epicenter.x, epicenter.y, epicenter.z, net.minecraft.sounds.SoundEvents.WITHER_SHOOT, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.5f);
+                    serverLevel.playSound(null, epicenter.x, epicenter.y, epicenter.z,
+                            net.minecraft.sounds.SoundEvents.WITHER_SHOOT, net.minecraft.sounds.SoundSource.PLAYERS,
+                            0.5f, 1.5f);
                 }
 
                 // Entity Suction
-                java.util.List<Entity> entities = level.getEntities(arrow, arrow.getBoundingBox().inflate(effectRadius));
+                java.util.List<Entity> entities = level.getEntities(arrow,
+                        arrow.getBoundingBox().inflate(effectRadius));
                 for (Entity entity : entities) {
                     if (entity instanceof LivingEntity living && entity != arrow.getOwner()) {
                         double distSq = epicenter.distanceToSqr(living.position());
@@ -453,12 +501,14 @@ public class ServerEvents {
                             double dist = Math.sqrt(distSq);
                             double pullStrength = 1.0 - (dist / effectRadius);
                             pullStrength = Math.pow(pullStrength, 1.5);
-                            double kbResist = living.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
+                            double kbResist = living.getAttributeValue(
+                                    net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
                             double actualPull = pullStrength * maxPullForce * (1.0 - kbResist);
 
                             if (actualPull > 0) {
                                 net.minecraft.world.phys.Vec3 dir = epicenter.subtract(living.position()).normalize();
-                                // Add a slight upward lift (0.3) so ground friction doesn't immediately cancel the pull
+                                // Add a slight upward lift (0.3) so ground friction doesn't immediately cancel
+                                // the pull
                                 net.minecraft.world.phys.Vec3 pullVelocity = dir.scale(actualPull).add(0, 0.3, 0);
                                 living.setDeltaMovement(living.getDeltaMovement().add(pullVelocity));
                                 living.hasImpulse = true;
@@ -525,10 +575,12 @@ public class ServerEvents {
             }
         }
     }
+
     @SubscribeEvent
     public static void onShieldBlock(net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent event) {
         if (event.getDamageSource().getEntity() instanceof LivingEntity attacker) {
-            if (attacker.getMainHandItem().getItem() instanceof net.ganyusbathwater.oririmod.item.custom.CustomScytheItem) {
+            if (attacker.getMainHandItem()
+                    .getItem() instanceof net.ganyusbathwater.oririmod.item.custom.CustomScytheItem) {
                 event.setCanceled(true);
             }
         }
@@ -541,23 +593,23 @@ public class ServerEvents {
             if (shooter instanceof LivingEntity livingShooter) {
                 net.minecraft.world.item.ItemStack weapon = null;
                 try {
-                    weapon = arrow.getWeaponItem(); 
+                    weapon = arrow.getWeaponItem();
                 } catch (Throwable t) {
                     weapon = livingShooter.getMainHandItem();
                 }
-                
-                boolean isArcus = (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get())) ||
-                                  livingShooter.getOffhandItem().is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get());
+
+                boolean isArcus = (weapon != null
+                        && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get())) ||
+                        livingShooter.getOffhandItem().is(net.ganyusbathwater.oririmod.item.ModItems.ARCUS_LUCIS.get());
 
                 if (isArcus) {
                     if (arrow.getClass() == net.minecraft.world.entity.projectile.Arrow.class) {
                         event.setCanceled(true);
                         net.minecraft.world.entity.projectile.SpectralArrow spectral = new net.minecraft.world.entity.projectile.SpectralArrow(
-                            arrow.level(), 
-                            livingShooter, 
-                            new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SPECTRAL_ARROW),
-                            weapon
-                        );
+                                arrow.level(),
+                                livingShooter,
+                                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SPECTRAL_ARROW),
+                                weapon);
                         spectral.copyPosition(arrow);
                         spectral.setDeltaMovement(arrow.getDeltaMovement());
                         spectral.setYRot(arrow.getYRot());
@@ -574,38 +626,48 @@ public class ServerEvents {
 
     @SubscribeEvent
     public static void onBossJoinLevel(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
-        if (event.getEntity() instanceof net.minecraft.world.entity.Mob mob && event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.Mob mob
+                && event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.IOririBoss) {
             if (!mob.level().isClientSide) {
-                // Global Swarm Punish AoE (Runs concurrently without interrupting standard movement)
+                // Global Swarm Punish AoE (Runs concurrently without interrupting standard
+                // movement)
                 mob.goalSelector.addGoal(2, new net.ganyusbathwater.oririmod.entity.ai.BossSwarmPunishGoal(mob));
-                
+
                 // Multitasking: Target summons/random monsters (Priority 3, lower than players)
-                mob.targetSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(mob, LivingEntity.class, 0, true, false, 
-                    (target) -> {
-                        return false && target instanceof Monster 
-                            && !target.getType().is(net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
-                            && !target.getPersistentData().getBoolean("IsNoxusMob");
-                    }
-                ));
+                mob.targetSelector.addGoal(3,
+                        new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(mob,
+                                LivingEntity.class, 0, true, false,
+                                (target) -> {
+                                    return false && target instanceof Monster
+                                            && !target.getType().is(
+                                                    net.ganyusbathwater.oririmod.entity.custom.NoxusKnightEntity.NOXUS_MOBS)
+                                            && !target.getPersistentData().getBoolean("IsNoxusMob");
+                                }));
             }
         }
     }
 
     @SubscribeEvent
     public static void onArrowTick(EntityTickEvent.Pre event) {
-        if (event.getEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow && !arrow.level().isClientSide) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow
+                && !arrow.level().isClientSide) {
             if (arrow.getPersistentData().getBoolean("ArcusLucisHoming")) {
-                if (arrow.getDeltaMovement().lengthSqr() < 0.05) return; // Stop homing if it has stopped moving (e.g., stuck in ground)
-                
+                if (arrow.getDeltaMovement().lengthSqr() < 0.05)
+                    return; // Stop homing if it has stopped moving (e.g., stuck in ground)
+
                 // Homing Logic
                 net.minecraft.world.phys.AABB scanBox = arrow.getBoundingBox().inflate(15.0D);
-                java.util.List<LivingEntity> entities = arrow.level().getEntitiesOfClass(LivingEntity.class, scanBox, 
+                java.util.List<LivingEntity> entities = arrow.level().getEntitiesOfClass(LivingEntity.class, scanBox,
                         e -> {
-                            if (e == arrow.getOwner() || !e.isAlive() || e instanceof net.minecraft.world.entity.animal.Animal) return false;
-                            if (e instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator())) return false;
+                            if (e == arrow.getOwner() || !e.isAlive()
+                                    || e instanceof net.minecraft.world.entity.animal.Animal)
+                                return false;
+                            if (e instanceof net.minecraft.world.entity.player.Player p
+                                    && (p.isCreative() || p.isSpectator()))
+                                return false;
                             return true;
                         });
-                
+
                 LivingEntity bestTarget = null;
                 double bestScore = Double.MAX_VALUE;
                 net.minecraft.world.phys.Vec3 arrowPos = arrow.position();
@@ -615,19 +677,20 @@ public class ServerEvents {
                     net.minecraft.world.phys.Vec3 targetCenter = e.getBoundingBox().getCenter();
                     net.minecraft.world.phys.Vec3 dirToTarget = targetCenter.subtract(arrowPos).normalize();
                     double dotProduct = currentDir.dot(dirToTarget);
-                    
-                    // Only target entities roughly in front of the arrow (dot > 0.4 means within ~66 degrees)
+
+                    // Only target entities roughly in front of the arrow (dot > 0.4 means within
+                    // ~66 degrees)
                     if (dotProduct > 0.4) {
                         // Check Line of Sight
                         net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                                arrowPos, targetCenter, net.minecraft.world.level.ClipContext.Block.COLLIDER, 
+                                arrowPos, targetCenter, net.minecraft.world.level.ClipContext.Block.COLLIDER,
                                 net.minecraft.world.level.ClipContext.Fluid.NONE, arrow);
                         net.minecraft.world.phys.HitResult hitResult = arrow.level().clip(context);
-                        
+
                         if (hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
                             double dist = arrow.distanceToSqr(e);
                             // Score based on distance and how directly we are aiming at it
-                            double score = dist / dotProduct; 
+                            double score = dist / dotProduct;
                             if (score < bestScore) {
                                 bestScore = score;
                                 bestTarget = e;
@@ -639,34 +702,36 @@ public class ServerEvents {
                 if (bestTarget != null) {
                     net.minecraft.world.phys.Vec3 targetPos = bestTarget.getBoundingBox().getCenter();
                     net.minecraft.world.phys.Vec3 desiredDir = targetPos.subtract(arrowPos).normalize();
-                    
+
                     // Interpolate towards target (0.2 is turning speed)
                     net.minecraft.world.phys.Vec3 newDir = currentDir.scale(0.8).add(desiredDir.scale(0.2)).normalize();
                     double speed = arrow.getDeltaMovement().length();
-                    if (speed < 0.1) speed = 1.0; 
-                    
+                    if (speed < 0.1)
+                        speed = 1.0;
+
                     arrow.setDeltaMovement(newDir.scale(speed));
-                    
+
                     // Update rotation for the client
                     double horizDist = newDir.horizontalDistance();
-                    arrow.setYRot((float)(net.minecraft.util.Mth.atan2(newDir.x, newDir.z) * (double)(180F / (float)Math.PI)));
-                    arrow.setXRot((float)(net.minecraft.util.Mth.atan2(newDir.y, horizDist) * (double)(180F / (float)Math.PI)));
+                    arrow.setYRot((float) (net.minecraft.util.Mth.atan2(newDir.x, newDir.z)
+                            * (double) (180F / (float) Math.PI)));
+                    arrow.setXRot((float) (net.minecraft.util.Mth.atan2(newDir.y, horizDist)
+                            * (double) (180F / (float) Math.PI)));
                     arrow.yRotO = arrow.getYRot();
                     arrow.xRotO = arrow.getXRot();
-                    
+
                     // Force velocity sync to client to prevent visual rubberbanding!
                     arrow.hasImpulse = true;
-                    
+
                     // Spawn particles trail
                     if (arrow.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                        serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, 
-                            arrow.getX(), arrow.getY(), arrow.getZ(), 1, 0.0, 0.0, 0.0, 0.01);
+                        serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                                arrow.getX(), arrow.getY(), arrow.getZ(), 1, 0.0, 0.0, 0.0, 0.01);
                     }
                 }
             }
         }
     }
-
 
     @SubscribeEvent
 
@@ -717,27 +782,29 @@ public class ServerEvents {
             return;
         if (!(entity.level() instanceof ServerLevel))
             return;
-            
+
         if (entity.getTags().contains("oriri_infinite_spawn")) {
             event.setCanceled(true);
             return;
         }
-            
+
         // ----- Pet Revival Mechanism -----
         if (entity instanceof net.minecraft.world.entity.TamableAnimal pet) {
             if (pet.isTame() && pet.hasCustomName()) {
                 ItemStack dogTag = new ItemStack(net.ganyusbathwater.oririmod.item.ModItems.DOG_TAG.get());
                 net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
                 pet.saveWithoutId(tag);
-                
+
                 // Save the exact entity type ID so we can recreate it later
-                net.minecraft.resources.ResourceLocation entityId = net.minecraft.world.entity.EntityType.getKey(pet.getType());
+                net.minecraft.resources.ResourceLocation entityId = net.minecraft.world.entity.EntityType
+                        .getKey(pet.getType());
                 tag.putString("RevivalEntityType", entityId.toString());
-                
+
                 tag.remove("active_effects"); // Clear mob effects so they don't persist on revival
-                dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+                dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                        net.minecraft.world.item.component.CustomData.of(tag));
                 dogTag.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, pet.getCustomName());
-                
+
                 net.minecraft.world.entity.item.ItemEntity drop = new net.minecraft.world.entity.item.ItemEntity(
                         pet.level(), pet.getX(), pet.getY(), pet.getZ(), dogTag);
                 event.getDrops().add(drop);
@@ -749,53 +816,63 @@ public class ServerEvents {
         if (entity instanceof net.minecraft.world.entity.monster.Monster) {
             net.minecraft.world.item.ItemStack weapon = null;
             LivingEntity attacker = null;
-            
-            if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+
+            if (event.getSource()
+                    .getDirectEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
                 attacker = arrow.getOwner() instanceof LivingEntity ? (LivingEntity) arrow.getOwner() : null;
                 try {
                     weapon = arrow.getWeaponItem();
-                } catch (Throwable t) {}
+                } catch (Throwable t) {
+                }
             } else if (event.getSource().getDirectEntity() instanceof LivingEntity directAttacker) {
                 attacker = directAttacker;
             }
-            
+
             if (attacker != null && (weapon == null || weapon.isEmpty())) {
                 weapon = attacker.getMainHandItem();
-                if (weapon == null || weapon.isEmpty() || !weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARBITER_CROSSBOW.get())) {
+                if (weapon == null || weapon.isEmpty()
+                        || !weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARBITER_CROSSBOW.get())) {
                     weapon = attacker.getOffhandItem();
                 }
             }
-                
+
             if (weapon != null && weapon.is(net.ganyusbathwater.oririmod.item.ModItems.ARBITER_CROSSBOW.get())) {
-                    net.ganyusbathwater.oririmod.OririMod.LOGGER.debug("Arbiter Crossbow loot roll triggered on {}", entity.getName().getString());
-                    double luck = attacker != null ? attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.LUCK) : 0;
-                    
-                    // 50% Double Loot
-                    if (level.random.nextFloat() < 0.5f) {
-                        net.ganyusbathwater.oririmod.OririMod.LOGGER.debug("Arbiter Crossbow rolled DOUBLE LOOT!");
-                        List<ItemEntity> originalDrops = new ArrayList<>(event.getDrops());
-                        for (ItemEntity drop : originalDrops) {
-                            ItemStack stack = drop.getItem().copy();
-                            ItemEntity extra = new ItemEntity(level, drop.getX(), drop.getY(), drop.getZ(), stack);
-                            event.getDrops().add(extra);
-                        }
-                    }
-                    
-                    // Independent Rare Metal drops scaling with luck (+1% flat chance per luck point)
-                    float ironChance = 0.02f + (float)(luck * 0.01f);
-                    float goldChance = 0.01f + (float)(luck * 0.01f);
-                    float diamondChance = 0.005f + (float)(luck * 0.01f);
-                    
-                    if (level.random.nextFloat() < ironChance) {
-                        event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), new ItemStack(net.minecraft.world.item.Items.IRON_INGOT)));
-                    }
-                    if (level.random.nextFloat() < goldChance) {
-                        event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), new ItemStack(net.minecraft.world.item.Items.GOLD_INGOT)));
-                    }
-                    if (level.random.nextFloat() < diamondChance) {
-                        event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), new ItemStack(net.minecraft.world.item.Items.DIAMOND)));
+                net.ganyusbathwater.oririmod.OririMod.LOGGER.debug("Arbiter Crossbow loot roll triggered on {}",
+                        entity.getName().getString());
+                double luck = attacker != null
+                        ? attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.LUCK)
+                        : 0;
+
+                // 50% Double Loot
+                if (level.random.nextFloat() < 0.5f) {
+                    net.ganyusbathwater.oririmod.OririMod.LOGGER.debug("Arbiter Crossbow rolled DOUBLE LOOT!");
+                    List<ItemEntity> originalDrops = new ArrayList<>(event.getDrops());
+                    for (ItemEntity drop : originalDrops) {
+                        ItemStack stack = drop.getItem().copy();
+                        ItemEntity extra = new ItemEntity(level, drop.getX(), drop.getY(), drop.getZ(), stack);
+                        event.getDrops().add(extra);
                     }
                 }
+
+                // Independent Rare Metal drops scaling with luck (+1% flat chance per luck
+                // point)
+                float ironChance = 0.02f + (float) (luck * 0.01f);
+                float goldChance = 0.01f + (float) (luck * 0.01f);
+                float diamondChance = 0.005f + (float) (luck * 0.01f);
+
+                if (level.random.nextFloat() < ironChance) {
+                    event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(),
+                            new ItemStack(net.minecraft.world.item.Items.IRON_INGOT)));
+                }
+                if (level.random.nextFloat() < goldChance) {
+                    event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(),
+                            new ItemStack(net.minecraft.world.item.Items.GOLD_INGOT)));
+                }
+                if (level.random.nextFloat() < diamondChance) {
+                    event.getDrops().add(new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(),
+                            new ItemStack(net.minecraft.world.item.Items.DIAMOND)));
+                }
+            }
         }
         // --------------------------------------
 
@@ -808,14 +885,67 @@ public class ServerEvents {
             List<ItemEntity> originalDrops = new ArrayList<>(event.getDrops());
 
             for (ItemEntity drop : originalDrops) {
-                // If it's a dog tag we just injected, this might duplicate it, but let's prevent duplicating dog tags.
-                if (drop.getItem().is(net.ganyusbathwater.oririmod.item.ModItems.DOG_TAG.get())) continue;
-                
+                // If it's a dog tag we just injected, this might duplicate it, but let's
+                // prevent duplicating dog tags.
+                if (drop.getItem().is(net.ganyusbathwater.oririmod.item.ModItems.DOG_TAG.get()))
+                    continue;
+
                 ItemStack stack = drop.getItem().copy();
                 stack.setCount(stack.getCount());
                 ItemEntity extra = new ItemEntity(level, drop.getX(), drop.getY(), drop.getZ(), stack);
                 event.getDrops().add(extra);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinLevelForAbyssFlee(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide()
+                && event.getEntity() instanceof net.minecraft.world.entity.PathfinderMob mob
+                && !(mob instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity)) {
+            mob.goalSelector.addGoal(1, new net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal(mob));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingTickForAbyssEscape(EntityTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof LivingEntity living) || living.level().isClientSide()) {
+            return;
+        }
+        if (living instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity || living instanceof Player
+                || living.isDeadOrDying()) {
+            return;
+        }
+
+        if (living.tickCount % 4 == 0) {
+            if (net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isInSilentDepths(living)) {
+                if (living.isInWater()) {
+                    Vec3 vel = living.getDeltaMovement();
+                    double upward = Math.max(vel.y + 0.08D, 0.20D);
+                    living.setDeltaMovement(vel.x * 1.08D, upward, vel.z * 1.08D);
+                    living.hasImpulse = true;
+
+                    if (living.level() instanceof ServerLevel serverLevel && living.tickCount % 12 == 0) {
+                        serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.BUBBLE,
+                                living.getX(), living.getY() + 0.5D, living.getZ(), 3, 0.2D, 0.2D, 0.2D, 0.05D);
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMobSpawnCheck(net.neoforged.neoforge.event.entity.living.MobSpawnEvent.PositionCheck event) {
+        if (event.getSpawnType() == net.minecraft.world.entity.MobSpawnType.SPAWN_EGG
+                || event.getSpawnType() == net.minecraft.world.entity.MobSpawnType.COMMAND) {
+            return;
+        }
+        if (event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity) {
+            return;
+        }
+        BlockPos pos = event.getEntity().blockPosition();
+        if (net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(event.getLevel().getBiome(pos))) {
+            event.setResult(net.neoforged.neoforge.event.entity.living.MobSpawnEvent.PositionCheck.Result.FAIL);
         }
     }
 }

@@ -20,7 +20,7 @@ public class CustomDimensionSpecialEffects extends DimensionSpecialEffects {
     public Vec3 getBrightnessDependentFogColor(Vec3 fogColor, float brightness) {
         // When lunar skybox is active, force fog contribution to black so Iris's
         // atmosphere composite doesn't tint the void background.
-        if (LunarSkyboxState.isEnabled()) {
+        if (LunarSkyboxState.isEnabled() || AbyssalDarknessManager.isSubmergedInAbyss()) {
             return Vec3.ZERO;
         }
         // Priority 1: Natural Disasters (Meteor Shower apocalyptic orange, Tornado dusty brown-gray)

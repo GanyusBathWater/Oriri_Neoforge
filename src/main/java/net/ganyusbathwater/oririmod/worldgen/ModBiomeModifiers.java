@@ -26,7 +26,8 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_SEA_URCHIN_FEATURES = registerKey("add_sea_urchin_features");
 
         public static final ResourceKey<BiomeModifier> ADD_ELDER_TREES = registerKey("add_elder_trees");
-        public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_OVERGROWTH = registerKey("add_elderwoods_overgrowth");
+        public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_OVERGROWTH = registerKey(
+                        "add_elderwoods_overgrowth");
         public static final ResourceKey<BiomeModifier> ADD_STAR_HERB = registerKey("add_star_herb");
         public static final ResourceKey<BiomeModifier> ADD_JADE_ORE = registerKey("add_jade_ore");
         public static final ResourceKey<BiomeModifier> ADD_DRAGON_IRON_ORE = registerKey("add_dragon_iron_ore");
@@ -36,7 +37,6 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_ELYSIAN_DECORATION = registerKey("add_elysian_decoration");
 
         public static final ResourceKey<BiomeModifier> ADD_GLOBAL_AETHER_RIVER = registerKey("add_global_aether_river");
-
 
         // Scarlet Forest & Plains
         public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_FEATURES = registerKey(
@@ -71,26 +71,43 @@ public class ModBiomeModifiers {
         // Spawns
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FIRE_ZOMBIE = registerKey("add_spawns_fire_zombie");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPORE_ZOMBIE = registerKey("add_spawns_spore_zombie");
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPORE_BLOSSOM = registerKey("add_spawns_spore_blossom");
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPLINTER_SPIDER = registerKey("add_spawns_splinter_spider");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPORE_BLOSSOM = registerKey(
+                        "add_spawns_spore_blossom");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SPLINTER_SPIDER = registerKey(
+                        "add_spawns_splinter_spider");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LOADED_BLAZE = registerKey("add_spawns_loaded_blaze");
-        
-        public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_FOREST_SPAWNS = registerKey("add_elderwoods_forest_spawns");
-        public static final ResourceKey<BiomeModifier> ADD_SCARLET_SWAMP_SPAWNS = registerKey("add_scarlet_swamp_spawns");
-        public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_SPAWNS = registerKey("add_scarlet_forest_spawns");
+
+        public static final ResourceKey<BiomeModifier> ADD_ELDERWOODS_FOREST_SPAWNS = registerKey(
+                        "add_elderwoods_forest_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_SCARLET_SWAMP_SPAWNS = registerKey(
+                        "add_scarlet_swamp_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_SCARLET_FOREST_SPAWNS = registerKey(
+                        "add_scarlet_forest_spawns");
         public static final ResourceKey<BiomeModifier> ADD_CAVE_SPAWNS = registerKey("add_cave_spawns");
-        
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_COMMON_FORESTS = registerKey("add_spawns_fairy_common_forests");
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_FLOWER_FOREST = registerKey("add_spawns_fairy_flower_forest");
+
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_COMMON_FORESTS = registerKey(
+                        "add_spawns_fairy_common_forests");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_FLOWER_FOREST = registerKey(
+                        "add_spawns_fairy_flower_forest");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_FAIRY_TAIGAS = registerKey("add_spawns_fairy_taigas");
 
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_COMMON_FORESTS = registerKey("add_spawns_dryad_common_forests");
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_FLOWER_FOREST = registerKey("add_spawns_dryad_flower_forest");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_COMMON_FORESTS = registerKey(
+                        "add_spawns_dryad_common_forests");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_DRYAD_FLOWER_FOREST = registerKey(
+                        "add_spawns_dryad_flower_forest");
 
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_SWAMPS = registerKey("add_spawns_lamia_swamps");
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_FORESTS = registerKey("add_spawns_lamia_forests");
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_LUSH_CAVES = registerKey("add_spawns_lamia_lush_caves");
-        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SILENT_NEREID = registerKey("add_spawns_silent_nereid");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_FORESTS = registerKey(
+                        "add_spawns_lamia_forests");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_LAMIA_LUSH_CAVES = registerKey(
+                        "add_spawns_lamia_lush_caves");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SILENT_NEREID = registerKey(
+                        "add_spawns_silent_nereid");
+        public static final ResourceKey<BiomeModifier> ADD_SILENT_OCEAN_WILDLIFE = registerKey(
+                        "add_silent_ocean_wildlife");
+        public static final ResourceKey<BiomeModifier> ADD_SILENT_DEPTHS_WILDLIFE = registerKey(
+                        "add_silent_depths_wildlife");
+
         // here will be the Features defined and later turned into json files
         public static void bootstrap(BootstrapContext<BiomeModifier> context) {
                 var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -563,12 +580,36 @@ public class ModBiomeModifiers {
                         List.of(new MobSpawnSettings.SpawnerData(ModEntities.LAMIA.get(), 35, 1, 3))
                 ));
 
-                // Silent Nereid Spawns: The Silent Depths
+                // Silent Nereid Spawns: The Silent Depths & The Sunken Trenches
                 context.register(ADD_SPAWNS_SILENT_NEREID, new BiomeModifiers.AddSpawnsBiomeModifier(
                         HolderSet.direct(
-                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_depths")))
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_depths"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_sunken_trenches")))
                         ),
                         List.of(new MobSpawnSettings.SpawnerData(ModEntities.SILENT_NEREID.get(), 1, 1, 1))
+                ));
+
+                // Silent Ocean Underwater Wildlife Spawns
+                List<MobSpawnSettings.SpawnerData> oceanWildlifeSpawns = List.of(
+                        new MobSpawnSettings.SpawnerData(EntityType.COD, 15, 3, 6),
+                        new MobSpawnSettings.SpawnerData(EntityType.SALMON, 15, 1, 5),
+                        new MobSpawnSettings.SpawnerData(EntityType.TROPICAL_FISH, 25, 4, 8),
+                        new MobSpawnSettings.SpawnerData(EntityType.PUFFERFISH, 10, 1, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.SQUID, 20, 1, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.GLOW_SQUID, 10, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.DOLPHIN, 6, 1, 2),
+                        new MobSpawnSettings.SpawnerData(EntityType.TURTLE, 8, 2, 5),
+                        new MobSpawnSettings.SpawnerData(EntityType.DROWNED, 5, 1, 1)
+                );
+                context.register(ADD_SILENT_OCEAN_WILDLIFE, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_oceans")))),
+                        oceanWildlifeSpawns
+                ));
+
+                // Abyssal Wildlife Spawns disabled (Both Silent Depths and Sunken Trenches are strictly exclusive to Silent Nereids)
+                context.register(ADD_SILENT_DEPTHS_WILDLIFE, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(),
+                        List.of()
                 ));
         }
 

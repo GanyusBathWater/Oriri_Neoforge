@@ -38,6 +38,16 @@ public abstract class ClientLevelMixin {
      */
     @Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true)
     private void oriri_overrideSkyColorForShaders(net.minecraft.world.phys.Vec3 pPos, float pPartialTick, CallbackInfoReturnable<net.minecraft.world.phys.Vec3> cir) {
+        float abyssalFactor = net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.getDarknessIntensity();
+        if (abyssalFactor > 0.0F) {
+            net.minecraft.world.phys.Vec3 orig = cir.getReturnValue();
+            cir.setReturnValue(new net.minecraft.world.phys.Vec3(
+                    net.minecraft.util.Mth.lerp(abyssalFactor, orig.x, 0.0),
+                    net.minecraft.util.Mth.lerp(abyssalFactor, orig.y, 0.0),
+                    net.minecraft.util.Mth.lerp(abyssalFactor, orig.z, 0.0)
+            ));
+            return;
+        }
         // Priority 1: Natural Disasters (Meteor Shower burning amber/orange, Tornado tempest dusk)
         if (net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.isDisasterActive()
                 || net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.getTransitionProgress() > 0.0f) {

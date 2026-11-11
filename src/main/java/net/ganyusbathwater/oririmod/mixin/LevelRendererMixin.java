@@ -83,8 +83,13 @@ public abstract class LevelRendererMixin {
         }
     }
 
-    @Inject(method = "renderClouds", at = @At("HEAD"))
+    @Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
     private void oriri_updateCloudTransition(CallbackInfo ci) {
+        if (net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.isSubmergedInAbyss()
+                && net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.getDarknessIntensity() >= 0.75F) {
+            ci.cancel();
+            return;
+        }
         oririmod$effects.updateTransitionProgress();
     }
 
@@ -109,6 +114,12 @@ public abstract class LevelRendererMixin {
             PoseStack poseStack = new PoseStack();
             poseStack.last().pose().set(modelViewMatrix);
             TimestopSkyboxRenderer.render(poseStack, projectionMatrix, partialTick);
+            ci.cancel();
+            return;
+        }
+
+        if (net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.isSubmergedInAbyss()
+                && net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.getDarknessIntensity() >= 0.75F) {
             ci.cancel();
             return;
         }

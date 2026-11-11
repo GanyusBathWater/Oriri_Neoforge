@@ -33,6 +33,9 @@ public class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> TELEPORTER_VORTEX_PARTICLE = PARTICLE_TYPES
             .register("teleporter_vortex", () -> new SimpleParticleType(true));
 
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ABYSSAL_SHROUD = PARTICLE_TYPES
+            .register("abyssal_shroud", () -> new SimpleParticleType(false));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }

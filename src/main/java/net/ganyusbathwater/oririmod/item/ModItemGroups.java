@@ -399,7 +399,9 @@ public class ModItemGroups {
                                         net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION1,
                                         net.ganyusbathwater.oririmod.potion.ModPotions.ANTI_HEAL_POTION2,
                                         net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION1,
-                                        net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2);
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.MANA_REGEN_POTION2,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.TRUE_VISION_POTION1,
+                                        net.ganyusbathwater.oririmod.potion.ModPotions.TRUE_VISION_POTION2);
                         for (var potionHolder : allPotions) {
                             output.accept(net.minecraft.world.item.alchemy.PotionContents
                                     .createItemStack(net.minecraft.world.item.Items.POTION, potionHolder));

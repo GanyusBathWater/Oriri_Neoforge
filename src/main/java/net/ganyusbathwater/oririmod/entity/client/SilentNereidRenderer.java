@@ -16,7 +16,13 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 /**
  * Renderer for the SilentNereidEntity.
- * Renders base skin, tinted hair layer, tinted scales layer, and fullbright emissive glow layer.
+ *
+ * Renders:
+ * - Base skin tinted with the mixed color (mixture between hair and scales).
+ * - Scale 2 layer tinted with the mixed color.
+ * - Scale 1 layer tinted with the scale color.
+ * - Hair layer tinted with the hair color.
+ * - Emissive glow layer at full brightness.
  */
 public class SilentNereidRenderer extends GeoEntityRenderer<SilentNereidEntity> {
 
@@ -24,6 +30,8 @@ public class SilentNereidRenderer extends GeoEntityRenderer<SilentNereidEntity> 
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/silent_nereids_hair.png");
     private static final ResourceLocation SCALE_TEMPLATE =
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/silent_nereids_scale.png");
+    private static final ResourceLocation SCALE2_TEMPLATE =
+            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/silent_nereids_scale2.png");
     private static final ResourceLocation EMISSIVE_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/silent_nereids_emissive.png");
 
@@ -35,9 +43,20 @@ public class SilentNereidRenderer extends GeoEntityRenderer<SilentNereidEntity> 
 
     public SilentNereidRenderer(EntityRendererProvider.Context context) {
         super(context, new SilentNereidModel());
-        this.addRenderLayer(new SilentNereidTintLayer(this, HAIR_TEMPLATE, SilentNereidEntity::getHairColor));
+        // Layer 1: Scale 2 (color mixture of scales and hair)
+        this.addRenderLayer(new SilentNereidTintLayer(this, SCALE2_TEMPLATE, SilentNereidEntity::getMixedColor));
+        // Layer 2: Scale 1 (primary scale color)
         this.addRenderLayer(new SilentNereidTintLayer(this, SCALE_TEMPLATE, SilentNereidEntity::getFinColor));
+        // Layer 3: Hair (hair color)
+        this.addRenderLayer(new SilentNereidTintLayer(this, HAIR_TEMPLATE, SilentNereidEntity::getHairColor));
+        // Layer 4: Emissive glow
         this.addRenderLayer(new SilentNereidEmissiveLayer(this, EMISSIVE_TEXTURE));
+    }
+
+    @Override
+    public software.bernie.geckolib.util.Color getRenderColor(SilentNereidEntity animatable, float partialTick, int packedLight) {
+        // Base skin texture gets the same mixed color as the scale2 texture
+        return software.bernie.geckolib.util.Color.ofOpaque(animatable.getMixedColor());
     }
 
     @Override
@@ -100,8 +119,8 @@ public class SilentNereidRenderer extends GeoEntityRenderer<SilentNereidEntity> 
         private final java.util.function.ToIntFunction<SilentNereidEntity> colorProvider;
 
         public SilentNereidTintLayer(GeoEntityRenderer<SilentNereidEntity> renderer,
-                                    ResourceLocation texture,
-                                    java.util.function.ToIntFunction<SilentNereidEntity> colorProvider) {
+                                     ResourceLocation texture,
+                                     java.util.function.ToIntFunction<SilentNereidEntity> colorProvider) {
             super(renderer);
             this.templateTexture = texture;
             this.colorProvider = colorProvider;
@@ -142,7 +161,7 @@ public class SilentNereidRenderer extends GeoEntityRenderer<SilentNereidEntity> 
                            RenderType renderType, MultiBufferSource bufferSource,
                            VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
 
-            RenderType emissiveRenderType = RenderType.entityTranslucentEmissive(emissiveTexture);
+            RenderType emissiveRenderType = RenderType.entityTranslucentEmissive(emissiveTexture, false);
             VertexConsumer emissiveBuffer = bufferSource.getBuffer(emissiveRenderType);
 
             // Light level 15728880 = LightTexture.FULL_BRIGHT (0xF000F0)

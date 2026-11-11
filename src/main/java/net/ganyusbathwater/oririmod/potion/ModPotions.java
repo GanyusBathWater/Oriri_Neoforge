@@ -46,6 +46,12 @@ public class ModPotions {
         public static final Holder<Potion> MANA_REGEN_POTION2 = POTIONS.register("mana_regen_potion2",
                         () -> new Potion(new MobEffectInstance(ModEffects.MANA_REGENERATION_EFFECT, 1200, 1)));
 
+        public static final Holder<Potion> TRUE_VISION_POTION1 = POTIONS.register("true_vision_potion1",
+                        () -> new Potion("true_vision_potion1", new MobEffectInstance(ModEffects.TRUE_VISION_EFFECT, 3600, 0)));
+
+        public static final Holder<Potion> TRUE_VISION_POTION2 = POTIONS.register("true_vision_potion2",
+                        () -> new Potion("true_vision_potion2", new MobEffectInstance(ModEffects.TRUE_VISION_EFFECT, 9600, 0)));
+
         public static void registerPotions(IEventBus eventBus) {
                 POTIONS.register(eventBus);
                 OririMod.LOGGER.info("Registering Mod Potions for " + OririMod.MOD_ID);

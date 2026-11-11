@@ -10,6 +10,8 @@ import net.ganyusbathwater.oririmod.particle.custom.ShiningParticle;
 import net.ganyusbathwater.oririmod.particle.custom.ElderwoodsCaveParticle;
 import net.ganyusbathwater.oririmod.particle.custom.ScarletCaveParticle;
 import net.ganyusbathwater.oririmod.particle.custom.ElysianAbyssParticle;
+import net.ganyusbathwater.oririmod.particle.custom.AbyssalShroudParticle;
+import net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager;
 import net.ganyusbathwater.oririmod.potion.ModPotions;
 import net.ganyusbathwater.oririmod.util.ModItemProperties;
 import net.ganyusbathwater.oririmod.util.ModRarity;
@@ -78,6 +80,7 @@ public class OririClient {
         event.registerSpriteSet(ModParticles.DEVIARTRAS_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.DeviartrasSporeParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELDER_SPORE_BLOSSOM_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.ElderSporeBlossomSporeParticle.Provider::new);
         event.registerSpriteSet(ModParticles.TELEPORTER_VORTEX_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.TeleporterVortexParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.ABYSSAL_SHROUD.get(), AbyssalShroudParticle.Provider::new);
     }
 
     @SubscribeEvent
@@ -283,6 +286,9 @@ public class OririClient {
         
         builder.addMix(Potions.AWKWARD, ModItems.MANA_MANIFESTATION.get(), ModPotions.MANA_REGEN_POTION1);
         builder.addMix(ModPotions.MANA_REGEN_POTION1, Items.GLOWSTONE_DUST, ModPotions.MANA_REGEN_POTION2);
+        
+        builder.addMix(ModPotions.MOB_SENSE_POTION1, Items.GOLDEN_CARROT, ModPotions.TRUE_VISION_POTION1);
+        builder.addMix(ModPotions.TRUE_VISION_POTION1, Items.REDSTONE, ModPotions.TRUE_VISION_POTION2);
     }
 
     @SubscribeEvent
@@ -337,6 +343,13 @@ public class OririClient {
                 event.setBlue(b);
             }
         }
+
+        AbyssalDarknessManager.onComputeFogColor(event);
+    }
+
+    @SubscribeEvent
+    public static void onRenderFog(ViewportEvent.RenderFog event) {
+        AbyssalDarknessManager.onRenderFog(event);
     }
 
     /**
@@ -425,6 +438,7 @@ public class OririClient {
         if (mc.level == null || mc.player == null) return;
         
         net.ganyusbathwater.oririmod.events.disaster.ClientDisasterState.tick();
+        AbyssalDarknessManager.tick();
         
         double maxDist = 64.0;
         
