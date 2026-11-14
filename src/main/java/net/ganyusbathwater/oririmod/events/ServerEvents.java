@@ -31,6 +31,16 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.ganyusbathwater.oririmod.effect.ModEffects;
+import net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal;
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.entity.living.LivingBreatheEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -972,6 +982,92 @@ public class ServerEvents {
                     event.setResult(net.neoforged.neoforge.event.entity.living.MobSpawnEvent.PositionCheck.Result.FAIL);
                 }
             }
+        }
+    }
+
+    private static final String TAG_WATER_PRESSURE_AIR_REM = "OririWaterPressureAirRem";
+    private static final String TAG_WATER_PRESSURE_WB_REM = "OririWaterPressureWbRem";
+    private static final String TAG_WATER_PRESSURE_WB_PENDING = "OririWaterPressureWbPending";
+
+    @SubscribeEvent
+    public static void onLivingBreathe(LivingBreatheEvent event) {
+        LivingEntity living = event.getEntity();
+        if (living.level().isClientSide) {
+            return;
+        }
+        if (living instanceof Player player && player.getAbilities().invulnerable) {
+            return;
+        }
+        if (!living.canDrownInFluidType(NeoForgeMod.WATER_TYPE.value())) {
+            return;
+        }
+        if (!living.isEyeInFluidType(NeoForgeMod.WATER_TYPE.value())) {
+            living.getPersistentData().remove(TAG_WATER_PRESSURE_AIR_REM);
+            return;
+        }
+
+        BlockPos eyePos = BlockPos.containing(living.getX(), living.getEyeY(), living.getZ());
+        if (living.level().getBlockState(eyePos).is(Blocks.BUBBLE_COLUMN)) {
+            return;
+        }
+
+        Holder<Biome> biome = living.level().getBiome(eyePos);
+        if (!FleeSilentDepthsGoal.isAbyssalBiome(biome)) {
+            living.getPersistentData().remove(TAG_WATER_PRESSURE_AIR_REM);
+            return;
+        }
+
+        // Depth scaling from 0% near Y=48 up to +100% at Y<=-80 inside Silent Depths / Sunken Trenches.
+        double pressure = Mth.clamp((48.0D - living.getEyeY()) / 128.0D, 0.0D, 1.0D);
+        if (pressure <= 0.0D) {
+            return;
+        }
+
+        CompoundTag data = living.getPersistentData();
+
+        // Deplete Water Breathing potion duration faster (up to 3x total drain rate at +100% pressure).
+        MobEffectInstance wbEffect = living.getEffect(MobEffects.WATER_BREATHING);
+        if (wbEffect != null && !wbEffect.isInfiniteDuration()) {
+            double wbRem = data.getDouble(TAG_WATER_PRESSURE_WB_REM) + (pressure * 2.0D);
+            int wbExtra = (int) Math.floor(wbRem);
+            data.putDouble(TAG_WATER_PRESSURE_WB_REM, wbRem - wbExtra);
+
+            if (wbExtra > 0) {
+                int pending = data.getInt(TAG_WATER_PRESSURE_WB_PENDING) + wbExtra;
+                int curDuration = wbEffect.getDuration();
+                int newDuration = curDuration - pending;
+                if (newDuration <= 0) {
+                    data.remove(TAG_WATER_PRESSURE_WB_PENDING);
+                    living.removeEffect(MobEffects.WATER_BREATHING);
+                } else if (pending >= 10 || newDuration <= 15) {
+                    data.putInt(TAG_WATER_PRESSURE_WB_PENDING, 0);
+                    living.forceAddEffect(new MobEffectInstance(
+                            wbEffect.getEffect(),
+                            newDuration,
+                            wbEffect.getAmplifier(),
+                            wbEffect.isAmbient(),
+                            wbEffect.isVisible(),
+                            wbEffect.showIcon()
+                    ), null);
+                } else {
+                    data.putInt(TAG_WATER_PRESSURE_WB_PENDING, pending);
+                }
+            }
+        } else {
+            data.remove(TAG_WATER_PRESSURE_WB_REM);
+            data.remove(TAG_WATER_PRESSURE_WB_PENDING);
+        }
+
+        // Scale oxygen consumption and drowning damage cadence up to +100% (2x total consumeAirAmount).
+        if (!event.canBreathe()) {
+            double airRem = data.getDouble(TAG_WATER_PRESSURE_AIR_REM) + (event.getConsumeAirAmount() * pressure);
+            int airExtra = (int) Math.floor(airRem);
+            data.putDouble(TAG_WATER_PRESSURE_AIR_REM, airRem - airExtra);
+            if (airExtra > 0) {
+                event.setConsumeAirAmount(event.getConsumeAirAmount() + airExtra);
+            }
+        } else {
+            data.remove(TAG_WATER_PRESSURE_AIR_REM);
         }
     }
 }

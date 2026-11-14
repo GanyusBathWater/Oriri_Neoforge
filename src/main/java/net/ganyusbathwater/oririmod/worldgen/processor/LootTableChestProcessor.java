@@ -109,7 +109,6 @@ public class LootTableChestProcessor extends StructureProcessor {
                     // Vanilla double chests CANNOT be front-to-back. The facing must be perpendicular to the axis they are placed on.
                     if (adjacentDir != null && adjacentDir.getAxis() == facing.getAxis()) {
                         correctedFacing = facing.getClockWise();
-                        System.out.println("[ChestProcessor] Auto-correcting impossible front-to-back chest from " + facing + " to " + correctedFacing);
                     }
 
                     net.minecraft.world.level.block.state.properties.ChestType infoType = net.minecraft.world.level.block.state.properties.ChestType.SINGLE;
@@ -124,10 +123,7 @@ public class LootTableChestProcessor extends StructureProcessor {
                             partnerType = net.minecraft.world.level.block.state.properties.ChestType.LEFT;
                         }
                     }
-                    
-                    // Log out exactly what is calculated so we can cross-reference with world geometry
-                    System.out.println("[ChestProcessor] Pair: " + info.pos() + " & " + partner.pos() + " | Final Facing: " + correctedFacing + " | AdjDir: " + adjacentDir + " | Types: " + infoType + ", " + partnerType);
-                    
+
                     BlockState infoState = info.state().setValue(ChestBlock.TYPE, infoType).setValue(ChestBlock.FACING, correctedFacing);
                     BlockState partnerState = partner.state().setValue(ChestBlock.TYPE, partnerType).setValue(ChestBlock.FACING, correctedFacing);
                     

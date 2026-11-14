@@ -1,6 +1,6 @@
 {
   "type": "oririmod:grid",
-  "biomes": "oririmod:elderwoods",
+  "biomes": "#oririmod:has_structure/elderwoods_outpost",
   "step": "surface_structures",
   "terrain_adaptation": "beard_thin",
   "spawn_overrides": {},

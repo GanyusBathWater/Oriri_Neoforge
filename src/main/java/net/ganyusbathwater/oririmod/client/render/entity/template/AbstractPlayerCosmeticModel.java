@@ -8,6 +8,7 @@ import software.bernie.geckolib.cache.object.GeoBone;
 public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmeticAnimatable> extends GeoModel<T> {
 
     public static final software.bernie.geckolib.constant.dataticket.DataTicket<Boolean> FIRST_PERSON = new software.bernie.geckolib.constant.dataticket.DataTicket<>("first_person", Boolean.class);
+    public static final software.bernie.geckolib.constant.dataticket.DataTicket<Boolean> IS_RENDER_LAYER = new software.bernie.geckolib.constant.dataticket.DataTicket<>("is_render_layer", Boolean.class);
 
     @Override
     public void setCustomAnimations(T animatable, long instanceId, AnimationState<T> animationState) {
@@ -15,6 +16,8 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
         net.minecraft.world.entity.Entity entity = animationState.getData(software.bernie.geckolib.constant.DataTickets.ENTITY);
         Boolean isFirstPerson = animationState.getData(FIRST_PERSON);
         if (isFirstPerson == null) isFirstPerson = false;
+        Boolean isRenderLayer = animationState.getData(IS_RENDER_LAYER);
+        if (isRenderLayer == null) isRenderLayer = false;
 
         if (entity instanceof net.minecraft.client.player.AbstractClientPlayer player) {
             net.minecraft.client.renderer.entity.EntityRenderer<?> renderer = net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
@@ -61,9 +64,10 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
                 if (mainBody != null) {
                     mainBody.setRotX(-playerModel.body.xRot);
                     mainBody.setRotY(-playerModel.body.yRot);
-                    mainBody.setRotZ(-playerModel.body.zRot);
-                    
-                    mainBody.setPosX(-playerModel.body.x);
+                    mainBody.setRotZ(playerModel.body.zRot);
+
+                    // RenderUtil.translateMatrixToBone already negates posX, so pass +x / -y / +z like GeoArmorRenderer.
+                    mainBody.setPosX(playerModel.body.x);
                     mainBody.setPosY(-playerModel.body.y);
                     mainBody.setPosZ(playerModel.body.z);
                     
@@ -87,24 +91,11 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
 
                     head.setRotX(-(playerModel.head.xRot - parentXRot));
                     head.setRotY(-(playerModel.head.yRot - parentYRot));
-                    head.setRotZ(-(playerModel.head.zRot - parentZRot));
-                    
-                    head.setPosX(-(playerModel.head.x - parentDX));
+                    head.setRotZ(playerModel.head.zRot - parentZRot);
+
+                    head.setPosX(playerModel.head.x - parentDX);
                     head.setPosY(-(playerModel.head.y - parentDY));
                     head.setPosZ(playerModel.head.z - parentDZ);
-
-                    // Compensate for any non-standard body pivot so the head stays locked to the neck during tilt
-                    if (!childOfBody && mainBody != null) {
-                        float bodyPivotY = mainBody.getPivotY();
-                        float deltaNeckY = 24.0F - bodyPivotY;
-                        if (Math.abs(deltaNeckY) > 0.01F) {
-                            float rotX = mainBody.getRotX();
-                            float neckShiftZ = deltaNeckY * (float) Math.sin(-rotX);
-                            float neckShiftY = deltaNeckY * ((float) Math.cos(rotX) - 1.0F);
-                            head.setPosZ(head.getPosZ() + neckShiftZ);
-                            head.setPosY(head.getPosY() + neckShiftY);
-                        }
-                    }
                 }
 
                 // 3. Synchronize Right Arm
@@ -119,13 +110,13 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
 
                     rightArm.setRotX(-(playerModel.rightArm.xRot - parentXRot));
                     rightArm.setRotY(-(playerModel.rightArm.yRot - parentYRot));
-                    rightArm.setRotZ(-(playerModel.rightArm.zRot - parentZRot));
+                    rightArm.setRotZ(playerModel.rightArm.zRot - parentZRot);
                     
                     float dX = playerModel.rightArm.x - (-5.0F);
                     float dY = playerModel.rightArm.y - 2.0F;
                     float dZ = playerModel.rightArm.z - 0.0F;
 
-                    rightArm.setPosX(-(dX - parentDX));
+                    rightArm.setPosX(dX - parentDX);
                     rightArm.setPosY(-(dY - parentDY));
                     rightArm.setPosZ(dZ - parentDZ);
                 }
@@ -142,13 +133,13 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
 
                     leftArm.setRotX(-(playerModel.leftArm.xRot - parentXRot));
                     leftArm.setRotY(-(playerModel.leftArm.yRot - parentYRot));
-                    leftArm.setRotZ(-(playerModel.leftArm.zRot - parentZRot));
+                    leftArm.setRotZ(playerModel.leftArm.zRot - parentZRot);
                     
                     float dX = playerModel.leftArm.x - 5.0F;
                     float dY = playerModel.leftArm.y - 2.0F;
                     float dZ = playerModel.leftArm.z - 0.0F;
 
-                    leftArm.setPosX(-(dX - parentDX));
+                    leftArm.setPosX(dX - parentDX);
                     leftArm.setPosY(-(dY - parentDY));
                     leftArm.setPosZ(dZ - parentDZ);
                 }
@@ -165,13 +156,13 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
 
                     rightLeg.setRotX(-(playerModel.rightLeg.xRot - parentXRot));
                     rightLeg.setRotY(-(playerModel.rightLeg.yRot - parentYRot));
-                    rightLeg.setRotZ(-(playerModel.rightLeg.zRot - parentZRot));
+                    rightLeg.setRotZ(playerModel.rightLeg.zRot - parentZRot);
                     
                     float dX = playerModel.rightLeg.x - (-1.9F);
                     float dY = playerModel.rightLeg.y - 12.0F;
                     float dZ = playerModel.rightLeg.z - 0.0F;
 
-                    rightLeg.setPosX(-(dX - parentDX));
+                    rightLeg.setPosX(dX - parentDX);
                     rightLeg.setPosY(-(dY - parentDY));
                     rightLeg.setPosZ(dZ - parentDZ);
                 }
@@ -188,13 +179,13 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
 
                     leftLeg.setRotX(-(playerModel.leftLeg.xRot - parentXRot));
                     leftLeg.setRotY(-(playerModel.leftLeg.yRot - parentYRot));
-                    leftLeg.setRotZ(-(playerModel.leftLeg.zRot - parentZRot));
+                    leftLeg.setRotZ(playerModel.leftLeg.zRot - parentZRot);
                     
                     float dX = playerModel.leftLeg.x - 1.9F;
                     float dY = playerModel.leftLeg.y - 12.0F;
                     float dZ = playerModel.leftLeg.z - 0.0F;
 
-                    leftLeg.setPosX(-(dX - parentDX));
+                    leftLeg.setPosX(dX - parentDX);
                     leftLeg.setPosY(-(dY - parentDY));
                     leftLeg.setPosZ(dZ - parentDZ);
                 }
@@ -218,8 +209,8 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
                 }
 
                 if (swimAmount > 0.0F && !isFirstPerson) {
-                    // 1. Head: Lift face so player looks forward along the crawlway instead of down into the dirt
-                    if (head != null) {
+                    // 1. Head: For RenderLayers, PlayerModel already handles swim/crawl head pitch cleanly.
+                    if (head != null && !isRenderLayer) {
                         float lookPitch = player.getXRot(); // negative = looking up, positive = looking down
                         // When looking forward (pitch = 0), tilt head up ~75 degrees (1.30 rad) relative to horizontal body
                         float crawlHeadX = 1.30F - (lookPitch * net.minecraft.util.Mth.DEG_TO_RAD * 0.7F);

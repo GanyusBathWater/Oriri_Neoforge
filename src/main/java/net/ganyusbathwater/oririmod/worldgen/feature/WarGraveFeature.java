@@ -29,28 +29,21 @@ public class WarGraveFeature extends Feature<NoneFeatureConfiguration> {
         int numSwords = 6 + random.nextInt(10); // 6 to 15 swords scattered in the area
 
         boolean placedAny = false;
+        BlockPos.MutableBlockPos placePos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos belowPos = new BlockPos.MutableBlockPos();
 
         for (int i = 0; i < numSwords; i++) {
             int x = random.nextInt(radius * 2) - radius;
             int z = random.nextInt(radius * 2) - radius;
-            
-            BlockPos targetPos = origin.offset(x, 0, z);
-            
-            // Find surface at target x,z
-            int actualY = targetPos.getY();
-            // Go down to find the highest solid block
-            while (level.isEmptyBlock(new BlockPos(targetPos.getX(), actualY - 1, targetPos.getZ())) && actualY > context.chunkGenerator().getMinY()) {
-                actualY--;
-            }
-            // Go up if we are inside solid ground
-            while (!level.isEmptyBlock(new BlockPos(targetPos.getX(), actualY, targetPos.getZ())) && actualY < context.chunkGenerator().getGenDepth()) {
-                actualY++;
-            }
-            
-            BlockPos placePos = new BlockPos(targetPos.getX(), actualY, targetPos.getZ());
-            
+            int worldX = origin.getX() + x;
+            int worldZ = origin.getZ() + z;
+            int actualY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, worldX, worldZ);
+
+            placePos.set(worldX, actualY, worldZ);
+            belowPos.set(worldX, actualY - 1, worldZ);
+
             // Must be on sol sand
-            if (level.getBlockState(placePos.below()).is(ModBlocks.SOL_SAND.get()) && 
+            if (level.getBlockState(belowPos).is(ModBlocks.SOL_SAND.get()) && 
                 (level.isEmptyBlock(placePos) || level.getBlockState(placePos).canBeReplaced())) {
                 
                 Block swordBlock = random.nextBoolean() ? ModBlocks.BROKEN_SWORD_BLOCK.get() : ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get();
@@ -61,7 +54,7 @@ public class WarGraveFeature extends Feature<NoneFeatureConfiguration> {
                     state = state.setValue(HorizontalDirectionalBlock.FACING, facing);
                 }
                 
-                setBlock(level, placePos, state);
+                level.setBlock(placePos, state, 2);
                 placedAny = true;
             }
         }

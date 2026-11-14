@@ -145,6 +145,19 @@ public class SilentNereidEntity extends MermaidEntity {
         if (!level.getFluidState(pos).is(FluidTags.WATER)) {
             return false;
         }
+        // Prefer spawning near the bottom of the Silent Depths / Sunken Trenches (within 18 blocks of solid seafloor)
+        BlockPos.MutableBlockPos floorCursor = new BlockPos.MutableBlockPos();
+        boolean nearSeafloor = false;
+        for (int dy = 1; dy <= 18; dy++) {
+            floorCursor.set(pos.getX(), pos.getY() - dy, pos.getZ());
+            if (level.getBlockState(floorCursor).blocksMotion()) {
+                nearSeafloor = true;
+                break;
+            }
+        }
+        if (!nearSeafloor) {
+            return false;
+        }
         // Global spawn rate throttling near the Silent Abyss is handled uniformly in AbyssalSpawnEvents;
         // keep a generous local cap here as a safety floor for overlapping patrol pockets.
         return level.getEntitiesOfClass(
@@ -300,7 +313,7 @@ public class SilentNereidEntity extends MermaidEntity {
         // When not hunting and outside the abyss, swim back down to the Silent Depths
         this.goalSelector.addGoal(3, new SilentNereidReturnToDepthsGoal(this));
 
-        this.goalSelector.addGoal(4, new MermaidWanderGoal(this));
+        this.goalSelector.addGoal(4, new SilentNereidBenthicWanderGoal(this));
         this.goalSelector.addGoal(5, new RandomStrollGoal(this, 0.9D) {
             @Override
             public boolean canUse() {
@@ -574,6 +587,107 @@ public class SilentNereidEntity extends MermaidEntity {
                 this.nereid.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 this.nereid.doHurtTarget(target);
             }
+        }
+    }
+
+    /**
+     * Benthic wander goal that keeps idle Silent Nereids patrolling close to the abyssal
+     * seabed while still allowing occasional smooth rises and unrestricted 3D combat chases.
+     */
+    public static class SilentNereidBenthicWanderGoal extends Goal {
+        private static final int MAX_FLOOR_SCAN_DEPTH = 64;
+        private static final double HIGH_ALTITUDE_THRESHOLD = 9.0D;
+
+        private final SilentNereidEntity nereid;
+
+        public SilentNereidBenthicWanderGoal(SilentNereidEntity nereid) {
+            this.nereid = nereid;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            if (!this.nereid.isInWater() || this.nereid.getTarget() != null) {
+                return false;
+            }
+            if (this.nereid.getRandom().nextInt(32) == 0) {
+                return true;
+            }
+            // Gently pull idle Nereids back toward the seafloor sooner if they drifted high up after a hunt
+            int currentFloor = findSeafloorY(
+                    this.nereid.level(),
+                    this.nereid.getBlockX(),
+                    this.nereid.getBlockY(),
+                    this.nereid.getBlockZ());
+            return currentFloor != Integer.MIN_VALUE
+                    && (this.nereid.getY() - (currentFloor + 1)) > HIGH_ALTITUDE_THRESHOLD
+                    && this.nereid.getRandom().nextInt(8) == 0;
+        }
+
+        @Override
+        public void start() {
+            RandomSource random = this.nereid.getRandom();
+            Level level = this.nereid.level();
+
+            for (int attempt = 0; attempt < 5; attempt++) {
+                double x = this.nereid.getX() + (random.nextDouble() * 20.0D - 10.0D);
+                double z = this.nereid.getZ() + (random.nextDouble() * 20.0D - 10.0D);
+                int bx = net.minecraft.util.Mth.floor(x);
+                int bz = net.minecraft.util.Mth.floor(z);
+
+                int seafloorY = findSeafloorY(level, bx, this.nereid.getBlockY() + 6, bz);
+                if (seafloorY == Integer.MIN_VALUE) {
+                    continue;
+                }
+
+                // Prefer targets inside Silent Depths / Sunken Trenches (allow bypass only on final fallback)
+                BlockPos floorSamplePos = new BlockPos(bx, seafloorY + 2, bz);
+                if (attempt < 3 && !net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal
+                        .isAbyssalBiome(level.getBiome(floorSamplePos))) {
+                    continue;
+                }
+
+                // 85% stay 1.5-6 blocks off the bottom; 15% rise in a higher graceful arc (6-13 blocks)
+                double hoverOffset = random.nextFloat() < 0.85F
+                        ? (1.5D + random.nextDouble() * 4.5D)
+                        : (6.0D + random.nextDouble() * 7.0D);
+                double desiredBottomY = seafloorY + 1.0D + hoverOffset;
+
+                // Blend gently down if currently very high above the seafloor so dives look fluid rather than vertical
+                double targetY = this.nereid.getY() - desiredBottomY > 14.0D
+                        ? this.nereid.getY() - (6.0D + random.nextDouble() * 6.0D)
+                        : desiredBottomY;
+
+                BlockPos targetPos = BlockPos.containing(x, targetY, z);
+                if (level.getFluidState(targetPos).is(FluidTags.WATER)) {
+                    this.nereid.getMoveControl().setWantedPosition(x, targetY, z, 1.0D);
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.nereid.getMoveControl().hasWanted()
+                    && this.nereid.getTarget() == null
+                    && this.nereid.isInWater();
+        }
+
+        private static int findSeafloorY(Level level, int x, int startY, int z) {
+            BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+            int topY = Math.min(startY, level.getMaxBuildHeight() - 2);
+            int minY = Math.max(level.getMinBuildHeight() + 1, startY - MAX_FLOOR_SCAN_DEPTH);
+
+            for (int y = topY; y >= minY; y--) {
+                cursor.set(x, y, z);
+                if (level.getBlockState(cursor).blocksMotion()) {
+                    cursor.set(x, y + 1, z);
+                    if (level.getFluidState(cursor).is(FluidTags.WATER)) {
+                        return y;
+                    }
+                }
+            }
+            return Integer.MIN_VALUE;
         }
     }
 }

@@ -77,6 +77,11 @@ public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCos
     }
 
     @Override
+    public long getInstanceId(T animatable) {
+        return this.currentEntity != null ? this.currentEntity.getId() : System.identityHashCode(animatable);
+    }
+
+    @Override
     public boolean shouldShowName(AbstractClientPlayer entity) {
         return false;
     }
@@ -170,12 +175,15 @@ public abstract class AbstractPlayerCosmeticRenderer<T extends AbstractPlayerCos
 
             animationState.setData(DataTickets.TICK, animatable.getTick(this.currentEntity));
             animationState.setData(DataTickets.ENTITY, this.currentEntity);
+            animationState.setData(AbstractPlayerCosmeticModel.IS_RENDER_LAYER, this.isRenderLayer);
             animationState.setData(DataTickets.ENTITY_MODEL_DATA, new EntityModelData(shouldSit, livingEntity != null && livingEntity.isBaby(), -netHeadYaw, -headPitch));
             currentModel.addAdditionalStateData(animatable, instanceId, animationState::setData);
             currentModel.handleAnimations(animatable, instanceId, animationState, partialTick);
         }
 
-        poseStack.translate(0, 0.01f, 0);
+        if (!this.isRenderLayer) {
+            poseStack.translate(0, 0.01f, 0);
+        }
 
         this.modelRenderTranslations = new Matrix4f(poseStack.last().pose());
 

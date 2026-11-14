@@ -1,16 +1,20 @@
 package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
+import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
-import net.ganyusbathwater.oririmod.block.ModBlocks;
 
 public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
 
@@ -25,13 +29,16 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
         RandomSource random = context.random();
         BlockStateConfiguration config = context.config();
 
+        ChunkPos centerChunk = (level instanceof net.minecraft.server.level.WorldGenRegion wgr)
+                ? wgr.getCenter()
+                : null;
+
+        if (config.state.is(ModBlocks.ELDER_PINE_LOG.get())) {
+            return placeFallenPineTree(level, origin, random, config.state, centerChunk);
+        }
+
         if (!level.getBlockState(origin.below()).isSolid() || !level.getBlockState(origin).isAir()) {
             return false;
-        }
-        
-        net.minecraft.world.level.ChunkPos centerChunk = null;
-        if (level instanceof net.minecraft.server.level.WorldGenRegion wgr) {
-            centerChunk = wgr.getCenter();
         }
 
         // 1. Determine size (solid 2x2 to 4x4)
@@ -173,7 +180,157 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
         return true;
     }
 
-    private void safeSetBlock(WorldGenLevel level, BlockPos pos, BlockState state, net.minecraft.world.level.ChunkPos centerChunk) {
+    private boolean placeFallenPineTree(
+            WorldGenLevel level,
+            BlockPos origin,
+            RandomSource random,
+            BlockState logBaseState,
+            ChunkPos centerChunk) {
+        if (!isValidPineGround(level.getBlockState(origin.below()))) {
+            return false;
+        }
+        BlockState originState = level.getBlockState(origin);
+        if ((!originState.isAir() && !originState.canBeReplaced()) || !level.getFluidState(origin).isEmpty()) {
+            return false;
+        }
+
+        BlockState verticalLog = logBaseState.setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        BlockState woodState = ModBlocks.ELDER_PINE_WOOD.get().defaultBlockState();
+        BlockState pineLeaves = ModBlocks.ELDER_PINE_LEAVES.get().defaultBlockState()
+                .setValue(LeavesBlock.PERSISTENT, false)
+                .setValue(LeavesBlock.DISTANCE, 1);
+
+        // 1. Snapped 1x1 Elder Pine stump (2-3 blocks tall) with all-bark buttress roots
+        int stumpHeight = 2 + random.nextInt(2);
+        for (int y = 0; y < stumpHeight; y++) {
+            BlockPos p = origin.above(y);
+            if (level.getBlockState(p).canBeReplaced()) {
+                safeSetBlock(level, p, y == 0 ? woodState : verticalLog, centerChunk);
+            }
+        }
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            if (random.nextFloat() < 0.70f) {
+                BlockPos rootPos = origin.relative(dir);
+                if (level.getBlockState(rootPos).canBeReplaced() && level.getFluidState(rootPos).isEmpty()) {
+                    safeSetBlock(level, rootPos, woodState, centerChunk);
+                    if (!level.getBlockState(rootPos.below()).isSolid() && level.getFluidState(rootPos.below()).isEmpty()) {
+                        safeSetBlock(level, rootPos.below(), woodState, centerChunk);
+                    }
+                }
+            }
+        }
+
+        // 2. Pick downhill/level horizontal direction so the fallen conifer rests naturally on Highland terrain
+        Direction moveDir = pickBestPineFallDirection(level, origin, random);
+        Direction.Axis trunkAxis = moveDir.getAxis();
+        Direction sideDir = (trunkAxis == Direction.Axis.X) ? Direction.SOUTH : Direction.EAST;
+        BlockState horizontalLog = logBaseState.setValue(RotatedPillarBlock.AXIS, trunkAxis);
+
+        int gap = 1 + random.nextInt(2);
+        int trunkLength = 9 + random.nextInt(7); // 9 to 15 blocks
+        int currentY = origin.getY();
+        int crownStartIdx = Math.max(4, trunkLength / 2);
+
+        for (int i = 0; i < trunkLength; i++) {
+            BlockPos stepXZ = origin.relative(moveDir, 1 + gap + i);
+            int groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, stepXZ.getX(), stepXZ.getZ());
+            // Gently drape the fallen trunk downward along mountain slopes without climbing cliffs
+            if (groundY < currentY && currentY - groundY >= 1) {
+                currentY--;
+            } else if (groundY > currentY && groundY - currentY == 1) {
+                currentY++;
+            } else if (groundY - currentY > 2) {
+                trunkLength = i;
+                break;
+            }
+
+            BlockPos logPos = new BlockPos(stepXZ.getX(), currentY, stepXZ.getZ());
+            if (!level.getFluidState(logPos).isEmpty()) {
+                trunkLength = i;
+                break;
+            }
+            if (level.getBlockState(logPos).canBeReplaced()) {
+                safeSetBlock(level, logPos, horizontalLog, centerChunk);
+            }
+
+            // Weathered bark stubs protruding horizontally or slightly upward
+            if (i >= 2 && i < trunkLength - 1 && random.nextFloat() < 0.30f) {
+                Direction stubSide = random.nextBoolean() ? sideDir : sideDir.getOpposite();
+                BlockPos stubPos = logPos.relative(stubSide);
+                if (level.getBlockState(stubPos).canBeReplaced()) {
+                    safeSetBlock(level, stubPos, woodState, centerChunk);
+                }
+            }
+
+            // Conical crushed pine boughs along the upper half toward the tip
+            if (i >= crownStartIdx) {
+                float crownProgress = (float) (i - crownStartIdx) / Math.max(1, (trunkLength - 1 - crownStartIdx));
+                int whorlRadius = crownProgress < 0.45f ? 2 : (crownProgress < 0.85f ? 1 : 0);
+                placeFallenPineBoughs(level, logPos, sideDir, whorlRadius, random, pineLeaves, centerChunk);
+            }
+        }
+
+        return true;
+    }
+
+    private Direction pickBestPineFallDirection(WorldGenLevel level, BlockPos origin, RandomSource random) {
+        Direction[] dirs = { Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST };
+        Direction bestDir = dirs[random.nextInt(dirs.length)];
+        int bestScore = Integer.MAX_VALUE;
+        for (int idx = 0; idx < 4; idx++) {
+            Direction d = dirs[(idx + random.nextInt(4)) & 3];
+            BlockPos check = origin.relative(d, 7);
+            int h = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, check.getX(), check.getZ());
+            int drop = origin.getY() - h;
+            int penalty = (drop < -1) ? 50 + (-drop) * 10 : Math.abs(drop - 1);
+            if (penalty < bestScore) {
+                bestScore = penalty;
+                bestDir = d;
+            }
+        }
+        return bestDir;
+    }
+
+    private void placeFallenPineBoughs(
+            WorldGenLevel level,
+            BlockPos center,
+            Direction sideDir,
+            int radius,
+            RandomSource random,
+            BlockState pineLeaves,
+            ChunkPos centerChunk) {
+        for (int s = -radius; s <= radius; s++) {
+            for (int dy = 0; dy <= Math.max(1, radius); dy++) {
+                if (s == 0 && dy == 0) continue;
+                int dist = Math.abs(s) + dy;
+                if (dist > radius + 1) continue;
+                if (dist == radius + 1 && random.nextFloat() < 0.45f) continue;
+
+                BlockPos leafPos = center.relative(sideDir, s).above(dy);
+                BlockState existing = level.getBlockState(leafPos);
+                if ((existing.isAir() || existing.canBeReplaced()) && level.getFluidState(leafPos).isEmpty()) {
+                    safeSetBlock(level, leafPos, pineLeaves, centerChunk);
+                }
+            }
+        }
+        // Always cap the tip/top ridge with a leaf cluster if space permits
+        BlockPos topPos = center.above();
+        if (level.getBlockState(topPos).canBeReplaced()) {
+            safeSetBlock(level, topPos, pineLeaves, centerChunk);
+        }
+    }
+
+    private static boolean isValidPineGround(BlockState state) {
+        return state.is(ModBlocks.HIGHLANDS_GRASS_BLOCK.get())
+                || state.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())
+                || state.is(Blocks.GRASS_BLOCK)
+                || state.is(Blocks.PODZOL)
+                || state.is(Blocks.DIRT)
+                || state.is(Blocks.COARSE_DIRT)
+                || state.is(Blocks.MOSS_BLOCK);
+    }
+
+    private void safeSetBlock(WorldGenLevel level, BlockPos pos, BlockState state, ChunkPos centerChunk) {
         if (centerChunk != null) {
             int chunkX = pos.getX() >> 4;
             int chunkZ = pos.getZ() >> 4;

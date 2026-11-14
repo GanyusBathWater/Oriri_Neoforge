@@ -4,17 +4,20 @@ import com.mojang.serialization.Codec;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
@@ -79,47 +82,100 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
             spikes.add(new Spike(direction, length, width));
         }
 
-        int maxBounding = 24; 
+        int maxBounding = 24;
         float noiseScale = 0.15f;
-        
-        // Phase 1: Carve volume and place solid crystals
+        int ox = origin.getX();
+        int oy = origin.getY();
+        int oz = origin.getZ();
+        int minWorldY = level.getMinBuildHeight() + 1;
+        WorldGenRegion region = level instanceof WorldGenRegion r ? r : null;
+        int centerCx = region != null ? region.getCenter().x : 0;
+        int centerCz = region != null ? region.getCenter().z : 0;
+
+        BlockState calcite = Blocks.CALCITE.defaultBlockState();
+        BlockState smoothBasalt = Blocks.SMOOTH_BASALT.defaultBlockState();
+        BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos neighborPos = new BlockPos.MutableBlockPos();
+
+        int span = maxBounding * 2 + 1;
+        int spanSq = span * span;
+        int[] placedOffsets = new int[2048];
+        int placedCount = 0;
+
+        double maxPossibleCoreRadius = coreRadius + 2.0;
+
+        // Phase 1: Carve volume and place solid crystals (column-first for heightmap & chunk locality)
         for (int x = -maxBounding; x <= maxBounding; x++) {
-            for (int y = -maxBounding; y <= maxBounding; y++) {
-                for (int z = -maxBounding; z <= maxBounding; z++) {
-                    double distSq = x*x + y*y + z*z;
+            int wx = ox + x;
+            if (region != null && Math.abs((wx >> 4) - centerCx) > 1) {
+                continue;
+            }
+            for (int z = -maxBounding; z <= maxBounding; z++) {
+                int xzSq = x * x + z * z;
+                if (xzSq > maxBounding * maxBounding) {
+                    continue;
+                }
+                int wz = oz + z;
+                if (region != null && Math.abs((wz >> 4) - centerCz) > 1) {
+                    continue;
+                }
+
+                int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, wx, wz);
+                int sphereMaxY = (int) Math.sqrt(maxBounding * maxBounding - xzSq);
+                int minY = Math.max(-sphereMaxY, minWorldY - oy);
+                int maxY = Math.min(sphereMaxY, (surfaceY - 5) - oy);
+                if (minY > maxY) {
+                    continue;
+                }
+
+                for (int y = minY; y <= maxY; y++) {
+                    double distSq = xzSq + y * y;
                     double dist = Math.sqrt(distSq);
-                    
-                    if (dist > maxBounding) continue;
-                    
-                    BlockPos pos = origin.offset(x, y, z);
-                    
-                    // 3D Noise for organic distortion
-                    float nx = (origin.getX() + x) * noiseScale;
-                    float ny = (origin.getY() + y) * noiseScale;
-                    float nz = (origin.getZ() + z) * noiseScale;
-                    
-                    double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(nx, ny, nz, 2);
-                    
+
+                    // Conservative envelope check before reading blocks or evaluating 3D FBM
+                    boolean possibleCore = dist < maxPossibleCoreRadius;
+                    boolean possibleSpike = false;
+                    if (!possibleCore) {
+                        for (int si = 0; si < numSpikes; si++) {
+                            Spike s = spikes.get(si);
+                            double dot = x * s.dir.x() + y * s.dir.y() + z * s.dir.z();
+                            if (dot > 0 && dot < s.length) {
+                                double distToAxisSq = Math.max(0.0, distSq - dot * dot);
+                                double taper = 1.0 - (dot / s.length);
+                                double maxThick = (s.baseWidth + 1.8) * taper;
+                                if (distToAxisSq < maxThick * maxThick) {
+                                    possibleSpike = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!possibleCore && !possibleSpike) {
+                        continue;
+                    }
+
+                    int wy = oy + y;
+                    mPos.set(wx, wy, wz);
+                    BlockState currentState = level.getBlockState(mPos);
+                    if (currentState.isAir() || currentState.is(Blocks.WATER) || currentState.is(Blocks.LAVA) || !currentState.isSolid()) {
+                        continue;
+                    }
+
+                    double noise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                            wx * noiseScale, wy * noiseScale, wz * noiseScale, 2);
+
                     boolean isInside = false;
-                    
-                    // Check core
-                    double distortedCoreRadius = coreRadius + (noise * 2.0); // Bumpy core
+                    double distortedCoreRadius = coreRadius + (noise * 2.0);
                     if (dist < distortedCoreRadius) {
                         isInside = true;
-                    } else {
-                        // Check spikes
-                        for (Spike s : spikes) {
-                            double dot = (x * s.dir.x() + y * s.dir.y() + z * s.dir.z());
+                    } else if (possibleSpike) {
+                        for (int si = 0; si < numSpikes; si++) {
+                            Spike s = spikes.get(si);
+                            double dot = x * s.dir.x() + y * s.dir.y() + z * s.dir.z();
                             if (dot > 0 && dot < s.length) {
-                                double distToAxis = Math.sqrt(distSq - dot*dot);
-                                
-                                // Linear taper from base to tip
+                                double distToAxis = Math.sqrt(Math.max(0.0, distSq - dot * dot));
                                 double taper = 1.0 - (dot / s.length);
-                                double currentThickness = s.baseWidth * taper;
-                                
-                                // Noise distorts the surface of the spikes
-                                double distortedThickness = currentThickness + (noise * 1.8 * taper);
-                                
+                                double distortedThickness = s.baseWidth * taper + (noise * 1.8 * taper);
                                 if (distToAxis < distortedThickness) {
                                     isInside = true;
                                     break;
@@ -127,55 +183,83 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
                             }
                         }
                     }
-                    
-                    if (isInside) {
-                        int surfaceY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, pos.getX(), pos.getZ());
-                        if (pos.getY() > surfaceY - 5) {
-                            continue;
-                        }
-                        
-                        BlockState currentState = level.getBlockState(pos);
-                        if (currentState.isAir() || currentState.is(Blocks.WATER) || currentState.is(Blocks.LAVA) || !currentState.isSolid()) {
-                            continue;
-                        }
 
+                    if (isInside) {
                         // Geode Crust
                         if (dist > distortedCoreRadius - 1.5 && dist < distortedCoreRadius + 0.5) {
                             if (rng.nextFloat() < 0.2f) {
-                                level.setBlock(pos, Blocks.CALCITE.defaultBlockState(), 2);
+                                level.setBlock(mPos, calcite, 2);
                             } else if (rng.nextFloat() < 0.1f) {
-                                level.setBlock(pos, Blocks.SMOOTH_BASALT.defaultBlockState(), 2);
+                                level.setBlock(mPos, smoothBasalt, 2);
                             } else {
-                                level.setBlock(pos, crystalBlock, 2);
+                                level.setBlock(mPos, crystalBlock, 2);
+                                if (placedCount == placedOffsets.length) {
+                                    placedOffsets = java.util.Arrays.copyOf(placedOffsets, placedOffsets.length * 2);
+                                }
+                                placedOffsets[placedCount++] = ((x + maxBounding) * span + (y + maxBounding)) * span + (z + maxBounding);
                             }
                         } else {
-                            level.setBlock(pos, crystalBlock, 2);
+                            level.setBlock(mPos, crystalBlock, 2);
+                            if (placedCount == placedOffsets.length) {
+                                placedOffsets = java.util.Arrays.copyOf(placedOffsets, placedOffsets.length * 2);
+                            }
+                            placedOffsets[placedCount++] = ((x + maxBounding) * span + (y + maxBounding)) * span + (z + maxBounding);
                         }
                     }
                 }
             }
         }
-        
-        // Phase 2: Place clusters on the surface for texture
-        for (int x = -maxBounding; x <= maxBounding; x++) {
-            for (int y = -maxBounding; y <= maxBounding; y++) {
-                for (int z = -maxBounding; z <= maxBounding; z++) {
-                    BlockPos pos = origin.offset(x, y, z);
-                    
-                    if (level.getBlockState(pos).isAir() || level.getBlockState(pos).canBeReplaced()) {
-                        Direction attachedFace = null;
-                        for (Direction dir : Direction.values()) {
-                            BlockPos neighbor = pos.relative(dir);
-                            BlockState neighborState = level.getBlockState(neighbor);
-                            if (neighborState.is(crystalBlock.getBlock())) {
-                                attachedFace = dir;
-                                break;
-                            }
+
+        // Phase 2: Place clusters only on exposed surfaces adjacent to placed crystal blocks
+        BitSet visitedAir = new BitSet((span + 2) * (span + 2) * (span + 2));
+        int vSpan = span + 2;
+        net.minecraft.world.level.block.Block crystalBlockType = crystalBlock.getBlock();
+        Direction[] directions = Direction.values();
+
+        for (int i = 0; i < placedCount; i++) {
+            int idx = placedOffsets[i];
+            int pz = (idx % span) - maxBounding;
+            int py = ((idx / span) % span) - maxBounding;
+            int px = (idx / spanSq) - maxBounding;
+
+            for (Direction d : directions) {
+                int ax = px + d.getStepX();
+                int ay = py + d.getStepY();
+                int az = pz + d.getStepZ();
+                int vx = ax + maxBounding + 1;
+                int vy = ay + maxBounding + 1;
+                int vz = az + maxBounding + 1;
+                int vIdx = (vx * vSpan + vy) * vSpan + vz;
+                if (visitedAir.get(vIdx)) {
+                    continue;
+                }
+                visitedAir.set(vIdx);
+
+                int awx = ox + ax;
+                int awy = oy + ay;
+                int awz = oz + az;
+                if (awy < minWorldY) {
+                    continue;
+                }
+                if (region != null && (Math.abs((awx >> 4) - centerCx) > 1 || Math.abs((awz >> 4) - centerCz) > 1)) {
+                    continue;
+                }
+
+                mPos.set(awx, awy, awz);
+                BlockState airState = level.getBlockState(mPos);
+                if (airState.isAir() || airState.canBeReplaced()) {
+                    Direction attachedFace = null;
+                    for (Direction nd : directions) {
+                        neighborPos.set(awx + nd.getStepX(), awy + nd.getStepY(), awz + nd.getStepZ());
+                        if (level.getBlockState(neighborPos).is(crystalBlockType)) {
+                            attachedFace = nd;
+                            break;
                         }
-                        
-                        if (attachedFace != null && rng.nextFloat() < 0.04f) {
-                            level.setBlock(pos, clusterBlock.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING, attachedFace.getOpposite()), 2);
-                        }
+                    }
+                    if (attachedFace != null && rng.nextFloat() < 0.04f) {
+                        level.setBlock(mPos, clusterBlock.setValue(
+                                net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING,
+                                attachedFace.getOpposite()), 2);
                     }
                 }
             }

@@ -20,21 +20,30 @@ public class ElderLeafPileFeature extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel level = context.level();
         BlockPos origin = context.origin();
 
-        // 1. Proximity Check: only spawn if an Elder Log is within 5 blocks
+        // 1. Base placement condition first (cheap O(1) bailout before scanning surrounding 1,331 blocks)
+        if (!level.getBlockState(origin.below()).isSolid() || !level.getBlockState(origin).canBeReplaced()) {
+            return false;
+        }
+
+        // 2. Proximity Check: only spawn if an Elder Log is within 5 blocks
         boolean nearLog = false;
-        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-5, -5, -5), origin.offset(5, 5, 5))) {
-            if (level.getBlockState(pos).is(ModBlocks.ELDER_LOG_BLOCK.get())) {
-                nearLog = true;
-                break;
+        BlockPos.MutableBlockPos scanPos = new BlockPos.MutableBlockPos();
+        int ox = origin.getX();
+        int oy = origin.getY();
+        int oz = origin.getZ();
+        for (int dx = -5; dx <= 5 && !nearLog; dx++) {
+            for (int dz = -5; dz <= 5 && !nearLog; dz++) {
+                for (int dy = -5; dy <= 5; dy++) {
+                    scanPos.set(ox + dx, oy + dy, oz + dz);
+                    if (level.getBlockState(scanPos).is(ModBlocks.ELDER_LOG_BLOCK.get())) {
+                        nearLog = true;
+                        break;
+                    }
+                }
             }
         }
 
         if (!nearLog) {
-            return false;
-        }
-
-        // 2. Base placement condition
-        if (!level.getBlockState(origin.below()).isSolid() || !level.getBlockState(origin).canBeReplaced()) {
             return false;
         }
 

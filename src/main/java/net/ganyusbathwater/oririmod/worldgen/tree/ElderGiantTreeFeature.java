@@ -18,6 +18,8 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.ganyusbathwater.oririmod.block.custom.UpgradedSaplingBlock;
 
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +35,9 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
     private final ThreadLocal<Integer> canopyRadiusLocal = ThreadLocal.withInitial(() -> 0);
     private final ThreadLocal<BlockPos> trunkOrigin = ThreadLocal.withInitial(() -> BlockPos.ZERO);
     private final ThreadLocal<Integer> trunkSizeLocal = ThreadLocal.withInitial(() -> 1);
+    private final ThreadLocal<long[]> bfsQueueScratch = ThreadLocal.withInitial(() -> new long[512]);
+    private final ThreadLocal<LongOpenHashSet> bfsVisitedScratch = ThreadLocal
+            .withInitial(() -> new LongOpenHashSet(512));
 
     public ElderGiantTreeFeature(Codec<ElderGiantTreeConfig> codec) {
         super(codec);
@@ -82,19 +87,26 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         int canopyFromTrunk = clamp(trunkSize * 3, 3, 18);
         int canopyR = clamp((int) Math.round(rawCanopy * 0.4 + canopyFromHeight * 0.4 + canopyFromTrunk * 0.2), 3, 18);
 
-        if (containsNonReplaceableBlocks(level, origin, height, trunkSize, canopyR))
-            return false;
-
         int branchLenBase = clamp((int) Math.round(rawBranch * (1.0 + trunkSize / 8.0)), 3, 12);
+
+        // Run O(1) bounds, border, and substrate checks before scanning ~100k canopy
+        // blocks
+        int localX = Math.floorMod(origin.getX(), 16);
+        int localZ = Math.floorMod(origin.getZ(), 16);
+        boolean forcingGrowth = UpgradedSaplingBlock.IS_FORCING_GROWTH.get();
+        if (!forcingGrowth) {
+            if (localX == 0 || localX == 15 || localZ == 0 || localZ == 15) {
+                return false;
+            }
+        }
 
         if (origin.getY() + height + canopyR + 2 >= level.getMaxBuildHeight())
             return false;
         if (origin.getY() <= level.getMinBuildHeight() + 1)
             return false;
 
-        BlockPos below = origin.below();
-        BlockState ground = level.getBlockState(below);
-        if (!UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
+        if (!forcingGrowth) {
+            BlockState ground = level.getBlockState(origin.below());
             if (!ground.is(Blocks.GRASS_BLOCK) && !ground.is(ModBlocks.SCARLET_MOSS.get())
                     && !ground.is(ModBlocks.SCARLET_GRASS_BLOCK.get())
                     && !ground.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())) {
@@ -102,26 +114,22 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             }
         }
 
+        BlockPos.MutableBlockPos trunkCheckPos = new BlockPos.MutableBlockPos();
         for (int y = 0; y <= height; y++) {
             for (int dx = 0; dx < trunkSize; dx++) {
                 for (int dz = 0; dz < trunkSize; dz++) {
-                    BlockPos p = origin.offset(dx, y, dz);
-                    if (!canReplaceForLog(level, p))
+                    trunkCheckPos.set(origin.getX() + dx, origin.getY() + y, origin.getZ() + dz);
+                    if (!canReplaceForLog(level, trunkCheckPos))
                         return false;
                 }
             }
         }
 
+        if (containsNonReplaceableBlocks(level, origin, height, trunkSize, canopyR))
+            return false;
+
         long baseSeed = rnd.nextLong();
         BlockPos top = origin.offset((trunkSize - 1) / 2, height, (trunkSize - 1) / 2);
-
-        int localX = Math.floorMod(origin.getX(), 16);
-        int localZ = Math.floorMod(origin.getZ(), 16);
-        if (!UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
-            if (localX == 0 || localX == 15 || localZ == 0 || localZ == 15) {
-                return false;
-            }
-        }
 
         if (!areChunksLoaded(level, top, canopyR)) {
             if (level instanceof ServerLevel serverLevel) {
@@ -138,7 +146,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                     try {
                         RandomSource deferredRnd = RandomSource.create(deferredRndSeed);
                         generateTree(serverLevel, sCfg, sOrigin, deferredRnd, sHeight, sTrunkSize, sCanopyR,
-                                sBranchLenBase, sBaseSeed);
+                                sBranchLenBase, sBaseSeed, true);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -149,13 +157,13 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             }
         }
 
-        return generateTree(level, cfg, origin, rnd, height, trunkSize, canopyR, branchLenBase, baseSeed);
+        return generateTree(level, cfg, origin, rnd, height, trunkSize, canopyR, branchLenBase, baseSeed, false);
     }
 
     private boolean generateTree(WorldGenLevel level, ElderGiantTreeConfig cfg, BlockPos origin, RandomSource rnd,
-            int height, int trunkSize, int canopyR, int branchLenBase, long baseSeed) {
+            int height, int trunkSize, int canopyR, int branchLenBase, long baseSeed, boolean checkNonReplaceable) {
 
-        if (containsNonReplaceableBlocks(level, origin, height, trunkSize, canopyR))
+        if (checkNonReplaceable && containsNonReplaceableBlocks(level, origin, height, trunkSize, canopyR))
             return false;
         placedBranchLogs.get().clear();
         placedAllLogs.get().clear();
@@ -271,7 +279,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
 
         // Replace logs with stems where ends are exposed
         replaceExposedLogsWithStems(level, cfg);
-        
+
         if (cfg.placeMoonshrooms()) {
             placeMoonshrooms(level, cfg, rnd, origin);
         }
@@ -280,7 +288,11 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             placeSporeBlossom(level, cfg, rnd);
         }
 
-        placeHangingMoss(level, rnd);
+        // Scarlet trees use Scarlet Vines under leaves (finalizePlannedLeaves) instead
+        // of Hanging Elder Moss.
+        if (cfg.floweringChance() > 0.0f) {
+            placeHangingMoss(level, rnd);
+        }
 
         placedBranchLogs.get().clear();
         placedAllLogs.get().clear();
@@ -332,33 +344,39 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
     }
 
     private void placeMoonshrooms(WorldGenLevel level, ElderGiantTreeConfig cfg, RandomSource rnd, BlockPos origin) {
-        if (rnd.nextInt(2) != 0) return; // 50% chance to have moonshrooms at all
-        
+        if (rnd.nextInt(2) != 0)
+            return; // 50% chance to have moonshrooms at all
+
         List<BlockPos> baseLogs = new ArrayList<>();
         for (BlockPos pos : placedAllLogs.get()) {
             if (pos.getY() <= origin.getY() + 4) {
                 baseLogs.add(pos);
             }
         }
-        
+
         java.util.Collections.shuffle(baseLogs, new java.util.Random(rnd.nextLong()));
         int toPlace = 1 + rnd.nextInt(3);
         int placed = 0;
-        
+
         for (BlockPos pos : baseLogs) {
             List<Direction> dirs = new ArrayList<>();
-            for (Direction d : Direction.Plane.HORIZONTAL) dirs.add(d);
+            for (Direction d : Direction.Plane.HORIZONTAL)
+                dirs.add(d);
             java.util.Collections.shuffle(dirs, new java.util.Random(rnd.nextLong()));
-            
+
             for (Direction dir : dirs) {
                 BlockPos target = pos.relative(dir);
                 if (level.isEmptyBlock(target)) {
-                    level.setBlock(target, net.ganyusbathwater.oririmod.block.ModBlocks.MOONSHROOM_BLOCK.get().defaultBlockState().setValue(net.ganyusbathwater.oririmod.block.custom.MoonshroomBlock.FACING, dir), 3);
+                    level.setBlock(target,
+                            net.ganyusbathwater.oririmod.block.ModBlocks.MOONSHROOM_BLOCK.get().defaultBlockState()
+                                    .setValue(net.ganyusbathwater.oririmod.block.custom.MoonshroomBlock.FACING, dir),
+                            level instanceof ServerLevel ? 3 : 2);
                     placed++;
                     break; // Move to next log
                 }
             }
-            if (placed >= toPlace) break;
+            if (placed >= toPlace)
+                break;
         }
     }
 
@@ -402,7 +420,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         }
 
         if (placeInWorld) {
-            level.setBlock(pos, state, 3);
+            level.setBlock(pos, state, level instanceof ServerLevel ? 3 : 2);
         }
 
         placedAllLogs.get().add(pos.immutable());
@@ -1149,21 +1167,25 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
             if (isScarletTree && r.nextFloat() < 0.20f) {
                 BlockPos below = p.below();
                 if (withinBuildHeight(level, below) && level.isEmptyBlock(below)) {
-                    net.minecraft.world.level.block.state.properties.BooleanProperty[] vineSides = new net.minecraft.world.level.block.state.properties.BooleanProperty[]{
-                        net.minecraft.world.level.block.VineBlock.NORTH, 
-                        net.minecraft.world.level.block.VineBlock.SOUTH, 
-                        net.minecraft.world.level.block.VineBlock.EAST, 
-                        net.minecraft.world.level.block.VineBlock.WEST
+                    net.minecraft.world.level.block.state.properties.BooleanProperty[] vineSides = new net.minecraft.world.level.block.state.properties.BooleanProperty[] {
+                            net.minecraft.world.level.block.VineBlock.NORTH,
+                            net.minecraft.world.level.block.VineBlock.SOUTH,
+                            net.minecraft.world.level.block.VineBlock.EAST,
+                            net.minecraft.world.level.block.VineBlock.WEST
                     };
-                    net.minecraft.world.level.block.state.properties.BooleanProperty chosenSide = vineSides[r.nextInt(4)];
-                    
-                    level.setBlock(below, ModBlocks.SCARLET_VINE.get().defaultBlockState().setValue(net.minecraft.world.level.block.VineBlock.UP, true).setValue(chosenSide, true), 2);
+                    net.minecraft.world.level.block.state.properties.BooleanProperty chosenSide = vineSides[r
+                            .nextInt(4)];
+
+                    level.setBlock(below, ModBlocks.SCARLET_VINE.get().defaultBlockState()
+                            .setValue(net.minecraft.world.level.block.VineBlock.UP, true).setValue(chosenSide, true),
+                            2);
 
                     // Chance to grow down further
                     if (r.nextFloat() < 0.4f) {
                         BlockPos below2 = below.below();
                         if (withinBuildHeight(level, below2) && level.isEmptyBlock(below2)) {
-                            level.setBlock(below2, ModBlocks.SCARLET_VINE.get().defaultBlockState().setValue(chosenSide, true), 2);
+                            level.setBlock(below2,
+                                    ModBlocks.SCARLET_VINE.get().defaultBlockState().setValue(chosenSide, true), 2);
                         }
                     }
                 }
@@ -1226,7 +1248,7 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                 flowering = flowering.setValue(LeavesBlock.PERSISTENT, current.getValue(LeavesBlock.PERSISTENT));
             }
 
-            level.setBlock(p, flowering, 3);
+            level.setBlock(p, flowering, level instanceof ServerLevel ? 3 : 2);
         }
     }
 
@@ -1295,36 +1317,59 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         if (hasAdjacentLog(level, start))
             return 1;
 
-        java.util.Deque<BlockPos> queue = new java.util.ArrayDeque<>();
-        java.util.Set<BlockPos> visited = new HashSet<>();
-        queue.addLast(start);
-        visited.add(start);
+        long[] queue = bfsQueueScratch.get();
+        LongOpenHashSet visited = bfsVisitedScratch.get();
+        visited.clear();
+
+        int minY = level.getMinBuildHeight();
+        int maxY = level.getMaxBuildHeight() - 1;
+        long startKey = start.asLong();
+        queue[0] = startKey;
+        visited.add(startKey);
+        int head = 0;
+        int tail = 1;
+
+        Set<BlockPos> branchLogs = placedBranchLogs.get();
+        Set<BlockPos> allLogs = placedAllLogs.get();
+        BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos();
 
         int depth = 0;
         // vorher depth < 6, jetzt depth < 7 um bis Distanz 7 zu suchen
-        while (!queue.isEmpty() && depth < 7) {
-            int layerSize = queue.size();
+        while (head < tail && depth < 7) {
+            int layerEnd = tail;
             depth++;
-            for (int i = 0; i < layerSize; i++) {
-                BlockPos p = queue.removeFirst();
+            while (head < layerEnd) {
+                long packed = queue[head++];
+                int px = BlockPos.getX(packed);
+                int py = BlockPos.getY(packed);
+                int pz = BlockPos.getZ(packed);
+
                 for (Direction d : Direction.values()) {
-                    BlockPos n = p.relative(d);
-                    if (!withinBuildHeight(level, n) || visited.contains(n))
+                    int nx = px + d.getStepX();
+                    int ny = py + d.getStepY();
+                    int nz = pz + d.getStepZ();
+                    if (ny < minY || ny > maxY) {
                         continue;
-                    visited.add(n);
-                    BlockState ns = level.getBlockState(n);
+                    }
+                    long nKey = BlockPos.asLong(nx, ny, nz);
+                    if (!visited.add(nKey)) {
+                        continue;
+                    }
+                    mPos.set(nx, ny, nz);
+                    BlockState ns = level.getBlockState(mPos);
                     // erkenne Logs auch über den BlockTag und placedBranchLogs
-                    if (ns.getBlock() instanceof RotatedPillarBlock) {
+                    if (ns.getBlock() instanceof RotatedPillarBlock
+                            || ns.is(BlockTags.LOGS)
+                            || allLogs.contains(mPos)
+                            || branchLogs.contains(mPos)) {
                         return depth;
                     }
-                    if (ns.is(BlockTags.LOGS)) {
-                        return depth;
-                    }
-                    if (placedAllLogs.get().contains(n) || placedBranchLogs.get().contains(n)) {
-                        return depth;
-                    }
-                    if (ns.is(BlockTags.LEAVES) || (futureLeaves != null && futureLeaves.contains(n))) {
-                        queue.addLast(n);
+                    if (ns.is(BlockTags.LEAVES) || (futureLeaves != null && futureLeaves.contains(mPos))) {
+                        if (tail == queue.length) {
+                            queue = java.util.Arrays.copyOf(queue, queue.length * 2);
+                            bfsQueueScratch.set(queue);
+                        }
+                        queue[tail++] = nKey;
                     }
                 }
             }
@@ -1339,17 +1384,23 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         int extra = 2; // prüfen um +2 Blöcke erweitern
         int radiusX = canopyR + trunkSize + 2 + extra;
         int radiusZ = canopyR + trunkSize + 2 + extra;
-        int minY = origin.getY() - extra;
-        int maxY = origin.getY() + height + canopyR + 2 + extra;
+        int ox = origin.getX();
+        int oz = origin.getZ();
+        int minY = Math.max(level.getMinBuildHeight(), origin.getY() - extra);
+        int maxY = Math.min(level.getMaxBuildHeight() - 1, origin.getY() + height + canopyR + 2 + extra);
+        if (minY > maxY) {
+            return false;
+        }
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int dx = -radiusX; dx <= radiusX; dx++) {
-                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
-                    BlockPos p = origin.offset(dx, y - origin.getY(), dz);
-                    if (!withinBuildHeight(level, p))
-                        continue;
+        BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos();
+        for (int dx = -radiusX; dx <= radiusX; dx++) {
+            int wx = ox + dx;
+            for (int dz = -radiusZ; dz <= radiusZ; dz++) {
+                int wz = oz + dz;
+                for (int y = minY; y <= maxY; y++) {
+                    mPos.set(wx, y, wz);
                     try {
-                        BlockState s = level.getBlockState(p);
+                        BlockState s = level.getBlockState(mPos);
                         // Wenn der Block den geschützten Tag hat -> Abbruch
                         if (s.is(ModTags.Blocks.ELDERWOODS_PROTECTED_STRUCTURE_BLOCKS)) {
                             return true;
@@ -1378,28 +1429,33 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
         // immer zuerst normale Blätter setzen
         BlockState state = cfg.leavesProvider().getState(rnd, pos);
 
+        boolean persistent;
         if (state.hasProperty(LeavesBlock.DISTANCE)) {
             int dist = computeDistanceToLog(level, pos, futureLeaves);
+            persistent = (dist == 1) && hasAdjacentLog(level, pos);
             dist = Math.max(1, Math.min(6, dist));
             state = state.setValue(LeavesBlock.DISTANCE, dist);
+        } else {
+            persistent = hasAdjacentLog(level, pos);
         }
 
-        boolean persistent = hasAdjacentLog(level, pos);
         if (state.hasProperty(LeavesBlock.PERSISTENT)) {
             state = state.setValue(LeavesBlock.PERSISTENT, persistent);
         }
 
+        boolean forcingGrowth = UpgradedSaplingBlock.IS_FORCING_GROWTH.get();
         boolean placeInWorld = true;
-        if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
+        if (forcingGrowth) {
             boolean replaceable = existing.isAir() || existing.is(BlockTags.LEAVES) || existing.canBeReplaced()
-                    || existing.is(Blocks.GRASS_BLOCK) || existing.is(Blocks.TALL_GRASS) || existing.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get());
+                    || existing.is(Blocks.GRASS_BLOCK) || existing.is(Blocks.TALL_GRASS)
+                    || existing.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get());
             if (!replaceable) {
                 placeInWorld = false;
             }
         }
 
         if (placeInWorld) {
-            level.setBlock(pos, state, 3);
+            level.setBlock(pos, state, forcingGrowth ? 3 : 2);
         }
     }
 
@@ -1558,10 +1614,10 @@ public class ElderGiantTreeFeature extends Feature<ElderGiantTreeConfig> {
                             break;
                         }
                         boolean isTip = (i == mossLength - 1) || !level.getBlockState(current.below()).isAir();
-                        BlockState mossState = isTip 
-                                ? ModBlocks.HANGING_ELDER_MOSS.get().defaultBlockState() 
+                        BlockState mossState = isTip
+                                ? ModBlocks.HANGING_ELDER_MOSS.get().defaultBlockState()
                                 : ModBlocks.HANGING_ELDER_MOSS_PLANT.get().defaultBlockState();
-                        
+
                         level.setBlock(current, mossState, 2);
                     }
                 }

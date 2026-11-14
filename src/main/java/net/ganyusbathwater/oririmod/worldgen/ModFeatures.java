@@ -123,6 +123,11 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.BeachUnderwaterReefFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.BeachMangroveSwampFeature> BEACH_MANGROVE_SWAMP_FEATURE = FEATURES
+                        .register("beach_mangrove_swamp_feature",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.BeachMangroveSwampFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);
         }

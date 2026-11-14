@@ -28,6 +28,9 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
         super(codec);
     }
 
+    private static final net.minecraft.resources.ResourceLocation ELYSIAN_RL =
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "elysian_abyss");
+
     @Override
     public boolean place(FeaturePlaceContext<ScarletDripstoneClusterConfig> context) {
         WorldGenLevel level = context.level();
@@ -38,8 +41,6 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
         // Hard exclusion: never place in Elysian Abyss.
         // BiomeFilter only checks the origin cell; the feature's ceiling search can
         // reach the abyss ceiling even when the origin is in scarlet_caves.
-        net.minecraft.resources.ResourceLocation ELYSIAN_RL =
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "elysian_abyss");
         if (level.getBiome(origin).is(ELYSIAN_RL)) return false;
         // Also block if the ceiling we'd attach to is inside the abyss Y-range
         // (rough check: abyss ceiling is typically Y -70 to -20)
@@ -54,38 +55,38 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
                 : Blocks.POINTED_DRIPSTONE;
 
         int radius = config.clusterRadius().sample(random);
+        int radiusSq = radius * radius;
         boolean placedAny = false;
+        BlockPos.MutableBlockPos columnPos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos patchPos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos geodeScratch = new BlockPos.MutableBlockPos();
 
         // Scan a horizontal area around the origin
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
                 // Elliptical check
-                double distSq = (double) (dx * dx + dz * dz);
-                if (distSq > (double) (radius * radius)) {
+                int distSq = dx * dx + dz * dz;
+                if (distSq > radiusSq) {
                     continue;
                 }
 
-                BlockPos columnPos = origin.offset(dx, 0, dz);
+                columnPos.set(origin.getX() + dx, origin.getY(), origin.getZ() + dz);
 
                 // Try to find floor and ceiling
                 BlockPos floorPos = findFloor(level, columnPos, config.floorToCeilingSearchRange(), config);
                 BlockPos ceilingPos = findCeiling(level, columnPos, config.floorToCeilingSearchRange(), config);
 
                 // 1. Attempt to place Patch (Base Blocks)
-                // We try to place patch blocks more frequently than spikes to create a "patch"
-                // effect.
                 boolean hasFloorPatch = false;
                 boolean hasCeilingPatch = false;
 
                 if (floorPos != null) {
-                    // Try to place base block on the floor (below the air)
-                    // Vein goes DOWN into the floor
-                    hasFloorPatch = placePatchBlock(level, random, floorPos.below(), Direction.DOWN, baseBlock);
+                    patchPos.set(floorPos.getX(), floorPos.getY() - 1, floorPos.getZ());
+                    hasFloorPatch = placePatchBlock(level, random, patchPos, Direction.DOWN, baseBlock, geodeScratch);
                 }
                 if (ceilingPos != null) {
-                    // Try to place base block on the ceiling (above the air)
-                    // Vein goes UP into the ceiling
-                    hasCeilingPatch = placePatchBlock(level, random, ceilingPos.above(), Direction.UP, baseBlock);
+                    patchPos.set(ceilingPos.getX(), ceilingPos.getY() + 1, ceilingPos.getZ());
+                    hasCeilingPatch = placePatchBlock(level, random, patchPos, Direction.UP, baseBlock, geodeScratch);
                 }
 
                 // 2. Decide if we should place a spike here
@@ -129,15 +130,15 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
      */
     private BlockPos findFloor(WorldGenLevel level, BlockPos pos, int searchRange, ScarletDripstoneClusterConfig config) {
         BlockPos.MutableBlockPos mutable = pos.mutable();
-        for (int i = 0; i < searchRange; i++) {
-            BlockState state = level.getBlockState(mutable);
-            BlockState below = level.getBlockState(mutable.below());
-            if (state.isAir() && below.isSolid() && !isDripstone(below)) {
-                if (isValidAttachmentBlock(below, config)) {
-                    return mutable.immutable();
-                }
-            }
+        BlockState state = level.getBlockState(mutable);
+        int minY = level.getMinBuildHeight();
+        for (int i = 0; i < searchRange && mutable.getY() > minY; i++) {
             mutable.move(Direction.DOWN);
+            BlockState below = level.getBlockState(mutable);
+            if (state.isAir() && below.isSolid() && !isDripstone(below) && isValidAttachmentBlock(below, config)) {
+                return mutable.above();
+            }
+            state = below;
         }
         return null;
     }
@@ -147,15 +148,15 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
      */
     private BlockPos findCeiling(WorldGenLevel level, BlockPos pos, int searchRange, ScarletDripstoneClusterConfig config) {
         BlockPos.MutableBlockPos mutable = pos.mutable();
-        for (int i = 0; i < searchRange; i++) {
-            BlockState state = level.getBlockState(mutable);
-            BlockState above = level.getBlockState(mutable.above());
-            if (state.isAir() && above.isSolid() && !isDripstone(above)) {
-                if (isValidAttachmentBlock(above, config)) {
-                    return mutable.immutable();
-                }
-            }
+        BlockState state = level.getBlockState(mutable);
+        int maxY = level.getMaxBuildHeight() - 1;
+        for (int i = 0; i < searchRange && mutable.getY() < maxY; i++) {
             mutable.move(Direction.UP);
+            BlockState above = level.getBlockState(mutable);
+            if (state.isAir() && above.isSolid() && !isDripstone(above) && isValidAttachmentBlock(above, config)) {
+                return mutable.below();
+            }
+            state = above;
         }
         return null;
     }
@@ -178,13 +179,11 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
                 || state.is(ModBlocks.MANA_CRYSTAL_CLUSTER.get());
     }
 
-    private boolean isNearGeode(WorldGenLevel level, BlockPos pos) {
-        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-        // Check a 2-block radius
+    private boolean isNearGeode(WorldGenLevel level, int cx, int cy, int cz, BlockPos.MutableBlockPos mutable) {
         for (int x = -2; x <= 2; x++) {
             for (int y = -2; y <= 2; y++) {
                 for (int z = -2; z <= 2; z++) {
-                    mutable.set(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                    mutable.set(cx + x, cy + y, cz + z);
                     if (isGeodeBlock(level.getBlockState(mutable))) {
                         return true;
                     }
@@ -194,8 +193,8 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
         return false;
     }
 
-    private boolean placePatchBlock(WorldGenLevel level, RandomSource random, BlockPos pos, Direction direction,
-            Block baseBlock) {
+    private boolean placePatchBlock(WorldGenLevel level, RandomSource random, BlockPos.MutableBlockPos pos,
+            Direction direction, Block baseBlock, BlockPos.MutableBlockPos geodeScratch) {
         // Height check: Ensure we are well below the surface (dirt layer)
         int surfaceY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG,
                 pos.getX(), pos.getZ());
@@ -206,33 +205,33 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
         // Random vein length: 2 to 5 blocks extending into the surface
         int veinLength = 2 + random.nextInt(4);
         boolean placedAny = false;
+        int sx = pos.getX();
+        int sy = pos.getY();
+        int sz = pos.getZ();
+        int dy = direction.getStepY();
+        BlockPos.MutableBlockPos currentPos = new BlockPos.MutableBlockPos();
 
         for (int i = 0; i < veinLength; i++) {
-            BlockPos currentPos = pos.relative(direction, i); // direction is usually DOWN (floor) or UP (ceiling) so we
-                                                              // go DEEPER
-
-            // Geode proximity check for every block in the vein
-            if (isNearGeode(level, currentPos)) {
-                // If we hit geode proximity, stop the vein here
-                break;
-            }
-
+            int cy = sy + dy * i;
+            currentPos.set(sx, cy, sz);
             BlockState state = level.getBlockState(currentPos);
 
-            // If it's already a dripstone block, count it as a success (we can grow from
-            // it)
-            if (isDripstone(state)) {
-                placedAny = true;
-                continue;
+            boolean dripstone = isDripstone(state);
+            boolean replaceable = !dripstone && state.is(net.minecraft.tags.BlockTags.DRIPSTONE_REPLACEABLE);
+            if (!dripstone && !replaceable) {
+                break;
             }
 
-            // Only replace valid blocks (e.g. stone), never air
-            if (state.is(net.minecraft.tags.BlockTags.DRIPSTONE_REPLACEABLE)) {
-                level.setBlock(currentPos, baseBlock.defaultBlockState(), 2);
+            // Geode proximity check only when block is actually a candidate
+            if (isNearGeode(level, sx, cy, sz, geodeScratch)) {
+                break;
+            }
+
+            if (dripstone) {
                 placedAny = true;
             } else {
-                // Hit something we can't replace (e.g. bedrock, air, ore), stop the vein
-                break;
+                level.setBlock(currentPos, baseBlock.defaultBlockState(), 2);
+                placedAny = true;
             }
         }
 

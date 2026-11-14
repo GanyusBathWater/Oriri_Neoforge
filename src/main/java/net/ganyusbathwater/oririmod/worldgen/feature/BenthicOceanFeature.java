@@ -121,13 +121,23 @@ public class BenthicOceanFeature extends Feature<NoneFeatureConfiguration> {
                 continue;
             }
 
-            int height = 2 + random.nextInt(4); // 2 to 5 blocks tall
-            for (int dy = 0; dy < height; dy++) {
-                BlockPos cPos = basePos.above(dy + 1);
-                if (!level.getBlockState(cPos).is(Blocks.WATER)) {
+            int desiredHeight = 2 + random.nextInt(4); // 2 to 5 blocks tall
+            int availableWater = 0;
+            for (int dy = 0; dy < desiredHeight + 1; dy++) {
+                if (!level.getBlockState(basePos.above(dy + 1)).is(Blocks.WATER)) {
                     break;
                 }
-
+                availableWater++;
+            }
+            // Leave 1 block of headroom below any cave overhang/ceiling when clipped cleanly
+            int height = availableWater > desiredHeight ? desiredHeight : availableWater - 1;
+            if (height < 2) {
+                continue;
+            }
+            BlockState chimneyBaseState = ModBlocks.HYDROTHERMAL_CHIMNEY.get().defaultBlockState()
+                    .setValue(HydrothermalChimneyBlock.WATERLOGGED, true);
+            for (int dy = 0; dy < height; dy++) {
+                BlockPos cPos = basePos.above(dy + 1);
                 DripstoneThickness thickness;
                 if (dy == height - 1) {
                     thickness = DripstoneThickness.TIP;
@@ -139,11 +149,7 @@ public class BenthicOceanFeature extends Feature<NoneFeatureConfiguration> {
                     thickness = DripstoneThickness.MIDDLE;
                 }
 
-                BlockState chimneyState = ModBlocks.HYDROTHERMAL_CHIMNEY.get().defaultBlockState()
-                        .setValue(HydrothermalChimneyBlock.THICKNESS, thickness)
-                        .setValue(HydrothermalChimneyBlock.WATERLOGGED, true);
-
-                level.setBlock(cPos, chimneyState, 2);
+                level.setBlock(cPos, chimneyBaseState.setValue(HydrothermalChimneyBlock.THICKNESS, thickness), 2);
                 placedAny = true;
             }
         }

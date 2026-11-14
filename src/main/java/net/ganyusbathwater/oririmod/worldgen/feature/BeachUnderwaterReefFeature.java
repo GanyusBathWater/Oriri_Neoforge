@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource;
 import net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator;
 import net.ganyusbathwater.oririmod.worldgen.feature.OceanEcologyHelper.SilentOceanHabitat;
 import net.ganyusbathwater.oririmod.worldgen.structure.OceanMonumentPlacementHelper;
@@ -111,6 +112,12 @@ public class BeachUnderwaterReefFeature extends Feature<NoneFeatureConfiguration
         long seed = level.getSeed();
         Holder<Biome> biome = level.getBiome(floorPos);
         boolean isSilentOcean = biome.is(ElderwoodsChunkGenerator.THE_SILENT_OCEANS_KEY);
+
+        if (!isSilentOcean
+                && context.chunkGenerator().getBiomeSource() instanceof ElderwoodsBiomeSource ebs
+                && ebs.getFlatBeachMangroveFactor(floorPos.getX(), floorPos.getZ()) > 0.30) {
+            return false;
+        }
 
         boolean allowRock = OceanEcologyHelper.shouldSpawnRockFormation(
                 seed, floorPos.getX(), floorPos.getZ(), isSilentOcean, nearMonument);

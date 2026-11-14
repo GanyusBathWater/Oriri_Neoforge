@@ -52,17 +52,35 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
             Function<BlockPos, Holder<Biome>> biomeAccessor, RandomSource random, Aquifer aquifer,
             net.minecraft.world.level.ChunkPos chunkPos, CarvingMask carvingMask) {
                 
-        // 1. Origin Chunk Strict Biome Verification:
-        // Scarlet Cave Entrances MUST strictly originate on mainland Scarlet biomes (never on islands, beaches, or oceans)!
+        // 1. Origin Chunk Strict Horizontal Bounding + Biome Verification:
+        // Max winding is 6 and max radius is 13.5, so any block carved by chunkPos lies within +-20 blocks of (midX, midZ).
         int midX = chunkPos.getMiddleBlockX();
         int midZ = chunkPos.getMiddleBlockZ();
-        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, midX & 15, midZ & 15);
+        int chunkMinX = chunk.getPos().getMinBlockX();
+        int chunkMaxX = chunk.getPos().getMaxBlockX();
+        int chunkMinZ = chunk.getPos().getMinBlockZ();
+        int chunkMaxZ = chunk.getPos().getMaxBlockZ();
+        if (chunkMaxX < midX - 20 || chunkMinX > midX + 20 || chunkMaxZ < midZ - 20 || chunkMinZ > midZ + 20) {
+            return false;
+        }
+
+        // Fast biome pre-check before sampling surface height
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        Holder<Biome> originBiome = biomeAccessor.apply(mutablePos.set(midX, 80, midZ));
+        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)) {
+            return false;
+        }
+
+        int surfaceY = chunk.getPos().equals(chunkPos)
+                ? chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, midX & 15, midZ & 15)
+                : context.getMinGenY() >= -128
+                    ? net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource.sampleStaticSurfaceHeight(midX, midZ)
+                    : 72;
         if (surfaceY < 65) {
             return false; // Strictly protect water bodies, beaches, and lowlands from flooding
         }
 
-        BlockPos surfacePos = new BlockPos(midX, surfaceY, midZ);
-        Holder<Biome> originBiome = biomeAccessor.apply(surfacePos);
+        originBiome = biomeAccessor.apply(mutablePos.set(midX, surfaceY, midZ));
         if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)) {
             return false;
         }
@@ -74,14 +92,13 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
         int minRadius = 5;
         // Start flush with the actual surface terrain (never punch a void into the sky at Y=150!)
         int entranceTop = surfaceY + 1;
-        int entranceBottom = -16 + originRandom.nextInt(24);
+        int entranceBottom = Math.max(-40, -24 + originRandom.nextInt(18));
+        int minBuildY = chunk.getMinBuildHeight();
 
         int centerX = midX;
         int centerZ = midZ;
-
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        BlockPos.MutableBlockPos neighborPos = new BlockPos.MutableBlockPos();
-
+        BlockState caveAir = Blocks.CAVE_AIR.defaultBlockState();
+        BlockState abyssalBasalt = ModBlocks.ABYSSAL_BASALT.get().defaultBlockState();
         boolean hit = false;
 
         for (int y = entranceTop; y >= entranceBottom; y--) {
@@ -98,62 +115,58 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
             double extraNoise = originRandom.nextFloat() * 1.5;
 
             radiusAtY += wobble + extraNoise;
+            if (y < -48 || y <= minBuildY) {
+                continue;
+            }
 
-            for (int worldX = chunk.getPos().getMinBlockX(); worldX <= chunk.getPos().getMaxBlockX(); worldX++) {
-                for (int worldZ = chunk.getPos().getMinBlockZ(); worldZ <= chunk.getPos().getMaxBlockZ(); worldZ++) {
-                    int x = worldX - centerX;
-                    int z = worldZ - centerZ;
+            double tunnelCenterX = centerX + windingX;
+            double tunnelCenterZ = centerZ + windingZ;
+            int minWX = Math.max(chunkMinX, Mth.floor(tunnelCenterX - radiusAtY));
+            int maxWX = Math.min(chunkMaxX, Mth.ceil(tunnelCenterX + radiusAtY));
+            int minWZ = Math.max(chunkMinZ, Mth.floor(tunnelCenterZ - radiusAtY));
+            int maxWZ = Math.min(chunkMaxZ, Mth.ceil(tunnelCenterZ + radiusAtY));
+            if (minWX > maxWX || minWZ > maxWZ) {
+                continue;
+            }
+
+            double radiusSq = radiusAtY * radiusAtY;
+
+            for (int worldX = minWX; worldX <= maxWX; worldX++) {
+                double offsetX = worldX - tunnelCenterX;
+                double offsetXSq = offsetX * offsetX;
+                if (offsetXSq >= radiusSq) {
+                    continue;
+                }
+                for (int worldZ = minWZ; worldZ <= maxWZ; worldZ++) {
+                    double offsetZ = worldZ - tunnelCenterZ;
+                    if (offsetXSq + offsetZ * offsetZ >= radiusSq) {
+                        continue;
+                    }
 
                     mutablePos.set(worldX, y, worldZ);
 
-                    // Strictly verify that the target position is within Scarlet territory!
-                    // Prohibits cutting into beaches, oceans, islands, elderwoods, or highlands!
+                    // Check target biome only for blocks actually inside the carved cylinder
                     Holder<Biome> targetBiome = biomeAccessor.apply(mutablePos);
                     if (!targetBiome.is(SCARLET_SWAMP_KEY) && !targetBiome.is(SCARLET_FOREST_KEY) && !targetBiome.is(SCARLET_CAVES_KEY)) {
                         continue;
                     }
 
-                    double offsetX = x - windingX;
-                    double offsetZ = z - windingZ;
-                    double dist = Math.sqrt(offsetX * offsetX + offsetZ * offsetZ);
+                    BlockState blockState = chunk.getBlockState(mutablePos);
+                    if (blockState.is(Blocks.WATER) || blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)
+                            || blockState.is(abyssalBasalt.getBlock()) || blockState.is(ModBlocks.ABYSS_SAND.get())) {
+                        continue; // Never breach or carve open ocean, beach sand/gravel, or abyssal seabed
+                    }
 
-                    if (dist < radiusAtY) {
-                        BlockState blockState = chunk.getBlockState(mutablePos);
-                        if (blockState.is(Blocks.WATER) || blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)
-                                || blockState.is(ModBlocks.ABYSSAL_BASALT.get()) || blockState.is(ModBlocks.ABYSS_SAND.get())) {
-                            continue; // Never breach or carve open ocean, beach sand/gravel, or abyssal seabed
+                    if (this.canReplaceBlock(config, blockState)) {
+                        if (net.ganyusbathwater.oririmod.worldgen.ElderwoodsCaveAquifer
+                                .hasAdjacentFluidInChunk(chunk, worldX, y, worldZ, 1, 1)) {
+                            continue; // Never breach aquifer water/lava walls
                         }
-
-                        if (this.canReplaceBlock(config, blockState)) {
-                            if (y < -105) {
-                                continue; // Protect aether rivers
-                            }
-                            chunk.setBlockState(mutablePos, Blocks.CAVE_AIR.defaultBlockState(), false);
-                            if (carvingMask != null) {
-                                carvingMask.set(mutablePos.getX() & 15, mutablePos.getY(), mutablePos.getZ() & 15);
-                            }
-                            
-                            // Check if adjacent to liquid inside this chunk to schedule fluid update
-                            for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.values()) {
-                                int nx = mutablePos.getX() + dir.getStepX();
-                                int ny = mutablePos.getY() + dir.getStepY();
-                                int nz = mutablePos.getZ() + dir.getStepZ();
-                                if (nx >= chunk.getPos().getMinBlockX() && nx <= chunk.getPos().getMaxBlockX() &&
-                                    nz >= chunk.getPos().getMinBlockZ() && nz <= chunk.getPos().getMaxBlockZ() &&
-                                    ny >= chunk.getMinBuildHeight() && ny < chunk.getMaxBuildHeight()) {
-                                    
-                                    neighborPos.set(nx, ny, nz);
-                                    net.minecraft.world.level.material.FluidState fState = chunk.getFluidState(neighborPos);
-                                    if (!fState.isEmpty()) {
-                                        chunk.markPosForPostprocessing(neighborPos);
-                                        chunk.markPosForPostprocessing(mutablePos);
-                                        chunk.getFluidTicks().schedule(new net.minecraft.world.ticks.ScheduledTick<>(fState.getType(), new BlockPos(nx, ny, nz), 0, 0));
-                                    }
-                                }
-                            }
-                            
-                            hit = true;
+                        chunk.setBlockState(mutablePos, caveAir, false);
+                        if (carvingMask != null) {
+                            carvingMask.set(worldX & 15, y, worldZ & 15);
                         }
+                        hit = true;
                     }
                 }
             }

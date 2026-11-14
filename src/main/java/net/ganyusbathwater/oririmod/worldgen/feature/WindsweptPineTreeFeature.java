@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -252,6 +253,6 @@ public class WindsweptPineTreeFeature extends Feature<NoneFeatureConfiguration> 
     }
 
     private void setLeaf(WorldGenLevel level, BlockPos pos, BlockState leafState) {
-        level.setBlock(pos, leafState, 3);
+        level.setBlock(pos, leafState, level instanceof ServerLevel ? 3 : 2);
     }
 }

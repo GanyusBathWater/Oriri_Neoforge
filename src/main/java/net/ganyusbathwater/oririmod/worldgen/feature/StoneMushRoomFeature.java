@@ -60,6 +60,7 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
         // ── 1. FIND CAVE FLOOR ──────────────────────────────────────────────
         // Search downward from origin for an air-over-solid boundary
         BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos auxPos = new BlockPos.MutableBlockPos();
         boolean foundFloor = false;
 
         int startY = origin.getY() + 32;
@@ -68,7 +69,7 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
         for (int y = startY; y >= endY; y--) {
             mPos.set(origin.getX(), y, origin.getZ());
             BlockState state = level.getBlockState(mPos);
-            BlockState below = level.getBlockState(mPos.below());
+            BlockState below = level.getBlockState(auxPos.set(origin.getX(), y - 1, origin.getZ()));
 
             if ((state.isAir() || state.is(Blocks.CAVE_AIR)) &&
                 (!below.isAir() && !below.is(Blocks.CAVE_AIR) && !below.is(Blocks.BEDROCK) && !below.canBeReplaced())) {
@@ -149,13 +150,14 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
         // ── 4. GENERATE STEM (5x5 pillar with Deepslate Gradient) ───────────
         BlockState mushBlock = ModBlocks.HARDENED_MANASHROOM.get().defaultBlockState();
         BlockState deepslateBlock = Blocks.DEEPSLATE.defaultBlockState();
-        
+        int ox = origin.getX();
+        int oy = origin.getY();
+        int oz = origin.getZ();
+
         for (int x = -2; x <= 2; x++) {
             for (int z = -2; z <= 2; z++) {
-                // Dynamically find the terrain floor for this specific vertical column
-                // so the stem can grow Deepslate "roots" that anchor into cliffs and slopes!
                 int bottomY = 0;
-                while (bottomY > -2 && level.isEmptyBlock(origin.offset(x, bottomY - 1, z))) {
+                while (bottomY > -2 && level.isEmptyBlock(mPos.set(ox + x, oy + bottomY - 1, oz + z))) {
                     bottomY--;
                 }
 
@@ -163,14 +165,11 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
                     double progress = (double) Math.max(0, y) / stemHeight;
                     BlockState toPlace = mushBlock;
                     if (y < 0 || progress < 0.2) {
-                        toPlace = deepslateBlock; // Pure deepslate base and roots
-                    } else if (progress < 0.6) {
-                        // Fade out deepslate
-                        if (rng.nextDouble() > (progress - 0.2) / 0.4) {
-                            toPlace = deepslateBlock;
-                        }
+                        toPlace = deepslateBlock;
+                    } else if (progress < 0.6 && rng.nextDouble() > (progress - 0.2) / 0.4) {
+                        toPlace = deepslateBlock;
                     }
-                    level.setBlock(origin.offset(x, y, z), toPlace, 3);
+                    level.setBlock(mPos.set(ox + x, oy + y, oz + z), toPlace, 2);
                 }
             }
         }
@@ -178,59 +177,43 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
         // ── 5. GENERATE UMBRELLA CAP ────────────────────────────────────────
         BlockState aetherMagma = ModBlocks.AETHER_MAGMA_BLOCK.get().defaultBlockState();
         BlockState aetherLiquid = ModFluids.AETHER_BLOCK.get().defaultBlockState();
-        
-        int capY = origin.getY() + stemHeight;
-        int maxRadius = capRadius + 2; // Make it a bit wider for the umbrella droop
-        int edgeDrop = 2 + rng.nextInt(3); // How far the edges droop down
+        BlockState caveAir = Blocks.CAVE_AIR.defaultBlockState();
+
+        int capY = oy + stemHeight;
+        int maxRadius = capRadius + 2;
+        int edgeDrop = 2 + rng.nextInt(3);
         int bowlRadius = maxRadius - 3;
-        int poolY = capThickness - 2; // The flat surface of the liquid
-        
+        int poolY = capThickness - 2;
+
         for (int dx = -maxRadius; dx <= maxRadius; dx++) {
             for (int dz = -maxRadius; dz <= maxRadius; dz++) {
                 double distSq = dx * dx + dz * dz;
                 double dist = Math.sqrt(distSq);
                 if (dist > maxRadius) continue;
-                
+
                 double t = dist / maxRadius;
-                
                 int topY = (int) Math.round(capThickness * Math.sqrt(1 - t * t));
                 int bottomY = (int) Math.round(-edgeDrop * (t * t));
-                
-                // Form a guaranteed solid lip to contain the Aether bowl
-                if (dist > bowlRadius && dist <= bowlRadius + 2) {
-                    if (topY < poolY + 1) {
-                        topY = poolY + 1;
-                    }
+
+                if (dist > bowlRadius && dist <= bowlRadius + 2 && topY < poolY + 1) {
+                    topY = poolY + 1;
                 }
-                
+
                 for (int y = bottomY; y <= topY; y++) {
-                    BlockPos p = new BlockPos(origin.getX() + dx, capY + y, origin.getZ() + dz);
-                    
+                    mPos.set(ox + dx, capY + y, oz + dz);
+                    BlockState existing = level.getBlockState(mPos);
+
                     if (dist <= bowlRadius && y >= poolY) {
-                        // Inside the hollow bowl
                         if (y == poolY) {
-                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).isAir() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(Blocks.CAVE_AIR)) {
-                                level.setBlock(p, aetherLiquid, 3);
+                            if (existing.canBeReplaced() || existing.isAir() || existing.is(Blocks.WATER) || existing.is(Blocks.CAVE_AIR)) {
+                                level.setBlock(mPos, aetherLiquid, 2);
                             }
-                        } else {
-                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(ModFluids.AETHER_BLOCK.get())) {
-                                level.setBlock(p, Blocks.CAVE_AIR.defaultBlockState(), 3);
-                            }
+                        } else if (existing.canBeReplaced() || existing.is(Blocks.WATER) || existing.is(aetherLiquid.getBlock())) {
+                            level.setBlock(mPos, caveAir, 2);
                         }
-                    } else {
-                        // Solid umbrella tissue
-                        // Make the crust thicker (top 3 blocks and outer horizontal edges) 
-                        // to completely hide the beige manashroom blocks on steep slopes
+                    } else if (existing.canBeReplaced() || existing.isAir() || existing.is(Blocks.WATER) || existing.is(Blocks.CAVE_AIR)) {
                         boolean isCrust = (y >= topY - 2) || (dist > maxRadius - 1.5);
-                        if (isCrust) {
-                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).isAir() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(Blocks.CAVE_AIR)) {
-                                level.setBlock(p, aetherMagma, 3);
-                            }
-                        } else {
-                            if (level.getBlockState(p).canBeReplaced() || level.getBlockState(p).isAir() || level.getBlockState(p).is(Blocks.WATER) || level.getBlockState(p).is(Blocks.CAVE_AIR)) {
-                                level.setBlock(p, mushBlock, 3);
-                            }
-                        }
+                        level.setBlock(mPos, isCrust ? aetherMagma : mushBlock, 2);
                     }
                 }
             }
@@ -240,22 +223,16 @@ public class StoneMushRoomFeature extends Feature<StoneMushRoomConfig> {
         int notchCount = 4 + rng.nextInt(3);
         for (int n = 0; n < notchCount; n++) {
             double angle = (2.0 * Math.PI / notchCount) * n + rng.nextDouble() * 0.4;
-            // Target the crust ring exactly at the lip
             int nx = (int) Math.round(Math.cos(angle) * (bowlRadius + 1));
             int nz = (int) Math.round(Math.sin(angle) * (bowlRadius + 1));
-            
-            BlockPos spoutPos = new BlockPos(origin.getX() + nx, capY + poolY, origin.getZ() + nz);
-            
-            // Break the crust and place Aether
-            level.setBlock(spoutPos, aetherLiquid, 3);
-            
-            // Clear everything above the spout to let it flow freely and not suffocate the water source
-            for(int clearY = poolY + 1; clearY <= capThickness + 2; clearY++) {
-                BlockPos toClear = new BlockPos(origin.getX() + nx, capY + clearY, origin.getZ() + nz);
-                level.setBlock(toClear, Blocks.CAVE_AIR.defaultBlockState(), 3);
+
+            BlockPos spoutPos = new BlockPos(ox + nx, capY + poolY, oz + nz);
+            level.setBlock(spoutPos, aetherLiquid, 2);
+
+            for (int clearY = poolY + 1; clearY <= capThickness + 2; clearY++) {
+                level.setBlock(mPos.set(ox + nx, capY + clearY, oz + nz), caveAir, 2);
             }
-            
-            // GUARANTEED FLOW: Schedule an immediate tick so it cascades down!
+
             level.scheduleTick(spoutPos, ModFluids.AETHER_SOURCE.get(), 0);
         }
 

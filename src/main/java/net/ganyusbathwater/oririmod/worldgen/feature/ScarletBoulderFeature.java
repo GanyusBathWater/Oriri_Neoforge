@@ -78,7 +78,7 @@ public class ScarletBoulderFeature extends Feature<NoneFeatureConfiguration> {
                         BlockState currentState = level.getBlockState(currentPos);
                         if (currentState.canBeReplaced() || currentState.is(ModBlocks.SCARLET_GRASS_BLOCK.get())
                                 || currentState.isAir()) {
-                            level.setBlock(currentPos, stone, 3);
+                            level.setBlock(currentPos, stone, 2);
                             placedAny = true;
                         }
                     }

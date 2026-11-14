@@ -28,6 +28,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
 
     public static final ThreadLocal<net.minecraft.world.level.StructureManager> CURRENT_STRUCTURE_MANAGER = new ThreadLocal<>();
     public static final ThreadLocal<net.minecraft.core.RegistryAccess> CURRENT_REGISTRY_ACCESS = new ThreadLocal<>();
+    public static final ThreadLocal<net.ganyusbathwater.oririmod.worldgen.ElderwoodsCaveAquifer> CURRENT_AQUIFER = new ThreadLocal<>();
 
     public ElysianAbyssCarver(Codec<CaveCarverConfiguration> codec) {
         super(codec);
@@ -92,9 +93,8 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         // --- Mathematical Abyss Detection ---
         double seedOffsetCave = net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.currentSeedOffsetCave;
         float scale = 0.004f;
-        double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+        double caveNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
             (float)((ox * 16 + seedOffsetCave) * scale),
-            0f,
             (float)((oz * 16 + seedOffsetCave) * scale),
             4
         );
@@ -202,16 +202,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                 
                                 if (dx * dx + dy * dy + dz * dz < finalWidth * finalWidth) {
                                     pos.set(bx, by, bz);
-                                    BlockState state = chunk.getBlockState(pos);
-                                    if (this.canReplaceBlock(config, state)) {
-                                        if (by < -105 || by >= 60) {
-                                            continue; // Protect aether rivers and islands/beaches
-                                        }
-                                        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, bx & 15, bz & 15);
-                                        if (by >= surfaceY - 12) {
-                                            continue; // Leave solid 12-block seabed crust so caves never breach open ocean water!
-                                        }
-                                        chunk.setBlockState(pos, Blocks.CAVE_AIR.defaultBlockState(), false);
+                                    if (tryCarveSafeCaveAir(config, chunk, pos, bx, by, bz)) {
                                         hit = true;
                                     }
                                 }
@@ -254,6 +245,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
         
         // Safe bounding box check
         if (maxX >= chunkMinX && minX <= chunkMaxX && maxZ >= chunkMinZ && minZ <= chunkMaxZ) {
+            BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
             for (int bx = Math.max(minX, chunkMinX); bx <= Math.min(maxX, chunkMaxX); bx++) {
                 for (int bz = Math.max(minZ, chunkMinZ); bz <= Math.min(maxZ, chunkMaxZ); bz++) {
                     for (int by = minY; by <= maxY; by++) {
@@ -281,18 +273,8 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                             // If noise is very high, leave it as solid rock (creates pillars)
                             if (noise > noiseThreshold) continue;
                             
-                            BlockPos pos = new BlockPos(bx, by, bz);
-                            BlockState state = chunk.getBlockState(pos);
-                            
-                            if (this.canReplaceBlock(config, state)) {
-                                if (by < -105 || by >= 60) {
-                                    continue; // Protect aether rivers and islands/beaches
-                                }
-                                int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, bx & 15, bz & 15);
-                                if (by >= surfaceY - 12) {
-                                    continue; // Leave solid 12-block seabed crust so caves never breach open ocean water!
-                                }
-                                chunk.setBlockState(pos, Blocks.CAVE_AIR.defaultBlockState(), false);
+                            mutablePos.set(bx, by, bz);
+                            if (tryCarveSafeCaveAir(config, chunk, mutablePos, bx, by, bz)) {
                                 hit = true;
                             }
                         }
@@ -365,16 +347,7 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
                                 
                                 if (dx * dx + dy * dy + dz * dz < finalWidth * finalWidth) {
                                     pos.set(bx, by, bz);
-                                    BlockState state = chunk.getBlockState(pos);
-                                    if (this.canReplaceBlock(config, state)) {
-                                        if (by < -105 || by >= 60) {
-                                            continue; // Protect aether rivers and islands/beaches
-                                        }
-                                        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, bx & 15, bz & 15);
-                                        if (by >= surfaceY - 12) {
-                                            continue; // Leave solid 12-block seabed crust so caves never breach open ocean water!
-                                        }
-                                        chunk.setBlockState(pos, Blocks.CAVE_AIR.defaultBlockState(), false);
+                                    if (tryCarveSafeCaveAir(config, chunk, pos, bx, by, bz)) {
                                         hit = true;
                                     }
                                 }
@@ -385,5 +358,32 @@ public class ElysianAbyssCarver extends WorldCarver<CaveCarverConfiguration> {
             }
         }
         return hit;
+    }
+
+    private boolean tryCarveSafeCaveAir(CaveCarverConfiguration config, ChunkAccess chunk, BlockPos pos, int bx, int by, int bz) {
+        if (by < -96 || by >= 60) {
+            return false; // Protect aether rivers and islands/beaches
+        }
+        BlockState state = chunk.getBlockState(pos);
+        if (!state.getFluidState().isEmpty()
+                || state.is(net.ganyusbathwater.oririmod.block.ModBlocks.ABYSSAL_BASALT.get())
+                || state.is(net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_SAND.get())
+                || !this.canReplaceBlock(config, state)) {
+            return false; // Never carve oceanic abyssal basalt or leak into underwater caves
+        }
+        int surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, bx & 15, bz & 15);
+        if (by >= surfaceY - 12) {
+            return false; // Protect ocean seabed crust
+        }
+        net.ganyusbathwater.oririmod.worldgen.ElderwoodsCaveAquifer activeAquifer = CURRENT_AQUIFER.get();
+        boolean nearFluid = activeAquifer != null
+                ? activeAquifer.hasAdjacentOrPredictedFluid(chunk, bx, by, bz, 2, 1)
+                : net.ganyusbathwater.oririmod.worldgen.ElderwoodsCaveAquifer
+                        .hasAdjacentFluidInChunk(chunk, bx, by, bz, 2, 1);
+        if (nearFluid) {
+            return false; // Keep aquifer rock basins sealed across both local and neighbor chunks
+        }
+        chunk.setBlockState(pos, Blocks.CAVE_AIR.defaultBlockState(), false);
+        return true;
     }
 }

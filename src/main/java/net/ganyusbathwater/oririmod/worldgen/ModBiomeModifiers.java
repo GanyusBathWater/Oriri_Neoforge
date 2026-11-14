@@ -65,6 +65,8 @@ public class ModBiomeModifiers {
                         "add_ocean_benthic_features");
         public static final ResourceKey<BiomeModifier> ADD_BEACH_FEATURES = registerKey(
                         "add_beach_features");
+        public static final ResourceKey<BiomeModifier> ADD_BEACH_SWAMP_FEATURES = registerKey(
+                        "add_beach_swamp_features");
 
         public static final ResourceKey<BiomeModifier> ADD_GLOWLINGS = registerKey("add_glowlings");
 
@@ -238,7 +240,7 @@ public class ModBiomeModifiers {
                                                 highlandsForestBiomes,
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.ELDER_PINE_DENSE_PLACED_KEY),
-                                                                placedFeatures.getOrThrow(ModPlacedFeatures.FALLEN_LOGS_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.FALLEN_PINE_LOGS_PLACED_KEY),
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.LEAF_PILE_PATCH_PLACED_KEY),
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.HIGHLANDS_GRASS_PATCH_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
@@ -310,7 +312,21 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
                                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
-                                                .fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"))));
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "golden_desert"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "elder_highlands_meadow"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_forest"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_summit"))));
 
                 context.register(ADD_GLOBAL_AETHER_RIVER,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
@@ -394,6 +410,17 @@ public class ModBiomeModifiers {
                                                 photicMarineBiomes,
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.BEACH_UNDERWATER_REEF_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                // 3. Flat Wide Beach Mangrove Swamps (exclusively elder_beach basins detected by BiomeSource)
+                var elderBeachBiomes = HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_beach"))));
+                context.register(ADD_BEACH_SWAMP_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                elderBeachBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.BEACH_MANGROVE_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
                 // Custom Mob Spawns

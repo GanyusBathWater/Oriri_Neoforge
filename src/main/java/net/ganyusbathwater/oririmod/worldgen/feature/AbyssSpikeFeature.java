@@ -177,7 +177,7 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
                             }
                             
                             
-                            level.setBlock(targetPos, toPlace, 3);
+                            level.setBlock(targetPos, toPlace, 2);
                         }
                     }
                 }

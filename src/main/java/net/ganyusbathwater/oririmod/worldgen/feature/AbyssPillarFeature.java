@@ -147,7 +147,7 @@ public class AbyssPillarFeature extends Feature<NoneFeatureConfiguration> {
                         BlockState existing = level.getBlockState(mPos);
                         
                         if (isReplaceableByPillar(existing)) {
-                            level.setBlock(mPos, material, 3);
+                            level.setBlock(mPos, material, 2);
                         }
                     }
                 }

@@ -98,7 +98,7 @@ public class HighlandsBoulderFeature extends Feature<NoneFeatureConfiguration> {
                         if (y == height - 1 && p.getY() >= 130) {
                             BlockPos above = p.above();
                             if (level.isEmptyBlock(above)) {
-                                level.setBlock(above, Blocks.SNOW.defaultBlockState(), 3);
+                                level.setBlock(above, Blocks.SNOW.defaultBlockState(), 2);
                             }
                         }
                     }
@@ -127,6 +127,6 @@ public class HighlandsBoulderFeature extends Feature<NoneFeatureConfiguration> {
         } else {
             state = Blocks.MOSSY_COBBLESTONE.defaultBlockState();
         }
-        level.setBlock(pos, state, 3);
+        level.setBlock(pos, state, 2);
     }
 }

@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource;
 import net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator;
 import net.ganyusbathwater.oririmod.worldgen.structure.OceanMonumentPlacementHelper;
 import net.ganyusbathwater.oririmod.worldgen.structure.OceanMonumentPlacementHelper.MonumentProximity;
@@ -54,13 +55,16 @@ public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
         }
 
         int baseFloorY = scanPos.getY();
-        if (baseFloorY < 28 || baseFloorY >= ElderwoodsChunkGenerator.BASE_HEIGHT - 1) {
+        if (baseFloorY < 28 || baseFloorY >= ElderwoodsChunkGenerator.BASE_HEIGHT) {
             return false;
         }
 
         long seed = level.getSeed();
         Holder<Biome> originBiome = level.getBiome(scanPos);
         boolean isSilentOcean = originBiome.is(ElderwoodsChunkGenerator.THE_SILENT_OCEANS_KEY);
+        ElderwoodsBiomeSource elderBiomeSource = (context.chunkGenerator().getBiomeSource() instanceof ElderwoodsBiomeSource ebs)
+                ? ebs
+                : null;
 
         if (isSilentOcean) {
             SilentOceanHabitat originHabitat = OceanEcologyHelper.getSilentOceanHabitat(
@@ -106,7 +110,9 @@ public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
                     placedAny |= placeForSilentOceanHabitat(
                             level, random, targetFloorPos, targetWaterPos, habitat, canopyDensity);
                 } else {
-                    placedAny |= placeBeachFlora(level, random, targetFloorPos, targetWaterPos, canopyDensity);
+                    boolean inMangroveSwamp = elderBiomeSource != null
+                            && elderBiomeSource.getFlatBeachMangroveFactor(targetX, targetZ) > 0.30;
+                    placedAny |= placeBeachFlora(level, random, targetFloorPos, targetWaterPos, canopyDensity, inMangroveSwamp);
                 }
             }
         }
@@ -151,14 +157,15 @@ public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     private boolean placeBeachFlora(WorldGenLevel level, RandomSource random,
-            BlockPos floorPos, BlockPos waterPos, float canopyDensity) {
+            BlockPos floorPos, BlockPos waterPos, float canopyDensity, boolean inMangroveSwamp) {
         // Beach shallows keep sandy gaps while allowing patchy seagrass and occasional nearshore kelp in deeper coves
-        int depth = ElderwoodsChunkGenerator.BASE_HEIGHT - waterPos.getY();
-        if (depth >= 7 && OceanEcologyHelper.getSilentOceanHabitat(level.getSeed(), floorPos.getX(), floorPos.getZ())
+        int depth = (ElderwoodsChunkGenerator.BASE_HEIGHT + 1) - waterPos.getY();
+        if (!inMangroveSwamp && depth >= 7 && OceanEcologyHelper.getSilentOceanHabitat(level.getSeed(), floorPos.getX(), floorPos.getZ())
                 == SilentOceanHabitat.KELP_FOREST && random.nextFloat() < canopyDensity * 0.35f) {
             return tryPlaceKelp(level, random, waterPos, 3, Math.min(8, depth - 1));
         }
-        if (random.nextFloat() < canopyDensity * 0.52f) {
+        float seagrassChance = inMangroveSwamp ? Math.max(0.45f, canopyDensity * 0.72f) : canopyDensity * 0.52f;
+        if (random.nextFloat() < seagrassChance) {
             return tryPlaceSeagrassOrPickle(level, random, waterPos, true);
         }
         return false;
@@ -210,7 +217,7 @@ public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
 
         BlockPos abovePos = waterPos.above();
         if (random.nextInt(4) == 0
-                && waterPos.getY() + 1 < ElderwoodsChunkGenerator.BASE_HEIGHT
+                && waterPos.getY() + 1 <= ElderwoodsChunkGenerator.BASE_HEIGHT
                 && level.getBlockState(abovePos).is(Blocks.WATER)) {
             level.setBlock(waterPos, Blocks.TALL_SEAGRASS.defaultBlockState()
                     .setValue(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER), 2);
@@ -228,7 +235,7 @@ public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
         BlockPos.MutableBlockPos above = new BlockPos.MutableBlockPos();
         for (int dy = 4; dy >= -4; dy--) {
             int y = approxFloorY + dy;
-            if (y < 28 || y >= ElderwoodsChunkGenerator.BASE_HEIGHT - 1) {
+            if (y < 28 || y >= ElderwoodsChunkGenerator.BASE_HEIGHT) {
                 continue;
             }
             outFloor.set(x, y, z);
@@ -244,8 +251,10 @@ public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
         return state.is(Blocks.SAND)
                 || state.is(Blocks.GRAVEL)
                 || state.is(Blocks.STONE)
+                || state.is(Blocks.ANDESITE)
                 || state.is(Blocks.CLAY)
                 || state.is(Blocks.MUD)
+                || state.is(Blocks.MUDDY_MANGROVE_ROOTS)
                 || state.is(BlockTags.TERRACOTTA);
     }
 }

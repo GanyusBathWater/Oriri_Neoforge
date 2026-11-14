@@ -57,6 +57,8 @@ public class ModPlacedFeatures {
 
 
         public static final ResourceKey<PlacedFeature> FALLEN_LOGS_PLACED_KEY = registerKey("fallen_logs_placed");
+        public static final ResourceKey<PlacedFeature> FALLEN_PINE_LOGS_PLACED_KEY = registerKey(
+                        "fallen_pine_logs_placed");
         public static final ResourceKey<PlacedFeature> LEAF_PILE_PATCH_PLACED_KEY = registerKey("leaf_pile_patch_placed");
 
         public static final ResourceKey<PlacedFeature> ELDERWOODS_DRIPSTONE_CLUSTER_PLACED_KEY = registerKey(
@@ -119,7 +121,8 @@ public class ModPlacedFeatures {
                 List<PlacementModifier> elderTreeModifiers = List.of(
                                 CountPlacement.of(2),
                                 InSquarePlacement.spread(),
-                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES));
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
+                                BiomeFilter.biome());
                 register(context, ELDER_TREE_PLACED_KEY, configuredElderTree, elderTreeModifiers);
 
                 var configuredElderPineTree = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELDER_PINE_TREE_KEY);
@@ -178,6 +181,13 @@ public class ModPlacedFeatures {
                                 PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                                 BiomeFilter.biome()));
 
+                var configuredFallenPineLogs = configuredFeatures.getOrThrow(ModConfiguredFeatures.FALLEN_PINE_LOGS_KEY);
+                register(context, FALLEN_PINE_LOGS_PLACED_KEY, configuredFallenPineLogs, List.of(
+                                RarityFilter.onAverageOnceEvery(24),
+                                InSquarePlacement.spread(),
+                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                BiomeFilter.biome()));
+
                 var configuredLeafPile = configuredFeatures.getOrThrow(ModConfiguredFeatures.LEAF_PILE_KEY);
                 register(context, LEAF_PILE_PATCH_PLACED_KEY, configuredLeafPile, List.of(
                                 CountPlacement.of(2), // Reduced count
@@ -190,7 +200,8 @@ public class ModPlacedFeatures {
                 List<PlacementModifier> scarletTreeModifiers = List.of(
                                 CountPlacement.of(1), // Sparser than elder trees
                                 InSquarePlacement.spread(),
-                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES));
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
+                                BiomeFilter.biome());
                 register(context, SCARLET_TREE_PLACED_KEY, configuredScarletTree, scarletTreeModifiers);
 
                 // Scarlet Boulder (Plains)
@@ -200,7 +211,8 @@ public class ModPlacedFeatures {
                                 CountPlacement.of(1),
                                 RarityFilter.onAverageOnceEvery(60), // Rare generation
                                 InSquarePlacement.spread(),
-                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG)); // Land on ground/under water
+                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
+                                BiomeFilter.biome()); // Land on ground/under water
                 register(context, SCARLET_BOULDER_PLACED_KEY, configuredScarletBoulder, scarletBoulderModifiers);
 
                 // Golden Desert Feature Placements
@@ -376,7 +388,8 @@ public class ModPlacedFeatures {
                                 CountPlacement.of(3),
                                 InSquarePlacement.spread(),
                                 // Expand range to catch all ceilings vertically (-120 to +30)
-                                HeightRangePlacement.uniform(absolute(-120), absolute(30))));
+                                HeightRangePlacement.uniform(absolute(-120), absolute(30)),
+                                BiomeFilter.biome()));
 
                 // Floor moss: scattered at cave-floor elevations, no heightmap (underground)
                 var configuredMoss = configuredFeatures.getOrThrow(ModConfiguredFeatures.ELYSIAN_FLOOR_MOSS_KEY);
@@ -435,22 +448,17 @@ public class ModPlacedFeatures {
                 register(context, SILENT_OCEAN_FLORA_PLACED_KEY,
                                 configuredFeatures.getOrThrow(ModConfiguredFeatures.SILENT_OCEAN_FLORA_KEY),
                                 List.of(
-                                                CountPlacement.of(12),
+                                                CountPlacement.of(10),
                                                 InSquarePlacement.spread(),
-                                                HeightRangePlacement.uniform(absolute(25), absolute(70)),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
                                                 BiomeFilter.biome()));
 
                 register(context, BEACH_MANGROVE_PLACED_KEY,
-                                configuredFeatures.getOrThrow(net.minecraft.data.worldgen.features.TreeFeatures.MANGROVE),
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.BEACH_MANGROVE_SWAMP_KEY),
                                 List.of(
-                                                RarityFilter.onAverageOnceEvery(4),
+                                                CountPlacement.of(8),
                                                 InSquarePlacement.spread(),
-                                                SurfaceWaterDepthFilter.forMaxDepth(2),
-                                                PlacementUtils.HEIGHTMAP_TOP_SOLID,
-                                                BlockPredicateFilter.forPredicate(net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.matchesBlocks(
-                                                                net.minecraft.core.Direction.DOWN.getNormal(),
-                                                                net.minecraft.world.level.block.Blocks.SAND,
-                                                                net.minecraft.world.level.block.Blocks.MUD)),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
                                                 BiomeFilter.biome()));
 
                 register(context, BEACH_UNDERWATER_REEF_PLACED_KEY,

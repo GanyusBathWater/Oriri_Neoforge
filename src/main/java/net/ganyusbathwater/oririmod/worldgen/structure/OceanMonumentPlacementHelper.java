@@ -21,7 +21,10 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.structures.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.structures.OceanMonumentStructure;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
 
@@ -207,6 +210,60 @@ public final class OceanMonumentPlacementHelper {
     private static final int MONUMENT_CLEANUP_MARGIN = 6;
     private static final int MONUMENT_EXCLUSION_MARGIN_SQ = MONUMENT_CLEANUP_MARGIN * MONUMENT_CLEANUP_MARGIN;
     private static final int MONUMENT_HALO_RADIUS_SQ = 38 * 38;
+    private static final BoundingBox[] EMPTY_BOXES = new BoundingBox[0];
+    private static final ThreadLocal<ProximityChunkCache> PROXIMITY_CACHE = ThreadLocal.withInitial(ProximityChunkCache::new);
+
+    private static final class ProximityChunkCache {
+        WeakReference<WorldGenLevel> levelRef;
+        final int[] cx = {Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
+        final int[] cz = {Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
+        final BoundingBox[][] boxes = new BoundingBox[4][];
+        int cursor = 0;
+
+        BoundingBox[] getOrScan(WorldGenLevel level, int chunkX, int chunkZ) {
+            if (levelRef == null || levelRef.get() != level) {
+                levelRef = new WeakReference<>(level);
+                Arrays.fill(cx, Integer.MIN_VALUE);
+                Arrays.fill(cz, Integer.MIN_VALUE);
+                Arrays.fill(boxes, null);
+                cursor = 0;
+            } else {
+                for (int i = 0; i < 4; i++) {
+                    if (cx[i] == chunkX && cz[i] == chunkZ && boxes[i] != null) {
+                        return boxes[i];
+                    }
+                }
+            }
+
+            WorldGenRegion region = level instanceof WorldGenRegion r ? r : null;
+            List<BoundingBox> found = null;
+            for (int scanX = chunkX - 4; scanX <= chunkX + 4; scanX++) {
+                for (int scanZ = chunkZ - 4; scanZ <= chunkZ + 4; scanZ++) {
+                    if (region != null && !region.hasChunk(scanX, scanZ)) {
+                        continue;
+                    }
+                    ChunkAccess chunk = level.getChunk(scanX, scanZ, ChunkStatus.STRUCTURE_STARTS, false);
+                    if (chunk == null) {
+                        continue;
+                    }
+                    for (StructureStart start : chunk.getAllStarts().values()) {
+                        if (start.isValid() && start.getStructure() instanceof OceanMonumentStructure) {
+                            if (found == null) {
+                                found = new ArrayList<>(4);
+                            }
+                            found.add(start.getBoundingBox());
+                        }
+                    }
+                }
+            }
+            BoundingBox[] result = found == null ? EMPTY_BOXES : found.toArray(new BoundingBox[0]);
+            cx[cursor] = chunkX;
+            cz[cursor] = chunkZ;
+            boxes[cursor] = result;
+            cursor = (cursor + 1) & 3;
+            return result;
+        }
+    }
 
     public static MonumentProximity getMonumentProximity(WorldGenLevel level, BlockPos pos) {
         return getMonumentProximity(level, pos.getX(), pos.getZ());
@@ -220,34 +277,20 @@ public final class OceanMonumentPlacementHelper {
     public static MonumentProximity getMonumentProximity(WorldGenLevel level, int worldX, int worldZ) {
         int cx = worldX >> 4;
         int cz = worldZ >> 4;
-        WorldGenRegion region = level instanceof WorldGenRegion r ? r : null;
+        BoundingBox[] boxes = PROXIMITY_CACHE.get().getOrScan(level, cx, cz);
+        if (boxes.length == 0) {
+            return MonumentProximity.NONE;
+        }
         MonumentProximity closest = MonumentProximity.NONE;
-
-        // MonumentBuilding spans 58x58 blocks (half-width 29) centered on its start chunk;
-        // scanning +-4 chunks covers the full footprint + 38-block outer halo across chunk borders.
-        for (int scanX = cx - 4; scanX <= cx + 4; scanX++) {
-            for (int scanZ = cz - 4; scanZ <= cz + 4; scanZ++) {
-                if (region != null && !region.hasChunk(scanX, scanZ)) {
-                    continue;
-                }
-                ChunkAccess chunk = level.getChunk(scanX, scanZ, ChunkStatus.STRUCTURE_STARTS, false);
-                if (chunk == null) {
-                    continue;
-                }
-                for (StructureStart start : chunk.getAllStarts().values()) {
-                    if (start.isValid() && start.getStructure() instanceof OceanMonumentStructure) {
-                        BoundingBox box = start.getBoundingBox();
-                        int dx = Math.max(0, Math.max(box.minX() - worldX, worldX - box.maxX()));
-                        int dz = Math.max(0, Math.max(box.minZ() - worldZ, worldZ - box.maxZ()));
-                        int distSq = dx * dx + dz * dz;
-                        if (distSq <= MONUMENT_EXCLUSION_MARGIN_SQ) {
-                            return MonumentProximity.INSIDE;
-                        }
-                        if (distSq <= MONUMENT_HALO_RADIUS_SQ) {
-                            closest = MonumentProximity.HALO;
-                        }
-                    }
-                }
+        for (BoundingBox box : boxes) {
+            int dx = Math.max(0, Math.max(box.minX() - worldX, worldX - box.maxX()));
+            int dz = Math.max(0, Math.max(box.minZ() - worldZ, worldZ - box.maxZ()));
+            int distSq = dx * dx + dz * dz;
+            if (distSq <= MONUMENT_EXCLUSION_MARGIN_SQ) {
+                return MonumentProximity.INSIDE;
+            }
+            if (distSq <= MONUMENT_HALO_RADIUS_SQ) {
+                closest = MonumentProximity.HALO;
             }
         }
         return closest;

@@ -74,6 +74,7 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> DRAGON_IRON_ORE_KEY = registerKey("dragon_iron_ore");
 
         public static final ResourceKey<ConfiguredFeature<?, ?>> FALLEN_LOGS_KEY = registerKey("fallen_logs");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> FALLEN_PINE_LOGS_KEY = registerKey("fallen_pine_logs");
         public static final ResourceKey<ConfiguredFeature<?, ?>> LEAF_PILE_KEY = registerKey("leaf_pile_patch");
 
         // Elysian Abyss features
@@ -101,6 +102,7 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> BENTHIC_OCEAN_KEY = registerKey("benthic_ocean");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SILENT_OCEAN_FLORA_KEY = registerKey("silent_ocean_flora");
         public static final ResourceKey<ConfiguredFeature<?, ?>> BEACH_UNDERWATER_REEF_KEY = registerKey("beach_underwater_reef");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> BEACH_MANGROVE_SWAMP_KEY = registerKey("beach_mangrove_swamp");
 
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
                 GeodeBlockSettings layerConfig = new GeodeBlockSettings(
@@ -249,6 +251,9 @@ public class ModConfiguredFeatures {
                 register(context, FALLEN_LOGS_KEY, ModFeatures.FALLEN_LOGS.get(),
                                 new BlockStateConfiguration(ModBlocks.ELDER_LOG_BLOCK.get().defaultBlockState()));
 
+                register(context, FALLEN_PINE_LOGS_KEY, ModFeatures.FALLEN_LOGS.get(),
+                                new BlockStateConfiguration(ModBlocks.ELDER_PINE_LOG.get().defaultBlockState()));
+
                 register(context, LEAF_PILE_KEY, ModFeatures.ELDER_LEAF_PILE.get(),
                                 net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.NONE);
 
@@ -337,6 +342,8 @@ public class ModConfiguredFeatures {
                 register(context, SILENT_OCEAN_FLORA_KEY, ModFeatures.SILENT_OCEAN_FLORA_FEATURE.get(),
                                 new NoneFeatureConfiguration());
                 register(context, BEACH_UNDERWATER_REEF_KEY, ModFeatures.BEACH_UNDERWATER_REEF_FEATURE.get(),
+                                new NoneFeatureConfiguration());
+                register(context, BEACH_MANGROVE_SWAMP_KEY, ModFeatures.BEACH_MANGROVE_SWAMP_FEATURE.get(),
                                 new NoneFeatureConfiguration());
         }
 
