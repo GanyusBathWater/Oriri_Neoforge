@@ -98,7 +98,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private double seedOffsetX = 0;
     private double seedOffsetZ = 0;
     private double seedOffsetCave = 0;
-    private boolean seedInitialized = false;
+    private volatile boolean seedInitialized = false;
+    private volatile long syncedSeed = Long.MIN_VALUE;
 
     // Cached Biome Holders for performance
     private Holder<Biome> cachedElderwoods;
@@ -141,11 +142,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     private synchronized void initSeed(long seed) {
-        if (!seedInitialized) {
+        if (!seedInitialized || syncedSeed != seed) {
             if (this.biomeSourceReference instanceof ElderwoodsBiomeSource elderwoodsBiomeSource) {
-                if (!elderwoodsBiomeSource.isSeedInitialized()) {
-                    elderwoodsBiomeSource.syncSeed(seed);
-                }
+                elderwoodsBiomeSource.syncSeed(seed);
                 this.seedOffsetX = elderwoodsBiomeSource.getSeedOffsetX();
                 this.seedOffsetZ = elderwoodsBiomeSource.getSeedOffsetZ();
                 this.seedOffsetCave = elderwoodsBiomeSource.getSeedOffsetCave();
@@ -161,6 +160,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 seedOffsetCave = random.nextDouble() * 10000.0;
                 currentSeedOffsetCave = seedOffsetCave;
             }
+            syncedSeed = seed;
             seedInitialized = true;
 
             // Initialize scarlet block states (lazy init to ensure blocks are registered)
@@ -180,8 +180,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     private void initSeedFromRandomState(RandomState randomState) {
-        if (!seedInitialized) {
-            initSeed(net.ganyusbathwater.oririmod.OririMod.globalWorldSeed);
+        long targetSeed = OririMod.globalWorldSeed;
+        if (!seedInitialized || syncedSeed != targetSeed) {
+            initSeed(targetSeed);
         }
     }
 
@@ -189,6 +190,12 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         return biomeHolder.is(SCARLET_SWAMP_KEY) ||
                 biomeHolder.is(SCARLET_FOREST_KEY) ||
                 biomeHolder.is(SCARLET_CAVES_KEY);
+    }
+
+    private boolean isHighlandBiome(Holder<Biome> biomeHolder) {
+        return biomeHolder.is(ELDER_HIGHLANDS_MEADOW_KEY) ||
+                biomeHolder.is(ELDER_HIGHLAND_FOREST_KEY) ||
+                biomeHolder.is(ELDER_HIGHLAND_SUMMIT_KEY);
     }
 
     private boolean isElysianAbyssBiome(Holder<Biome> biomeHolder) {
@@ -500,6 +507,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                              StructureManager structureManager, ChunkAccess chunk, GenerationStep.Carving step) {
         
         lastSeed = seed;
+        OririMod.globalWorldSeed = seed;
+        initSeed(seed);
 
         if (step == GenerationStep.Carving.AIR || step == GenerationStep.Carving.LIQUID) {
             try {
@@ -619,7 +628,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                 if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
                     colBiome = ebs.getSurfaceBiome(worldX, worldZ);
                 } else {
-                    colBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, surfaceY / 4, worldZ / 4, randomState.sampler());
+                    colBiome = this.biomeSourceReference.getNoiseBiome(
+                            net.minecraft.core.QuartPos.fromBlock(worldX),
+                            net.minecraft.core.QuartPos.fromBlock(surfaceY),
+                            net.minecraft.core.QuartPos.fromBlock(worldZ),
+                            randomState.sampler());
                 }
 
                 boolean isOceanCol = colBiome.is(THE_SILENT_OCEANS_KEY) || colBiome.is(THE_SILENT_DEPTHS_KEY) || colBiome.is(THE_SUNKEN_TRENCHES_KEY);
@@ -803,7 +816,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
             entranceBiome = ebs.getSurfaceBiome(centerX, centerZ);
         } else {
-            entranceBiome = this.biomeSourceReference.getNoiseBiome(centerX / 4, surfaceY / 4, centerZ / 4, randomState.sampler());
+            entranceBiome = this.biomeSourceReference.getNoiseBiome(
+                    net.minecraft.core.QuartPos.fromBlock(centerX),
+                    net.minecraft.core.QuartPos.fromBlock(surfaceY),
+                    net.minecraft.core.QuartPos.fromBlock(centerZ),
+                    randomState.sampler());
         }
         if (!entranceBiome.is(SCARLET_SWAMP_KEY) && !entranceBiome.is(SCARLET_FOREST_KEY)) {
             return;
@@ -1074,11 +1091,15 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
                         surfaceBiome = ebs.getSurfaceBiome(worldX, worldZ);
                     } else {
-                        surfaceBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, surfaceY / 4, worldZ / 4, random.sampler());
+                        surfaceBiome = this.biomeSourceReference.getNoiseBiome(
+                                net.minecraft.core.QuartPos.fromBlock(worldX),
+                                net.minecraft.core.QuartPos.fromBlock(surfaceY),
+                                net.minecraft.core.QuartPos.fromBlock(worldZ),
+                                random.sampler());
                     }
                     boolean isScarletCurrent = isScarletBiome(surfaceBiome);
                     boolean isDesertCurrent = isGoldenDesertBiome(surfaceBiome);
-                    boolean isHighlandCurrent = surfaceBiome.is(ELDER_HIGHLANDS_MEADOW_KEY) || surfaceBiome.is(ELDER_HIGHLAND_FOREST_KEY);
+                    boolean isHighlandCurrent = isHighlandBiome(surfaceBiome);
                     boolean isBeachCurrent = surfaceBiome.is(ELDER_BEACH_KEY);
                     boolean isOceanCurrent = surfaceBiome.is(THE_SILENT_OCEANS_KEY);
                     boolean isDepthsCurrent = surfaceBiome.is(THE_SILENT_DEPTHS_KEY);
@@ -1103,7 +1124,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
                         // 2. Elder Beach: Natural Macro-Geological Shoreline Sediment Provinces
                         // Beaches strictly consist of contiguous sand expanses, distinct gravel shores, and shallow stone reefs
-                        if (isBeachCurrent || (surfaceY >= 58 && surfaceY <= 65 && !isDesertCurrent && !isScarletCurrent)) {
+                        if (isBeachCurrent || (surfaceY >= 58 && surfaceY < BASE_HEIGHT + 2 && !isDesertCurrent && !isScarletCurrent && !isHighlandCurrent)) {
                             // Macro-scale sediment province (scale ~500-800 blocks):
                             double sedimentProvince = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
                                     (float)(worldX * 0.0018f), 0f, (float)(worldZ * 0.0018f), 2) / 0.32;
@@ -1382,7 +1403,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     // We blend a mathematical cone onto the cave ceiling strictly beneath the Sanctuary bounding box
                     int limitY = MIN_Y; // Lowest point the ceiling can be pulled down to
 
-                    int maxY = Math.max(surfaceY, BASE_HEIGHT - 1);
+                    int maxY = Math.max(surfaceY, BASE_HEIGHT);
                     
                     // Cache column biome properties
                     boolean isScarletColumn = false;
@@ -1390,6 +1411,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     boolean isDesertColumn = false;
                     boolean isOceanColumn = false;
                     boolean isBeachColumn = false;
+                    boolean isHighlandColumn = false;
                     boolean isMainland = false;
                     if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
                         Holder<Biome> surfaceBiome = ebs.getSurfaceBiome(worldX, worldZ);
@@ -1398,14 +1420,20 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         isDesertColumn = isGoldenDesertBiome(surfaceBiome);
                         isOceanColumn = surfaceBiome.is(THE_SILENT_OCEANS_KEY) || surfaceBiome.is(THE_SILENT_DEPTHS_KEY) || surfaceBiome.is(THE_SUNKEN_TRENCHES_KEY);
                         isBeachColumn = surfaceBiome.is(ELDER_BEACH_KEY);
+                        isHighlandColumn = isHighlandBiome(surfaceBiome);
                         isMainland = ebs.isMainland(worldX, worldZ);
                     } else {
-                        Holder<Biome> surfaceBiome = this.biomeSourceReference.getNoiseBiome(worldX / 4, surfaceY / 4, worldZ / 4, random.sampler());
+                        Holder<Biome> surfaceBiome = this.biomeSourceReference.getNoiseBiome(
+                                net.minecraft.core.QuartPos.fromBlock(worldX),
+                                net.minecraft.core.QuartPos.fromBlock(surfaceY),
+                                net.minecraft.core.QuartPos.fromBlock(worldZ),
+                                random.sampler());
                         isScarletColumn = isScarletBiome(surfaceBiome);
                         isScarletSwampColumn = surfaceBiome.is(SCARLET_SWAMP_KEY);
                         isDesertColumn = isGoldenDesertBiome(surfaceBiome);
                         isOceanColumn = surfaceBiome.is(THE_SILENT_OCEANS_KEY) || surfaceBiome.is(THE_SILENT_DEPTHS_KEY) || surfaceBiome.is(THE_SUNKEN_TRENCHES_KEY);
                         isBeachColumn = surfaceBiome.is(ELDER_BEACH_KEY);
+                        isHighlandColumn = isHighlandBiome(surfaceBiome);
                         isMainland = true;
                     }
 
@@ -1514,9 +1542,9 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             BlockState stoneState = STONE;
                             BlockState deepslateState = DEEPSLATE;
 
-                            boolean placeScarlet = isScarletColumn && isMainland;
-                            // Scarlet Stone strictly prohibited in Ocean or Beach columns, or Islands!
-                            if (isMainland && !isDesertColumn && !isOceanColumn && !isBeachColumn) {
+                            boolean placeScarlet = isScarletColumn && isMainland && !isHighlandColumn;
+                            // Scarlet Stone strictly prohibited in Ocean, Beach, Highland, or Island columns!
+                            if (isMainland && !isDesertColumn && !isOceanColumn && !isBeachColumn && !isHighlandColumn) {
                                 double humNoise = getScarletHumidityNoise(worldX, worldZ);
                                 // Dither the border between humNoise 0.15 and 0.25 to remove straight lines!
                                 if (humNoise > 0.15 && humNoise < 0.25) {
@@ -1527,7 +1555,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 }
                             }
 
-                            if (placeScarlet && !isOceanColumn && !isBeachColumn && SCARLET_STONE != null && SCARLET_DEEPSLATE != null) {
+                            if (placeScarlet && !isOceanColumn && !isBeachColumn && !isHighlandColumn && SCARLET_STONE != null && SCARLET_DEEPSLATE != null) {
                                 stoneState = SCARLET_STONE;
                                 deepslateState = SCARLET_DEEPSLATE;
                             } else if (isOceanColumn) {
@@ -1620,7 +1648,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return 62;
+        return BASE_HEIGHT;
     }
 
     private boolean isCrystalCaveBiome(Holder<Biome> biomeHolder) {

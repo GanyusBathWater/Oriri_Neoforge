@@ -86,7 +86,8 @@ public abstract class LevelRendererMixin {
     @Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
     private void oriri_updateCloudTransition(CallbackInfo ci) {
         if (net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.isSubmergedInAbyss()
-                && net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.getDarknessIntensity() >= 0.75F) {
+                && net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.getDarknessIntensity() >= 0.75F
+                && !net.ganyusbathwater.oririmod.util.ShaderDetector.isShaderActive()) {
             ci.cancel();
             return;
         }
@@ -119,7 +120,8 @@ public abstract class LevelRendererMixin {
         }
 
         if (net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.isSubmergedInAbyss()
-                && net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.getDarknessIntensity() >= 0.75F) {
+                && net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager.getDarknessIntensity() >= 0.75F
+                && !net.ganyusbathwater.oririmod.util.ShaderDetector.isShaderActive()) {
             ci.cancel();
             return;
         }

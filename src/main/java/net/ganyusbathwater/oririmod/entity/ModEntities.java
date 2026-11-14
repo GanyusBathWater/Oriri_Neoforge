@@ -384,7 +384,7 @@ public final class ModEntities {
                                         () -> EntityType.Builder
                                                         .<net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity>of(
                                                                         net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity::new,
-                                                                        net.minecraft.world.entity.MobCategory.WATER_CREATURE)
+                                                                        net.minecraft.world.entity.MobCategory.MONSTER)
                                                         .sized(0.6F, 1.95F)
                                                         .clientTrackingRange(32)
                                                         .build(ResourceLocation

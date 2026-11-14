@@ -1,24 +1,30 @@
 package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator;
+import net.ganyusbathwater.oririmod.worldgen.structure.OceanMonumentPlacementHelper;
+import net.ganyusbathwater.oririmod.worldgen.structure.OceanMonumentPlacementHelper.MonumentProximity;
+import net.ganyusbathwater.oririmod.worldgen.feature.OceanEcologyHelper.SilentOceanHabitat;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.KelpBlock;
+import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 /**
- * Natural Underwater Flora Feature for the standard photic ocean (the_silent_oceans).
- * Generates:
- * 1. Seagrass and Tall Seagrass meadows across sand/gravel seabed.
- * 2. Kelp forest columns rising toward the photic ocean surface.
- * 3. Clusters of Sea Pickles on rocky outcroppings.
+ * Generates naturally zoned Silent Ocean and shallow beach marine flora
+ * (kelp forests, seagrass meadows, sea pickles) while strictly respecting
+ * Ocean Monument footprints across chunk decoration boundaries.
  */
 public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
 
@@ -32,98 +38,214 @@ public class SilentOceanFloraFeature extends Feature<NoneFeatureConfiguration> {
         BlockPos origin = context.origin();
         RandomSource random = context.random();
 
-        // 1. Locate the solid ocean floor below water
-        BlockPos.MutableBlockPos mPos = origin.mutable();
-        while (mPos.getY() > level.getMinBuildHeight() + 5 && level.getBlockState(mPos).is(Blocks.WATER)) {
-            mPos.move(Direction.DOWN);
-        }
-
-        BlockPos floorPos = mPos.immutable();
-        BlockState floorState = level.getBlockState(floorPos);
-        BlockPos waterPos = floorPos.above();
-
-        // Must be submerged in water below sea level (72)
-        // Barren Continental Descent: Flora only grows in the photic ocean (Y >= 30)
-        if (!level.getBlockState(waterPos).is(Blocks.WATER) || floorPos.getY() >= 72 || floorPos.getY() < 30) {
+        if (!level.getBlockState(origin).is(Blocks.WATER)) {
             return false;
         }
 
-        // Must rest on sand, gravel, or stone
-        boolean isValidFloor = floorState.is(Blocks.SAND) || floorState.is(Blocks.GRAVEL) || floorState.is(Blocks.STONE);
-        if (!isValidFloor) {
+        // Scan downward to locate seabed under the water column
+        BlockPos.MutableBlockPos scanPos = origin.mutable();
+        while (scanPos.getY() > 28 && level.getBlockState(scanPos).is(Blocks.WATER)) {
+            scanPos.move(0, -1, 0);
+        }
+
+        BlockState originFloor = level.getBlockState(scanPos);
+        if (!isValidSeabedSubstrate(originFloor)) {
             return false;
         }
 
-        int patchRadius = 3 + random.nextInt(4); // 3 to 6 blocks radius
-        boolean isKelpForest = random.nextInt(100) < 35; // 35% chance to be a dense kelp forest
+        int baseFloorY = scanPos.getY();
+        if (baseFloorY < 28 || baseFloorY >= ElderwoodsChunkGenerator.BASE_HEIGHT - 1) {
+            return false;
+        }
+
+        long seed = level.getSeed();
+        Holder<Biome> originBiome = level.getBiome(scanPos);
+        boolean isSilentOcean = originBiome.is(ElderwoodsChunkGenerator.THE_SILENT_OCEANS_KEY);
+
+        if (isSilentOcean) {
+            SilentOceanHabitat originHabitat = OceanEcologyHelper.getSilentOceanHabitat(
+                    seed, scanPos.getX(), scanPos.getZ());
+            if (originHabitat == SilentOceanHabitat.BARREN_SEABED) {
+                return false;
+            }
+        }
+
+        int patchRadius = 3 + random.nextInt(4);
         boolean placedAny = false;
+        BlockPos.MutableBlockPos targetFloorPos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos targetWaterPos = new BlockPos.MutableBlockPos();
 
         for (int dx = -patchRadius; dx <= patchRadius; dx++) {
             for (int dz = -patchRadius; dz <= patchRadius; dz++) {
-                if (dx * dx + dz * dz > patchRadius * patchRadius) {
+                if (dx * dx + dz * dz > patchRadius * patchRadius + random.nextInt(3)) {
                     continue;
                 }
 
-                BlockPos targetFloor = floorPos.offset(dx, 0, dz);
-                // Adjust for slight vertical terrain undulations
-                while (level.getBlockState(targetFloor.above()).isSolid() && targetFloor.getY() < 71) {
-                    targetFloor = targetFloor.above();
-                }
-                while (level.getBlockState(targetFloor).is(Blocks.WATER) && targetFloor.getY() > 5) {
-                    targetFloor = targetFloor.below();
-                }
+                int targetX = origin.getX() + dx;
+                int targetZ = origin.getZ() + dz;
 
-                BlockPos targetWater = targetFloor.above();
-                BlockState tFloorState = level.getBlockState(targetFloor);
-                if (!level.getBlockState(targetWater).is(Blocks.WATER) || !tFloorState.isSolid()) {
+                // Never spill flora into or adjacent to an Ocean Monument footprint across chunk borders
+                if (OceanMonumentPlacementHelper.getMonumentProximity(level, targetX, targetZ)
+                        == MonumentProximity.INSIDE) {
                     continue;
                 }
 
-                if (isKelpForest && random.nextFloat() < 0.65f) {
-                    // Place tall kelp column
-                    int maxHeight = Math.min(18, 71 - targetWater.getY());
-                    if (maxHeight >= 4) {
-                        int kelpHeight = 3 + random.nextInt(maxHeight - 2);
-                        for (int h = 0; h < kelpHeight; h++) {
-                            BlockPos kPos = targetWater.above(h);
-                            if (!level.getBlockState(kPos).is(Blocks.WATER)) {
-                                break;
-                            }
-                            if (h == kelpHeight - 1) {
-                                level.setBlock(kPos, Blocks.KELP.defaultBlockState(), 2);
-                            } else {
-                                level.setBlock(kPos, Blocks.KELP_PLANT.defaultBlockState(), 2);
-                            }
-                            placedAny = true;
-                        }
-                    }
-                } else if (random.nextFloat() < 0.70f) {
-                    // Place Seagrass / Tall Seagrass / Sea Pickles
-                    float roll = random.nextFloat();
-                    if (roll < 0.25f && level.getBlockState(targetWater.above()).is(Blocks.WATER)) {
-                        // Tall Seagrass (2 blocks)
-                        BlockState lower = Blocks.TALL_SEAGRASS.defaultBlockState().setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
-                        BlockState upper = Blocks.TALL_SEAGRASS.defaultBlockState().setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER);
-                        level.setBlock(targetWater, lower, 2);
-                        level.setBlock(targetWater.above(), upper, 2);
-                        placedAny = true;
-                    } else if (roll < 0.85f) {
-                        // Standard Seagrass
-                        level.setBlock(targetWater, Blocks.SEAGRASS.defaultBlockState(), 2);
-                        placedAny = true;
-                    } else if (tFloorState.is(Blocks.STONE)) {
-                        // Sea Pickles on rocky ground
-                        int pickles = 1 + random.nextInt(4);
-                        level.setBlock(targetWater, Blocks.SEA_PICKLE.defaultBlockState()
-                                .setValue(BlockStateProperties.PICKLES, pickles)
-                                .setValue(BlockStateProperties.WATERLOGGED, true), 2);
-                        placedAny = true;
-                    }
+                if (!findLocalFloor(level, targetX, baseFloorY, targetZ, targetFloorPos)) {
+                    continue;
+                }
+
+                targetWaterPos.set(targetX, targetFloorPos.getY() + 1, targetZ);
+                float canopyDensity = OceanEcologyHelper.getFloraCanopyMask(seed, targetX, targetZ);
+                if (canopyDensity < 0.20f) {
+                    continue;
+                }
+
+                Holder<Biome> colBiome = level.getBiome(targetFloorPos);
+                if (colBiome.is(ElderwoodsChunkGenerator.THE_SILENT_OCEANS_KEY)) {
+                    SilentOceanHabitat habitat = OceanEcologyHelper.getSilentOceanHabitat(seed, targetX, targetZ);
+                    placedAny |= placeForSilentOceanHabitat(
+                            level, random, targetFloorPos, targetWaterPos, habitat, canopyDensity);
+                } else {
+                    placedAny |= placeBeachFlora(level, random, targetFloorPos, targetWaterPos, canopyDensity);
                 }
             }
         }
 
         return placedAny;
     }
-}
 
+    private boolean placeForSilentOceanHabitat(WorldGenLevel level, RandomSource random,
+            BlockPos floorPos, BlockPos waterPos, SilentOceanHabitat habitat, float canopyDensity) {
+        switch (habitat) {
+            case BARREN_SEABED:
+                return false;
+            case KELP_FOREST:
+                if (random.nextFloat() < canopyDensity * 0.62f && waterPos.getY() < ElderwoodsChunkGenerator.BASE_HEIGHT - 3) {
+                    return tryPlaceKelp(level, random, waterPos, 4, 15);
+                }
+                if (random.nextFloat() < canopyDensity * 0.30f) {
+                    return tryPlaceSeagrassOrPickle(level, random, waterPos, false);
+                }
+                return false;
+            case MIXED_REEF:
+                if (random.nextFloat() < canopyDensity * 0.42f && waterPos.getY() < ElderwoodsChunkGenerator.BASE_HEIGHT - 4) {
+                    return tryPlaceKelp(level, random, waterPos, 3, 11);
+                }
+                if (random.nextFloat() < canopyDensity * 0.55f) {
+                    return tryPlaceSeagrassOrPickle(level, random, waterPos, true);
+                }
+                return false;
+            case CORAL_GARDEN:
+                // Understory seagrass/pickles around coral beds; no canopy-blocking kelp forest
+                if (random.nextFloat() < canopyDensity * 0.40f) {
+                    return tryPlaceSeagrassOrPickle(level, random, waterPos, true);
+                }
+                return false;
+            case SEAGRASS_MEADOW:
+                if (random.nextFloat() < canopyDensity * 0.78f) {
+                    return tryPlaceSeagrassOrPickle(level, random, waterPos, false);
+                }
+                return false;
+        }
+        return false;
+    }
+
+    private boolean placeBeachFlora(WorldGenLevel level, RandomSource random,
+            BlockPos floorPos, BlockPos waterPos, float canopyDensity) {
+        // Beach shallows keep sandy gaps while allowing patchy seagrass and occasional nearshore kelp in deeper coves
+        int depth = ElderwoodsChunkGenerator.BASE_HEIGHT - waterPos.getY();
+        if (depth >= 7 && OceanEcologyHelper.getSilentOceanHabitat(level.getSeed(), floorPos.getX(), floorPos.getZ())
+                == SilentOceanHabitat.KELP_FOREST && random.nextFloat() < canopyDensity * 0.35f) {
+            return tryPlaceKelp(level, random, waterPos, 3, Math.min(8, depth - 1));
+        }
+        if (random.nextFloat() < canopyDensity * 0.52f) {
+            return tryPlaceSeagrassOrPickle(level, random, waterPos, true);
+        }
+        return false;
+    }
+
+    private boolean tryPlaceKelp(WorldGenLevel level, RandomSource random, BlockPos baseWaterPos,
+            int minHeight, int maxExtraHeight) {
+        int maxAllowedTop = ElderwoodsChunkGenerator.BASE_HEIGHT - 2;
+        int desiredHeight = minHeight + random.nextInt(Math.max(1, maxExtraHeight));
+        int height = Math.min(desiredHeight, maxAllowedTop - baseWaterPos.getY());
+        if (height < 2) {
+            return false;
+        }
+
+        BlockPos.MutableBlockPos kelpPos = baseWaterPos.mutable();
+        int actualTopOffset = -1;
+        for (int h = 0; h < height; h++) {
+            kelpPos.set(baseWaterPos.getX(), baseWaterPos.getY() + h, baseWaterPos.getZ());
+            if (!level.getBlockState(kelpPos).is(Blocks.WATER)) {
+                break;
+            }
+            actualTopOffset = h;
+        }
+        if (actualTopOffset < 1) {
+            return false;
+        }
+
+        for (int h = 0; h < actualTopOffset; h++) {
+            kelpPos.set(baseWaterPos.getX(), baseWaterPos.getY() + h, baseWaterPos.getZ());
+            level.setBlock(kelpPos, Blocks.KELP_PLANT.defaultBlockState(), 2);
+        }
+        kelpPos.set(baseWaterPos.getX(), baseWaterPos.getY() + actualTopOffset, baseWaterPos.getZ());
+        level.setBlock(kelpPos, Blocks.KELP.defaultBlockState().setValue(KelpBlock.AGE, 18 + random.nextInt(7)), 2);
+        return true;
+    }
+
+    private boolean tryPlaceSeagrassOrPickle(WorldGenLevel level, RandomSource random, BlockPos waterPos,
+            boolean allowSeaPickles) {
+        if (!level.getBlockState(waterPos).is(Blocks.WATER)) {
+            return false;
+        }
+        if (allowSeaPickles && random.nextInt(14) == 0) {
+            BlockState pickle = Blocks.SEA_PICKLE.defaultBlockState()
+                    .setValue(SeaPickleBlock.PICKLES, 1 + random.nextInt(4))
+                    .setValue(SeaPickleBlock.WATERLOGGED, true);
+            level.setBlock(waterPos, pickle, 2);
+            return true;
+        }
+
+        BlockPos abovePos = waterPos.above();
+        if (random.nextInt(4) == 0
+                && waterPos.getY() + 1 < ElderwoodsChunkGenerator.BASE_HEIGHT
+                && level.getBlockState(abovePos).is(Blocks.WATER)) {
+            level.setBlock(waterPos, Blocks.TALL_SEAGRASS.defaultBlockState()
+                    .setValue(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER), 2);
+            level.setBlock(abovePos, Blocks.TALL_SEAGRASS.defaultBlockState()
+                    .setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER), 2);
+            return true;
+        }
+
+        level.setBlock(waterPos, Blocks.SEAGRASS.defaultBlockState(), 2);
+        return true;
+    }
+
+    private boolean findLocalFloor(WorldGenLevel level, int x, int approxFloorY, int z,
+            BlockPos.MutableBlockPos outFloor) {
+        BlockPos.MutableBlockPos above = new BlockPos.MutableBlockPos();
+        for (int dy = 4; dy >= -4; dy--) {
+            int y = approxFloorY + dy;
+            if (y < 28 || y >= ElderwoodsChunkGenerator.BASE_HEIGHT - 1) {
+                continue;
+            }
+            outFloor.set(x, y, z);
+            above.set(x, y + 1, z);
+            if (level.getBlockState(above).is(Blocks.WATER) && isValidSeabedSubstrate(level.getBlockState(outFloor))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isValidSeabedSubstrate(BlockState state) {
+        return state.is(Blocks.SAND)
+                || state.is(Blocks.GRAVEL)
+                || state.is(Blocks.STONE)
+                || state.is(Blocks.CLAY)
+                || state.is(Blocks.MUD)
+                || state.is(BlockTags.TERRACOTTA);
+    }
+}

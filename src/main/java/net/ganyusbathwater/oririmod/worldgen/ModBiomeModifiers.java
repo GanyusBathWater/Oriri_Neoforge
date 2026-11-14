@@ -586,20 +586,20 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_depths"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_sunken_trenches")))
                         ),
-                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SILENT_NEREID.get(), 1, 1, 1))
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SILENT_NEREID.get(), 8, 1, 2))
                 ));
 
-                // Silent Ocean Underwater Wildlife Spawns
+                // Silent Ocean Underwater Wildlife Spawns (tuned pack sizes so neighboring photic shelves don't bloat around trenches)
                 List<MobSpawnSettings.SpawnerData> oceanWildlifeSpawns = List.of(
-                        new MobSpawnSettings.SpawnerData(EntityType.COD, 15, 3, 6),
-                        new MobSpawnSettings.SpawnerData(EntityType.SALMON, 15, 1, 5),
-                        new MobSpawnSettings.SpawnerData(EntityType.TROPICAL_FISH, 25, 4, 8),
-                        new MobSpawnSettings.SpawnerData(EntityType.PUFFERFISH, 10, 1, 3),
-                        new MobSpawnSettings.SpawnerData(EntityType.SQUID, 20, 1, 4),
-                        new MobSpawnSettings.SpawnerData(EntityType.GLOW_SQUID, 10, 2, 4),
-                        new MobSpawnSettings.SpawnerData(EntityType.DOLPHIN, 6, 1, 2),
-                        new MobSpawnSettings.SpawnerData(EntityType.TURTLE, 8, 2, 5),
-                        new MobSpawnSettings.SpawnerData(EntityType.DROWNED, 5, 1, 1)
+                        new MobSpawnSettings.SpawnerData(EntityType.COD, 10, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SALMON, 10, 1, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.TROPICAL_FISH, 12, 3, 5),
+                        new MobSpawnSettings.SpawnerData(EntityType.PUFFERFISH, 6, 1, 2),
+                        new MobSpawnSettings.SpawnerData(EntityType.SQUID, 10, 1, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.GLOW_SQUID, 4, 1, 2),
+                        new MobSpawnSettings.SpawnerData(EntityType.DOLPHIN, 5, 1, 2),
+                        new MobSpawnSettings.SpawnerData(EntityType.TURTLE, 6, 1, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.DROWNED, 4, 1, 1)
                 );
                 context.register(ADD_SILENT_OCEAN_WILDLIFE, new BiomeModifiers.AddSpawnsBiomeModifier(
                         HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_oceans")))),

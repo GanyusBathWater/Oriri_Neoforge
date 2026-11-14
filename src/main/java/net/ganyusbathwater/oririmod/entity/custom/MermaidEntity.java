@@ -138,6 +138,9 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
     public static boolean checkMermaidSpawnRules(net.minecraft.world.entity.EntityType<MermaidEntity> type,
             net.minecraft.world.level.ServerLevelAccessor level, net.minecraft.world.entity.MobSpawnType spawnType,
             net.minecraft.core.BlockPos pos, net.minecraft.util.RandomSource random) {
+        if (net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(level.getBiome(pos))) {
+            return false;
+        }
         return level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER);
     }
 
@@ -529,47 +532,68 @@ public class MermaidEntity extends Monster implements GeoEntity, IElementalEntit
                     double d0 = this.wantedX - this.mob.getX();
                     double d1 = this.wantedY - this.mob.getY();
                     double d2 = this.wantedZ - this.mob.getZ();
-                    
-                    double distSqr = d0 * d0 + d1 * d1 + d2 * d2;
-                    
-                    if (distSqr < 0.0001D) {
+
+                    double horizDistSqr = d0 * d0 + d2 * d2;
+                    double distSqr = horizDistSqr + d1 * d1;
+
+                    if (distSqr < 0.04D || (target == null && distSqr < 2.25D)) {
+                        if (target == null && distSqr < 2.25D) {
+                            this.operation = net.minecraft.world.entity.ai.control.MoveControl.Operation.WAIT;
+                        }
                         this.mob.setSpeed(0.0F);
+                        this.mob.setXxa(0.0F);
+                        this.mob.setYya(0.0F);
+                        this.mob.setZza(0.0F);
+                        this.mob.setXRot(this.rotlerp(this.mob.getXRot(), 0.0F, 8.0F));
                         return;
                     }
 
-                    if (target == null && distSqr < 2.25D) {
-                        this.operation = net.minecraft.world.entity.ai.control.MoveControl.Operation.WAIT;
-                        this.mob.setSpeed(0.0F);
-                        return;
+                    double dist = Math.sqrt(distSqr);
+                    double horizDist = Math.sqrt(horizDistSqr);
+                    double horizRatio = horizDist / dist;
+                    double vertRatio = d1 / dist;
+
+                    float turnFactor;
+                    if (horizDist > 0.25D) {
+                        float targetYaw = (float) (net.minecraft.util.Mth.atan2(d2, d0) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
+                        float yawDiff = Math.abs(net.minecraft.util.Mth.wrapDegrees(targetYaw - this.mob.getYRot()));
+                        this.mob.setYRot(this.rotlerp(this.mob.getYRot(), targetYaw, target != null ? 28.0F : 16.0F));
+                        this.mob.yBodyRot = this.mob.getYRot();
+                        this.mob.yHeadRot = this.mob.getYRot();
+                        // Throttle horizontal thrust while making sharp turns so we don't orbit vertical targets
+                        turnFactor = net.minecraft.util.Mth.clamp(1.0F - (yawDiff / 140.0F), 0.15F, 1.0F);
+                    } else {
+                        // Hold yaw steady when virtually aligned horizontally so vertical climbs/dives never spin in place
+                        this.mob.yBodyRot = this.mob.getYRot();
+                        this.mob.yHeadRot = this.mob.getYRot();
+                        turnFactor = 0.0F;
                     }
 
-                    double horizontalDist = Math.sqrt(d0 * d0 + d2 * d2);
-                    d1 /= Math.sqrt(distSqr);
-                    
-                    float targetYaw = (float) (net.minecraft.util.Mth.atan2(d2, d0) * (180F / (float) Math.PI)) - 90.0F;
-                    this.mob.setYRot(this.rotlerp(this.mob.getYRot(), targetYaw, 90.0F));
-                    this.mob.yBodyRot = this.mob.getYRot();
-                    this.mob.yHeadRot = this.mob.getYRot();
-                    
-                    float targetPitch = (float) (-(net.minecraft.util.Mth.atan2(this.wantedY - this.mob.getY(), horizontalDist) * (180F / (float) Math.PI)));
-                    this.mob.setXRot(this.rotlerp(this.mob.getXRot(), targetPitch, 90.0F));
+                    float targetPitch = (float) (-(net.minecraft.util.Mth.atan2(d1, horizDist) * net.minecraft.util.Mth.RAD_TO_DEG));
+                    this.mob.setXRot(this.rotlerp(this.mob.getXRot(), targetPitch, 20.0F));
 
-                    float speedMod = target != null ? 1.5F : 0.8F;
+                    float speedMod = target != null ? 1.5F : 0.9F;
                     float f1 = (float) (speedMod * this.speedModifier * this.mob.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
-                    float f2 = net.minecraft.util.Mth.lerp(0.125F, this.mob.getSpeed(), f1);
-                    this.mob.setSpeed(f2);
-                    
-                    // Directly apply vertical movement to DeltaMovement (Vanilla aquatic behavior)
-                    // The horizontal movement is inherently handled by aiStep forcing Zza to getSpeed() based on YRot.
-                    this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(0.0D, (double)this.mob.getSpeed() * d1 * 0.1D, 0.0D));
+                    // travel() passes (xxa, yya, zza) directly to moveRelative(getSpeed(), vec), so keep swim accel balanced across all 3 axes
+                    float targetAccel = net.minecraft.util.Mth.clamp(f1 * 0.14F, 0.015F, 0.068F);
+                    float currentAccel = Math.min(this.mob.getSpeed(), 0.075F);
+                    float accel = net.minecraft.util.Mth.lerp(0.25F, currentAccel, targetAccel);
+
+                    this.mob.setSpeed(accel);
+                    this.mob.setXxa(0.0F);
+                    this.mob.setYya((float) vertRatio);
+                    this.mob.setZza((float) (horizRatio * turnFactor));
                 } else {
                     this.mob.setSpeed(0.0F);
                     this.mob.setXxa(0.0F);
                     this.mob.setYya(0.0F);
                     this.mob.setZza(0.0F);
+                    this.mob.setXRot(this.rotlerp(this.mob.getXRot(), 0.0F, 8.0F));
                 }
             } else {
-                // We are on land! Rely on standard MoveControl which flawlessly handles jumping up 1 block steps!
+                // We are on land! Clear residual water vertical thrust and rely on standard MoveControl.
+                this.mob.setYya(0.0F);
+                this.mob.setXRot(this.rotlerp(this.mob.getXRot(), 0.0F, 15.0F));
                 super.tick();
             }
         }

@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
@@ -32,9 +33,27 @@ public class OasisFeature extends Feature<NoneFeatureConfiguration> {
         int radiusZ = 5 + random.nextInt(3); // 5 to 7 radius Z
         int depth = 3 + random.nextInt(2);   // 3 to 4 blocks deep at center
 
-        // Scan the area to find the absolute lowest surface point.
-        // This ensures the water level is naturally enclosed by the terrain and never spills!
+        // Ensure Oasis only spawns deep inside broad desert terrain well above sea level,
+        // never punching salt craters into small desert islands or steep coastal dune slopes.
+        int minPerimeterY = ElderwoodsChunkGenerator.BASE_HEIGHT + 4;
+        int checkRadiusX = radiusX + 5;
+        int checkRadiusZ = radiusZ + 5;
+        int[] dirX = {1, -1, 0, 0, 1, 1, -1, -1};
+        int[] dirZ = {0, 0, 1, -1, 1, -1, 1, -1};
+        for (int i = 0; i < dirX.length; i++) {
+            int px = origin.getX() + (int) Math.round(dirX[i] * checkRadiusX * (i >= 4 ? 0.707 : 1.0));
+            int pz = origin.getZ() + (int) Math.round(dirZ[i] * checkRadiusZ * (i >= 4 ? 0.707 : 1.0));
+            int py = origin.getY();
+            while (level.isEmptyBlock(new BlockPos(px, py - 1, pz)) && py > context.chunkGenerator().getMinY()) py--;
+            while (!level.isEmptyBlock(new BlockPos(px, py, pz)) && py < context.chunkGenerator().getGenDepth()) py++;
+            if (py < minPerimeterY || !level.getBlockState(new BlockPos(px, py - 1, pz)).is(ModBlocks.SOL_SAND.get())) {
+                return false;
+            }
+        }
+
+        // Scan the area to find both lowest and highest surface points to guarantee flat enclosed rim
         int lowestSurfaceY = Integer.MAX_VALUE;
+        int highestSurfaceY = Integer.MIN_VALUE;
         for (int x = -radiusX; x <= radiusX; x++) {
             for (int z = -radiusZ; z <= radiusZ; z++) {
                 double distanceSq = (double)(x * x) / (radiusX * radiusX) + (double)(z * z) / (radiusZ * radiusZ);
@@ -46,12 +65,23 @@ public class OasisFeature extends Feature<NoneFeatureConfiguration> {
                     if (y < lowestSurfaceY) {
                         lowestSurfaceY = y;
                     }
+                    if (y > highestSurfaceY) {
+                        highestSurfaceY = y;
+                    }
                 }
             }
+        }
+
+        if (lowestSurfaceY < ElderwoodsChunkGenerator.BASE_HEIGHT + 3
+                || highestSurfaceY - lowestSurfaceY > 6) {
+            return false;
         }
         
         // Water is strictly below the lowest terrain lip, guaranteeing a flat, spill-free pond without artificial walls
         int waterLevel = lowestSurfaceY - 1;
+        if (waterLevel - depth < ElderwoodsChunkGenerator.BASE_HEIGHT) {
+            return false;
+        }
 
         // Carve crater and fill with water (Oval, sloping sides)
         for (int x = -radiusX; x <= radiusX; x++) {

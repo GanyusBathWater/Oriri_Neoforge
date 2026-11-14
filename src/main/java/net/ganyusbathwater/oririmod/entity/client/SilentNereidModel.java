@@ -49,26 +49,10 @@ public class SilentNereidModel extends GeoModel<SilentNereidEntity> {
     public void setCustomAnimations(SilentNereidEntity animatable, long instanceId,
                                     AnimationState<SilentNereidEntity> animationState) {
         super.setCustomAnimations(animatable, instanceId, animationState);
-        GeoBone head = getAnimationProcessor().getBone("head");
-        float netHeadYaw = 0.0F;
-        float headPitch = 0.0F;
-        if (head != null) {
-            EntityModelData entityData = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
-            if (entityData != null) {
-                netHeadYaw = entityData.netHeadYaw();
-                headPitch = entityData.headPitch();
-                head.setRotX(headPitch * Mth.DEG_TO_RAD);
-                head.setRotY(netHeadYaw * Mth.DEG_TO_RAD);
-            }
-        }
-
-        float partialTick = animationState.getPartialTick();
-        net.ganyusbathwater.oririmod.client.physics.HairPhysicsController.applyHairPhysics(
+        MermaidModel.applyMermaidCustomAnimations(
                 animatable,
                 name -> getAnimationProcessor().getBone(name),
-                partialTick,
-                netHeadYaw,
-                headPitch
+                animationState
         );
     }
 }

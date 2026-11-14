@@ -7,11 +7,15 @@
     "LiquidBlockMixin",
     "AbstractArrowMixin",
     "TreeFeatureMixin",
-    "LevelMixin"
+    "LevelMixin",
+    "OceanMonumentStructureMixin",
+    "MonumentBuildingMixin",
+    "OceanMonumentPieceMixin"
   ],
   "client": [
     "ClientLevelMixin",
     "LevelRendererMixin",
+    "LightTextureMixin",
     "WolfRendererMixin",
     "HumanoidArmorLayerMixin"
   ],

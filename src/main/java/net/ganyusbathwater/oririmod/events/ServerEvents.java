@@ -944,8 +944,34 @@ public class ServerEvents {
             return;
         }
         BlockPos pos = event.getEntity().blockPosition();
-        if (net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(event.getLevel().getBiome(pos))) {
+        net.minecraft.world.level.ServerLevelAccessor level = event.getLevel();
+        net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = level.getBiome(pos);
+        if (net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(biome)) {
             event.setResult(net.neoforged.neoforge.event.entity.living.MobSpawnEvent.PositionCheck.Result.FAIL);
+            return;
+        }
+
+        // Keep photic ocean wildlife (fish, squid, glow squid, dolphins, mermaids, drowned)
+        // in upper sunlit waters (Y >= 42) and outside a 18-block buffer rim around the abyss
+        // so neighboring ocean slopes don't flood the abyssal depths or starve spawn areas.
+        if (biome.is(net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator.THE_SILENT_OCEANS_KEY)) {
+            net.minecraft.world.entity.MobCategory cat = event.getEntity().getType().getCategory();
+            if (cat == net.minecraft.world.entity.MobCategory.WATER_CREATURE
+                    || cat == net.minecraft.world.entity.MobCategory.WATER_AMBIENT
+                    || cat == net.minecraft.world.entity.MobCategory.UNDERGROUND_WATER_CREATURE
+                    || event.getEntity().getType() == EntityType.DROWNED
+                    || event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.MermaidEntity) {
+                if (pos.getY() < 42) {
+                    event.setResult(net.neoforged.neoforge.event.entity.living.MobSpawnEvent.PositionCheck.Result.FAIL);
+                    return;
+                }
+                if (net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(level.getBiome(pos.east(18)))
+                        || net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(level.getBiome(pos.west(18)))
+                        || net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(level.getBiome(pos.north(18)))
+                        || net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(level.getBiome(pos.south(18)))) {
+                    event.setResult(net.neoforged.neoforge.event.entity.living.MobSpawnEvent.PositionCheck.Result.FAIL);
+                }
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ public class ModStructureTypes {
 
     public static final Supplier<StructureType<CenteredJigsawStructure>> CENTERED_JIGSAW = STRUCTURE_TYPES.register("centered_jigsaw", () -> type(CenteredJigsawStructure.CODEC));
     public static final Supplier<StructureType<GridStructure>> GRID = STRUCTURE_TYPES.register("grid", () -> type(GridStructure.CODEC));
+    public static final Supplier<StructureType<SafeUndergroundJigsawStructure>> SAFE_UNDERGROUND_JIGSAW = STRUCTURE_TYPES.register("safe_underground_jigsaw", () -> type(SafeUndergroundJigsawStructure.CODEC));
 
     private static <S extends Structure> StructureType<S> type(MapCodec<S> codec) {
         return () -> codec;

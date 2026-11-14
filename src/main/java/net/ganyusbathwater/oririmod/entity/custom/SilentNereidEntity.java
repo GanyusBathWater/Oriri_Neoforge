@@ -139,11 +139,17 @@ public class SilentNereidEntity extends MermaidEntity {
         if (spawnType == MobSpawnType.SPAWNER || spawnType == MobSpawnType.SPAWN_EGG) {
             return true;
         }
-        // Spawn chance 1 to 130
-        if (random.nextInt(130) != 0) {
+        if (!net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal.isAbyssalBiome(level.getBiome(pos))) {
             return false;
         }
-        return level.getFluidState(pos).is(FluidTags.WATER);
+        if (!level.getFluidState(pos).is(FluidTags.WATER)) {
+            return false;
+        }
+        // Global spawn rate throttling near the Silent Abyss is handled uniformly in AbyssalSpawnEvents;
+        // keep a generous local cap here as a safety floor for overlapping patrol pockets.
+        return level.getEntitiesOfClass(
+                SilentNereidEntity.class,
+                new net.minecraft.world.phys.AABB(pos).inflate(56.0)).size() < 4;
     }
 
     @Override

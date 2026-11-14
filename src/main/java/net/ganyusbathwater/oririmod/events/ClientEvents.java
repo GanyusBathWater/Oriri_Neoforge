@@ -552,6 +552,11 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+            net.ganyusbathwater.oririmod.client.render.world.AbyssalDarknessManager
+                    .renderShaderAbyssOverlay(event.getPartialTick().getGameTimeDeltaPartialTick(false));
+            return;
+        }
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             if (TimestopState.isActive()) {
                 TimestopWaveRenderer.render(event.getPoseStack(), event.getProjectionMatrix(), event.getCamera());

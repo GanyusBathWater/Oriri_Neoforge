@@ -32,6 +32,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -50,7 +51,7 @@ public class OririMod {
     public static final Logger LOGGER = LogUtils.getLogger();
     
     // Global world seed captured for custom dimension noise generation
-    public static long globalWorldSeed = 42069L;
+    public static volatile long globalWorldSeed = 42069L;
 
     // The constructor for the mod class is the first code that is run when your mod
     // is loaded.
@@ -317,6 +318,11 @@ public class OririMod {
                 // Sync to all players on /reload
                 net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(payload);
             }
+        }
+
+        @SubscribeEvent
+        public static void onServerAboutToStart(ServerAboutToStartEvent event) {
+            OririMod.globalWorldSeed = event.getServer().getWorldData().worldGenOptions().seed();
         }
 
         @SubscribeEvent
