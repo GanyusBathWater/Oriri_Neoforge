@@ -588,11 +588,18 @@ public class ServerEvents {
 
     @SubscribeEvent
     public static void onShieldBlock(net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent event) {
-        if (event.getDamageSource().getEntity() instanceof LivingEntity attacker) {
-            if (attacker.getMainHandItem()
-                    .getItem() instanceof net.ganyusbathwater.oririmod.item.custom.CustomScytheItem) {
-                event.setCanceled(true);
-            }
+        // Check direct melee attacker so scythes (including sweeping hits) bypass shields cleanly
+        net.minecraft.world.entity.Entity attackerEntity = event.getDamageSource().getDirectEntity();
+        if (attackerEntity == null) {
+            attackerEntity = event.getDamageSource().getEntity();
+        }
+        if (attackerEntity instanceof LivingEntity attacker
+                && (event.getDamageSource().getDirectEntity() == null || event.getDamageSource().getDirectEntity() == attacker)
+                && attacker.getMainHandItem()
+                        .getItem() instanceof net.ganyusbathwater.oririmod.item.custom.CustomScytheItem) {
+            // NeoForge 1.21.1 LivingEntity.hurt checks event.getBlocked(), not event.isCanceled()
+            event.setBlocked(false);
+            event.setBlockedDamage(0.0F);
         }
     }
 

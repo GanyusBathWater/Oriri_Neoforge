@@ -206,9 +206,8 @@ public class ModConfiguredFeatures {
                 register(context, SCARLET_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
-                                                                .simple(ModBlocks.SCARLET_GRASS.get())),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(),
-                                                                ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+                                                                .simple(Blocks.SHORT_GRASS)),
+                                                List.of(Blocks.GRASS_BLOCK)));
 
                 register(context, ELDERWOODS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
@@ -219,7 +218,7 @@ public class ModConfiguredFeatures {
                                                                                                 .add(Blocks.SHORT_GRASS
                                                                                                                 .defaultBlockState(),
                                                                                                                 3))),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+                                                List.of(Blocks.GRASS_BLOCK)));
 
                 register(context, HIGHLANDS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
@@ -227,18 +226,15 @@ public class ModConfiguredFeatures {
                                                                 new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
                                                                                 net.minecraft.util.random.SimpleWeightedRandomList
                                                                                                 .<BlockState>builder()
-                                                                                                .add(ModBlocks.HIGHLANDS_SHORT_GRASS
-                                                                                                                .get()
+                                                                                                .add(Blocks.SHORT_GRASS
                                                                                                                 .defaultBlockState(),
                                                                                                                 5))),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.HIGHLANDS_GRASS_BLOCK.get(),
-                                                                ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+                                                List.of(Blocks.GRASS_BLOCK)));
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
                                                                 .simple(ModBlocks.SCARLET_TOOTH_LEAVES.get())),
-                                                List.of(Blocks.GRASS_BLOCK, ModBlocks.SCARLET_GRASS_BLOCK.get(),
-                                                                ModBlocks.ELDERWOODS_GRASS_BLOCK.get())));
+                                                List.of(Blocks.GRASS_BLOCK)));
                 register(context, SCARLET_LILY_PATCH_KEY, Feature.RANDOM_PATCH, new RandomPatchConfiguration(10, 7, 3,
                                 PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(
                                                 BlockStateProvider.simple(ModBlocks.SCARLET_LILY.get())))));
@@ -283,7 +279,7 @@ public class ModConfiguredFeatures {
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
                                                 new SimpleBlockConfiguration(BlockStateProvider
                                                                 .simple(ModBlocks.BLOOD_CAP_BLOCK.get())),
-                                                List.of(ModBlocks.SCARLET_GRASS_BLOCK.get(),
+                                                List.of(Blocks.GRASS_BLOCK,
                                                                 ModBlocks.SCARLET_MOSS.get())));
 
                 register(context, GLOWLINGS_KEY, Feature.RANDOM_PATCH,

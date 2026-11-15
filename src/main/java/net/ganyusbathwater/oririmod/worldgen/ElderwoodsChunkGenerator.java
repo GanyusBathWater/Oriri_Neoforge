@@ -27,6 +27,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
@@ -51,7 +52,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     public static final int WORLD_HEIGHT = MAX_Y - MIN_Y;
 
     // ===== ELDERWOODS BLOCKS =====
-    private static BlockState ELDERWOODS_GRASS;
+    private static final BlockState GRASS_BLOCK = Blocks.GRASS_BLOCK.defaultBlockState();
     private static final BlockState DIRT = Blocks.DIRT.defaultBlockState();
     private static final BlockState STONE = Blocks.STONE.defaultBlockState();
     private static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
@@ -59,7 +60,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
 
     // ===== SCARLET BIOME BLOCKS =====
-    private static BlockState SCARLET_GRASS;
     private static BlockState SCARLET_STONE;
     private static BlockState SCARLET_DEEPSLATE;
 
@@ -83,13 +83,29 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private static final BlockState MAGMA_STATE = Blocks.MAGMA_BLOCK.defaultBlockState();
     private static BlockState ABYSSAL_BASALT;
     private static BlockState ABYSS_SAND;
-    private static BlockState HIGHLANDS_GRASS;
     private static BlockState SOL_SAND;
     private static BlockState SOL_SANDSTONE;
     private static BlockState AETHER_MAGMA;
     private static BlockState FLUORITE_CLUSTER_DOWN;
 
     private volatile net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator cachedCarvingDummyGen;
+    private volatile Boolean cachedHasLiquidCarvers;
+
+    private boolean hasLiquidCarvers() {
+        Boolean cached = this.cachedHasLiquidCarvers;
+        if (cached != null) {
+            return cached;
+        }
+        boolean found = false;
+        for (Holder<Biome> biome : this.biomeSourceReference.possibleBiomes()) {
+            if (biome.value().getGenerationSettings().getCarvers(GenerationStep.Carving.LIQUID).iterator().hasNext()) {
+                found = true;
+                break;
+            }
+        }
+        this.cachedHasLiquidCarvers = found;
+        return found;
+    }
 
     // Biome keys for scarlet biomes
     private static final ResourceKey<Biome> SCARLET_SWAMP_KEY = ResourceKey.create(
@@ -146,7 +162,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     public static double getScarletHumidityNoise(int x, int z) {
         return net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                 (float) ((x + currentHumOffsetX) * ElderwoodsBiomeSource.SCARLET_HUMIDITY_NOISE_FREQUENCY),
-                (float) ((z + currentHumOffsetZ) * ElderwoodsBiomeSource.SCARLET_HUMIDITY_NOISE_FREQUENCY), 3);
+                (float) ((z + currentHumOffsetZ) * ElderwoodsBiomeSource.SCARLET_HUMIDITY_NOISE_FREQUENCY), 2) / 0.32;
     }
 
     public static double getDesertTemperatureNoise(int x, int z) {
@@ -188,14 +204,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             }
 
             // Initialize cached block states BEFORE publishing seedInitialized = true
-            if (SCARLET_GRASS == null) {
-                ELDERWOODS_GRASS = ModBlocks.ELDERWOODS_GRASS_BLOCK.get().defaultBlockState();
-                SCARLET_GRASS = ModBlocks.SCARLET_GRASS_BLOCK.get().defaultBlockState();
+            if (SCARLET_STONE == null) {
                 SCARLET_STONE = ModBlocks.SCARLET_STONE.get().defaultBlockState();
                 SCARLET_DEEPSLATE = ModBlocks.SCARLET_DEEPSLATE.get().defaultBlockState();
                 ABYSSAL_BASALT = ModBlocks.ABYSSAL_BASALT.get().defaultBlockState();
                 ABYSS_SAND = ModBlocks.ABYSS_SAND.get().defaultBlockState();
-                HIGHLANDS_GRASS = ModBlocks.HIGHLANDS_GRASS_BLOCK.get().defaultBlockState();
                 SOL_SAND = ModBlocks.SOL_SAND.get().defaultBlockState();
                 SOL_SANDSTONE = ModBlocks.SOL_SANDSTONE.get().defaultBlockState();
                 AETHER_MAGMA = ModBlocks.AETHER_MAGMA_BLOCK.get().defaultBlockState();
@@ -304,21 +317,20 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         double baseCeiling = 60.0; 
         double ceilVariation = ceilNoise * 18.0; // Subtle vault variation
 
-        boolean isMainlandCol = false;
-        if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebs) {
-            isMainlandCol = ebs.isMainland(x, z);
+        // Smooth coastal transition based on continuous surface height (no hard discontinuity across beaches)
+        double coastalSeal = Mth.clamp((73.0 - (double) surfaceY) / 16.0, 0.0, 1.0);
+        double maxCeiling = (double) surfaceY - (15.0 + 5.0 * coastalSeal);
+        if (maxCeiling <= 20.0) {
+            return maxCeiling;
         }
-        // Under islands, beaches, and oceans, keep ceiling safely below the photic ocean seabed (<= 32)
-        // so the cave can never breach the outer flank walls of the island seamount!
-        double maxCeiling = isMainlandCol ? ((double) surfaceY - 15.0) : Math.min((double) surfaceY - 25.0, 32.0);
-        return Mth.clamp(baseCeiling + ceilVariation, 20.0, maxCeiling);
+        return Math.min(Math.max(baseCeiling + ceilVariation, 20.0), maxCeiling);
     }
 
 
 
     private double getAbyssNoise(int x, int z) {
-        // Synchronized with ElderwoodsBiomeSource
-        float scale = 0.004f;
+        // Synchronized 1:1 with ElderwoodsBiomeSource.sampleCaveNoise & ElysianAbyssCarver
+        float scale = ElderwoodsBiomeSource.CAVE_NOISE_FREQUENCY;
         return net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
             (float)((x + seedOffsetCave) * scale),
             (float)((z + seedOffsetCave) * scale),
@@ -540,7 +552,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         OririMod.globalWorldSeed = seed;
         initSeed(seed);
 
-        if (step == GenerationStep.Carving.AIR || step == GenerationStep.Carving.LIQUID) {
+        if (step == GenerationStep.Carving.AIR || (step == GenerationStep.Carving.LIQUID && hasLiquidCarvers())) {
             final ElderwoodsCaveAquifer caveAquifer = createCaveAquifer(seed, chunk.getPos());
             ElysianAbyssCarver.CURRENT_AQUIFER.set(caveAquifer);
             try {
@@ -559,6 +571,22 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     carvingMask = protoChunk.getOrCreateCarvingMask(step);
                 }
 
+                final int chunkMinX = chunk.getPos().getMinBlockX();
+                final int chunkMaxX = chunk.getPos().getMaxBlockX();
+                final int chunkMinZ = chunk.getPos().getMinBlockZ();
+                final int chunkMaxZ = chunk.getPos().getMaxBlockZ();
+                final int chunkMinY = chunk.getMinBuildHeight();
+                final int chunkMaxY = chunk.getMaxBuildHeight();
+                final ElderwoodsBiomeSource ebs = (biomeSourceReference instanceof ElderwoodsBiomeSource src) ? src : null;
+
+                final int[] colSurfaceHeight = new int[256];
+                Arrays.fill(colSurfaceHeight, Integer.MIN_VALUE);
+                final byte[] colBiomeFlags = new byte[256]; // bit 0: known, bit 1: silent ocean/trench, bit 2: beach
+                final double[] colAbyssNoise = new double[256];
+                Arrays.fill(colAbyssNoise, Double.NaN);
+                final double[] colRiverIntensity = new double[256];
+                Arrays.fill(colRiverIntensity, Double.NaN);
+
                 final BlockPos.MutableBlockPos carverPos = new BlockPos.MutableBlockPos();
                 final net.minecraft.world.level.levelgen.Aquifer aquifer = new net.minecraft.world.level.levelgen.Aquifer() {
                     private boolean scheduleUpdate;
@@ -572,10 +600,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         int bx = ctx.blockX();
                         int by = ctx.blockY();
                         int bz = ctx.blockZ();
+                        boolean inChunk = chunkMinX <= bx && bx <= chunkMaxX && chunkMinZ <= bz && bz <= chunkMaxZ;
+
                         // Never overwrite pre-generated cave water/blood-water/lava lakes or breach an adjacent lake wall
-                        if (chunk.getPos().getMinBlockX() <= bx && bx <= chunk.getPos().getMaxBlockX()
-                                && chunk.getPos().getMinBlockZ() <= bz && bz <= chunk.getPos().getMaxBlockZ()
-                                && by >= chunk.getMinBuildHeight() && by < chunk.getMaxBuildHeight()) {
+                        if (inChunk && by >= chunkMinY && by < chunkMaxY) {
                             carverPos.set(bx, by, bz);
                             if (!chunk.getFluidState(carverPos).isEmpty()) {
                                 this.scheduleUpdate = false;
@@ -583,22 +611,56 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             }
                         }
 
-                        int surfaceHeight = getSurfaceHeight(bx, bz);
-                        Holder<Biome> b = (biomeSourceReference instanceof ElderwoodsBiomeSource ebs)
-                                ? ebs.getSurfaceBiome(bx, bz)
-                                : biomeSourceReference.getNoiseBiome(bx / 4, by / 4, bz / 4, randomState.sampler());
-                        if (b.is(THE_SILENT_DEPTHS_KEY) || b.is(THE_SUNKEN_TRENCHES_KEY)) {
-                            this.scheduleUpdate = false;
-                            return null; // Preserve water-filled Silent Depths caves and abyssal crust
-                        }
-                        boolean isOceanOrBeach = b.is(THE_SILENT_OCEANS_KEY) || b.is(ELDER_BEACH_KEY);
+                        int colIdx = inChunk ? (((bx - chunkMinX) << 4) | (bz - chunkMinZ)) : -1;
 
-                        if (by <= BASE_HEIGHT && by > surfaceHeight && isOceanOrBeach) {
+                        int surfaceHeight;
+                        if (colIdx >= 0) {
+                            surfaceHeight = colSurfaceHeight[colIdx];
+                            if (surfaceHeight == Integer.MIN_VALUE) {
+                                surfaceHeight = getSurfaceHeight(bx, bz);
+                                colSurfaceHeight[colIdx] = surfaceHeight;
+                            }
+                        } else {
+                            surfaceHeight = getSurfaceHeight(bx, bz);
+                        }
+
+                        boolean isOceanOrTrench;
+                        boolean isBeach;
+                        if (colIdx >= 0 && ebs != null) {
+                            byte flags = colBiomeFlags[colIdx];
+                            if (flags == 0) {
+                                Holder<Biome> b = ebs.getSurfaceBiome(bx, bz);
+                                int encoded = 1;
+                                if (b.is(THE_SILENT_OCEANS_KEY) || b.is(THE_SILENT_DEPTHS_KEY) || b.is(THE_SUNKEN_TRENCHES_KEY)) {
+                                    encoded |= 2;
+                                }
+                                if (b.is(ELDER_BEACH_KEY)) {
+                                    encoded |= 4;
+                                }
+                                flags = (byte) encoded;
+                                colBiomeFlags[colIdx] = flags;
+                            }
+                            isOceanOrTrench = (flags & 2) != 0;
+                            isBeach = (flags & 4) != 0;
+                        } else {
+                            Holder<Biome> b = ebs != null
+                                    ? ebs.getSurfaceBiome(bx, bz)
+                                    : biomeSourceReference.getNoiseBiome(bx / 4, by / 4, bz / 4, randomState.sampler());
+                            isOceanOrTrench = b.is(THE_SILENT_OCEANS_KEY) || b.is(THE_SILENT_DEPTHS_KEY) || b.is(THE_SUNKEN_TRENCHES_KEY);
+                            isBeach = b.is(ELDER_BEACH_KEY);
+                        }
+
+                        if (isOceanOrTrench) {
+                            this.scheduleUpdate = false;
+                            return null; // Preserve water-filled Silent Depths caves and solid Silent Oceans basalt
+                        }
+
+                        if (by <= BASE_HEIGHT && by > surfaceHeight && isBeach) {
                             this.scheduleUpdate = false;
                             return WATER_STATE;
                         }
-                        // Never breach the protective ocean floor basalt crust
-                        if (isOceanOrBeach && surfaceHeight < BASE_HEIGHT - 1 && by >= surfaceHeight - 15) {
+                        // Never breach the protective shallow coastal floor under submerged beach shoals
+                        if (isBeach && surfaceHeight < BASE_HEIGHT - 1 && by >= surfaceHeight - 15) {
                             this.scheduleUpdate = false;
                             return null;
                         }
@@ -612,10 +674,37 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             this.scheduleUpdate = false;
                             return Blocks.AIR.defaultBlockState();
                         }
+
                         // Keep Elysian Abyss cavern & lower Aether river zone unaffected by cave aquifers
-                        if (getAbyssNoise(bx, bz) > 0.14 || (by <= -92 && getRiverIntensity(bx, bz) > 0.0)) {
+                        double abyssNoise;
+                        if (colIdx >= 0) {
+                            abyssNoise = colAbyssNoise[colIdx];
+                            if (Double.isNaN(abyssNoise)) {
+                                abyssNoise = getAbyssNoise(bx, bz);
+                                colAbyssNoise[colIdx] = abyssNoise;
+                            }
+                        } else {
+                            abyssNoise = getAbyssNoise(bx, bz);
+                        }
+                        if (abyssNoise > 0.14) {
                             this.scheduleUpdate = false;
                             return Blocks.AIR.defaultBlockState();
+                        }
+                        if (by <= -92) {
+                            double riverIntensity;
+                            if (colIdx >= 0) {
+                                riverIntensity = colRiverIntensity[colIdx];
+                                if (Double.isNaN(riverIntensity)) {
+                                    riverIntensity = getRiverIntensity(bx, bz);
+                                    colRiverIntensity[colIdx] = riverIntensity;
+                                }
+                            } else {
+                                riverIntensity = getRiverIntensity(bx, bz);
+                            }
+                            if (riverIntensity > 0.0) {
+                                this.scheduleUpdate = false;
+                                return Blocks.AIR.defaultBlockState();
+                            }
                         }
 
                         // Carvers run after fillFromNoise and must never materialize un-updated suspended fluid volumes in rock
@@ -633,6 +722,12 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         return this.scheduleUpdate;
                     }
                 };
+
+                // Bind BiomeManager to biomeSource directly instead of ServerLevel so background carver workers
+                // never trigger synchronous main-thread chunk loads via ServerChunkCache.getChunk().
+                final BiomeManager carverBiomeManager = biomeManager.withDifferentSource(
+                        (qx, qy, qz) -> this.biomeSource.getNoiseBiome(qx, qy, qz, randomState.sampler())
+                );
 
                 // 1. Vanilla Carvers (Properly loaded per origin chunk to allow biome crossing)
                 int vanillaRange = 8;
@@ -661,7 +756,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 try {
                                     net.minecraft.util.RandomSource carverRandom = net.minecraft.util.RandomSource.create(seed ^ originPos.toLong());
                                     if (carver.isStartChunk(carverRandom)) {
-                                        carver.carve(context, chunk, biomeManager::getBiome, carverRandom, aquifer, originPos, carvingMask);
+                                        carver.carve(context, chunk, carverBiomeManager::getBiome, carverRandom, aquifer, originPos, carvingMask);
                                     }
                                 } catch (Exception ex) {
                                     OririMod.LOGGER.error("Error running vanilla carver", ex);
@@ -681,7 +776,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                 for (int rz = -range; rz <= range; rz++) {
                                     net.minecraft.world.level.ChunkPos originPos = new net.minecraft.world.level.ChunkPos(chunk.getPos().x + rx, chunk.getPos().z + rz);
                                     net.minecraft.util.RandomSource globalRandom = net.minecraft.util.RandomSource.create(seed ^ originPos.toLong());
-                                    globalCarver.carve(context, chunk, biomeManager::getBiome, globalRandom, aquifer, originPos, carvingMask);
+                                    globalCarver.carve(context, chunk, carverBiomeManager::getBiome, globalRandom, aquifer, originPos, carvingMask);
                                 }
                             }
                         }
@@ -914,9 +1009,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         if (centerInThisChunk) {
             BlockPos.MutableBlockPos surfaceCheckPos = new BlockPos.MutableBlockPos(centerX, surfaceY, centerZ);
             BlockState surfaceBlock = chunk.getBlockState(surfaceCheckPos);
-            if (!surfaceBlock.is(Blocks.GRASS_BLOCK) && !surfaceBlock.is(Blocks.DIRT)
-                    && !surfaceBlock.is(ModBlocks.SCARLET_GRASS_BLOCK.get())
-                    && !surfaceBlock.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())) {
+            if (!surfaceBlock.is(Blocks.GRASS_BLOCK) && !surfaceBlock.is(Blocks.DIRT)) {
                 return;
             }
 
@@ -1379,7 +1472,6 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         }
                         subState = isSnowCovered ? SNOW_BLOCK_STATE : rockState;
                     } else {
-                        BlockState grassState = isScarletCurrent ? SCARLET_GRASS : (isHighlandCurrent ? HIGHLANDS_GRASS : ELDERWOODS_GRASS);
                         int slopeX = Math.abs(surfaceY - getSurfaceHeight(worldX + 1, worldZ));
                         int slopeZ = Math.abs(surfaceY - getSurfaceHeight(worldX, worldZ + 1));
                         int maxSlope = Math.max(slopeX, slopeZ);
@@ -1390,13 +1482,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             if (surfaceY < BASE_HEIGHT - 1 && surfaceBiome.is(SCARLET_SWAMP_KEY)) {
                                 double mudNoise = Math.sin(worldX * 0.1) * Math.cos(worldZ * 0.1)
                                         + 0.5 * Math.sin(worldX * 0.03 + 2.0) * Math.cos(worldZ * 0.04 - 1.0);
-                                topState = (mudNoise > 0.3 || surfaceY < BASE_HEIGHT - 2) ? DIRT : grassState;
+                                topState = (mudNoise > 0.3 || surfaceY < BASE_HEIGHT - 2) ? DIRT : GRASS_BLOCK;
                             } else if (surfaceBiome.is(ELDER_HIGHLAND_FOREST_KEY)) {
                                 double podzolNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                                         (float) (worldX * 0.03f), (float) (worldZ * 0.03f), 2);
-                                topState = podzolNoise > 0.32 ? PODZOL_STATE : grassState;
+                                topState = podzolNoise > 0.32 ? PODZOL_STATE : GRASS_BLOCK;
                             } else {
-                                topState = grassState;
+                                topState = GRASS_BLOCK;
                             }
                             subState = DIRT;
                         }
@@ -1428,7 +1520,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     public void spawnOriginalMobs(WorldGenRegion level) {
     }
 
-    private static final int SILENT_CAVE_ENTRANCE_GRID = 112;
+    private static final int SILENT_CAVE_ENTRANCE_GRID = 80;
     private static final int DEPTHS_ENTRANCE_CACHE_SIZE = 256;
     private static final int DEPTHS_ENTRANCE_CACHE_MASK = DEPTHS_ENTRANCE_CACHE_SIZE - 1;
 
@@ -1467,30 +1559,44 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         }
 
         long cellHash = mix64(syncedSeed ^ (gx * 0x9E3779B97F4A7C15L) ^ (gz * 0xD6E8FEB86659FD93L));
-        // Strictly inside [24..87] of each 112x112 cell so a <= 22-block radius never crosses cell bounds
-        int centerX = gx * SILENT_CAVE_ENTRANCE_GRID + 24 + (int) Math.floorMod(cellHash, 64L);
-        int centerZ = gz * SILENT_CAVE_ENTRANCE_GRID + 24 + (int) Math.floorMod(cellHash >>> 16, 64L);
-
+        int span = SILENT_CAVE_ENTRANCE_GRID - 44; // Strictly [22 .. 57] inside 80x80 cell so <=22 radius never crosses cell bounds
+        int bestX = gx * SILENT_CAVE_ENTRANCE_GRID + 22 + (int) Math.floorMod(cellHash, (long) span);
+        int bestZ = gz * SILENT_CAVE_ENTRANCE_GRID + 22 + (int) Math.floorMod(cellHash >>> 16, (long) span);
         boolean valid = false;
         int centerSurfaceY = BASE_HEIGHT;
-        if (ebs != null && ebs.getSurfaceBiome(centerX, centerZ).is(THE_SILENT_DEPTHS_KEY)) {
-            centerSurfaceY = ebs.computeSurfaceHeight(centerX, centerZ, null);
-            if (centerSurfaceY <= -56 && centerSurfaceY >= -105) {
-                double margin = ebs.getDynamicAbyssThreshold(centerX, centerZ) - ebs.sampleContinentalness(centerX, centerZ);
-                if (margin >= 0.020) {
-                    valid = isValidEntrancePerimeter(ebs, centerX + 14, centerZ)
-                            && isValidEntrancePerimeter(ebs, centerX - 14, centerZ)
-                            && isValidEntrancePerimeter(ebs, centerX, centerZ + 14)
-                            && isValidEntrancePerimeter(ebs, centerX, centerZ - 14);
+
+        if (ebs != null) {
+            long probeHash = cellHash;
+            for (int attempt = 0; attempt < 6; attempt++) {
+                int cx = gx * SILENT_CAVE_ENTRANCE_GRID + 22 + (int) Math.floorMod(probeHash, (long) span);
+                int cz = gz * SILENT_CAVE_ENTRANCE_GRID + 22 + (int) Math.floorMod(probeHash >>> 16, (long) span);
+                if (ebs.getSurfaceBiome(cx, cz).is(THE_SILENT_DEPTHS_KEY)
+                        && ebs.sampleSunkenTrenchAbsCrack(cx, cz) >= 0.095) {
+                    int cSurfY = ebs.computeSurfaceHeight(cx, cz, null);
+                    if (cSurfY <= -42 && cSurfY >= -108) {
+                        double margin = ebs.getDynamicAbyssThreshold(cx, cz) - ebs.sampleContinentalness(cx, cz);
+                        if (margin >= 0.006
+                                && isValidEntrancePerimeter(ebs, cx + 10, cz)
+                                && isValidEntrancePerimeter(ebs, cx - 10, cz)
+                                && isValidEntrancePerimeter(ebs, cx, cz + 10)
+                                && isValidEntrancePerimeter(ebs, cx, cz - 10)) {
+                            bestX = cx;
+                            bestZ = cz;
+                            centerSurfaceY = cSurfY;
+                            valid = true;
+                            break;
+                        }
+                    }
                 }
+                probeHash = mix64(probeHash ^ (0x517CC1B727220A95L * (attempt + 1)));
             }
         }
 
         entry.seed = syncedSeed;
         entry.gx = gx;
         entry.gz = gz;
-        entry.centerX = centerX;
-        entry.centerZ = centerZ;
+        entry.centerX = bestX;
+        entry.centerZ = bestZ;
         entry.centerSurfaceY = centerSurfaceY;
         entry.cellHash = cellHash;
         entry.valid = valid;
@@ -1499,100 +1605,159 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     }
 
     private static boolean isValidEntrancePerimeter(ElderwoodsBiomeSource ebs, int px, int pz) {
-        if (!ebs.getSurfaceBiome(px, pz).is(THE_SILENT_DEPTHS_KEY)) {
+        if (!ebs.getSurfaceBiome(px, pz).is(THE_SILENT_DEPTHS_KEY)
+                || ebs.sampleSunkenTrenchAbsCrack(px, pz) < 0.075) {
             return false;
         }
         int py = ebs.computeSurfaceHeight(px, pz, null);
-        if (py > -50 || py < -110) {
+        if (py > -38 || py < -112) {
             return false;
         }
-        return (ebs.getDynamicAbyssThreshold(px, pz) - ebs.sampleContinentalness(px, pz)) >= 0.008;
+        return (ebs.getDynamicAbyssThreshold(px, pz) - ebs.sampleContinentalness(px, pz)) >= 0.002;
     }
 
     /**
      * Evaluates deterministic 3D water-filled caves and flared seafloor entrances inside the_silent_depths.
-     * Always fills cavities with Blocks.WATER and pinches shut safely inside the abyssal basalt perimeter,
-     * guaranteeing zero dry air pockets and zero hanging non-flowing water seams.
+     * Uses continuous C1 floor/roof envelopes, domain-warped 3D caverns, circular L2 tubes, and smoothMax
+     * fillets so walls, ceilings, floors, and trench/entrance junctions curve organically without sharp seams.
      */
     private boolean isSilentDepthsWaterCave(
             int x, int y, int z, int surfaceY, double depthsCaveMask,
+            double trenchAbsCrack, boolean isTrenchColumn,
             DepthsEntranceCandidate entrance, int entranceDistSq, double entranceJoinBoost) {
-        // 1. Flared seafloor sinkhole entrance shaft + basal vestibule chamber
-        if (entrance != null && entranceDistSq <= 20 * 20) {
-            int entranceBottomY = MIN_Y + 8;
+        int uFloorY = MIN_Y + 6;
+        if (y < uFloorY) {
+            return false;
+        }
+
+        // 1. Flared seafloor sinkhole entrance shaft + basal vestibule dome (continuous C1 distance field)
+        double dEntrance = -1.5;
+        double bellJoin = 0.0;
+        if (!isTrenchColumn && entrance != null && entranceDistSq <= 22 * 22 && trenchAbsCrack >= 0.072) {
+            int entranceBottomY = MIN_Y + 9;
             int entranceTopY = Math.max(surfaceY, entrance.centerSurfaceY) + 1;
             if (y >= entranceBottomY && y <= entranceTopY) {
                 double depthFrac = (double) (entranceTopY - y) / Math.max(1, entranceTopY - entranceBottomY);
-                double windPhase = depthFrac * Math.PI * 1.6 + ((entrance.cellHash & 255L) * 0.025);
-                double windAmp = 4.5 * Math.sin(depthFrac * Math.PI);
+                double windPhase = depthFrac * Math.PI * 1.5 + ((entrance.cellHash & 255L) * 0.025);
+                double windAmp = 4.0 * Math.sin(depthFrac * Math.PI);
                 double wx = entrance.centerX + Math.sin(windPhase) * windAmp;
                 double wz = entrance.centerZ + Math.cos(windPhase * 1.15) * windAmp;
 
-                double rimT = Math.max(0.0, 1.0 - (double) (entranceTopY - y) / 7.5);
-                double shaftRadius = 5.0 + 3.0 * rimT * rimT;
-                if (y <= entranceBottomY + 16) {
-                    double bell = Math.sin(Mth.clamp((double) (y - entranceBottomY) / 16.0, 0.0, 1.0) * Math.PI);
-                    shaftRadius = Math.max(shaftRadius, 5.2 + 7.2 * bell);
+                double rimT = ElderwoodsBiomeSource.hermite01(1.0 - (double) (entranceTopY - y) / 9.0);
+                double flareRadius = 4.4 + 3.6 * rimT;
+
+                double bellTopY = Math.min(entranceTopY - 10.0, -80.0);
+                double bellRadius = 0.0;
+                if (bellTopY > entranceBottomY + 6.0) {
+                    double bellCenterY = (entranceBottomY + bellTopY) * 0.5;
+                    double bellHalfH = (bellTopY - entranceBottomY) * 0.52;
+                    double bellU = Math.min(1.0, Math.abs(y - bellCenterY) / bellHalfH);
+                    bellJoin = 0.5 * (1.0 + Math.cos(Math.PI * bellU));
+                    bellRadius = 4.4 + 8.6 * bellJoin;
                 }
 
-                double wallWobble = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                        (float) (x * 0.085f), (float) (y * 0.085f), (float) (z * 0.085f), 2) * 2.0;
-                double radius = shaftRadius + wallWobble;
+                double baseRadius = ElderwoodsBiomeSource.smoothMax(flareRadius, bellRadius, 2.2);
+                double bottomT = ElderwoodsBiomeSource.hermite01((double) (y - entranceBottomY) / 7.0);
+                baseRadius *= bottomT;
+
+                double wallWobble = (net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                        (float) (x * 0.065f), (float) (y * 0.065f), (float) (z * 0.065f), 2) / 0.32) * 1.6 * bottomT;
+                double radius = Math.max(0.0, baseRadius + wallWobble);
                 double dx = x - wx;
                 double dz = z - wz;
-                if (radius > 0.0 && (dx * dx + dz * dz) < radius * radius) {
-                    return true;
+                dEntrance = (radius - Math.sqrt(dx * dx + dz * dz)) * 0.065;
+            }
+        }
+
+        // 2. Shield upper Sunken Trench walls while cleanly curving deep hydrothermal caves into trench floors
+        double trenchUpperShield = (trenchAbsCrack < 0.095)
+                ? ElderwoodsBiomeSource.hermite01((trenchAbsCrack - 0.048) / 0.047)
+                : 1.0;
+
+        double trenchBasalExtend = 0.0;
+        if (trenchAbsCrack < 0.092) {
+            double dt = ElderwoodsBiomeSource.hermite01((-97.0 - y) / 9.0);
+            double et = ElderwoodsBiomeSource.hermite01((0.092 - trenchAbsCrack) / 0.036);
+            trenchBasalExtend = 0.62 * dt * et;
+        }
+
+        double smoothMask = ElderwoodsBiomeSource.hermite01(
+                Math.max(depthsCaveMask * trenchUpperShield, trenchBasalExtend));
+        if (smoothMask <= 0.0 && dEntrance <= 0.0) {
+            return false;
+        }
+
+        // 3. Smooth dome ceiling & undulating bowl floor envelopes (13-14 block C1 transitions)
+        double openCeilY = (double) surfaceY - 5.5;
+        double shieldedCeilY = Math.min(openCeilY, -99.0);
+        double ceilLimitY = Mth.lerp(trenchUpperShield, shieldedCeilY, openCeilY);
+
+        double trenchMouthT = (trenchAbsCrack < 0.068)
+                ? ElderwoodsBiomeSource.hermite01((0.068 - trenchAbsCrack) / 0.025)
+                : 0.0;
+        if (trenchMouthT > 0.0) {
+            ceilLimitY = Mth.lerp(trenchMouthT, ceilLimitY, -96.0);
+        }
+
+        double roofT = ElderwoodsBiomeSource.hermite01((y - (ceilLimitY - 14.0)) / 14.0);
+        double floorWave = (net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) (x * 0.014f), (float) (z * 0.014f), 2) / 0.32) * 2.4;
+        double floorTopY = -106.5 - trenchMouthT * 4.5 + floorWave;
+        double floorT = ElderwoodsBiomeSource.hermite01((floorTopY - y) / 11.5);
+        double envTaper = Math.max(roofT, floorT);
+
+        if (dEntrance < -0.35 && (envTaper >= 0.96 || smoothMask <= 0.01)) {
+            return false;
+        }
+
+        double caveDensity = -1.5;
+        if (smoothMask > 0.01) {
+            float cx = (float) (x + seedOffsetCave);
+            float cy = (float) (y + seedOffsetCave);
+            float cz = (float) (z + seedOffsetCave);
+
+            // Light 3D domain warp breaks axis-aligned noise planes into organic billowing vaults
+            float warp = net.ganyusbathwater.oririmod.util.FastNoise.noise3D(
+                    (cx + 4100f) * 0.011f, (cy + 4100f) * 0.011f, (cz + 4100f) * 0.011f) * 5.0f;
+
+            double uCheese = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                    (cx + 6100f + warp) * 0.015f,
+                    (cy + 6100f + warp * 0.7f) * 0.020f,
+                    (cz + 6100f - warp) * 0.015f, 2) / 0.32;
+
+            double cheeseThresh = -0.04 + (1.0 - smoothMask) * 0.62 + roofT * 1.15 + floorT * 1.15;
+            double dCheese = uCheese - cheeseThresh;
+
+            // Circular Euclidean (L2) worm tubes with full smooth C1 tapering to zero
+            double tunnelRadius = (0.24 + entranceJoinBoost * bellJoin * 2.4) * smoothMask * (1.0 - envTaper);
+            double dTunnel = -1.5;
+            if (tunnelRadius > 0.015) {
+                double t1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                        (cx + 7300f + warp * 0.8f) * 0.013f,
+                        (cy + 7300f) * 0.017f,
+                        (cz + 7300f) * 0.013f, 2) / 0.32;
+                if (Math.abs(t1) < tunnelRadius + 0.25) {
+                    double t2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                            (cx + 8700f) * 0.013f,
+                            (cy + 8700f + warp * 0.8f) * 0.017f,
+                            (cz + 8700f - warp * 0.8f) * 0.013f, 2) / 0.32;
+                    double tubeDist = Math.sqrt(t1 * t1 + t2 * t2);
+                    dTunnel = (tunnelRadius - tubeDist) * 1.15;
                 }
             }
+
+            caveDensity = ElderwoodsBiomeSource.smoothMax(dCheese, dTunnel, 0.26);
         }
 
-        // 2. Interconnected 3D underwater grottoes and submerged tunnels beneath the basalt seabed
-        if (depthsCaveMask <= 0.0) {
-            return false;
-        }
-        int uFloorY = MIN_Y + 8;
-        int uMaxY = surfaceY - 5;
-        if (uMaxY <= uFloorY + 3 || y < uFloorY || y > uMaxY) {
-            return false;
+        if (dEntrance > -0.35) {
+            caveDensity = ElderwoodsBiomeSource.smoothMax(caveDensity, dEntrance, 0.32);
         }
 
-        double roofT = Mth.clamp((double) (y - (surfaceY - 10)) / 5.0, 0.0, 1.0);
-        double floorT = Mth.clamp((double) (-115 - y) / 4.0, 0.0, 1.0);
-        double taper = Math.max(roofT, floorT);
-        // Allow basal entrance vestibules (y <= -104) to break cleanly into neighboring cave halls
-        if (entranceJoinBoost > 0.0 && y <= -104 && y > -117) {
-            taper *= (1.0 - entranceJoinBoost * 5.0);
-            if (taper < 0.0) taper = 0.0;
-        }
-
-        double uCheeseThresh = 0.22 + (1.0 - depthsCaveMask) * 0.60 + taper * 1.4 - entranceJoinBoost;
-        if (uCheeseThresh >= 1.0 && (taper >= 0.45 || depthsCaveMask <= 0.15)) {
+        if (dEntrance <= 0.0 && trenchMouthT <= 0.0 && y > surfaceY - 3) {
             return false;
         }
 
-        float cx = (float) (x + seedOffsetCave);
-        float cy = (float) (y + seedOffsetCave);
-        float cz = (float) (z + seedOffsetCave);
-
-        if (uCheeseThresh < 1.0) {
-            double uCheese = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                    (cx + 6100f) * 0.022f, (cy + 6100f) * 0.032f, (cz + 6100f) * 0.022f, 2);
-            if (uCheese > uCheeseThresh) {
-                return true;
-            }
-        }
-
-        if (taper < 0.45 && depthsCaveMask > 0.15) {
-            double tunHalfWidth = (0.058 + entranceJoinBoost * 0.15) * depthsCaveMask * (1.0 - taper);
-            double uTunnel1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                    (cx + 7300f) * 0.018f, (cy + 7300f) * 0.026f, (cz + 7300f) * 0.018f, 2);
-            if (Math.abs(uTunnel1) < tunHalfWidth) {
-                double uTunnel2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                        (cx + 8700f) * 0.018f, (cy + 8700f) * 0.026f, (cz + 8700f) * 0.018f, 2);
-                return Math.abs(uTunnel2) < tunHalfWidth;
-            }
-        }
-        return false;
+        return caveDensity > 0.0;
     }
 
     @Override
@@ -1622,7 +1787,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     int surfaceY = getSurfaceHeight(worldX, worldZ);
 
                     double caveNoise = getAbyssNoise(worldX, worldZ);
-                    double abyssIntensity = Mth.clamp((caveNoise - 0.20) / 0.03, 0.0, 1.0);
+                    double abyssT = Mth.clamp((caveNoise - 0.15) / 0.07, 0.0, 1.0);
 
                     double caveFloorSmooth = getCaveFloorHeightDouble(worldX, worldZ, -115);
                     double caveCeilingSmooth = getCaveCeilingHeightDouble(worldX, worldZ, surfaceY);
@@ -1649,47 +1814,65 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     boolean isHighlandColumn = isHighlandBiome(surfaceBiome);
                     boolean isMainland = (ebs == null) || ebs.isMainland(worldX, worldZ);
 
-                    // Silent Depths underwater cave + entrance parameters (hoisted once per column)
+                    // Evaluate humidity once per eligible column: feeds Scarlet lithology and tapers Elysian caverns closed
+                    // in solid rock BEFORE reaching Scarlet Caves (zero other biomes or sheared cave cuts inside Scarlet).
+                    double colHumNoise = (!isOceanColumn && !isDesertColumn && !isHighlandColumn)
+                            ? getScarletHumidityNoise(worldX, worldZ)
+                            : -2.0;
+                    double oceanFloorFactor = Mth.clamp((surfaceY - 58.0) / 12.0, 0.0, 1.0);
+                    double abyssOceanFade = oceanFloorFactor * oceanFloorFactor * (3.0 - 2.0 * oceanFloorFactor);
+                    double abyssScarletFade = 1.0;
+                    if (!isOceanColumn && !isDesertColumn && !isHighlandColumn) {
+                        double sf = Mth.clamp((0.45 - colHumNoise) / 0.15, 0.0, 1.0);
+                        abyssScarletFade = sf * sf * (3.0 - 2.0 * sf);
+                    }
+                    double abyssIntensity = abyssT * abyssT * (3.0 - 2.0 * abyssT) * abyssScarletFade * abyssOceanFade;
+
+                    // Silent Depths & Sunken Trench underwater cave + entrance parameters (hoisted once per column)
                     double depthsCaveMask = 0.0;
+                    double trenchAbsCrack = 1.0;
                     DepthsEntranceCandidate entrance = null;
                     int entranceDistSq = Integer.MAX_VALUE;
                     double entranceJoinBoost = 0.0;
-                    if (isDepthsColumn && ebs != null && surfaceY <= -50 && surfaceY >= -111) {
-                        double margin = ebs.getDynamicAbyssThreshold(worldX, worldZ) - ebs.sampleContinentalness(worldX, worldZ);
-                        if (margin > 0.014) {
-                            depthsCaveMask = Mth.clamp((margin - 0.014) / 0.022, 0.0, 1.0)
-                                    * Mth.clamp((surfaceY + 111.0) / 5.0, 0.0, 1.0);
-                        }
-                        int gx = Math.floorDiv(worldX, SILENT_CAVE_ENTRANCE_GRID);
-                        int gz = Math.floorDiv(worldZ, SILENT_CAVE_ENTRANCE_GRID);
-                        DepthsEntranceCandidate candidate = getDepthsEntranceForCell(gx, gz, ebs);
-                        if (candidate.valid) {
-                            int edx = worldX - candidate.centerX;
-                            int edz = worldZ - candidate.centerZ;
-                            entranceDistSq = edx * edx + edz * edz;
-                            if (entranceDistSq <= 22 * 22) {
-                                entrance = candidate;
-                                entranceJoinBoost = Mth.clamp(1.0 - Math.sqrt(entranceDistSq) / 22.0, 0.0, 1.0) * 0.12;
+                    if (isDepthsOrTrench && ebs != null && surfaceY <= -42) {
+                        trenchAbsCrack = ebs.sampleSunkenTrenchAbsCrack(worldX, worldZ);
+                        if (isDepthsColumn && surfaceY >= -113) {
+                            double margin = ebs.getDynamicAbyssThreshold(worldX, worldZ) - ebs.sampleContinentalness(worldX, worldZ);
+                            if (margin > 0.003) {
+                                depthsCaveMask = Mth.clamp((margin - 0.003) / 0.017, 0.0, 1.0)
+                                        * Mth.clamp((surfaceY + 114.0) / 5.0, 0.0, 1.0);
+                            }
+                            int gx = Math.floorDiv(worldX, SILENT_CAVE_ENTRANCE_GRID);
+                            int gz = Math.floorDiv(worldZ, SILENT_CAVE_ENTRANCE_GRID);
+                            DepthsEntranceCandidate candidate = getDepthsEntranceForCell(gx, gz, ebs);
+                            if (candidate.valid) {
+                                int edx = worldX - candidate.centerX;
+                                int edz = worldZ - candidate.centerZ;
+                                entranceDistSq = edx * edx + edz * edz;
+                                if (entranceDistSq <= 22 * 22) {
+                                    entrance = candidate;
+                                    entranceJoinBoost = Mth.clamp(1.0 - Math.sqrt(entranceDistSq) / 22.0, 0.0, 1.0) * 0.12;
+                                }
                             }
                         }
                     }
 
-                    // Hoist column-invariant lithology & cave ceiling bounds out of the Y loop
-                    int maxAllowedCaveY = isMainland ? (surfaceY - 15) : Math.min(surfaceY - 25, 32);
-                    int ceilingTaperStart = isMainland ? (surfaceY - 35) : Math.min(surfaceY - 35, 18);
+                    // Hoist column-invariant lithology & smooth coastal cave ceiling bounds out of the Y loop
+                    double coastalSeal = Mth.clamp((73.0 - (double) surfaceY) / 16.0, 0.0, 1.0);
+                    int maxAllowedCaveY = (int) Math.floor((double) surfaceY - (15.0 + 5.0 * coastalSeal));
+                    int ceilingTaperStart = maxAllowedCaveY - 18;
                     boolean scarletBorderActive = false;
-                    boolean scarletSolidBase = isScarletColumn && isMainland && !isHighlandColumn
-                            && !isOceanColumn && !isBeachColumn && SCARLET_STONE != null && SCARLET_DEEPSLATE != null;
-                    double colHumNoise = -1.0;
+                    boolean scarletSolidBase = isScarletColumn && !isHighlandColumn
+                            && !isOceanColumn && SCARLET_STONE != null && SCARLET_DEEPSLATE != null;
                     int colScarletBottomY = Integer.MAX_VALUE;
-                    if (isMainland && !isDesertColumn && !isOceanColumn && !isBeachColumn && !isHighlandColumn
+                    if (!isDesertColumn && !isOceanColumn && !isHighlandColumn
+                            && oceanFloorFactor > 0.35
                             && SCARLET_STONE != null && SCARLET_DEEPSLATE != null) {
-                        colHumNoise = getScarletHumidityNoise(worldX, worldZ);
-                        if (colHumNoise > 0.15 && colHumNoise < 0.25) {
+                        if (colHumNoise > 0.40 && colHumNoise < 0.54) {
                             scarletBorderActive = true;
                             colScarletBottomY = ElderwoodsBiomeSource.getScarletCaveBottomY(worldX, worldZ);
-                        } else if (colHumNoise >= 0.25 || scarletSolidBase) {
-                            scarletSolidBase = colHumNoise >= 0.25 || isScarletColumn;
+                        } else if (colHumNoise >= 0.54 || scarletSolidBase) {
+                            scarletSolidBase = colHumNoise >= 0.54 || isScarletColumn;
                             if (scarletSolidBase) {
                                 colScarletBottomY = ElderwoodsBiomeSource.getScarletCaveBottomY(worldX, worldZ);
                             }
@@ -1698,15 +1881,18 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         scarletSolidBase = false;
                     }
 
+                    boolean prevWasBasalt = false;
                     for (int y = MIN_Y; y <= maxY; y++) {
                         pos.set(worldX, y, worldZ);
 
                         if (y <= MIN_Y + 4) {
                             chunk.setBlockState(pos, BEDROCK, false);
+                            prevWasBasalt = false;
                             continue;
                         }
 
                         if (y > surfaceY) {
+                            prevWasBasalt = false;
                             if (isScarletSwampColumn && isMainland && y <= BASE_HEIGHT - 2) {
                                 chunk.setBlockState(pos, BLOOD_WATER, false);
                                 continue;
@@ -1720,27 +1906,40 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         }
 
                         // Silent Depths & Sunken Trenches: purely Abyssal Basalt + WATER-filled underwater caves/entrances.
-                        // Never enters dry Elysian caverns or dry cheese caves/aquifers -> zero air pockets possible.
+                        // Hydrothermal caves extending from trenches receive magma/aether-magma floor veins.
                         if (isDepthsOrTrench) {
-                            if (y > MIN_Y + 6 && isDepthsColumn
-                                    && (depthsCaveMask > 0.0 || (entrance != null && entranceDistSq <= 20 * 20))
+                            if (y > MIN_Y + 6
+                                    && (depthsCaveMask > 0.0 || trenchAbsCrack < 0.092 || (!isTrenchColumn && entrance != null))
                                     && isSilentDepthsWaterCave(worldX, y, worldZ, surfaceY, depthsCaveMask,
-                                            entrance, entranceDistSq, entranceJoinBoost)) {
+                                            trenchAbsCrack, isTrenchColumn, entrance, entranceDistSq, entranceJoinBoost)) {
+                                if (prevWasBasalt && y <= -96 && trenchAbsCrack < 0.125) {
+                                    double trenchT = 1.0 - Mth.clamp((trenchAbsCrack - 0.035) / 0.090, 0.0, 1.0);
+                                    double magmaNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                                            (float) (worldX * 0.09f), (float) (worldZ * 0.09f), 2) / 0.32;
+                                    if ((magmaNoise + (trenchT - 0.5) * 0.9) > 0.05) {
+                                        pos.set(worldX, y - 1, worldZ);
+                                        BlockState floorMagma = (magmaNoise > 0.35 && AETHER_MAGMA != null) ? AETHER_MAGMA : MAGMA_STATE;
+                                        chunk.setBlockState(pos, floorMagma, false);
+                                        pos.set(worldX, y, worldZ);
+                                    }
+                                }
                                 chunk.setBlockState(pos, WATER_STATE, false);
+                                prevWasBasalt = false;
                                 continue;
                             }
                             chunk.setBlockState(pos, ABYSSAL_BASALT, false);
+                            prevWasBasalt = true;
                             continue;
                         }
 
-                        // Seabed Crust (Solid Rock Shell protecting Silent Oceans floor from caves)
-                        if (isOceanColumn && surfaceY < BASE_HEIGHT - 1 && y >= surfaceY - 14) {
+                        // Silent Oceans: solid abyssal basalt down to bedrock — zero empty air pockets below seabed
+                        if (isOceanColumn) {
                             chunk.setBlockState(pos, ABYSSAL_BASALT, false);
                             continue;
                         }
 
                         if (y < MIN_Y + 6) {
-                            chunk.setBlockState(pos, isOceanColumn ? ABYSSAL_BASALT : DEEPSLATE, false);
+                            chunk.setBlockState(pos, DEEPSLATE, false);
                             continue;
                         }
 
@@ -1756,8 +1955,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
                         // General Cave Generation (3D Cheese Caves & Tunnels with Vanilla-Style Aquifers)
                         if (y < maxAllowedCaveY && y >= -108 && (density >= 0.45 || caveNoise <= 0.10)) {
-                            double taperThreshold = 0.15;
-                            boolean allowTunnel = true;
+                            double taperThreshold = 0.15 + (1.0 - oceanFloorFactor) * 1.6;
+                            boolean allowTunnel = oceanFloorFactor >= 0.35;
 
                             if (y < -94) {
                                 double taper = (-94 - y) / 14.0;
@@ -1830,15 +2029,13 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         BlockState stoneState = STONE;
                         BlockState deepslateState = DEEPSLATE;
 
-                        if (isOceanColumn) {
-                            stoneState = ABYSSAL_BASALT;
-                            deepslateState = ABYSSAL_BASALT;
-                        } else if ((scarletSolidBase || scarletBorderActive) && y >= colScarletBottomY - 3) {
+                        if ((scarletSolidBase || scarletBorderActive) && (!isBeachColumn || y < surfaceY - 12)
+                                && y >= colScarletBottomY - 3) {
                             boolean placeScarlet = scarletSolidBase;
                             if (scarletBorderActive) {
-                                double dither = net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
-                                        (float) worldX * 0.1f, (float) y * 0.1f, (float) worldZ * 0.1f, 2) * 0.05;
-                                placeScarlet = (colHumNoise + dither) > 0.2;
+                                double dither = (net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
+                                        (float) worldX * 0.1f, (float) y * 0.1f, (float) worldZ * 0.1f, 2) / 0.32) * 0.08;
+                                placeScarlet = (colHumNoise + dither) > 0.48;
                             }
                             if (placeScarlet && y < colScarletBottomY + 3) {
                                 double floorDither = (net.ganyusbathwater.oririmod.util.FastNoise.fbm3D(
@@ -2007,7 +2204,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             } else if (y <= surfaceY - 3) {
                 states[i] = STONE;
             } else if (y <= surfaceY) {
-                states[i] = (y == surfaceY) ? ELDERWOODS_GRASS : DIRT;
+                states[i] = (y == surfaceY) ? GRASS_BLOCK : DIRT;
             } else {
                 states[i] = AIR;
             }

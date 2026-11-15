@@ -464,10 +464,6 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.EMISSIVE_CLOCKER.get());
 
                 tag(BlockTags.MINEABLE_WITH_SHOVEL)
-                                .add(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())
-                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
-                                .add(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get())
-                                .add(ModBlocks.HIGHLANDS_GRASS_BLOCK.get())
                                 .add(ModBlocks.SOL_SAND.get())
                                 .add(ModBlocks.ABYSS_SAND.get())
                                 .add(ModBlocks.BLOOD_SLUDGE.get())
@@ -535,12 +531,6 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
                 tag(BlockTags.CLIMBABLE)
                                 .add(ModBlocks.SCARLET_VINE.get());
-
-                tag(BlockTags.DIRT)
-                                .add(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())
-                                .add(ModBlocks.SCARLET_GRASS_BLOCK.get())
-                                .add(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get())
-                                .add(ModBlocks.HIGHLANDS_GRASS_BLOCK.get());
 
                 tag(BlockTags.DRIPSTONE_REPLACEABLE)
                                 .add(ModBlocks.SCARLET_STONE.get())

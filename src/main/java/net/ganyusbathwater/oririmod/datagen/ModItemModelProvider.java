@@ -99,8 +99,6 @@ public class ModItemModelProvider extends ItemModelProvider {
                 basicItem(ModItems.ELDER_CHEST_BOAT.get());
 
                 // Scarlet Blocks
-                simpleBlockItem(ModBlocks.ELDERWOODS_GRASS_BLOCK.get());
-                simpleBlockItem(ModBlocks.SCARLET_GRASS_BLOCK.get());
                 simpleBlockItem(ModBlocks.SCARLET_LOG.get());
                 simpleBlockItem(ModBlocks.STRIPPED_SCARLET_LOG.get());
                 simpleBlockItem(ModBlocks.SCARLET_PLANKS.get());
@@ -270,15 +268,6 @@ public class ModItemModelProvider extends ItemModelProvider {
                 wallItem(ModBlocks.CALICHE_BRICK_WALL, ModBlocks.CALICHE_BRICKS);
                 simpleBlockItem(ModBlocks.CHISELED_CALICHE.get());
 
-                simpleBlockItem(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get());
-                withExistingParent(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/golden_savanna_short_grass"));
-                withExistingParent(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/golden_savanna_tall_grass_top"));
-
-                // ===== ELDER HIGHLANDS =====
-                simpleBlockItem(ModBlocks.HIGHLANDS_GRASS_BLOCK.get());
-                withExistingParent(ModBlocks.HIGHLANDS_SHORT_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/highlands_short_grass"));
-                withExistingParent(ModBlocks.HIGHLANDS_TALL_GRASS.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/highlands_tall_grass_top"));
-
                 // ===== THE SILENT DEPTHS =====
                 simpleBlockItem(ModBlocks.ABYSSAL_BASALT.get());
                 simpleBlockItem(ModBlocks.ABYSSAL_BASALT_STAIRS.get());
@@ -373,7 +362,6 @@ public class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(ModBlocks.UPGRADED_WARPED_FUNGUS.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", mcLoc("block/warped_fungus"));
                 withExistingParent(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/abyss_crown_sapling"));
                 withExistingParent(ModBlocks.UPGRADED_EPOCH_SAPLING.getId().getPath(), ResourceLocation.parse("item/generated")).texture("layer0", modLoc("block/epoch_sapling"));
-                saplingItem(ModBlocks.SCARLET_GRASS);
                 saplingItem(ModBlocks.SCARLET_TOOTH_LEAVES);
                 simpleBlockItem(ModBlocks.SCARLET_LILY.get());
 

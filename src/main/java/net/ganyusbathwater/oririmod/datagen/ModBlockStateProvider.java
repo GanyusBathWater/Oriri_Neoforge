@@ -111,15 +111,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 saplingBlock(ModBlocks.ELDER_SAPLING);
                 saplingBlock(ModBlocks.STAR_HERB);
 
-                // Elderwoods Blocks
-                simpleBlockWithItem(ModBlocks.ELDERWOODS_GRASS_BLOCK.get(),
-                                models().cubeBottomTop("elderwoods_grass_block",
-                                                modLoc("block/elderwoods_grass_block_side"),
-                                                mcLoc("block/dirt"),
-                                                modLoc("block/elderwoods_grass_block_top")));
-                
                 // Scarlet Blocks
-                grassBlockWithItem(ModBlocks.SCARLET_GRASS_BLOCK, 1);
                 blockWithItem(ModBlocks.SCARLET_LEAVES, 3); // Cutout Mipped
 
                 // Logs and Wood
@@ -259,10 +251,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 models().cross("upgraded_warped_fungus", mcLoc("block/warped_fungus"))
                                                 .renderType("cutout"));
 
-                // Vegetation
-                simpleBlockWithItem(ModBlocks.SCARLET_GRASS.get(),
-                                models().cross("scarlet_grass", modLoc("block/scarlet_grass")).renderType("cutout"));
-
                 // Tooth Leaves - cross model
                 simpleBlockWithItem(ModBlocks.SCARLET_TOOTH_LEAVES.get(),
                                 models().cross("scarlet_tooth_leaves", modLoc("block/scarlet_tooth_leaves"))
@@ -378,23 +366,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.CALICHE_BRICK_SLAB.get(), modLoc("block/caliche_bricks"), modLoc("block/caliche_bricks"));
                 wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.CALICHE_BRICK_WALL.get(), modLoc("block/caliche_bricks"));
                 blockWithItem(ModBlocks.CHISELED_CALICHE, 1);
-
-                simpleBlockWithItem(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get(),
-                                models().cubeBottomTop("golden_savanna_grass_block",
-                                                modLoc("block/golden_savanna_grass_block_side"),
-                                                mcLoc("block/dirt"),
-                                                modLoc("block/golden_savanna_grass_block_top")));
-                simpleBlockWithItem(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get(), models().cross("golden_savanna_short_grass", modLoc("block/golden_savanna_short_grass")).renderType("cutout"));
-                goldenSavannaTallGrassBlock();
-
-                // ===== ELDER HIGHLANDS =====
-                simpleBlockWithItem(ModBlocks.HIGHLANDS_GRASS_BLOCK.get(),
-                                models().cubeBottomTop("highlands_grass_block",
-                                                modLoc("block/highlands_grass_block_side"),
-                                                mcLoc("block/dirt"),
-                                                modLoc("block/highlands_grass_block_top")));
-                simpleBlockWithItem(ModBlocks.HIGHLANDS_SHORT_GRASS.get(), models().cross("highlands_short_grass", modLoc("block/highlands_short_grass")).renderType("cutout"));
-                highlandsTallGrassBlock();
 
                 // ===== THE SILENT DEPTHS =====
                 blockWithItem(ModBlocks.ABYSS_SAND, 1);
@@ -827,23 +798,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 builder.part().modelFile(nosideAlt).addModel().condition(BlockStateProperties.EAST, false).end();
         }
 
-        private void grassBlockWithItem(DeferredBlock<?> deferredBlock, int renderType) {
-                String name = (deferredBlock.getId().getPath());
-                ResourceLocation top = modLoc("block/" + name + "_top");
-                ResourceLocation bottom = modLoc("block/" + name + "_bottom");
-                ResourceLocation side = modLoc("block/" + name + "_side");
-
-                BlockModelBuilder model = models().cubeBottomTop(name, side, bottom, top);
-                if (renderType > 1) {
-                        model.texture("particle", side);
-                        model.renderType(getRenderType(renderType));
-                }
-
-                simpleBlockWithItem(
-                                deferredBlock.get(),
-                                model);
-        }
-
         private void pillarBlockWithItem(DeferredBlock<?> deferredBlock, int renderType) {
                 String name = (deferredBlock.getId().getPath());
                 ResourceLocation side = modLoc("block/" + name + "_side");
@@ -1108,36 +1062,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 if (!shade) el8.shade(false).emissivity(15, 15).ao(false);
                 el8.face(Direction.NORTH).uvs(0, 0, 5, 8).texture(textureKey).end()
                    .face(Direction.SOUTH).uvs(0, 0, 5, 8).texture(textureKey).end();
-        }
-
-        private void goldenSavannaTallGrassBlock() {
-                Block block = ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.get();
-                getVariantBuilder(block).forAllStates(state -> {
-                        net.minecraft.world.level.block.state.properties.DoubleBlockHalf half = state.getValue(net.minecraft.world.level.block.DoublePlantBlock.HALF);
-                        String halfTexture = half == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER ? "golden_savanna_tall_grass_bottom" : "golden_savanna_tall_grass_top";
-                        String modelName = "golden_savanna_tall_grass_" + half.getSerializedName();
-
-                        BlockModelBuilder model = models().withExistingParent(modelName, mcLoc("block/cross"))
-                                        .texture("cross", modLoc("block/" + halfTexture))
-                                        .renderType("cutout");
-
-                        return ConfiguredModel.builder().modelFile(model).build();
-                });
-        }
-
-        private void highlandsTallGrassBlock() {
-                Block block = ModBlocks.HIGHLANDS_TALL_GRASS.get();
-                getVariantBuilder(block).forAllStates(state -> {
-                        net.minecraft.world.level.block.state.properties.DoubleBlockHalf half = state.getValue(net.minecraft.world.level.block.DoublePlantBlock.HALF);
-                        String halfTexture = half == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER ? "highlands_tall_grass_bottom" : "highlands_tall_grass_top";
-                        String modelName = "highlands_tall_grass_" + half.getSerializedName();
-
-                        BlockModelBuilder model = models().withExistingParent(modelName, mcLoc("block/cross"))
-                                        .texture("cross", modLoc("block/" + halfTexture))
-                                        .renderType("cutout");
-
-                        return ConfiguredModel.builder().modelFile(model).build();
-                });
         }
 
         private void abyssalBasaltBricksWithEmissive() {

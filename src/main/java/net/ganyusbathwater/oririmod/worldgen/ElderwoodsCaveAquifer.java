@@ -84,6 +84,15 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
     private final double barrierSeedOffset;
     private final double warpSeedOffset;
 
+    private static final int OUTER_RING_PAD = 2;
+    private static final int OUTER_RING_SPAN = 16 + OUTER_RING_PAD * 2;
+
+    private final int chunkMinX;
+    private final int chunkMinZ;
+    private final int ringOriginX;
+    private final int ringOriginZ;
+    private final int buildHeight;
+    private final int predictedWordCountY;
     private final int minGridX;
     private final int minGridY;
     private final int minGridZ;
@@ -93,6 +102,11 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
     private final int[] levelCache;
     private final BlockState[] typeCache;
     private final boolean[] statusComputed;
+
+    @Nullable
+    private long[] predictedFluidKnown;
+    @Nullable
+    private long[] predictedFluidValue;
 
     private boolean shouldScheduleFluidUpdate;
     private final MutableDouble barrierScratch = new MutableDouble(Double.NaN);
@@ -137,6 +151,12 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
         this.seed = seed;
         this.minBuildY = minY;
         this.maxBuildY = minY + height - 1;
+        this.chunkMinX = chunkPos.getMinBlockX();
+        this.chunkMinZ = chunkPos.getMinBlockZ();
+        this.ringOriginX = this.chunkMinX - OUTER_RING_PAD;
+        this.ringOriginZ = this.chunkMinZ - OUTER_RING_PAD;
+        this.buildHeight = height;
+        this.predictedWordCountY = (height + 63) >>> 6;
         this.surfaceHeightFn = surfaceHeightFn;
         this.abyssNoiseFn = abyssNoiseFn;
         this.isScarletCaveFn = isScarletCaveFn != null ? isScarletCaveFn : (x, y, z) -> false;
@@ -221,18 +241,36 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
         int startZ = bz - radiusXZ;
         int endZ = bz + radiusXZ;
 
+        // Scan fast in-chunk columns first before evaluating expensive cross-chunk Voronoi predictions
+        int inStartX = Math.max(chunkMinX, startX);
+        int inEndX = Math.min(chunkMaxX, endX);
+        int inStartZ = Math.max(chunkMinZ, startZ);
+        int inEndZ = Math.min(chunkMaxZ, endZ);
+        for (int nx = inStartX; nx <= inEndX; nx++) {
+            for (int nz = inStartZ; nz <= inEndZ; nz++) {
+                for (int ny = startY; ny <= endY; ny++) {
+                    cursor.set(nx, ny, nz);
+                    if (!chunk.getFluidState(cursor).isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (startX >= chunkMinX && endX <= chunkMaxX && startZ >= chunkMinZ && endZ <= chunkMaxZ) {
+            return false;
+        }
+
         boolean prevUpdate = this.shouldScheduleFluidUpdate;
         try {
             for (int nx = startX; nx <= endX; nx++) {
+                boolean xInside = nx >= chunkMinX && nx <= chunkMaxX;
                 for (int nz = startZ; nz <= endZ; nz++) {
-                    boolean inChunk = nx >= chunkMinX && nx <= chunkMaxX && nz >= chunkMinZ && nz <= chunkMaxZ;
+                    if (xInside && nz >= chunkMinZ && nz <= chunkMaxZ) {
+                        continue;
+                    }
                     for (int ny = startY; ny <= endY; ny++) {
-                        if (inChunk) {
-                            cursor.set(nx, ny, nz);
-                            if (!chunk.getFluidState(cursor).isEmpty()) {
-                                return true;
-                            }
-                        } else if (isPredictedFluidAt(nx, ny, nz)) {
+                        if (isPredictedFluidCached(nx, ny, nz)) {
                             return true;
                         }
                     }
@@ -242,6 +280,31 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
         } finally {
             this.shouldScheduleFluidUpdate = prevUpdate;
         }
+    }
+
+    private boolean isPredictedFluidCached(int nx, int ny, int nz) {
+        int lx = nx - this.ringOriginX;
+        int lz = nz - this.ringOriginZ;
+        int ly = ny - this.minBuildY;
+        if (lx < 0 || lx >= OUTER_RING_SPAN || lz < 0 || lz >= OUTER_RING_SPAN || ly < 0 || ly >= this.buildHeight) {
+            return isPredictedFluidAt(nx, ny, nz);
+        }
+        if (this.predictedFluidKnown == null) {
+            int words = OUTER_RING_SPAN * OUTER_RING_SPAN * this.predictedWordCountY;
+            this.predictedFluidKnown = new long[words];
+            this.predictedFluidValue = new long[words];
+        }
+        int wordIdx = (lx * OUTER_RING_SPAN + lz) * this.predictedWordCountY + (ly >>> 6);
+        long bit = 1L << (ly & 63);
+        if ((this.predictedFluidKnown[wordIdx] & bit) != 0L) {
+            return (this.predictedFluidValue[wordIdx] & bit) != 0L;
+        }
+        boolean fluid = isPredictedFluidAt(nx, ny, nz);
+        this.predictedFluidKnown[wordIdx] |= bit;
+        if (fluid) {
+            this.predictedFluidValue[wordIdx] |= bit;
+        }
+        return fluid;
     }
 
     private boolean isPredictedFluidAt(int x, int y, int z) {
@@ -437,6 +500,36 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
         int cy = BlockPos.getY(packedCenter);
         int cz = BlockPos.getZ(packedCenter);
 
+        int localSurface = surfaceHeightFn.applyAsInt(cx, cz);
+        // Since minNeighborSurface <= localSurface and maxSafeLevel <= minNeighborSurface - 11,
+        // any center at or above localSurface is strictly above maxSafeLevel + 10.
+        if (cy > localSurface - 1) {
+            this.levelCache[idx] = WAY_BELOW_MIN_Y;
+            this.typeCache[idx] = AIR;
+            this.statusComputed[idx] = true;
+            return;
+        }
+
+        double regionalBasin = FastNoise.fbm3D(
+                (float) ((cx + floodSeedOffset) * 0.0082f),
+                (float) (cy * 0.011f),
+                (float) ((cz - floodSeedOffset) * 0.0082f),
+                2) / 0.28;
+        double localPocket = FastNoise.fbm3D(
+                (float) ((cx - floodSeedOffset) * 0.020f),
+                (float) (cy * 0.026f),
+                (float) ((cz + floodSeedOffset) * 0.020f),
+                2) / 0.28;
+        double floodedness = Mth.clamp(regionalBasin * 0.65 + localPocket * 0.35, -1.0, 1.0);
+
+        // randomFloodThreshold = lerp(depthT, 0.44, 0.88) is always >= 0.44; bail before expensive 13-tap checks
+        if (floodedness <= 0.44) {
+            this.levelCache[idx] = WAY_BELOW_MIN_Y;
+            this.typeCache[idx] = AIR;
+            this.statusComputed[idx] = true;
+            return;
+        }
+
         if (isNearAbyss(cx, cz)) {
             this.levelCache[idx] = WAY_BELOW_MIN_Y;
             this.typeCache[idx] = AIR;
@@ -452,11 +545,10 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
             return;
         }
 
-        int localSurface = surfaceHeightFn.applyAsInt(cx, cz);
-
         // Keep aquifers well away from open air and protect the ocean floor basalt crust
-        int minNeighborSurface = Integer.MAX_VALUE;
-        for (int[] offset : SURFACE_OFFSETS) {
+        int minNeighborSurface = localSurface;
+        for (int i = 1; i < SURFACE_OFFSETS.length; i++) {
+            int[] offset = SURFACE_OFFSETS[i];
             int s = surfaceHeightFn.applyAsInt(cx + offset[0], cz + offset[1]);
             if (s < minNeighborSurface) {
                 minNeighborSurface = s;
@@ -478,18 +570,6 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
         // Sparse, cohesive regional reservoirs (~12-16% of deep cave volume instead of flooded grids)
         int depthBelowCap = Math.max(0, maxSafeLevel - cy);
         double depthT = Mth.clampedMap(depthBelowCap, 0.0, 56.0, 1.0, 0.0);
-        double regionalBasin = FastNoise.fbm3D(
-                (float) ((cx + floodSeedOffset) * 0.0082f),
-                (float) (cy * 0.011f),
-                (float) ((cz - floodSeedOffset) * 0.0082f),
-                2) / 0.28;
-        double localPocket = FastNoise.fbm3D(
-                (float) ((cx - floodSeedOffset) * 0.020f),
-                (float) (cy * 0.026f),
-                (float) ((cz + floodSeedOffset) * 0.020f),
-                2) / 0.28;
-        double floodedness = Mth.clamp(regionalBasin * 0.65 + localPocket * 0.35, -1.0, 1.0);
-
         double randomFloodThreshold = Mth.lerp(depthT, 0.44, 0.88);
 
         int resolvedLevel;

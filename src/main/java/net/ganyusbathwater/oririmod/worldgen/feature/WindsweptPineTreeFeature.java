@@ -38,9 +38,7 @@ public class WindsweptPineTreeFeature extends Feature<NoneFeatureConfiguration> 
         // 1. Ground Validation
         BlockPos belowPos = origin.below();
         BlockState belowState = level.getBlockState(belowPos);
-        boolean validGround = belowState.is(ModBlocks.HIGHLANDS_GRASS_BLOCK.get()) ||
-                belowState.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get()) ||
-                belowState.is(Blocks.GRASS_BLOCK) ||
+        boolean validGround = belowState.is(Blocks.GRASS_BLOCK) ||
                 belowState.is(Blocks.DIRT) ||
                 belowState.is(Blocks.PODZOL) ||
                 belowState.is(Blocks.COARSE_DIRT) ||

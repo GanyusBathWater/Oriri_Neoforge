@@ -322,12 +322,6 @@ public class ModBlocks {
         public static final DeferredBlock<Block> POTTED_STAR_HERB = registerPottedBlock("potted_star_herb", STAR_HERB);
 
         // ===== NEW SCARLET BLOCKS =====
-        public static final DeferredBlock<Block> ELDERWOODS_GRASS_BLOCK = registerBlock("elderwoods_grass_block",
-                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderwoodsGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
-                        
-        public static final DeferredBlock<Block> SCARLET_GRASS_BLOCK = registerBlock("scarlet_grass_block",
-                        () -> new ScarletGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
-
         public static final DeferredBlock<Block> SCARLET_STEM = registerBlock("scarlet_stem",
                         () -> new ModFlammableRotatedPillarBlock(
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD)));
@@ -335,9 +329,6 @@ public class ModBlocks {
         public static final DeferredBlock<Block> STRIPPED_SCARLET_STEM = registerBlock("stripped_scarlet_stem",
                         () -> new ModFlammableRotatedPillarBlock(
                                         BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD)));
-
-        public static final DeferredBlock<Block> SCARLET_GRASS = registerBlock("scarlet_grass",
-                        () -> new TallGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)));
 
         public static final DeferredBlock<Block> SCARLET_TOOTH_LEAVES = registerBlock("scarlet_tooth_leaves",
                         () -> new ScarletToothLeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
@@ -967,21 +958,6 @@ public class ModBlocks {
                         () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_WALL)));
         public static final DeferredBlock<Block> CHISELED_CALICHE = registerBlock("chiseled_caliche",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CHISELED_STONE_BRICKS)));
-
-        public static final DeferredBlock<Block> GOLDEN_SAVANNA_GRASS_BLOCK = registerBlock("golden_savanna_grass_block",
-                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderwoodsGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
-        public static final DeferredBlock<Block> GOLDEN_SAVANNA_SHORT_GRASS = registerBlock("golden_savanna_short_grass",
-                        () -> new net.minecraft.world.level.block.TallGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)));
-        public static final DeferredBlock<Block> GOLDEN_SAVANNA_TALL_GRASS = registerBlock("golden_savanna_tall_grass",
-                        () -> new DoublePlantBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)));
-
-        // ===== ELDER HIGHLANDS VEGETATION =====
-        public static final DeferredBlock<Block> HIGHLANDS_GRASS_BLOCK = registerBlock("highlands_grass_block",
-                        () -> new net.ganyusbathwater.oririmod.block.custom.ElderwoodsGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK)));
-        public static final DeferredBlock<Block> HIGHLANDS_SHORT_GRASS = registerBlock("highlands_short_grass",
-                        () -> new net.minecraft.world.level.block.TallGrassBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)));
-        public static final DeferredBlock<Block> HIGHLANDS_TALL_GRASS = registerBlock("highlands_tall_grass",
-                        () -> new DoublePlantBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)));
 
         // ===== THE SILENT DEPTHS (DEEP OCEANS) =====
         public static final DeferredBlock<Block> ABYSS_SAND = registerBlock("abyss_sand",

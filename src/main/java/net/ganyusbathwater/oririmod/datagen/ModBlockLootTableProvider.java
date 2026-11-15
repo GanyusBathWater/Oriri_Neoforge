@@ -127,15 +127,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.SCARLET_MOSS.get());
         add(ModBlocks.SCARLET_VINE.get(), block -> createShearsOnlyDrop(block));
         dropSelf(ModBlocks.STAR_HERB.get());
-        add(ModBlocks.ELDERWOODS_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
-        add(ModBlocks.SCARLET_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
         dropSelf(ModBlocks.SCARLET_STEM.get());
         dropSelf(ModBlocks.STRIPPED_SCARLET_STEM.get());
-        this.add(ModBlocks.SCARLET_GRASS.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable()
-                .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                        .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
-                        .when(net.minecraft.world.level.storage.loot.predicates.MatchTool.toolMatches(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(net.minecraft.world.item.Items.SHEARS)).or(this.hasSilkTouch()))
-                        .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block))));
         dropSelf(ModBlocks.SCARLET_TOOTH_LEAVES.get());
         this.add(ModBlocks.SCARLET_LILY.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable()
                 .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
@@ -345,15 +338,6 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.CALICHE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.CALICHE_BRICK_SLAB.get()));
         dropSelf(ModBlocks.CALICHE_BRICK_WALL.get());
         dropSelf(ModBlocks.CHISELED_CALICHE.get());
-
-        add(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
-        add(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get(), block -> createShearsDispatchTable(block, applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.WHEAT_SEEDS).when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.125F)))));
-        add(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS.get(), block -> createDoublePlantWithSeedDrops(block, ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS.get()));
-
-        // ===== ELDER HIGHLANDS =====
-        add(ModBlocks.HIGHLANDS_GRASS_BLOCK.get(), block -> createSingleItemTableWithSilkTouch(block, net.minecraft.world.level.block.Blocks.DIRT));
-        add(ModBlocks.HIGHLANDS_SHORT_GRASS.get(), block -> createShearsDispatchTable(block, applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.WHEAT_SEEDS).when(net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance(0.125F)))));
-        add(ModBlocks.HIGHLANDS_TALL_GRASS.get(), block -> createDoublePlantWithSeedDrops(block, ModBlocks.HIGHLANDS_SHORT_GRASS.get()));
 
         // ===== THE SILENT DEPTHS =====
         dropSelf(ModBlocks.ABYSS_SAND.get());

@@ -110,12 +110,15 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
 
             double radiusAtY = Mth.lerp(depthProgress, maxRadius, minRadius);
 
-            // Wobble/Noise
-            double wobble = Math.sin(centerX * 0.2 + y * 0.1) * Math.cos(centerZ * 0.2 + y * 0.1) * 1.5;
-            double extraNoise = originRandom.nextFloat() * 1.5;
+            // Smooth organic rock irregularity (no random horizontal per-Y shelf jitter or vertical biome cuts)
+            double wobble = Math.sin(centerX * 0.14 + y * 0.22) * Math.cos(centerZ * 0.14 + y * 0.19) * 1.1;
+            if (depthProgress > 0.78) {
+                double bottomTaper = 1.0 - (depthProgress - 0.78) / 0.22;
+                radiusAtY *= Mth.clamp(bottomTaper, 0.25, 1.0);
+            }
 
-            radiusAtY += wobble + extraNoise;
-            if (y < -48 || y <= minBuildY) {
+            radiusAtY += wobble;
+            if (y < -48 || y <= minBuildY || radiusAtY <= 0.8) {
                 continue;
             }
 
@@ -145,12 +148,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
 
                     mutablePos.set(worldX, y, worldZ);
 
-                    // Check target biome only for blocks actually inside the carved cylinder
-                    Holder<Biome> targetBiome = biomeAccessor.apply(mutablePos);
-                    if (!targetBiome.is(SCARLET_SWAMP_KEY) && !targetBiome.is(SCARLET_FOREST_KEY) && !targetBiome.is(SCARLET_CAVES_KEY)) {
-                        continue;
-                    }
-
+                    // Once an entrance originates inside mainland Scarlet Forest/Swamp, let its natural
+                    // tapered cylinder finish smoothly instead of slicing flat vertical walls on 4x4 biome edges.
                     BlockState blockState = chunk.getBlockState(mutablePos);
                     if (blockState.is(Blocks.WATER) || blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)
                             || blockState.is(abyssalBasalt.getBlock()) || blockState.is(ModBlocks.ABYSS_SAND.get())) {

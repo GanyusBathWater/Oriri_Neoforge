@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +26,8 @@ import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasBinding
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,8 +139,19 @@ public final class SafeUndergroundJigsawStructure extends Structure {
                 new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor())
         );
         BlockPos startPos = new BlockPos(chunkPos.getMinBlockX(), startY, chunkPos.getMinBlockZ());
+        int minAllowedY = context.chunkGenerator().getMinY() + this.minBedrockClearance;
 
-        if (!this.hasSafeSurfaceCore(context, startPos)) {
+        Long2IntOpenHashMap surfaceCache = new Long2IntOpenHashMap(64);
+        surfaceCache.defaultReturnValue(Integer.MIN_VALUE);
+
+        int centerSurfaceY = getSolidSurfaceY(context, startPos.getX(), startPos.getZ(), surfaceCache);
+        if (this.projectStartToHeightmap.isEmpty() && !this.useExpansionHack) {
+            if (startY < minAllowedY || startY + this.minSurfaceCover > centerSurfaceY) {
+                return Optional.empty();
+            }
+        }
+
+        if (!this.hasSafeSurfaceCore(context, startPos, centerSurfaceY, surfaceCache)) {
             return Optional.empty();
         }
 
@@ -160,7 +174,7 @@ public final class SafeUndergroundJigsawStructure extends Structure {
 
         Structure.GenerationStub stub = generated.get();
         StructurePiecesBuilder piecesBuilder = stub.getPiecesBuilder();
-        if (!this.allPiecesSafelyBuried(context, piecesBuilder.build())) {
+        if (!this.allPiecesSafelyBuried(context, piecesBuilder.build(), minAllowedY, surfaceCache)) {
             return Optional.empty();
         }
 
@@ -168,13 +182,17 @@ public final class SafeUndergroundJigsawStructure extends Structure {
         return Optional.of(new Structure.GenerationStub(stub.position(), Either.right(piecesBuilder)));
     }
 
-    private boolean hasSafeSurfaceCore(Structure.GenerationContext context, BlockPos startPos) {
+    private boolean hasSafeSurfaceCore(
+            Structure.GenerationContext context,
+            BlockPos startPos,
+            int centerSurfaceY,
+            Long2IntOpenHashMap surfaceCache) {
         if (this.coreCheckRadius <= 0) {
             return true;
         }
         int originX = startPos.getX();
         int originZ = startPos.getZ();
-        if (getSolidSurfaceY(context, originX, originZ) < this.coreMinSurfaceY) {
+        if (centerSurfaceY < this.coreMinSurfaceY) {
             return false;
         }
 
@@ -184,7 +202,7 @@ public final class SafeUndergroundJigsawStructure extends Structure {
             for (int dz = -this.coreCheckRadius; ; dz += CORE_SAMPLE_STEP) {
                 int offsetZ = Math.min(dz, this.coreCheckRadius);
                 if (offsetX * offsetX + offsetZ * offsetZ <= radiusSq) {
-                    if (getSolidSurfaceY(context, originX + offsetX, originZ + offsetZ) < this.coreMinSurfaceY) {
+                    if (getSolidSurfaceY(context, originX + offsetX, originZ + offsetZ, surfaceCache) < this.coreMinSurfaceY) {
                         return false;
                     }
                 }
@@ -199,51 +217,90 @@ public final class SafeUndergroundJigsawStructure extends Structure {
         return true;
     }
 
-    private boolean allPiecesSafelyBuried(Structure.GenerationContext context, PiecesContainer piecesContainer) {
+    private boolean allPiecesSafelyBuried(
+            Structure.GenerationContext context,
+            PiecesContainer piecesContainer,
+            int minAllowedY,
+            Long2IntOpenHashMap surfaceCache) {
         List<StructurePiece> pieces = piecesContainer.pieces();
         if (pieces.isEmpty()) {
             return false;
         }
-        int minAllowedY = context.chunkGenerator().getMinY() + this.minBedrockClearance;
+        // Check bedrock bounds first with pure integer comparisons (zero heightmap queries)
         for (StructurePiece piece : pieces) {
-            if (!this.isPieceSafelyBuried(context, piece.getBoundingBox(), minAllowedY)) {
+            if (piece.getBoundingBox().minY() < minAllowedY) {
+                return false;
+            }
+        }
+        // Inspect the highest rooms first so surface-cover breaches fail as early as possible
+        List<BoundingBox> boxes = new ArrayList<>(pieces.size());
+        for (StructurePiece piece : pieces) {
+            boxes.add(piece.getBoundingBox());
+        }
+        boxes.sort(Comparator.comparingInt(BoundingBox::maxY).reversed());
+
+        for (BoundingBox box : boxes) {
+            if (!this.isPieceSafelyBuried(context, box, surfaceCache)) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean isPieceSafelyBuried(Structure.GenerationContext context, BoundingBox box, int minAllowedY) {
-        if (box.minY() < minAllowedY) {
+    private boolean isPieceSafelyBuried(
+            Structure.GenerationContext context,
+            BoundingBox box,
+            Long2IntOpenHashMap surfaceCache) {
+        int requiredSurfaceY = box.maxY() + this.minSurfaceCover;
+        // Fast check on the 4 corners before walking the interior grid
+        int minX = box.minX();
+        int maxX = box.maxX();
+        int minZ = box.minZ();
+        int maxZ = box.maxZ();
+        if (requiredSurfaceY > getSolidSurfaceY(context, minX, minZ, surfaceCache)
+                || requiredSurfaceY > getSolidSurfaceY(context, maxX, minZ, surfaceCache)
+                || requiredSurfaceY > getSolidSurfaceY(context, minX, maxZ, surfaceCache)
+                || requiredSurfaceY > getSolidSurfaceY(context, maxX, maxZ, surfaceCache)) {
             return false;
         }
-        for (int x = box.minX(); ; x += PIECE_SAMPLE_STEP) {
-            int sampleX = Math.min(x, box.maxX());
-            for (int z = box.minZ(); ; z += PIECE_SAMPLE_STEP) {
-                int sampleZ = Math.min(z, box.maxZ());
-                int surfaceY = getSolidSurfaceY(context, sampleX, sampleZ);
-                if (box.maxY() + this.minSurfaceCover > surfaceY) {
+
+        for (int x = minX; ; x += PIECE_SAMPLE_STEP) {
+            int sampleX = Math.min(x, maxX);
+            for (int z = minZ; ; z += PIECE_SAMPLE_STEP) {
+                int sampleZ = Math.min(z, maxZ);
+                if (requiredSurfaceY > getSolidSurfaceY(context, sampleX, sampleZ, surfaceCache)) {
                     return false;
                 }
-                if (sampleZ >= box.maxZ()) {
+                if (sampleZ >= maxZ) {
                     break;
                 }
             }
-            if (sampleX >= box.maxX()) {
+            if (sampleX >= maxX) {
                 break;
             }
         }
         return true;
     }
 
-    private static int getSolidSurfaceY(Structure.GenerationContext context, int x, int z) {
-        return context.chunkGenerator().getBaseHeight(
+    private static int getSolidSurfaceY(
+            Structure.GenerationContext context,
+            int x,
+            int z,
+            Long2IntOpenHashMap surfaceCache) {
+        long key = ChunkPos.asLong(x, z);
+        int cached = surfaceCache.get(key);
+        if (cached != Integer.MIN_VALUE) {
+            return cached;
+        }
+        int computed = context.chunkGenerator().getBaseHeight(
                 x,
                 z,
                 Heightmap.Types.OCEAN_FLOOR_WG,
                 context.heightAccessor(),
                 context.randomState()
         );
+        surfaceCache.put(key, computed);
+        return computed;
     }
 
     @Override

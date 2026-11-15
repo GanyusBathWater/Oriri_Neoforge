@@ -65,11 +65,11 @@ public class GlobalAetherRiverFeature extends Feature<NoneFeatureConfiguration> 
                     }
                 }
 
-                // Safety check: detect Scarlet Cave climate within a ~34-block radius using synchronized
-                // climate noise so the Aether River narrows, pinches closed, and stops BEFORE reaching Scarlet Caves.
+                // Safety check: detect Scarlet Cave climate (normalized humNoise > 0.46) within a ~34-block radius
+                // so the Aether River narrows, pinches closed, and stops BEFORE reaching Scarlet Caves.
                 double maxScarletHumidity = sampleMaxScarletHumidityInRadius(worldX, worldZ);
-                if (maxScarletHumidity > 0.08) {
-                    double t = Mth.clamp((maxScarletHumidity - 0.08) / 0.095, 0.0, 1.0);
+                if (maxScarletHumidity > 0.28) {
+                    double t = Mth.clamp((maxScarletHumidity - 0.28) / 0.16, 0.0, 1.0);
                     double smoothT = t * t * (3.0 - 2.0 * t);
                     riverIntensity *= (1.0 - smoothT);
                 }
@@ -180,7 +180,7 @@ public class GlobalAetherRiverFeature extends Feature<NoneFeatureConfiguration> 
     }
 
     private static double sampleMaxScarletHumidityInRadius(int worldX, int worldZ) {
-        double maxHumidity = -1.0;
+        double maxHumidity = -2.0;
         for (int[] offset : SCARLET_PROXIMITY_OFFSETS) {
             int sx = worldX + offset[0];
             int sz = worldZ + offset[1];

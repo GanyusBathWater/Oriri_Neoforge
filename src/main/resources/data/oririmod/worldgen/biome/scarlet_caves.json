@@ -7,6 +7,8 @@
         "fog_color": 6710886,
         "water_color": 4159204,
         "water_fog_color": 329011,
+        "grass_color": 12387589,
+        "foliage_color": 12387589,
         "particle": {
             "options": {
                 "type": "oririmod:scarlet_cave_particle"
@@ -16,8 +18,7 @@
     },
     "carvers": {
         "air": [
-            "oririmod:deep_cave",
-            "minecraft:canyon"
+            "oririmod:deep_cave"
         ]
     },
     "features": [

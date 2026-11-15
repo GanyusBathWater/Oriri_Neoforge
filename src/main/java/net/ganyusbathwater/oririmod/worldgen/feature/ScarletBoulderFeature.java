@@ -5,6 +5,7 @@ import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -22,10 +23,10 @@ public class ScarletBoulderFeature extends Feature<NoneFeatureConfiguration> {
         RandomSource random = context.random();
 
         // 1. Valid Ground Check (Avoid Ponds/Caves)
-        // Must be on solid Scarlet Grass Block, Stone, or Deepslate
+        // Must be on solid Grass Block, Scarlet Stone, or Deepslate
         BlockPos belowPos = pos.below();
         BlockState belowState = level.getBlockState(belowPos);
-        boolean validGround = belowState.is(ModBlocks.SCARLET_GRASS_BLOCK.get()) ||
+        boolean validGround = belowState.is(Blocks.GRASS_BLOCK) ||
                 belowState.is(ModBlocks.SCARLET_STONE.get()) ||
                 belowState.is(ModBlocks.SCARLET_DEEPSLATE.get());
 
@@ -76,7 +77,7 @@ public class ScarletBoulderFeature extends Feature<NoneFeatureConfiguration> {
                         BlockPos currentPos = pos.offset(x, y, z);
 
                         BlockState currentState = level.getBlockState(currentPos);
-                        if (currentState.canBeReplaced() || currentState.is(ModBlocks.SCARLET_GRASS_BLOCK.get())
+                        if (currentState.canBeReplaced() || currentState.is(Blocks.GRASS_BLOCK)
                                 || currentState.isAir()) {
                             level.setBlock(currentPos, stone, 2);
                             placedAny = true;

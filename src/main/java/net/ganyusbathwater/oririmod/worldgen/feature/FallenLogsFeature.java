@@ -321,9 +321,7 @@ public class FallenLogsFeature extends Feature<BlockStateConfiguration> {
     }
 
     private static boolean isValidPineGround(BlockState state) {
-        return state.is(ModBlocks.HIGHLANDS_GRASS_BLOCK.get())
-                || state.is(ModBlocks.ELDERWOODS_GRASS_BLOCK.get())
-                || state.is(Blocks.GRASS_BLOCK)
+        return state.is(Blocks.GRASS_BLOCK)
                 || state.is(Blocks.PODZOL)
                 || state.is(Blocks.DIRT)
                 || state.is(Blocks.COARSE_DIRT)

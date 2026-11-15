@@ -66,10 +66,10 @@ import java.util.EnumSet;
 public class SilentNereidEntity extends MermaidEntity {
 
     public enum Variant {
-        BIOLUMINESCENT_BLUE_INDIGO(0, "bioluminescent_blue_indigo", 0x00E5FF, 0x1A237E),
-        GLISTERING_VIOLET_ABYSSAL_BLACK(1, "glistering_violet_abyssal_black", 0xBA55D3, 0x18181B),
-        PHOSPHOR_GREEN_COLD_STONE(2, "phosphor_green_cold_stone", 0x39FF14, 0x5A6B7C),
-        DEEP_SEA_RED_DARK_GREY(3, "deep_sea_red_dark_grey", 0xDC143C, 0x2B2D31);
+        BIOLUMINESCENT_BLUE_INDIGO(0, "bioluminescent_blue_indigo", 0x0F4C5C, 0x1A237E),
+        GLISTERING_VIOLET_ABYSSAL_BLACK(1, "glistering_violet_abyssal_black", 0x3B1D4A, 0x18181B),
+        PHOSPHOR_GREEN_COLD_STONE(2, "phosphor_green_cold_stone", 0x16422A, 0x394856),
+        DEEP_SEA_RED_DARK_GREY(3, "deep_sea_red_dark_grey", 0x4A121E, 0x2B2D31);
 
         private final int id;
         private final String name;
@@ -183,10 +183,10 @@ public class SilentNereidEntity extends MermaidEntity {
         int g = (baseRgb >> 8) & 0xFF;
         int b = baseRgb & 0xFF;
 
-        float factor = 0.80F + random.nextFloat() * 0.40F; // 80% - 120% brightness
-        int jr = Math.clamp((int) (r * factor) + (random.nextInt(31) - 15), 0, 255);
-        int jg = Math.clamp((int) (g * factor) + (random.nextInt(31) - 15), 0, 255);
-        int jb = Math.clamp((int) (b * factor) + (random.nextInt(31) - 15), 0, 255);
+        float factor = 0.78F + random.nextFloat() * 0.30F; // 78% - 108% deep-sea brightness
+        int jr = Math.clamp((int) (r * factor) + (random.nextInt(17) - 8), 0, 255);
+        int jg = Math.clamp((int) (g * factor) + (random.nextInt(17) - 8), 0, 255);
+        int jb = Math.clamp((int) (b * factor) + (random.nextInt(17) - 8), 0, 255);
 
         return (jr << 16) | (jg << 8) | jb;
     }

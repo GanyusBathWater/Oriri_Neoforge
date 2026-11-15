@@ -111,14 +111,6 @@ public class ModItemGroups {
                         output.accept(ModBlocks.CALICHE_BRICK_SLAB);
                         output.accept(ModBlocks.CALICHE_BRICK_WALL);
                         output.accept(ModBlocks.CHISELED_CALICHE);
-                        output.accept(ModBlocks.GOLDEN_SAVANNA_GRASS_BLOCK);
-                        output.accept(ModBlocks.GOLDEN_SAVANNA_SHORT_GRASS);
-                        output.accept(ModBlocks.GOLDEN_SAVANNA_TALL_GRASS);
-
-                        // ===== ELDER HIGHLANDS =====
-                        output.accept(ModBlocks.HIGHLANDS_GRASS_BLOCK);
-                        output.accept(ModBlocks.HIGHLANDS_SHORT_GRASS);
-                        output.accept(ModBlocks.HIGHLANDS_TALL_GRASS);
 
                         // ===== THE SILENT DEPTHS =====
                         output.accept(ModBlocks.ABYSS_SAND);
@@ -193,8 +185,6 @@ public class ModItemGroups {
                         output.accept(ModBlocks.ELDER_LEAVES_FLOWERING); // Ensuring order
 
                         // Scarlet Block Group
-                        output.accept(ModBlocks.ELDERWOODS_GRASS_BLOCK);
-                        output.accept(ModBlocks.SCARLET_GRASS_BLOCK);
                         output.accept(ModBlocks.SCARLET_STONE);
                         output.accept(ModBlocks.SCARLET_STONE_STAIRS);
                         output.accept(ModBlocks.SCARLET_STONE_SLAB);
@@ -277,7 +267,6 @@ public class ModItemGroups {
                         output.accept(ModBlocks.UPGRADED_SCARLET_SAPLING);
                         output.accept(ModBlocks.SCARLET_LEAVES);
                         output.accept(ModBlocks.SCARLET_TOOTH_LEAVES);
-                        output.accept(ModBlocks.SCARLET_GRASS);
                         output.accept(ModBlocks.SCARLET_MOSS);
                         output.accept(ModBlocks.SCARLET_VINE);
                         output.accept(ModBlocks.SCARLET_LILY);
