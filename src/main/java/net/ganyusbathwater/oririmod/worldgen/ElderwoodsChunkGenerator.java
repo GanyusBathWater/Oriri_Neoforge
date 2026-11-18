@@ -61,7 +61,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
     // ===== SCARLET BIOME BLOCKS =====
     private static BlockState SCARLET_STONE;
+    private static BlockState SCARLET_DRIPSTONE;
     private static BlockState SCARLET_DEEPSLATE;
+    private static BlockState SCARLET_MOSS;
+    private static BlockState BLOOD_SLUDGE;
 
     // ===== ELYSIAN ABYSS BLOCKS =====
     private static BlockState AETHER_LIQUID;
@@ -118,6 +121,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"));
     private static final ResourceKey<Biome> SCARLET_FOREST_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"));
+    public static final ResourceKey<Biome> SCARLET_KARST_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_karst"));
     private static final ResourceKey<Biome> SCARLET_CAVES_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"));
     private static final ResourceKey<Biome> CRYSTAL_CAVES_KEY = ResourceKey.create(
@@ -220,7 +225,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             // Initialize cached block states BEFORE publishing seedInitialized = true
             if (SCARLET_STONE == null) {
                 SCARLET_STONE = ModBlocks.SCARLET_STONE.get().defaultBlockState();
+                SCARLET_DRIPSTONE = ModBlocks.SCARLET_DRIPSTONE_BLOCK.get().defaultBlockState();
                 SCARLET_DEEPSLATE = ModBlocks.SCARLET_DEEPSLATE.get().defaultBlockState();
+                SCARLET_MOSS = ModBlocks.SCARLET_MOSS.get().defaultBlockState();
+                BLOOD_SLUDGE = ModBlocks.BLOOD_SLUDGE.get().defaultBlockState();
                 CALICHE = ModBlocks.CALICHE.get().defaultBlockState();
                 ABYSSAL_BASALT = ModBlocks.ABYSSAL_BASALT.get().defaultBlockState();
                 ABYSS_SAND = ModBlocks.ABYSS_SAND.get().defaultBlockState();
@@ -252,7 +260,12 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
     private boolean isScarletBiome(Holder<Biome> biomeHolder) {
         return biomeHolder.is(SCARLET_SWAMP_KEY) ||
                 biomeHolder.is(SCARLET_FOREST_KEY) ||
+                biomeHolder.is(SCARLET_KARST_KEY) ||
                 biomeHolder.is(SCARLET_CAVES_KEY);
+    }
+
+    private boolean isScarletKarstBiome(Holder<Biome> biomeHolder) {
+        return biomeHolder.is(SCARLET_KARST_KEY);
     }
 
     private boolean isHighlandBiome(Holder<Biome> biomeHolder) {
@@ -1110,7 +1123,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     net.minecraft.core.QuartPos.fromBlock(centerZ),
                     randomState.sampler());
         }
-        if (!entranceBiome.is(SCARLET_SWAMP_KEY) && !entranceBiome.is(SCARLET_FOREST_KEY)) {
+        if (!entranceBiome.is(SCARLET_SWAMP_KEY) && !entranceBiome.is(SCARLET_FOREST_KEY)
+                && !entranceBiome.is(SCARLET_KARST_KEY)) {
             return;
         }
         if (this.biomeSourceReference instanceof ElderwoodsBiomeSource ebsCheck
@@ -1123,7 +1137,11 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
         if (centerInThisChunk) {
             BlockPos.MutableBlockPos surfaceCheckPos = new BlockPos.MutableBlockPos(centerX, surfaceY, centerZ);
             BlockState surfaceBlock = chunk.getBlockState(surfaceCheckPos);
-            if (!surfaceBlock.is(Blocks.GRASS_BLOCK) && !surfaceBlock.is(Blocks.DIRT)) {
+            if (!surfaceBlock.is(Blocks.GRASS_BLOCK) && !surfaceBlock.is(Blocks.DIRT)
+                    && !surfaceBlock.is(Blocks.COARSE_DIRT)
+                    && !surfaceBlock.is(ModBlocks.SCARLET_STONE.get())
+                    && !surfaceBlock.is(ModBlocks.SCARLET_DEEPSLATE.get())
+                    && !surfaceBlock.is(ModBlocks.SCARLET_MOSS.get())) {
                 return;
             }
 
@@ -1398,6 +1416,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                                     random.sampler());
 
                     boolean isScarletCurrent = isScarletBiome(surfaceBiome);
+                    boolean isKarstCurrent = isScarletKarstBiome(surfaceBiome);
                     boolean isDesertCurrent = isGoldenDesertBiome(surfaceBiome);
                     boolean isSavannaCurrent = isGoldenSavannaBiome(surfaceBiome);
                     boolean isMesaCurrent = isGoldenMesaBiome(surfaceBiome);
@@ -1480,6 +1499,69 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         } else {
                             topState = GRASS_BLOCK;
                             subState = DIRT;
+                        }
+                    } else if (isKarstCurrent) {
+                        int hPx = getSurfaceHeight(worldX + 1, worldZ);
+                        int hNx = getSurfaceHeight(worldX - 1, worldZ);
+                        int hPz = getSurfaceHeight(worldX, worldZ + 1);
+                        int hNz = getSurfaceHeight(worldX, worldZ - 1);
+                        int maxDrop1 = Math.max(0, Math.max(
+                                Math.max(surfaceY - hPx, surfaceY - hNx),
+                                Math.max(surfaceY - hPz, surfaceY - hNz)));
+                        int maxDiff1 = Math.max(
+                                Math.max(Math.abs(surfaceY - hPx), Math.abs(surfaceY - hNx)),
+                                Math.max(Math.abs(surfaceY - hPz), Math.abs(surfaceY - hNz)));
+                        int maxDrop2 = Math.max(0, Math.max(
+                                Math.max(surfaceY - getSurfaceHeight(worldX + 2, worldZ),
+                                        surfaceY - getSurfaceHeight(worldX - 2, worldZ)),
+                                Math.max(surfaceY - getSurfaceHeight(worldX, worldZ + 2),
+                                        surfaceY - getSurfaceHeight(worldX, worldZ - 2))));
+                        double karstPatch = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                                (float) (worldX * 0.055f - 310.0f), (float) (worldZ * 0.055f + 240.0f), 2) / 0.32;
+                        int rockBand = Math.floorMod(surfaceY + (int) Math.round(karstPatch * 3.0), 12);
+                        BlockState karstRock = ((rockBand == 2 || rockBand == 6 || rockBand == 9 || karstPatch > 0.25)
+                                && SCARLET_DRIPSTONE != null)
+                                        ? SCARLET_DRIPSTONE
+                                        : (SCARLET_STONE != null ? SCARLET_STONE : STONE);
+
+                        if (maxDrop1 >= 2 || maxDrop2 >= 4) {
+                            // Vertical tower karst cliffs and sinkhole walls: Scarlet Stone & Scarlet Dripstone strata
+                            topState = karstRock;
+                            subState = (karstRock == SCARLET_DRIPSTONE)
+                                    ? SCARLET_DRIPSTONE
+                                    : (SCARLET_STONE != null ? SCARLET_STONE : STONE);
+                            subDepth = Math.max(8, Math.min(18, maxDrop1 + 5));
+                        } else if (surfaceY <= BASE_HEIGHT + 3) {
+                            // Doline sinkhole floor: Scarlet Dripstone, Scarlet Stone, Coarse Dirt & Grass
+                            if (karstPatch < 0.05 && SCARLET_DRIPSTONE != null) {
+                                topState = SCARLET_DRIPSTONE;
+                                subState = SCARLET_DRIPSTONE;
+                            } else if (karstPatch < 0.35 && SCARLET_STONE != null) {
+                                topState = SCARLET_STONE;
+                                subState = SCARLET_STONE;
+                            } else if (karstPatch < 0.55) {
+                                topState = COARSE_DIRT_STATE;
+                                subState = DIRT;
+                            } else {
+                                topState = GRASS_BLOCK;
+                                subState = DIRT;
+                            }
+                            subDepth = 4;
+                        } else {
+                            // Karst tower crowns, ledges & rolling saddles
+                            if ((karstPatch < -0.05 || maxDiff1 >= 2) && SCARLET_STONE != null) {
+                                topState = karstRock;
+                                subState = (karstRock == SCARLET_DRIPSTONE) ? SCARLET_DRIPSTONE : SCARLET_STONE;
+                                subDepth = 5;
+                            } else if (karstPatch > 0.28) {
+                                topState = COARSE_DIRT_STATE;
+                                subState = SCARLET_STONE != null ? SCARLET_STONE : DIRT;
+                                subDepth = 3;
+                            } else {
+                                topState = GRASS_BLOCK;
+                                subState = DIRT;
+                                subDepth = 3;
+                            }
                         }
                     } else if (isLagoonCurrent) {
                         // 2. Dedicated Elder Lagoon: sheltered mud/clay channels & mossy mangrove banks

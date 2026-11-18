@@ -34,6 +34,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"));
     private static final ResourceKey<Biome> SCARLET_FOREST_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"));
+    public static final ResourceKey<Biome> SCARLET_KARST_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_karst"));
     private static final ResourceKey<Biome> SCARLET_CAVES_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"));
     private static final ResourceKey<Biome> CRYSTAL_CAVES_KEY = ResourceKey.create(
@@ -79,6 +81,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private final Holder<Biome> elderwoodsBiome;
     private final Holder<Biome> scarletSwampBiome;
     private final Holder<Biome> scarletForestBiome;
+    private final Holder<Biome> scarletKarstBiome;
     private final Holder<Biome> scarletCavesBiome;
     private final Holder<Biome> crystalCavesBiome;
     private final Holder<Biome> elderwoodsCaveBiome;
@@ -324,6 +327,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         this.elderwoodsBiome = findBiome(ELDERWOODS_KEY);
         this.scarletSwampBiome = findBiome(SCARLET_SWAMP_KEY);
         this.scarletForestBiome = findBiome(SCARLET_FOREST_KEY);
+        this.scarletKarstBiome = findBiome(SCARLET_KARST_KEY);
         this.scarletCavesBiome = findBiome(SCARLET_CAVES_KEY);
         this.crystalCavesBiome = findBiome(CRYSTAL_CAVES_KEY);
         this.elderwoodsCaveBiome = findBiome(ELDERWOODS_CAVE_KEY);
@@ -698,6 +702,21 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         return 0.42 * lowerCliff + 0.58 * upperCliff;
     }
 
+    private double computeEffectiveKarst(double wx, double wz, double contNoise, double tempNoise, double humNoise) {
+        double humFade = hermite01((humNoise - 0.46) / 0.08);
+        double swampExclude = hermite01((0.71 - humNoise) / 0.07);
+        double tempFade = hermite01((0.08 - tempNoise) / 0.06);
+        double contFade = hermite01((contNoise - 0.14) / 0.06);
+        double support = humFade * swampExclude * tempFade * contFade;
+        if (support <= 0.0) {
+            return 0.0;
+        }
+        double rawKarst = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((wx + highlandOffsetX - 3187) * 0.00058f),
+                (float) ((wz + highlandOffsetZ + 1943) * 0.00058f), 2) / 0.25;
+        return Math.max(0.0, rawKarst) * support;
+    }
+
     @Override
     protected MapCodec<? extends BiomeSource> codec() {
         return CODEC;
@@ -736,6 +755,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         if (isHighlandBiome(surfaceBiome)
                 || !(surfaceBiome.is(SCARLET_SWAMP_KEY)
                         || surfaceBiome.is(SCARLET_FOREST_KEY)
+                        || surfaceBiome.is(SCARLET_KARST_KEY)
                         || surfaceBiome.is(ELDER_BEACH_KEY))) {
             return false;
         }
@@ -853,7 +873,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             }
         }
 
-        if (raw == scarletForestBiome || raw == scarletSwampBiome) {
+        if (raw == scarletForestBiome || raw == scarletKarstBiome || raw == scarletSwampBiome) {
             final MorphCoreCache scarletCache = scarletCoreCache.get();
             if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.045f,
                     (cx, cz) -> hasMorphCoreNear(cx, cz, false, scarletCache, SCARLET_DILATE_OFFSETS,
@@ -937,6 +957,13 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 // inland lakes.
                 if (contNoise >= 0.055) {
                     if (!inHighlandFringe && humNoise > 0.46) {
+                        if (contNoise >= 0.14) {
+                            double wx = sampleWarpedX(x, z);
+                            double wz = sampleWarpedZ(x, z);
+                            if (computeEffectiveKarst(wx, wz, contNoise, tempNoise, humNoise) > 0.15) {
+                                return scarletKarstBiome;
+                            }
+                        }
                         return scarletForestBiome;
                     }
                     return elderwoodsBiome;
@@ -986,6 +1013,9 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         if (contNoise >= 0.14 && humNoise > 0.72) {
             return scarletSwampBiome;
         } else if (humNoise > 0.46) {
+            if (contNoise >= 0.14 && computeEffectiveKarst(wx, wz, contNoise, tempNoise, humNoise) > 0.15) {
+                return scarletKarstBiome;
+            }
             return scarletForestBiome;
         } else {
             return elderwoodsBiome;
@@ -995,7 +1025,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private boolean matchesMorphTarget(Holder<Biome> biome, boolean swampOnly) {
         return swampOnly
                 ? biome == scarletSwampBiome
-                : (biome == scarletForestBiome || biome == scarletSwampBiome);
+                : (biome == scarletForestBiome || biome == scarletKarstBiome || biome == scarletSwampBiome);
     }
 
     private boolean isMorphCoreQuart(int qx, int qz, boolean swampOnly, MorphCoreCache cache, int[][] probes) {
@@ -1079,7 +1109,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 int px = x + BORDER_SAMPLE_DIRS[d][0] * step;
                 int pz = z + BORDER_SAMPLE_DIRS[d][1] * step;
                 Holder<Biome> b = computeRawSurfaceBiome(px, pz);
-                if (b == scarletForestBiome || b == scarletSwampBiome
+                if (b == scarletForestBiome || b == scarletKarstBiome || b == scarletSwampBiome
                         || b == silentOceansBiome || b == silentDepthsBiome || b == sunkenTrenchesBiome) {
                     continue;
                 }
@@ -1356,6 +1386,33 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
         // Blend Swamp into Base Hills
         double terrainHeight = net.minecraft.util.Mth.lerp(swampWeight, baseNoise, swampHeight);
+
+        // 2b. Scarlet Karst: Steep Tower Karst Spires & Doline Sinkholes
+        double effectiveKarst = computeEffectiveKarst(wx, wz, contNoise, tempNoise, humNoise);
+        if (effectiveKarst > 0.06) {
+            double karstBlend = hermite01((effectiveKarst - 0.06) / 0.12);
+            double tA = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                    (float) ((wx + ridgeOffsetX + 911) * 0.014f),
+                    (float) ((wz + ridgeOffsetZ - 613) * 0.014f), 2) / 0.30;
+            double tB = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                    (float) ((x + seedOffsetX - 407) * 0.026f),
+                    (float) ((z + seedOffsetZ + 829) * 0.026f), 2) / 0.30;
+            double rK = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                    (float) ((wx + ridgeOffsetX - 521) * 0.0085f),
+                    (float) ((wz + ridgeOffsetZ + 373) * 0.0085f), 2)) / 0.30;
+            double ridgeSpine = net.minecraft.util.Mth.clamp(rK, 0.0, 1.0);
+
+            double spireA = hermite01((tA - 0.08) / 0.32);
+            double spireB = hermite01((tB - 0.14) / 0.34);
+            double towerStrength = hermite01((effectiveKarst - 0.10) / 0.22);
+            double towerHeight = (spireA * 38.0 + spireB * 18.0 + (ridgeSpine * ridgeSpine) * 14.0) * towerStrength;
+
+            double dolineT = hermite01((-0.22 - tA) / 0.30);
+            double sinkholeDrop = dolineT * 13.0 * towerStrength;
+
+            double karstTarget = terrainHeight + 6.0 + towerHeight - sinkholeDrop;
+            terrainHeight = net.minecraft.util.Mth.lerp(karstBlend, terrainHeight, karstTarget);
+        }
 
         // 3. Golden Savanna, Dunes & Stratified Mesa / Tablemountains
         double duneNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(

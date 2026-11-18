@@ -27,6 +27,21 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.ScarletBoulderFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.ScarletKarstSpireFeature> SCARLET_KARST_SPIRE = FEATURES
+                        .register("scarlet_karst_spire",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.ScarletKarstSpireFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.ScarletKarstPondFeature> SCARLET_KARST_POND = FEATURES
+                        .register("scarlet_karst_pond",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.ScarletKarstPondFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.ScarletKarstPondFeature.CliffSpringFeature> SCARLET_KARST_SPRING = FEATURES
+                        .register("scarlet_karst_spring",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.ScarletKarstPondFeature.CliffSpringFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.HighlandsBoulderFeature> HIGHLANDS_BOULDER = FEATURES
                         .register("highlands_boulder",
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.HighlandsBoulderFeature(

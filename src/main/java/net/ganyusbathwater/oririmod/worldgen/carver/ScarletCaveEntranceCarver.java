@@ -30,6 +30,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_swamp"));
     private static final ResourceKey<Biome> SCARLET_FOREST_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_forest"));
+    private static final ResourceKey<Biome> SCARLET_KARST_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_karst"));
     private static final ResourceKey<Biome> SCARLET_CAVES_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"));
 
@@ -67,7 +69,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
         // Fast biome pre-check before sampling surface height
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         Holder<Biome> originBiome = biomeAccessor.apply(mutablePos.set(midX, 80, midZ));
-        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)) {
+        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)
+                && !originBiome.is(SCARLET_KARST_KEY)) {
             return false;
         }
 
@@ -81,7 +84,8 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
         }
 
         originBiome = biomeAccessor.apply(mutablePos.set(midX, surfaceY, midZ));
-        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)) {
+        if (!originBiome.is(SCARLET_SWAMP_KEY) && !originBiome.is(SCARLET_FOREST_KEY)
+                && !originBiome.is(SCARLET_KARST_KEY)) {
             return false;
         }
 

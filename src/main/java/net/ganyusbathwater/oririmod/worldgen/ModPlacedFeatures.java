@@ -50,6 +50,12 @@ public class ModPlacedFeatures {
         
         public static final ResourceKey<PlacedFeature> SCARLET_BOULDER_PLACED_KEY = registerKey(
                         "scarlet_boulder_placed");
+        public static final ResourceKey<PlacedFeature> SCARLET_KARST_SPIRE_PLACED_KEY = registerKey(
+                        "scarlet_karst_spire_placed");
+        public static final ResourceKey<PlacedFeature> SCARLET_KARST_POND_PLACED_KEY = registerKey(
+                        "scarlet_karst_pond_placed");
+        public static final ResourceKey<PlacedFeature> SCARLET_KARST_SPRING_PLACED_KEY = registerKey(
+                        "scarlet_karst_spring_placed");
         public static final ResourceKey<PlacedFeature> SCARLET_GRASS_PATCH_PLACED_KEY = registerKey(
                         "scarlet_grass_patch_placed");
         public static final ResourceKey<PlacedFeature> ELDERWOODS_GRASS_PATCH_PLACED_KEY = registerKey(
@@ -514,6 +520,30 @@ public class ModPlacedFeatures {
                                                 RarityFilter.onAverageOnceEvery(2),
                                                 InSquarePlacement.spread(),
                                                 HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
+                                                BiomeFilter.biome()));
+
+                register(context, SCARLET_KARST_SPIRE_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.SCARLET_KARST_SPIRE_KEY),
+                                List.of(
+                                                CountPlacement.of(2),
+                                                InSquarePlacement.spread(),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
+                                                BiomeFilter.biome()));
+
+                register(context, SCARLET_KARST_POND_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.SCARLET_KARST_POND_KEY),
+                                List.of(
+                                                RarityFilter.onAverageOnceEvery(6),
+                                                InSquarePlacement.spread(),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
+                                                BiomeFilter.biome()));
+
+                register(context, SCARLET_KARST_SPRING_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.SCARLET_KARST_SPRING_KEY),
+                                List.of(
+                                                CountPlacement.of(2),
+                                                InSquarePlacement.spread(),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
                                                 BiomeFilter.biome()));
         }
 

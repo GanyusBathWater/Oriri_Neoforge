@@ -47,6 +47,12 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> WAR_GRAVE_KEY = registerKey("war_grave");
 
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_BOULDER_KEY = registerKey("scarlet_boulder");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_KARST_SPIRE_KEY = registerKey(
+                        "scarlet_karst_spire");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_KARST_POND_KEY = registerKey(
+                        "scarlet_karst_pond");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_KARST_SPRING_KEY = registerKey(
+                        "scarlet_karst_spring");
         public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_BOULDER_KEY = registerKey(
                         "highlands_boulder");
         public static final ResourceKey<ConfiguredFeature<?, ?>> CALICHE_BOULDER_KEY = registerKey(
@@ -176,6 +182,15 @@ public class ModConfiguredFeatures {
                                 NoneFeatureConfiguration.INSTANCE);
 
                 register(context, SCARLET_BOULDER_KEY, ModFeatures.SCARLET_BOULDER.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+
+                register(context, SCARLET_KARST_SPIRE_KEY, ModFeatures.SCARLET_KARST_SPIRE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+
+                register(context, SCARLET_KARST_POND_KEY, ModFeatures.SCARLET_KARST_POND.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+
+                register(context, SCARLET_KARST_SPRING_KEY, ModFeatures.SCARLET_KARST_SPRING.get(),
                                 NoneFeatureConfiguration.INSTANCE);
 
                 register(context, HIGHLANDS_BOULDER_KEY, ModFeatures.HIGHLANDS_BOULDER.get(),
