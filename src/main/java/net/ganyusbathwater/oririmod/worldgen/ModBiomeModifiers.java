@@ -67,6 +67,18 @@ public class ModBiomeModifiers {
                         "add_beach_features");
         public static final ResourceKey<BiomeModifier> ADD_BEACH_SWAMP_FEATURES = registerKey(
                         "add_beach_swamp_features");
+        public static final ResourceKey<BiomeModifier> ADD_ELDER_LAGOON_SPAWNS = registerKey(
+                        "add_elder_lagoon_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_ELDER_VALLEY_FEATURES = registerKey(
+                        "add_elder_valley_features");
+        public static final ResourceKey<BiomeModifier> ADD_ELDER_VALLEY_SPAWNS = registerKey(
+                        "add_elder_valley_spawns");
+        public static final ResourceKey<BiomeModifier> ADD_GOLDEN_SAVANNA_FEATURES = registerKey(
+                        "add_golden_savanna_features");
+        public static final ResourceKey<BiomeModifier> ADD_GOLDEN_SAVANNA_MESA_FEATURES = registerKey(
+                        "add_golden_savanna_mesa_features");
+        public static final ResourceKey<BiomeModifier> ADD_GOLDEN_SAVANNA_SPAWNS = registerKey(
+                        "add_golden_savanna_spawns");
 
         public static final ResourceKey<BiomeModifier> ADD_GLOWLINGS = registerKey("add_glowlings");
 
@@ -326,7 +338,13 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
                                                 .fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_forest"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
-                                                .fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_summit"))));
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_summit"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "elder_valley"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna_mesa"))));
 
                 context.register(ADD_GLOBAL_AETHER_RIVER,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
@@ -351,7 +369,11 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
                                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
-                                                .fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"))));
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna_mesa"))));
 
                 context.register(ADD_MANA_GEODE_DIMENSION,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
@@ -412,15 +434,50 @@ public class ModBiomeModifiers {
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.BEACH_UNDERWATER_REEF_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
-                // 3. Flat Wide Beach Mangrove Swamps (exclusively elder_beach basins detected by BiomeSource)
-                var elderBeachBiomes = HolderSet.direct(
+                // 3. Dedicated Elder Lagoon Mangrove Wetlands (exclusively oririmod:elder_lagoon)
+                var elderLagoonBiomes = HolderSet.direct(
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
-                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_beach"))));
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_lagoon"))));
                 context.register(ADD_BEACH_SWAMP_FEATURES,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
-                                                elderBeachBiomes,
+                                                elderLagoonBiomes,
                                                 HolderSet.direct(
                                                                 placedFeatures.getOrThrow(ModPlacedFeatures.BEACH_MANGROVE_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                var elderValleyBiomes = HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_valley"))));
+                context.register(ADD_ELDER_VALLEY_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                elderValleyBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.ELDER_VALLEY_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                var goldenSavannaBiomes = HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna"))));
+                context.register(ADD_GOLDEN_SAVANNA_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                goldenSavannaBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.CALICHE_BOULDER_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.SAVANNA_EPOCH_TREE_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.GOLDEN_SAVANNA_GRASS_PATCH_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.GOLDEN_SAVANNA_TALL_GRASS_PATCH_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                var goldenSavannaMesaBiomes = HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna_mesa"))));
+                context.register(ADD_GOLDEN_SAVANNA_MESA_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                goldenSavannaMesaBiomes,
+                                                HolderSet.direct(
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.CALICHE_BOULDER_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.SAVANNA_EPOCH_TREE_PLACED_KEY),
+                                                                placedFeatures.getOrThrow(ModPlacedFeatures.GOLDEN_SAVANNA_GRASS_PATCH_PLACED_KEY)),
                                                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
                 // Custom Mob Spawns
@@ -485,6 +542,43 @@ public class ModBiomeModifiers {
                 context.register(ADD_ELDERWOODS_FOREST_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
                         HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods")))),
                         forestSpawns
+                ));
+
+                List<MobSpawnSettings.SpawnerData> valleySpawns = List.of(
+                        new MobSpawnSettings.SpawnerData(EntityType.SALMON, 12, 2, 5),
+                        new MobSpawnSettings.SpawnerData(EntityType.SQUID, 6, 1, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.FROG, 8, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SHEEP, 10, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.COW, 8, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, 95, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SLIME, 80, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.BAT, 10, 8, 8)
+                );
+                context.register(ADD_ELDER_VALLEY_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        elderValleyBiomes,
+                        valleySpawns
+                ));
+
+                List<MobSpawnSettings.SpawnerData> lagoonSpawns = List.of(
+                        new MobSpawnSettings.SpawnerData(EntityType.FROG, 12, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.TROPICAL_FISH, 12, 3, 5),
+                        new MobSpawnSettings.SpawnerData(EntityType.SALMON, 8, 1, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.SQUID, 5, 1, 2),
+                        new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, 95, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SLIME, 80, 3, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.WITCH, 5, 1, 1)
+                );
+                context.register(ADD_ELDER_LAGOON_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        elderLagoonBiomes,
+                        lagoonSpawns
                 ));
                 
                 List<MobSpawnSettings.SpawnerData> monsterSpawns = List.of(
@@ -637,6 +731,31 @@ public class ModBiomeModifiers {
                 context.register(ADD_SILENT_DEPTHS_WILDLIFE, new BiomeModifiers.AddSpawnsBiomeModifier(
                         HolderSet.direct(),
                         List.of()
+                ));
+
+                // Golden Savanna & Mesa Wildlife + Arid Monster Spawns
+                List<MobSpawnSettings.SpawnerData> goldenSavannaSpawns = List.of(
+                        new MobSpawnSettings.SpawnerData(EntityType.SHEEP, 10, 3, 5),
+                        new MobSpawnSettings.SpawnerData(EntityType.HORSE, 6, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.LLAMA, 5, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 8, 2, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.ARMADILLO, 10, 2, 3),
+                        new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, 20, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.HUSK, 80, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE_VILLAGER, 5, 1, 1),
+                        new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.SLIME, 40, 2, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4),
+                        new MobSpawnSettings.SpawnerData(EntityType.WITCH, 5, 1, 1)
+                );
+                context.register(ADD_GOLDEN_SAVANNA_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna_mesa")))
+                        ),
+                        goldenSavannaSpawns
                 ));
         }
 

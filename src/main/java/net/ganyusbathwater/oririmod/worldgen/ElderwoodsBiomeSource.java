@@ -44,6 +44,10 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"));
     private static final ResourceKey<Biome> GOLDEN_DESERT_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_desert"));
+    public static final ResourceKey<Biome> GOLDEN_SAVANNA_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna"));
+    public static final ResourceKey<Biome> GOLDEN_SAVANNA_MESA_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna_mesa"));
 
     // Elder Highlands biomes
     public static final ResourceKey<Biome> ELDER_HIGHLANDS_MEADOW_KEY = ResourceKey.create(
@@ -53,9 +57,15 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     public static final ResourceKey<Biome> ELDER_HIGHLAND_SUMMIT_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_highland_summit"));
 
+    // Valley & Riparian Biome
+    public static final ResourceKey<Biome> ELDER_VALLEY_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_valley"));
+
     // Deep Ocean & Coastal Biomes
     public static final ResourceKey<Biome> ELDER_BEACH_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_beach"));
+    public static final ResourceKey<Biome> ELDER_LAGOON_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elder_lagoon"));
     public static final ResourceKey<Biome> THE_SILENT_OCEANS_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_oceans"));
     public static final ResourceKey<Biome> THE_SILENT_DEPTHS_KEY = ResourceKey.create(
@@ -74,10 +84,14 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private final Holder<Biome> elderwoodsCaveBiome;
     private final Holder<Biome> elysianAbyssBiome;
     private final Holder<Biome> goldenDesertBiome;
+    private final Holder<Biome> goldenSavannaBiome;
+    private final Holder<Biome> goldenSavannaMesaBiome;
     private final Holder<Biome> highlandMeadowBiome;
     private final Holder<Biome> highlandForestBiome;
     private final Holder<Biome> highlandSummitBiome;
+    private final Holder<Biome> elderValleyBiome;
     private final Holder<Biome> elderBeachBiome;
+    private final Holder<Biome> elderLagoonBiome;
     private final Holder<Biome> silentOceansBiome;
     private final Holder<Biome> silentDepthsBiome;
     private final Holder<Biome> sunkenTrenchesBiome;
@@ -160,16 +174,18 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         }
     }
 
-    private final ThreadLocal<UndergroundColumnCache> undergroundCache = ThreadLocal.withInitial(UndergroundColumnCache::new);
+    private final ThreadLocal<UndergroundColumnCache> undergroundCache = ThreadLocal
+            .withInitial(UndergroundColumnCache::new);
 
     private static final int FLAT_BEACH_GRID = 16;
 
-    // Morphological opening parameters for filtering tiny Scarlet biome slivers & micro-swamps.
+    // Morphological opening parameters for filtering tiny Scarlet biome slivers &
+    // micro-swamps.
     private static final int MORPH_QUART_STEP = 4;
     private static final int SCARLET_CORE_RADIUS = 26;
     private static final int SCARLET_DILATE_QUARTS = 7; // 7 * 4 = 28 blocks (>= 26 + diagonal grid step)
     private static final int SWAMP_CORE_RADIUS = 14;
-    private static final int SWAMP_DILATE_QUARTS = 4;   // 4 * 4 = 16 blocks
+    private static final int SWAMP_DILATE_QUARTS = 4; // 4 * 4 = 16 blocks
     private static final int MORPH_CACHE_SIZE = 8192;
     private static final int MORPH_CACHE_MASK = MORPH_CACHE_SIZE - 1;
 
@@ -230,6 +246,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 { diag, diag }, { -diag, diag }, { diag, -diag }, { -diag, -diag }
         };
     }
+
     private static final int FLAT_BEACH_CACHE_SIZE = 4096;
     private static final int FLAT_BEACH_CACHE_MASK = FLAT_BEACH_CACHE_SIZE - 1;
     private static final int[][] FLAT_BEACH_PROBES = {
@@ -248,6 +265,60 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
     private final ThreadLocal<FlatBeachCache> flatBeachCache = ThreadLocal.withInitial(FlatBeachCache::new);
 
+    private static final int VALLEY_CACHE_SIZE = 4096;
+    private static final int VALLEY_CACHE_MASK = VALLEY_CACHE_SIZE - 1;
+
+    private static final class ValleyCache {
+        long seed = Long.MIN_VALUE;
+        final long[] keys = new long[VALLEY_CACHE_SIZE];
+        final ElderValleyTerrainHelper.ValleyColumnInfo[] infos = new ElderValleyTerrainHelper.ValleyColumnInfo[VALLEY_CACHE_SIZE];
+        final boolean[] occupied = new boolean[VALLEY_CACHE_SIZE];
+
+        ValleyCache() {
+            for (int i = 0; i < VALLEY_CACHE_SIZE; i++) {
+                infos[i] = new ElderValleyTerrainHelper.ValleyColumnInfo();
+            }
+        }
+    }
+
+    private final ThreadLocal<ValleyCache> valleyColumnCache = ThreadLocal.withInitial(ValleyCache::new);
+    private final ElderValleyTerrainHelper valleyTerrainHelper = new ElderValleyTerrainHelper();
+    private final ElderValleyTerrainHelper.BaseTerrainLookup valleyTerrainLookup = new ElderValleyTerrainHelper.BaseTerrainLookup() {
+        @Override
+        public double sampleContinentalness(int x, int z) {
+            return ElderwoodsBiomeSource.this.sampleContinentalness(x, z);
+        }
+
+        @Override
+        public double sampleTemperature(int x, int z) {
+            return ElderwoodsBiomeSource.this.sampleTemperatureNoise(x, z);
+        }
+
+        @Override
+        public double sampleHumidity(int x, int z) {
+            return ElderwoodsBiomeSource.this.sampleHumidityNoise(x, z);
+        }
+
+        @Override
+        public double sampleHighland(int x, int z) {
+            double wx = sampleWarpedX(x, z);
+            double wz = sampleWarpedZ(x, z);
+            return sampleWarpedHighlandNoise(wx, wz);
+        }
+
+        @Override
+        public int sampleBaseHeight(int x, int z) {
+            return getRawSurfaceHeight(x, z);
+        }
+
+        @Override
+        public double sampleIslandNoise(int x, int z) {
+            double wx = sampleWarpedX(x, z);
+            double wz = sampleWarpedZ(x, z);
+            return computeIslandNoiseValue(x, z, wx, wz);
+        }
+    };
+
     public ElderwoodsBiomeSource(List<Holder<Biome>> biomes) {
         this.biomes = biomes;
         this.elderwoodsBiome = findBiome(ELDERWOODS_KEY);
@@ -258,10 +329,14 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         this.elderwoodsCaveBiome = findBiome(ELDERWOODS_CAVE_KEY);
         this.elysianAbyssBiome = findBiome(ELYSIAN_ABYSS_KEY);
         this.goldenDesertBiome = findBiome(GOLDEN_DESERT_KEY);
+        this.goldenSavannaBiome = findBiome(GOLDEN_SAVANNA_KEY);
+        this.goldenSavannaMesaBiome = findBiome(GOLDEN_SAVANNA_MESA_KEY);
         this.highlandMeadowBiome = findBiome(ELDER_HIGHLANDS_MEADOW_KEY);
         this.highlandForestBiome = findBiome(ELDER_HIGHLAND_FOREST_KEY);
         this.highlandSummitBiome = findBiome(ELDER_HIGHLAND_SUMMIT_KEY);
+        this.elderValleyBiome = findBiome(ELDER_VALLEY_KEY);
         this.elderBeachBiome = findBiome(ELDER_BEACH_KEY);
+        this.elderLagoonBiome = findBiome(ELDER_LAGOON_KEY);
         this.silentOceansBiome = findBiome(THE_SILENT_OCEANS_KEY);
         this.silentDepthsBiome = findBiome(THE_SILENT_DEPTHS_KEY);
         this.sunkenTrenchesBiome = findBiome(THE_SUNKEN_TRENCHES_KEY);
@@ -269,7 +344,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     /**
-     * Static surface-height probe used by cross-chunk carvers (e.g. {@code ScarletCaveEntranceCarver}).
+     * Static surface-height probe used by cross-chunk carvers (e.g.
+     * {@code ScarletCaveEntranceCarver}).
      */
     public static int sampleStaticSurfaceHeight(int x, int z) {
         ElderwoodsBiomeSource instance = activeInstance;
@@ -280,7 +356,16 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     /**
-     * Ensures this BiomeSource matches the given seed, re-initializing if not yet initialized
+     * Returns the most recently initialized {@link ElderwoodsBiomeSource}, or
+     * {@code null} if inactive.
+     */
+    public static ElderwoodsBiomeSource getActiveInstance() {
+        return activeInstance;
+    }
+
+    /**
+     * Ensures this BiomeSource matches the given seed, re-initializing if not yet
+     * initialized
      * or if a different world seed is provided.
      */
     public synchronized void syncSeed(long seed) {
@@ -306,6 +391,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             islandOffsetX = random.nextDouble() * 10000.0;
             islandOffsetZ = random.nextDouble() * 10000.0;
 
+            valleyTerrainHelper.resetForSeed(seed);
             syncedSeed = seed;
             seedInitialized = true;
         }
@@ -362,20 +448,23 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         return contOffsetZ;
     }
 
-    // Broad continents + stronger positive landmass bias keep oceans smaller and rarer (~18-22% coverage)
+    // Broad continents + stronger positive landmass bias keep oceans smaller and
+    // rarer (~18-22% coverage)
     // while macro climate/highland/cave frequencies enlarge all biomes coherently.
     private static final float CONTINENT_FREQUENCY = 0.00042f;
     private static final double CONTINENT_LAND_BIAS = 0.35;
     private static final double OCEAN_BATHYMETRY_SPAN = 0.36;
     public static final float CLIMATE_NOISE_FREQUENCY = 0.0011f;
-    // Lower frequency + 2-octave macro lobes form broad, cohesive Scarlet regions instead of thin slivers
+    // Lower frequency + 2-octave macro lobes form broad, cohesive Scarlet regions
+    // instead of thin slivers
     public static final float SCARLET_HUMIDITY_NOISE_FREQUENCY = 0.00034f;
     private static final float HIGHLAND_NOISE_FREQUENCY = 0.00025f;
     public static final float CAVE_NOISE_FREQUENCY = 0.0022f;
     public static final int SCARLET_CAVE_BASE_BOTTOM_Y = -56;
 
     /**
-     * Smoothly undulating lower boundary of Scarlet Caves, keeping them safely above
+     * Smoothly undulating lower boundary of Scarlet Caves, keeping them safely
+     * above
      * the deep Aether River zone while preventing flat horizontal biome seams.
      */
     public static int getScarletCaveBottomY(int x, int z) {
@@ -424,7 +513,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     /**
-     * Smooth inland margin factor [0..1] keeping deep Aether Rivers cleanly inside mainland rock
+     * Smooth inland margin factor [0..1] keeping deep Aether Rivers cleanly inside
+     * mainland rock
      * well before reaching coastal beaches or ocean shelves.
      */
     public double getMainlandRiverFade(int x, int z) {
@@ -435,11 +525,20 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     /**
-     * Detects abnormally wide, flat Elder Beach / shallow coastal basins (where height barely varies
-     * across hundreds of blocks) and returns a smooth [0..1] Swamp-Mangrove transformation factor.
+     * Returns the unified [0..1] Elder Lagoon mangrove-feature factor, strictly
+     * confined inside
+     * dedicated {@code elder_lagoon} biomes (well away from Scarlet biomes and open
+     * beaches).
      */
     public double getFlatBeachMangroveFactor(int x, int z) {
         ensureSeedSynced();
+        if (!getSurfaceBiome(x, z).is(ELDER_LAGOON_KEY)) {
+            return 0.0;
+        }
+        double factor = getLagoonFeatureFactor(x, z);
+        if (!Double.isNaN(factor)) {
+            return factor;
+        }
         int gx0 = Math.floorDiv(x, FLAT_BEACH_GRID) * FLAT_BEACH_GRID;
         int gz0 = Math.floorDiv(z, FLAT_BEACH_GRID) * FLAT_BEACH_GRID;
         double tx = (double) (x - gx0) / FLAT_BEACH_GRID;
@@ -497,8 +596,10 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             remaining--;
             if (ph >= 61 && ph <= 75) {
                 flatCount++;
-                if (ph < minH) minH = ph;
-                if (ph > maxH) maxH = ph;
+                if (ph < minH)
+                    minH = ph;
+                if (ph > maxH)
+                    maxH = ph;
                 if (maxH - minH > 10) {
                     return 0.0;
                 }
@@ -531,10 +632,70 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         return rawHighland / 0.32;
     }
 
+    private double computeEffectiveHighland(double wx, double wz, double contNoise, double tempNoise, double humNoise) {
+        double tempFade = hermite01((-0.02 - tempNoise) / 0.12);
+        double humFade = hermite01((0.44 - humNoise) / 0.10);
+        double contFade = hermite01((contNoise - 0.30) / 0.08);
+        double climateSupport = tempFade * humFade * contFade;
+        if (climateSupport <= 0.0) {
+            return 0.0;
+        }
+        double highlandNoise = sampleWarpedHighlandNoise(wx, wz);
+        return Math.max(0.0, highlandNoise) * climateSupport;
+    }
+
+    /**
+     * Modulates high-altitude highland massifs by localized 2D peak isolation noise so
+     * summits form compact alpine peaks surrounded by wide Forest and Meadow skirts
+     * rather than spanning 1000+ block continuous plateaus.
+     */
+    private double computeSummitPeakIntensity(double wx, double wz, double effectiveHighland) {
+        if (effectiveHighland <= 0.66) {
+            return 0.0;
+        }
+        double peakNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((wx + ridgeOffsetX + 731) * 0.0017f),
+                (float) ((wz + ridgeOffsetZ - 419) * 0.0017f), 2) / 0.32;
+        double peakIsolation = net.minecraft.util.Mth.clamp(0.5 + 0.5 * peakNoise, 0.0, 1.0);
+        double summitBase = Math.max(0.0, effectiveHighland - 0.66) / 0.42;
+        return summitBase * peakIsolation;
+    }
+
     private boolean isHighlandBiome(Holder<Biome> biome) {
         return biome.is(ELDER_HIGHLANDS_MEADOW_KEY)
                 || biome.is(ELDER_HIGHLAND_FOREST_KEY)
                 || biome.is(ELDER_HIGHLAND_SUMMIT_KEY);
+    }
+
+    public boolean isAridBiome(Holder<Biome> biome) {
+        return biome == goldenDesertBiome
+                || biome == goldenSavannaBiome
+                || biome == goldenSavannaMesaBiome
+                || biome.is(GOLDEN_DESERT_KEY)
+                || biome.is(GOLDEN_SAVANNA_KEY)
+                || biome.is(GOLDEN_SAVANNA_MESA_KEY);
+    }
+
+    private double computeEffectiveMesa(double wx, double wz, double contNoise, double tempNoise) {
+        double tempFade = hermite01((tempNoise - 0.09) / 0.05);
+        double contFade = hermite01((contNoise - 0.11) / 0.06);
+        double support = tempFade * contFade;
+        if (support <= 0.0) {
+            return 0.0;
+        }
+        double rawMesa = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((wx + highlandOffsetX + 4129) * 0.00052f),
+                (float) ((wz + highlandOffsetZ - 2897) * 0.00052f), 2) / 0.24;
+        return Math.max(0.0, rawMesa) * support;
+    }
+
+    private double computeTablemountainPlateauFactor(double wx, double wz, double effectiveMesa) {
+        if (effectiveMesa <= 0.14) {
+            return 0.0;
+        }
+        double lowerCliff = hermite01((effectiveMesa - 0.14) / 0.06);
+        double upperCliff = hermite01((effectiveMesa - 0.21) / 0.06);
+        return 0.42 * lowerCliff + 0.58 * upperCliff;
     }
 
     @Override
@@ -561,12 +722,14 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     /**
-     * Returns true for underground points belonging to the Scarlet Caves stratum (including shallow
-     * upper aquifer chambers directly beneath mainland Scarlet Forest/Swamp before stone transitions).
+     * Returns true for underground points belonging to the Scarlet Caves stratum
+     * (including shallow
+     * upper aquifer chambers directly beneath mainland Scarlet Forest/Swamp before
+     * stone transitions).
      */
     public boolean isScarletCaveAt(int x, int y, int z) {
         ensureSeedSynced();
-        if (sampleContinentalness(x, z) < 0.0 || sampleTemperatureNoise(x, z) > 0.15) {
+        if (sampleContinentalness(x, z) < 0.0 || sampleTemperatureNoise(x, z) > 0.13) {
             return false;
         }
         Holder<Biome> surfaceBiome = getSurfaceBiome(x, z);
@@ -608,7 +771,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             if (col.surfaceY >= 58) {
                 col.caveNoise = sampleCaveNoise(x, z);
                 boolean eligibleScarlet = !col.isHighland
-                        && col.surfaceBiome != goldenDesertBiome
+                        && !isAridBiome(col.surfaceBiome)
                         && col.contNoise >= 0.0;
                 if (eligibleScarlet) {
                     col.humNoise = sampleHumidityNoise(x, z);
@@ -639,7 +802,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         }
 
         // Strictly zero Elysian Abyss or other biomes inside Scarlet Caves territory.
-        // Elysian Abyss caverns taper closed smoothly in rock before humNoise reaches 0.44.
+        // Elysian Abyss caverns taper closed smoothly in rock before humNoise reaches
+        // 0.44.
         if (col.humNoise > 0.48 && y >= col.scarletBottomY) {
             return scarletCavesBiome;
         }
@@ -682,15 +846,24 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         Holder<Biome> raw = computeRawSurfaceBiome(x, z);
 
         if (raw == scarletSwampBiome) {
-            if (!hasMorphCoreNear(x, z, true, swampCoreCache.get(), SWAMP_DILATE_OFFSETS, SWAMP_CORE_PROBES)) {
+            final MorphCoreCache swampCache = swampCoreCache.get();
+            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.055f,
+                    (cx, cz) -> hasMorphCoreNear(cx, cz, true, swampCache, SWAMP_DILATE_OFFSETS, SWAMP_CORE_PROBES))) {
                 raw = scarletForestBiome;
             }
         }
 
         if (raw == scarletForestBiome || raw == scarletSwampBiome) {
-            if (!hasMorphCoreNear(x, z, false, scarletCoreCache.get(), SCARLET_DILATE_OFFSETS, SCARLET_CORE_PROBES)) {
+            final MorphCoreCache scarletCache = scarletCoreCache.get();
+            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.045f,
+                    (cx, cz) -> hasMorphCoreNear(cx, cz, false, scarletCache, SCARLET_DILATE_OFFSETS,
+                            SCARLET_CORE_PROBES))) {
                 int surfaceY = computeSurfaceHeight(x, z, null);
-                return pickBorderingNonScarletBiome(x, z, surfaceY);
+                Holder<Biome> fallback = pickBorderingNonScarletBiome(x, z, surfaceY);
+                if (fallback == elderBeachBiome && sampleContinentalness(x, z) >= 0.055) {
+                    return elderwoodsBiome;
+                }
+                return fallback;
             }
         }
 
@@ -698,7 +871,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     private Holder<Biome> computeRawSurfaceBiome(int x, int z) {
-        // 0. Master Continentalness Axis: Oceanic Domain vs Coastal Beach vs Continental Landmass
+        // 0. Master Continentalness Axis: Oceanic Domain vs Coastal Beach vs
+        // Continental Landmass
         double contNoise = sampleContinentalness(x, z);
         int surfaceY = computeSurfaceHeight(x, z, null);
 
@@ -717,58 +891,85 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
         double tempNoise = sampleTemperatureNoise(x, z);
 
-        // 1. Coastal Beach Band (Y=58 to 73): allow Scarlet Forest to directly border Elder Beach
-        // without injecting an artificial Elderwoods strip, while shielding coastal sand from inland swamps.
+        // 0.5 Elder Valley Corridor: check BEFORE coastal beach fallback so inland
+        // river channels (Y=67..73)
+        // never misclassify as Elder Beach, and estuaries keep elder_valley cleanly
+        // until the ocean shelf.
+        ElderValleyTerrainHelper.ValleyColumnInfo valleyInfo = getOrEvaluateValley(x, z, Integer.MIN_VALUE);
+        if (valleyInfo.hasValley) {
+            if (valleyInfo.inWaterChannel && contNoise >= -0.015) {
+                return elderValleyBiome;
+            }
+            if (valleyInfo.biomeMask >= 0.42 && !valleyInfo.isEstuary && contNoise >= 0.015) {
+                return elderValleyBiome;
+            }
+        }
+
+        // 1. Coastal Zone & Dedicated Elder Lagoon (Y=58 to 73/74):
+        // Sheltered Lagoons occupy calm, low-humidity basins cleanly separated from
+        // Scarlet biomes;
+        // outer sandy shores (Y <= 73) remain Elder Beach while inland Scarlet Swamps
+        // stay well inland (cont >= 0.14).
+        if (surfaceY <= 74 && tempNoise <= 0.08) {
+            double humNoiseCheck = sampleHumidityNoise(x, z);
+            if (humNoiseCheck < 0.24) {
+                double lagoonWeight = computeLagoonBiomeWeight(x, z, contNoise, tempNoise, humNoiseCheck, surfaceY);
+                if (lagoonWeight >= 0.40) {
+                    return elderLagoonBiome;
+                }
+            }
+        }
+
         if (surfaceY < 74) {
-            if (tempNoise <= 0.15) {
-                double humNoise = sampleHumidityNoise(x, z);
+            double humNoise = sampleHumidityNoise(x, z);
+            if (tempNoise <= 0.09) {
                 boolean inHighlandFringe = false;
-                if (contNoise > 0.24 && tempNoise < -0.02 && humNoise <= 0.46) {
+                if (contNoise > 0.26 && tempNoise < -0.02 && humNoise <= 0.46) {
                     double wx = sampleWarpedX(x, z);
                     double wz = sampleWarpedZ(x, z);
-                    inHighlandFringe = sampleWarpedHighlandNoise(wx, wz) > -0.08;
+                    inHighlandFringe = sampleWarpedHighlandNoise(wx, wz) > 0.04;
                 }
-                if (!inHighlandFringe) {
-                    if (contNoise >= 0.06 && humNoise > 0.72) {
-                        return scarletSwampBiome;
-                    }
-                    if (humNoise > 0.46 && surfaceY >= ElderwoodsChunkGenerator.BASE_HEIGHT + 1) {
+                if (!inHighlandFringe && contNoise >= 0.14 && humNoise > 0.72) {
+                    return scarletSwampBiome;
+                }
+                // Only true coastal/island rims (contNoise < 0.055) may form sandy Elder Beach;
+                // inland low spots inside continents stay woodland instead of creating sandy
+                // inland lakes.
+                if (contNoise >= 0.055) {
+                    if (!inHighlandFringe && humNoise > 0.46) {
                         return scarletForestBiome;
                     }
+                    return elderwoodsBiome;
                 }
+            } else if (contNoise >= 0.055) {
+                return resolveAridSurfaceBiome(x, z, contNoise, tempNoise, humNoise, surfaceY);
             }
             return elderBeachBiome;
         }
 
-        // 2. Hot Climate: Golden Desert (T > 0.15)
-        if (tempNoise > 0.15) {
-            return goldenDesertBiome;
-        }
-
         double humNoise = sampleHumidityNoise(x, z);
 
+        // 2. Warm / Arid Climate: Golden Savanna, Golden Savanna Mesa & Golden Desert (T > 0.09)
+        if (tempNoise > 0.09) {
+            return resolveAridSurfaceBiome(x, z, contNoise, tempNoise, humNoise, surfaceY);
+        }
+
         // 3. Elder Highlands Continental System (strictly deep continental interior:
-        // contNoise > 0.28, Cold/Temperate: T < -0.02, away from desert buffer and Scarlet macro basins)
-        // Use the exact same domain-warped coordinates (wx, wz) as computeSurfaceHeight so
+        // contNoise > 0.30, Cold/Temperate: T < -0.02, away from desert buffer and
+        // Scarlet macro basins)
+        // Use the exact same domain-warped coordinates (wx, wz) as computeSurfaceHeight
+        // so
         // physical mountain flanks and surface biomes never drift out of alignment.
         double wx = sampleWarpedX(x, z);
         double wz = sampleWarpedZ(x, z);
         double highlandNoise = sampleWarpedHighlandNoise(wx, wz);
+        double effectiveHighland = computeEffectiveHighland(wx, wz, contNoise, tempNoise, humNoise);
 
-        // Highlands yield cohesive Scarlet humidity zones (humNoise >= 0.44) while slightly broadening
-        // highlandNoise (-0.04) so overall Highland coverage stays unchanged without slicing Scarlet into slivers.
-        if (contNoise > 0.28 && tempNoise < -0.02 && humNoise < 0.44 && highlandNoise > -0.04) {
-            double r1 = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                    (float) ((wx + ridgeOffsetX) * 0.0011f), (float) ((wz + ridgeOffsetZ) * 0.0011f), 2));
-            double r2 = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                    (float) ((wx + ridgeOffsetX + 333) * 0.0022f), (float) ((wz + ridgeOffsetZ + 333) * 0.0022f), 2));
-            double ridgeNoise = r1 * 0.72 + r2 * 0.28;
-
-            // Summits sit strictly inside full climate support (humNoise < 0.36, contNoise > 0.31, tempNoise < -0.12)
-            // so mountain peaks always reach full elevation instead of deflating near borders.
-            if (highlandNoise > 0.66 && ridgeNoise > 0.72 && tempNoise < -0.12 && humNoise < 0.36 && contNoise > 0.31) {
+        if (effectiveHighland > 0.04) {
+            double summitIntensity = computeSummitPeakIntensity(wx, wz, effectiveHighland);
+            if (summitIntensity > 0.24 && surfaceY >= 152) {
                 return highlandSummitBiome;
-            } else if (highlandNoise > 0.30 && humNoise < 0.40) {
+            } else if (effectiveHighland > 0.42) {
                 return highlandForestBiome;
             } else {
                 return highlandMeadowBiome;
@@ -776,12 +977,13 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         }
 
         // Thin cold foothill separator ring when humidity is below core Scarlet range
-        if (contNoise > 0.24 && tempNoise < -0.02 && highlandNoise > -0.08 && humNoise <= 0.46) {
+        if (contNoise > 0.26 && tempNoise < -0.02 && highlandNoise > 0.04 && humNoise <= 0.46) {
             return elderwoodsBiome;
         }
 
-        // 4. Lowland Woodland Biomes (Normalized macro Humidity controlled; keep Scarlet Swamp inland behind forest berm)
-        if (contNoise >= 0.06 && humNoise > 0.72) {
+        // 4. Lowland Woodland Biomes (Normalized macro Humidity controlled; keep
+        // Scarlet Swamp deeply inland)
+        if (contNoise >= 0.14 && humNoise > 0.72) {
             return scarletSwampBiome;
         } else if (humNoise > 0.46) {
             return scarletForestBiome;
@@ -823,7 +1025,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     private boolean hasMorphCoreNear(int x, int z, boolean swampOnly, MorphCoreCache cache,
-                                     int[][] offsets, int[][] probes) {
+            int[][] offsets, int[][] probes) {
         int baseQx = Math.floorDiv(x, MORPH_QUART_STEP);
         int baseQz = Math.floorDiv(z, MORPH_QUART_STEP);
         for (int i = 0; i < offsets.length; i++) {
@@ -843,12 +1045,29 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         return false;
     }
 
+    private Holder<Biome> resolveAridSurfaceBiome(
+            int x, int z, double contNoise, double tempNoise, double humNoise, int surfaceY) {
+        double wx = sampleWarpedX(x, z);
+        double wz = sampleWarpedZ(x, z);
+        double effectiveMesa = computeEffectiveMesa(wx, wz, contNoise, tempNoise);
+        if (effectiveMesa >= 0.16 && surfaceY >= 94) {
+            return goldenSavannaMesaBiome;
+        }
+        if (tempNoise <= 0.20 || humNoise > 0.02) {
+            return goldenSavannaBiome;
+        }
+        return goldenDesertBiome;
+    }
+
     private Holder<Biome> pickBorderingNonScarletBiome(int x, int z, int surfaceY) {
         int elderwoodsCount = 0;
         int beachCount = 0;
         int desertCount = 0;
+        int savannaCount = 0;
+        int mesaCount = 0;
         int meadowCount = 0;
         int forestCount = 0;
+        int valleyCount = 0;
         int bestNonScarletDist = Integer.MAX_VALUE;
         Holder<Biome> nearestLandBiome = null;
 
@@ -866,10 +1085,16 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 }
                 if (b == elderwoodsBiome) {
                     elderwoodsCount++;
+                } else if (b == elderValleyBiome) {
+                    valleyCount++;
                 } else if (b == elderBeachBiome) {
                     beachCount++;
                 } else if (b == goldenDesertBiome) {
                     desertCount++;
+                } else if (b == goldenSavannaBiome) {
+                    savannaCount++;
+                } else if (b == goldenSavannaMesaBiome) {
+                    mesaCount++;
                 } else if (b == highlandMeadowBiome) {
                     meadowCount++;
                 } else if (b == highlandForestBiome) {
@@ -885,16 +1110,39 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         if (surfaceY < 74 && beachCount > 0) {
             return elderBeachBiome;
         }
+        if (valleyCount > elderwoodsCount && valleyCount > 0) {
+            return elderValleyBiome;
+        }
         if (elderwoodsCount > 0) {
             return elderwoodsBiome;
         }
 
         Holder<Biome> dominant = nearestLandBiome != null ? nearestLandBiome : elderwoodsBiome;
         int bestCount = 0;
-        if (meadowCount > bestCount) { bestCount = meadowCount; dominant = highlandMeadowBiome; }
-        if (forestCount > bestCount) { bestCount = forestCount; dominant = highlandForestBiome; }
-        if (desertCount > bestCount) { bestCount = desertCount; dominant = goldenDesertBiome; }
-        if (beachCount > bestCount) { bestCount = beachCount; dominant = elderBeachBiome; }
+        if (meadowCount > bestCount) {
+            bestCount = meadowCount;
+            dominant = highlandMeadowBiome;
+        }
+        if (forestCount > bestCount) {
+            bestCount = forestCount;
+            dominant = highlandForestBiome;
+        }
+        if (savannaCount > bestCount) {
+            bestCount = savannaCount;
+            dominant = goldenSavannaBiome;
+        }
+        if (mesaCount > bestCount) {
+            bestCount = mesaCount;
+            dominant = goldenSavannaMesaBiome;
+        }
+        if (desertCount > bestCount) {
+            bestCount = desertCount;
+            dominant = goldenDesertBiome;
+        }
+        if (beachCount > bestCount) {
+            bestCount = beachCount;
+            dominant = elderBeachBiome;
+        }
         return dominant;
     }
 
@@ -932,10 +1180,60 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     private int computeSmoothedSurfaceHeight(int x, int z) {
+        int preRiverH = computePreRiverSmoothedHeight(x, z);
+        ElderValleyTerrainHelper.ValleyColumnInfo valley = getOrEvaluateValley(x, z, preRiverH);
+        return valley.hasValley ? valley.surfaceY : preRiverH;
+    }
+
+    /**
+     * Copies cached or computed Elder Valley hydrological info for the column at
+     * {@code (x, z)}.
+     */
+    public void sampleValleyColumn(int x, int z, ElderValleyTerrainHelper.ValleyColumnInfo out) {
+        ensureSeedSynced();
+        out.copyFrom(getOrEvaluateValley(x, z, Integer.MIN_VALUE));
+    }
+
+    public boolean isInRiverChannel(int x, int z) {
+        ensureSeedSynced();
+        ElderValleyTerrainHelper.ValleyColumnInfo info = getOrEvaluateValley(x, z, Integer.MIN_VALUE);
+        return info.hasValley && info.inWaterChannel;
+    }
+
+    private ElderValleyTerrainHelper.ValleyColumnInfo getOrEvaluateValley(int x, int z, int knownPreRiverBaseH) {
+        ValleyCache cache = valleyColumnCache.get();
+        if (cache.seed != syncedSeed) {
+            Arrays.fill(cache.occupied, false);
+            cache.seed = syncedSeed;
+        }
+        long key = (((long) x) << 32) ^ (z & 0xFFFFFFFFL);
+        int slot = ((x * 73856093) ^ (z * 19349663)) & VALLEY_CACHE_MASK;
+        if (cache.occupied[slot] && cache.keys[slot] == key) {
+            return cache.infos[slot];
+        }
+
+        int baseH = (knownPreRiverBaseH != Integer.MIN_VALUE)
+                ? knownPreRiverBaseH
+                : computePreRiverSmoothedHeight(x, z);
+        double cont = sampleContinentalness(x, z);
+        double temp = sampleTemperatureNoise(x, z);
+        double hum = sampleHumidityNoise(x, z);
+        ElderValleyTerrainHelper.ValleyColumnInfo scratch = valleyTerrainHelper.getScratchInfo();
+        valleyTerrainHelper.evaluateColumn(syncedSeed, x, z, baseH, cont, temp, hum, valleyTerrainLookup, scratch);
+
+        cache.keys[slot] = key;
+        cache.infos[slot].copyFrom(scratch);
+        cache.occupied[slot] = true;
+        return cache.infos[slot];
+    }
+
+    private int computePreRiverSmoothedHeight(int x, int z) {
         int h = getRawSurfaceHeight(x, z);
 
-        // Relax steep underwater coastal / island aprons using a C1 distance-faded multi-tier cone.
-        // Smooth radial and lower-depth attenuation guarantee zero circular edge steps or cutoff cliffs.
+        // Relax steep underwater coastal / island aprons using a C1 distance-faded
+        // multi-tier cone.
+        // Smooth radial and lower-depth attenuation guarantee zero circular edge steps
+        // or cutoff cliffs.
         boolean coneApplied = false;
         double contNoise = sampleContinentalness(x, z);
         if (contNoise < 0.22 && h >= -8 && h < 70) {
@@ -952,9 +1250,12 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             }
         }
 
-        // Suppress isolated 1x1 sand block pimples and 1x1 water pinholes along flat beach terraces
-        // deterministically across chunk borders without affecting hills, cone ramps, or ocean basins.
-        if (!coneApplied && h >= ElderwoodsChunkGenerator.BASE_HEIGHT - 1 && h <= ElderwoodsChunkGenerator.BASE_HEIGHT + 3) {
+        // Suppress isolated 1x1 sand block pimples and 1x1 water pinholes along flat
+        // beach terraces
+        // deterministically across chunk borders without affecting hills, cone ramps,
+        // or ocean basins.
+        if (!coneApplied && h >= ElderwoodsChunkGenerator.BASE_HEIGHT - 1
+                && h <= ElderwoodsChunkGenerator.BASE_HEIGHT + 3) {
             int n1 = getRawSurfaceHeight(x + 1, z);
             int n2 = getRawSurfaceHeight(x - 1, z);
             int n3 = getRawSurfaceHeight(x, z + 1);
@@ -971,7 +1272,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     }
 
     private double extendConeOnLattice(int x, int z, int baseRawH, double coneH, int step, int minDistSq, int maxRadius,
-                                       double shoreCap, double maxAllowedSlope) {
+            double shoreCap, double maxAllowedSlope) {
         double maxR = (shoreCap - baseRawH) / maxAllowedSlope;
         if (maxR <= 0.0 || maxR * maxR <= minDistSq) {
             return coneH;
@@ -999,7 +1300,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                     continue;
                 }
                 double distFade = (dist <= 20.0) ? 1.0 : hermite01((28.0 - dist) / 8.0);
-                // Exact branch-and-bound: even at shoreCap, this point cannot beat current coneH
+                // Exact branch-and-bound: even at shoreCap, this point cannot beat current
+                // coneH
                 if (baseRawH + maxRawLift * distFade <= coneH) {
                     continue;
                 }
@@ -1027,10 +1329,13 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         double humNoise = sampleHumidityNoise(x, z);
         double contNoise = sampleContinentalness(x, z);
 
-        // Blending weights centered on Biome thresholds; restrict Scarlet Swamp basin depression inland
-        // so coastal Scarlet rims form dry Scarlet Forest shelves right onto the beach instead of leaking water steps.
-        double desertWeight = net.minecraft.util.Mth.clamp((tempNoise - 0.05) / 0.20, 0.0, 1.0);
-        double swampInland = hermite01((contNoise - 0.055) / 0.045);
+        // Blending weights centered on Biome thresholds; restrict Scarlet Swamp basin
+        // depression inland so coastal Scarlet rims form dry Scarlet Forest shelves right
+        // onto the beach instead of leaking water steps.
+        double warmWeight = net.minecraft.util.Mth.clamp((tempNoise - 0.04) / 0.10, 0.0, 1.0);
+        double desertBlend = net.minecraft.util.Mth.clamp((tempNoise - 0.16) / 0.08, 0.0, 1.0)
+                * net.minecraft.util.Mth.clamp((0.08 - humNoise) / 0.12, 0.0, 1.0);
+        double swampInland = hermite01((contNoise - 0.105) / 0.055);
         double swampWeight = net.minecraft.util.Mth.clamp((humNoise - 0.50) / 0.24, 0.0, 1.0) * swampInland;
 
         // Domain Warping for organic, non-symmetrical mountain and hill contours
@@ -1040,10 +1345,9 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         // 1. Base Rolling Hills (Elderwoods / Scarlet Forest)
         double nx = (wx + seedOffsetX) * 0.0021;
         double nz = (wz + seedOffsetZ) * 0.0021;
-        // Elevated baseline (centered at +8.0) ensures valleys naturally curve smoothly
-        // above water level
-        double baseNoise = 8.0 + Math.sin(nx) * Math.cos(nz) * 9.0;
-        baseNoise += Math.sin(nx * 0.5 + 2.0) * Math.cos(nz * 0.6 + 1.1) * 4.5;
+        // Elevated baseline (range +1.0..+19.0) keeps inland forests naturally above sea level Y=72
+        double baseNoise = 10.0 + Math.sin(nx) * Math.cos(nz) * 6.5;
+        baseNoise += Math.sin(nx * 0.5 + 2.0) * Math.cos(nz * 0.6 + 1.1) * 2.5;
 
         // 2. Swamp Basin
         double bumpyNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
@@ -1053,82 +1357,80 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         // Blend Swamp into Base Hills
         double terrainHeight = net.minecraft.util.Mth.lerp(swampWeight, baseNoise, swampHeight);
 
-        // 3. Golden Desert Dunes
+        // 3. Golden Savanna, Dunes & Stratified Mesa / Tablemountains
         double duneNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                 (float) ((x + seedOffsetX) * 0.03), (float) ((z + seedOffsetZ) * 0.03), 2) * 5.0;
-        // Keep interior/coastal desert dunes safely above sea level so dune troughs never punch saltwater craters into dunes
+        // Keep interior/coastal arid terrain safely above sea level so troughs never punch saltwater holes
+        double savannaBaseHeight = Math.max((terrainHeight * 0.55) + 3.5 + duneNoise * 0.70, 2.6);
         double desertHeight = Math.max((terrainHeight * 0.45) + 2.8 + duneNoise * 0.85, 2.4);
+        double aridBaseNoise = net.minecraft.util.Mth.lerp(desertBlend, savannaBaseHeight, desertHeight);
 
-        // Blend Desert over base terrain
-        double finalNoise = net.minecraft.util.Mth.lerp(desertWeight, terrainHeight, desertHeight);
+        // Blend Warm/Arid over base terrain
+        double finalNoise = net.minecraft.util.Mth.lerp(warmWeight, terrainHeight, aridBaseNoise);
 
-        // 4. Elder Highlands Continental Mountain System (Massive ranges Y=80 to Y=215)
-        // Ramps reach 1.0 strictly outside Forest/Summit thresholds so peaks never deflate near biome edges
-        double tempFade = net.minecraft.util.Mth.clamp((0.02 - tempNoise) / 0.10, 0.0, 1.0);
-        double humFade = net.minecraft.util.Mth.clamp((0.50 - humNoise) / 0.12, 0.0, 1.0);
-        double contFade = net.minecraft.util.Mth.clamp((contNoise - 0.20) / 0.10, 0.0, 1.0);
-        double climateSupport = tempFade * humFade * contFade;
+        double effectiveMesa = computeEffectiveMesa(wx, wz, contNoise, tempNoise);
+        if (effectiveMesa > 0.08) {
+            double talusRamp = hermite01((effectiveMesa - 0.08) / 0.07) * 10.0;
+            double plateauFactor = computeTablemountainPlateauFactor(wx, wz, effectiveMesa);
+            double rockCrag = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                    (float) ((x + seedOffsetX) * 0.022f), (float) ((z + seedOffsetZ) * 0.022f), 2) / 0.32;
+            double innerBench = hermite01((effectiveMesa - 0.38) / 0.06) * 4.5;
+            double plateauNoise = 70.0 + innerBench + rockCrag * 2.5;
+            double dampedBase = net.minecraft.util.Mth.lerp(0.88 * plateauFactor, finalNoise + talusRamp, plateauNoise);
+            finalNoise = dampedBase;
+        }
 
-        double highlandNoise = sampleWarpedHighlandNoise(wx, wz);
+        // 4. Elder Highlands Continental Mountain System (Topological concentric tiers:
+        // Wide Meadow Y~84-110 -> Broad Forest Slopes Y~110-150 -> Compact Central Summit Peaks Y~152-220+)
+        double effectiveHighland = computeEffectiveHighland(wx, wz, contNoise, tempNoise, humNoise);
 
-        double highlandWeight = net.minecraft.util.Mth.clamp((highlandNoise - (-0.10)) / 0.18, 0.0, 1.0);
-        double effectiveHighlandWeight = highlandWeight * climateSupport;
+        if (effectiveHighland > 0.01) {
+            double smoothT = hermite01((effectiveHighland - 0.01) / 0.14);
 
-        if (effectiveHighlandWeight > 0.0) {
-            double smoothT = effectiveHighlandWeight * effectiveHighlandWeight * (3.0 - 2.0 * effectiveHighlandWeight);
+            // A. Lower Level — Expansive Highland Meadow Belt (effectiveHighland 0.02..0.42, Y ~ 84..110)
+            double meadowT = hermite01((effectiveHighland - 0.02) / 0.40);
+            double baseLift = meadowT * 24.0;
 
-            // A. Base Elevation Lift: elevates Highlands Meadows noticeably above Elderwoods baseline
-            double baseLift = 18.0 + smoothT * 16.0;
-
-            // B. Asymmetrical Alpine Slopes & Glacial Valleys
+            // B. Asymmetrical Alpine Slopes & Crag Detail
             double alpineSlope = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                    (float) ((wx + seedOffsetX) * 0.0018f), (float) ((wz + seedOffsetZ) * 0.0018f), 3) * 26.0;
+                    (float) ((wx + seedOffsetX) * 0.0018f), (float) ((wz + seedOffsetZ) * 0.0018f), 3) * 22.0;
             double cragDetail = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                     (float) (x * 0.015f), (float) (z * 0.015f), 2) * 7.0;
             double microRoughness = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                     (float) (x * 0.04f), (float) (z * 0.04f), 2) * 3.0;
 
-            // C. Mountain Flank / Pine Forest Lift (Y=115..155)
-            double forestFactor = net.minecraft.util.Mth.clamp((highlandNoise - 0.26) / 0.35, 0.0, 1.0);
-            double forestLift = forestFactor * 38.0;
+            // C. Mid Level — Broad Highland Forest Mountain Flanks (effectiveHighland 0.40..0.72, Y ~ 110..150)
+            double forestT = hermite01((effectiveHighland - 0.40) / 0.32);
+            double forestLift = forestT * 32.0;
 
-            // D. Alpine Ridged Peak Formation (narrow razor-sharp crests thrusting to Y=175..220)
+            // D. Center Peak — Compact Isolated Summit Peaks (Y~152 to Y~215+)
             double r1 = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                    (float) ((wx + ridgeOffsetX) * 0.0011f), (float) ((wz + ridgeOffsetZ) * 0.0011f), 2));
+                    (float) ((wx + ridgeOffsetX) * 0.0011f), (float) ((wz + ridgeOffsetZ) * 0.0011f), 2)) / 0.30;
             double r2 = 1.0 - Math.abs(net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                    (float) ((wx + ridgeOffsetX + 333) * 0.0022f), (float) ((wz + ridgeOffsetZ + 333) * 0.0022f), 2));
-            double ridgeCombined = r1 * 0.72 + r2 * 0.28;
-            double ridgeVal = Math.max(0.0, ridgeCombined - 0.32) / 0.68;
-            double ridgePeak = ridgeVal * ridgeVal * ridgeVal;
+                    (float) ((wx + ridgeOffsetX + 333) * 0.0022f), (float) ((wz + ridgeOffsetZ + 333) * 0.0022f), 2)) / 0.30;
+            double ridgeCrest = net.minecraft.util.Mth.clamp(r1 * 0.72 + r2 * 0.28, 0.0, 1.0);
 
-            double summitFactor = net.minecraft.util.Mth.clamp((highlandNoise - 0.56) / 0.24, 0.0, 1.0);
-            double summitRidgeBoost = summitFactor * net.minecraft.util.Mth.clamp((ridgeCombined - 0.64) / 0.14, 0.0, 1.0) * 24.0;
-            double peakLift = ridgePeak * 88.0 * summitFactor + summitRidgeBoost;
+            double summitIntensity = computeSummitPeakIntensity(wx, wz, effectiveHighland);
+            double summitNorm = Math.max(0.0, summitIntensity - 0.06) / 0.55;
+            double mountainCone = (summitNorm * summitNorm) / (1.0 + 0.25 * summitNorm * summitNorm);
+            double peakLift = mountainCone * (88.0 + 42.0 * ridgeCrest * ridgeCrest);
 
-            double valleyClampedSlope = net.minecraft.util.Mth.lerp(summitFactor * 0.75, alpineSlope, Math.max(alpineSlope, -4.0));
-            double totalHighlandBonus = baseLift + valleyClampedSlope + cragDetail + microRoughness + forestLift + peakLift;
+            double summitTransition = hermite01((summitIntensity - 0.04) / 0.22);
+            double valleyClampedSlope = net.minecraft.util.Mth.lerp(summitTransition * 0.85, alpineSlope,
+                    Math.max(alpineSlope, -2.0));
+            double totalHighlandBonus = baseLift + valleyClampedSlope + cragDetail + microRoughness + forestLift
+                    + peakLift;
             finalNoise = net.minecraft.util.Mth.lerp(smoothT, finalNoise, terrainHeight + totalHighlandBonus);
         }
 
         // 5. Continental Protection, Coastline Unification & Bathymetric Carving
-        // Sample Island Noise with restrained domain-warped coordinates + multi-scale coastline jaggedness
+        // Sample Island Noise with restrained domain-warped coordinates + multi-scale
+        // coastline jaggedness
         // so islands form organic bays without folding contours into shear cliffs.
-        double islandWarpX = wx + net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                (float) ((x + islandOffsetX + 2713) * 0.0018f), (float) ((z + islandOffsetZ - 1831) * 0.0018f), 2) * 68.0;
-        double islandWarpZ = wz + net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                (float) ((x + islandOffsetX - 3917) * 0.0018f), (float) ((z + islandOffsetZ + 2243) * 0.0018f), 2) * 68.0;
+        double islandNoise = computeIslandNoiseValue(x, z, wx, wz);
 
-        double rawIsland = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                (float) ((islandWarpX + islandOffsetX) * 0.00068f), (float) ((islandWarpZ + islandOffsetZ) * 0.00068f), 3);
-        double coastDetail = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                (float) ((wx + islandOffsetX + 641) * 0.0032f), (float) ((wz + islandOffsetZ - 487) * 0.0032f), 2) * 0.14
-                + net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                (float) ((x + islandOffsetX) * 0.0070f), (float) ((z + islandOffsetZ) * 0.0070f), 1) * 0.04;
-        // Fade coastline detail cleanly so deep-sea shelves stay broad while emerged island shores carve gentle bays
-        double detailFade = net.minecraft.util.Mth.clamp(((rawIsland / 0.32) + 0.15) / 0.55, 0.25, 1.0);
-        double islandNoise = (rawIsland / 0.32) + coastDetail * detailFade;
-
-        // A. Mainland Coastal Slope & Shoreline (tight natural beaches transitioning crisply into water)
+        // A. Mainland Coastal Slope & Shoreline (tight natural beaches transitioning
+        // crisply into water)
         double mainlandY = ElderwoodsChunkGenerator.BASE_HEIGHT + finalNoise;
 
         // Inland-to-Coast Smooth Taper (contNoise from 0.050 down to 0.012):
@@ -1139,13 +1441,17 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         double taperedMainlandY = net.minecraft.util.Mth.lerp(smoothLandCoast, targetCoastY, mainlandY);
 
         // Crisp Coastal Beach (contNoise from 0.012 down to -0.014):
-        // Steps quickly from forest grade across thin sand beach down to submerged shallow water (Y=66.5)
+        // Steps quickly from forest grade across thin sand beach down to submerged
+        // shallow water (Y=66.5)
         double beachT = net.minecraft.util.Mth.clamp((0.012 - contNoise) / 0.026, 0.0, 1.0);
         double smoothBeach = beachT * beachT * (3.0 - 2.0 * beachT);
-        double mainlandShoreY = net.minecraft.util.Mth.lerp(smoothBeach, taperedMainlandY, ElderwoodsChunkGenerator.BASE_HEIGHT - 5.5);
+        double mainlandShoreY = net.minecraft.util.Mth.lerp(smoothBeach, taperedMainlandY,
+                ElderwoodsChunkGenerator.BASE_HEIGHT - 5.5);
 
-        // B. Ocean Bathymetry (Shallow photic shelf -> Continental slope -> Deep abyssal plains)
-        // oceanProgress: 0.0 at coast (contNoise = 0.0), 1.0 at deep abyss (contNoise = -OCEAN_BATHYMETRY_SPAN)
+        // B. Ocean Bathymetry (Shallow photic shelf -> Continental slope -> Deep
+        // abyssal plains)
+        // oceanProgress: 0.0 at coast (contNoise = 0.0), 1.0 at deep abyss (contNoise =
+        // -OCEAN_BATHYMETRY_SPAN)
         double oceanProgress = net.minecraft.util.Mth.clamp((-contNoise) / OCEAN_BATHYMETRY_SPAN, 0.0, 1.0);
 
         // Continental Shelf Dynamic Modulation:
@@ -1154,16 +1460,19 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
         double oceanY;
         if (oceanProgress < dynamicShelfEdge) {
-            // Photic Continental Shelf (Silent Oceans): slopes gently from shallow water (Y=58) to shelf floor (Y=42)
+            // Photic Continental Shelf (Silent Oceans): slopes gently from shallow water
+            // (Y=58) to shelf floor (Y=42)
             double shelfFrac = oceanProgress / dynamicShelfEdge;
             double s = shelfFrac * shelfFrac * (3.0 - 2.0 * shelfFrac);
             oceanY = net.minecraft.util.Mth.lerp(s, ElderwoodsChunkGenerator.BASE_HEIGHT - 4.0, 42.0);
-            // Rolling sandbanks and dunes across the expansive ocean floor (warped organic FBM, zero periodic grids)
+            // Rolling sandbanks and dunes across the expansive ocean floor (warped organic
+            // FBM, zero periodic grids)
             double sandbankNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                     (float) ((wx + islandOffsetX + 1103) * 0.011f), (float) ((wz + islandOffsetZ - 881) * 0.011f), 2);
             oceanY += (sandbankNoise / 0.32) * 2.2 * (1.0 - shelfFrac);
         } else if (oceanProgress < dynamicAbyssEdge) {
-            // Continental Slope: gradual descent from photic shelf floor (Y=42) down to abyssal floor (Y=-98)
+            // Continental Slope: gradual descent from photic shelf floor (Y=42) down to
+            // abyssal floor (Y=-98)
             double slopeFrac = (oceanProgress - dynamicShelfEdge) / Math.max(0.18, dynamicAbyssEdge - dynamicShelfEdge);
             double hermite = slopeFrac * slopeFrac * (3.0 - 2.0 * slopeFrac);
             double s = 0.72 * hermite + 0.28 * slopeFrac;
@@ -1201,19 +1510,22 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             // Power exponent creates needle-sharp mountain crests and steep pyramid flanks
             double spikeFactor = Math.pow(Math.max(0.0, (combinedRidge - 0.28) / 0.72), 2.8);
 
-            // Spiked mountains flank the rift valleys and rise in high amounts: up to 72 blocks above valley floor!
+            // Spiked mountains flank the rift valleys and rise in high amounts: up to 72
+            // blocks above valley floor!
             double valleyWallBoost = net.minecraft.util.Mth.clamp(valleyAxis / 0.18, 0.25, 1.0);
             double spikedMountainLift = spikeFactor * 72.0 * valleyWallBoost;
 
             // Gentle floor undulation in deep valley troughs
             double valleyFloorCurve = (net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                    (float) ((wx + trenchOffsetX) * 0.0085f), (float) ((wz + trenchOffsetZ) * 0.0085f), 2) / 0.32) * 3.8;
+                    (float) ((wx + trenchOffsetX) * 0.0085f), (float) ((wz + trenchOffsetZ) * 0.0085f), 2) / 0.32)
+                    * 3.8;
 
             // Combine into full abyssal valley topography
             double abyssalTerrainY = valleyBaseY + valleyFloorCurve + spikedMountainLift;
             oceanY = net.minecraft.util.Mth.lerp(smoothAbyssal, -98.0, abyssalTerrainY);
 
-            // Seamounts in the open ocean (Underwater Mountain Ranges rising to photic zone)
+            // Seamounts in the open ocean (Underwater Mountain Ranges rising to photic
+            // zone)
             double m1 = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                     (float) (x * 0.0014f), (float) (z * 0.0014f), 3) / 0.32;
             double m2 = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
@@ -1227,7 +1539,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 oceanY += mtLift * smoothAbyssal;
             }
 
-            // Sunken Trenches / Bedrock fault cracks: smooth Hermite drop down to bedrock layer (-118)
+            // Sunken Trenches / Bedrock fault cracks: smooth Hermite drop down to bedrock
+            // layer (-118)
             double crackNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                     (float) ((x + trenchOffsetX) * 0.012f), (float) ((z + trenchOffsetZ) * 0.012f), 2);
             double absCrack = Math.abs(crackNoise);
@@ -1247,40 +1560,48 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         double baseTerrainY = net.minecraft.util.Mth.lerp(smoothCoast, oceanY, mainlandShoreY);
 
         // D. Island Seamounts & Dynamic Expansive Island Marine Shelves
-        // Samples regional marine shelf noise so every island tapers gradually into surrounding seabed with zero sheer cliffs.
+        // Samples regional marine shelf noise so every island tapers gradually into
+        // surrounding seabed with zero sheer cliffs.
         double rawIslandShelfMod = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                 (float) ((x + islandOffsetX + 7821) * 0.00065f), (float) ((z + islandOffsetZ + 7821) * 0.00065f), 2);
         double islandShelfMod = net.minecraft.util.Mth.clamp(rawIslandShelfMod / 0.32, -0.75, 1.0);
 
         double shelfNoiseStart = Math.min(-0.14, -0.34 - 0.24 * islandShelfMod);
-        double apronNoiseStart = shelfNoiseStart - (0.34 + 0.12 * net.minecraft.util.Mth.clamp(islandShelfMod, -0.6, 1.0));
+        double apronNoiseStart = shelfNoiseStart
+                - (0.34 + 0.12 * net.minecraft.util.Mth.clamp(islandShelfMod, -0.6, 1.0));
 
         double finalTerrainY = baseTerrainY;
         if (islandNoise > apronNoiseStart) {
             double islandTargetY;
             if (islandNoise > 0.50) {
-                // Island Interior (Y=74+): wider, softer rolling hills rather than steep pointed cones
+                // Island Interior (Y=74+): wider, softer rolling hills rather than steep
+                // pointed cones
                 double t = net.minecraft.util.Mth.clamp((islandNoise - 0.50) / 0.42, 0.0, 1.0);
                 double smoothT = t * t * (3.0 - 2.0 * t);
                 double islandRoll = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                        (float) ((wx + seedOffsetX + 219) * 0.0068f), (float) ((wz + seedOffsetZ - 411) * 0.0068f), 3) / 0.32;
+                        (float) ((wx + seedOffsetX + 219) * 0.0068f), (float) ((wz + seedOffsetZ - 411) * 0.0068f), 3)
+                        / 0.32;
                 double organicRelief = Math.max(0.8, 3.2 + Math.max(finalNoise * 0.28, -0.8) + islandRoll * 2.1);
                 islandTargetY = ElderwoodsChunkGenerator.BASE_HEIGHT + 2.0 + smoothT * organicRelief;
             } else if (islandNoise > 0.34) {
-                // Beach Zone (Y=56 to 74) - broad sandy shore passing smoothly through sea level (Y=72)
+                // Beach Zone (Y=56 to 74) - broad sandy shore passing smoothly through sea
+                // level (Y=72)
                 double t = (islandNoise - 0.34) / 0.16;
                 double smoothT = t * t * (3.0 - 2.0 * t);
                 islandTargetY = net.minecraft.util.Mth.lerp(smoothT, 56.0, 74.0);
             } else if (islandNoise > shelfNoiseStart) {
-                // Photic Silent Ocean Shelf (Y=40 to 56) - gentle marine shelf around the island
+                // Photic Silent Ocean Shelf (Y=40 to 56) - gentle marine shelf around the
+                // island
                 double shelfT = (islandNoise - shelfNoiseStart) / (0.34 - shelfNoiseStart);
                 double smoothShelf = shelfT * shelfT * (3.0 - 2.0 * shelfT);
                 double shelfRollNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                        (float) ((wx + islandOffsetX + 1423) * 0.013f), (float) ((wz + islandOffsetZ - 997) * 0.013f), 2) / 0.32;
+                        (float) ((wx + islandOffsetX + 1423) * 0.013f), (float) ((wz + islandOffsetZ - 997) * 0.013f),
+                        2) / 0.32;
                 double shelfRoll = shelfRollNoise * 2.8 * (shelfT * (1.0 - shelfT));
                 islandTargetY = net.minecraft.util.Mth.lerp(smoothShelf, 40.0, 56.0) + shelfRoll;
             } else {
-                // Submarine apron / ramp (sloping smoothly from surrounding seafloor baseTerrainY up to Y=40)
+                // Submarine apron / ramp (sloping smoothly from surrounding seafloor
+                // baseTerrainY up to Y=40)
                 double apronT = (islandNoise - apronNoiseStart) / (shelfNoiseStart - apronNoiseStart);
                 double smoothApron = apronT * apronT * (3.0 - 2.0 * apronT);
                 islandTargetY = net.minecraft.util.Mth.lerp(smoothApron, baseTerrainY, 40.0);
@@ -1291,41 +1612,28 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             finalTerrainY = smoothMax(baseTerrainY, islandTargetY, k);
         }
 
-        // D2. Photic-Shelf Archipelagos, Island Arcs & Atoll Shoals (gated strictly off coasts & abyssal slopes)
+        // D2. Photic-Shelf Archipelagos, Island Arcs & Atoll Shoals (gated strictly off
+        // coasts & abyssal slopes)
         finalTerrainY = ArchipelagoTerrainHelper.applyArchipelagoTerrain(
                 x, z, contNoise, oceanProgress, dynamicShelfEdge, finalTerrainY);
 
-        // E. Sheltered Coastal Lagoons: strictly excluded near Scarlet regions so Y=72 lagoons never border
-        // Y=70 Scarlet Swamps, with macro-scale committed basins eliminating <10-block micro-puddles.
-        double lagoonScarletFade = hermite01((0.32 - humNoise) / 0.14);
-        double lagoonCoastWeight = hermite01((0.010 - contNoise) / 0.022) * lagoonScarletFade;
-        if (lagoonCoastWeight > 0.0 && finalTerrainY > 58.0 && finalTerrainY < 74.8) {
-            double rawLagoonZone = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                    (float) ((wx + islandOffsetX + 5209) * 0.0017f), (float) ((wz + islandOffsetZ - 4127) * 0.0017f), 2);
-            double lagoonZone = hermite01(((rawLagoonZone / 0.32) - 0.18) / 0.14);
-            double bandWeight = hermite01((finalTerrainY - 58.0) / 5.0)
-                    * hermite01((74.8 - finalTerrainY) / 1.8);
-            double basinMask = lagoonCoastWeight * lagoonZone * bandWeight;
-            if (basinMask > 0.52) {
-                double lagoonField = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                        (float) ((wx + seedOffsetX + 7919) * 0.0038f), (float) ((wz + seedOffsetZ - 6131) * 0.0038f), 2) / 0.32;
-                if (lagoonField < -0.22) {
-                    double bankCurve = hermite01((-0.22 - lagoonField) / 0.16)
-                            * hermite01((basinMask - 0.52) / 0.26);
-                    double bedUndulation = (net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
-                            (float) (x * 0.038f), (float) (z * 0.038f), 2) / 0.32) * 1.4;
-                    double lagoonBedY = 62.5 + bedUndulation;
-                    finalTerrainY = net.minecraft.util.Mth.lerp(bankCurve, finalTerrainY, Math.min(finalTerrainY, lagoonBedY));
-                }
-            }
-        }
+        // E. Sheltered Coastal Lagoons (Elder Lagoon): strictly excluded near Scarlet
+        // (hum < 0.24)
+        // and Golden Desert (temp < 0.06), centered in sheltered nearshore basins so
+        // outer sandy bars
+        // and wide dry buffers always isolate lagoons from Scarlet Swamps & deep ocean
+        // shelves.
+        finalTerrainY = ElderCoastalHelper.applyLagoonCarving(
+                x, z, wx, wz, contNoise, tempNoise, humNoise,
+                islandOffsetX, islandOffsetZ, seedOffsetX, seedOffsetZ, finalTerrainY);
 
         // --- DYNAMIC SWAMP SHORELINE (SPILL PREVENTION) ---
-        // Strictly applies only on deep inland mainland where Scarlet Swamp meets adjacent biomes
+        // Strictly applies only on deep inland mainland where Scarlet Swamp meets
+        // adjacent biomes
         if (contNoise > 0.05) {
             double landFade = net.minecraft.util.Mth.clamp((contNoise - 0.05) / 0.08, 0.0, 1.0);
             double distToHumBorder = Math.abs(swampWeight - 0.5) * 2.0;
-            double distToTempBorder = Math.abs(desertWeight - 0.5) * 2.0;
+            double distToTempBorder = Math.abs(warmWeight - 0.5) * 2.0;
 
             double ridgeForce = 0.0;
             if (swampWeight > 0.5) {
@@ -1337,11 +1645,37 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
             if (ridgeForce > 0.0) {
                 double ridgeMinimum = ElderwoodsChunkGenerator.BASE_HEIGHT + 0.5;
-                finalTerrainY = net.minecraft.util.Mth.lerp(ridgeForce * landFade, finalTerrainY, Math.max(finalTerrainY, ridgeMinimum));
+                finalTerrainY = net.minecraft.util.Mth.lerp(ridgeForce * landFade, finalTerrainY,
+                        Math.max(finalTerrainY, ridgeMinimum));
             }
         }
 
         return (int) Math.round(finalTerrainY);
+    }
+
+    private double computeLagoonBiomeWeight(int x, int z, double contNoise, double tempNoise, double humNoise,
+            int surfaceY) {
+        double wx = sampleWarpedX(x, z);
+        double wz = sampleWarpedZ(x, z);
+        return ElderCoastalHelper.computeLagoonBiomeWeight(
+                x, z, wx, wz, contNoise, tempNoise, humNoise,
+                islandOffsetX, islandOffsetZ, seedOffsetX, seedOffsetZ, surfaceY);
+    }
+
+    public double getLagoonFeatureFactor(int x, int z) {
+        ensureSeedSynced();
+        double humNoise = sampleHumidityNoise(x, z);
+        if (humNoise >= 0.24) {
+            return 0.0;
+        }
+        double tempNoise = sampleTemperatureNoise(x, z);
+        if (tempNoise >= 0.06) {
+            return 0.0;
+        }
+        double contNoise = sampleContinentalness(x, z);
+        int surfaceY = computeSurfaceHeight(x, z, null);
+        double weight = computeLagoonBiomeWeight(x, z, contNoise, tempNoise, humNoise, surfaceY);
+        return ElderCoastalHelper.computeLagoonFeatureFactor(weight);
     }
 
     /**
@@ -1375,8 +1709,29 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         return net.minecraft.util.Mth.clamp(dynamicShelfEdge + 0.36, 0.72, 0.88);
     }
 
+    private double computeIslandNoiseValue(int x, int z, double wx, double wz) {
+        double islandWarpX = wx + net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((x + islandOffsetX + 2713) * 0.0018f), (float) ((z + islandOffsetZ - 1831) * 0.0018f), 2)
+                * 68.0;
+        double islandWarpZ = wz + net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((x + islandOffsetX - 3917) * 0.0018f), (float) ((z + islandOffsetZ + 2243) * 0.0018f), 2)
+                * 68.0;
+
+        double rawIsland = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((islandWarpX + islandOffsetX) * 0.00068f), (float) ((islandWarpZ + islandOffsetZ) * 0.00068f),
+                3);
+        double coastDetail = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((wx + islandOffsetX + 641) * 0.0032f), (float) ((wz + islandOffsetZ - 487) * 0.0032f), 2)
+                * 0.14
+                + net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                        (float) ((x + islandOffsetX) * 0.0070f), (float) ((z + islandOffsetZ) * 0.0070f), 1) * 0.04;
+        double detailFade = net.minecraft.util.Mth.clamp(((rawIsland / 0.32) + 0.15) / 0.55, 0.25, 1.0);
+        return (rawIsland / 0.32) + coastDetail * detailFade;
+    }
+
     /**
-     * Computes the dynamic continentalness threshold for the deep abyssal floor (Silent Depths),
+     * Computes the dynamic continentalness threshold for the deep abyssal floor
+     * (Silent Depths),
      * dynamically varying based on regional continental shelf width.
      */
     public double getDynamicAbyssThreshold(int x, int z) {

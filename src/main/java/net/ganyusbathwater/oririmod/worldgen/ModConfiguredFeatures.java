@@ -49,12 +49,18 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_BOULDER_KEY = registerKey("scarlet_boulder");
         public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_BOULDER_KEY = registerKey(
                         "highlands_boulder");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> CALICHE_BOULDER_KEY = registerKey(
+                        "caliche_boulder");
         public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_MEADOW_FLOWERS_KEY = registerKey(
                         "highlands_meadow_flowers");
         public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLAND_SUMMIT_POWDER_SNOW_KEY = registerKey(
                         "highland_summit_powder_snow");
         public static final ResourceKey<ConfiguredFeature<?, ?>> HIGHLANDS_GRASS_PATCH_KEY = registerKey(
                         "highlands_grass_patch");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> GOLDEN_SAVANNA_GRASS_PATCH_KEY = registerKey(
+                        "golden_savanna_grass_patch");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> GOLDEN_SAVANNA_TALL_GRASS_PATCH_KEY = registerKey(
+                        "golden_savanna_tall_grass_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> SCARLET_GRASS_PATCH_KEY = registerKey(
                         "scarlet_grass_patch");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDERWOODS_GRASS_PATCH_KEY = registerKey(
@@ -103,6 +109,7 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> SILENT_OCEAN_FLORA_KEY = registerKey("silent_ocean_flora");
         public static final ResourceKey<ConfiguredFeature<?, ?>> BEACH_UNDERWATER_REEF_KEY = registerKey("beach_underwater_reef");
         public static final ResourceKey<ConfiguredFeature<?, ?>> BEACH_MANGROVE_SWAMP_KEY = registerKey("beach_mangrove_swamp");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_VALLEY_KEY = registerKey("elder_valley");
 
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
                 GeodeBlockSettings layerConfig = new GeodeBlockSettings(
@@ -174,6 +181,9 @@ public class ModConfiguredFeatures {
                 register(context, HIGHLANDS_BOULDER_KEY, ModFeatures.HIGHLANDS_BOULDER.get(),
                                 NoneFeatureConfiguration.INSTANCE);
 
+                register(context, CALICHE_BOULDER_KEY, ModFeatures.CALICHE_BOULDER.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+
                 register(context, HIGHLANDS_MEADOW_FLOWERS_KEY, Feature.FLOWER,
                                 new RandomPatchConfiguration(32, 7, 3, PlacementUtils.onlyWhenEmpty(
                                                 Feature.SIMPLE_BLOCK,
@@ -229,6 +239,26 @@ public class ModConfiguredFeatures {
                                                                                                 .add(Blocks.SHORT_GRASS
                                                                                                                 .defaultBlockState(),
                                                                                                                 5))),
+                                                List.of(Blocks.GRASS_BLOCK)));
+
+                register(context, GOLDEN_SAVANNA_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
+                                FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(
+                                                                new net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider(
+                                                                                net.minecraft.util.random.SimpleWeightedRandomList
+                                                                                                .<BlockState>builder()
+                                                                                                .add(Blocks.SHORT_GRASS
+                                                                                                                .defaultBlockState(),
+                                                                                                                5)
+                                                                                                .add(Blocks.DEAD_BUSH
+                                                                                                                .defaultBlockState(),
+                                                                                                                1))),
+                                                List.of(Blocks.GRASS_BLOCK, Blocks.COARSE_DIRT)));
+
+                register(context, GOLDEN_SAVANNA_TALL_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
+                                FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(
+                                                                BlockStateProvider.simple(Blocks.TALL_GRASS)),
                                                 List.of(Blocks.GRASS_BLOCK)));
                 register(context, SCARLET_TOOTH_LEAVES_PATCH_KEY, Feature.RANDOM_PATCH,
                                 FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK,
@@ -340,6 +370,8 @@ public class ModConfiguredFeatures {
                 register(context, BEACH_UNDERWATER_REEF_KEY, ModFeatures.BEACH_UNDERWATER_REEF_FEATURE.get(),
                                 new NoneFeatureConfiguration());
                 register(context, BEACH_MANGROVE_SWAMP_KEY, ModFeatures.BEACH_MANGROVE_SWAMP_FEATURE.get(),
+                                new NoneFeatureConfiguration());
+                register(context, ELDER_VALLEY_KEY, ModFeatures.ELDER_VALLEY_FEATURE.get(),
                                 new NoneFeatureConfiguration());
         }
 

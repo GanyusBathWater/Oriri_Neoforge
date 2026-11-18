@@ -1,13 +1,13 @@
 {
   "structures": [
-    { "structure": "oririmod:elderwoods_outpost", "weight": 1 },
-    { "structure": "oririmod:elderwoods_outpost_ruins", "weight": 1 },
-    { "structure": "oririmod:elderwoods_sanctuary", "weight": 1 }
+    { "structure": "oririmod:elderwoods_outpost", "weight": 4 },
+    { "structure": "oririmod:elderwoods_outpost_ruins", "weight": 4 },
+    { "structure": "oririmod:elderwoods_sanctuary", "weight": 7 }
   ],
   "placement": {
     "type": "minecraft:random_spread",
-    "spacing": 20,
-    "separation": 15,
+    "spacing": 24,
+    "separation": 18,
     "salt": 1234567890
   }
 }

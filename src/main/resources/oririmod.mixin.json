@@ -10,7 +10,8 @@
     "LevelMixin",
     "OceanMonumentStructureMixin",
     "MonumentBuildingMixin",
-    "OceanMonumentPieceMixin"
+    "OceanMonumentPieceMixin",
+    "NetherFossilStructureMixin"
   ],
   "client": [
     "ClientLevelMixin",

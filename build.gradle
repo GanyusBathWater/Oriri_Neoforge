@@ -193,6 +193,7 @@ dependencies {
     localRuntime "maven.modrinth:emi-loot:0.7.9+1.21+neoforge"
 
     // GeckoLib (Required for Eye of Desolation and future animated mobs)
+    compileOnly "maven.modrinth:uCdwusMi:3.1.0-b-1.21.1"
     implementation "software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}"
 
     // Lodestone (Required library)

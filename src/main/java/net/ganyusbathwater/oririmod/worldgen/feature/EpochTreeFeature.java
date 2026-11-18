@@ -33,9 +33,13 @@ public class EpochTreeFeature extends Feature<EpochTreeFeature.EpochTreeConfig> 
         RandomSource random = context.random();
         boolean generateFruit = context.config().hasFruit();
 
-        // Need sol sand or dirt/grass beneath to grow
+        // Need sol sand, dirt, grass, coarse dirt, or caliche beneath to grow
         BlockState belowState = level.getBlockState(origin.below());
-        if (!belowState.is(ModBlocks.SOL_SAND.get()) && !belowState.is(net.minecraft.world.level.block.Blocks.DIRT) && !belowState.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)) {
+        if (!belowState.is(ModBlocks.SOL_SAND.get())
+                && !belowState.is(net.minecraft.world.level.block.Blocks.DIRT)
+                && !belowState.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)
+                && !belowState.is(net.minecraft.world.level.block.Blocks.COARSE_DIRT)
+                && !belowState.is(ModBlocks.CALICHE.get())) {
             return false;
         }
 

@@ -32,6 +32,11 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.HighlandsBoulderFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.CalicheBoulderFeature> CALICHE_BOULDER = FEATURES
+                        .register("caliche_boulder",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.CalicheBoulderFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.WindsweptPineTreeFeature> WINDSWEPT_PINE = FEATURES
                         .register("windswept_pine",
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.WindsweptPineTreeFeature(
@@ -126,6 +131,11 @@ public class ModFeatures {
         public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.BeachMangroveSwampFeature> BEACH_MANGROVE_SWAMP_FEATURE = FEATURES
                         .register("beach_mangrove_swamp_feature",
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.BeachMangroveSwampFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.ElderValleyFeature> ELDER_VALLEY_FEATURE = FEATURES
+                        .register("elder_valley_feature",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.ElderValleyFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
         public static void register(IEventBus bus) {

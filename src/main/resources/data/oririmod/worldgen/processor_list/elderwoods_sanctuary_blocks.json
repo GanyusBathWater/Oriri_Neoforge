@@ -85,6 +85,9 @@
           "output_state": { "Name": "minecraft:air" }
         }
       ]
+    },
+    {
+      "processor_type": "oririmod:outpost_terrain_blend"
     }
   ]
 }

@@ -7,12 +7,18 @@ import net.ganyusbathwater.oririmod.OririMod;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasBinding;
 import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
@@ -52,9 +58,12 @@ public class CenteredJigsawStructure extends Structure {
         for (int checkX = x - radius; checkX <= x + radius; checkX += step) {
             for (int checkZ = z - radius; checkZ <= z + radius; checkZ += step) {
                 int height = context.chunkGenerator().getBaseHeight(checkX, checkZ, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState());
+                if (height <= 72) {
+                    return Optional.empty();
+                }
                 Holder<Biome> biome = context.biomeSource().getNoiseBiome(checkX >> 2, height >> 2, checkZ >> 2, context.randomState().sampler());
-                if (!this.biomes().contains(biome)) {
-                    return Optional.empty(); // Cancel generation if too close to border on the surface
+                if (!this.biomes().contains(biome) || biome.is(net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource.ELDER_VALLEY_KEY)) {
+                    return Optional.empty(); // Cancel generation if too close to border or river valley
                 }
                 minY = Math.min(minY, height);
                 maxY = Math.max(maxY, height);
@@ -68,7 +77,19 @@ public class CenteredJigsawStructure extends Structure {
         
         return this.jigsawStructure.findGenerationPoint(context);
     }
-    
+
+    @Override
+    public void afterPlace(
+            WorldGenLevel level,
+            StructureManager structureManager,
+            ChunkGenerator chunkGenerator,
+            RandomSource random,
+            BoundingBox chunkBox,
+            ChunkPos chunkPos,
+            PiecesContainer pieces) {
+        GridStructure.applyRetainingWallAndFoundation(level, chunkGenerator, chunkBox, pieces, false, false, false);
+    }
+
     @Override
     public StructureType<?> type() {
         return ModStructureTypes.CENTERED_JIGSAW.get();

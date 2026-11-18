@@ -152,6 +152,7 @@ public class ScarletCaveEntranceCarver extends WorldCarver<CaveCarverConfigurati
                     // tapered cylinder finish smoothly instead of slicing flat vertical walls on 4x4 biome edges.
                     BlockState blockState = chunk.getBlockState(mutablePos);
                     if (blockState.is(Blocks.WATER) || blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)
+                            || blockState.is(Blocks.MUD) || blockState.is(Blocks.CLAY) || blockState.is(Blocks.COARSE_DIRT)
                             || blockState.is(abyssalBasalt.getBlock()) || blockState.is(ModBlocks.ABYSS_SAND.get())) {
                         continue; // Never breach or carve open ocean, beach sand/gravel, or abyssal seabed
                     }

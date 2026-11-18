@@ -41,6 +41,12 @@ public class ModPlacedFeatures {
         public static final ResourceKey<PlacedFeature> OASIS_PLACED_KEY = registerKey("oasis_placed");
         public static final ResourceKey<PlacedFeature> QUICKSAND_POND_PLACED_KEY = registerKey("quicksand_pond_placed");
         public static final ResourceKey<PlacedFeature> WAR_GRAVE_PLACED_KEY = registerKey("war_grave_placed");
+
+        // Golden Savanna & Mesa Features
+        public static final ResourceKey<PlacedFeature> CALICHE_BOULDER_PLACED_KEY = registerKey("caliche_boulder_placed");
+        public static final ResourceKey<PlacedFeature> GOLDEN_SAVANNA_GRASS_PATCH_PLACED_KEY = registerKey("golden_savanna_grass_patch_placed");
+        public static final ResourceKey<PlacedFeature> GOLDEN_SAVANNA_TALL_GRASS_PATCH_PLACED_KEY = registerKey("golden_savanna_tall_grass_patch_placed");
+        public static final ResourceKey<PlacedFeature> SAVANNA_EPOCH_TREE_PLACED_KEY = registerKey("savanna_epoch_tree_placed");
         
         public static final ResourceKey<PlacedFeature> SCARLET_BOULDER_PLACED_KEY = registerKey(
                         "scarlet_boulder_placed");
@@ -99,6 +105,7 @@ public class ModPlacedFeatures {
         public static final ResourceKey<PlacedFeature> SILENT_OCEAN_FLORA_PLACED_KEY = registerKey("silent_ocean_flora_placed");
         public static final ResourceKey<PlacedFeature> BEACH_MANGROVE_PLACED_KEY = registerKey("beach_mangrove_placed");
         public static final ResourceKey<PlacedFeature> BEACH_UNDERWATER_REEF_PLACED_KEY = registerKey("beach_underwater_reef_placed");
+        public static final ResourceKey<PlacedFeature> ELDER_VALLEY_PLACED_KEY = registerKey("elder_valley_placed");
 
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<PlacedFeature> context) {
@@ -467,6 +474,46 @@ public class ModPlacedFeatures {
                                                 CountPlacement.of(6),
                                                 InSquarePlacement.spread(),
                                                 HeightRangePlacement.uniform(absolute(30), absolute(71)),
+                                                BiomeFilter.biome()));
+
+                register(context, ELDER_VALLEY_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.ELDER_VALLEY_KEY),
+                                List.of(
+                                                CountPlacement.of(8),
+                                                InSquarePlacement.spread(),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
+                                                BiomeFilter.biome()));
+
+                register(context, CALICHE_BOULDER_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.CALICHE_BOULDER_KEY),
+                                List.of(
+                                                RarityFilter.onAverageOnceEvery(3),
+                                                InSquarePlacement.spread(),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
+                                                BiomeFilter.biome()));
+
+                register(context, GOLDEN_SAVANNA_GRASS_PATCH_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.GOLDEN_SAVANNA_GRASS_PATCH_KEY),
+                                List.of(
+                                                CountPlacement.of(8),
+                                                InSquarePlacement.spread(),
+                                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                                BiomeFilter.biome()));
+
+                register(context, GOLDEN_SAVANNA_TALL_GRASS_PATCH_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.GOLDEN_SAVANNA_TALL_GRASS_PATCH_KEY),
+                                List.of(
+                                                CountPlacement.of(3),
+                                                InSquarePlacement.spread(),
+                                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                                                BiomeFilter.biome()));
+
+                register(context, SAVANNA_EPOCH_TREE_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.EPOCH_TREE_KEY),
+                                List.of(
+                                                RarityFilter.onAverageOnceEvery(2),
+                                                InSquarePlacement.spread(),
+                                                HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES),
                                                 BiomeFilter.biome()));
         }
 

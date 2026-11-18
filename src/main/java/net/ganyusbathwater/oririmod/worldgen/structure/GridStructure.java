@@ -5,8 +5,11 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource;
+import net.ganyusbathwater.oririmod.worldgen.ModStructureProcessorLists;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -15,8 +18,10 @@ import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
@@ -32,9 +37,11 @@ import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -116,15 +123,19 @@ public class GridStructure extends Structure {
                 );
 
                 // Prevent structures from encroaching on oceans, lakes, or river channels
-                if (sampleY <= 63) {
+                if (sampleY <= 72) {
                     return Optional.empty();
                 }
 
-                // Reject if structure footprint crosses outside allowed biomes
+                // Reject if structure footprint crosses outside allowed biomes or touches an Elder Valley river channel
                 Holder<Biome> biome = context.biomeSource().getNoiseBiome(
                         sampleX >> 2, sampleY >> 2, sampleZ >> 2, context.randomState().sampler()
                 );
-                if (!this.biomes().contains(biome)) {
+                if (!this.biomes().contains(biome) || biome.is(ElderwoodsBiomeSource.ELDER_VALLEY_KEY)) {
+                    return Optional.empty();
+                }
+                if (context.biomeSource() instanceof ElderwoodsBiomeSource ebs
+                        && ebs.isInRiverChannel(sampleX, sampleZ)) {
                     return Optional.empty();
                 }
 
@@ -157,6 +168,24 @@ public class GridStructure extends Structure {
     @Override
     public void afterPlace(WorldGenLevel level, StructureManager structureManager, ChunkGenerator chunkGenerator,
                            RandomSource random, BoundingBox chunkBox, ChunkPos chunkPos, PiecesContainer pieces) {
+        String path = this.basename.getPath();
+        boolean isScarlet = path.contains("scarlet");
+        boolean isRuins = path.contains("ruins");
+        applyRetainingWallAndFoundation(level, chunkGenerator, chunkBox, pieces, isScarlet, isRuins, true);
+    }
+
+    /**
+     * Builds perimeter retaining walls, corner wing walls, under-structure stone/dirt foundation
+     * fill, and grass apron leveling across a placed structure's bounding box.
+     */
+    public static void applyRetainingWallAndFoundation(
+            WorldGenLevel level,
+            ChunkGenerator chunkGenerator,
+            BoundingBox chunkBox,
+            PiecesContainer pieces,
+            boolean isScarlet,
+            boolean isRuins,
+            boolean hasRaisedInnerTerrace) {
         List<StructurePiece> pieceList = pieces.pieces();
         if (pieceList.isEmpty()) {
             return;
@@ -190,7 +219,7 @@ public class GridStructure extends Structure {
         int worldMaxY = level.getMaxBuildHeight() - 1;
         // Outposts build y=0..1 dirt, y=2 outer grass apron, and y=3 inner grass terrace/courtyard walls.
         int lawnY = Math.min(worldMaxY, structMinY + 2);
-        int wallTopY = Math.min(worldMaxY, structMinY + 3);
+        int wallTopY = hasRaisedInnerTerrace ? Math.min(worldMaxY, structMinY + 3) : lawnY;
 
         int width = structMaxX - structMinX + 1;
         int depth = structMaxZ - structMinZ + 1;
@@ -198,22 +227,20 @@ public class GridStructure extends Structure {
             return;
         }
 
-        String path = this.basename.getPath();
-        boolean isScarlet = path.contains("scarlet");
-        boolean isRuins = path.contains("ruins");
-
         ElderwoodsBiomeSource biomeSource = chunkGenerator.getBiomeSource() instanceof ElderwoodsBiomeSource ebs
                 ? ebs : null;
         BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos();
 
-        boolean[][] wallGrid = buildPerimeterWallGrid(
+        PerimeterWallData wallData = buildPerimeterWallGrid(
                 biomeSource, level, mPos, chunkBox, structMinX, structMinZ, width, depth,
                 structMinY, wallTopY, worldMinY);
+        int[][] wallCapGrid = wallData.wallCapGrid();
+        int[][] outsideYGrid = wallData.outsideYGrid();
 
         boolean hasAnyWall = false;
         for (int lx = 0; lx < width && !hasAnyWall; lx++) {
             for (int lz = 0; lz < depth; lz++) {
-                if (wallGrid[lx][lz]) {
+                if (wallCapGrid[lx][lz] != Integer.MIN_VALUE) {
                     hasAnyWall = true;
                     break;
                 }
@@ -225,67 +252,141 @@ public class GridStructure extends Structure {
                         width, depth, wallTopY, worldMinY, lawnY)
                 : null;
         boolean[][] cornerActive = hasAnyWall
-                ? buildCornerActiveGrid(wallGrid, naturalYGrid, width, depth, lawnY)
+                ? buildCornerActiveGrid(wallCapGrid, naturalYGrid, width, depth, lawnY)
                 : null;
 
         for (int wx = x0; wx <= x1; wx++) {
             int lx = wx - structMinX;
             for (int wz = z0; wz <= z1; wz++) {
                 int lz = wz - structMinZ;
-                int subGroundY = findSolidTerrainBelow(level, mPos, wx, structMinY - 1, wz, worldMinY, 44);
+                int subGroundY = findSolidFoundationBelow(level, mPos, wx, structMinY - 1, wz, worldMinY, 44);
 
-                if (wallGrid[lx][lz]) {
-                    placeRetainingWallColumn(level, mPos, wx, wz, structMinY, wallTopY, subGroundY,
+                int perimCapY = wallCapGrid[lx][lz];
+                if (perimCapY != Integer.MIN_VALUE) {
+                    int outY = outsideYGrid[lx][lz];
+                    int wallFootY = (outY != Integer.MIN_VALUE) ? Math.min(subGroundY, outY) : subGroundY;
+                    placeRetainingWallColumn(level, mPos, wx, wz, structMinY, perimCapY, wallFootY,
                             worldMinY, isScarlet, isRuins, true);
                     continue;
                 }
 
-                boolean hasUpperTerrace = hasSolidSurfaceAt(level, mPos, wx, wallTopY, wz);
-                boolean hasLawnSurface = hasSolidSurfaceAt(level, mPos, wx, lawnY, wz);
-                boolean templateEmpty = !hasUpperTerrace && !hasLawnSurface;
+                boolean hasUpperBuilding = hasStructureBuildingAt(level, mPos, wx, wallTopY, wz);
+                boolean hasLawnBuilding = hasStructureBuildingAt(level, mPos, wx, lawnY, wz);
+                boolean hasLowerBuilding = hasStructureBuildingAt(level, mPos, wx, structMinY, wz)
+                        || hasStructureBuildingAt(level, mPos, wx, Math.min(worldMaxY, structMinY + 1), wz);
+                boolean hasAnyBuilding = hasUpperBuilding || hasLawnBuilding || hasLowerBuilding;
 
-                if (templateEmpty && cornerActive != null && cornerActive[lx][lz]) {
-                    if (isExposedWingCell(level, mPos, wallGrid, cornerActive, naturalYGrid,
-                            structMinX, structMinZ, width, depth, lx, lz, lawnY, wallTopY)) {
-                        placeRetainingWallColumn(level, mPos, wx, wz, structMinY, wallTopY, subGroundY,
-                                worldMinY, isScarlet, isRuins, false);
+                int apronTargetY = hasAnyWall
+                        ? getWallApronTargetY(wallCapGrid, width, depth, lx, lz, lawnY, wallTopY)
+                        : Integer.MIN_VALUE;
+                boolean inCorner = cornerActive != null && cornerActive[lx][lz];
+                boolean behindFullWall = apronTargetY >= wallTopY;
+                boolean behindWall = apronTargetY >= lawnY || inCorner;
+
+                int fillEndY = Math.max(worldMinY + 2, subGroundY);
+
+                if (!hasAnyBuilding && behindWall) {
+                    int targetSurfY = behindFullWall ? wallTopY : Math.max(lawnY, apronTargetY);
+                    mPos.set(wx, targetSurfY + 1, wz);
+                    BlockState aboveTarget = level.getBlockState(mPos);
+                    boolean buriedBelowTerrain = !aboveTarget.isAir()
+                            && !aboveTarget.liquid()
+                            && !aboveTarget.canBeReplaced()
+                            && !aboveTarget.is(BlockTags.LEAVES)
+                            && !aboveTarget.is(BlockTags.LOGS)
+                            && !isNaturalGrassOrFoliage(aboveTarget);
+
+                    // Unconditionally replace natural grass/foliage and fill behind the visible wall with dirt.
+                    for (int y = structMinY; y < targetSurfY; y++) {
+                        mPos.set(wx, y, wz);
+                        BlockState cur = level.getBlockState(mPos);
+                        if (isReplaceableForStructureWall(cur) || isNaturalGrassOrFoliage(cur)) {
+                            level.setBlock(mPos, Blocks.DIRT.defaultBlockState(), 2);
+                        }
+                    }
+
+                    mPos.set(wx, targetSurfY, wz);
+                    BlockState atTarget = level.getBlockState(mPos);
+                    if (isReplaceableForStructureWall(atTarget) || isNaturalGrassOrFoliage(atTarget)) {
+                        level.setBlock(mPos,
+                                buriedBelowTerrain ? Blocks.DIRT.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState(),
+                                2);
+                        if (aboveTarget.getBlock() instanceof DoublePlantBlock
+                                && aboveTarget.hasProperty(DoublePlantBlock.HALF)
+                                && aboveTarget.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER) {
+                            mPos.set(wx, targetSurfY + 1, wz);
+                            level.setBlock(mPos, Blocks.AIR.defaultBlockState(), 2);
+                        }
+                    }
+
+                    for (int y = structMinY - 1; y >= fillEndY; y--) {
+                        mPos.set(wx, y, wz);
+                        BlockState cur = level.getBlockState(mPos);
+                        if (isReplaceableForStructureWall(cur) || isNaturalGrassOrFoliage(cur)) {
+                            level.setBlock(mPos, Blocks.DIRT.defaultBlockState(), 2);
+                        }
+                    }
+                } else {
+                    boolean hasSurfacePlatform = hasAnyBuilding
+                            || hasSolidSurfaceAt(level, mPos, wx, wallTopY, wz)
+                            || hasSolidSurfaceAt(level, mPos, wx, lawnY, wz);
+                    if (!hasSurfacePlatform) {
                         continue;
                     }
-                    mPos.set(wx, lawnY, wz);
-                    level.setBlock(mPos, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
-                } else if (templateEmpty) {
-                    // Outside retained corners and outside template ground: leave natural terrain untouched.
-                    continue;
+
+                    for (int y = structMinY - 1; y >= fillEndY; y--) {
+                        mPos.set(wx, y, wz);
+                        BlockState cur = level.getBlockState(mPos);
+                        if (isReplaceableForStructureWall(cur) || isNaturalGrassOrFoliage(cur)) {
+                            level.setBlock(mPos, Blocks.DIRT.defaultBlockState(), 2);
+                        }
+                    }
                 }
 
-                int fillTopY = templateEmpty ? (lawnY - 1) : (structMinY - 1);
-                int fillEndY = Math.max(worldMinY + 2, subGroundY);
-                for (int y = fillTopY; y >= fillEndY; y--) {
+                // Clean buried grass blocks and trapped plants inside the structure footprint unconditionally.
+                int cleanTopY = Math.min(worldMaxY - 1, structMinY + 10);
+                for (int y = fillEndY; y <= cleanTopY; y++) {
                     mPos.set(wx, y, wz);
                     BlockState cur = level.getBlockState(mPos);
-                    if (cur.isAir() || cur.liquid() || cur.canBeReplaced() || cur.is(BlockTags.LEAVES)
-                            || (templateEmpty && (cur.is(Blocks.GRASS_BLOCK) || cur.is(Blocks.SAND)))) {
-                        BlockState fill;
-                        if (y >= structMinY || structMinY - y <= 2) {
-                            fill = Blocks.DIRT.defaultBlockState();
-                        } else if (isScarlet) {
-                            fill = ModBlocks.SCARLET_STONE.get().defaultBlockState();
-                        } else {
-                            fill = (y <= subGroundY + 1) ? Blocks.STONE.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState();
+                    if (cur.is(Blocks.GRASS_BLOCK)) {
+                        mPos.set(wx, y + 1, wz);
+                        BlockState above = level.getBlockState(mPos);
+                        boolean buried = !above.isAir()
+                                && !above.liquid()
+                                && !above.is(BlockTags.LEAVES)
+                                && !isNaturalGrassOrFoliage(above)
+                                && (!above.canBeReplaced() || above.isCollisionShapeFullBlock(level, mPos));
+                        if (buried) {
+                            mPos.set(wx, y, wz);
+                            level.setBlock(mPos, Blocks.DIRT.defaultBlockState(), 2);
                         }
-                        level.setBlock(mPos, fill, 2);
+                    } else if (cur.is(Blocks.SHORT_GRASS) || cur.is(Blocks.TALL_GRASS)
+                            || cur.is(Blocks.FERN) || cur.is(Blocks.LARGE_FERN) || cur.is(BlockTags.FLOWERS)) {
+                        mPos.set(wx, y - 1, wz);
+                        if (!level.getBlockState(mPos).is(BlockTags.DIRT)) {
+                            mPos.set(wx, y, wz);
+                            level.setBlock(mPos, Blocks.AIR.defaultBlockState(), 2);
+                        }
                     }
                 }
             }
+        }
+
+        if (hasAnyWall) {
+            fillSingleBlockApronHoles(level, mPos, wallCapGrid, structMinX, structMinZ, width, depth,
+                    x0, x1, z0, z1, lawnY, wallTopY);
         }
     }
 
     private static final int CORNER_EXTENT = 15;
 
-    private static boolean[][] buildPerimeterWallGrid(ElderwoodsBiomeSource biomeSource, WorldGenLevel level,
-                                                        BlockPos.MutableBlockPos mPos, BoundingBox chunkBox,
-                                                        int minX, int minZ, int w, int d,
-                                                        int structMinY, int wallTopY, int worldMinY) {
+    private record PerimeterWallData(int[][] wallCapGrid, int[][] outsideYGrid) {
+    }
+
+    private static PerimeterWallData buildPerimeterWallGrid(ElderwoodsBiomeSource biomeSource, WorldGenLevel level,
+                                                            BlockPos.MutableBlockPos mPos, BoundingBox chunkBox,
+                                                            int minX, int minZ, int w, int d,
+                                                            int structMinY, int wallTopY, int worldMinY) {
         int perimLen = 2 * (w - 1) + 2 * (d - 1);
         int[] px = new int[perimLen];
         int[] pz = new int[perimLen];
@@ -373,7 +474,7 @@ public class GridStructure extends Structure {
                 wall[i] = true;
             }
         } else {
-            // Trigger any sustained (>= 4 blocks) coastal or terrace drop of >= 3 blocks below lawnY
+            // Trigger any sustained (>= 2 blocks) drop below lawnY so no gap opens beside backfill
             int runStart = -1;
             int runLen = 0;
             for (int step = 1; step <= perimLen; step++) {
@@ -382,7 +483,7 @@ public class GridStructure extends Structure {
                     if (runLen == 0) runStart = step;
                     runLen++;
                 } else {
-                    if (runLen >= 4) {
+                    if (runLen >= 2) {
                         for (int s = runStart; s < runStart + runLen; s++) {
                             wall[(highAnchor + s) % perimLen] = true;
                         }
@@ -391,45 +492,89 @@ public class GridStructure extends Structure {
                 }
             }
 
-            // Expand active walls seamlessly through connected slope cells (<= softTriggerMaxY)
+            // Expand active walls seamlessly through connected slope cells (<= bridgeMaxY)
             for (int pass = 0; pass < 2; pass++) {
                 for (int step = 0; step < perimLen * 2; step++) {
                     int a = step % perimLen;
                     int b = (step + 1) % perimLen;
-                    if (wall[a] && outsideY[b] <= softTriggerMaxY) {
+                    if (wall[a] && outsideY[b] <= bridgeMaxY) {
                         wall[b] = true;
                     }
                 }
                 for (int step = perimLen * 2 - 1; step >= 0; step--) {
                     int a = (step + 1) % perimLen;
                     int b = step % perimLen;
-                    if (wall[a] && outsideY[b] <= softTriggerMaxY) {
+                    if (wall[a] && outsideY[b] <= bridgeMaxY) {
                         wall[b] = true;
                     }
                 }
             }
 
-            // Bridge tiny 1-2 block rock humps (outsideY <= structMinY) between two wall segments
+            // Bridge narrow 1-4 block rock/grass humps (outsideY <= wallTopY) between two wall segments
             for (int i = 0; i < perimLen; i++) {
                 if (!wall[i]) continue;
-                int n1 = (i + 1) % perimLen;
-                int n2 = (i + 2) % perimLen;
-                int n3 = (i + 3) % perimLen;
-                if (!wall[n1] && outsideY[n1] <= bridgeMaxY && wall[n2]) {
-                    wall[n1] = true;
-                } else if (!wall[n1] && !wall[n2] && outsideY[n1] <= bridgeMaxY
-                        && outsideY[n2] <= bridgeMaxY && wall[n3]) {
-                    wall[n1] = true;
-                    wall[n2] = true;
+                int bridgeEnd = -1;
+                for (int span = 1; span <= 4; span++) {
+                    int far = (i + span + 1) % perimLen;
+                    boolean lowSpan = true;
+                    for (int k = 1; k <= span; k++) {
+                        if (outsideY[(i + k) % perimLen] > wallTopY) {
+                            lowSpan = false;
+                            break;
+                        }
+                    }
+                    if (!lowSpan) break;
+                    if (wall[far]) {
+                        bridgeEnd = span;
+                        break;
+                    }
+                }
+                if (bridgeEnd > 0) {
+                    for (int k = 1; k <= bridgeEnd; k++) {
+                        wall[(i + k) % perimLen] = true;
+                    }
                 }
             }
         }
 
-        boolean[][] wallGrid = new boolean[w][d];
+        int[] wallCap = new int[perimLen];
+        Arrays.fill(wallCap, Integer.MIN_VALUE);
         for (int i = 0; i < perimLen; i++) {
-            wallGrid[px[i]][pz[i]] = wall[i];
+            if (wall[i]) {
+                wallCap[i] = wallTopY;
+            }
         }
-        return wallGrid;
+        if (highAnchor >= 0) {
+            // Gradually descend the retaining wall 1 block per step past each active wall end
+            // until the lowered cap no longer sits above the outside ground level.
+            for (int i = 0; i < perimLen; i++) {
+                if (!wall[i]) continue;
+                for (int dir = -1; dir <= 1; dir += 2) {
+                    if (wall[Math.floorMod(i + dir, perimLen)]) continue;
+                    for (int step = 1; step <= 16; step++) {
+                        int cur = Math.floorMod(i + dir * step, perimLen);
+                        if (wall[cur]) break;
+                        int capY = wallTopY - step;
+                        if (capY <= outsideY[cur]) break;
+                        if (capY > wallCap[cur]) {
+                            wallCap[cur] = capY;
+                        }
+                    }
+                }
+            }
+        }
+
+        int[][] wallCapGrid = new int[w][d];
+        int[][] outsideYGrid = new int[w][d];
+        for (int x = 0; x < w; x++) {
+            Arrays.fill(wallCapGrid[x], Integer.MIN_VALUE);
+            Arrays.fill(outsideYGrid[x], Integer.MIN_VALUE);
+        }
+        for (int i = 0; i < perimLen; i++) {
+            wallCapGrid[px[i]][pz[i]] = wallCap[i];
+            outsideYGrid[px[i]][pz[i]] = outsideY[i];
+        }
+        return new PerimeterWallData(wallCapGrid, outsideYGrid);
     }
 
     private static int[][] buildCornerSurfaceGrid(ElderwoodsBiomeSource biomeSource, WorldGenLevel level,
@@ -454,7 +599,7 @@ public class GridStructure extends Structure {
         return surfaceY;
     }
 
-    private static boolean[][] buildCornerActiveGrid(boolean[][] wallGrid, int[][] naturalYGrid,
+    private static boolean[][] buildCornerActiveGrid(int[][] wallCapGrid, int[][] naturalYGrid,
                                                        int w, int d, int lawnY) {
         boolean[][] active = new boolean[w][d];
         int extX = Math.min(CORNER_EXTENT, w - 1);
@@ -471,13 +616,13 @@ public class GridStructure extends Structure {
 
                 boolean behindWall;
                 if (nearW && nearN) {
-                    behindWall = wallGrid[0][lz] || wallGrid[lx][0];
+                    behindWall = wallCapGrid[0][lz] >= lawnY || wallCapGrid[lx][0] >= lawnY;
                 } else if (nearE && nearN) {
-                    behindWall = wallGrid[w - 1][lz] || wallGrid[lx][0];
+                    behindWall = wallCapGrid[w - 1][lz] >= lawnY || wallCapGrid[lx][0] >= lawnY;
                 } else if (nearW) {
-                    behindWall = wallGrid[0][lz] || wallGrid[lx][d - 1];
+                    behindWall = wallCapGrid[0][lz] >= lawnY || wallCapGrid[lx][d - 1] >= lawnY;
                 } else {
-                    behindWall = wallGrid[w - 1][lz] || wallGrid[lx][d - 1];
+                    behindWall = wallCapGrid[w - 1][lz] >= lawnY || wallCapGrid[lx][d - 1] >= lawnY;
                 }
 
                 if (behindWall && naturalYGrid[lx][lz] < lawnY) {
@@ -488,37 +633,95 @@ public class GridStructure extends Structure {
         return active;
     }
 
-    private static boolean isExposedWingCell(WorldGenLevel level, BlockPos.MutableBlockPos mPos,
-                                             boolean[][] wallGrid, boolean[][] cornerActive,
-                                             int[][] naturalYGrid, int minX, int minZ, int w, int d,
-                                             int lx, int lz, int lawnY, int wallTopY) {
-        for (int dx = -1; dx <= 1; dx++) {
-            int nx = lx + dx;
-            if (nx < 0 || nx >= w) continue;
-            for (int dz = -1; dz <= 1; dz++) {
-                if (dx == 0 && dz == 0) continue;
-                int nz = lz + dz;
-                if (nz < 0 || nz >= d) continue;
-                if (wallGrid[nx][nz] || cornerActive[nx][nz]) continue;
-                if (naturalYGrid[nx][nz] >= lawnY) continue;
-                int nwx = minX + nx;
-                int nwz = minZ + nz;
-                if (!hasSolidSurfaceAt(level, mPos, nwx, lawnY, nwz)
-                        && !hasSolidSurfaceAt(level, mPos, nwx, wallTopY, nwz)) {
-                    return true;
+    private static int getWallApronTargetY(int[][] wallCapGrid, int w, int d, int lx, int lz, int lawnY, int wallTopY) {
+        int distW = lx;
+        int distE = w - 1 - lx;
+        int distN = lz;
+        int distS = d - 1 - lz;
+        int bestCap = Integer.MIN_VALUE;
+        if (distW <= CORNER_EXTENT && wallCapGrid[0][lz] >= lawnY) {
+            bestCap = Math.max(bestCap, wallCapGrid[0][lz]);
+        }
+        if (distE <= CORNER_EXTENT && wallCapGrid[w - 1][lz] >= lawnY) {
+            bestCap = Math.max(bestCap, wallCapGrid[w - 1][lz]);
+        }
+        if (distN <= CORNER_EXTENT && wallCapGrid[lx][0] >= lawnY) {
+            bestCap = Math.max(bestCap, wallCapGrid[lx][0]);
+        }
+        if (distS <= CORNER_EXTENT && wallCapGrid[lx][d - 1] >= lawnY) {
+            bestCap = Math.max(bestCap, wallCapGrid[lx][d - 1]);
+        }
+        return Math.min(wallTopY, bestCap);
+    }
+
+    private static void fillSingleBlockApronHoles(WorldGenLevel level, BlockPos.MutableBlockPos mPos,
+                                                  int[][] wallCapGrid, int structMinX, int structMinZ,
+                                                  int w, int d, int x0, int x1, int z0, int z1,
+                                                  int lawnY, int wallTopY) {
+        for (int wx = x0; wx <= x1; wx++) {
+            int lx = wx - structMinX;
+            for (int wz = z0; wz <= z1; wz++) {
+                int lz = wz - structMinZ;
+                if (lx <= 0 || lx >= w - 1 || lz <= 0 || lz >= d - 1) continue;
+                int targetY = getWallApronTargetY(wallCapGrid, w, d, lx, lz, lawnY, wallTopY);
+                if (targetY < wallTopY) continue;
+
+                mPos.set(wx, wallTopY, wz);
+                BlockState atTop = level.getBlockState(mPos);
+                if (!atTop.isAir() && !atTop.canBeReplaced() && !atTop.is(BlockTags.FLOWERS)) continue;
+
+                mPos.set(wx, wallTopY + 1, wz);
+                BlockState above = level.getBlockState(mPos);
+                if (!above.isAir() && !above.canBeReplaced()) continue;
+
+                mPos.set(wx, wallTopY - 1, wz);
+                BlockState below = level.getBlockState(mPos);
+                boolean safeBase = below.is(BlockTags.DIRT) || below.is(Blocks.STONE_BRICKS)
+                        || below.is(Blocks.MOSSY_STONE_BRICKS) || below.is(Blocks.CRACKED_STONE_BRICKS)
+                        || below.is(ModBlocks.SCARLET_STONE_BRICKS.get())
+                        || below.is(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get())
+                        || below.is(ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get());
+                if (!safeBase) continue;
+
+                int solidHigherNeighbors = 0;
+                for (Direction dir : Direction.Plane.HORIZONTAL) {
+                    mPos.set(wx + dir.getStepX(), wallTopY, wz + dir.getStepZ());
+                    BlockState nSt = level.getBlockState(mPos);
+                    if (nSt.is(BlockTags.DIRT) || nSt.is(Blocks.STONE_BRICKS)
+                            || nSt.is(Blocks.MOSSY_STONE_BRICKS) || nSt.is(Blocks.CRACKED_STONE_BRICKS)
+                            || nSt.is(ModBlocks.SCARLET_STONE_BRICKS.get())
+                            || nSt.is(ModBlocks.MOSSY_SCARLET_STONE_BRICKS.get())
+                            || nSt.is(ModBlocks.CRACKED_SCARLET_STONE_BRICKS.get())) {
+                        solidHigherNeighbors++;
+                    }
+                }
+                if (solidHigherNeighbors >= 3) {
+                    if (below.is(Blocks.GRASS_BLOCK)) {
+                        mPos.set(wx, wallTopY - 1, wz);
+                        level.setBlock(mPos, Blocks.DIRT.defaultBlockState(), 2);
+                    }
+                    mPos.set(wx, wallTopY, wz);
+                    level.setBlock(mPos, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
                 }
             }
         }
-        return false;
     }
 
     private static int sampleSurfaceY(ElderwoodsBiomeSource biomeSource, WorldGenLevel level,
                                       BlockPos.MutableBlockPos mPos, BoundingBox chunkBox,
                                       int wx, int wz, int wallTopY, int worldMinY) {
-        if (biomeSource != null) {
-            return biomeSource.computeSurfaceHeight(wx, wz, null);
+        int theoreticalY = (biomeSource != null)
+                ? biomeSource.computeSurfaceHeight(wx, wz, null)
+                : Integer.MAX_VALUE;
+        boolean inSafeHalo = wx >= chunkBox.minX() - 4 && wx <= chunkBox.maxX() + 4
+                && wz >= chunkBox.minZ() - 4 && wz <= chunkBox.maxZ() + 4;
+        if (inSafeHalo) {
+            int actualY = findSolidTerrainBelow(level, mPos, wx, wallTopY + 12, wz, worldMinY, 56);
+            return (theoreticalY == Integer.MAX_VALUE) ? actualY : Math.min(theoreticalY, actualY);
         }
-        // Fallback outside ElderwoodsBiomeSource: keep block reads strictly within safe local halo
+        if (theoreticalY != Integer.MAX_VALUE) {
+            return theoreticalY;
+        }
         int cx = Math.max(chunkBox.minX() - 1, Math.min(chunkBox.maxX() + 1, wx));
         int cz = Math.max(chunkBox.minZ() - 1, Math.min(chunkBox.maxZ() + 1, wz));
         return findSolidTerrainBelow(level, mPos, cx, wallTopY, cz, worldMinY, 44);
@@ -531,26 +734,113 @@ public class GridStructure extends Structure {
         return !st.isAir() && !st.liquid() && !st.canBeReplaced() && !st.is(BlockTags.LEAVES);
     }
 
+    private static boolean hasStructureBuildingAt(WorldGenLevel level, BlockPos.MutableBlockPos mPos,
+                                                  int wx, int y, int wz) {
+        mPos.set(wx, y, wz);
+        return isStructureBuildingBlock(level.getBlockState(mPos));
+    }
+
+    private static boolean isStructureBuildingBlock(BlockState state) {
+        if (state.isAir()
+                || state.liquid()
+                || state.canBeReplaced()
+                || state.is(BlockTags.FLOWERS)
+                || state.is(BlockTags.LEAVES)
+                || state.is(BlockTags.LOGS)) {
+            return false;
+        }
+        return !state.is(BlockTags.DIRT)
+                && !state.is(BlockTags.SAND)
+                && !state.is(Blocks.SANDSTONE)
+                && !state.is(Blocks.GRAVEL)
+                && !state.is(Blocks.CLAY)
+                && !state.is(Blocks.SNOW)
+                && !state.is(Blocks.SNOW_BLOCK)
+                && !state.is(Blocks.STONE)
+                && !state.is(Blocks.ANDESITE)
+                && !state.is(Blocks.GRANITE)
+                && !state.is(Blocks.DIORITE)
+                && !state.is(Blocks.DEEPSLATE)
+                && !state.is(ModBlocks.SCARLET_STONE.get())
+                && !state.is(ModBlocks.SCARLET_DEEPSLATE.get())
+                && !state.is(ModBlocks.SOL_SAND.get())
+                && !state.is(ModBlocks.SOL_SANDSTONE.get())
+                && !state.is(ModBlocks.ABYSS_SAND.get());
+    }
+
+    private static boolean isNaturalGrassOrFoliage(BlockState state) {
+        return state.is(Blocks.GRASS_BLOCK)
+                || state.is(Blocks.SHORT_GRASS)
+                || state.is(Blocks.TALL_GRASS)
+                || state.is(Blocks.FERN)
+                || state.is(Blocks.LARGE_FERN)
+                || state.is(BlockTags.FLOWERS);
+    }
+
+    private static boolean isReplaceableForStructureWall(BlockState cur) {
+        return cur.isAir()
+                || cur.liquid()
+                || cur.canBeReplaced()
+                || cur.is(BlockTags.FLOWERS)
+                || cur.is(BlockTags.LEAVES)
+                || cur.is(BlockTags.LOGS)
+                || cur.is(BlockTags.DIRT)
+                || cur.is(BlockTags.SAND)
+                || cur.is(Blocks.SANDSTONE)
+                || cur.is(Blocks.GRAVEL)
+                || cur.is(Blocks.CLAY)
+                || cur.is(Blocks.SNOW)
+                || cur.is(Blocks.SNOW_BLOCK)
+                || cur.is(Blocks.STONE)
+                || cur.is(Blocks.ANDESITE)
+                || cur.is(Blocks.GRANITE)
+                || cur.is(Blocks.DIORITE)
+                || cur.is(Blocks.DEEPSLATE)
+                || cur.is(Blocks.COBBLESTONE)
+                || cur.is(Blocks.MOSSY_COBBLESTONE)
+                || cur.is(ModBlocks.SCARLET_STONE.get())
+                || cur.is(ModBlocks.SCARLET_DEEPSLATE.get())
+                || cur.is(ModBlocks.SCARLET_COBBLESTONE.get())
+                || cur.is(ModBlocks.SOL_SAND.get())
+                || cur.is(ModBlocks.SOL_SANDSTONE.get())
+                || cur.is(ModBlocks.ABYSS_SAND.get());
+    }
+
     private static void placeRetainingWallColumn(WorldGenLevel level, BlockPos.MutableBlockPos mPos,
-                                                 int wx, int wz, int structMinY, int wallTopY, int subGroundY,
+                                                 int wx, int wz, int structMinY, int wallCapY, int subGroundY,
                                                  int worldMinY, boolean isScarlet, boolean isRuins,
                                                  boolean allowTerrainTrim) {
-        int embedY = Math.max(worldMinY + 2, subGroundY - 1);
-        for (int y = wallTopY; y >= embedY; y--) {
+        int embedY = Math.max(worldMinY + 2, subGroundY - 2);
+        boolean placedTop = false;
+        for (int y = wallCapY; y >= embedY; y--) {
             mPos.set(wx, y, wz);
             BlockState cur = level.getBlockState(mPos);
+            boolean grassOrNatural = isNaturalGrassOrFoliage(cur) || isReplaceableForStructureWall(cur);
             boolean shouldReplace = (y < structMinY)
-                    ? (y >= subGroundY || cur.isAir() || cur.liquid() || cur.canBeReplaced()
-                            || cur.is(BlockTags.LEAVES) || cur.is(Blocks.DIRT))
-                    : (cur.isAir() || cur.liquid() || cur.canBeReplaced() || cur.is(BlockTags.LEAVES)
-                            || cur.is(Blocks.DIRT) || cur.is(Blocks.COARSE_DIRT)
-                            || cur.is(Blocks.GRASS_BLOCK) || cur.is(Blocks.SAND)
-                            || cur.is(Blocks.SANDSTONE)
-                            || (allowTerrainTrim && (cur.is(Blocks.STONE)
-                                    || cur.is(ModBlocks.SCARLET_STONE.get()))));
+                    ? (y >= subGroundY || grassOrNatural)
+                    : (isNaturalGrassOrFoliage(cur)
+                            || (grassOrNatural && (allowTerrainTrim || (!cur.is(Blocks.STONE) && !cur.is(ModBlocks.SCARLET_STONE.get())))));
             if (shouldReplace) {
-                boolean topCourse = (y == wallTopY);
+                boolean topCourse = (y == wallCapY);
                 level.setBlock(mPos, pickWallMasonry(wx, y, wz, subGroundY, topCourse, isScarlet, isRuins), 2);
+                if (topCourse) {
+                    placedTop = true;
+                }
+            }
+        }
+        if (placedTop && wallCapY + 1 < level.getMaxBuildHeight()) {
+            mPos.set(wx, wallCapY + 1, wz);
+            BlockState above = level.getBlockState(mPos);
+            if (above.is(Blocks.SHORT_GRASS) || above.is(Blocks.FERN)
+                    || above.is(Blocks.TALL_GRASS) || above.is(Blocks.LARGE_FERN)
+                    || above.is(BlockTags.FLOWERS)) {
+                level.setBlock(mPos, Blocks.AIR.defaultBlockState(), 2);
+                if (above.getBlock() instanceof DoublePlantBlock && wallCapY + 2 < level.getMaxBuildHeight()) {
+                    mPos.set(wx, wallCapY + 2, wz);
+                    if (level.getBlockState(mPos).getBlock() == above.getBlock()) {
+                        level.setBlock(mPos, Blocks.AIR.defaultBlockState(), 2);
+                    }
+                }
             }
         }
     }
@@ -564,6 +854,27 @@ public class GridStructure extends Structure {
                     && !st.is(BlockTags.LEAVES) && !st.is(BlockTags.LOGS)
                     && st.isCollisionShapeFullBlock(level, mPos)) {
                 return y;
+            }
+        }
+        return minSearchY;
+    }
+
+    private static int findSolidFoundationBelow(WorldGenLevel level, BlockPos.MutableBlockPos mPos, int x, int startY, int z, int worldMinY, int maxSearch) {
+        int minSearchY = Math.max(worldMinY + 2, startY - maxSearch);
+        for (int y = startY; y >= minSearchY; y--) {
+            mPos.set(x, y, z);
+            BlockState st = level.getBlockState(mPos);
+            if (!st.isAir() && !st.liquid() && !st.canBeReplaced()
+                    && !st.is(BlockTags.LEAVES) && !st.is(BlockTags.LOGS)
+                    && !st.is(Blocks.GRASS_BLOCK)
+                    && st.isCollisionShapeFullBlock(level, mPos)) {
+                // Skip thin 1-block hanging crusts over caves/overhangs so foundation dirt reaches solid ground
+                mPos.set(x, y - 1, z);
+                BlockState below = level.getBlockState(mPos);
+                if (st.is(Blocks.BEDROCK) || y - 1 <= minSearchY
+                        || (!below.isAir() && !below.liquid() && !below.canBeReplaced())) {
+                    return y;
+                }
             }
         }
         return minSearchY;
@@ -603,7 +914,11 @@ public class GridStructure extends Structure {
 
     private void generatePieces(StructurePiecesBuilder builder, GenerationContext context, BlockPos startPos, Rotation rotation) {
         StructureTemplateManager manager = context.structureTemplateManager();
-        
+        Holder<StructureProcessorList> terrainBlendProcessors = context.registryAccess()
+                .registry(Registries.PROCESSOR_LIST)
+                .flatMap(reg -> reg.getHolder(ModStructureProcessorLists.OUTPOST_TERRAIN_BLEND_KEY))
+                .orElse(null);
+
         for (int gridX = 0; gridX < this.widthChunks; gridX++) {
             for (int gridZ = 0; gridZ < this.depthChunks; gridZ++) {
                 
@@ -615,7 +930,10 @@ public class GridStructure extends Structure {
                 
                 ResourceLocation templateId = ResourceLocation.fromNamespaceAndPath(this.basename.getNamespace(), this.basename.getPath() + "_" + offsetX + "_" + offsetZ);
                 
-                StructurePoolElement element = SinglePoolElement.legacy(templateId.toString()).apply(StructureTemplatePool.Projection.RIGID);
+                StructurePoolElement element = (terrainBlendProcessors != null
+                        ? SinglePoolElement.legacy(templateId.toString(), terrainBlendProcessors)
+                        : SinglePoolElement.legacy(templateId.toString()))
+                        .apply(StructureTemplatePool.Projection.RIGID);
                 
                 BoundingBox boundingBox = element.getBoundingBox(manager, finalPos, rotation);
                 

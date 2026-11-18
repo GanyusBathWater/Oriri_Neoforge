@@ -117,6 +117,10 @@ public class OririMod {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
             modEventBus.addListener(net.ganyusbathwater.oririmod.util.ModItemProperties::onClientSetup);
+            if (net.neoforged.fml.ModList.get().isLoaded("distanthorizons")) {
+                modEventBus.addListener((final FMLClientSetupEvent event) ->
+                        event.enqueueWork(() -> net.ganyusbathwater.oririmod.compat.dh.OririDhClientCompat.registerClient()));
+            }
         }
     }
 
@@ -129,6 +133,9 @@ public class OririMod {
             net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.init();
             net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.init();
             ModBlocks.registerPottedPlants();
+            if (net.neoforged.fml.ModList.get().isLoaded("distanthorizons")) {
+                net.ganyusbathwater.oririmod.compat.dh.OririDistantHorizonsCompat.registerCommon();
+            }
         });
     }
 
