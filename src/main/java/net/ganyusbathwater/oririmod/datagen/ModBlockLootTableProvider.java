@@ -210,6 +210,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropPottedContents(ModBlocks.POTTED_MYRIAD_CACTUS.get());
         dropPottedContents(ModBlocks.POTTED_ELDER_PINE_SAPLING.get());
         dropPottedContents(ModBlocks.POTTED_UPGRADED_ELDER_PINE_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_VILE_SAPLING.get());
+        dropPottedContents(ModBlocks.POTTED_UPGRADED_VILE_SAPLING.get());
 
         dropSelf(ModBlocks.EQUINOX_TABLE.get());
 
@@ -318,6 +320,28 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.ELDER_PINE_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.ELDER_PINE_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
         dropSelf(ModBlocks.ELDER_PINE_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.get());
+
+        // ===== VILE PLAINS & VILE CAVES =====
+        add(ModBlocks.VILE_VINE_BLOCK.get(), block -> {
+            net.minecraft.core.HolderLookup.RegistryLookup<net.minecraft.world.item.enchantment.Enchantment> enchantments =
+                    this.registries.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+            return net.minecraft.world.level.storage.loot.LootTable.lootTable()
+                    .withPool(this.applyExplosionCondition(block,
+                            net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                                    .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                                    .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block))))
+                    .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                            .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
+                            .when(this.doesNotHaveSilkTouch())
+                            .add(this.applyExplosionCondition(block,
+                                    net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(ModBlocks.VILE_SAPLING.get()))
+                                    .when(net.minecraft.world.level.storage.loot.predicates.BonusLevelTableCondition
+                                            .bonusLevelFlatChance(
+                                                    enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.FORTUNE),
+                                                    NORMAL_LEAVES_SAPLING_CHANCES))));
+        });
+        dropSelf(ModBlocks.VILE_SAPLING.get());
+        dropSelf(ModBlocks.UPGRADED_VILE_SAPLING.get());
 
         // ===== ELDER VALLEYS =====
         dropSelf(ModBlocks.CATTAIL.get());

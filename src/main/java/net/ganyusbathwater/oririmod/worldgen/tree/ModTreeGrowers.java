@@ -21,6 +21,9 @@ public class ModTreeGrowers {
 
     public static final TreeGrower EPOCH_TREE = new TreeGrower(OririMod.MOD_ID + ":epoch_tree",
             Optional.empty(), Optional.of(ModConfiguredFeatures.EPOCH_TREE_KEY), Optional.empty());
+
+    public static final TreeGrower VILE_VINE = new TreeGrower(OririMod.MOD_ID + ":vile_vine",
+            Optional.empty(), Optional.of(ModConfiguredFeatures.VILE_VINE_KEY), Optional.empty());
             
     public static final TreeGrower HUGE_RED_MUSHROOM = new TreeGrower(OririMod.MOD_ID + ":huge_red_mushroom",
             Optional.empty(), Optional.of(net.minecraft.data.worldgen.features.TreeFeatures.HUGE_RED_MUSHROOM), Optional.empty());

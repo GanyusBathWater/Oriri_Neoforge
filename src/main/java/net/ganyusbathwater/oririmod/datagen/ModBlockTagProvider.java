@@ -185,7 +185,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ABYSS_CROWN_SAPLING.get())
                                 .add(ModBlocks.UPGRADED_ABYSS_CROWN_SAPLING.get())
                                 .add(ModBlocks.EPOCH_SAPLING.get())
-                                .add(ModBlocks.UPGRADED_EPOCH_SAPLING.get());
+                                .add(ModBlocks.UPGRADED_EPOCH_SAPLING.get())
+                                .add(ModBlocks.VILE_SAPLING.get())
+                                .add(ModBlocks.UPGRADED_VILE_SAPLING.get());
 
                 tag(BlockTags.WOODEN_TRAPDOORS)
                                 .add(ModBlocks.ELDER_TRAPDOOR.get())
@@ -338,6 +340,7 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.POTTED_EPOCH_SAPLING.get())
                                 .add(ModBlocks.UPGRADED_EPOCH_SAPLING.get())
                                 .add(ModBlocks.POTTED_UPGRADED_EPOCH_SAPLING.get())
+                                .add(ModBlocks.VILE_VINE_BLOCK.get())
                                 .add(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
 
                 tag(BlockTags.MINEABLE_WITH_PICKAXE)

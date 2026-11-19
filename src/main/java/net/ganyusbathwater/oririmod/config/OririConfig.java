@@ -136,7 +136,7 @@ public class OririConfig {
         NaturalDisasters(ModConfigSpec.Builder b) {
             disastersEnabled = b
                     .comment("Master switch. If false, no natural disaster will ever start on its own (the debug tool can still force them).")
-                    .define("disastersEnabled", true);
+                    .define("disastersEnabled", false);
             disasterAnnouncements = b
                     .comment("Show a chat message to players when a natural disaster starts or ends.")
                     .define("disasterAnnouncements", true);

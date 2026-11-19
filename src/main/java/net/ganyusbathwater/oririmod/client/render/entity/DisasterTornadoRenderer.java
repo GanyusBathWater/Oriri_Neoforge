@@ -13,10 +13,17 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
+
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Procedural shader-compatible renderer for the Natural Disaster Tornado.
@@ -34,6 +41,9 @@ public class DisasterTornadoRenderer extends EntityRenderer<DisasterTornadoEntit
 
     private static final RenderType VORTEX_SHEATH_LAYER = ModRenderTypes.getTornadoVortex(BEAM_NOISE_TEXTURE);
     private static final RenderType DUST_CORE_LAYER = ModRenderTypes.getTornadoVortex(SMOKE_TEXTURE);
+
+    // Smoothly interpolated per-entity color state: [coreR, coreG, coreB, sheathR, sheathG, sheathB]
+    private static final Map<DisasterTornadoEntity, float[]> SMOOTHED_COLORS = new WeakHashMap<>();
 
     public DisasterTornadoRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -57,25 +67,85 @@ public class DisasterTornadoRenderer extends EntityRenderer<DisasterTornadoEntit
 
         float time = entity.tickCount + partialTick;
 
+        // Resolve biome-based palette and smoothly morph color as the tornado moves between biomes
+        float[] targetColors = resolveBiomeColors(entity);
+        float[] currentColors = SMOOTHED_COLORS.computeIfAbsent(entity, e -> targetColors.clone());
+        float lerpSpeed = 0.035f;
+        for (int c = 0; c < 6; c++) {
+            currentColors[c] = Mth.lerp(lerpSpeed, currentColors[c], targetColors[c]);
+        }
+
         poseStack.pushPose();
 
         // 1. Render Inner Dust Core Cylinder (High resolution slices for massive 120m height)
         VertexConsumer coreConsumer = buffer.getBuffer(DUST_CORE_LAYER);
         renderVortexCylinder(poseStack, coreConsumer, time, totalHeight,
                 baseRadius * 0.85f, topRadius * 0.82f, 36, 18,
-                0.24f, 0.22f, 0.20f, 0.82f, 0.06f, 0.035f, packedLight);
+                currentColors[0], currentColors[1], currentColors[2], 0.84f, 0.06f, 0.035f, packedLight);
 
         // 2. Render Outer Swirling Wind Ribbons (Depth-writing emissive vortex)
         VertexConsumer sheathConsumer = buffer.getBuffer(VORTEX_SHEATH_LAYER);
         renderVortexCylinder(poseStack, sheathConsumer, time, totalHeight,
                 baseRadius * 1.15f, topRadius * 1.05f, 40, 24,
-                0.88f, 0.88f, 0.92f, 0.65f, -0.09f, 0.055f, LightTexture.FULL_BRIGHT);
+                currentColors[3], currentColors[4], currentColors[5], 0.68f, -0.09f, 0.055f, LightTexture.FULL_BRIGHT);
 
         // 3. Render Orbiting 3D Debris Blocks Tumbling Up the Funnel Wall
         renderOrbitingDebris(entity, poseStack, buffer, time, totalHeight, baseRadius, topRadius, packedLight);
 
         poseStack.popPose();
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+    }
+
+    /**
+     * Computes target [coreR, coreG, coreB, sheathR, sheathG, sheathB] based on the tornado's current biome.
+     */
+    private static float[] resolveBiomeColors(DisasterTornadoEntity entity) {
+        Holder<Biome> biome = entity.level().getBiome(entity.blockPosition());
+        String path = biome.unwrapKey()
+                .map(ResourceKey::location)
+                .map(ResourceLocation::getPath)
+                .orElse("");
+
+        // Scarlet biomes & Crimson Nether -> Deep Crimson Red
+        if (path.contains("scarlet") || path.contains("crimson")) {
+            return new float[] { 0.56f, 0.10f, 0.12f, 0.95f, 0.24f, 0.26f };
+        }
+        // Vile Plains / Vile Caves -> Dark Violet-Purple
+        if (path.contains("vile") || path.contains("end_") || path.equals("the_end")) {
+            return new float[] { 0.38f, 0.15f, 0.54f, 0.78f, 0.40f, 0.98f };
+        }
+        // Desert / Golden Desert / Beach -> Golden-Yellow Sandstorm
+        if (path.contains("desert") || path.contains("beach") || biome.is(BiomeTags.IS_BEACH)) {
+            return new float[] { 0.78f, 0.64f, 0.26f, 0.98f, 0.88f, 0.44f };
+        }
+        // Golden Savanna / Mesa / Badlands -> Warm Terracotta-Amber Dust Devil
+        if (path.contains("mesa") || path.contains("savanna") || biome.is(BiomeTags.IS_BADLANDS) || biome.is(BiomeTags.IS_SAVANNA)) {
+            return new float[] { 0.72f, 0.46f, 0.22f, 0.96f, 0.72f, 0.38f };
+        }
+        // Snowy / Frozen / Alpine Summit -> Icy White-Cyan Blizzard Funnel
+        if (path.contains("snow") || path.contains("ice") || path.contains("frozen")
+                || path.contains("glacier") || path.contains("summit") || biome.value().getBaseTemperature() <= 0.15f) {
+            return new float[] { 0.72f, 0.84f, 0.92f, 0.95f, 0.98f, 1.00f };
+        }
+        // Oceans / Silent Depths / Rivers / Lagoons -> Waterspout Teal-Blue
+        if (path.contains("silent_") || path.contains("lagoon") || path.contains("valley")
+                || biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_DEEP_OCEAN) || biome.is(BiomeTags.IS_RIVER)) {
+            return new float[] { 0.16f, 0.40f, 0.54f, 0.56f, 0.86f, 0.98f };
+        }
+        // Elderwoods / Elder Highlands -> Mystical Deep Cyan-Slate
+        if (path.contains("elder")) {
+            return new float[] { 0.18f, 0.36f, 0.44f, 0.58f, 0.86f, 0.94f };
+        }
+        // Swamp / Mangrove / Jungle -> Murky Mossy Green
+        if (path.contains("swamp") || path.contains("mangrove") || biome.is(BiomeTags.IS_JUNGLE)) {
+            return new float[] { 0.24f, 0.36f, 0.20f, 0.62f, 0.80f, 0.54f };
+        }
+        // Cherry / Flower biomes -> Soft Blossom Pink-Grey
+        if (path.contains("cherry")) {
+            return new float[] { 0.56f, 0.36f, 0.44f, 0.96f, 0.74f, 0.82f };
+        }
+        // Default (Plains, Forests, Hills, etc.) -> Classic Stormy Charcoal-Grey
+        return new float[] { 0.24f, 0.22f, 0.20f, 0.88f, 0.88f, 0.92f };
     }
 
     private void renderVortexCylinder(PoseStack poseStack, VertexConsumer consumer, float time,

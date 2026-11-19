@@ -248,6 +248,10 @@ public class ModItemModelProvider extends ItemModelProvider {
                 saplingItem(ModBlocks.ELDER_PINE_SAPLING);
                 withExistingParent(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/elder_pine_sapling"));
 
+                // ===== VILE PLAINS & VILE CAVES =====
+                saplingItem(ModBlocks.VILE_SAPLING);
+                withExistingParent(ModBlocks.UPGRADED_VILE_SAPLING.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("block/vile_sapling"));
+
                 // ===== ELDER VALLEYS =====
                 withExistingParent(ModBlocks.CATTAIL.getId().getPath(), mcLoc("item/generated")).texture("layer0", modLoc("item/cattail"));
 

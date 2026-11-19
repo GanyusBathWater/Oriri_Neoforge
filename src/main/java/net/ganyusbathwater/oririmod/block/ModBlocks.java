@@ -917,6 +917,17 @@ public class ModBlocks {
                         () -> new UpgradedSaplingBlock(ModTreeGrowers.ELDER_PINE_TREE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
         public static final DeferredBlock<Block> POTTED_UPGRADED_ELDER_PINE_SAPLING = registerPottedBlock("potted_upgraded_elder_pine_sapling", UPGRADED_ELDER_PINE_SAPLING);
 
+        // ===== VILE PLAINS & VILE CAVES =====
+        public static final DeferredBlock<Block> VILE_VINE_BLOCK = registerBlock("vile_vine_block",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)
+                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<Block> VILE_SAPLING = registerBlock("vile_sapling",
+                        () -> new SaplingBlock(ModTreeGrowers.VILE_VINE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_VILE_SAPLING = registerPottedBlock("potted_vile_sapling", VILE_SAPLING);
+        public static final DeferredBlock<Block> UPGRADED_VILE_SAPLING = registerBlock("upgraded_vile_sapling",
+                        () -> new UpgradedSaplingBlock(ModTreeGrowers.VILE_VINE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
+        public static final DeferredBlock<Block> POTTED_UPGRADED_VILE_SAPLING = registerPottedBlock("potted_upgraded_vile_sapling", UPGRADED_VILE_SAPLING);
+
         // ===== ELDER VALLEYS VEGETATION =====
         public static final DeferredBlock<Block> CATTAIL = registerBlock("cattail",
                         () -> new net.ganyusbathwater.oririmod.block.custom.CattailBlock(BlockBehaviour.Properties.of()
@@ -1106,5 +1117,7 @@ public class ModBlocks {
                 pot.addPlant(UPGRADED_WARPED_FUNGUS.getId(), POTTED_UPGRADED_WARPED_FUNGUS);
                 pot.addPlant(ELDER_PINE_SAPLING.getId(), POTTED_ELDER_PINE_SAPLING);
                 pot.addPlant(UPGRADED_ELDER_PINE_SAPLING.getId(), POTTED_UPGRADED_ELDER_PINE_SAPLING);
+                pot.addPlant(VILE_SAPLING.getId(), POTTED_VILE_SAPLING);
+                pot.addPlant(UPGRADED_VILE_SAPLING.getId(), POTTED_UPGRADED_VILE_SAPLING);
         }
 }

@@ -20,6 +20,15 @@ public abstract class LevelMixin {
         if (UpgradedSaplingBlock.IS_FORCING_GROWTH.get()) {
             Level level = (Level) (Object) this;
             BlockState current = level.getBlockState(pos);
+
+            // Upgraded Vile Sapling is designed to burrow through everything except bedrock / unbreakable blocks
+            if (state.is(net.ganyusbathwater.oririmod.block.ModBlocks.VILE_VINE_BLOCK.get())) {
+                if (current.is(Blocks.BEDROCK) || current.getDestroySpeed(level, pos) < 0.0F) {
+                    cir.setReturnValue(false);
+                }
+                return;
+            }
+
             boolean isTargetReplaceable = current.isAir()
                     || current.is(BlockTags.REPLACEABLE_BY_TREES)
                     || current.is(BlockTags.LEAVES)

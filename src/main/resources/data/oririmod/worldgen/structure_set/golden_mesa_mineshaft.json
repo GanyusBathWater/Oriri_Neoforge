@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 5,
+    "separation": 2,
+    "salt": 847291635
+  },
+  "structures": [
+    {
+      "structure": "oririmod:golden_mesa_mineshaft",
+      "weight": 1
+    }
+  ]
+}

@@ -347,6 +347,18 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 saplingBlock(ModBlocks.ELDER_PINE_SAPLING);
                 simpleBlockWithItem(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.get(), models().cross("upgraded_elder_pine_sapling", modLoc("block/elder_pine_sapling")).renderType("cutout"));
 
+                // ===== VILE PLAINS & VILE CAVES =====
+                blockWithItem(ModBlocks.VILE_VINE_BLOCK, 1);
+                saplingBlock(ModBlocks.VILE_SAPLING);
+                simpleBlockWithItem(ModBlocks.UPGRADED_VILE_SAPLING.get(),
+                                models().cross("upgraded_vile_sapling", modLoc("block/vile_sapling")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_VILE_SAPLING.get(),
+                                models().withExistingParent("potted_vile_sapling", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", modLoc("block/vile_sapling")).renderType("cutout"));
+                simpleBlock(ModBlocks.POTTED_UPGRADED_VILE_SAPLING.get(),
+                                models().withExistingParent("potted_upgraded_vile_sapling", mcLoc("block/flower_pot_cross"))
+                                                .texture("plant", modLoc("block/vile_sapling")).renderType("cutout"));
+
                 // ===== ELDER VALLEYS =====
                 cattailBlock();
 

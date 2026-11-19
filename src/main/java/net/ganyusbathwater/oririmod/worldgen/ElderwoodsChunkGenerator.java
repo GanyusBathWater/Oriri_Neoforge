@@ -153,6 +153,10 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_depths"));
     public static final ResourceKey<Biome> THE_SUNKEN_TRENCHES_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_sunken_trenches"));
+    public static final ResourceKey<Biome> VILE_PLAINS_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_plains"));
+    public static final ResourceKey<Biome> VILE_CAVES_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_caves"));
 
     private double seedOffsetX = 0;
     private double seedOffsetZ = 0;
@@ -2213,13 +2217,14 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     boolean isOceanColumn = isDepthsOrTrench || surfaceBiome.is(THE_SILENT_OCEANS_KEY);
                     boolean isBeachColumn = surfaceBiome.is(ELDER_BEACH_KEY) || surfaceBiome.is(ELDER_LAGOON_KEY);
                     boolean isHighlandColumn = isHighlandBiome(surfaceBiome);
+                    boolean isVilePlainsColumn = surfaceBiome.is(VILE_PLAINS_KEY);
                     boolean isMainland = (ebs == null) || ebs.isMainland(worldX, worldZ);
 
                     // Evaluate humidity once per eligible column: feeds Scarlet lithology and
                     // tapers Elysian caverns closed
                     // in solid rock BEFORE reaching Scarlet Caves (zero other biomes or sheared
                     // cave cuts inside Scarlet).
-                    double colHumNoise = (!isOceanColumn && !isAridColumn && !isHighlandColumn)
+                    double colHumNoise = (!isOceanColumn && !isAridColumn && !isHighlandColumn && !isVilePlainsColumn)
                             ? getScarletHumidityNoise(worldX, worldZ)
                             : -2.0;
                     double oceanFloorFactor = Mth.clamp((surfaceY - 58.0) / 12.0, 0.0, 1.0);
@@ -2229,7 +2234,21 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         double sf = Mth.clamp((0.45 - colHumNoise) / 0.15, 0.0, 1.0);
                         abyssScarletFade = sf * sf * (3.0 - 2.0 * sf);
                     }
-                    double abyssIntensity = abyssT * abyssT * (3.0 - 2.0 * abyssT) * abyssScarletFade * abyssOceanFade;
+                    double abyssVileFade = 1.0;
+                    double vileCaveOpenBoost = 0.0;
+                    if (ebs != null && !isOceanColumn) {
+                        double colTemp = ebs.sampleTemperatureNoise(worldX, worldZ);
+                        double vf = Mth.clamp((colTemp - (ElderwoodsBiomeSource.VILE_TEMP_THRESHOLD + 0.03)) / 0.08, 0.0, 1.0);
+                        abyssVileFade = vf * vf * (3.0 - 2.0 * vf);
+                        // Pure continuous smooth boost (0.0 floor, no hard biome-border boolean)
+                        // so Vile Caves naturally merge into neighboring cave formations with zero flat walls.
+                        double tempIn = Mth.clamp((ElderwoodsBiomeSource.VILE_TEMP_THRESHOLD - colTemp) / 0.09, 0.0, 1.0);
+                        double humOut = Mth.clamp((0.46 - colHumNoise) / 0.14, 0.0, 1.0);
+                        double smoothT = tempIn * tempIn * (3.0 - 2.0 * tempIn);
+                        double smoothH = humOut * humOut * (3.0 - 2.0 * humOut);
+                        vileCaveOpenBoost = smoothT * smoothH * oceanFloorFactor * 0.075;
+                    }
+                    double abyssIntensity = abyssT * abyssT * (3.0 - 2.0 * abyssT) * abyssScarletFade * abyssVileFade * abyssOceanFade;
 
                     // Silent Depths & Sunken Trench underwater cave + entrance parameters (hoisted
                     // once per column)
@@ -2385,7 +2404,7 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                         // Aquifers)
                         if (allowCaveAtY && y < maxAllowedCaveY && y >= -108
                                 && (density >= 0.45 || caveNoise <= 0.10)) {
-                            double taperThreshold = 0.15 + (1.0 - oceanFloorFactor) * 1.6;
+                            double taperThreshold = (0.15 - vileCaveOpenBoost) + (1.0 - oceanFloorFactor) * 1.6;
                             boolean allowTunnel = oceanFloorFactor >= 0.35;
 
                             if (y < -94) {

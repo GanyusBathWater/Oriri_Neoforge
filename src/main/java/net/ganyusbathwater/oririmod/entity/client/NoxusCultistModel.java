@@ -30,6 +30,9 @@ public class NoxusCultistModel extends GeoModel<NoxusCultistEntity> {
             if (entityData != null) {
                 head.setRotX(entityData.headPitch() * net.minecraft.util.Mth.DEG_TO_RAD);
                 head.setRotY(entityData.netHeadYaw() * net.minecraft.util.Mth.DEG_TO_RAD);
+                if (animatable.hurtTime <= 0) {
+                    head.setRotZ(0.0F);
+                }
             }
         }
     }

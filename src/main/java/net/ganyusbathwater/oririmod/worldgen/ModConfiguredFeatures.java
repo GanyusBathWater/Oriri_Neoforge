@@ -117,6 +117,11 @@ public class ModConfiguredFeatures {
         public static final ResourceKey<ConfiguredFeature<?, ?>> BEACH_MANGROVE_SWAMP_KEY = registerKey("beach_mangrove_swamp");
         public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_VALLEY_KEY = registerKey("elder_valley");
 
+        // Vile Plains & Vile Caves
+        public static final ResourceKey<ConfiguredFeature<?, ?>> VILE_VINE_KEY = registerKey("vile_vine");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> VILE_PLAINS_COMPLEX_KEY = registerKey("vile_plains_complex");
+        public static final ResourceKey<ConfiguredFeature<?, ?>> VILE_PLAINS_GRASS_PATCH_KEY = registerKey("vile_plains_grass_patch");
+
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
                 GeodeBlockSettings layerConfig = new GeodeBlockSettings(
                                 BlockStateProvider.simple(Blocks.AIR.defaultBlockState()),
@@ -388,6 +393,18 @@ public class ModConfiguredFeatures {
                                 new NoneFeatureConfiguration());
                 register(context, ELDER_VALLEY_KEY, ModFeatures.ELDER_VALLEY_FEATURE.get(),
                                 new NoneFeatureConfiguration());
+
+                // Vile Plains & Vile Caves
+                register(context, VILE_VINE_KEY, ModFeatures.VILE_VINE_FEATURE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+                register(context, VILE_PLAINS_COMPLEX_KEY, ModFeatures.VILE_PLAINS_COMPLEX_FEATURE.get(),
+                                NoneFeatureConfiguration.INSTANCE);
+                register(context, VILE_PLAINS_GRASS_PATCH_KEY, Feature.RANDOM_PATCH,
+                                FeatureUtils.simplePatchConfiguration(
+                                                Feature.SIMPLE_BLOCK,
+                                                new SimpleBlockConfiguration(
+                                                                BlockStateProvider.simple(Blocks.SHORT_GRASS)),
+                                                List.of(Blocks.GRASS_BLOCK)));
         }
 
         public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {

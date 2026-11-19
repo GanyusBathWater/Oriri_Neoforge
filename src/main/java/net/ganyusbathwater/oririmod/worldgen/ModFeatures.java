@@ -153,6 +153,17 @@ public class ModFeatures {
                                         () -> new net.ganyusbathwater.oririmod.worldgen.feature.ElderValleyFeature(
                                                         net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+        // Vile Plains & Vile Caves Features
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.tree.VileVineFeature> VILE_VINE_FEATURE = FEATURES
+                        .register("vile_vine",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.tree.VileVineFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+        public static final DeferredHolder<Feature<?>, net.ganyusbathwater.oririmod.worldgen.feature.VilePlainsComplexFeature> VILE_PLAINS_COMPLEX_FEATURE = FEATURES
+                        .register("vile_plains_complex",
+                                        () -> new net.ganyusbathwater.oririmod.worldgen.feature.VilePlainsComplexFeature(
+                                                        net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
         public static void register(IEventBus bus) {
                 FEATURES.register(bus);
         }

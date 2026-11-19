@@ -80,6 +80,7 @@ public class OririClient {
         event.registerSpriteSet(ModParticles.ELDERWOODS_CAVE_PARTICLE.get(), ElderwoodsCaveParticle.Provider::new);
         event.registerSpriteSet(ModParticles.SCARLET_CAVE_PARTICLE.get(), ScarletCaveParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELYSIAN_ABYSS_PARTICLE.get(), ElysianAbyssParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.VILE_CAVE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.VileCaveParticle.Provider::new);
         event.registerSpriteSet(ModParticles.DEVIARTRAS_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.DeviartrasSporeParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ELDER_SPORE_BLOSSOM_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.ElderSporeBlossomSporeParticle.Provider::new);
         event.registerSpriteSet(ModParticles.TELEPORTER_VORTEX_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.TeleporterVortexParticle.Provider::new);
@@ -292,6 +293,9 @@ public class OririClient {
         
         builder.addMix(ModPotions.MOB_SENSE_POTION1, Items.GOLDEN_CARROT, ModPotions.TRUE_VISION_POTION1);
         builder.addMix(ModPotions.TRUE_VISION_POTION1, Items.REDSTONE, ModPotions.TRUE_VISION_POTION2);
+
+        // Pearl -> vanilla Luck potion (includes splash & lingering automatically)
+        builder.addMix(Potions.AWKWARD, ModItems.PEARL.get(), Potions.LUCK);
     }
 
     @SubscribeEvent

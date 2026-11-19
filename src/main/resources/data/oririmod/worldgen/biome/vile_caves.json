@@ -1,0 +1,45 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.25,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 4071767,
+    "fog_color": 5844346,
+    "water_color": 4994923,
+    "water_fog_color": 2364216,
+    "grass_color": 9069480,
+    "foliage_color": 7688084,
+    "particle": {
+      "options": {
+        "type": "oririmod:vile_cave_particle"
+      },
+      "probability": 0.008
+    },
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    }
+  },
+  "carvers": {
+    "air": [
+      "oririmod:deep_cave"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "spawn_costs": {},
+  "spawners": {}
+}

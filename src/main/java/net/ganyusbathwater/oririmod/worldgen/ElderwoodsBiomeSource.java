@@ -75,6 +75,12 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     public static final ResourceKey<Biome> THE_SUNKEN_TRENCHES_KEY = ResourceKey.create(
             Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_sunken_trenches"));
 
+    // Vile Plains & Paired Vile Caves Biomes
+    public static final ResourceKey<Biome> VILE_PLAINS_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_plains"));
+    public static final ResourceKey<Biome> VILE_CAVES_KEY = ResourceKey.create(
+            Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_caves"));
+
     private final List<Holder<Biome>> biomes;
 
     // Pre-resolved biome holders eliminate O(N) list scans in hot worldgen loops
@@ -98,6 +104,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private final Holder<Biome> silentOceansBiome;
     private final Holder<Biome> silentDepthsBiome;
     private final Holder<Biome> sunkenTrenchesBiome;
+    private final Holder<Biome> vilePlainsBiome;
+    private final Holder<Biome> vileCavesBiome;
 
     private static volatile ElderwoodsBiomeSource activeInstance;
 
@@ -163,6 +171,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         double caveNoise;
         double humNoise;
         int scarletBottomY;
+        int vileBottomY;
         boolean isHighland;
     }
 
@@ -189,13 +198,17 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private static final int SCARLET_DILATE_QUARTS = 7; // 7 * 4 = 28 blocks (>= 26 + diagonal grid step)
     private static final int SWAMP_CORE_RADIUS = 14;
     private static final int SWAMP_DILATE_QUARTS = 4; // 4 * 4 = 16 blocks
+    private static final int VILE_CORE_RADIUS = 22;
+    private static final int VILE_DILATE_QUARTS = 6; // 6 * 4 = 24 blocks
     private static final int MORPH_CACHE_SIZE = 8192;
     private static final int MORPH_CACHE_MASK = MORPH_CACHE_SIZE - 1;
 
     private static final int[][] SCARLET_DILATE_OFFSETS = buildSortedQuartOffsets(SCARLET_DILATE_QUARTS);
     private static final int[][] SWAMP_DILATE_OFFSETS = buildSortedQuartOffsets(SWAMP_DILATE_QUARTS);
+    private static final int[][] VILE_DILATE_OFFSETS = buildSortedQuartOffsets(VILE_DILATE_QUARTS);
     private static final int[][] SCARLET_CORE_PROBES = buildCoreProbes(SCARLET_CORE_RADIUS, true);
     private static final int[][] SWAMP_CORE_PROBES = buildCoreProbes(SWAMP_CORE_RADIUS, false);
+    private static final int[][] VILE_CORE_PROBES = buildCoreProbes(VILE_CORE_RADIUS, true);
     private static final int[][] BORDER_SAMPLE_DIRS = {
             { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },
             { 1, 1 }, { -1, 1 }, { 1, -1 }, { -1, -1 }
@@ -211,6 +224,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
     private final ThreadLocal<MorphCoreCache> scarletCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
     private final ThreadLocal<MorphCoreCache> swampCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
+    private final ThreadLocal<MorphCoreCache> vileCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
 
     private static int[][] buildSortedQuartOffsets(int maxQuarts) {
         int maxSq = maxQuarts * maxQuarts;
@@ -344,6 +358,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         this.silentOceansBiome = findBiome(THE_SILENT_OCEANS_KEY);
         this.silentDepthsBiome = findBiome(THE_SILENT_DEPTHS_KEY);
         this.sunkenTrenchesBiome = findBiome(THE_SUNKEN_TRENCHES_KEY);
+        this.vilePlainsBiome = findBiome(VILE_PLAINS_KEY);
+        this.vileCavesBiome = findBiome(VILE_CAVES_KEY);
         activeInstance = this;
     }
 
@@ -465,6 +481,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private static final float HIGHLAND_NOISE_FREQUENCY = 0.00025f;
     public static final float CAVE_NOISE_FREQUENCY = 0.0022f;
     public static final int SCARLET_CAVE_BASE_BOTTOM_Y = -56;
+    public static final int VILE_CAVE_BASE_BOTTOM_Y = -68;
+    public static final double VILE_TEMP_THRESHOLD = -0.14;
 
     /**
      * Smoothly undulating lower boundary of Scarlet Caves, keeping them safely
@@ -475,6 +493,15 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         double floorWave = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                 (float) (x * 0.006f), (float) (z * 0.006f), 2) / 0.32;
         return SCARLET_CAVE_BASE_BOTTOM_Y + (int) Math.round(net.minecraft.util.Mth.clamp(floorWave, -1.0, 1.0) * 6.0);
+    }
+
+    /**
+     * Smoothly undulating lower boundary of Vile Caves deep inside the deepslate stratum.
+     */
+    public static int getVileCaveBottomY(int x, int z) {
+        double floorWave = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((x + 713.0f) * 0.006f), (float) ((z - 419.0f) * 0.006f), 2) / 0.32;
+        return VILE_CAVE_BASE_BOTTOM_Y + (int) Math.round(net.minecraft.util.Mth.clamp(floorWave, -1.0, 1.0) * 6.0);
     }
 
     public double sampleHumidityNoise(int x, int z) {
@@ -498,7 +525,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 3);
     }
 
-    private double sampleTemperatureNoise(int x, int z) {
+    public double sampleTemperatureNoise(int x, int z) {
         return net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
                 (float) ((x + tempOffsetX) * CLIMATE_NOISE_FREQUENCY),
                 (float) ((z + tempOffsetZ) * CLIMATE_NOISE_FREQUENCY), 3);
@@ -766,6 +793,23 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         return sampleHumidityNoise(x, z) > 0.48;
     }
 
+    /**
+     * Returns true strictly for underground points directly beneath Vile Plains
+     * down to the undulating Vile Caves deepslate floor.
+     */
+    public boolean isVileCaveAt(int x, int y, int z) {
+        ensureSeedSynced();
+        Holder<Biome> surfaceBiome = getSurfaceBiome(x, z);
+        if (surfaceBiome != vilePlainsBiome) {
+            return false;
+        }
+        int surfaceY = computeSurfaceHeight(x, z, surfaceBiome);
+        if (surfaceY < 62 || y >= surfaceY - 14 || y < getVileCaveBottomY(x, z)) {
+            return false;
+        }
+        return true;
+    }
+
     private Holder<Biome> resolveBiomeAtBlock(int x, int y, int z) {
         ensureSeedSynced();
 
@@ -792,6 +836,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 col.caveNoise = sampleCaveNoise(x, z);
                 boolean eligibleScarlet = !col.isHighland
                         && !isAridBiome(col.surfaceBiome)
+                        && col.surfaceBiome != vilePlainsBiome
                         && col.contNoise >= 0.0;
                 if (eligibleScarlet) {
                     col.humNoise = sampleHumidityNoise(x, z);
@@ -800,9 +845,13 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                     col.humNoise = -2.0;
                     col.scarletBottomY = Integer.MAX_VALUE;
                 }
+                col.vileBottomY = (col.surfaceBiome == vilePlainsBiome)
+                        ? getVileCaveBottomY(x, z)
+                        : Integer.MAX_VALUE;
             } else {
                 col.humNoise = -2.0;
                 col.scarletBottomY = Integer.MAX_VALUE;
+                col.vileBottomY = Integer.MAX_VALUE;
             }
             col.valid = true;
         }
@@ -821,16 +870,21 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             }
         }
 
+        // Vile Plains & Vile Caves are strictly paired 1-to-1: never one without the other.
+        if (col.surfaceBiome == vilePlainsBiome && y >= col.vileBottomY) {
+            return vileCavesBiome;
+        }
+
         // Strictly zero Elysian Abyss or other biomes inside Scarlet Caves territory.
         // Elysian Abyss caverns taper closed smoothly in rock before humNoise reaches
         // 0.44.
         if (col.humNoise > 0.48 && y >= col.scarletBottomY) {
             return scarletCavesBiome;
         }
-        if (col.caveNoise > 0.20 && col.humNoise <= 0.44) {
+        if (col.caveNoise > 0.20 && col.humNoise <= 0.44 && col.surfaceBiome != vilePlainsBiome) {
             return elysianAbyssBiome;
         }
-        if (col.caveNoise < -0.15 && col.caveNoise > -0.2 && col.humNoise <= 0.46) {
+        if (col.caveNoise < -0.15 && col.caveNoise > -0.2 && col.humNoise <= 0.46 && col.surfaceBiome != vilePlainsBiome) {
             return crystalCavesBiome;
         }
         return elderwoodsCaveBiome;
@@ -884,6 +938,14 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                     return elderwoodsBiome;
                 }
                 return fallback;
+            }
+        }
+
+        if (raw == vilePlainsBiome) {
+            final MorphCoreCache vileCache = vileCoreCache.get();
+            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.045f,
+                    (cx, cz) -> hasVileMorphCoreNear(cx, cz, vileCache))) {
+                return elderwoodsBiome;
             }
         }
 
@@ -966,6 +1028,9 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                         }
                         return scarletForestBiome;
                     }
+                    if (!inHighlandFringe && tempNoise < VILE_TEMP_THRESHOLD) {
+                        return vilePlainsBiome;
+                    }
                     return elderwoodsBiome;
                 }
             } else if (contNoise >= 0.055) {
@@ -1008,8 +1073,8 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             return elderwoodsBiome;
         }
 
-        // 4. Lowland Woodland Biomes (Normalized macro Humidity controlled; keep
-        // Scarlet Swamp deeply inland)
+        // 4. Lowland Woodland & Cold Vile Plains Biomes (Normalized macro Humidity & Temperature controlled;
+        // keep Scarlet Swamp deeply inland)
         if (contNoise >= 0.14 && humNoise > 0.72) {
             return scarletSwampBiome;
         } else if (humNoise > 0.46) {
@@ -1017,9 +1082,57 @@ public class ElderwoodsBiomeSource extends BiomeSource {
                 return scarletKarstBiome;
             }
             return scarletForestBiome;
+        } else if (tempNoise < VILE_TEMP_THRESHOLD && contNoise >= 0.055) {
+            return vilePlainsBiome;
         } else {
             return elderwoodsBiome;
         }
+    }
+
+    private boolean isVileMorphCoreQuart(int qx, int qz, MorphCoreCache cache) {
+        if (cache.seed != syncedSeed) {
+            Arrays.fill(cache.states, (byte) 0);
+            cache.seed = syncedSeed;
+        }
+        long key = (((long) qx) << 32) ^ (qz & 0xFFFFFFFFL);
+        int slot = ((qx * 73856093) ^ (qz * 19349663)) & MORPH_CACHE_MASK;
+        byte cached = cache.states[slot];
+        if (cached != 0 && cache.keys[slot] == key) {
+            return cached == 2;
+        }
+
+        int bx = qx * MORPH_QUART_STEP;
+        int bz = qz * MORPH_QUART_STEP;
+        boolean isCore = true;
+        for (int i = 0; i < VILE_CORE_PROBES.length; i++) {
+            if (computeRawSurfaceBiome(bx + VILE_CORE_PROBES[i][0], bz + VILE_CORE_PROBES[i][1]) != vilePlainsBiome) {
+                isCore = false;
+                break;
+            }
+        }
+        cache.keys[slot] = key;
+        cache.states[slot] = (byte) (isCore ? 2 : 1);
+        return isCore;
+    }
+
+    private boolean hasVileMorphCoreNear(int x, int z, MorphCoreCache cache) {
+        int baseQx = Math.floorDiv(x, MORPH_QUART_STEP);
+        int baseQz = Math.floorDiv(z, MORPH_QUART_STEP);
+        for (int i = 0; i < VILE_DILATE_OFFSETS.length; i++) {
+            int qx = baseQx + VILE_DILATE_OFFSETS[i][0];
+            int qz = baseQz + VILE_DILATE_OFFSETS[i][1];
+            if (isVileMorphCoreQuart(qx, qz, cache)) {
+                int cx = qx * MORPH_QUART_STEP;
+                int cz = qz * MORPH_QUART_STEP;
+                int dx = cx - x;
+                int dz = cz - z;
+                if (dx * dx + dz * dz <= 64
+                        || computeRawSurfaceBiome((x + cx) >> 1, (z + cz) >> 1) == vilePlainsBiome) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean matchesMorphTarget(Holder<Biome> biome, boolean swampOnly) {

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:mineshaft",
+  "biomes": "oririmod:golden_savanna_mesa",
+  "mineshaft_type": "mesa",
+  "spawn_overrides": {},
+  "step": "underground_structures",
+  "terrain_adaptation": "none"
+}

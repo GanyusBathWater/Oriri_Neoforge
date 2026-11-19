@@ -126,6 +126,16 @@ public class ModBiomeModifiers {
         public static final ResourceKey<BiomeModifier> ADD_SILENT_DEPTHS_WILDLIFE = registerKey(
                         "add_silent_depths_wildlife");
 
+        // Vile Plains & Vile Caves
+        public static final ResourceKey<BiomeModifier> ADD_VILE_PLAINS_COMPLEX = registerKey(
+                        "add_vile_plains_complex");
+        public static final ResourceKey<BiomeModifier> ADD_VILE_PLAINS_VEGETATION = registerKey(
+                        "add_vile_plains_vegetation");
+        public static final ResourceKey<BiomeModifier> ADD_VILE_CAVE_FEATURES = registerKey(
+                        "add_vile_cave_features");
+        public static final ResourceKey<BiomeModifier> ADD_VILE_PLAINS_SPAWNS = registerKey(
+                        "add_vile_plains_spawns");
+
         // here will be the Features defined and later turned into json files
         public static void bootstrap(BootstrapContext<BiomeModifier> context) {
                 var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -376,7 +386,11 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
                                                 .fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
-                                                .fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna_mesa"))));
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "golden_savanna_mesa"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "vile_plains"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation
+                                                .fromNamespaceAndPath(OririMod.MOD_ID, "vile_caves"))));
 
                 context.register(ADD_GLOBAL_AETHER_RIVER,
                                 new BiomeModifiers.AddFeaturesBiomeModifier(
@@ -384,6 +398,33 @@ public class ModBiomeModifiers {
                                                 HolderSet.direct(placedFeatures.getOrThrow(
                                                                 ModPlacedFeatures.GLOBAL_AETHER_RIVER_PLACED_KEY)),
                                                 GenerationStep.Decoration.LOCAL_MODIFICATIONS));
+
+                // Vile Plains & Vile Caves Complex (attached to Elderwoods land biomes so border-leaning
+                // giant vines & floating islands never clip at biome borders; O(1) skip outside Vile Plains)
+                context.register(ADD_VILE_PLAINS_COMPLEX,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                aetherRiverBiomes,
+                                                HolderSet.direct(placedFeatures.getOrThrow(
+                                                                ModPlacedFeatures.VILE_PLAINS_COMPLEX_PLACED_KEY)),
+                                                GenerationStep.Decoration.LOCAL_MODIFICATIONS));
+
+                var vilePlainsBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_plains"))));
+                context.register(ADD_VILE_PLAINS_VEGETATION,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                vilePlainsBiomes,
+                                                HolderSet.direct(placedFeatures.getOrThrow(
+                                                                ModPlacedFeatures.VILE_PLAINS_GRASS_PATCH_PLACED_KEY)),
+                                                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+                var vileCaveBiomes = HolderSet.direct(biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
+                                ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_caves"))));
+                context.register(ADD_VILE_CAVE_FEATURES,
+                                new BiomeModifiers.AddFeaturesBiomeModifier(
+                                                vileCaveBiomes,
+                                                HolderSet.direct(placedFeatures.getOrThrow(
+                                                                ModPlacedFeatures.ELDERWOODS_DRIPSTONE_CLUSTER_PLACED_KEY)),
+                                                GenerationStep.Decoration.UNDERGROUND_DECORATION));
 
                 var nonScarletCaveBiomes = HolderSet.direct(
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME,
@@ -634,6 +675,12 @@ public class ModBiomeModifiers {
                         ),
                         monsterSpawns
                 ));
+                context.register(ADD_VILE_PLAINS_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_plains")))
+                        ),
+                        monsterSpawns
+                ));
 
                 List<MobSpawnSettings.SpawnerData> caveSpawns = List.of(
                         new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4),
@@ -651,7 +698,8 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elderwoods_cave"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "crystal_caves"))),
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"))),
-                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss")))
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "vile_caves")))
                         ),
                         caveSpawns
                 ));

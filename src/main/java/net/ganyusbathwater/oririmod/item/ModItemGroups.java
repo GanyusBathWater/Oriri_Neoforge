@@ -95,6 +95,11 @@ public class ModItemGroups {
                         output.accept(ModItems.ELDER_PINE_BOAT);
                         output.accept(ModItems.ELDER_PINE_CHEST_BOAT);
 
+                        // ===== VILE PLAINS & VILE CAVES =====
+                        output.accept(ModBlocks.VILE_VINE_BLOCK);
+                        output.accept(ModBlocks.VILE_SAPLING);
+                        output.accept(ModBlocks.UPGRADED_VILE_SAPLING);
+
                         // ===== ELDER VALLEYS =====
                         output.accept(ModBlocks.CATTAIL);
 

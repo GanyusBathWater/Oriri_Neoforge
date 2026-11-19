@@ -180,6 +180,18 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
                                                MobSpawnType spawnType, BlockPos pos, RandomSource random) {
         if (level.getDifficulty() == Difficulty.PEACEFUL) return false;
 
+        // Strictly require solid natural ground below (never spawn on tree branches, logs, or canopies)
+        BlockState below = level.getBlockState(pos.below());
+        if (!isValidNaturalGround(below)) {
+            return false;
+        }
+        // Reject perched 1-block ledges/tree canopies: require solid non-foliage support underneath as well
+        BlockState below2 = level.getBlockState(pos.below(2));
+        if (below2.isAir() || below2.is(net.minecraft.tags.BlockTags.LEAVES)
+                || below2.is(net.minecraft.tags.BlockTags.LOGS)) {
+            return false;
+        }
+
         // In lush caves, allow spawning even with light from glow berries
         Holder<Biome> biome = level.getBiome(pos);
         if (biome.is(ResourceLocation.withDefaultNamespace("lush_caves"))) {
@@ -188,6 +200,23 @@ public class LamiaEntity extends Monster implements GeoEntity, IElementalEntity 
 
         // In surface swamps and moist forests: allow in light level <= 7 (canopies, dusk, night)
         return level.getRawBrightness(pos, 0) <= 7 && checkMobSpawnRules(type, level, spawnType, pos, random);
+    }
+
+    private static boolean isValidNaturalGround(BlockState state) {
+        if (state.is(net.minecraft.tags.BlockTags.LEAVES) || state.is(net.minecraft.tags.BlockTags.LOGS)
+                || state.is(net.minecraft.tags.BlockTags.PLANKS)) {
+            return false;
+        }
+        return state.is(net.minecraft.tags.BlockTags.DIRT)
+                || state.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)
+                || state.is(net.minecraft.world.level.block.Blocks.MUD)
+                || state.is(net.minecraft.world.level.block.Blocks.CLAY)
+                || state.is(net.minecraft.world.level.block.Blocks.MOSS_BLOCK)
+                || state.is(net.minecraft.tags.BlockTags.SAND)
+                || state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD)
+                || state.is(net.minecraft.world.level.block.Blocks.GRAVEL)
+                || state.is(net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_MOSS.get())
+                || state.is(net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_STONE.get());
     }
 
     @Override

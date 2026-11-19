@@ -113,6 +113,10 @@ public class ModPlacedFeatures {
         public static final ResourceKey<PlacedFeature> BEACH_UNDERWATER_REEF_PLACED_KEY = registerKey("beach_underwater_reef_placed");
         public static final ResourceKey<PlacedFeature> ELDER_VALLEY_PLACED_KEY = registerKey("elder_valley_placed");
 
+        // Vile Plains & Vile Caves
+        public static final ResourceKey<PlacedFeature> VILE_PLAINS_COMPLEX_PLACED_KEY = registerKey("vile_plains_complex_placed");
+        public static final ResourceKey<PlacedFeature> VILE_PLAINS_GRASS_PATCH_PLACED_KEY = registerKey("vile_plains_grass_patch_placed");
+
         // here will be the Features be defined and later turned into json files
         public static void bootstrap(BootstrapContext<PlacedFeature> context) {
                 var configuredFeatures = context.lookup(Registries.CONFIGURED_FEATURE);
@@ -544,6 +548,20 @@ public class ModPlacedFeatures {
                                                 CountPlacement.of(2),
                                                 InSquarePlacement.spread(),
                                                 HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG),
+                                                BiomeFilter.biome()));
+
+                // Vile Plains & Vile Caves: deterministic per-chunk complex (craters, floating islands,
+                // Outpost Ruins on largest islands, twisting Vile Vines & stone-only cave islands)
+                register(context, VILE_PLAINS_COMPLEX_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.VILE_PLAINS_COMPLEX_KEY),
+                                List.of(CountPlacement.of(1)));
+
+                register(context, VILE_PLAINS_GRASS_PATCH_PLACED_KEY,
+                                configuredFeatures.getOrThrow(ModConfiguredFeatures.VILE_PLAINS_GRASS_PATCH_KEY),
+                                List.of(
+                                                CountPlacement.of(7),
+                                                InSquarePlacement.spread(),
+                                                PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                                                 BiomeFilter.biome()));
         }
 
