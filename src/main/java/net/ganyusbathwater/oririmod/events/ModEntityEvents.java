@@ -17,6 +17,7 @@ public class ModEntityEvents {
         event.put(ModEntities.SPLINTER_SPIDER.get(), net.minecraft.world.entity.monster.Spider.createAttributes().build());
         event.put(ModEntities.MERMAID.get(), net.ganyusbathwater.oririmod.entity.custom.MermaidEntity.createAttributes().build());
         event.put(ModEntities.SILENT_NEREID.get(), net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity.createAttributes().build());
+        event.put(ModEntities.SILENT_CLAM.get(), net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity.createAttributes().build());
         event.put(ModEntities.LAMIA.get(), net.ganyusbathwater.oririmod.entity.custom.LamiaEntity.createAttributes().build());
         event.put(ModEntities.LOADED_BLAZE.get(), net.ganyusbathwater.oririmod.entity.custom.LoadedBlazeEntity.createAttributes().build());
         event.put(ModEntities.REX_ARANEA.get(), net.ganyusbathwater.oririmod.entity.custom.RexAraneaEntity.createAttributes().build());

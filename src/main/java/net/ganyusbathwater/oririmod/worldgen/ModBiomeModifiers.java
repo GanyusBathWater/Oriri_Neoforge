@@ -119,6 +119,8 @@ public class ModBiomeModifiers {
                         "add_spawns_lamia_lush_caves");
         public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SILENT_NEREID = registerKey(
                         "add_spawns_silent_nereid");
+        public static final ResourceKey<BiomeModifier> ADD_SPAWNS_SILENT_CLAM = registerKey(
+                        "add_spawns_silent_clam");
         public static final ResourceKey<BiomeModifier> ADD_SILENT_OCEAN_WILDLIFE = registerKey(
                         "add_silent_ocean_wildlife");
         public static final ResourceKey<BiomeModifier> ADD_SILENT_DEPTHS_WILDLIFE = registerKey(
@@ -742,6 +744,15 @@ public class ModBiomeModifiers {
                                 biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_sunken_trenches")))
                         ),
                         List.of(new MobSpawnSettings.SpawnerData(ModEntities.SILENT_NEREID.get(), 8, 1, 2))
+                ));
+
+                // Silent Clam Spawns: The Silent Depths & The Sunken Trenches (seafloor / abyssal caves)
+                context.register(ADD_SPAWNS_SILENT_CLAM, new BiomeModifiers.AddSpawnsBiomeModifier(
+                        HolderSet.direct(
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_silent_depths"))),
+                                biomes.getOrThrow(ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "the_sunken_trenches")))
+                        ),
+                        List.of(new MobSpawnSettings.SpawnerData(ModEntities.SILENT_CLAM.get(), 12, 1, 3))
                 ));
 
                 // Silent Ocean Underwater Wildlife Spawns (tuned pack sizes so neighboring photic shelves don't bloat around trenches)

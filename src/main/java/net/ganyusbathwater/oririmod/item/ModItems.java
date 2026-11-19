@@ -80,7 +80,14 @@ public class ModItems {
         public static final DeferredItem<Item> LAMIA_SCALE = ITEMS.register("lamia_scale",
                         () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.LamiaScaleItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(net.ganyusbathwater.oririmod.item.custom.cosmetic.LamiaScaleItem.DEFAULT_COLOR, false))));
 
+        public static final DeferredItem<Item> ELVEN_JEWLERY = ITEMS.register("elven_jewlery",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.ElvenJewelryItem(new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> SILENT_NEREID_SCALE = ITEMS.register("silent_nereid_scale",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.SilentNereidScaleItem(new Item.Properties().stacksTo(1).component(ModDataComponents.SILENT_NEREID_COLORS.get(), net.ganyusbathwater.oririmod.item.component.SilentNereidColors.DEFAULT)));
+
         public static final DeferredItem<Item> MANA_MANIFESTATION = ITEMS.register("mana_manifestation",
+                        () -> new Item(new Item.Properties()));
+        public static final DeferredItem<Item> PEARL = ITEMS.register("pearl",
                         () -> new Item(new Item.Properties()));
         public static final DeferredItem<Item> MOON_STONE = ITEMS.register("moon_stone",
                         () -> new Item(new Item.Properties()));
@@ -556,6 +563,12 @@ public class ModItems {
                         "silent_nereid_spawn_egg",
                         () -> new DeferredSpawnEggItem(ModEntities.SILENT_NEREID,
                                         0x1A237E, 0x00E5FF, // outer: deep-sea indigo, inner: bioluminescent blue
+                                        new Item.Properties()));
+
+        public static final DeferredItem<DeferredSpawnEggItem> SILENT_CLAM_SPAWN_EGG = ITEMS.register(
+                        "silent_clam_spawn_egg",
+                        () -> new DeferredSpawnEggItem(ModEntities.SILENT_CLAM,
+                                        0x2B7A78, 0xF4C2C2, // outer: abyssal clam teal, inner: pinkish pearl
                                         new Item.Properties()));
 
         public static final DeferredItem<DeferredSpawnEggItem> MERMAID_SPAWN_EGG = ITEMS.register(

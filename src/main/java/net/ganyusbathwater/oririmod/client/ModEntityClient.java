@@ -74,6 +74,8 @@ public class ModEntityClient {
                                 net.ganyusbathwater.oririmod.entity.client.MermaidRenderer::new);
                 event.registerEntityRenderer(ModEntities.SILENT_NEREID.get(),
                                 net.ganyusbathwater.oririmod.entity.client.SilentNereidRenderer::new);
+                event.registerEntityRenderer(ModEntities.SILENT_CLAM.get(),
+                                net.ganyusbathwater.oririmod.entity.client.SilentClamRenderer::new);
                 event.registerEntityRenderer(ModEntities.LAMIA.get(),
                                 net.ganyusbathwater.oririmod.entity.client.LamiaRenderer::new);
                 event.registerEntityRenderer(ModEntities.FAIRY.get(),

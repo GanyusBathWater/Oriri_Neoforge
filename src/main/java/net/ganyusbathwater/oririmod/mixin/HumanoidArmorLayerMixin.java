@@ -27,10 +27,11 @@ public abstract class HumanoidArmorLayerMixin<T extends LivingEntity, M extends 
                     return true;
                 }
 
-                boolean hasMermaid = CuriosApi.getCuriosInventory(player)
-                        .map(inv -> inv.findFirstCurio(ModItems.MERMAID_SCALE.get()).isPresent())
+                boolean hasAquaticScale = CuriosApi.getCuriosInventory(player)
+                        .map(inv -> inv.findFirstCurio(ModItems.MERMAID_SCALE.get()).isPresent()
+                                || inv.findFirstCurio(ModItems.SILENT_NEREID_SCALE.get()).isPresent())
                         .orElse(false);
-                if (hasMermaid) {
+                if (hasAquaticScale) {
                     return player.isInWater() ||
                             player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) ||
                             player.isVisuallySwimming();

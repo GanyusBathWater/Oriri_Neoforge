@@ -392,6 +392,19 @@ public final class ModEntities {
                                                                                         "silent_nereid")
                                                                         .toString()));
 
+        public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity>> SILENT_CLAM = ENTITIES
+                        .register("silent_clam",
+                                        () -> EntityType.Builder
+                                                        .<net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity>of(
+                                                                        net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity::new,
+                                                                        net.minecraft.world.entity.MobCategory.UNDERGROUND_WATER_CREATURE)
+                                                        .sized(0.6F, 0.45F)
+                                                        .clientTrackingRange(32)
+                                                        .build(ResourceLocation
+                                                                        .fromNamespaceAndPath(OririMod.MOD_ID,
+                                                                                        "silent_clam")
+                                                                        .toString()));
+
         public static final DeferredHolder<EntityType<?>, EntityType<net.ganyusbathwater.oririmod.entity.custom.LamiaEntity>> LAMIA = ENTITIES
                         .register("lamia",
                                         () -> EntityType.Builder

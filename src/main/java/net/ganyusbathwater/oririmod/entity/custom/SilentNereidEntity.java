@@ -145,7 +145,8 @@ public class SilentNereidEntity extends MermaidEntity {
         if (!level.getFluidState(pos).is(FluidTags.WATER)) {
             return false;
         }
-        // Prefer spawning near the bottom of the Silent Depths / Sunken Trenches (within 18 blocks of solid seafloor)
+        // Prefer spawning near the bottom of the Silent Depths / Sunken Trenches
+        // (within 18 blocks of solid seafloor)
         BlockPos.MutableBlockPos floorCursor = new BlockPos.MutableBlockPos();
         boolean nearSeafloor = false;
         for (int dy = 1; dy <= 18; dy++) {
@@ -158,8 +159,10 @@ public class SilentNereidEntity extends MermaidEntity {
         if (!nearSeafloor) {
             return false;
         }
-        // Global spawn rate throttling near the Silent Abyss is handled uniformly in AbyssalSpawnEvents;
-        // keep a generous local cap here as a safety floor for overlapping patrol pockets.
+        // Global spawn rate throttling near the Silent Abyss is handled uniformly in
+        // AbyssalSpawnEvents;
+        // keep a generous local cap here as a safety floor for overlapping patrol
+        // pockets.
         return level.getEntitiesOfClass(
                 SilentNereidEntity.class,
                 new net.minecraft.world.phys.AABB(pos).inflate(56.0)).size() < 4;
@@ -328,8 +331,9 @@ public class SilentNereidEntity extends MermaidEntity {
             }
         });
 
-        // Retaliate when hurt, ignoring friendly fire from other Silent Nereids
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this, SilentNereidEntity.class));
+        // Retaliate when hurt, ignoring friendly fire from other Silent Nereids or
+        // Silent Clams
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this, SilentNereidEntity.class, SilentClamEntity.class));
 
         // Attack all other living mobs! For players: triggers within 8 blocks (64.0D
         // sqr)
@@ -341,8 +345,8 @@ public class SilentNereidEntity extends MermaidEntity {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        // Never attack other Silent Nereids
-        if (target instanceof SilentNereidEntity) {
+        // Never attack other Silent Nereids or Silent Clams
+        if (target instanceof SilentNereidEntity || target instanceof SilentClamEntity) {
             return false;
         }
         // For players: only attack if in survival/adventure AND within 8 blocks (or
@@ -494,11 +498,13 @@ public class SilentNereidEntity extends MermaidEntity {
             Level level = this.nereid.level();
             BlockPos current = this.nereid.blockPosition();
 
-            // Check downward column first (Silent Depths and Sunken Trenches are beneath photic oceans)
+            // Check downward column first (Silent Depths and Sunken Trenches are beneath
+            // photic oceans)
             for (int dy = -5; dy >= -40; dy -= 5) {
                 BlockPos check = current.offset(0, dy, 0);
                 Holder<Biome> b = level.getBiome(check);
-                if ((b.is(SILENT_DEPTHS_KEY) || b.is(SUNKEN_TRENCHES_KEY)) && level.getFluidState(check).is(FluidTags.WATER)) {
+                if ((b.is(SILENT_DEPTHS_KEY) || b.is(SUNKEN_TRENCHES_KEY))
+                        && level.getFluidState(check).is(FluidTags.WATER)) {
                     return check;
                 }
             }
@@ -509,7 +515,8 @@ public class SilentNereidEntity extends MermaidEntity {
                     for (int dy = -20; dy <= 0; dy += 10) {
                         BlockPos check = current.offset(dx, dy, dz);
                         Holder<Biome> b = level.getBiome(check);
-                        if ((b.is(SILENT_DEPTHS_KEY) || b.is(SUNKEN_TRENCHES_KEY)) && level.getFluidState(check).is(FluidTags.WATER)) {
+                        if ((b.is(SILENT_DEPTHS_KEY) || b.is(SUNKEN_TRENCHES_KEY))
+                                && level.getFluidState(check).is(FluidTags.WATER)) {
                             return check;
                         }
                     }
@@ -556,7 +563,8 @@ public class SilentNereidEntity extends MermaidEntity {
         @Override
         public void tick() {
             LivingEntity target = this.nereid.getTarget();
-            if (target == null) return;
+            if (target == null)
+                return;
 
             this.nereid.getLookControl().setLookAt(target, 30.0F, 30.0F);
 
@@ -568,8 +576,7 @@ public class SilentNereidEntity extends MermaidEntity {
                         target.getX(),
                         target.getY() + target.getBbHeight() * 0.5D,
                         target.getZ(),
-                        1.4D
-                );
+                        1.4D);
             } else {
                 this.nereid.getNavigation().moveTo(target, 1.25D);
             }
@@ -591,8 +598,10 @@ public class SilentNereidEntity extends MermaidEntity {
     }
 
     /**
-     * Benthic wander goal that keeps idle Silent Nereids patrolling close to the abyssal
-     * seabed while still allowing occasional smooth rises and unrestricted 3D combat chases.
+     * Benthic wander goal that keeps idle Silent Nereids patrolling close to the
+     * abyssal
+     * seabed while still allowing occasional smooth rises and unrestricted 3D
+     * combat chases.
      */
     public static class SilentNereidBenthicWanderGoal extends Goal {
         private static final int MAX_FLOOR_SCAN_DEPTH = 64;
@@ -613,7 +622,8 @@ public class SilentNereidEntity extends MermaidEntity {
             if (this.nereid.getRandom().nextInt(32) == 0) {
                 return true;
             }
-            // Gently pull idle Nereids back toward the seafloor sooner if they drifted high up after a hunt
+            // Gently pull idle Nereids back toward the seafloor sooner if they drifted high
+            // up after a hunt
             int currentFloor = findSeafloorY(
                     this.nereid.level(),
                     this.nereid.getBlockX(),
@@ -640,20 +650,23 @@ public class SilentNereidEntity extends MermaidEntity {
                     continue;
                 }
 
-                // Prefer targets inside Silent Depths / Sunken Trenches (allow bypass only on final fallback)
+                // Prefer targets inside Silent Depths / Sunken Trenches (allow bypass only on
+                // final fallback)
                 BlockPos floorSamplePos = new BlockPos(bx, seafloorY + 2, bz);
                 if (attempt < 3 && !net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal
                         .isAbyssalBiome(level.getBiome(floorSamplePos))) {
                     continue;
                 }
 
-                // 85% stay 1.5-6 blocks off the bottom; 15% rise in a higher graceful arc (6-13 blocks)
+                // 85% stay 1.5-6 blocks off the bottom; 15% rise in a higher graceful arc (6-13
+                // blocks)
                 double hoverOffset = random.nextFloat() < 0.85F
                         ? (1.5D + random.nextDouble() * 4.5D)
                         : (6.0D + random.nextDouble() * 7.0D);
                 double desiredBottomY = seafloorY + 1.0D + hoverOffset;
 
-                // Blend gently down if currently very high above the seafloor so dives look fluid rather than vertical
+                // Blend gently down if currently very high above the seafloor so dives look
+                // fluid rather than vertical
                 double targetY = this.nereid.getY() - desiredBottomY > 14.0D
                         ? this.nereid.getY() - (6.0D + random.nextDouble() * 6.0D)
                         : desiredBottomY;

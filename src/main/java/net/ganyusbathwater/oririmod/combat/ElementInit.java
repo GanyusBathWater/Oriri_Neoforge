@@ -60,6 +60,7 @@ public final class ElementInit {
         EntityElementRegistry.setElement(ModEntities.BLACK_HOLE.get(), Element.DARKNESS);
         EntityElementRegistry.setElement(ModEntities.DEVIARTRAS.get(), Element.NATURE);
         EntityElementRegistry.setElement(ModEntities.MERMAID.get(), Element.WATER);
+        EntityElementRegistry.setElement(ModEntities.SILENT_CLAM.get(), Element.WATER);
         EntityElementRegistry.setElement(ModEntities.LOADED_BLAZE.get(), Element.FIRE);
         EntityElementRegistry.setElement(ModEntities.REX_ARANEA_WEB.get(), Element.DARKNESS);
         EntityElementRegistry.setElement(ModEntities.REX_ARANEA.get(), Element.DARKNESS);

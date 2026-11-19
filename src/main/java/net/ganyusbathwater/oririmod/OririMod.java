@@ -209,6 +209,13 @@ public class OririMod {
             net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
         event.register(
+            net.ganyusbathwater.oririmod.entity.ModEntities.SILENT_CLAM.get(),
+            net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+            net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity::checkSilentClamSpawnRules,
+            net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+        event.register(
             net.ganyusbathwater.oririmod.entity.ModEntities.FIRE_ZOMBIE.get(),
             net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
             net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,

@@ -1,11 +1,13 @@
 package net.ganyusbathwater.oririmod.datagen;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.entity.ModEntities;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -30,5 +32,11 @@ public class ModEntityTypeTagsProvider extends EntityTypeTagsProvider {
                 .add(EntityType.SPIDER)
                 .add(EntityType.CAVE_SPIDER)
                 .add(EntityType.SLIME);
+
+        this.tag(EntityTypeTags.AQUATIC)
+                .add(ModEntities.SILENT_CLAM.get());
+
+        this.tag(EntityTypeTags.CAN_BREATHE_UNDER_WATER)
+                .add(ModEntities.SILENT_CLAM.get());
     }
 }

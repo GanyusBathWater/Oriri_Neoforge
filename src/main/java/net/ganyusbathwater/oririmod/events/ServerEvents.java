@@ -919,7 +919,8 @@ public class ServerEvents {
     public static void onEntityJoinLevelForAbyssFlee(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
         if (!event.getLevel().isClientSide()
                 && event.getEntity() instanceof net.minecraft.world.entity.PathfinderMob mob
-                && !(mob instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity)) {
+                && !(mob instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity)
+                && !(mob instanceof net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity)) {
             mob.goalSelector.addGoal(1, new net.ganyusbathwater.oririmod.entity.ai.FleeSilentDepthsGoal(mob));
         }
     }
@@ -929,7 +930,9 @@ public class ServerEvents {
         if (!(event.getEntity() instanceof LivingEntity living) || living.level().isClientSide()) {
             return;
         }
-        if (living instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity || living instanceof Player
+        if (living instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity
+                || living instanceof net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity
+                || living instanceof Player
                 || living.isDeadOrDying()) {
             return;
         }
@@ -957,7 +960,8 @@ public class ServerEvents {
                 || event.getSpawnType() == net.minecraft.world.entity.MobSpawnType.COMMAND) {
             return;
         }
-        if (event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity) {
+        if (event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity
+                || event.getEntity() instanceof net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity) {
             return;
         }
         BlockPos pos = event.getEntity().blockPosition();

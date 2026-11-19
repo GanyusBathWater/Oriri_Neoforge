@@ -15,6 +15,7 @@ import net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFu
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithEnchantedBonusCondition;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -127,6 +128,12 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                         .add(LootItem.lootTableItem(ModItems.PRISMARINE_IRON_INGOT.get()))
                         .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.15F, 0.05F))));
 
+        // Silent Clam (5% Pearl drop chance on kill)
+        this.add(ModEntities.SILENT_CLAM.get(), LootTable.lootTable()
+                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(ModItems.PEARL.get()))
+                        .when(LootItemRandomChanceCondition.randomChance(0.05F))));
+
         // Rex Aranea
         this.add(ModEntities.REX_ARANEA.get(), LootTable.lootTable()
                 .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
@@ -189,6 +196,7 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
                 ModEntities.EYE_OF_DESOLATION.get(),
                 ModEntities.MERMAID.get(),
                 ModEntities.SILENT_NEREID.get(),
+                ModEntities.SILENT_CLAM.get(),
                 ModEntities.REX_ARANEA.get(),
                 ModEntities.DEVIARTRAS.get(),
                 ModEntities.BLIZZA.get(),

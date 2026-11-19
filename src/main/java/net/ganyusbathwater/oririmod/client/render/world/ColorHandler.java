@@ -40,6 +40,17 @@ public final class ColorHandler {
         };
         event.register(lamiaScaleItem, net.ganyusbathwater.oririmod.item.ModItems.LAMIA_SCALE.get());
 
+        ItemColor silentNereidScaleItem = (stack, tintIndex) -> {
+            if (tintIndex == 0) {
+                net.ganyusbathwater.oririmod.item.component.SilentNereidColors colors = stack.getOrDefault(
+                        net.ganyusbathwater.oririmod.item.component.ModDataComponents.SILENT_NEREID_COLORS.get(),
+                        net.ganyusbathwater.oririmod.item.component.SilentNereidColors.DEFAULT);
+                return colors.primary() | 0xFF000000;
+            }
+            return 0xFFFFFFFF;
+        };
+        event.register(silentNereidScaleItem, net.ganyusbathwater.oririmod.item.ModItems.SILENT_NEREID_SCALE.get());
+
 
         ItemColor teleporterItem = (stack, tintIndex) -> {
             if (tintIndex == 0) {

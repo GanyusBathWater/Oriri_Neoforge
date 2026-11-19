@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.entity.ai;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.entity.custom.SilentClamEntity;
 import net.ganyusbathwater.oririmod.entity.custom.SilentNereidEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -50,7 +51,9 @@ public class FleeSilentDepthsGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (this.mob.isDeadOrDying() || this.mob instanceof SilentNereidEntity) {
+        if (this.mob.isDeadOrDying()
+                || this.mob instanceof SilentNereidEntity
+                || this.mob instanceof SilentClamEntity) {
             return false;
         }
         if (!isInSilentDepths(this.mob)) {

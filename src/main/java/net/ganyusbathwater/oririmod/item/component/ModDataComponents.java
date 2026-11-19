@@ -52,6 +52,14 @@ public final class ModDataComponents {
                             .build()
             );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SilentNereidColors>> SILENT_NEREID_COLORS =
+            COMPONENTS.register("silent_nereid_colors", () ->
+                    DataComponentType.<SilentNereidColors>builder()
+                            .persistent(SilentNereidColors.CODEC)
+                            .networkSynchronized(SilentNereidColors.STREAM_CODEC)
+                            .build()
+            );
+
 
     public static void register(IEventBus eventBus) {
         COMPONENTS.register(eventBus);

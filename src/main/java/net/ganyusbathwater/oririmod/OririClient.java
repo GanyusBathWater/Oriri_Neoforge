@@ -69,6 +69,9 @@ public class OririClient {
         net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.AURORA_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.AuroraCosmeticRenderer(event.getContext());
         net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.MERMAID_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.MermaidCosmeticRenderer(event.getContext());
         net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.MERMAID_HEADFINS_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.MermaidHeadfinsRenderer(event.getContext());
+        net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.ELVEN_EARS_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.ElvenEarsRenderer(event.getContext());
+        net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.SILENT_NEREID_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.SilentNereidCosmeticRenderer(event.getContext());
+        net.ganyusbathwater.oririmod.event.CosmeticPlayerRenderEventHandler.SILENT_NEREID_HEADFINS_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.SilentNereidHeadfinsRenderer(event.getContext());
     }
 
     @SubscribeEvent

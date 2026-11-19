@@ -208,9 +208,9 @@ public abstract class AbstractPlayerCosmeticModel<T extends AbstractPlayerCosmet
                     swimAmount = 1.0F;
                 }
 
-                if (swimAmount > 0.0F && !isFirstPerson) {
+                if (swimAmount > 0.0F && !isFirstPerson && !isRenderLayer) {
                     // 1. Head: For RenderLayers, PlayerModel already handles swim/crawl head pitch cleanly.
-                    if (head != null && !isRenderLayer) {
+                    if (head != null) {
                         float lookPitch = player.getXRot(); // negative = looking up, positive = looking down
                         // When looking forward (pitch = 0), tilt head up ~75 degrees (1.30 rad) relative to horizontal body
                         float crawlHeadX = 1.30F - (lookPitch * net.minecraft.util.Mth.DEG_TO_RAD * 0.7F);
