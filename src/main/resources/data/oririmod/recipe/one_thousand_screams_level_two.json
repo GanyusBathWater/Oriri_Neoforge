@@ -1,0 +1,27 @@
+{
+    "type": "oririmod:magic_equinox_upgrade",
+    "top": {
+        "item": "oririmod:mana_crystal_block"
+    },
+    "left": {
+        "item": "minecraft:echo_shard"
+    },
+    "center": {
+        "item": "oririmod:one_thousand_screams"
+    },
+    "right": {
+        "item": "minecraft:echo_shard"
+    },
+    "bottom": {
+        "item": "oririmod:power_soul"
+    },
+    "template": {
+        "item": "oririmod:magic_upgrade_template"
+    },
+    "result": {
+        "id": "oririmod:one_thousand_screams",
+        "count": 1
+    },
+    "mana_cost": 175,
+    "required_level": 1
+}

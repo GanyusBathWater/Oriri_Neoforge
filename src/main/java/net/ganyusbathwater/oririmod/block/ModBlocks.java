@@ -919,7 +919,81 @@ public class ModBlocks {
 
         // ===== VILE PLAINS & VILE CAVES =====
         public static final DeferredBlock<Block> VILE_VINE_BLOCK = registerBlock("vile_vine_block",
-                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)
+                        () -> new ModFlammableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)
+                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)) {
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+                                        return 5;
+                                }
+
+                                @Override
+                                public @org.jetbrains.annotations.Nullable BlockState getToolModifiedState(
+                                                BlockState state,
+                                                net.minecraft.world.item.context.UseOnContext context,
+                                                net.neoforged.neoforge.common.ItemAbility itemAbility,
+                                                boolean simulate) {
+                                        if (itemAbility == net.neoforged.neoforge.common.ItemAbilities.AXE_STRIP) {
+                                                return ModBlocks.STRIPPED_VILE_VINE.get().defaultBlockState();
+                                        }
+                                        return super.getToolModifiedState(state, context, itemAbility, simulate);
+                                }
+                        });
+        public static final DeferredBlock<Block> STRIPPED_VILE_VINE = registerBlock("stripped_vile_vine",
+                        () -> new ModFlammableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG)
+                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)) {
+                                @Override
+                                public int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+                                        return 5;
+                                }
+                        });
+        public static final DeferredBlock<Block> VILE_PLANKS = registerBlock("vile_planks",
+                        () -> new ModFlammableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)
+                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<StairBlock> VILE_STAIRS = registerBlock("vile_stairs",
+                        () -> new StairBlock(ModBlocks.VILE_PLANKS.get().defaultBlockState(),
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS)
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<SlabBlock> VILE_SLAB = registerBlock("vile_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB)
+                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<FenceBlock> VILE_FENCE = registerBlock("vile_fence",
+                        () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE)
+                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<FenceGateBlock> VILE_GATE = registerBlock("vile_gate",
+                        () -> new FenceGateBlock(ModWoodTypes.VILE_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE)
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<DoorBlock> VILE_DOOR = registerBlock("vile_door",
+                        () -> new DoorBlock(ModWoodTypes.VILE_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR)
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<TrapDoorBlock> VILE_TRAPDOOR = registerBlock("vile_trapdoor",
+                        () -> new TrapDoorBlock(ModWoodTypes.VILE_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR)
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<PressurePlateBlock> VILE_PRESSURE_PLATE = registerBlock("vile_pressure_plate",
+                        () -> new PressurePlateBlock(ModWoodTypes.VILE_BLOCK_SET_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE)
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
+        public static final DeferredBlock<ButtonBlock> VILE_BUTTON = registerBlock("vile_button",
+                        () -> new ButtonBlock(ModWoodTypes.VILE_BLOCK_SET_TYPE, 30,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON)));
+
+        public static final DeferredBlock<StandingSignBlock> VILE_SIGN = BLOCKS.register("vile_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModStandingSignBlock(ModWoodTypes.VILE_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN)));
+        public static final DeferredBlock<WallSignBlock> VILE_WALL_SIGN = BLOCKS.register("vile_wall_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallSignBlock(ModWoodTypes.VILE_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).lootFrom(VILE_SIGN)));
+        public static final DeferredBlock<CeilingHangingSignBlock> VILE_HANGING_SIGN = BLOCKS.register("vile_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModCeilingHangingSignBlock(ModWoodTypes.VILE_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN)));
+        public static final DeferredBlock<WallHangingSignBlock> VILE_WALL_HANGING_SIGN = BLOCKS.register("vile_wall_hanging_sign",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.ModWallHangingSignBlock(ModWoodTypes.VILE_WOOD_TYPE,
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).lootFrom(VILE_HANGING_SIGN)));
+
+        public static final DeferredBlock<Block> VILE_LEAVES = registerBlock("vile_leaves",
+                        () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
                                         .mapColor(net.minecraft.world.level.material.MapColor.COLOR_PURPLE)));
         public static final DeferredBlock<Block> VILE_SAPLING = registerBlock("vile_sapling",
                         () -> new SaplingBlock(ModTreeGrowers.VILE_VINE, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));

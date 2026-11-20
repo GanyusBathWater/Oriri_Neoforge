@@ -74,7 +74,9 @@ public class ModItemTagProvider extends ItemTagsProvider {
                         net.ganyusbathwater.oririmod.item.ModItems.ELDER_BOAT.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.SCARLET_BOAT.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_BOAT.get(),
-                        net.ganyusbathwater.oririmod.item.ModItems.EPOCH_BOAT.get()
+                        net.ganyusbathwater.oririmod.item.ModItems.EPOCH_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.VILE_BOAT.get()
                 );
         
         this.tag(ItemTags.CHEST_BOATS)
@@ -82,7 +84,9 @@ public class ModItemTagProvider extends ItemTagsProvider {
                         net.ganyusbathwater.oririmod.item.ModItems.ELDER_CHEST_BOAT.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.SCARLET_CHEST_BOAT.get(),
                         net.ganyusbathwater.oririmod.item.ModItems.ABYSS_CROWN_CHEST_BOAT.get(),
-                        net.ganyusbathwater.oririmod.item.ModItems.EPOCH_CHEST_BOAT.get()
+                        net.ganyusbathwater.oririmod.item.ModItems.EPOCH_CHEST_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.ELDER_PINE_CHEST_BOAT.get(),
+                        net.ganyusbathwater.oririmod.item.ModItems.VILE_CHEST_BOAT.get()
                 );
 
         this.tag(ItemTags.SWORD_ENCHANTABLE)

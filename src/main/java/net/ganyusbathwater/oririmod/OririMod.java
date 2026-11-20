@@ -441,4 +441,95 @@ public class OririMod {
             }
         }
     }
+
+    @SubscribeEvent
+    public void onItemCrafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent event) {
+        Player player = event.getEntity();
+        if (player.level().isClientSide) {
+            return;
+        }
+        net.minecraft.world.item.ItemStack crafted = event.getCrafting();
+        if (!crafted.is(net.minecraft.world.item.Items.POTION)) {
+            return;
+        }
+        net.minecraft.world.item.alchemy.PotionContents contents = crafted.get(net.minecraft.core.component.DataComponents.POTION_CONTENTS);
+        if (contents != null && contents.is(ModPotions.TRUE_VISION_POTION1)) {
+            int bonusCount = Math.max(1, crafted.getCount());
+            for (int i = 0; i < bonusCount; i++) {
+                net.minecraft.world.item.ItemStack bonusPotion = net.minecraft.world.item.alchemy.PotionContents.createItemStack(
+                        net.minecraft.world.item.Items.POTION, ModPotions.TRUE_VISION_POTION1);
+                if (!player.getInventory().add(bonusPotion)) {
+                    player.drop(bonusPotion, false);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onLivingDeathSoulCollector(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        LivingEntity victim = event.getEntity();
+        if (victim.level().isClientSide || victim instanceof Player) {
+            return;
+        }
+        if (!(event.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
+            return;
+        }
+
+        String killedId = net.minecraft.world.entity.EntityType.getKey(victim.getType()).toString();
+        net.minecraft.world.entity.player.Inventory inv = player.getInventory();
+
+        // Check main inventory + hotbar (0..35) and offhand (40); feed the first matching Soul Collector
+        int[] slotsToCheck = new int[37];
+        for (int i = 0; i < 36; i++) {
+            slotsToCheck[i] = i;
+        }
+        slotsToCheck[36] = net.minecraft.world.entity.player.Inventory.SLOT_OFFHAND;
+
+        for (int slotIdx : slotsToCheck) {
+            net.minecraft.world.item.ItemStack collector = inv.getItem(slotIdx);
+            if (!collector.is(ModItems.SOUL_COLLECTOR.get())) {
+                continue;
+            }
+            net.minecraft.world.item.ItemStack shard = net.ganyusbathwater.oririmod.item.custom.SoulCollectorItem.getStoredShard(collector);
+            if (shard.isEmpty() || !net.ganyusbathwater.oririmod.item.custom.SoulShardItem.hasBoundEntity(shard)
+                    || net.ganyusbathwater.oririmod.item.custom.SoulShardItem.isCompleted(shard)) {
+                continue;
+            }
+            String boundId = net.ganyusbathwater.oririmod.item.custom.SoulShardItem.getBoundEntityId(shard);
+            if (!killedId.equals(boundId)) {
+                continue;
+            }
+
+            net.minecraft.world.item.ItemStack updatedShard = shard.copy();
+            boolean completedNow = net.ganyusbathwater.oririmod.item.custom.SoulShardItem.addKill(updatedShard);
+            net.ganyusbathwater.oririmod.item.custom.SoulCollectorItem.setStoredShard(collector, updatedShard);
+            inv.setChanged();
+
+            if (player.containerMenu instanceof net.ganyusbathwater.oririmod.block.menu.SoulCollectorMenu openMenu
+                    && openMenu.getCollectorSlotIndex() == slotIdx) {
+                openMenu.reloadFromCollector();
+            }
+
+            int kills = net.ganyusbathwater.oririmod.item.custom.SoulShardItem.getKills(updatedShard);
+            int req = net.ganyusbathwater.oririmod.item.custom.SoulShardItem.getRequiredKills(updatedShard);
+            if (completedNow) {
+                player.level().playSound(null, player.blockPosition(),
+                        net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP,
+                        net.minecraft.sounds.SoundSource.PLAYERS, 0.7F, 1.2F);
+                player.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable("message.oririmod.soul_collector_completed",
+                                victim.getType().getDescription()).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE),
+                        true);
+            } else {
+                player.level().playSound(null, player.blockPosition(),
+                        net.minecraft.sounds.SoundEvents.SOUL_ESCAPE.value(),
+                        net.minecraft.sounds.SoundSource.PLAYERS, 0.4F, 1.3F);
+                player.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable("message.oririmod.soul_collector_progress",
+                                victim.getType().getDescription(), kills, req).withStyle(net.minecraft.ChatFormatting.AQUA),
+                        true);
+            }
+            return; // Feed only the first matching Soul Collector
+        }
+    }
 }

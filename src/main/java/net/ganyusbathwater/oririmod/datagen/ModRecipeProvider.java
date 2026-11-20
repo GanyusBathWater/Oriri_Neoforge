@@ -139,10 +139,23 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .unlockedBy("has_abyss_crown_planks", has(ModBlocks.ABYSS_CROWN_PLANKS))
                                 .save(recipeOutput);
 
+                // Vile Wood
+                stairBuilder(ModBlocks.VILE_STAIRS.get(), Ingredient.of(ModBlocks.VILE_PLANKS))
+                                .unlockedBy("has_vile_planks", has(ModBlocks.VILE_PLANKS))
+                                .save(recipeOutput);
+                slab(recipeOutput, RecipeCategory.BUILDING_BLOCKS, ModBlocks.VILE_SLAB.get(), ModBlocks.VILE_PLANKS);
+                fenceBuilder(ModBlocks.VILE_FENCE.get(), Ingredient.of(ModBlocks.VILE_PLANKS))
+                                .unlockedBy("has_vile_planks", has(ModBlocks.VILE_PLANKS))
+                                .save(recipeOutput);
+                fenceGateBuilder(ModBlocks.VILE_GATE.get(), Ingredient.of(ModBlocks.VILE_PLANKS))
+                                .unlockedBy("has_vile_planks", has(ModBlocks.VILE_PLANKS))
+                                .save(recipeOutput);
+
                 makeWoodRecipes(recipeOutput, ModBlocks.ELDER_PLANKS.get(), ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get(), ModBlocks.ELDER_BUTTON.get(), ModBlocks.ELDER_PRESSURE_PLATE.get(), ModBlocks.ELDER_DOOR.get(), ModBlocks.ELDER_TRAPDOOR.get(), ModItems.ELDER_SIGN.get(), ModItems.ELDER_HANGING_SIGN.get(), ModItems.ELDER_BOAT.get(), ModItems.ELDER_CHEST_BOAT.get(), "elder");
                 makeWoodRecipes(recipeOutput, ModBlocks.SCARLET_PLANKS.get(), ModBlocks.STRIPPED_SCARLET_LOG.get(), ModBlocks.SCARLET_BUTTON.get(), ModBlocks.SCARLET_PRESSURE_PLATE.get(), ModBlocks.SCARLET_DOOR.get(), ModBlocks.SCARLET_TRAPDOOR.get(), ModItems.SCARLET_SIGN.get(), ModItems.SCARLET_HANGING_SIGN.get(), ModItems.SCARLET_BOAT.get(), ModItems.SCARLET_CHEST_BOAT.get(), "scarlet");
                 makeWoodRecipes(recipeOutput, ModBlocks.ABYSS_CROWN_PLANKS.get(), ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get(), ModBlocks.ABYSS_CROWN_BUTTON.get(), ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get(), ModBlocks.ABYSS_CROWN_DOOR.get(), ModBlocks.ABYSS_CROWN_TRAPDOOR.get(), ModItems.ABYSS_CROWN_SIGN.get(), ModItems.ABYSS_CROWN_HANGING_SIGN.get(), ModItems.ABYSS_CROWN_BOAT.get(), ModItems.ABYSS_CROWN_CHEST_BOAT.get(), "abyss_crown");
                 makeWoodRecipes(recipeOutput, ModBlocks.EPOCH_WOOD_PLANKS.get(), ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get(), ModBlocks.EPOCH_BUTTON.get(), ModBlocks.EPOCH_PRESSURE_PLATE.get(), ModBlocks.EPOCH_DOOR.get(), ModBlocks.EPOCH_TRAPDOOR.get(), ModItems.EPOCH_SIGN.get(), ModItems.EPOCH_HANGING_SIGN.get(), ModItems.EPOCH_BOAT.get(), ModItems.EPOCH_CHEST_BOAT.get(), "epoch");
+                makeWoodRecipes(recipeOutput, ModBlocks.VILE_PLANKS.get(), ModBlocks.STRIPPED_VILE_VINE.get(), ModBlocks.VILE_BUTTON.get(), ModBlocks.VILE_PRESSURE_PLATE.get(), ModBlocks.VILE_DOOR.get(), ModBlocks.VILE_TRAPDOOR.get(), ModItems.VILE_SIGN.get(), ModItems.VILE_HANGING_SIGN.get(), ModItems.VILE_BOAT.get(), ModItems.VILE_CHEST_BOAT.get(), "vile");
 
                 makeStoneRecipes(recipeOutput, "scarlet_cobblestone", ModBlocks.SCARLET_COBBLESTONE.get(), ModBlocks.SCARLET_COBBLESTONE_STAIRS.get(), ModBlocks.SCARLET_COBBLESTONE_SLAB.get(), ModBlocks.SCARLET_COBBLESTONE_WALL.get());
                 makeStoneRecipes(recipeOutput, "mossy_scarlet_cobblestone", ModBlocks.MOSSY_SCARLET_COBBLESTONE.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_STAIRS.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_SLAB.get(), ModBlocks.MOSSY_SCARLET_COBBLESTONE_WALL.get());
@@ -216,6 +229,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .requires(ModBlocks.EPOCH_WOOD_LOG.get())
                                 .unlockedBy("has_epoch_wood_log", has(ModBlocks.EPOCH_WOOD_LOG.get()))
                                 .save(recipeOutput, "oririmod:epoch_wood_planks_from_log");
+
+                // Vile Wood
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.VILE_PLANKS.get(), 4)
+                                .requires(ModBlocks.VILE_VINE_BLOCK.get())
+                                .unlockedBy("has_vile_vine_block", has(ModBlocks.VILE_VINE_BLOCK.get()))
+                                .save(recipeOutput, "oririmod:vile_planks_from_vine");
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.VILE_PLANKS.get(), 4)
+                                .requires(ModBlocks.STRIPPED_VILE_VINE.get())
+                                .unlockedBy("has_stripped_vile_vine", has(ModBlocks.STRIPPED_VILE_VINE.get()))
+                                .save(recipeOutput, "oririmod:vile_planks_from_stripped_vine");
                 ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.EPOCH_WOOD_PLANKS.get(), 4)
                                 .requires(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get())
                                 .unlockedBy("has_stripped_epoch_wood_log", has(ModBlocks.STRIPPED_EPOCH_WOOD_LOG.get()))
@@ -777,9 +800,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                         .pattern("GSG")
                         .define('D', Items.DIAMOND_BLOCK)
                         .define('S', ModItems.IRON_STICK.get())
-                        .define('C', ModItems.SOUL_COLLECTOR.get())
+                        .define('C', Items.NETHER_STAR)
                         .define('G', ModItems.GILDED_NETHERRITE_INGOT.get())
-                        .unlockedBy("has_soul_collector", has(ModItems.SOUL_COLLECTOR.get()))
+                        .unlockedBy("has_nether_star", has(Items.NETHER_STAR))
                         .save(recipeOutput);
 
                 // Emissive Clocker
@@ -925,9 +948,59 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 }
 
                 makeMermaidScaleDyeRecipes(recipeOutput);
+                makeTrueVisionPotionRecipe(recipeOutput);
                 net.minecraft.data.recipes.SpecialRecipeBuilder.special(net.ganyusbathwater.oririmod.recipe.KitsuneDyeRecipe::new).save(recipeOutput, "oririmod:kitsune_dye");
                 net.minecraft.data.recipes.SpecialRecipeBuilder.special(net.ganyusbathwater.oririmod.recipe.SilentNereidDyeRecipe::new).save(recipeOutput, "oririmod:silent_nereid_dye");
                 net.minecraft.data.recipes.SpecialRecipeBuilder.special(net.ganyusbathwater.oririmod.recipe.LamiaDyeRecipe::new).save(recipeOutput, "oririmod:lamia_dye");
+        }
+
+        private void makeTrueVisionPotionRecipe(RecipeOutput recipeOutput) {
+                Ingredient nightVisionPotion = net.neoforged.neoforge.common.crafting.CompoundIngredient.of(
+                                net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(
+                                                false,
+                                                net.minecraft.core.component.DataComponents.POTION_CONTENTS,
+                                                new net.minecraft.world.item.alchemy.PotionContents(net.minecraft.world.item.alchemy.Potions.NIGHT_VISION),
+                                                Items.POTION),
+                                net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(
+                                                false,
+                                                net.minecraft.core.component.DataComponents.POTION_CONTENTS,
+                                                new net.minecraft.world.item.alchemy.PotionContents(net.minecraft.world.item.alchemy.Potions.LONG_NIGHT_VISION),
+                                                Items.POTION));
+
+                Ingredient mobSensePotion = net.neoforged.neoforge.common.crafting.CompoundIngredient.of(
+                                net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(
+                                                false,
+                                                net.minecraft.core.component.DataComponents.POTION_CONTENTS,
+                                                new net.minecraft.world.item.alchemy.PotionContents(net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION1),
+                                                Items.POTION),
+                                net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(
+                                                false,
+                                                net.minecraft.core.component.DataComponents.POTION_CONTENTS,
+                                                new net.minecraft.world.item.alchemy.PotionContents(net.ganyusbathwater.oririmod.potion.ModPotions.MOB_SENSE_POTION2),
+                                                Items.POTION));
+
+                Ingredient elderCoral = Ingredient.of(
+                                ModBlocks.ELDER_CORAL.get(),
+                                ModBlocks.ELDER_CORAL_FAN.get(),
+                                ModBlocks.ELDER_CORAL_BLOCK.get());
+
+                Ingredient abyssalCoralCrown = Ingredient.of(
+                                ModBlocks.ABYSSAL_CORAL_CROWN.get(),
+                                ModBlocks.ABYSSAL_CORAL_CROWN_FAN.get(),
+                                ModBlocks.ABYSSAL_CORAL_CROWN_BLOCK.get());
+
+                net.minecraft.world.item.ItemStack result = net.minecraft.world.item.alchemy.PotionContents.createItemStack(
+                                Items.POTION,
+                                net.ganyusbathwater.oririmod.potion.ModPotions.TRUE_VISION_POTION1);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BREWING, result)
+                                .requires(nightVisionPotion)
+                                .requires(mobSensePotion)
+                                .requires(elderCoral)
+                                .requires(abyssalCoralCrown)
+                                .unlockedBy("has_elder_coral", has(ModBlocks.ELDER_CORAL.get()))
+                                .unlockedBy("has_abyssal_coral_crown", has(ModBlocks.ABYSSAL_CORAL_CROWN.get()))
+                                .save(recipeOutput, "oririmod:true_vision_potion");
         }
 
         private void makeMermaidScaleDyeRecipes(RecipeOutput recipeOutput) {

@@ -39,6 +39,9 @@ public class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ABYSSAL_SHROUD = PARTICLE_TYPES
             .register("abyssal_shroud", () -> new SimpleParticleType(false));
 
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> LARGE_SONIC_BOOM = PARTICLE_TYPES
+            .register("large_sonic_boom", () -> new SimpleParticleType(true));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }

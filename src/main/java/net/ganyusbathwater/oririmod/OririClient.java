@@ -85,6 +85,7 @@ public class OririClient {
         event.registerSpriteSet(ModParticles.ELDER_SPORE_BLOSSOM_SPORE_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.ElderSporeBlossomSporeParticle.Provider::new);
         event.registerSpriteSet(ModParticles.TELEPORTER_VORTEX_PARTICLE.get(), net.ganyusbathwater.oririmod.particle.custom.TeleporterVortexParticle.Provider::new);
         event.registerSpriteSet(ModParticles.ABYSSAL_SHROUD.get(), AbyssalShroudParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.LARGE_SONIC_BOOM.get(), net.ganyusbathwater.oririmod.particle.custom.LargeSonicBoomParticle.Provider::new);
     }
 
     @SubscribeEvent
@@ -94,6 +95,9 @@ public class OririClient {
         Sheets.addWoodType(ModWoodTypes.ELDER_WOOD_TYPE);
         Sheets.addWoodType(ModWoodTypes.SCARLET_WOOD_TYPE);
         Sheets.addWoodType(ModWoodTypes.ABYSS_CROWN_WOOD_TYPE);
+        Sheets.addWoodType(ModWoodTypes.EPOCH_WOOD_TYPE);
+        Sheets.addWoodType(ModWoodTypes.ELDER_PINE_WOOD_TYPE);
+        Sheets.addWoodType(ModWoodTypes.VILE_WOOD_TYPE);
         
     }
 
@@ -291,7 +295,6 @@ public class OririClient {
         builder.addMix(Potions.AWKWARD, ModItems.MANA_MANIFESTATION.get(), ModPotions.MANA_REGEN_POTION1);
         builder.addMix(ModPotions.MANA_REGEN_POTION1, Items.GLOWSTONE_DUST, ModPotions.MANA_REGEN_POTION2);
         
-        builder.addMix(ModPotions.MOB_SENSE_POTION1, Items.GOLDEN_CARROT, ModPotions.TRUE_VISION_POTION1);
         builder.addMix(ModPotions.TRUE_VISION_POTION1, Items.REDSTONE, ModPotions.TRUE_VISION_POTION2);
 
         // Pearl -> vanilla Luck potion (includes splash & lingering automatically)
@@ -615,6 +618,9 @@ public class OririClient {
         event.register(
                 net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.SOUL_HARVESTER_MENU.get(),
                 net.ganyusbathwater.oririmod.client.screen.SoulHarvesterScreen::new);
+        event.register(
+                net.ganyusbathwater.oririmod.block.menu.ModMenuTypes.SOUL_COLLECTOR_MENU.get(),
+                net.ganyusbathwater.oririmod.client.screen.SoulCollectorScreen::new);
     }
 
     private static net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer choirRenderer;

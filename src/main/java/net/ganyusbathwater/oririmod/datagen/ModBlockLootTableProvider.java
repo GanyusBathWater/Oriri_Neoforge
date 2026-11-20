@@ -16,7 +16,15 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
     protected void generate() {
 
         dropSelf(ModBlocks.BLOOD_SLUDGE.get());
-        add(ModBlocks.ELDERBUSH_BLOCK.get(), block -> net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool().setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F)).add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.ELDERBERRY.get()).apply(net.minecraft.world.level.storage.loot.functions.SetItemCountFunction.setCount(net.minecraft.world.level.storage.loot.providers.number.UniformGenerator.between(2.0F, 6.0F))))));
+        add(ModBlocks.ELDERBUSH_BLOCK.get(), block -> createSilkTouchOrShearsDispatchTable(
+                block,
+                net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.ganyusbathwater.oririmod.item.ModItems.ELDERBERRY.get())
+                        .when(net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition
+                                .hasBlockStateProperties(block)
+                                .setProperties(net.minecraft.advancements.critereon.StatePropertiesPredicate.Builder.properties()
+                                        .hasProperty(net.ganyusbathwater.oririmod.block.custom.ElderBerryBush.HAS_BERRIES, true)))
+                        .apply(net.minecraft.world.level.storage.loot.functions.SetItemCountFunction
+                                .setCount(net.minecraft.world.level.storage.loot.providers.number.UniformGenerator.between(2.0F, 6.0F)))));
         dropSelf(ModBlocks.MANA_CRYSTAL_BLOCK.get());
         add(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), block -> createOreDrop(ModBlocks.MANA_CRYSTAL_CLUSTER.get(), net.ganyusbathwater.oririmod.item.ModItems.MANA_MANIFESTATION.get()));
         dropSelf(ModBlocks.ELDER_LOG_BLOCK.get());
@@ -322,24 +330,22 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.UPGRADED_ELDER_PINE_SAPLING.get());
 
         // ===== VILE PLAINS & VILE CAVES =====
-        add(ModBlocks.VILE_VINE_BLOCK.get(), block -> {
-            net.minecraft.core.HolderLookup.RegistryLookup<net.minecraft.world.item.enchantment.Enchantment> enchantments =
-                    this.registries.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
-            return net.minecraft.world.level.storage.loot.LootTable.lootTable()
-                    .withPool(this.applyExplosionCondition(block,
-                            net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                                    .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
-                                    .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(block))))
-                    .withPool(net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                            .setRolls(net.minecraft.world.level.storage.loot.providers.number.ConstantValue.exactly(1.0F))
-                            .when(this.doesNotHaveSilkTouch())
-                            .add(this.applyExplosionCondition(block,
-                                    net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(ModBlocks.VILE_SAPLING.get()))
-                                    .when(net.minecraft.world.level.storage.loot.predicates.BonusLevelTableCondition
-                                            .bonusLevelFlatChance(
-                                                    enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.FORTUNE),
-                                                    NORMAL_LEAVES_SAPLING_CHANCES))));
-        });
+        dropSelf(ModBlocks.VILE_VINE_BLOCK.get());
+        dropSelf(ModBlocks.STRIPPED_VILE_VINE.get());
+        dropSelf(ModBlocks.VILE_PLANKS.get());
+        dropSelf(ModBlocks.VILE_STAIRS.get());
+        add(ModBlocks.VILE_SLAB.get(), block -> createSlabItemTable(ModBlocks.VILE_SLAB.get()));
+        dropSelf(ModBlocks.VILE_FENCE.get());
+        dropSelf(ModBlocks.VILE_GATE.get());
+        add(ModBlocks.VILE_DOOR.get(), block -> createDoorTable(block));
+        dropSelf(ModBlocks.VILE_TRAPDOOR.get());
+        dropSelf(ModBlocks.VILE_BUTTON.get());
+        dropSelf(ModBlocks.VILE_PRESSURE_PLATE.get());
+        dropOther(ModBlocks.VILE_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.VILE_SIGN.get());
+        dropOther(ModBlocks.VILE_WALL_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.VILE_SIGN.get());
+        dropOther(ModBlocks.VILE_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.VILE_HANGING_SIGN.get());
+        dropOther(ModBlocks.VILE_WALL_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.item.ModItems.VILE_HANGING_SIGN.get());
+        add(ModBlocks.VILE_LEAVES.get(), block -> createLeavesDrops(block, ModBlocks.VILE_SAPLING.get(), NORMAL_LEAVES_SAPLING_CHANCES));
         dropSelf(ModBlocks.VILE_SAPLING.get());
         dropSelf(ModBlocks.UPGRADED_VILE_SAPLING.get());
 

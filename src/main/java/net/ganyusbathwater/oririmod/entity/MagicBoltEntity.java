@@ -1,6 +1,8 @@
 package net.ganyusbathwater.oririmod.entity;
 
+import net.ganyusbathwater.oririmod.particle.ModParticles;
 import net.ganyusbathwater.oririmod.util.MagicBoltAbility;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -10,14 +12,18 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -42,6 +48,8 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
             EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> EXPLODES_ON_HIT = SynchedEntityData.defineId(MagicBoltEntity.class,
             EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> UPGRADE_LEVEL = SynchedEntityData.defineId(MagicBoltEntity.class,
+            EntityDataSerializers.INT);
 
     public MagicBoltEntity(EntityType<? extends MagicBoltEntity> type, Level level) {
         super(type, level);
@@ -89,14 +97,40 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         builder.define(LOCKED_YAW, 0.0F);
         builder.define(LOCKED_PITCH, 0.0F);
         builder.define(EXPLODES_ON_HIT, false);
+        builder.define(UPGRADE_LEVEL, 1);
     }
 
     public void setExplodesOnHit(boolean explodes) {
         this.entityData.set(EXPLODES_ON_HIT, explodes);
     }
 
+    public void setUpgradeLevel(int upgradeLevel) {
+        this.entityData.set(UPGRADE_LEVEL, Math.max(1, upgradeLevel));
+        this.refreshDimensions();
+    }
+
+    public int getUpgradeLevel() {
+        return this.entityData.get(UPGRADE_LEVEL);
+    }
+
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        EntityDimensions base = super.getDimensions(pose);
+        if (getAbility() == MagicBoltAbility.SONIC) {
+            // Normal SONIC projectile hitbox is doubled (0.5x0.5); Level 2+ adds +50% on top (0.75x0.75).
+            float scale = getUpgradeLevel() >= 2 ? 3.0F : 2.0F;
+            return base.scale(scale);
+        }
+        return base;
+    }
+
+    private ParticleOptions getSonicParticle() {
+        return getUpgradeLevel() >= 2 ? ModParticles.LARGE_SONIC_BOOM.get() : ParticleTypes.SONIC_BOOM;
+    }
+
     public void setAbility(MagicBoltAbility ability) {
         entityData.set(ABILITY, ability.ordinal());
+        this.refreshDimensions();
     }
 
     public MagicBoltAbility getAbility() {
@@ -118,6 +152,27 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
     public void tick() {
         if (spawnGraceTicks > 0) {
             spawnGraceTicks--;
+        }
+
+        // SONIC bolts use a doubled base hit radius (0.6F vs vanilla 0.3F) and +50% more at Level 2+ (0.9F).
+        if (!level().isClientSide && spawnGraceTicks == 0 && getAbility() == MagicBoltAbility.SONIC) {
+            float hitMargin = getUpgradeLevel() >= 2 ? 0.9F : 0.6F;
+            Vec3 start = this.position();
+            Vec3 delta = this.getDeltaMovement();
+            Vec3 end = start.add(delta);
+            BlockHitResult blockHit = level().clip(new ClipContext(
+                    start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+            Vec3 entityTraceEnd = blockHit.getType() != HitResult.Type.MISS ? blockHit.getLocation() : end;
+            EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
+                    level(), this, start, entityTraceEnd,
+                    this.getBoundingBox().expandTowards(delta).inflate(1.0D + hitMargin),
+                    this::canHitEntity, hitMargin);
+            if (entityHit != null) {
+                this.onHit(entityHit);
+                if (this.isRemoved()) {
+                    return;
+                }
+            }
         }
 
         super.tick();
@@ -156,7 +211,7 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
                 case BLAZE -> spawnTrail(ParticleTypes.SMALL_FLAME, 2);
                 case EXPLOSIVE -> spawnTrail(ParticleTypes.CRIT, 1);
                 case ENDER -> spawnTrail(ParticleTypes.PORTAL, 3);
-                case SONIC -> spawnTrail(ParticleTypes.SONIC_BOOM, 1, true);
+                case SONIC -> spawnTrail(getSonicParticle(), 1, true);
                 default -> {
                 }
             }
@@ -222,7 +277,9 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
             case SONIC -> {
                 level().playSound(null, loc.x, loc.y, loc.z,
                         SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.0F, 1.0F);
-                level().addParticle(ParticleTypes.SONIC_BOOM, loc.x, loc.y, loc.z, 0, 0, 0);
+                if (level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(getSonicParticle(), loc.x, loc.y, loc.z, 1, 0, 0, 0, 0);
+                }
             }
             default -> {
             }
@@ -273,7 +330,7 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
 
         MagicBoltAbility ability = getAbility();
         float damage = switch (ability) {
-            case SONIC -> 10.0F;
+            case SONIC -> getUpgradeLevel() >= 3 ? 15.0F : 10.0F;
             case BLAZE -> BASE_DAMAGE - 1.0F;
             case NORMAL -> BASE_DAMAGE;
             case ENDER -> 0.0F;
@@ -307,8 +364,10 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
                 hit.getEntity().push(push.x, 0.2D, push.z);
                 level().playSound(null, getX(), getY(), getZ(),
                         SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.0F, 1.0F);
-                level().addParticle(ParticleTypes.SONIC_BOOM, hit.getLocation().x, hit.getLocation().y,
-                        hit.getLocation().z, 0, 0, 0);
+                if (level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(getSonicParticle(), hit.getLocation().x, hit.getLocation().y,
+                            hit.getLocation().z, 1, 0, 0, 0, 0);
+                }
             }
             default -> {
             }
@@ -362,6 +421,9 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         super.onSyncedDataUpdated(key);
         if (key.equals(ABILITY)) {
             updateGravityFlag();
+            this.refreshDimensions();
+        } else if (key.equals(UPGRADE_LEVEL)) {
+            this.refreshDimensions();
         }
     }
 
@@ -372,6 +434,7 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         tag.putFloat("StoredSpeed", entityData.get(SPEED));
         tag.putInt("LifeTime", lifeTime);
         tag.putBoolean("ExplodesOnHit", entityData.get(EXPLODES_ON_HIT));
+        tag.putInt("UpgradeLevel", getUpgradeLevel());
     }
 
     @Override
@@ -388,6 +451,9 @@ public class MagicBoltEntity extends ThrowableItemProjectile {
         }
         if (tag.contains("ExplodesOnHit")) {
             entityData.set(EXPLODES_ON_HIT, tag.getBoolean("ExplodesOnHit"));
+        }
+        if (tag.contains("UpgradeLevel")) {
+            setUpgradeLevel(tag.getInt("UpgradeLevel"));
         }
     }
 

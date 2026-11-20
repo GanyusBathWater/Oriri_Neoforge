@@ -36,7 +36,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         @Override
         protected void registerStatesAndModels() {
-                pillarBlockWithItem(ModBlocks.ELDERBUSH_BLOCK, 3);
+                elderBushBlock();
                 blockWithItem(ModBlocks.ELDER_LEAVES, 3);
                 blockWithItem(ModBlocks.ELDER_LEAVES_FLOWERING, 3);
 
@@ -77,10 +77,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 blockWithItem(ModBlocks.FLUORITE_BLOCK, 4);
                 fluoriteClusterState(ModBlocks.FLUORITE_CLUSTER);
 
-                blockWithItem(ModBlocks.ELDER_STEM_BLOCK, 1);
-                // blockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK, 1);
-                // pillarBlockWithItem(ModBlocks.ELDER_LOG_BLOCK, 1);
-                pillarBlockWithItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK, 1);
+                simpleBlockWithItem(ModBlocks.ELDER_STEM_BLOCK.get(),
+                                models().cubeAll("elder_stem_block", modLoc("block/elder_log_block_side")));
+                axisBlock(((RotatedPillarBlock) ModBlocks.CRACKED_ELDER_LOG_BLOCK.get()),
+                                modLoc("block/cracked_elder_log_block_side"),
+                                modLoc("block/stripped_elder_log_block_top_bottom"));
+                simpleBlockItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get(),
+                                models().getExistingFile(modLoc("block/cracked_elder_log_block")));
                 axisBlock(((RotatedPillarBlock) ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get()),
                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                 "block/stripped_elder_log_block_side"),
@@ -91,7 +94,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "block/elder_log_block_side"),
                                 ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
                                                 "block/elder_log_block_top_bottom"));
-                blockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK, 1);
+                simpleBlockWithItem(ModBlocks.STRIPPED_ELDER_STEM_BLOCK.get(),
+                                models().cubeAll("stripped_elder_stem_block",
+                                                modLoc("block/stripped_elder_log_block_side")));
 
                 stairsBlock(ModBlocks.ELDER_STAIRS.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()));
                 slabBlock(ModBlocks.ELDER_SLAB.get(), blockTexture(ModBlocks.ELDER_PLANKS.get()),
@@ -170,8 +175,18 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.POLISHED_SCARLET_DEEPSLATE_SLAB.get(), modLoc("block/polished_scarlet_deepslate"), modLoc("block/polished_scarlet_deepslate"));
                 wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.POLISHED_SCARLET_DEEPSLATE_WALL.get(), modLoc("block/polished_scarlet_deepslate"));
 
-                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_DEEPSLATE_STAIRS.get(), modLoc("block/scarlet_deepslate"));
-                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_DEEPSLATE_SLAB.get(), modLoc("block/scarlet_deepslate"), modLoc("block/scarlet_deepslate"));
+                simpleBlock(ModBlocks.SMOOTH_SCARLET_STONE.get(), cubeAll(ModBlocks.SMOOTH_SCARLET_STONE.get()));
+                slabBlock(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get(), modLoc("block/smooth_scarlet_stone"), modLoc("block/smooth_scarlet_stone"));
+
+                stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_DEEPSLATE_STAIRS.get(),
+                                modLoc("block/scarlet_deepslate"),
+                                modLoc("block/scarlet_deepslate_top"),
+                                modLoc("block/scarlet_deepslate_top"));
+                slabBlock((net.minecraft.world.level.block.SlabBlock) ModBlocks.SCARLET_DEEPSLATE_SLAB.get(),
+                                modLoc("block/scarlet_deepslate"),
+                                modLoc("block/scarlet_deepslate"),
+                                modLoc("block/scarlet_deepslate_top"),
+                                modLoc("block/scarlet_deepslate_top"));
                 wallBlock((net.minecraft.world.level.block.WallBlock) ModBlocks.SCARLET_DEEPSLATE_WALL.get(), modLoc("block/scarlet_deepslate"));
 
                 stairsBlock((net.minecraft.world.level.block.StairBlock) ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS.get(), modLoc("block/scarlet_deepslate_bricks"));
@@ -349,6 +364,24 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
                 // ===== VILE PLAINS & VILE CAVES =====
                 blockWithItem(ModBlocks.VILE_VINE_BLOCK, 1);
+                blockWithItem(ModBlocks.STRIPPED_VILE_VINE, 1);
+                blockWithItem(ModBlocks.VILE_PLANKS, 1);
+                stairsBlock(ModBlocks.VILE_STAIRS.get(), blockTexture(ModBlocks.VILE_PLANKS.get()));
+                slabBlock(ModBlocks.VILE_SLAB.get(), blockTexture(ModBlocks.VILE_PLANKS.get()),
+                                blockTexture(ModBlocks.VILE_PLANKS.get()));
+                fenceBlock(ModBlocks.VILE_FENCE.get(), blockTexture(ModBlocks.VILE_PLANKS.get()));
+                fenceGateBlock(ModBlocks.VILE_GATE.get(), blockTexture(ModBlocks.VILE_PLANKS.get()));
+
+                doorBlockWithRenderType((DoorBlock) ModBlocks.VILE_DOOR.get(), modLoc("block/vile_door_bottom"), modLoc("block/vile_door_top"), "cutout");
+                trapdoorBlockWithRenderType((TrapDoorBlock) ModBlocks.VILE_TRAPDOOR.get(), modLoc("block/vile_trapdoor"), true, "cutout");
+
+                buttonBlock((net.minecraft.world.level.block.ButtonBlock) ModBlocks.VILE_BUTTON.get(), blockTexture(ModBlocks.VILE_PLANKS.get()));
+                pressurePlateBlock((net.minecraft.world.level.block.PressurePlateBlock) ModBlocks.VILE_PRESSURE_PLATE.get(), blockTexture(ModBlocks.VILE_PLANKS.get()));
+
+                signBlock((net.minecraft.world.level.block.StandingSignBlock) ModBlocks.VILE_SIGN.get(), (net.minecraft.world.level.block.WallSignBlock) ModBlocks.VILE_WALL_SIGN.get(), blockTexture(ModBlocks.VILE_PLANKS.get()));
+                hangingSignBlock(ModBlocks.VILE_HANGING_SIGN.get(), ModBlocks.VILE_WALL_HANGING_SIGN.get(), modLoc("block/vile_vine_block"));
+
+                blockWithItem(ModBlocks.VILE_LEAVES, 3);
                 saplingBlock(ModBlocks.VILE_SAPLING);
                 simpleBlockWithItem(ModBlocks.UPGRADED_VILE_SAPLING.get(),
                                 models().cross("upgraded_vile_sapling", modLoc("block/vile_sapling")).renderType("cutout"));
@@ -1147,5 +1180,54 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#emissive").end();
 
                 simpleBlockWithItem(block.get(), model);
+        }
+
+        private void elderBushBlock() {
+                ResourceLocation berrylessTex = modLoc("block/elderbush_block_berryless");
+                ResourceLocation berryBgTex = modLoc("block/elderbush_block_berry_background");
+                ResourceLocation berryOverlayTex = modLoc("block/elderbush_block_berry_overlay");
+
+                // Berry-bearing model: biome-tinted leaves (tintindex 0) + untinted berries overlay
+                BlockModelBuilder withBerriesModel = models().withExistingParent("elderbush_block", mcLoc("block/block"))
+                                .renderType("minecraft:cutout_mipped")
+                                .texture("particle", berrylessTex)
+                                .texture("leaves", berryBgTex)
+                                .texture("berries", berryOverlayTex);
+
+                withBerriesModel.element()
+                                .from(0, 0, 0).to(16, 16, 16)
+                                .face(Direction.DOWN).uvs(0, 0, 16, 16).texture("#leaves").tintindex(0).cullface(Direction.DOWN).end()
+                                .face(Direction.UP).uvs(0, 0, 16, 16).texture("#leaves").tintindex(0).cullface(Direction.UP).end()
+                                .face(Direction.NORTH).uvs(0, 0, 16, 16).texture("#leaves").tintindex(0).cullface(Direction.NORTH).end()
+                                .face(Direction.SOUTH).uvs(0, 0, 16, 16).texture("#leaves").tintindex(0).cullface(Direction.SOUTH).end()
+                                .face(Direction.WEST).uvs(0, 0, 16, 16).texture("#leaves").tintindex(0).cullface(Direction.WEST).end()
+                                .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#leaves").tintindex(0).cullface(Direction.EAST).end();
+
+                withBerriesModel.element()
+                                .from(0, 0, 0).to(16, 16, 16)
+                                .face(Direction.DOWN).uvs(0, 0, 16, 16).texture("#berries").cullface(Direction.DOWN).end()
+                                .face(Direction.UP).uvs(0, 0, 16, 16).texture("#berries").cullface(Direction.UP).end()
+                                .face(Direction.NORTH).uvs(0, 0, 16, 16).texture("#berries").cullface(Direction.NORTH).end()
+                                .face(Direction.SOUTH).uvs(0, 0, 16, 16).texture("#berries").cullface(Direction.SOUTH).end()
+                                .face(Direction.WEST).uvs(0, 0, 16, 16).texture("#berries").cullface(Direction.WEST).end()
+                                .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#berries").cullface(Direction.EAST).end();
+
+                // Berryless model: solid greyscale leaves (minecraft:block/leaves applies tintindex 0 to all faces)
+                BlockModelBuilder berrylessModel = models().withExistingParent("elderbush_block_berryless", mcLoc("block/leaves"))
+                                .renderType("minecraft:cutout_mipped")
+                                .texture("all", berrylessTex)
+                                .texture("particle", berrylessTex);
+
+                getVariantBuilder(ModBlocks.ELDERBUSH_BLOCK.get()).forAllStatesExcept(
+                                state -> ConfiguredModel.builder()
+                                                .modelFile(state.getValue(net.ganyusbathwater.oririmod.block.custom.ElderBerryBush.HAS_BERRIES)
+                                                                ? withBerriesModel
+                                                                : berrylessModel)
+                                                .build(),
+                                net.minecraft.world.level.block.LeavesBlock.DISTANCE,
+                                net.minecraft.world.level.block.LeavesBlock.PERSISTENT,
+                                net.minecraft.world.level.block.LeavesBlock.WATERLOGGED);
+
+                simpleBlockItem(ModBlocks.ELDERBUSH_BLOCK.get(), withBerriesModel);
         }
 }

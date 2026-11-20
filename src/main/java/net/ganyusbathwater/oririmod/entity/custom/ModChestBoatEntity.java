@@ -61,6 +61,7 @@ public class ModChestBoatEntity extends ChestBoat {
             case ABYSS_CROWN -> ModItems.ABYSS_CROWN_CHEST_BOAT.get();
             case EPOCH -> ModItems.EPOCH_CHEST_BOAT.get();
             case ELDER_PINE -> ModItems.ELDER_PINE_CHEST_BOAT.get();
+            case VILE -> ModItems.VILE_CHEST_BOAT.get();
             default -> ModItems.ELDER_CHEST_BOAT.get();
         };
     }

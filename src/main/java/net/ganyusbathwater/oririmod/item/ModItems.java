@@ -132,7 +132,7 @@ public class ModItems {
         public static final DeferredItem<Item> SOUL_SHARD = ITEMS.register("soul_shard",
                         () -> new net.ganyusbathwater.oririmod.item.custom.SoulShardItem(new Item.Properties().stacksTo(64)));
         public static final DeferredItem<Item> SOUL_COLLECTOR = ITEMS.register("soul_collector",
-                        () -> new Item(new Item.Properties().stacksTo(1)));
+                        () -> new net.ganyusbathwater.oririmod.item.custom.SoulCollectorItem(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> SOUL_HARVESTER_SPEED_UPGRADE = ITEMS.register("soul_harvester_speed_upgrade",
                         () -> new net.ganyusbathwater.oririmod.item.custom.UpgradeItem(new Item.Properties().stacksTo(64), "speed", "tooltip.oririmod.soul_harvester_speed_upgrade"));
         public static final DeferredItem<Item> SOUL_HARVESTER_LOOTING_UPGRADE = ITEMS.register("soul_harvester_looting_upgrade",
@@ -895,6 +895,10 @@ public class ModItems {
 
         public static final DeferredItem<Item> ABYSS_CROWN_HANGING_SIGN = ITEMS.register("abyss_crown_hanging_sign",
                         () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
+        public static final DeferredItem<Item> VILE_SIGN = ITEMS.register("vile_sign",
+                        () -> new SignItem(new Item.Properties().stacksTo(16), net.ganyusbathwater.oririmod.block.ModBlocks.VILE_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.VILE_WALL_SIGN.get()));
+        public static final DeferredItem<Item> VILE_HANGING_SIGN = ITEMS.register("vile_hanging_sign",
+                        () -> new HangingSignItem(net.ganyusbathwater.oririmod.block.ModBlocks.VILE_HANGING_SIGN.get(), net.ganyusbathwater.oririmod.block.ModBlocks.VILE_WALL_HANGING_SIGN.get(), new Item.Properties().stacksTo(16)));
 
         public static final DeferredItem<Item> ELDER_BOAT = ITEMS.register("elder_boat",
                         () -> new ModBoatItem(false, ModBoatType.ELDER, new Item.Properties().stacksTo(1)));
@@ -913,6 +917,10 @@ public class ModItems {
 
         public static final DeferredItem<Item> ABYSS_CROWN_CHEST_BOAT = ITEMS.register("abyss_crown_chest_boat",
                         () -> new ModBoatItem(true, ModBoatType.ABYSS_CROWN, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> VILE_BOAT = ITEMS.register("vile_boat",
+                        () -> new ModBoatItem(false, ModBoatType.VILE, new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> VILE_CHEST_BOAT = ITEMS.register("vile_chest_boat",
+                        () -> new ModBoatItem(true, ModBoatType.VILE, new Item.Properties().stacksTo(1)));
 
         private static void addItemsToIngredientTabItemGroup() {
 

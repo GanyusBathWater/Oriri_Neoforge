@@ -44,11 +44,11 @@ public class SoulHarvesterMenu extends AbstractContainerMenu {
         net.neoforged.neoforge.items.IItemHandler upgradesHandler = entity == null ? new net.neoforged.neoforge.items.wrapper.InvWrapper(new net.minecraft.world.SimpleContainer(5)) : new net.neoforged.neoforge.items.wrapper.InvWrapper(this.blockEntity.getUpgradesInv());
         net.neoforged.neoforge.items.IItemHandler storageHandler = entity == null ? new net.neoforged.neoforge.items.wrapper.InvWrapper(new net.minecraft.world.SimpleContainer(27)) : new net.neoforged.neoforge.items.wrapper.InvWrapper(this.blockEntity.getStorageInv());
 
-        // Shard slot (0)
+        // Shard slot (0) — only accepts fully empowered Soul Shards
         this.addSlot(new SlotItemHandler(shardHandler, 0, 80, 36) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(ModItems.SOUL_SHARD.get());
+                return net.ganyusbathwater.oririmod.item.custom.SoulShardItem.isReadyForHarvester(stack);
             }
         });
 

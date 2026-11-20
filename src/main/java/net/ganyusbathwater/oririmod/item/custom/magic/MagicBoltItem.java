@@ -281,6 +281,7 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         } else {
             MagicBoltEntity bolt = new MagicBoltEntity(level, living);
             bolt.setAbility(this.ability);
+            bolt.setUpgradeLevel(getUnlockedLevel(stack));
 
             float speed = switch (this.ability) {
                 case SONIC -> 5.0F;
@@ -345,7 +346,11 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
 
     private String getDamageTooltip(ItemStack stack) {
         return switch (this.ability) {
-            case SONIC -> "10.0";
+            case SONIC -> {
+                int level = getUnlockedLevel(stack);
+                if (level >= 3) yield "15.0";
+                yield "10.0";
+            }
             case BLAZE -> "5.0";
             case NORMAL -> "6.0";
             case AMATEUR_FIREBALL -> "5.0 (Splash)";
@@ -375,11 +380,12 @@ public class MagicBoltItem extends Item implements ModRarityCarrier {
         int actualManaCost = ModManaUtil.getActualManaCost(this.manaCost, stack, context);
         if (this.ability != MagicBoltAbility.ENDER) {
         }
-        // Level info if METEOR (Staff of Cosmos) or ETERNAL_ICE (Staff of Eternal Ice) or BLAZE (Staff of Hell)
+        // Level info if METEOR (Staff of Cosmos), ETERNAL_ICE (Staff of Eternal Ice), BLAZE (Staff of Hell), or SONIC (One Thousand Screams)
         // Lore
         String loreKey = descriptionId + ".lore";
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        if (this.ability == MagicBoltAbility.METEOR || this.ability == MagicBoltAbility.ETERNAL_ICE || this.ability == MagicBoltAbility.BLAZE) {
+        if (this.ability == MagicBoltAbility.METEOR || this.ability == MagicBoltAbility.ETERNAL_ICE
+                || this.ability == MagicBoltAbility.BLAZE || this.ability == MagicBoltAbility.SONIC) {
             int unlockedLevel = getUnlockedLevel(stack);
             net.ganyusbathwater.oririmod.util.TooltipHelper.addLevelInfo(tooltipComponents, descriptionId, unlockedLevel);
         }

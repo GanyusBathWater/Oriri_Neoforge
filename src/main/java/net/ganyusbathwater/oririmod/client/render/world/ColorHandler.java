@@ -1,7 +1,10 @@
 package net.ganyusbathwater.oririmod.client.render.world;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.renderer.BiomeColors;
+import net.minecraft.world.level.FoliageColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -9,9 +12,28 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public final class ColorHandler {
+    // ---------- Block Colors ----------
+    @SubscribeEvent
+    public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.register((state, level, pos, tintIndex) -> {
+            if (tintIndex == 0) {
+                return (level != null && pos != null)
+                        ? BiomeColors.getAverageFoliageColor(level, pos)
+                        : FoliageColor.getDefaultColor();
+            }
+            return 0xFFFFFFFF;
+        }, ModBlocks.ELDERBUSH_BLOCK.get());
+    }
+
     // ---------- Item Colors ----------
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        event.register((stack, tintIndex) -> {
+            if (tintIndex == 0) {
+                return FoliageColor.getDefaultColor() | 0xFF000000;
+            }
+            return 0xFFFFFFFF;
+        }, ModBlocks.ELDERBUSH_BLOCK.get());
 
         ItemColor mermaidScaleItem = (stack, tintIndex) -> {
             if (tintIndex == 0) {

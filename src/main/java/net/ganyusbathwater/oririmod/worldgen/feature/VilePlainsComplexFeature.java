@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.util.FastNoise;
 import net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator;
 import net.ganyusbathwater.oririmod.worldgen.processor.OutpostTerrainBlendProcessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -330,35 +331,58 @@ public class VilePlainsComplexFeature extends Feature<NoneFeatureConfiguration> 
         return built;
     }
 
+    /**
+     * Checks that a circular footprint of {@code checkRadius} around {@code (centerX, centerZ)}
+     * stays strictly inside dry {@code vile_plains} interior (well above sea level
+     * {@link ElderwoodsChunkGenerator#BASE_HEIGHT} and clear of beaches, lagoons, rivers, and
+     * neighboring biome borders).
+     */
+    private static boolean isSafeVilePlainsInterior(
+            ElderwoodsBiomeSource ebs, double centerX, double centerZ, double checkRadius) {
+        int minDryY = ElderwoodsChunkGenerator.BASE_HEIGHT + 2;
+        int cx = Mth.floor(centerX);
+        int cz = Mth.floor(centerZ);
+        if (!ebs.getSurfaceBiome(cx, cz).is(ElderwoodsBiomeSource.VILE_PLAINS_KEY)
+                || ebs.computeSurfaceHeight(cx, cz, null) < minDryY) {
+            return false;
+        }
+        if (checkRadius <= 0.0) {
+            return true;
+        }
+
+        int ringCount = Math.max(1, Mth.ceil(checkRadius / 14.0));
+        for (int ring = 1; ring <= ringCount; ring++) {
+            double r = (checkRadius * ring) / ringCount;
+            int dirs = r >= 20.0 ? 16 : 8;
+            for (int i = 0; i < dirs; i++) {
+                double ang = (2.0 * Math.PI * i) / dirs;
+                int px = Mth.floor(centerX + Math.cos(ang) * r);
+                int pz = Mth.floor(centerZ + Math.sin(ang) * r);
+                if (!ebs.getSurfaceBiome(px, pz).is(ElderwoodsBiomeSource.VILE_PLAINS_KEY)
+                        || ebs.computeSurfaceHeight(px, pz, null) < minDryY) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private SitePlan buildSurfaceSite(long worldSeed, int cx, int cz, ElderwoodsBiomeSource ebs, int maxBuildHeight) {
         RandomSource rnd = createCellRandom(worldSeed, cx, cz, 0x56494C4553555246L);
 
         int anchorX = cx * SURFACE_CELL + 14 + rnd.nextInt(SURFACE_CELL - 28);
         int anchorZ = cz * SURFACE_CELL + 14 + rnd.nextInt(SURFACE_CELL - 28);
 
-        if (!ebs.getSurfaceBiome(anchorX, anchorZ).is(ElderwoodsBiomeSource.VILE_PLAINS_KEY)) {
+        // Keep Vile Vine sites clear of beaches, rivers, oceans, and biome borders (no ugly barrier walls needed)
+        if (!isSafeVilePlainsInterior(ebs, anchorX + 0.5, anchorZ + 0.5, 22.0)) {
             return SitePlan.EMPTY;
         }
         int surfaceY = ebs.computeSurfaceHeight(anchorX, anchorZ, null);
-        if (surfaceY < 66) {
-            return SitePlan.EMPTY;
-        }
-
-        // Check whether a generous 38-block interior ring is Vile Plains (eligible for an Outpost Ruins floating island)
-        boolean deepInterior = true;
-        int[][] probes = {
-                { 38, 0 }, { -38, 0 }, { 0, 38 }, { 0, -38 },
-                { 27, 27 }, { -27, 27 }, { 27, -27 }, { -27, -27 }
-        };
-        for (int[] p : probes) {
-            if (!ebs.getSurfaceBiome(anchorX + p[0], anchorZ + p[1]).is(ElderwoodsBiomeSource.VILE_PLAINS_KEY)) {
-                deepInterior = false;
-                break;
-            }
-        }
 
         // 1. Giant Floating Island Site (even parity keeps spacing >= 160 blocks; 40% have Outpost Ruins, 60% natural)
-        if (deepInterior && (cx & 1) == 0 && (cz & 1) == 0 && rnd.nextFloat() < 0.28F) {
+        // Giant crater has max jagged reach ~34 * 1.42 = 48.3 blocks; require 54 blocks of dry Vile Plains interior.
+        if ((cx & 1) == 0 && (cz & 1) == 0 && rnd.nextFloat() < 0.28F
+                && isSafeVilePlainsInterior(ebs, anchorX + 0.5, anchorZ + 0.5, 54.0)) {
             return buildGiantFloatingIslandSite(anchorX, surfaceY, anchorZ, ebs, maxBuildHeight, rnd);
         }
 
@@ -487,6 +511,9 @@ public class VilePlainsComplexFeature extends Feature<NoneFeatureConfiguration> 
             double startDist = 5.0 + rnd.nextDouble() * 8.0;
             double bx = anchorX + Math.cos(ang) * startDist;
             double bz = anchorZ + Math.sin(ang) * startDist;
+            if (!isSafeVilePlainsInterior(ebs, bx, bz, 14.0)) {
+                continue;
+            }
             int bSurfY = ebs.computeSurfaceHeight((int) bx, (int) bz, null);
 
             // Aim toward the flank of the biggest island
@@ -511,7 +538,7 @@ public class VilePlainsComplexFeature extends Feature<NoneFeatureConfiguration> 
             double cDist = 12.0 + rnd.nextDouble() * 14.0;
             double bx = anchorX + Math.cos(cAng) * cDist;
             double bz = anchorZ + Math.sin(cAng) * cDist;
-            if (ebs.getSurfaceBiome((int) bx, (int) bz).is(ElderwoodsBiomeSource.VILE_PLAINS_KEY)) {
+            if (isSafeVilePlainsInterior(ebs, bx, bz, 14.0)) {
                 int bSurfY = ebs.computeSurfaceHeight((int) bx, (int) bz, null);
                 double h = Math.min(80.0 + rnd.nextDouble() * 35.0, Math.max(30.0, (maxBuildHeight - 10) - bSurfY));
                 double d = Math.max(25.0, bSurfY - (vileBottom - (6 + rnd.nextInt(12))));
@@ -519,22 +546,34 @@ public class VilePlainsComplexFeature extends Feature<NoneFeatureConfiguration> 
             }
         }
 
-        // Surface crater sized directly by the total island mass pulled up from this site!
+        // Surface crater sized directly by the total island mass pulled up from this site —
+        // verified to stay strictly inside dry Vile Plains so it never intercepts a beach, river, or biome border.
         if (islandCount > 0) {
             double craterRadius = Mth.clamp(Math.sqrt(totalIslandAreaSq) * 1.12, 6.5, 25.0);
-            double craterDepth = Mth.clamp(craterRadius * (0.58 + rnd.nextDouble() * 0.28), 5.0, 22.0);
+            double depthScale = 0.58 + rnd.nextDouble() * 0.28;
             // Highest chance directly under the main vine, occasionally slightly offset near it
             double offset = rnd.nextFloat() < 0.72F ? (rnd.nextDouble() * 3.0) : (4.0 + rnd.nextDouble() * 6.0);
             double oAng = rnd.nextDouble() * Math.PI * 2.0;
             double crX = anchorX + Math.cos(oAng) * offset;
             double crZ = anchorZ + Math.sin(oAng) * offset;
+
+            // Shrink crater if needed to maintain a full dry-land buffer from any biome border; reject site if it cannot fit
+            while (craterRadius >= 6.0 && !isSafeVilePlainsInterior(ebs, crX, crZ, craterRadius * 1.42 + 6.0)) {
+                craterRadius *= 0.85;
+            }
+            if (craterRadius < 6.0) {
+                return SitePlan.EMPTY;
+            }
+            double craterDepth = Mth.clamp(craterRadius * depthScale, 5.0, 22.0);
             int crSurfY = ebs.computeSurfaceHeight((int) crX, (int) crZ, null);
             craters.add(new CraterSpec(crX, crZ, crSurfY, craterRadius, craterDepth, rnd));
         } else if (rnd.nextFloat() < 0.45F) {
             // Small chaotic root tear crater beneath solo vines
             double crR = 4.0 + rnd.nextDouble() * 3.5;
             double crD = 3.0 + rnd.nextDouble() * 3.0;
-            craters.add(new CraterSpec(anchorX + 0.5, anchorZ + 0.5, surfaceY, crR, crD, rnd));
+            if (isSafeVilePlainsInterior(ebs, anchorX + 0.5, anchorZ + 0.5, crR * 1.42 + 6.0)) {
+                craters.add(new CraterSpec(anchorX + 0.5, anchorZ + 0.5, surfaceY, crR, crD, rnd));
+            }
         }
 
         return new SitePlan(true, craters, islands, vines);
@@ -792,17 +831,22 @@ public class VilePlainsComplexFeature extends Feature<NoneFeatureConfiguration> 
                 int bottomY = Math.max(minSafeY, c.surfaceY - Mth.floor(localDepth));
                 int topCarveY = Math.min(level.getMaxBuildHeight() - 2, c.surfaceY + 12);
 
+                boolean hitFluid = false;
                 for (int y = topCarveY; y >= bottomY; y--) {
                     mPos.set(x, y, z);
                     BlockState cur = level.getBlockState(mPos);
                     if (cur.isAir() || cur.is(Blocks.BEDROCK)) {
                         continue;
                     }
-                    // Preserve water if crater somehow grazed a coastline
+                    // Never carve underneath water/fluid blocks (prevents floating water sheets)
                     if (!cur.getFluidState().isEmpty()) {
-                        continue;
+                        hitFluid = true;
+                        break;
                     }
                     level.setBlock(mPos, air, 2);
+                }
+                if (hitFluid) {
+                    continue;
                 }
 
                 // Roughen exposed crater floor with fractured stone / cobblestone rubble

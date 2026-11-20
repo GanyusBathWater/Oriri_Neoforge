@@ -19,4 +19,7 @@ public class ModWoodTypes {
 
     public static final BlockSetType ELDER_PINE_BLOCK_SET_TYPE = BlockSetType.register(new BlockSetType(OririMod.MOD_ID + ":elder_pine"));
     public static final WoodType ELDER_PINE_WOOD_TYPE = WoodType.register(new WoodType(OririMod.MOD_ID + ":elder_pine", ELDER_PINE_BLOCK_SET_TYPE));
+
+    public static final BlockSetType VILE_BLOCK_SET_TYPE = BlockSetType.register(new BlockSetType(OririMod.MOD_ID + ":vile"));
+    public static final WoodType VILE_WOOD_TYPE = WoodType.register(new WoodType(OririMod.MOD_ID + ":vile", VILE_BLOCK_SET_TYPE));
 }

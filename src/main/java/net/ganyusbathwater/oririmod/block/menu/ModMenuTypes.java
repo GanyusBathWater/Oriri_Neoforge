@@ -34,6 +34,12 @@ public class ModMenuTypes {
                 return new SoulHarvesterMenu(windowId, inv);
             }));
 
+    public static final Supplier<MenuType<SoulCollectorMenu>> SOUL_COLLECTOR_MENU = MENUS.register("soul_collector",
+            () -> IMenuTypeExtension.create((windowId, inv, data) -> {
+                int slotIndex = data.readVarInt();
+                return new SoulCollectorMenu(windowId, inv, slotIndex);
+            }));
+
     public static void register(IEventBus eventBus) {
         MENUS.register(eventBus);
     }

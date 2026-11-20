@@ -187,7 +187,7 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
         if (level.isClientSide()) return;
 
         ItemStack shardStack = shardInv.getItem(0);
-        if (shardStack.isEmpty() || !shardStack.is(ModItems.SOUL_SHARD.get())) {
+        if (!net.ganyusbathwater.oririmod.item.custom.SoulShardItem.isReadyForHarvester(shardStack)) {
             if (progress > 0) {
                 progress = 0;
                 setChanged();
@@ -195,16 +195,14 @@ public class SoulHarvesterBlockEntity extends BlockEntity implements MenuProvide
             return;
         }
 
-        net.minecraft.nbt.CompoundTag tag = shardStack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
-        if (!tag.contains("captured_entity")) {
+        String entityId = net.ganyusbathwater.oririmod.item.custom.SoulShardItem.getBoundEntityId(shardStack);
+        if (entityId == null) {
             if (progress > 0) {
                 progress = 0;
                 setChanged();
             }
             return;
         }
-
-        String entityId = tag.getString("captured_entity");
         Optional<EntityType<?>> optionalType = EntityType.byString(entityId);
         if (optionalType.isEmpty()) {
             if (progress > 0) {

@@ -42,7 +42,9 @@ public class ModBlockEntities {
                     ModBlocks.ELDER_SIGN.get(), ModBlocks.ELDER_WALL_SIGN.get(),
                     ModBlocks.SCARLET_SIGN.get(), ModBlocks.SCARLET_WALL_SIGN.get(),
                     ModBlocks.ABYSS_CROWN_SIGN.get(), ModBlocks.ABYSS_CROWN_WALL_SIGN.get(),
-                    ModBlocks.EPOCH_SIGN.get(), ModBlocks.EPOCH_WALL_SIGN.get()).build(null));
+                    ModBlocks.EPOCH_SIGN.get(), ModBlocks.EPOCH_WALL_SIGN.get(),
+                    ModBlocks.ELDER_PINE_SIGN.get(), ModBlocks.ELDER_PINE_WALL_SIGN.get(),
+                    ModBlocks.VILE_SIGN.get(), ModBlocks.VILE_WALL_SIGN.get()).build(null));
 
     public static final Supplier<BlockEntityType<ModHangingSignBlockEntity>> MOD_HANGING_SIGN = BLOCK_ENTITIES.register(
             "mod_hanging_sign",
@@ -50,7 +52,9 @@ public class ModBlockEntities {
                     ModBlocks.ELDER_HANGING_SIGN.get(), ModBlocks.ELDER_WALL_HANGING_SIGN.get(),
                     ModBlocks.SCARLET_HANGING_SIGN.get(), ModBlocks.SCARLET_WALL_HANGING_SIGN.get(),
                     ModBlocks.ABYSS_CROWN_HANGING_SIGN.get(), ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get(),
-                    ModBlocks.EPOCH_HANGING_SIGN.get(), ModBlocks.EPOCH_WALL_HANGING_SIGN.get()).build(null));
+                    ModBlocks.EPOCH_HANGING_SIGN.get(), ModBlocks.EPOCH_WALL_HANGING_SIGN.get(),
+                    ModBlocks.ELDER_PINE_HANGING_SIGN.get(), ModBlocks.ELDER_PINE_WALL_HANGING_SIGN.get(),
+                    ModBlocks.VILE_HANGING_SIGN.get(), ModBlocks.VILE_WALL_HANGING_SIGN.get()).build(null));
 
     public static final Supplier<BlockEntityType<BloodCapBlockEntity>> BLOOD_CAP_BE = BLOCK_ENTITIES.register(
             "blood_cap",

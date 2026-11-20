@@ -42,7 +42,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ELDER_PINE_LOG.get())
                                 .add(ModBlocks.STRIPPED_ELDER_PINE_LOG.get())
                                 .add(ModBlocks.ELDER_PINE_WOOD.get())
-                                .add(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get());
+                                .add(ModBlocks.STRIPPED_ELDER_PINE_WOOD.get())
+                                .add(ModBlocks.VILE_VINE_BLOCK.get())
+                                .add(ModBlocks.STRIPPED_VILE_VINE.get());
 
                 tag(ModTags.Blocks.ELDERWOODS_PROTECTED_STRUCTURE_BLOCKS)
                                 .add(Blocks.STONE_BRICKS)
@@ -64,6 +66,8 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 .add(ModBlocks.SCARLET_LEAVES.get())
                 .add(ModBlocks.SCARLET_TOOTH_LEAVES.get())
                 .add(ModBlocks.ABYSS_CROWN_LEAVES.get())
+                .add(ModBlocks.ELDER_PINE_LEAVES.get())
+                .add(ModBlocks.VILE_LEAVES.get())
                 .add(ModBlocks.EPOCH_CACTUS.get())
                 .add(ModBlocks.UPGRADED_AZALEA.get())
                 .add(ModBlocks.UPGRADED_FLOWERING_AZALEA.get());
@@ -73,14 +77,16 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_FENCE.get())
                                 .add(ModBlocks.ABYSS_CROWN_FENCE.get())
                                 .add(ModBlocks.EPOCH_FENCE.get())
-                                .add(ModBlocks.ELDER_PINE_FENCE.get());
+                                .add(ModBlocks.ELDER_PINE_FENCE.get())
+                                .add(ModBlocks.VILE_FENCE.get());
 
                 tag(BlockTags.FENCE_GATES)
                                 .add(ModBlocks.ELDER_GATE.get())
                                 .add(ModBlocks.SCARLET_GATE.get())
                                 .add(ModBlocks.ABYSS_CROWN_GATE.get())
                                 .add(ModBlocks.EPOCH_GATE.get())
-                                .add(ModBlocks.ELDER_PINE_GATE.get());
+                                .add(ModBlocks.ELDER_PINE_GATE.get())
+                                .add(ModBlocks.VILE_GATE.get());
 
                 tag(BlockTags.WALLS)
                                 .add(ModBlocks.JADE_WALL.get())
@@ -130,42 +136,49 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ELDER_PLANKS.get())
                                 .add(ModBlocks.SCARLET_PLANKS.get())
                                 .add(ModBlocks.ABYSS_CROWN_PLANKS.get())
-                                .add(ModBlocks.EPOCH_WOOD_PLANKS.get());
+                                .add(ModBlocks.EPOCH_WOOD_PLANKS.get())
+                                .add(ModBlocks.ELDER_PINE_PLANKS.get())
+                                .add(ModBlocks.VILE_PLANKS.get());
 
                 tag(BlockTags.WOODEN_STAIRS)
                                 .add(ModBlocks.ELDER_STAIRS.get())
                                 .add(ModBlocks.SCARLET_STAIRS.get())
                                 .add(ModBlocks.ABYSS_CROWN_STAIRS.get())
                                 .add(ModBlocks.EPOCH_STAIRS.get())
-                                .add(ModBlocks.ELDER_PINE_STAIRS.get());
+                                .add(ModBlocks.ELDER_PINE_STAIRS.get())
+                                .add(ModBlocks.VILE_STAIRS.get());
 
                 tag(BlockTags.WOODEN_SLABS)
                                 .add(ModBlocks.ELDER_SLAB.get())
                                 .add(ModBlocks.SCARLET_SLAB.get())
                                 .add(ModBlocks.ABYSS_CROWN_SLAB.get())
                                 .add(ModBlocks.EPOCH_SLAB.get())
-                                .add(ModBlocks.ELDER_PINE_SLAB.get());
+                                .add(ModBlocks.ELDER_PINE_SLAB.get())
+                                .add(ModBlocks.VILE_SLAB.get());
 
                 tag(BlockTags.WOODEN_FENCES)
                                 .add(ModBlocks.ELDER_FENCE.get())
                                 .add(ModBlocks.SCARLET_FENCE.get())
                                 .add(ModBlocks.ABYSS_CROWN_FENCE.get())
                                 .add(ModBlocks.EPOCH_FENCE.get())
-                                .add(ModBlocks.ELDER_PINE_FENCE.get());
+                                .add(ModBlocks.ELDER_PINE_FENCE.get())
+                                .add(ModBlocks.VILE_FENCE.get());
 
                 tag(BlockTags.WOODEN_BUTTONS)
                                 .add(ModBlocks.ELDER_BUTTON.get())
                                 .add(ModBlocks.SCARLET_BUTTON.get())
                                 .add(ModBlocks.ABYSS_CROWN_BUTTON.get())
                                 .add(ModBlocks.EPOCH_BUTTON.get())
-                                .add(ModBlocks.ELDER_PINE_BUTTON.get());
+                                .add(ModBlocks.ELDER_PINE_BUTTON.get())
+                                .add(ModBlocks.VILE_BUTTON.get());
 
                 tag(BlockTags.WOODEN_DOORS)
                                 .add(ModBlocks.ELDER_DOOR.get())
                                 .add(ModBlocks.SCARLET_DOOR.get())
                                 .add(ModBlocks.ABYSS_CROWN_DOOR.get())
                                 .add(ModBlocks.EPOCH_DOOR.get())
-                                .add(ModBlocks.ELDER_PINE_DOOR.get());
+                                .add(ModBlocks.ELDER_PINE_DOOR.get())
+                                .add(ModBlocks.VILE_DOOR.get());
 
                 tag(BlockTags.SAPLINGS)
                                 .add(ModBlocks.UPGRADED_OAK_SAPLING.get())
@@ -194,38 +207,48 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_TRAPDOOR.get())
                                 .add(ModBlocks.ABYSS_CROWN_TRAPDOOR.get())
                                 .add(ModBlocks.EPOCH_TRAPDOOR.get())
-                                .add(ModBlocks.ELDER_PINE_TRAPDOOR.get());
+                                .add(ModBlocks.ELDER_PINE_TRAPDOOR.get())
+                                .add(ModBlocks.VILE_TRAPDOOR.get());
 
                 tag(BlockTags.WOODEN_PRESSURE_PLATES)
                                 .add(ModBlocks.ELDER_PRESSURE_PLATE.get())
                                 .add(ModBlocks.SCARLET_PRESSURE_PLATE.get())
                                 .add(ModBlocks.ABYSS_CROWN_PRESSURE_PLATE.get())
                                 .add(ModBlocks.EPOCH_PRESSURE_PLATE.get())
-                                .add(ModBlocks.ELDER_PINE_PRESSURE_PLATE.get());
+                                .add(ModBlocks.ELDER_PINE_PRESSURE_PLATE.get())
+                                .add(ModBlocks.VILE_PRESSURE_PLATE.get());
 
                 tag(BlockTags.STANDING_SIGNS)
                                 .add(ModBlocks.ELDER_SIGN.get())
                                 .add(ModBlocks.SCARLET_SIGN.get())
                                 .add(ModBlocks.ABYSS_CROWN_SIGN.get())
-                                .add(ModBlocks.EPOCH_SIGN.get());
+                                .add(ModBlocks.EPOCH_SIGN.get())
+                                .add(ModBlocks.ELDER_PINE_SIGN.get())
+                                .add(ModBlocks.VILE_SIGN.get());
 
                 tag(BlockTags.WALL_SIGNS)
                                 .add(ModBlocks.ELDER_WALL_SIGN.get())
                                 .add(ModBlocks.SCARLET_WALL_SIGN.get())
                                 .add(ModBlocks.ABYSS_CROWN_WALL_SIGN.get())
-                                .add(ModBlocks.EPOCH_WALL_SIGN.get());
+                                .add(ModBlocks.EPOCH_WALL_SIGN.get())
+                                .add(ModBlocks.ELDER_PINE_WALL_SIGN.get())
+                                .add(ModBlocks.VILE_WALL_SIGN.get());
 
                 tag(BlockTags.CEILING_HANGING_SIGNS)
                                 .add(ModBlocks.ELDER_HANGING_SIGN.get())
                                 .add(ModBlocks.SCARLET_HANGING_SIGN.get())
                                 .add(ModBlocks.ABYSS_CROWN_HANGING_SIGN.get())
-                                .add(ModBlocks.EPOCH_HANGING_SIGN.get());
+                                .add(ModBlocks.EPOCH_HANGING_SIGN.get())
+                                .add(ModBlocks.ELDER_PINE_HANGING_SIGN.get())
+                                .add(ModBlocks.VILE_HANGING_SIGN.get());
 
                 tag(BlockTags.WALL_HANGING_SIGNS)
                                 .add(ModBlocks.ELDER_WALL_HANGING_SIGN.get())
                                 .add(ModBlocks.SCARLET_WALL_HANGING_SIGN.get())
                                 .add(ModBlocks.ABYSS_CROWN_WALL_HANGING_SIGN.get())
-                                .add(ModBlocks.EPOCH_WALL_HANGING_SIGN.get());
+                                .add(ModBlocks.EPOCH_WALL_HANGING_SIGN.get())
+                                .add(ModBlocks.ELDER_PINE_WALL_HANGING_SIGN.get())
+                                .add(ModBlocks.VILE_WALL_HANGING_SIGN.get());
 
                 tag(ModTags.Blocks.ORES)
                                 .add(ModBlocks.JADE_ORE.get())
@@ -341,6 +364,20 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.UPGRADED_EPOCH_SAPLING.get())
                                 .add(ModBlocks.POTTED_UPGRADED_EPOCH_SAPLING.get())
                                 .add(ModBlocks.VILE_VINE_BLOCK.get())
+                                .add(ModBlocks.STRIPPED_VILE_VINE.get())
+                                .add(ModBlocks.VILE_PLANKS.get())
+                                .add(ModBlocks.VILE_STAIRS.get())
+                                .add(ModBlocks.VILE_SLAB.get())
+                                .add(ModBlocks.VILE_FENCE.get())
+                                .add(ModBlocks.VILE_GATE.get())
+                                .add(ModBlocks.VILE_DOOR.get())
+                                .add(ModBlocks.VILE_TRAPDOOR.get())
+                                .add(ModBlocks.VILE_BUTTON.get())
+                                .add(ModBlocks.VILE_PRESSURE_PLATE.get())
+                                .add(ModBlocks.VILE_SIGN.get())
+                                .add(ModBlocks.VILE_WALL_SIGN.get())
+                                .add(ModBlocks.VILE_HANGING_SIGN.get())
+                                .add(ModBlocks.VILE_WALL_HANGING_SIGN.get())
                                 .add(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());
 
                 tag(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -476,6 +513,8 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ABYSS_CROWN_LEAVES.get())
                                 .add(ModBlocks.ELDER_LEAVES.get())
                                 .add(ModBlocks.ELDER_LEAVES_FLOWERING.get())
+                                .add(ModBlocks.ELDER_PINE_LEAVES.get())
+                                .add(ModBlocks.VILE_LEAVES.get())
                                 .add(ModBlocks.SCARLET_LEAVES.get())
                                 .add(ModBlocks.SCARLET_TOOTH_LEAVES.get())
                                 .add(ModBlocks.HANGING_ELDER_MOSS.get())
@@ -491,6 +530,8 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ABYSS_CROWN_LEAVES.get())
                                 .add(ModBlocks.ELDER_LEAVES.get())
                                 .add(ModBlocks.ELDER_LEAVES_FLOWERING.get())
+                                .add(ModBlocks.ELDER_PINE_LEAVES.get())
+                                .add(ModBlocks.VILE_LEAVES.get())
                                 .add(ModBlocks.SCARLET_LEAVES.get())
                                 .add(ModBlocks.SCARLET_TOOTH_LEAVES.get())
                                 .add(ModBlocks.HANGING_ELDER_MOSS.get())
@@ -514,7 +555,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.ABYSS_CROWN_LOG.get())
                                 .add(ModBlocks.STRIPPED_ABYSS_CROWN_LOG.get())
                                 .add(ModBlocks.ABYSS_CROWN_STEM.get())
-                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get());
+                                .add(ModBlocks.STRIPPED_ABYSS_CROWN_STEM.get())
+                                .add(ModBlocks.VILE_VINE_BLOCK.get())
+                                .add(ModBlocks.STRIPPED_VILE_VINE.get());
 
                 tag(BlockTags.NEEDS_DIAMOND_TOOL)
                                 .add(ModBlocks.HARDENED_MANASHROOM.get())

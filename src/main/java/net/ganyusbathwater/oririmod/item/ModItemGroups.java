@@ -97,8 +97,23 @@ public class ModItemGroups {
 
                         // ===== VILE PLAINS & VILE CAVES =====
                         output.accept(ModBlocks.VILE_VINE_BLOCK);
+                        output.accept(ModBlocks.STRIPPED_VILE_VINE);
+                        output.accept(ModBlocks.VILE_PLANKS);
+                        output.accept(ModBlocks.VILE_STAIRS);
+                        output.accept(ModBlocks.VILE_SLAB);
+                        output.accept(ModBlocks.VILE_FENCE);
+                        output.accept(ModBlocks.VILE_GATE);
+                        output.accept(ModBlocks.VILE_DOOR);
+                        output.accept(ModBlocks.VILE_TRAPDOOR);
+                        output.accept(ModBlocks.VILE_PRESSURE_PLATE);
+                        output.accept(ModBlocks.VILE_BUTTON);
+                        output.accept(ModItems.VILE_SIGN);
+                        output.accept(ModItems.VILE_HANGING_SIGN);
+                        output.accept(ModBlocks.VILE_LEAVES);
                         output.accept(ModBlocks.VILE_SAPLING);
                         output.accept(ModBlocks.UPGRADED_VILE_SAPLING);
+                        output.accept(ModItems.VILE_BOAT);
+                        output.accept(ModItems.VILE_CHEST_BOAT);
 
                         // ===== ELDER VALLEYS =====
                         output.accept(ModBlocks.CATTAIL);
@@ -509,7 +524,7 @@ public class ModItemGroups {
                         output.accept(ModItems.STAFF_OF_WISE);
                         output.accept(ModItems.STAFF_OF_EARTH);
                         output.accept(ModItems.STAFF_OF_FOREST);
-                        output.accept(ModItems.ONE_THOUSAND_SCREAMS);
+                        acceptAllLevels(output, ModItems.ONE_THOUSAND_SCREAMS);
                         acceptAllLevels(output, ModItems.STAFF_OF_HELL);
                         acceptAllLevels(output, ModItems.STAFF_OF_COSMOS);
                         acceptAllLevels(output, ModItems.STAFF_OF_ETERNAL_ICE);

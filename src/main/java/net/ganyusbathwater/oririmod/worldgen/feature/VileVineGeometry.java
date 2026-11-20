@@ -6,6 +6,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -66,6 +67,120 @@ public final class VileVineGeometry {
             this.minZ = Math.min(startZ, endZ) - pad;
             this.maxZ = Math.max(startZ, endZ) + pad;
         }
+
+        /**
+         * Samples a point along this curling tendril at distance {@code d in [0, length]}.
+         */
+        public void samplePoint(double d, double[] outXYZ) {
+            double refX = Math.abs(dirX) < 0.85 ? 1.0 : 0.0;
+            double refZ = Math.abs(dirX) < 0.85 ? 0.0 : 1.0;
+            double rx = dirY * refZ;
+            double ry = dirZ * refX - dirX * refZ;
+            double rz = -dirY * refX;
+            double rLen = Math.sqrt(rx * rx + ry * ry + rz * rz);
+            if (rLen < 1e-4) {
+                rx = 1; ry = 0; rz = 0;
+            } else {
+                rx /= rLen; ry /= rLen; rz /= rLen;
+            }
+            double fx = dirY * rz - dirZ * ry;
+            double fy = dirZ * rx - dirX * rz;
+            double fz = dirX * ry - dirY * rx;
+
+            double frac = Mth.clamp(d / Math.max(1.0, length), 0.0, 1.0);
+            double curlGrowth = frac * curlAmp;
+            double ang = curlPhase + Math.max(0.0, d) * curlRate;
+            double ca = Math.cos(ang);
+            double sa = Math.sin(ang);
+            double hookY = frac * frac * 2.5;
+
+            outXYZ[0] = startX + dirX * d + (rx * ca + fx * sa) * curlGrowth;
+            outXYZ[1] = startY + dirY * d + (ry * ca + fy * sa) * curlGrowth + hookY;
+            outXYZ[2] = startZ + dirZ * d + (rz * ca + fz * sa) * curlGrowth;
+        }
+    }
+
+    /**
+     * Parametric 3D giant botanical leaf blade (ovate-lanceolate silhouette with longitudinal arch,
+     * graceful tip droop, and subtle V-rib cross-sectional cupping) built out of {@code Vile Leaves}.
+     */
+    public static final class LeafSpec {
+        public final double ox, oy, oz;
+        public final double fx, fy, fz; // unit forward axis (base -> pointed tip)
+        public final double rx, ry, rz; // unit lateral axis (left -> right across blade)
+        public final double ux, uy, uz; // unit upward normal (for arch & V-cup)
+        public final double length;
+        public final double maxHalfWidth;
+        public final double archAmp;
+        public final double droopAmp;
+        public final double cupAmp;
+        public final double wavePhase;
+        public final double minX, maxX, minZ, maxZ;
+
+        public LeafSpec(double ox, double oy, double oz,
+                double dirX, double dirY, double dirZ,
+                double rollRad,
+                double length, double maxHalfWidth,
+                double archAmp, double droopAmp, double cupAmp,
+                double wavePhase) {
+            this.ox = ox;
+            this.oy = oy;
+            this.oz = oz;
+
+            double fLen = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+            if (fLen < 1e-4) {
+                this.fx = 1.0; this.fy = 0.0; this.fz = 0.0;
+            } else {
+                this.fx = dirX / fLen;
+                this.fy = dirY / fLen;
+                this.fz = dirZ / fLen;
+            }
+
+            // Build horizontal right vector R0 perpendicular to F, then upward normal U0 = R0 x F
+            double horiz = Math.sqrt(this.fx * this.fx + this.fz * this.fz);
+            double r0x, r0y, r0z;
+            if (horiz < 1e-4) {
+                r0x = 1.0; r0y = 0.0; r0z = 0.0;
+            } else {
+                r0x = -this.fz / horiz;
+                r0y = 0.0;
+                r0z = this.fx / horiz;
+            }
+            double u0x = r0y * this.fz - r0z * this.fy;
+            double u0y = r0z * this.fx - r0x * this.fz;
+            double u0z = r0x * this.fy - r0y * this.fx;
+            double uLen = Math.sqrt(u0x * u0x + u0y * u0y + u0z * u0z);
+            if (uLen > 1e-4) {
+                u0x /= uLen; u0y /= uLen; u0z /= uLen;
+            } else {
+                u0x = 0.0; u0y = 1.0; u0z = 0.0;
+            }
+
+            double cr = Math.cos(rollRad);
+            double sr = Math.sin(rollRad);
+            this.rx = r0x * cr + u0x * sr;
+            this.ry = r0y * cr + u0y * sr;
+            this.rz = r0z * cr + u0z * sr;
+            this.ux = -r0x * sr + u0x * cr;
+            this.uy = -r0y * sr + u0y * cr;
+            this.uz = -r0z * sr + u0z * cr;
+
+            this.length = length;
+            this.maxHalfWidth = maxHalfWidth;
+            this.archAmp = archAmp;
+            this.droopAmp = droopAmp;
+            this.cupAmp = cupAmp;
+            this.wavePhase = wavePhase;
+
+            // Conservative XZ AABB for chunk-clipped placement (zero cross-chunk cutoffs)
+            double tipX = ox + this.fx * length;
+            double tipZ = oz + this.fz * length;
+            double pad = maxHalfWidth * 1.15 + Math.max(archAmp, droopAmp) + cupAmp + 2.0;
+            this.minX = Math.min(ox, tipX) - pad;
+            this.maxX = Math.max(ox, tipX) + pad;
+            this.minZ = Math.min(oz, tipZ) - pad;
+            this.maxZ = Math.max(oz, tipZ) + pad;
+        }
     }
 
     public static final class VineSpec {
@@ -83,6 +198,7 @@ public final class VileVineGeometry {
         public final double swayPhase1, swayPhase2;
         public final double rootTiltScale;
         public final List<TendrilSpec> tendrils;
+        public final List<LeafSpec> leaves;
         public final double minX, maxX, minZ, maxZ;
 
         public VineSpec(double baseX, double baseY, double baseZ,
@@ -113,6 +229,7 @@ public final class VileVineGeometry {
             this.swayPhase2 = swayPhase2;
             this.rootTiltScale = rootTiltScale;
             this.tendrils = tendrils;
+            this.leaves = buildLeaves(this);
 
             double[] p = new double[3];
             double mnX = baseX, mxX = baseX, mnZ = baseZ, mxZ = baseZ;
@@ -135,6 +252,12 @@ public final class VileVineGeometry {
                 if (t.maxX > mxX) mxX = t.maxX;
                 if (t.minZ < mnZ) mnZ = t.minZ;
                 if (t.maxZ > mxZ) mxZ = t.maxZ;
+            }
+            for (LeafSpec leaf : this.leaves) {
+                if (leaf.minX < mnX) mnX = leaf.minX;
+                if (leaf.maxX > mxX) mxX = leaf.maxX;
+                if (leaf.minZ < mnZ) mnZ = leaf.minZ;
+                if (leaf.maxZ > mxZ) mxZ = leaf.maxZ;
             }
             this.minX = mnX;
             this.maxX = mxX;
@@ -407,6 +530,234 @@ public final class VileVineGeometry {
             placeTendril(level, mPos, vineState, tendril, vine.baseY,
                     clipMinX, clipMaxX, clipMinZ, clipMaxZ,
                     worldMinY, worldMaxY, flags, replacePredicate);
+        }
+
+        // Giant sculpted Vile Leaves (mostly concentrated on tendrils/branches, with a few along the main vine)
+        if (!vine.leaves.isEmpty()) {
+            BlockState leafState = ModBlocks.VILE_LEAVES.get().defaultBlockState()
+                    .setValue(LeavesBlock.PERSISTENT, true);
+            for (LeafSpec leaf : vine.leaves) {
+                placeLeaf(level, mPos, leafState, leaf,
+                        clipMinX, clipMaxX, clipMinZ, clipMaxZ,
+                        worldMinY, worldMaxY, flags);
+            }
+        }
+    }
+
+    /**
+     * Deterministically generates giant botanical leaf blades for a vine, placing ~80-85% along its
+     * curling branches/tendrils and a few accent leaves on the main trunk &amp; upper crown.
+     */
+    private static List<LeafSpec> buildLeaves(VineSpec vine) {
+        if (vine.tendrils.isEmpty() && vine.heightAbove < 12.0) {
+            return List.of();
+        }
+
+        long seed = Double.doubleToLongBits(vine.baseX) * 341873128712L
+                ^ Double.doubleToLongBits(vine.baseY) * 132897987541L
+                ^ Double.doubleToLongBits(vine.baseZ) * 42317861L
+                ^ Double.doubleToLongBits(vine.twistPhase) * 918273645L
+                ^ Double.doubleToLongBits(vine.azimuth) * 2654435761L;
+        RandomSource rnd = RandomSource.create(seed);
+
+        List<LeafSpec> leaves = new ArrayList<>();
+        double[] p0 = new double[3];
+        double[] p1 = new double[3];
+
+        // 1. Primary foliage: 3-5 giant leaves per tendril/branch (alternating side leaves + terminal tip leaves)
+        for (TendrilSpec t : vine.tendrils) {
+            int sideLeafCount = 2 + rnd.nextInt(2); // 2..3 along the branch body
+            int sideSign = rnd.nextBoolean() ? 1 : -1;
+
+            for (int i = 0; i < sideLeafCount; i++) {
+                double frac = 0.28 + ((double) i / Math.max(1, sideLeafCount)) * 0.52 + (rnd.nextDouble() - 0.5) * 0.10;
+                frac = Mth.clamp(frac, 0.22, 0.84);
+                double d = frac * t.length;
+                t.samplePoint(d, p0);
+                t.samplePoint(Math.min(t.length, d + 0.6), p1);
+
+                double tx = p1[0] - p0[0];
+                double tz = p1[2] - p0[2];
+                double baseAz = (tx * tx + tz * tz) > 1e-4 ? Math.atan2(tz, tx) : Math.atan2(t.dirZ, t.dirX);
+                double fanAngle = sideSign * Math.toRadians(42.0 + rnd.nextDouble() * 34.0);
+                sideSign = -sideSign;
+                double leafAz = baseAz + fanAngle;
+                double pitchRad = Math.toRadians(-6.0 + rnd.nextDouble() * 34.0);
+
+                double cp = Math.cos(pitchRad);
+                double dx = Math.cos(leafAz) * cp;
+                double dy = Math.sin(pitchRad);
+                double dz = Math.sin(leafAz) * cp;
+
+                double length = 7.0 + rnd.nextDouble() * 5.2;
+                double halfW = length * (0.31 + rnd.nextDouble() * 0.08);
+                double roll = Math.toRadians((rnd.nextDouble() - 0.5) * 44.0);
+                double arch = length * (0.12 + rnd.nextDouble() * 0.07);
+                double droop = length * (0.18 + rnd.nextDouble() * 0.11);
+                double cup = 0.8 + rnd.nextDouble() * 0.7;
+
+                leaves.add(new LeafSpec(
+                        p0[0], p0[1], p0[2],
+                        dx, dy, dz,
+                        roll, length, halfW, arch, droop, cup,
+                        rnd.nextDouble() * Math.PI * 2.0));
+            }
+
+            // 1-2 terminal leaves blooming out from the curling tendril tip
+            int tipLeaves = rnd.nextFloat() < 0.65F ? 2 : 1;
+            t.samplePoint(t.length * 0.90, p0);
+            t.samplePoint(t.length, p1);
+            double tx = p1[0] - p0[0];
+            double tz = p1[2] - p0[2];
+            double tipAz = (tx * tx + tz * tz) > 1e-4 ? Math.atan2(tz, tx) : Math.atan2(t.dirZ, t.dirX);
+
+            for (int k = 0; k < tipLeaves; k++) {
+                double spread = tipLeaves == 1
+                        ? (rnd.nextDouble() - 0.5) * 0.45
+                        : ((k == 0 ? -1.0 : 1.0) * Math.toRadians(28.0 + rnd.nextDouble() * 24.0));
+                double leafAz = tipAz + spread;
+                double pitchRad = Math.toRadians(2.0 + rnd.nextDouble() * 30.0);
+                double cp = Math.cos(pitchRad);
+
+                double length = 7.5 + rnd.nextDouble() * 5.0;
+                double halfW = length * (0.30 + rnd.nextDouble() * 0.08);
+                double roll = Math.toRadians((rnd.nextDouble() - 0.5) * 38.0);
+                double arch = length * (0.13 + rnd.nextDouble() * 0.07);
+                double droop = length * (0.20 + rnd.nextDouble() * 0.10);
+                double cup = 0.8 + rnd.nextDouble() * 0.7;
+
+                leaves.add(new LeafSpec(
+                        p1[0], p1[1], p1[2],
+                        Math.cos(leafAz) * cp, Math.sin(pitchRad), Math.sin(leafAz) * cp,
+                        roll, length, halfW, arch, droop, cup,
+                        rnd.nextDouble() * Math.PI * 2.0));
+            }
+        }
+
+        // 2. Sparse accent leaves along the upper main vine & crown (~15-20% of total foliage)
+        if (vine.heightAbove >= 18.0) {
+            int trunkLeaves = 2 + rnd.nextInt(3); // 2..4 scattered accent leaves
+            for (int i = 0; i < trunkLeaves; i++) {
+                double frac = 0.24 + ((double) i / trunkLeaves) * 0.68 + (rnd.nextDouble() - 0.5) * 0.10;
+                double s = Mth.clamp(frac, 0.20, 0.94) * vine.heightAbove;
+                vine.sampleSpine(s, p0);
+
+                double leafAz = rnd.nextDouble() * Math.PI * 2.0;
+                double pitchRad = Math.toRadians(-4.0 + rnd.nextDouble() * 30.0);
+                double cp = Math.cos(pitchRad);
+
+                double length = 8.5 + rnd.nextDouble() * 5.5;
+                double halfW = length * (0.31 + rnd.nextDouble() * 0.07);
+                double roll = Math.toRadians((rnd.nextDouble() - 0.5) * 40.0);
+                double arch = length * (0.12 + rnd.nextDouble() * 0.06);
+                double droop = length * (0.20 + rnd.nextDouble() * 0.10);
+                double cup = 0.9 + rnd.nextDouble() * 0.7;
+
+                // Anchor near the outer edge of the braided trunk so the full blade emerges cleanly
+                double rOut = vine.widthAt(s) * 0.35;
+                leaves.add(new LeafSpec(
+                        p0[0] + Math.cos(leafAz) * rOut, p0[1], p0[2] + Math.sin(leafAz) * rOut,
+                        Math.cos(leafAz) * cp, Math.sin(pitchRad), Math.sin(leafAz) * cp,
+                        roll, length, halfW, arch, droop, cup,
+                        rnd.nextDouble() * Math.PI * 2.0));
+            }
+
+            // 1-2 crown leaves fanning from the top tip of the vine
+            int crownLeaves = 1 + rnd.nextInt(2);
+            vine.sampleSpine(vine.heightAbove * 0.96, p0);
+            double crownBaseAz = rnd.nextDouble() * Math.PI * 2.0;
+            for (int k = 0; k < crownLeaves; k++) {
+                double leafAz = crownBaseAz + (Math.PI * 2.0 * k / crownLeaves) + (rnd.nextDouble() - 0.5) * 0.6;
+                double pitchRad = Math.toRadians(8.0 + rnd.nextDouble() * 24.0);
+                double cp = Math.cos(pitchRad);
+
+                double length = 8.0 + rnd.nextDouble() * 5.0;
+                double halfW = length * (0.30 + rnd.nextDouble() * 0.07);
+                leaves.add(new LeafSpec(
+                        p0[0], p0[1], p0[2],
+                        Math.cos(leafAz) * cp, Math.sin(pitchRad), Math.sin(leafAz) * cp,
+                        Math.toRadians((rnd.nextDouble() - 0.5) * 32.0),
+                        length, halfW,
+                        length * 0.14, length * 0.22, 0.9 + rnd.nextDouble() * 0.6,
+                        rnd.nextDouble() * Math.PI * 2.0));
+            }
+        }
+
+        return leaves;
+    }
+
+    private static void placeLeaf(
+            WorldGenLevel level,
+            BlockPos.MutableBlockPos mPos,
+            BlockState leafState,
+            LeafSpec leaf,
+            int clipMinX, int clipMaxX,
+            int clipMinZ, int clipMaxZ,
+            int worldMinY, int worldMaxY,
+            int flags) {
+
+        if (leaf.maxX < clipMinX || leaf.minX > clipMaxX || leaf.maxZ < clipMinZ || leaf.minZ > clipMaxZ) {
+            return;
+        }
+
+        int uSteps = Math.max(12, Mth.ceil(leaf.length / 0.38));
+        for (int ui = 0; ui <= uSteps; ui++) {
+            double u = (double) ui / uSteps;
+            // Ovate-lanceolate botanical profile: widens quickly near base (peak ~u=0.35), tapers to sharp tip
+            double envelope = Math.sin(Math.pow(u, 0.72) * Math.PI);
+            double serration = 1.0 + 0.07 * Math.sin(u * 12.0 + leaf.wavePhase);
+            double halfW = leaf.maxHalfWidth * envelope * serration;
+            if (u < 0.09) {
+                halfW = Math.max(halfW, 0.55); // solid petiole attachment into branch
+            }
+
+            double distAlong = u * leaf.length;
+            double archOffset = leaf.archAmp * Math.sin(u * Math.PI) - leaf.droopAmp * (u * u);
+            double cupScale = leaf.cupAmp * Math.sin(u * Math.PI);
+
+            int vSteps = Math.max(1, Mth.ceil(halfW / 0.42));
+            for (int vi = -vSteps; vi <= vSteps; vi++) {
+                double v = (double) vi / vSteps; // -1 .. +1
+                double distAcross = v * halfW;
+                double distUp = archOffset + cupScale * Math.abs(v);
+
+                double px = leaf.ox + leaf.fx * distAlong + leaf.rx * distAcross + leaf.ux * distUp;
+                double py = leaf.oy + leaf.fy * distAlong + leaf.ry * distAcross + leaf.uy * distUp;
+                double pz = leaf.oz + leaf.fz * distAlong + leaf.rz * distAcross + leaf.uz * distUp;
+
+                tryPlaceLeafBlock(level, mPos, leafState,
+                        Mth.floor(px), Mth.floor(py), Mth.floor(pz),
+                        clipMinX, clipMaxX, clipMinZ, clipMaxZ,
+                        worldMinY, worldMaxY, flags);
+
+                // Subtle 1-block underside reinforcement along the central midrib near the base for gap-free curvature
+                if (u < 0.65 && Math.abs(distAcross) < 0.85) {
+                    tryPlaceLeafBlock(level, mPos, leafState,
+                            Mth.floor(px), Mth.floor(py - 0.75), Mth.floor(pz),
+                            clipMinX, clipMaxX, clipMinZ, clipMaxZ,
+                            worldMinY, worldMaxY, flags);
+                }
+            }
+        }
+    }
+
+    private static void tryPlaceLeafBlock(
+            WorldGenLevel level,
+            BlockPos.MutableBlockPos mPos,
+            BlockState leafState,
+            int x, int y, int z,
+            int clipMinX, int clipMaxX,
+            int clipMinZ, int clipMaxZ,
+            int worldMinY, int worldMaxY,
+            int flags) {
+        if (x < clipMinX || x > clipMaxX || z < clipMinZ || z > clipMaxZ || y < worldMinY || y > worldMaxY) {
+            return;
+        }
+        mPos.set(x, y, z);
+        BlockState existing = level.getBlockState(mPos);
+        // Never overwrite vine wood, terrain, or structures — only fill open air / replaceable foliage
+        if (existing.isAir() || existing.canBeReplaced()) {
+            level.setBlock(mPos, leafState, flags);
         }
     }
 
