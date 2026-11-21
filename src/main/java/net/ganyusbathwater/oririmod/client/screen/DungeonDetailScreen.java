@@ -4,73 +4,58 @@ import net.ganyusbathwater.oririmod.network.packet.DungeonActionPayload;
 import net.ganyusbathwater.oririmod.network.packet.OpenDungeonSelectionPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static net.ganyusbathwater.oririmod.client.screen.DungeonGuiStyle.*;
+
 /**
- * Screen 2: Dungeon Detail — shows preview image and lore text for a specific dungeon.
- *
- * Layout (350 × 280 panel):
- * ┌──────────────────────────────────────────────┐
- * │  ⚔ [Dungeon Display Name] ⚔                  │  ← Title Zone (30px)
- * │──────────────────────────────────────────────│
- * │  ┌────────────────────────────────────────┐  │  ← Image Zone (128px tall, centered)
- * │  │       [Dungeon Preview Image]          │  │
- * │  └────────────────────────────────────────┘  │
- * │                                              │
- * │  [Lore text, word-wrapped, max 5 lines]      │  ← Lore Zone (bounded, clipped)
- * │                                              │
- * │──────────────────────────────────────────────│
- * │  [← Back]                      [Enter ▶]    │  ← Footer Zone (30px)
- * └──────────────────────────────────────────────┘
+ * Screen 2: Dungeon Dossier — framed preview banner, recessed scrollable lore
+ * chamber, and gilded Back / Enter actions.
  */
 @OnlyIn(Dist.CLIENT)
 public class DungeonDetailScreen extends Screen {
 
-    private int getPanelW() { return Math.min(350, this.width - 20); }
-    private int getPanelH() { return Math.min(280, this.height - 20); }
-
-    // Image dimensions (rendered size)
-    private static final int IMG_W = 200;
-    private static final int IMG_H = 100;
-
-    // Colors
-    private static final int C_BG      = 0xDD0A0A14;
-    private static final int C_BORDER  = 0xFF6A4A2A;
-    private static final int C_TITLE   = 0xFFFFD700;
-    private static final int C_LORE    = 0xFFCCBB99;
-    private static final int C_DIVIDER = 0xFF4A3A2A;
-    private static final int C_MUTED   = 0xFF777766;
-    private static final int C_IMG_BG  = 0xFF1A1A2A;
+    private static final int LINE_HEIGHT = 11;
 
     private final OpenDungeonSelectionPayload selectionData;
-    private final int dungeonIndex;
-
     private final String dungeonId;
     private final String displayName;
     private final String loreText;
     private final String previewTexturePath;
-    
-    private double scrollOffset = 0;
+
+    private double scrollOffset = 0.0;
 
     public DungeonDetailScreen(OpenDungeonSelectionPayload selectionData, int dungeonIndex) {
         super(Component.literal(selectionData.displayNames().get(dungeonIndex)));
         this.selectionData = selectionData;
-        this.dungeonIndex = dungeonIndex;
         this.dungeonId = selectionData.dungeonIds().get(dungeonIndex);
         this.displayName = selectionData.displayNames().get(dungeonIndex);
         this.loreText = selectionData.loreTexts().get(dungeonIndex);
         this.previewTexturePath = selectionData.previewTextures().get(dungeonIndex);
     }
+
+    private int getPanelW() { return Math.min(372, this.width - 20); }
+    private int getPanelH() { return Math.min(296, this.height - 20); }
+
+    private int getPanelLeft() { return (this.width - getPanelW()) / 2; }
+    private int getPanelTop()  { return (this.height - getPanelH()) / 2; }
+
+    private int getImgW() { return Math.min(216, getPanelW() - 36); }
+    private int getImgH() { return Math.min(104, Math.max(70, (getPanelH() - 160))); }
+
+    private int getLoreTop()    { return getPanelTop() + 38 + getImgH() + 12; }
+    private int getLoreBottom() { return getPanelTop() + getPanelH() - 42; }
+    private int getLoreHeight() { return Math.max(32, getLoreBottom() - getLoreTop()); }
 
     @Override
     public boolean isPauseScreen() { return false; }
@@ -79,140 +64,160 @@ public class DungeonDetailScreen extends Screen {
     protected void init() {
         super.init();
 
-        int left = (width - getPanelW()) / 2;
-        int top  = (height - getPanelH()) / 2;
-        int bottomY = top + getPanelH() - 30;
+        int left = getPanelLeft();
+        int top  = getPanelTop();
+        int pw   = getPanelW();
+        int ph   = getPanelH();
+        int bottomY = top + ph - 30;
 
         // ← Back button
-        addRenderableWidget(Button.builder(
-                Component.translatable("screen.oririmod.dungeon.detail_back").withStyle(ChatFormatting.GRAY),
-                btn -> minecraft.setScreen(new DungeonSelectionScreen(selectionData)))
-                .pos(left + 10, bottomY)
-                .size(70, 20)
-                .build());
+        addRenderableWidget(new SanctuaryButton(
+                left + 12,
+                bottomY,
+                76,
+                20,
+                Component.translatable("screen.oririmod.dungeon.detail_back"),
+                ButtonTone.NEUTRAL,
+                () -> {
+                    if (this.minecraft != null) {
+                        this.minecraft.setScreen(new DungeonSelectionScreen(selectionData));
+                    }
+                }
+        ));
 
         // Enter ▶ button
-        addRenderableWidget(Button.builder(
-                Component.translatable("screen.oririmod.dungeon.detail_enter").withStyle(ChatFormatting.GREEN),
-                btn -> {
+        addRenderableWidget(new SanctuaryButton(
+                left + pw - 96,
+                bottomY,
+                84,
+                20,
+                Component.translatable("screen.oririmod.dungeon.detail_enter"),
+                ButtonTone.EMERALD,
+                () -> {
                     PacketDistributor.sendToServer(new DungeonActionPayload("SELECT", UUID.randomUUID(), dungeonId));
                     onClose();
-                })
-                .pos(left + getPanelW() - 80, bottomY)
-                .size(70, 20)
-                .build());
+                }
+        ));
     }
 
     @Override
-    public void render(GuiGraphics gfx, int mouseX, int mouseY, float partial) {
-        renderBackground(gfx, mouseX, mouseY, partial);
+    public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
+        this.renderTransparentBackground(gfx);
 
-        int left = (width - getPanelW()) / 2;
-        int top  = (height - getPanelH()) / 2;
+        int left = getPanelLeft();
+        int top  = getPanelTop();
+        int pw   = getPanelW();
+        int ph   = getPanelH();
 
-        // Background panel
-        gfx.fill(left, top, left + getPanelW(), top + getPanelH(), C_BG);
-        drawBorder(gfx, left, top, getPanelW(), getPanelH(), C_BORDER);
+        drawSanctuaryPanel(gfx, left, top, pw, ph);
 
-        // Render widgets (buttons) on top of background
-        for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
-            renderable.render(gfx, mouseX, mouseY, partial);
-        }
-
-        // ── Title Zone ──
+        // Title Zone
         gfx.drawCenteredString(font,
                 Component.literal("⚔ " + displayName + " ⚔").withStyle(ChatFormatting.BOLD),
-                left + getPanelW() / 2, top + 10, C_TITLE);
-        gfx.hLine(left + 8, left + getPanelW() - 8, top + 28, C_DIVIDER);
+                left + pw / 2, top + 12, TEXT_TITLE);
+        drawGildedDivider(gfx, left + 12, top + 29, pw - 24, GOLD);
 
-        // ── Image Zone ──
-        int imgX = left + (getPanelW() - IMG_W) / 2;
-        int imgY = top + 35;
+        // Gallery Image Frame
+        int imgW = getImgW();
+        int imgH = getImgH();
+        int imgX = left + (pw - imgW) / 2;
+        int imgY = top + 38;
 
-        // Dark background for image area
-        gfx.fill(imgX, imgY, imgX + IMG_W, imgY + IMG_H, C_IMG_BG);
-        drawBorder(gfx, imgX, imgY, IMG_W, IMG_H, C_DIVIDER);
+        // Outer matted gallery surround
+        gfx.fill(imgX - 3, imgY - 3, imgX + imgW + 3, imgY + imgH + 3, OUTER_SHADOW);
+        gfx.fill(imgX, imgY, imgX + imgW, imgY + imgH, 0xFF0E0D1A);
 
-        if (!previewTexturePath.isBlank()) {
-            try {
-                ResourceLocation texLoc = ResourceLocation.tryParse(previewTexturePath);
-                if (texLoc != null) {
-                    gfx.blit(texLoc, imgX, imgY, 0, 0, IMG_W, IMG_H, IMG_W, IMG_H);
-                }
-            } catch (Exception ignored) {
-                // Texture missing or invalid — fall through to placeholder
-                drawNoPreview(gfx, imgX, imgY);
+        boolean drewTexture = false;
+        if (previewTexturePath != null && !previewTexturePath.isBlank()) {
+            ResourceLocation texLoc = ResourceLocation.tryParse(previewTexturePath);
+            if (texLoc != null && net.minecraft.client.Minecraft.getInstance().getResourceManager().getResource(texLoc).isPresent()) {
+                gfx.blit(texLoc, imgX, imgY, 0, 0, imgW, imgH, imgW, imgH);
+                drewTexture = true;
             }
+        }
+        if (!drewTexture) {
+            drawNoPreview(gfx, imgX, imgY, imgW, imgH);
         } else {
-            drawNoPreview(gfx, imgX, imgY);
+            // Subtle bottom/top vignette inside gallery frame for cohesion
+            gfx.fillGradient(imgX, imgY, imgX + imgW, imgY + 12, 0x55000000, 0x00000000);
+            gfx.fillGradient(imgX, imgY + imgH - 14, imgX + imgW, imgY + imgH, 0x00000000, 0x66000000);
         }
 
-        // ── Lore Zone ──
-        int loreY = imgY + IMG_H + 10;
-        int loreMaxWidth = getPanelW() - 30;
-        int maxLoreLines = 8;
-        int visibleHeight = maxLoreLines * 11;
+        drawBorder(gfx, imgX - 1, imgY - 1, imgW + 2, imgH + 2, GOLD_DIM);
+        drawCornerFiligree(gfx, imgX - 3, imgY - 3, imgW + 6, imgH + 6, 7, GOLD);
 
-        if (!loreText.isBlank()) {
-            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(loreText), loreMaxWidth);
-            int totalHeight = lines.size() * 11;
-            int maxScroll = Math.max(0, totalHeight - visibleHeight);
-            this.scrollOffset = net.minecraft.util.Mth.clamp(this.scrollOffset, 0, maxScroll);
-            
-            // Enable Scissoring
-            gfx.enableScissor(left + 10, loreY, left + getPanelW() - 10, loreY + visibleHeight);
-            
+        // Recessed Lore Chamber
+        int loreX = left + 14;
+        int loreY = getLoreTop();
+        int loreW = pw - 28;
+        int loreH = getLoreHeight();
+        drawRecessedWell(gfx, loreX, loreY, loreW, loreH, BRONZE);
+
+        // Footer Divider
+        drawGildedDivider(gfx, left + 12, top + ph - 36, pw - 24, GOLD_DIM);
+    }
+
+    @Override
+    public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
+        super.render(gfx, mouseX, mouseY, partialTick);
+
+        int left = getPanelLeft();
+        int pw   = getPanelW();
+        int loreX = left + 14;
+        int loreY = getLoreTop();
+        int loreW = pw - 28;
+        int loreH = getLoreHeight();
+
+        if (loreText != null && !loreText.isBlank()) {
+            int padX = 10;
+            int padY = 7;
+            int visibleH = Math.max(12, loreH - padY * 2);
+            int maxTextW = loreW - padX * 2 - 10;
+
+            List<FormattedCharSequence> lines = font.split(Component.literal(loreText), maxTextW);
+            int totalH = lines.size() * LINE_HEIGHT;
+            int maxScroll = Math.max(0, totalH - visibleH);
+            this.scrollOffset = Mth.clamp(this.scrollOffset, 0.0, maxScroll);
+
+            gfx.enableScissor(loreX + 2, loreY + 2, loreX + loreW - 2, loreY + loreH - 2);
             for (int i = 0; i < lines.size(); i++) {
-                int yPos = loreY + (i * 11) - (int) this.scrollOffset;
-                // Only draw if within visible vertical bounds to save performance
-                if (yPos > loreY - 11 && yPos < loreY + visibleHeight) {
-                    gfx.drawString(font, lines.get(i), left + 15, yPos, C_LORE, true);
+                int yPos = loreY + padY + i * LINE_HEIGHT - (int) this.scrollOffset;
+                if (yPos > loreY - LINE_HEIGHT && yPos < loreY + loreH) {
+                    gfx.drawString(font, lines.get(i), loreX + padX, yPos, TEXT_BODY, false);
                 }
             }
-            
             gfx.disableScissor();
-            
-            // Draw a subtle scroll indicator if scrolling is possible
+
             if (maxScroll > 0) {
-                int scrollbarHeight = Math.max(10, (int)((visibleHeight / (float)totalHeight) * visibleHeight));
-                int scrollbarY = loreY + (int)((this.scrollOffset / maxScroll) * (visibleHeight - scrollbarHeight));
-                gfx.fill(left + getPanelW() - 15, loreY, left + getPanelW() - 13, loreY + visibleHeight, C_IMG_BG);
-                gfx.fill(left + getPanelW() - 15, scrollbarY, left + getPanelW() - 13, scrollbarY + scrollbarHeight, C_BORDER);
+                float scrollFraction = (float) (this.scrollOffset / maxScroll);
+                float visibleFraction = (float) visibleH / (float) totalH;
+                drawScrollbar(gfx, loreX + loreW - 8, loreY + 4, loreH - 8, scrollFraction, visibleFraction);
             }
         }
-
-        // ── Footer divider ──
-        gfx.hLine(left + 8, left + getPanelW() - 8, top + getPanelH() - 38, C_DIVIDER);
     }
 
-    private void drawNoPreview(GuiGraphics gfx, int imgX, int imgY) {
+    private void drawNoPreview(GuiGraphics gfx, int imgX, int imgY, int imgW, int imgH) {
+        int cx = imgX + imgW / 2;
+        int cy = imgY + imgH / 2;
+        drawDiamond(gfx, cx, cy - 10, 10, withAlpha(GOLD_DIM, 0x44));
+        drawDiamond(gfx, cx, cy - 10, 5, withAlpha(GOLD, 0x88));
         String noPreview = Component.translatable("screen.oririmod.dungeon.no_preview").getString();
-        gfx.drawCenteredString(font, noPreview, imgX + IMG_W / 2, imgY + IMG_H / 2 - 4, C_MUTED);
+        gfx.drawCenteredString(font, noPreview, cx, cy + 8, TEXT_MUTED);
     }
-
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (!loreText.isBlank()) {
-            int loreMaxWidth = getPanelW() - 30;
-            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(loreText), loreMaxWidth);
-            int totalHeight = lines.size() * 11;
-            int visibleHeight = 8 * 11;
-            int maxScroll = Math.max(0, totalHeight - visibleHeight);
-            
+        if (loreText != null && !loreText.isBlank()) {
+            int loreW = getPanelW() - 28;
+            int visibleH = Math.max(12, getLoreHeight() - 14);
+            List<FormattedCharSequence> lines = font.split(Component.literal(loreText), loreW - 30);
+            int totalH = lines.size() * LINE_HEIGHT;
+            int maxScroll = Math.max(0, totalH - visibleH);
             if (maxScroll > 0) {
-                this.scrollOffset -= scrollY * 11;
-                this.scrollOffset = net.minecraft.util.Mth.clamp(this.scrollOffset, 0, maxScroll);
+                this.scrollOffset = Mth.clamp(this.scrollOffset - scrollY * 16.0, 0.0, maxScroll);
                 return true;
             }
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
-    }
-
-    private void drawBorder(GuiGraphics gfx, int x, int y, int w, int h, int color) {
-        gfx.hLine(x, x + w - 1, y,         color);
-        gfx.hLine(x, x + w - 1, y + h - 1, color);
-        gfx.vLine(x,         y, y + h - 1, color);
-        gfx.vLine(x + w - 1, y, y + h - 1, color);
     }
 }

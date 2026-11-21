@@ -1,5 +1,7 @@
 package net.ganyusbathwater.oririmod.client.screen;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.menu.SoulCollectorMenu;
 import net.ganyusbathwater.oririmod.item.custom.SoulShardItem;
 import net.minecraft.ChatFormatting;
@@ -35,6 +37,7 @@ public class SoulCollectorScreen extends AbstractContainerScreen<SoulCollectorMe
 
     private LivingEntity renderedEntity = null;
     private String lastEntityId = null;
+    private boolean previewErrorLogged = false;
 
     public SoulCollectorScreen(SoulCollectorMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -86,9 +89,7 @@ public class SoulCollectorScreen extends AbstractContainerScreen<SoulCollectorMe
             gui.fill(boxX, boxY, boxX + boxW, boxY + boxH, 0xFF22172B);
 
             if (this.renderedEntity != null) {
-                InventoryScreen.renderEntityInInventoryFollowsMouse(
-                        gui, boxX + 2, boxY + 2, boxX + boxW - 2, boxY + boxH - 2,
-                        22, 0.05F, mouseX, mouseY, this.renderedEntity);
+                renderPreviewEntity(gui, boxX + 2, boxY + 2, boxX + boxW - 2, boxY + boxH - 2, mouseX, mouseY);
             }
 
             // Mob name
@@ -97,7 +98,7 @@ public class SoulCollectorScreen extends AbstractContainerScreen<SoulCollectorMe
             Component mobName = opt.isPresent()
                     ? opt.get().getDescription()
                     : Component.literal(String.valueOf(entityId));
-            gui.drawCenteredString(this.font, mobName, rightPageCenterX, y + 77, 0xFF3E261A);
+            drawCenteredScaled(gui, mobName, rightPageCenterX, y + 77, 0xFF3E261A);
 
             // Kill progress bar
             int kills = SoulShardItem.getKills(shard);
@@ -186,11 +187,13 @@ public class SoulCollectorScreen extends AbstractContainerScreen<SoulCollectorMe
 
         // Animated swirling portal halo around the shard slot
         int outerR = 26;
-        for (int dy = -outerR; dy <= outerR; dy += 2) {
-            for (int dx = -outerR; dx <= outerR; dx += 2) {
-                float dist = Mth.sqrt(dx * dx + dy * dy);
-                if (dist > outerR || dist < 10.5F) continue;
-                float angle = (float) Math.atan2(dy, dx);
+        for (int dy = -outerR; dy < outerR; dy += 2) {
+            for (int dx = -outerR; dx < outerR; dx += 2) {
+                float pdx = dx + 1.0F;
+                float pdy = dy + 1.0F;
+                float dist = Mth.sqrt(pdx * pdx + pdy * pdy);
+                if (dist > outerR || dist < 7.0F) continue;
+                float angle = (float) Math.atan2(pdy, pdx);
                 float swirl = Mth.sin(angle * 3.0F - dist * 0.25F + time);
                 int color;
                 if (completed) {
@@ -274,19 +277,71 @@ public class SoulCollectorScreen extends AbstractContainerScreen<SoulCollectorMe
         }
     }
 
+    private void renderPreviewEntity(GuiGraphics gui, int x1, int y1, int x2, int y2, int mouseX, int mouseY) {
+        LivingEntity entity = this.renderedEntity;
+        if (entity == null) {
+            return;
+        }
+        try {
+            // Keep tickCount >= 20 and advancing with game time so custom renderers that suppress
+            // spawn-frame glitches (entity.tickCount < 2, e.g. Silent Nereid / Mermaid / Deviartras /
+            // Venomous Plant) render normally and GeckoLib/vanilla idle animations play cleanly.
+            if (this.minecraft != null && this.minecraft.level != null) {
+                entity.tickCount = (int) (this.minecraft.level.getGameTime() % 1_000_000L) + 20;
+            } else {
+                entity.tickCount = Math.max(20, entity.tickCount + 1);
+            }
+
+            float bbH = Math.max(0.5F, entity.getBbHeight());
+            float bbW = Math.max(0.5F, entity.getBbWidth());
+            float maxDim = Math.max(bbH, bbW);
+            int scale = Mth.clamp(Math.round(36.0F / maxDim), 8, 28);
+
+            // Flush prior gui.fill() quads, reset shader tint, and push Z well in front of the z=0 box
+            gui.flush();
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            float prevBodyRotO = entity.yBodyRotO;
+            // Align yBodyRotO near 180 deg so Mth.rotLerp(1.0F, yBodyRotO, 180+delta) doesn't wrap by 360 deg on the left side
+            entity.yBodyRotO = 180.0F;
+            gui.pose().pushPose();
+            gui.pose().translate(0.0, 0.0, 100.0);
+            try {
+                InventoryScreen.renderEntityInInventoryFollowsMouse(
+                        gui, x1, y1, x2, y2, scale, 0.0625F, mouseX, mouseY, entity);
+            } finally {
+                entity.yBodyRotO = prevBodyRotO;
+                gui.pose().popPose();
+            }
+        } catch (Throwable t) {
+            if (!this.previewErrorLogged) {
+                this.previewErrorLogged = true;
+                OririMod.LOGGER.warn("Failed to render Soul Collector preview entity '{}'", this.lastEntityId, t);
+            }
+        }
+    }
+
     private void updatePreviewEntity(ItemStack shard, boolean hasShard) {
         if (!hasShard || this.minecraft == null || this.minecraft.level == null) {
             this.lastEntityId = null;
             this.renderedEntity = null;
+            this.previewErrorLogged = false;
             return;
         }
         String entityId = SoulShardItem.getBoundEntityId(shard);
         if (entityId != null && !entityId.equals(this.lastEntityId)) {
             this.lastEntityId = entityId;
+            this.previewErrorLogged = false;
             Optional<EntityType<?>> opt = EntityType.byString(entityId);
             if (opt.isPresent()) {
                 Entity created = opt.get().create(this.minecraft.level);
-                this.renderedEntity = created instanceof LivingEntity living ? living : null;
+                if (created instanceof LivingEntity living) {
+                    living.tickCount = 20;
+                    living.setPos(0.0, -1000.0, 0.0);
+                    living.refreshDimensions();
+                    this.renderedEntity = living;
+                } else {
+                    this.renderedEntity = null;
+                }
             } else {
                 this.renderedEntity = null;
             }
@@ -307,7 +362,7 @@ public class SoulCollectorScreen extends AbstractContainerScreen<SoulCollectorMe
 
     @Override
     public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
-        renderBackground(gui, mouseX, mouseY, partialTick);
+        // Note: AbstractContainerScreen.render() already invokes renderBackground() in MC 1.21.1
         super.render(gui, mouseX, mouseY, partialTick);
         renderTooltip(gui, mouseX, mouseY);
 

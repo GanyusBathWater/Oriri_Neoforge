@@ -18,7 +18,14 @@
     "LevelRendererMixin",
     "LightTextureMixin",
     "WolfRendererMixin",
-    "HumanoidArmorLayerMixin"
+    "HumanoidArmorLayerMixin",
+    "InventoryScreenMixin",
+    "CreativeModeInventoryScreenMixin",
+    "CuriosScreenMixin",
+    "AbstractContainerScreenMixin",
+    "VanillaContainerScreensMixin",
+    "HorseInventoryScreenMixin",
+    "MerchantScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

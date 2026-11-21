@@ -6,5 +6,6 @@ import net.neoforged.fml.config.ModConfig.Type;
 public class ModConfig {
     public static void register(ModContainer modContainer) {
         modContainer.registerConfig(Type.COMMON, OririConfig.SPEC, "oririmod-common.toml");
+        modContainer.registerConfig(Type.CLIENT, OririClientConfig.SPEC, "oririmod-client.toml");
     }
 }

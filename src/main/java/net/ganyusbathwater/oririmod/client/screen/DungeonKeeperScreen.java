@@ -3,78 +3,60 @@ package net.ganyusbathwater.oririmod.client.screen;
 import net.ganyusbathwater.oririmod.network.packet.DungeonActionPayload;
 import net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.lwjgl.glfw.GLFW;
 
+import java.util.Locale;
 import java.util.UUID;
 
+import static net.ganyusbathwater.oririmod.client.screen.DungeonGuiStyle.*;
+
 /**
- * Screen 3: Party Management screen.
- *
- * Strict zone layout (320 × 240 panel):
- * ┌──────────────────────────────────────────────┐
- * │  ⚔ [Dungeon Name]                            │  ← Title Zone (y+0 to y+30)
- * │──────────────────────────────────────────────│
- * │  Party                                       │  ← Party Zone (y+35 to y+120)
- * │   ● Leader Name         (Leader)             │     Fixed 4 rows × 14px = 56px
- * │   ● Member 1            ACCEPTED             │
- * │   ● (empty slot)                             │
- * │   ● (empty slot)                             │
- * │──────────────────────────────────────────────│
- * │  Invite: [______________] [Invite]           │  ← Invite Zone (y+125 to y+155, leader only)
- * │──────────────────────────────────────────────│
- * │  [Accept] [Decline]   [Leave] [Start ▶]     │  ← Button Zone (y+160 to y+190)
- * └──────────────────────────────────────────────┘
+ * Screen 3: Party Sanctuary Board — 4-slot party roster with leader/status badges,
+ * Tab-autocompleting invite field, live countdown/cooldown bar, and party actions.
  */
 @OnlyIn(Dist.CLIENT)
 public class DungeonKeeperScreen extends Screen {
 
-    private int getPanelW() { return Math.min(320, this.width - 20); }
-    private int getPanelH() { return Math.min(200, this.height - 20); }
-
-    // Zone Y offsets (relative to panel top)
-    private static final int TITLE_Y   = 10;
-    private static final int DIV1_Y    = 30;
-    private static final int PARTY_Y   = 38;
-    private static final int PARTY_ROW = 14;
-    private static final int DIV2_Y    = 110;
-    private static final int INVITE_Y  = 118;
-    private static final int DIV3_Y    = 145;
-    private static final int BUTTON_Y  = 155;
-
-    // Colors
-    private static final int C_BG      = 0xDD0A0A14;
-    private static final int C_BORDER  = 0xFF6A4A2A;
-    private static final int C_TITLE   = 0xFFFFD700;
-    private static final int C_DIVIDER = 0xFF4A3A2A;
-    private static final int C_LABEL   = 0xFFEEDDAA;
-    private static final int C_ACCEPT  = 0xFF55FF55;
-    private static final int C_PENDING = 0xFFFFAA00;
-    private static final int C_DECLINE = 0xFFFF5555;
-    private static final int C_MUTED   = 0xFF777766;
+    private static final int SLOT_HEIGHT = 22;
+    private static final int SLOT_GAP = 4;
+    private static final int MAX_PARTY_SIZE = 4;
 
     private final OpenDungeonScreenPayload data;
     private final boolean isLeader;
+    private final long openClientTick;
+    private final int initialCountdownTicks;
     private EditBox inviteBox;
-    private long openClientTick;
     private String currentSuggestion = "";
+
+    private int inviteBoxX;
+    private int inviteBoxY;
+    private int inviteBoxW;
 
     public DungeonKeeperScreen(OpenDungeonScreenPayload data) {
         super(Component.literal(data.dungeonDisplayName()));
         this.data = data;
-        UUID myId = net.minecraft.client.Minecraft.getInstance().player != null
-                ? net.minecraft.client.Minecraft.getInstance().player.getUUID()
-                : UUID.randomUUID();
+        Minecraft mc = Minecraft.getInstance();
+        UUID myId = mc.player != null ? mc.player.getUUID() : UUID.randomUUID();
         this.isLeader = data.leaderId().equals(myId);
-        this.openClientTick = net.minecraft.client.Minecraft.getInstance().level != null 
-                ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : 0;
+        this.openClientTick = mc.level != null ? mc.level.getGameTime() : 0L;
+        this.initialCountdownTicks = Math.max(1, Math.abs(data.startTicksRemaining()));
     }
+
+    private int getPanelW() { return Math.min(348, this.width - 20); }
+    private int getPanelH() { return Math.min(246, this.height - 20); }
+
+    private int getPanelLeft() { return (this.width - getPanelW()) / 2; }
+    private int getPanelTop()  { return (this.height - getPanelH()) / 2; }
 
     @Override
     public boolean isPauseScreen() { return false; }
@@ -83,25 +65,38 @@ public class DungeonKeeperScreen extends Screen {
     protected void init() {
         super.init();
 
-        int left = (width - getPanelW()) / 2;
-        int top  = (height - getPanelH()) / 2;
+        int left = getPanelLeft();
+        int top  = getPanelTop();
+        int pw   = getPanelW();
+        int ph   = getPanelH();
 
-        // ── Invite Zone (leader only) ──
+        int statusZoneY = top + 168;
+        int buttonY = top + ph - 30;
+
+        // ── Invite Zone (leader only when neither starting nor on cooldown) ──
         if (isLeader && !data.isStarting() && data.startTicksRemaining() >= 0) {
-            inviteBox = new EditBox(font, left + 65, top + INVITE_Y, 140, 18,
-                    Component.literal("Player name"));
+            inviteBoxX = left + 62;
+            inviteBoxY = statusZoneY;
+            inviteBoxW = pw - 134;
+
+            inviteBox = new EditBox(font, inviteBoxX + 4, inviteBoxY + 5, inviteBoxW - 8, 12,
+                    Component.translatable("screen.oririmod.dungeon.invite_placeholder"));
+            inviteBox.setBordered(false);
             inviteBox.setMaxLength(40);
-            inviteBox.setHint(Component.literal("Player name").withStyle(ChatFormatting.DARK_GRAY));
+            inviteBox.setTextColor(TEXT_PRIMARY);
+            inviteBox.setTextColorUneditable(TEXT_MUTED);
+            inviteBox.setHint(Component.translatable("screen.oririmod.dungeon.invite_placeholder")
+                    .withStyle(ChatFormatting.DARK_GRAY));
             inviteBox.setResponder(text -> {
                 currentSuggestion = "";
                 inviteBox.setSuggestion("");
                 if (!text.isEmpty()) {
-                    var connection = net.minecraft.client.Minecraft.getInstance().getConnection();
+                    var connection = Minecraft.getInstance().getConnection();
                     if (connection != null) {
-                        String lowerText = text.toLowerCase(java.util.Locale.ROOT);
-                        for (net.minecraft.client.multiplayer.PlayerInfo info : connection.getOnlinePlayers()) {
+                        String lowerText = text.toLowerCase(Locale.ROOT);
+                        for (PlayerInfo info : connection.getOnlinePlayers()) {
                             String name = info.getProfile().getName();
-                            if (name.toLowerCase(java.util.Locale.ROOT).startsWith(lowerText) && !name.equalsIgnoreCase(text)) {
+                            if (name.toLowerCase(Locale.ROOT).startsWith(lowerText) && !name.equalsIgnoreCase(text)) {
                                 currentSuggestion = name.substring(text.length());
                                 inviteBox.setSuggestion(currentSuggestion);
                                 break;
@@ -112,148 +107,279 @@ public class DungeonKeeperScreen extends Screen {
             });
             addRenderableWidget(inviteBox);
 
-            addRenderableWidget(Button.builder(Component.literal("Invite"), btn -> invite())
-                    .pos(left + 210, top + INVITE_Y)
-                    .size(50, 18)
-                    .build());
+            addRenderableWidget(new SanctuaryButton(
+                    inviteBoxX + inviteBoxW + 6,
+                    inviteBoxY,
+                    54,
+                    18,
+                    Component.translatable("screen.oririmod.dungeon.invite"),
+                    ButtonTone.PRIMARY,
+                    this::invite
+            ));
+        } else {
+            inviteBox = null;
         }
 
-        // ── Button Zone ──
-        int btnY = top + BUTTON_Y;
-
+        // ── Footer Action Buttons ──
         if (data.isStarting()) {
-            // When starting, anyone can cancel
-            addRenderableWidget(Button.builder(
-                    Component.literal("Cancel Start").withStyle(ChatFormatting.RED),
-                    btn -> { sendAction("CANCEL_START", ""); onClose(); })
-                    .pos(left + getPanelW() / 2 - 40, btnY)
-                    .size(80, 20)
-                    .build());
+            addRenderableWidget(new SanctuaryButton(
+                    left + pw / 2 - 48,
+                    buttonY,
+                    96,
+                    20,
+                    Component.translatable("screen.oririmod.dungeon.cancel_start"),
+                    ButtonTone.CRIMSON,
+                    () -> {
+                        sendAction("CANCEL_START", "");
+                        onClose();
+                    }
+            ));
         } else {
             if (isLeader) {
-                addRenderableWidget(Button.builder(
-                        Component.literal("Start ▶").withStyle(ChatFormatting.GREEN),
-                        btn -> sendAction("START", ""))
-                        .pos(left + getPanelW() - 80, btnY)
-                        .size(72, 20)
-                        .build());
+                addRenderableWidget(new SanctuaryButton(
+                        left + pw - 90,
+                        buttonY,
+                        78,
+                        20,
+                        Component.translatable("screen.oririmod.dungeon.start"),
+                        ButtonTone.EMERALD,
+                        () -> sendAction("START", "")
+                ));
             }
 
-            addRenderableWidget(Button.builder(
-                    Component.literal("Leave Party").withStyle(ChatFormatting.RED),
-                    btn -> { sendAction("LEAVE", ""); onClose(); })
-                    .pos(left + (isLeader ? getPanelW() - 160 : getPanelW() - 90), btnY)
-                    .size(isLeader ? 74 : 82, 20)
-                    .build());
+            addRenderableWidget(new SanctuaryButton(
+                    left + (isLeader ? pw - 176 : pw - 96),
+                    buttonY,
+                    isLeader ? 80 : 84,
+                    20,
+                    Component.translatable("screen.oririmod.dungeon.leave_party"),
+                    ButtonTone.CRIMSON,
+                    () -> {
+                        sendAction("LEAVE", "");
+                        onClose();
+                    }
+            ));
         }
 
         // Accept / Decline buttons for non-leader pending members
-        UUID myId = net.minecraft.client.Minecraft.getInstance().player != null
-                ? net.minecraft.client.Minecraft.getInstance().player.getUUID() : null;
+        UUID myId = Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUUID() : null;
         if (!isLeader && myId != null) {
-            boolean isPending = data.memberStatuses().stream()
-                    .anyMatch(s -> s.equals("PENDING"));
+            boolean isPending = false;
+            int myIndex = data.memberIds().indexOf(myId);
+            if (myIndex >= 0 && myIndex < data.memberStatuses().size()) {
+                isPending = "PENDING".equals(data.memberStatuses().get(myIndex));
+            } else {
+                isPending = data.memberStatuses().stream().anyMatch("PENDING"::equals);
+            }
             if (isPending) {
-                addRenderableWidget(Button.builder(
-                        Component.literal("Accept").withStyle(ChatFormatting.GREEN),
-                        btn -> { sendAction("ACCEPT", ""); onClose(); })
-                        .pos(left + 10, btnY)
-                        .size(70, 20)
-                        .build());
-                addRenderableWidget(Button.builder(
-                        Component.literal("Decline").withStyle(ChatFormatting.RED),
-                        btn -> { sendAction("DECLINE", ""); onClose(); })
-                        .pos(left + 86, btnY)
-                        .size(70, 20)
-                        .build());
+                addRenderableWidget(new SanctuaryButton(
+                        left + 12,
+                        buttonY,
+                        70,
+                        20,
+                        Component.translatable("screen.oririmod.dungeon.accept"),
+                        ButtonTone.EMERALD,
+                        () -> {
+                            sendAction("ACCEPT", "");
+                            onClose();
+                        }
+                ));
+                addRenderableWidget(new SanctuaryButton(
+                        left + 88,
+                        buttonY,
+                        70,
+                        20,
+                        Component.translatable("screen.oririmod.dungeon.decline"),
+                        ButtonTone.CRIMSON,
+                        () -> {
+                            sendAction("DECLINE", "");
+                            onClose();
+                        }
+                ));
             }
         }
     }
 
     @Override
-    public void render(GuiGraphics gfx, int mouseX, int mouseY, float partial) {
-        renderBackground(gfx, mouseX, mouseY, partial);
+    public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
+        this.renderTransparentBackground(gfx);
 
-        int left = (width - getPanelW()) / 2;
-        int top  = (height - getPanelH()) / 2;
+        int left = getPanelLeft();
+        int top  = getPanelTop();
+        int pw   = getPanelW();
+        int ph   = getPanelH();
 
-        // Background
-        gfx.fill(left, top, left + getPanelW(), top + getPanelH(), C_BG);
-        drawBorder(gfx, left, top, getPanelW(), getPanelH(), C_BORDER);
+        drawSanctuaryPanel(gfx, left, top, pw, ph);
 
-        // Render widgets on top
-        for (net.minecraft.client.gui.components.Renderable renderable : this.renderables) {
-            renderable.render(gfx, mouseX, mouseY, partial);
-        }
-
-        // ── Title Zone ──
+        // Title Zone
         gfx.drawCenteredString(font,
-                Component.literal("⚔  " + data.dungeonDisplayName()).withStyle(ChatFormatting.BOLD),
-                left + getPanelW() / 2, top + TITLE_Y, C_TITLE);
-        gfx.hLine(left + 8, left + getPanelW() - 8, top + DIV1_Y, C_DIVIDER);
+                Component.literal("⚔ " + data.dungeonDisplayName() + " ⚔").withStyle(ChatFormatting.BOLD),
+                left + pw / 2, top + 12, TEXT_TITLE);
+        drawGildedDivider(gfx, left + 12, top + 29, pw - 24, GOLD);
 
-        // ── Party Zone ──
-        gfx.drawString(font, "Party", left + 12, top + PARTY_Y, C_LABEL, true);
+        // Party Header & Size Pill
+        int partyY = top + 37;
+        gfx.drawString(font,
+                Component.translatable("screen.oririmod.dungeon.party_header"),
+                left + 14, partyY + 2, GOLD_BRIGHT, true);
 
-        int rowY = top + PARTY_Y + 16;
-        // Leader row
-        gfx.drawString(font, "● " + getLeaderName() + "  (Leader)", left + 16, rowY, C_ACCEPT, true);
-        rowY += PARTY_ROW;
+        int totalMembers = 1 + data.memberIds().size();
+        String sizePill = totalMembers + " / " + MAX_PARTY_SIZE;
+        int pillW = font.width(sizePill) + 10;
+        drawPill(gfx, font, sizePill, left + pw - pillW - 14, partyY, 0xCC1A1526, BRONZE, GOLD);
 
-        // Member rows
-        for (int i = 0; i < data.memberIds().size(); i++) {
+        // 4 Party Slot Cards
+        int slotX = left + 14;
+        int slotW = pw - 28;
+        int slotY = partyY + 17;
+
+        renderLeaderSlot(gfx, slotX, slotY, slotW, SLOT_HEIGHT);
+        slotY += SLOT_HEIGHT + SLOT_GAP;
+
+        int memberCount = Math.min(3, data.memberIds().size());
+        for (int i = 0; i < memberCount; i++) {
             String name = data.memberNames().get(i);
             String status = data.memberStatuses().get(i);
-            int color = switch (status) {
-                case "ACCEPTED" -> C_ACCEPT;
-                case "PENDING"  -> C_PENDING;
-                default         -> C_DECLINE;
-            };
-            gfx.drawString(font, "● " + name, left + 16, rowY, C_MUTED, true);
-            gfx.drawString(font, status, left + 200, rowY, color, true);
-            rowY += PARTY_ROW;
+            renderMemberSlot(gfx, slotX, slotY, slotW, SLOT_HEIGHT, name, status);
+            slotY += SLOT_HEIGHT + SLOT_GAP;
         }
 
-        // Empty slots
-        int emptySlots = 3 - data.memberIds().size();
-        for (int i = 0; i < emptySlots; i++) {
-            gfx.drawString(font, "● (empty slot)", left + 16, rowY, C_MUTED, true);
-            rowY += PARTY_ROW;
+        for (int i = memberCount; i < 3; i++) {
+            renderEmptySlot(gfx, slotX, slotY, slotW, SLOT_HEIGHT);
+            slotY += SLOT_HEIGHT + SLOT_GAP;
         }
 
-        // ── Dividers ──
-        gfx.hLine(left + 8, left + getPanelW() - 8, top + DIV2_Y, C_DIVIDER);
+        // Divider above Invite / Status Zone
+        drawGildedDivider(gfx, left + 12, top + 160, pw - 24, GOLD_DIM);
 
+        // Invite / Countdown / Cooldown Zone
+        int statusZoneY = top + 168;
         if (data.isStarting()) {
-            long currentTick = net.minecraft.client.Minecraft.getInstance().level != null 
-                    ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : openClientTick;
-            long passedTicks = currentTick - openClientTick;
-            int ticksLeft = Math.max(0, data.startTicksRemaining() - (int) passedTicks);
-            int secondsLeft = (int) Math.ceil(ticksLeft / 20.0);
-            gfx.drawString(font, "Starting in " + secondsLeft + "s...", left + 12, top + INVITE_Y + 4, C_PENDING, true);
+            renderCountdownBar(gfx, left + 14, statusZoneY, pw - 28, true);
         } else if (data.startTicksRemaining() < 0) {
-            long currentTick = net.minecraft.client.Minecraft.getInstance().level != null 
-                    ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : openClientTick;
-            long passedTicks = currentTick - openClientTick;
-            int ticksLeft = Math.min(0, data.startTicksRemaining() + (int) passedTicks);
-            int secondsLeft = Math.abs(ticksLeft) / 20;
-            gfx.drawString(font, "Cooldown: " + secondsLeft + "s...", left + 12, top + INVITE_Y + 4, C_DECLINE, true);
-        } else if (isLeader) {
-            gfx.drawString(font, "Invite:", left + 12, top + INVITE_Y + 4, C_LABEL, true);
+            renderCountdownBar(gfx, left + 14, statusZoneY, pw - 28, false);
+        } else if (isLeader && inviteBox != null) {
+            gfx.drawString(font,
+                    Component.translatable("screen.oririmod.dungeon.invite_label"),
+                    left + 14, statusZoneY + 5, TEXT_PRIMARY, false);
+            int boxBorder = inviteBox.isFocused() ? GOLD : BRONZE;
+            drawRecessedWell(gfx, inviteBoxX, inviteBoxY, inviteBoxW, 18, boxBorder);
+        } else {
+            gfx.drawCenteredString(font,
+                    Component.translatable("screen.oririmod.dungeon.waiting_leader"),
+                    left + pw / 2, statusZoneY + 5, TEXT_MUTED);
         }
 
-        gfx.hLine(left + 8, left + getPanelW() - 8, top + DIV3_Y, C_DIVIDER);
+        // Footer Divider
+        drawGildedDivider(gfx, left + 12, top + ph - 36, pw - 24, GOLD_DIM);
     }
 
-    // ── Helpers ──
+    private void renderLeaderSlot(GuiGraphics gfx, int x, int y, int w, int h) {
+        gfx.fillGradient(x, y, x + w, y + h, 0xE6261E14, 0xE618130E);
+        drawBorder(gfx, x, y, w, h, GOLD_DIM);
+        gfx.fill(x + 1, y + 1, x + 4, y + h - 1, GOLD);
+
+        // Crown diamond pip
+        drawDiamond(gfx, x + 13, y + h / 2, 3, GOLD_BRIGHT);
+
+        String leaderName = getLeaderName();
+        String badge = Component.translatable("screen.oririmod.dungeon.role_leader").getString();
+        int badgeW = font.width(badge) + 10;
+        String clipped = truncate(font, leaderName, w - badgeW - 32);
+        gfx.drawString(font, clipped, x + 23, y + (h - 8) / 2, GOLD_BRIGHT, true);
+
+        drawPill(gfx, font, badge, x + w - badgeW - 6, y + (h - 13) / 2, 0xCC3B2B14, GOLD, GOLD_BRIGHT);
+    }
+
+    private void renderMemberSlot(GuiGraphics gfx, int x, int y, int w, int h, String name, String status) {
+        gfx.fillGradient(x, y, x + w, y + h, 0xDD171526, 0xDD100F1C);
+        drawBorder(gfx, x, y, w, h, BRONZE);
+
+        int stripeColor;
+        int pillBg;
+        int pillBorder;
+        int pillText;
+        switch (status) {
+            case "ACCEPTED" -> {
+                stripeColor = EMERALD;
+                pillBg = EMERALD_DARK;
+                pillBorder = EMERALD;
+                pillText = EMERALD_LIGHT;
+            }
+            case "PENDING" -> {
+                float pulse = 0.72F + 0.28F * Mth.sin((System.currentTimeMillis() % 2000L) / 2000.0F * Mth.TWO_PI);
+                stripeColor = withAlpha(AMBER, (int) (pulse * 255));
+                pillBg = AMBER_DARK;
+                pillBorder = AMBER;
+                pillText = AMBER_LIGHT;
+            }
+            default -> {
+                stripeColor = CRIMSON;
+                pillBg = CRIMSON_DARK;
+                pillBorder = CRIMSON;
+                pillText = CRIMSON_LIGHT;
+            }
+        }
+
+        gfx.fill(x + 1, y + 1, x + 4, y + h - 1, stripeColor);
+        drawDiamond(gfx, x + 13, y + h / 2, 2, stripeColor);
+
+        int badgeW = font.width(status) + 10;
+        String clipped = truncate(font, name, w - badgeW - 32);
+        gfx.drawString(font, clipped, x + 23, y + (h - 8) / 2, TEXT_PRIMARY, false);
+
+        drawPill(gfx, font, status, x + w - badgeW - 6, y + (h - 13) / 2, pillBg, pillBorder, pillText);
+    }
+
+    private void renderEmptySlot(GuiGraphics gfx, int x, int y, int w, int h) {
+        gfx.fill(x, y, x + w, y + h, 0x990A0912);
+        drawBorder(gfx, x, y, w, h, 0xFF28222C);
+        drawDiamond(gfx, x + 13, y + h / 2, 2, 0xFF3E3845);
+        gfx.drawString(font,
+                Component.translatable("screen.oririmod.dungeon.empty_slot"),
+                x + 23, y + (h - 8) / 2, TEXT_MUTED, false);
+    }
+
+    private void renderCountdownBar(GuiGraphics gfx, int x, int y, int w, boolean starting) {
+        long currentTick = Minecraft.getInstance().level != null
+                ? Minecraft.getInstance().level.getGameTime() : openClientTick;
+        long passedTicks = currentTick - openClientTick;
+
+        int remainingTicks;
+        if (starting) {
+            remainingTicks = Math.max(0, data.startTicksRemaining() - (int) passedTicks);
+        } else {
+            int ticksLeft = Math.min(0, data.startTicksRemaining() + (int) passedTicks);
+            remainingTicks = Math.abs(ticksLeft);
+        }
+
+        int secondsLeft = starting ? (int) Math.ceil(remainingTicks / 20.0) : remainingTicks / 20;
+        float progress = Mth.clamp(remainingTicks / (float) initialCountdownTicks, 0.0F, 1.0F);
+
+        int barColor = starting ? AMBER : CRIMSON;
+        int barBright = starting ? AMBER_LIGHT : CRIMSON_LIGHT;
+        int barBg = starting ? AMBER_DARK : CRIMSON_DARK;
+
+        String label = starting
+                ? "Starting in " + secondsLeft + "s..."
+                : "Cooldown: " + secondsLeft + "s...";
+
+        drawRecessedWell(gfx, x, y, w, 18, barColor);
+        int innerW = Math.round((w - 4) * progress);
+        if (innerW > 0) {
+            gfx.fillGradient(x + 2, y + 2, x + 2 + innerW, y + 16, withAlpha(barColor, 0xAA), withAlpha(barBg, 0xDD));
+            gfx.hLine(x + 2, x + 1 + innerW, y + 2, withAlpha(barBright, 0xCC));
+        }
+        gfx.drawCenteredString(font, label, x + w / 2, y + 5, barBright);
+    }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (inviteBox != null && inviteBox.isFocused()) {
-            if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_TAB && !currentSuggestion.isEmpty()) {
+            if (keyCode == GLFW.GLFW_KEY_TAB && !currentSuggestion.isEmpty()) {
                 inviteBox.setValue(inviteBox.getValue() + currentSuggestion);
                 return true;
-            } else if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER || keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER) {
+            } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
                 invite();
                 return true;
             }
@@ -262,9 +388,16 @@ public class DungeonKeeperScreen extends Screen {
     }
 
     private String getLeaderName() {
-        var player = net.minecraft.client.Minecraft.getInstance().player;
-        if (player != null && player.getUUID().equals(data.leaderId())) {
-            return player.getName().getString();
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.getUUID().equals(data.leaderId())) {
+            return mc.player.getName().getString();
+        }
+        var connection = mc.getConnection();
+        if (connection != null) {
+            PlayerInfo info = connection.getPlayerInfo(data.leaderId());
+            if (info != null) {
+                return info.getProfile().getName();
+            }
         }
         return "Party Leader";
     }
@@ -280,12 +413,5 @@ public class DungeonKeeperScreen extends Screen {
 
     private void sendAction(String action, String targetName) {
         PacketDistributor.sendToServer(new DungeonActionPayload(action, data.partyId(), targetName));
-    }
-
-    private void drawBorder(GuiGraphics gfx, int x, int y, int w, int h, int color) {
-        gfx.hLine(x, x + w - 1, y,         color);
-        gfx.hLine(x, x + w - 1, y + h - 1, color);
-        gfx.vLine(x,         y, y + h - 1, color);
-        gfx.vLine(x + w - 1, y, y + h - 1, color);
     }
 }

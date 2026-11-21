@@ -105,7 +105,7 @@ public class MermaidModel extends GeoModel<MermaidEntity> {
         if (head != null) {
             EntityModelData entityData = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
             if (entityData != null) {
-                netHeadYaw = entityData.netHeadYaw();
+                netHeadYaw = Mth.wrapDegrees(entityData.netHeadYaw());
                 headPitch = entityData.headPitch();
                 float localHeadPitchDeg = Mth.clamp(headPitch - bodyPitchDeg, -45.0F, 75.0F);
                 float tiltBlend = Mth.clamp(-bodyPitchDeg / 85.0F, 0.0F, 1.0F);

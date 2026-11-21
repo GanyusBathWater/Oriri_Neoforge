@@ -119,6 +119,9 @@ public class SilentNereidEntity extends MermaidEntity {
     public SilentNereidEntity(EntityType<? extends SilentNereidEntity> type, Level level) {
         super(type, level);
         this.xpReward = 15;
+        // Initialize all 3 synced color channels consistently (super defines Mermaid's cyan defaults;
+        // world spawns still randomize across all variants in finalizeSpawn)
+        this.setVariant(Variant.BIOLUMINESCENT_BLUE_INDIGO);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -171,11 +174,8 @@ public class SilentNereidEntity extends MermaidEntity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        Variant[] values = Variant.values();
-        Variant initial = values[this.random.nextInt(values.length)];
-        int hair = jitterColor(initial.getHairColor(), this.random);
-        int scale = jitterColor(initial.getScaleColor(), this.random);
-        int mixed = calculateMixedColor(hair, scale);
+        Variant initial = Variant.BIOLUMINESCENT_BLUE_INDIGO;
+        int mixed = calculateMixedColor(initial.getHairColor(), initial.getScaleColor());
 
         builder.define(DATA_VARIANT, initial.getId());
         builder.define(DATA_MIXED_COLOR, mixed);
