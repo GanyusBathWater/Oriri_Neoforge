@@ -636,7 +636,9 @@ public final class ElderwoodsCaveAquifer implements Aquifer {
                 return LAVA;
             }
         }
-        if (isScarletCaveFn.test(x, y, z) || isScarletCaveFn.test(x, surfaceLevel - 1, z)) {
+        if (isScarletCaveFn.test(x, y, z)
+                || isScarletCaveFn.test(x, surfaceLevel - 1, z)
+                || isScarletCaveFn.test(x, Math.min(surfaceLevel - 1, y + 8), z)) {
             return BLOOD_WATER;
         }
         return WATER;

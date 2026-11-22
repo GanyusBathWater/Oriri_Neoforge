@@ -2,6 +2,8 @@ package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -26,8 +28,19 @@ public class AbyssPillarFeature extends Feature<NoneFeatureConfiguration> {
         super(codec);
     }
 
+    private static boolean isScarletRock(BlockState state) {
+        return state.is(ModBlocks.SCARLET_STONE.get())
+                || state.is(ModBlocks.SCARLET_DEEPSLATE.get())
+                || state.is(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get())
+                || state.is(ModBlocks.POINTED_SCARLET_DRIPSTONE.get())
+                || state.is(ModBlocks.SCARLET_MOSS.get());
+    }
+
     private boolean isReplaceableByPillar(BlockState state) {
-        return !state.is(Blocks.BEDROCK) && !state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) && !state.is(net.minecraft.tags.BlockTags.DIRT);
+        return !state.is(Blocks.BEDROCK)
+                && !state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD)
+                && !state.is(net.minecraft.tags.BlockTags.DIRT)
+                && !isScarletRock(state);
     }
 
     @Override
@@ -35,8 +48,10 @@ public class AbyssPillarFeature extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel level = context.level();
         BlockPos origin = context.origin();
         RandomSource rng = context.random();
+        ElderwoodsBiomeSource ebs = (context.chunkGenerator().getBiomeSource() instanceof ElderwoodsBiomeSource b) ? b : null;
 
-        if (!level.getBiome(origin).is(ELYSIAN_ABYSS_KEY)) {
+        if (!level.getBiome(origin).is(ELYSIAN_ABYSS_KEY)
+                || (ebs != null && ebs.isScarletCaveAt(origin.getX(), origin.getY(), origin.getZ()))) {
             return false;
         }
 
@@ -51,7 +66,7 @@ public class AbyssPillarFeature extends Feature<NoneFeatureConfiguration> {
             BlockState state = level.getBlockState(mPos);
             BlockState below = level.getBlockState(mPos.below());
 
-            if (isReplaceableByPillar(state) && !isReplaceableByPillar(below) && !below.is(Blocks.BEDROCK)) {
+            if (isReplaceableByPillar(state) && !isReplaceableByPillar(below) && !below.is(Blocks.BEDROCK) && !isScarletRock(below)) {
                 origin = mPos.immutable();
                 foundFloor = true;
                 break;
@@ -59,6 +74,10 @@ public class AbyssPillarFeature extends Feature<NoneFeatureConfiguration> {
         }
 
         if (!foundFloor || origin.getY() > MAX_FLOOR_Y) return false;
+        if (!level.getBiome(origin).is(ELYSIAN_ABYSS_KEY)
+                || (ebs != null && ebs.isScarletCaveAt(origin.getX(), origin.getY(), origin.getZ()))) {
+            return false;
+        }
 
         int ceilingY = -1;
         int freeAirRise = 0;
@@ -69,6 +88,7 @@ public class AbyssPillarFeature extends Feature<NoneFeatureConfiguration> {
             if (isReplaceableByPillar(state)) {
                 if (ceilingY == -1) freeAirRise++;
             } else {
+                if (isScarletRock(state)) return false;
                 if (ceilingY == -1) ceilingY = y;
                 break;
             }
@@ -76,6 +96,10 @@ public class AbyssPillarFeature extends Feature<NoneFeatureConfiguration> {
 
         if (ceilingY == -1) {
             return false; // No ceiling found
+        }
+        if (!level.getBiome(new BlockPos(origin.getX(), ceilingY - 1, origin.getZ())).is(ELYSIAN_ABYSS_KEY)
+                || (ebs != null && ebs.isScarletCaveAt(origin.getX(), ceilingY - 1, origin.getZ()))) {
+            return false;
         }
         if (freeAirRise < 30) {
             return false; // Too short to be a massive pillar (might be a ravine crack)

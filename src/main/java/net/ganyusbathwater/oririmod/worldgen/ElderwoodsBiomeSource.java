@@ -200,15 +200,19 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private static final int SWAMP_DILATE_QUARTS = 4; // 4 * 4 = 16 blocks
     private static final int VILE_CORE_RADIUS = 22;
     private static final int VILE_DILATE_QUARTS = 6; // 6 * 4 = 24 blocks
+    private static final int ARID_CORE_RADIUS = 24;
+    private static final int ARID_DILATE_QUARTS = 7; // 7 * 4 = 28 blocks (>= 24 + diagonal grid step)
     private static final int MORPH_CACHE_SIZE = 8192;
     private static final int MORPH_CACHE_MASK = MORPH_CACHE_SIZE - 1;
 
     private static final int[][] SCARLET_DILATE_OFFSETS = buildSortedQuartOffsets(SCARLET_DILATE_QUARTS);
     private static final int[][] SWAMP_DILATE_OFFSETS = buildSortedQuartOffsets(SWAMP_DILATE_QUARTS);
     private static final int[][] VILE_DILATE_OFFSETS = buildSortedQuartOffsets(VILE_DILATE_QUARTS);
+    private static final int[][] ARID_DILATE_OFFSETS = buildSortedQuartOffsets(ARID_DILATE_QUARTS);
     private static final int[][] SCARLET_CORE_PROBES = buildCoreProbes(SCARLET_CORE_RADIUS, true);
     private static final int[][] SWAMP_CORE_PROBES = buildCoreProbes(SWAMP_CORE_RADIUS, false);
     private static final int[][] VILE_CORE_PROBES = buildCoreProbes(VILE_CORE_RADIUS, true);
+    private static final int[][] ARID_CORE_PROBES = buildCoreProbes(ARID_CORE_RADIUS, true);
     private static final int[][] BORDER_SAMPLE_DIRS = {
             { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },
             { 1, 1 }, { -1, 1 }, { 1, -1 }, { -1, -1 }
@@ -225,6 +229,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private final ThreadLocal<MorphCoreCache> scarletCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
     private final ThreadLocal<MorphCoreCache> swampCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
     private final ThreadLocal<MorphCoreCache> vileCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
+    private final ThreadLocal<MorphCoreCache> aridCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
 
     private static int[][] buildSortedQuartOffsets(int maxQuarts) {
         int maxSq = maxQuarts * maxQuarts;
@@ -775,22 +780,26 @@ public class ElderwoodsBiomeSource extends BiomeSource {
      */
     public boolean isScarletCaveAt(int x, int y, int z) {
         ensureSeedSynced();
-        if (sampleContinentalness(x, z) < 0.0 || sampleTemperatureNoise(x, z) > 0.13) {
+        if (sampleContinentalness(x, z) < 0.0) {
             return false;
         }
         Holder<Biome> surfaceBiome = getSurfaceBiome(x, z);
         if (isHighlandBiome(surfaceBiome)
-                || !(surfaceBiome.is(SCARLET_SWAMP_KEY)
-                        || surfaceBiome.is(SCARLET_FOREST_KEY)
-                        || surfaceBiome.is(SCARLET_KARST_KEY)
-                        || surfaceBiome.is(ELDER_BEACH_KEY))) {
+                || isAridBiome(surfaceBiome)
+                || surfaceBiome == vilePlainsBiome
+                || surfaceBiome == silentOceansBiome
+                || surfaceBiome == silentDepthsBiome
+                || surfaceBiome == sunkenTrenchesBiome) {
             return false;
         }
         int surfaceY = computeSurfaceHeight(x, z, surfaceBiome);
-        if (surfaceY < 62 || y >= surfaceY - 10 || y < getScarletCaveBottomY(x, z)) {
+        if (surfaceY < 58 || y >= surfaceY - 10 || y < getScarletCaveBottomY(x, z) - 4) {
             return false;
         }
-        return sampleHumidityNoise(x, z) > 0.48;
+        boolean isScarletSurface = surfaceBiome == scarletSwampBiome
+                || surfaceBiome == scarletForestBiome
+                || surfaceBiome == scarletKarstBiome;
+        return isScarletSurface || sampleHumidityNoise(x, z) > 0.43;
     }
 
     /**
@@ -878,7 +887,7 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         // Strictly zero Elysian Abyss or other biomes inside Scarlet Caves territory.
         // Elysian Abyss caverns taper closed smoothly in rock before humNoise reaches
         // 0.44.
-        if (col.humNoise > 0.48 && y >= col.scarletBottomY) {
+        if (col.humNoise > 0.46 && y >= col.scarletBottomY) {
             return scarletCavesBiome;
         }
         if (col.caveNoise > 0.20 && col.humNoise <= 0.44 && col.surfaceBiome != vilePlainsBiome) {
@@ -918,6 +927,16 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
     private Holder<Biome> computeSurfaceBiome(int x, int z) {
         Holder<Biome> raw = computeRawSurfaceBiome(x, z);
+
+        // Filter out tiny isolated Golden Savanna / Golden Desert micro-blobs so temperature
+        // noise ripples never punch small yellow savanna puddles inside Scarlet or Elderwoods.
+        if (isAridBiome(raw)) {
+            final MorphCoreCache aridCache = aridCoreCache.get();
+            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.045f,
+                    (cx, cz) -> hasAridMorphCoreNear(cx, cz, aridCache))) {
+                raw = computeNonAridFallbackBiome(x, z);
+            }
+        }
 
         if (raw == scarletSwampBiome) {
             final MorphCoreCache swampCache = swampCoreCache.get();
@@ -1087,6 +1106,81 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         } else {
             return elderwoodsBiome;
         }
+    }
+
+    private boolean isAridMorphCoreQuart(int qx, int qz, MorphCoreCache cache) {
+        if (cache.seed != syncedSeed) {
+            Arrays.fill(cache.states, (byte) 0);
+            cache.seed = syncedSeed;
+        }
+        long key = (((long) qx) << 32) ^ (qz & 0xFFFFFFFFL);
+        int slot = ((qx * 73856093) ^ (qz * 19349663)) & MORPH_CACHE_MASK;
+        byte cached = cache.states[slot];
+        if (cached != 0 && cache.keys[slot] == key) {
+            return cached == 2;
+        }
+
+        int bx = qx * MORPH_QUART_STEP;
+        int bz = qz * MORPH_QUART_STEP;
+        boolean isCore = true;
+        for (int i = 0; i < ARID_CORE_PROBES.length; i++) {
+            if (!isAridBiome(computeRawSurfaceBiome(bx + ARID_CORE_PROBES[i][0], bz + ARID_CORE_PROBES[i][1]))) {
+                isCore = false;
+                break;
+            }
+        }
+        cache.keys[slot] = key;
+        cache.states[slot] = (byte) (isCore ? 2 : 1);
+        return isCore;
+    }
+
+    private boolean hasAridMorphCoreNear(int x, int z, MorphCoreCache cache) {
+        int baseQx = Math.floorDiv(x, MORPH_QUART_STEP);
+        int baseQz = Math.floorDiv(z, MORPH_QUART_STEP);
+        for (int i = 0; i < ARID_DILATE_OFFSETS.length; i++) {
+            int qx = baseQx + ARID_DILATE_OFFSETS[i][0];
+            int qz = baseQz + ARID_DILATE_OFFSETS[i][1];
+            if (isAridMorphCoreQuart(qx, qz, cache)) {
+                int cx = qx * MORPH_QUART_STEP;
+                int cz = qz * MORPH_QUART_STEP;
+                int dx = cx - x;
+                int dz = cz - z;
+                if (dx * dx + dz * dz <= 64
+                        || isAridBiome(computeRawSurfaceBiome((x + cx) >> 1, (z + cz) >> 1))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Resolves the surrounding non-arid land biome when an isolated micro-blob of Golden Savanna /
+     * Desert is removed by morphological opening, seamlessly matching Scarlet, Highland, Beach, or Elderwoods.
+     */
+    private Holder<Biome> computeNonAridFallbackBiome(int x, int z) {
+        double contNoise = sampleContinentalness(x, z);
+        int surfaceY = computeSurfaceHeight(x, z, null);
+        double tempNoise = sampleTemperatureNoise(x, z);
+        double humNoise = sampleHumidityNoise(x, z);
+
+        if (surfaceY < 74 && contNoise < 0.055) {
+            return elderBeachBiome;
+        }
+        if (contNoise >= 0.14 && humNoise > 0.72) {
+            return scarletSwampBiome;
+        }
+        if (humNoise > 0.46) {
+            if (contNoise >= 0.14) {
+                double wx = sampleWarpedX(x, z);
+                double wz = sampleWarpedZ(x, z);
+                if (computeEffectiveKarst(wx, wz, contNoise, Math.min(tempNoise, 0.08), humNoise) > 0.15) {
+                    return scarletKarstBiome;
+                }
+            }
+            return scarletForestBiome;
+        }
+        return elderwoodsBiome;
     }
 
     private boolean isVileMorphCoreQuart(int qx, int qz, MorphCoreCache cache) {

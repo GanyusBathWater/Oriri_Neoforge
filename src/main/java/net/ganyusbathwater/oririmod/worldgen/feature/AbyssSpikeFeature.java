@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -24,14 +25,25 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
 
     private static final ResourceKey<net.minecraft.world.level.biome.Biome> ELYSIAN_ABYSS_KEY =
             ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "elysian_abyss"));
+    private static final ResourceKey<net.minecraft.world.level.biome.Biome> SCARLET_CAVES_KEY =
+            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "scarlet_caves"));
 
     public AbyssSpikeFeature(Codec<AbyssSpikeConfig> codec) {
         super(codec);
     }
 
+    private static boolean isScarletRock(BlockState state) {
+        return state.is(ModBlocks.SCARLET_STONE.get())
+                || state.is(ModBlocks.SCARLET_DEEPSLATE.get())
+                || state.is(ModBlocks.SCARLET_DRIPSTONE_BLOCK.get())
+                || state.is(ModBlocks.POINTED_SCARLET_DRIPSTONE.get())
+                || state.is(ModBlocks.SCARLET_MOSS.get());
+    }
+
     private boolean isReplaceableBySpike(BlockState state) {
         // Allow replacing stone/deepslate so the root of the spike can anchor into the ceiling!
         return !state.is(Blocks.BEDROCK) && !state.is(net.minecraft.tags.BlockTags.DIRT)
+                && !isScarletRock(state)
                 && !state.is(ModBlocks.HARDENED_MANASHROOM.get())
                 && !state.is(ModBlocks.AETHER_MAGMA_BLOCK.get())
                 && !state.is(net.ganyusbathwater.oririmod.fluid.ModFluids.AETHER_BLOCK.get());
@@ -44,7 +56,10 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
         RandomSource rng = context.random();
         AbyssSpikeConfig config = context.config();
 
-        if (!level.getBiome(origin).is(ELYSIAN_ABYSS_KEY)) {
+        ElderwoodsBiomeSource ebs = (context.chunkGenerator().getBiomeSource() instanceof ElderwoodsBiomeSource b) ? b : null;
+
+        if (!level.getBiome(origin).is(ELYSIAN_ABYSS_KEY)
+                || (ebs != null && ebs.isScarletCaveAt(origin.getX(), origin.getY(), origin.getZ()))) {
             return false;
         }
 
@@ -60,6 +75,7 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
             BlockState next = level.getBlockState(mPos.relative(config.isCeiling() ? Direction.UP : Direction.DOWN));
 
             if ((state.isAir() || state.is(Blocks.WATER)) && !next.isAir() && !next.is(Blocks.WATER) && !next.is(Blocks.BEDROCK)
+                && !isScarletRock(next)
                 && !next.is(ModBlocks.HARDENED_MANASHROOM.get()) && !next.is(ModBlocks.AETHER_MAGMA_BLOCK.get())) {
                 origin = mPos.immutable();
                 foundAnchor = true;
@@ -68,6 +84,13 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
         }
 
         if (!foundAnchor) return false;
+
+        // Re-verify biome at anchored surface so vertical scans never leak into Scarlet Caves or other biomes
+        if (!level.getBiome(origin).is(ELYSIAN_ABYSS_KEY)
+                || level.getBiome(origin).is(SCARLET_CAVES_KEY)
+                || (ebs != null && ebs.isScarletCaveAt(origin.getX(), origin.getY(), origin.getZ()))) {
+            return false;
+        }
 
         // Prevent overlapping: check if there's already a spike or obstacle immediately in front of the anchor
         for (int i = 1; i <= 3; i++) {
@@ -80,6 +103,11 @@ public class AbyssSpikeFeature extends Feature<AbyssSpikeFeature.AbyssSpikeConfi
 
         // Dimensions
         int height = 4 + rng.nextInt(13); // 4 to 16 blocks tall
+        BlockPos tipPos = origin.relative(config.isCeiling() ? Direction.DOWN : Direction.UP, height);
+        if (!level.getBiome(tipPos).is(ELYSIAN_ABYSS_KEY)
+                || (ebs != null && ebs.isScarletCaveAt(tipPos.getX(), tipPos.getY(), tipPos.getZ()))) {
+            return false;
+        }
         
         // Scale base radius by height (taller spikes = thicker bases)
         double maxRadius = (height * 0.15) + 1.5; // 4 height -> 2.1; 16 height -> 3.9

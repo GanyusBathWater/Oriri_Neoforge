@@ -449,9 +449,9 @@ public class ModPlacedFeatures {
                 register(context, SEA_URCHIN_PLACED_KEY,
                                 configuredFeatures.getOrThrow(ModConfiguredFeatures.SEA_URCHIN_KEY),
                                 List.of(
-                                                RarityFilter.onAverageOnceEvery(3),
+                                                CountPlacement.of(2),
                                                 InSquarePlacement.spread(),
-                                                HeightRangePlacement.uniform(absolute(-64), absolute(64)),
+                                                HeightRangePlacement.uniform(absolute(-120), absolute(40)),
                                                 BiomeFilter.biome()));
 
                 register(context, BENTHIC_OCEAN_PLACED_KEY,

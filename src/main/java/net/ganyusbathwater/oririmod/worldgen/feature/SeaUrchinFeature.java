@@ -1,19 +1,31 @@
 package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsChunkGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -44,6 +56,18 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
         BlockPos origin = context.origin();
         RandomSource rng = context.random();
 
+        WorldGenRegion region = level instanceof WorldGenRegion r ? r : null;
+        int centerCx = region != null ? region.getCenter().x : (origin.getX() >> 4);
+        int centerCz = region != null ? region.getCenter().z : (origin.getZ() >> 4);
+
+        // Bias origin toward chunk center (local 6..9) so 10-22 block protruding spikes
+        // fit inside the 3x3 chunk write radius without flat chunk-border clipping.
+        if (region != null) {
+            int clampedLocalX = Mth.clamp(origin.getX() - (centerCx << 4), 6, 9);
+            int clampedLocalZ = Mth.clamp(origin.getZ() - (centerCz << 4), 6, 9);
+            origin = new BlockPos((centerCx << 4) + clampedLocalX, origin.getY(), (centerCz << 4) + clampedLocalZ);
+        }
+
         // 50/50 Chance between Amethyst and Mana Crystals
         boolean isMana = rng.nextBoolean();
         BlockState crystalBlock = isMana ? ModBlocks.MANA_CRYSTAL_BLOCK.get().defaultBlockState() : Blocks.AMETHYST_BLOCK.defaultBlockState();
@@ -62,35 +86,83 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
             if (!foundSolid) return false;
         }
 
-        int coreRadius = rng.nextInt(3) + 4; // 4 to 6 blocks core
-        int numSpikes = 15 + rng.nextInt(20); // 15 to 35 spikes
-        
-        List<Spike> spikes = new ArrayList<>();
-        for (int i = 0; i < numSpikes; i++) {
-            float theta = rng.nextFloat() * 2.0f * (float) Math.PI;
-            float phi = (float) Math.acos(2.0f * rng.nextFloat() - 1.0f);
-            
-            float dx = (float) (Math.sin(phi) * Math.cos(theta));
-            float dy = (float) (Math.cos(phi));
-            float dz = (float) (Math.sin(phi) * Math.sin(theta));
-            
-            Vector3f direction = new Vector3f(dx, dy, dz).normalize();
-            
-            float length = 10.0f + rng.nextFloat() * 12.0f; // 10 to 22 blocks long
-            float width = 3.0f + rng.nextFloat() * 2.5f; // 3 to 5.5 blocks wide base
-            
-            spikes.add(new Spike(direction, length, width));
-        }
-
         int maxBounding = 24;
         float noiseScale = 0.15f;
         int ox = origin.getX();
         int oy = origin.getY();
         int oz = origin.getZ();
         int minWorldY = level.getMinBuildHeight() + 1;
-        WorldGenRegion region = level instanceof WorldGenRegion r ? r : null;
-        int centerCx = region != null ? region.getCenter().x : 0;
-        int centerCz = region != null ? region.getCenter().z : 0;
+
+        int coreRadius = rng.nextInt(3) + 4; // 4 to 6 blocks core
+        int numSpikes = 15 + rng.nextInt(20); // 15 to 35 spikes
+
+        // Collect all underground structure piece boxes (Mineshafts, Trial Chambers, etc.) intersecting
+        // this urchin's volume so neighbor-chunk structure carving can never sever protruding spikes.
+        BoundingBox urchinBox = new BoundingBox(
+                ox - maxBounding - 2, oy - maxBounding - 2, oz - maxBounding - 2,
+                ox + maxBounding + 2, oy + maxBounding + 2, oz + maxBounding + 2);
+        List<BoundingBox> structureObstacles = collectStructureObstacles(level, region, centerCx, centerCz, urchinBox);
+
+        if (!structureObstacles.isEmpty()) {
+            BoundingBox coreBox = new BoundingBox(
+                    ox - coreRadius - 2, oy - coreRadius - 2, oz - coreRadius - 2,
+                    ox + coreRadius + 2, oy + coreRadius + 2, oz + coreRadius + 2);
+            for (BoundingBox obstacle : structureObstacles) {
+                if (obstacle.intersects(coreBox)) {
+                    return false;
+                }
+            }
+        }
+
+        List<Spike> spikes = new ArrayList<>();
+        for (int i = 0; i < numSpikes; i++) {
+            float theta = rng.nextFloat() * 2.0f * (float) Math.PI;
+            float phi = (float) Math.acos(2.0f * rng.nextFloat() - 1.0f);
+
+            float dx = (float) (Math.sin(phi) * Math.cos(theta));
+            float dy = (float) (Math.cos(phi));
+            float dz = (float) (Math.sin(phi) * Math.sin(theta));
+
+            Vector3f direction = new Vector3f(dx, dy, dz).normalize();
+
+            float length = 10.0f + rng.nextFloat() * 12.0f; // 10 to 22 blocks long
+            float width = 3.0f + rng.nextFloat() * 2.5f; // 3 to 5.5 blocks wide base
+
+            // Shorten any spike before it enters a structure corridor or deep Aether River
+            // so later neighbor-chunk carving never leaves floating severed crystal tips.
+            for (float t = 1.0f; t <= length; t += 1.0f) {
+                int px = ox + Math.round(direction.x() * t);
+                int py = oy + Math.round(direction.y() * t);
+                int pz = oz + Math.round(direction.z() * t);
+
+                if (py <= -78 && ElderwoodsChunkGenerator.getRiverIntensity(px, pz) > 0.005) {
+                    length = t - 2.0f;
+                    break;
+                }
+
+                if (!structureObstacles.isEmpty()) {
+                    int pad = (int) Math.ceil(width * Math.max(0.0f, 1.0f - t / length));
+                    boolean hitObstacle = false;
+                    for (BoundingBox box : structureObstacles) {
+                        if (px >= box.minX() - pad && px <= box.maxX() + pad
+                                && py >= box.minY() - pad && py <= box.maxY() + pad
+                                && pz >= box.minZ() - pad && pz <= box.maxZ() + pad) {
+                            hitObstacle = true;
+                            break;
+                        }
+                    }
+                    if (hitObstacle) {
+                        length = t - 2.0f;
+                        break;
+                    }
+                }
+            }
+
+            if (length >= coreRadius + 2.5f) {
+                spikes.add(new Spike(direction, length, width));
+            }
+        }
+        int activeSpikes = spikes.size();
 
         BlockState calcite = Blocks.CALCITE.defaultBlockState();
         BlockState smoothBasalt = Blocks.SMOOTH_BASALT.defaultBlockState();
@@ -136,13 +208,13 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
                     boolean possibleCore = dist < maxPossibleCoreRadius;
                     boolean possibleSpike = false;
                     if (!possibleCore) {
-                        for (int si = 0; si < numSpikes; si++) {
+                        for (int si = 0; si < activeSpikes; si++) {
                             Spike s = spikes.get(si);
                             double dot = x * s.dir.x() + y * s.dir.y() + z * s.dir.z();
-                            if (dot > 0 && dot < s.length) {
+                            if (dot >= -1.0 && dot < s.length) {
                                 double distToAxisSq = Math.max(0.0, distSq - dot * dot);
-                                double taper = 1.0 - (dot / s.length);
-                                double maxThick = (s.baseWidth + 1.8) * taper;
+                                double taper = 1.0 - (Math.max(0.0, dot) / s.length);
+                                double maxThick = (s.baseWidth + 1.4) * taper;
                                 if (distToAxisSq < maxThick * maxThick) {
                                     possibleSpike = true;
                                     break;
@@ -155,9 +227,21 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
                     }
 
                     int wy = oy + y;
+                    if (!structureObstacles.isEmpty() && isInsideAnyBox(structureObstacles, wx, wy, wz)) {
+                        continue;
+                    }
                     mPos.set(wx, wy, wz);
                     BlockState currentState = level.getBlockState(mPos);
-                    if (currentState.isAir() || currentState.is(Blocks.WATER) || currentState.is(Blocks.LAVA) || !currentState.isSolid()) {
+                    if (currentState.is(Blocks.BEDROCK)
+                            || currentState.is(BlockTags.FEATURES_CANNOT_REPLACE)
+                            || currentState.hasBlockEntity()
+                            || currentState.is(Blocks.LAVA)) {
+                        continue;
+                    }
+                    boolean wasSolid = currentState.isSolid();
+                    boolean canReplace = wasSolid || currentState.isAir()
+                            || currentState.is(Blocks.WATER) || currentState.canBeReplaced();
+                    if (!canReplace) {
                         continue;
                     }
 
@@ -169,13 +253,15 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
                     if (dist < distortedCoreRadius) {
                         isInside = true;
                     } else if (possibleSpike) {
-                        for (int si = 0; si < numSpikes; si++) {
+                        for (int si = 0; si < activeSpikes; si++) {
                             Spike s = spikes.get(si);
                             double dot = x * s.dir.x() + y * s.dir.y() + z * s.dir.z();
-                            if (dot > 0 && dot < s.length) {
+                            if (dot >= -1.0 && dot < s.length) {
                                 double distToAxis = Math.sqrt(Math.max(0.0, distSq - dot * dot));
-                                double taper = 1.0 - (dot / s.length);
-                                double distortedThickness = s.baseWidth * taper + (noise * 1.8 * taper);
+                                double taper = 1.0 - (Math.max(0.0, dot) / s.length);
+                                // Positive thickness floor prevents 3D noise from pinching spikes into detached tips
+                                double minThickness = Math.max(0.85, s.baseWidth * 0.52) * taper;
+                                double distortedThickness = Math.max(minThickness, (s.baseWidth + noise * 1.2) * taper);
                                 if (distToAxis < distortedThickness) {
                                     isInside = true;
                                     break;
@@ -185,8 +271,8 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
                     }
 
                     if (isInside) {
-                        // Geode Crust
-                        if (dist > distortedCoreRadius - 1.5 && dist < distortedCoreRadius + 0.5) {
+                        // Geode Crust: only where the core embeds into existing solid rock
+                        if (wasSolid && dist > distortedCoreRadius - 1.5 && dist < distortedCoreRadius + 0.5) {
                             if (rng.nextFloat() < 0.2f) {
                                 level.setBlock(mPos, calcite, 2);
                             } else if (rng.nextFloat() < 0.1f) {
@@ -247,7 +333,8 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
 
                 mPos.set(awx, awy, awz);
                 BlockState airState = level.getBlockState(mPos);
-                if (airState.isAir() || airState.canBeReplaced()) {
+                boolean isWater = airState.getFluidState().is(FluidTags.WATER);
+                if (airState.isAir() || isWater) {
                     Direction attachedFace = null;
                     for (Direction nd : directions) {
                         neighborPos.set(awx + nd.getStepX(), awy + nd.getStepY(), awz + nd.getStepZ());
@@ -257,14 +344,77 @@ public class SeaUrchinFeature extends Feature<NoneFeatureConfiguration> {
                         }
                     }
                     if (attachedFace != null && rng.nextFloat() < 0.04f) {
-                        level.setBlock(mPos, clusterBlock.setValue(
-                                net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING,
-                                attachedFace.getOpposite()), 2);
+                        BlockState placedCluster = clusterBlock.setValue(
+                                BlockStateProperties.FACING, attachedFace.getOpposite());
+                        if (placedCluster.hasProperty(BlockStateProperties.WATERLOGGED)) {
+                            placedCluster = placedCluster.setValue(BlockStateProperties.WATERLOGGED, isWater);
+                        }
+                        level.setBlock(mPos, placedCluster, 2);
                     }
                 }
             }
         }
 
         return true;
+    }
+
+    private static List<BoundingBox> collectStructureObstacles(
+            WorldGenLevel level, WorldGenRegion region, int centerCx, int centerCz, BoundingBox urchinBox) {
+        LongSet startChunks = new LongOpenHashSet();
+        for (int cx = centerCx - 1; cx <= centerCx + 1; cx++) {
+            for (int cz = centerCz - 1; cz <= centerCz + 1; cz++) {
+                if (region != null && !region.hasChunk(cx, cz)) {
+                    continue;
+                }
+                startChunks.add(ChunkPos.asLong(cx, cz));
+                ChunkAccess chunk = level.getChunk(cx, cz, ChunkStatus.STRUCTURE_REFERENCES, false);
+                if (chunk == null) {
+                    continue;
+                }
+                for (LongSet refs : chunk.getAllReferences().values()) {
+                    startChunks.addAll(refs);
+                }
+            }
+        }
+
+        List<BoundingBox> obstacles = List.of();
+        for (long packed : startChunks) {
+            int scx = ChunkPos.getX(packed);
+            int scz = ChunkPos.getZ(packed);
+            if (region != null && !region.hasChunk(scx, scz)) {
+                continue;
+            }
+            ChunkAccess startChunk = level.getChunk(scx, scz, ChunkStatus.STRUCTURE_STARTS, false);
+            if (startChunk == null) {
+                continue;
+            }
+            for (StructureStart start : startChunk.getAllStarts().values()) {
+                if (!start.isValid() || !start.getBoundingBox().intersects(urchinBox)) {
+                    continue;
+                }
+                for (StructurePiece piece : start.getPieces()) {
+                    BoundingBox pb = piece.getBoundingBox();
+                    BoundingBox padded = new BoundingBox(
+                            pb.minX() - 2, pb.minY() - 2, pb.minZ() - 2,
+                            pb.maxX() + 2, pb.maxY() + 2, pb.maxZ() + 2);
+                    if (padded.intersects(urchinBox)) {
+                        if (obstacles.isEmpty()) {
+                            obstacles = new ArrayList<>();
+                        }
+                        obstacles.add(padded);
+                    }
+                }
+            }
+        }
+        return obstacles;
+    }
+
+    private static boolean isInsideAnyBox(List<BoundingBox> boxes, int x, int y, int z) {
+        for (BoundingBox box : boxes) {
+            if (box.isInside(x, y, z)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

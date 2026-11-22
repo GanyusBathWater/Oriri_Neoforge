@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.worldgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.ganyusbathwater.oririmod.block.ModBlocks;
+import net.ganyusbathwater.oririmod.worldgen.ElderwoodsBiomeSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -30,6 +31,8 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
 
     private static final net.minecraft.resources.ResourceLocation ELYSIAN_RL =
             net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "elysian_abyss");
+    private static final net.minecraft.resources.ResourceLocation SCARLET_CAVES_RL =
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("oririmod", "scarlet_caves");
 
     @Override
     public boolean place(FeaturePlaceContext<ScarletDripstoneClusterConfig> context) {
@@ -37,11 +40,17 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
         BlockPos origin = context.origin();
         RandomSource random = context.random();
         ScarletDripstoneClusterConfig config = context.config();
+        ElderwoodsBiomeSource ebs = (context.chunkGenerator().getBiomeSource() instanceof ElderwoodsBiomeSource b) ? b : null;
 
         // Hard exclusion: never place in Elysian Abyss.
         // BiomeFilter only checks the origin cell; the feature's ceiling search can
         // reach the abyss ceiling even when the origin is in scarlet_caves.
         if (level.getBiome(origin).is(ELYSIAN_RL)) return false;
+        // Never allow vanilla dripstone clusters to originate inside Scarlet Caves
+        if (!config.useScarletBlocks() && (level.getBiome(origin).is(SCARLET_CAVES_RL)
+                || (ebs != null && ebs.isScarletCaveAt(origin.getX(), origin.getY(), origin.getZ())))) {
+            return false;
+        }
         // Also block if the ceiling we'd attach to is inside the abyss Y-range
         // (rough check: abyss ceiling is typically Y -70 to -20)
         if (origin.getY() > -80 && origin.getY() < -15) return false;
@@ -75,6 +84,14 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
                 // Try to find floor and ceiling
                 BlockPos floorPos = findFloor(level, columnPos, config.floorToCeilingSearchRange(), config);
                 BlockPos ceilingPos = findCeiling(level, columnPos, config.floorToCeilingSearchRange(), config);
+
+                // Prevent horizontal/vertical border bleed into Elysian Abyss or (for vanilla dripstone) Scarlet Caves
+                if (floorPos != null && isForbiddenBiomeAt(level, ebs, floorPos, config)) {
+                    floorPos = null;
+                }
+                if (ceilingPos != null && isForbiddenBiomeAt(level, ebs, ceilingPos, config)) {
+                    ceilingPos = null;
+                }
 
                 // 1. Attempt to place Patch (Base Blocks)
                 boolean hasFloorPatch = false;
@@ -116,6 +133,22 @@ public class ScarletDripstoneClusterFeature extends Feature<ScarletDripstoneClus
         }
 
         return placedAny;
+    }
+
+    private boolean isForbiddenBiomeAt(WorldGenLevel level, ElderwoodsBiomeSource ebs, BlockPos pos,
+            ScarletDripstoneClusterConfig config) {
+        if (level.getBiome(pos).is(ELYSIAN_RL)) {
+            return true;
+        }
+        if (!config.useScarletBlocks()) {
+            if (level.getBiome(pos).is(SCARLET_CAVES_RL)) {
+                return true;
+            }
+            if (ebs != null && ebs.isScarletCaveAt(pos.getX(), pos.getY(), pos.getZ())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isDripstone(BlockState state) {
