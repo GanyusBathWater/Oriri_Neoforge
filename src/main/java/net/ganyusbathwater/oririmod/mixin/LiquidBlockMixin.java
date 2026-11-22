@@ -90,6 +90,38 @@ public abstract class LiquidBlockMixin {
             }
 
             // When Blood Water is involved
+            if (hereBloodWater && otherLava) {
+                if (dir == Direction.UP) {
+                    // Lava directly above Blood Water -> Blood Water turns into Scarlet Stone
+                    BlockState scarletStone = net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_STONE.get().defaultBlockState();
+                    level.setBlock(pos, net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, pos, otherPos, scarletStone), 3);
+                    level.levelEvent(1501, pos, 0);
+                } else {
+                    // Blood Water above or beside Lava -> Lava source turns to Obsidian, flowing Lava to Cobbled Scarlet Deepslate
+                    BlockState result = fsOther.isSource()
+                            ? Blocks.OBSIDIAN.defaultBlockState()
+                            : net.ganyusbathwater.oririmod.block.ModBlocks.COBBLED_SCARLET_DEEPSLATE.get().defaultBlockState();
+                    level.setBlock(otherPos, net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, otherPos, pos, result), 3);
+                    level.levelEvent(1501, otherPos, 0);
+                }
+                return;
+            }
+            if (otherBloodWater && hereLava) {
+                if (dir == Direction.DOWN) {
+                    // Blood Water directly below Lava -> Blood Water turns into Scarlet Stone
+                    BlockState scarletStone = net.ganyusbathwater.oririmod.block.ModBlocks.SCARLET_STONE.get().defaultBlockState();
+                    level.setBlock(otherPos, net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, otherPos, pos, scarletStone), 3);
+                    level.levelEvent(1501, otherPos, 0);
+                } else {
+                    // Blood Water above or beside Lava -> Lava source turns to Obsidian, flowing Lava to Cobbled Scarlet Deepslate
+                    BlockState result = fsHere.isSource()
+                            ? Blocks.OBSIDIAN.defaultBlockState()
+                            : net.ganyusbathwater.oririmod.block.ModBlocks.COBBLED_SCARLET_DEEPSLATE.get().defaultBlockState();
+                    level.setBlock(pos, net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, pos, otherPos, result), 3);
+                    level.levelEvent(1501, pos, 0);
+                }
+                return;
+            }
             if (hereBloodWater && otherWater) {
                 level.setBlock(otherPos,
                         net.ganyusbathwater.oririmod.block.ModBlocks.BLOOD_SLUDGE.get().defaultBlockState(), 3);

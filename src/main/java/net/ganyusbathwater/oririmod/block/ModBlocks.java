@@ -1126,6 +1126,16 @@ public class ModBlocks {
         public static final DeferredBlock<Block> TELEPORTER_BLOCK = registerBlock("teleporter",
                         () -> new TeleporterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion().noCollission().strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
 
+        public static final DeferredBlock<Block> FOG_SOURCE = registerBlock("fog_source",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.FogSourceBlock(
+                                        BlockBehaviour.Properties.of()
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.NONE)
+                                                        .strength(-1.0F, 3600000.8F)
+                                                        .noLootTable()
+                                                        .noOcclusion()
+                                                        .noCollission()
+                                                        .replaceable()));
+
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);
                 registerBlockItem(name, toReturn);
@@ -1154,6 +1164,16 @@ public class ModBlocks {
                         ModItems.ITEMS.register(name,
                                         () -> new net.ganyusbathwater.oririmod.item.custom.ForcefieldEmitterBlockItem(
                                                         block.get(), new Item.Properties()));
+                } else if (name.equals("fog_source")) {
+                        ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()) {
+                                @Override
+                                public boolean doesSneakBypassUse(net.minecraft.world.item.ItemStack stack,
+                                                net.minecraft.world.level.LevelReader level,
+                                                net.minecraft.core.BlockPos pos,
+                                                net.minecraft.world.entity.player.Player player) {
+                                        return level.getBlockState(pos).is(FOG_SOURCE.get());
+                                }
+                        });
                 } else {
                         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
                 }

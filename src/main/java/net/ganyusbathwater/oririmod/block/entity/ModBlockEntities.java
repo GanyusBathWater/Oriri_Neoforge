@@ -81,6 +81,11 @@ public class ModBlockEntities {
             () -> BlockEntityType.Builder.of(SoulHarvesterBlockEntity::new,
                     ModBlocks.SOUL_HARVESTER.get()).build(null));
 
+    public static final Supplier<BlockEntityType<FogSourceBlockEntity>> FOG_SOURCE_BE = BLOCK_ENTITIES.register(
+            "fog_source",
+            () -> BlockEntityType.Builder.of(FogSourceBlockEntity::new,
+                    ModBlocks.FOG_SOURCE.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

@@ -133,6 +133,13 @@ public class OririMod {
             net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.init();
             net.ganyusbathwater.oririmod.dialogue.DialogueRegistry.init();
             ModBlocks.registerPottedPlants();
+            net.neoforged.neoforge.fluids.FluidInteractionRegistry.addInteraction(
+                    net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value(),
+                    new net.neoforged.neoforge.fluids.FluidInteractionRegistry.InteractionInformation(
+                            ModFluidTypes.BLOOD_WATER_TYPE.get(),
+                            fluidState -> fluidState.isSource()
+                                    ? net.minecraft.world.level.block.Blocks.OBSIDIAN.defaultBlockState()
+                                    : ModBlocks.COBBLED_SCARLET_DEEPSLATE.get().defaultBlockState()));
             if (net.neoforged.fml.ModList.get().isLoaded("distanthorizons")) {
                 net.ganyusbathwater.oririmod.compat.dh.OririDistantHorizonsCompat.registerCommon();
             }

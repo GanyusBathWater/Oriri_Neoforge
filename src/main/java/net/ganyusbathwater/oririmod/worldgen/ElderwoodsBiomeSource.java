@@ -191,45 +191,76 @@ public class ElderwoodsBiomeSource extends BiomeSource {
 
     private static final int FLAT_BEACH_GRID = 16;
 
-    // Morphological opening parameters for filtering tiny Scarlet biome slivers &
-    // micro-swamps.
+    // Morphological opening parameters for micro-swamps and unified ~150-block minimum
+    // diameter macro land biome enforcement.
     private static final int MORPH_QUART_STEP = 4;
-    private static final int SCARLET_CORE_RADIUS = 26;
-    private static final int SCARLET_DILATE_QUARTS = 7; // 7 * 4 = 28 blocks (>= 26 + diagonal grid step)
     private static final int SWAMP_CORE_RADIUS = 14;
     private static final int SWAMP_DILATE_QUARTS = 4; // 4 * 4 = 16 blocks
-    private static final int VILE_CORE_RADIUS = 22;
-    private static final int VILE_DILATE_QUARTS = 6; // 6 * 4 = 24 blocks
-    private static final int ARID_CORE_RADIUS = 24;
-    private static final int ARID_DILATE_QUARTS = 7; // 7 * 4 = 28 blocks (>= 24 + diagonal grid step)
     private static final int MORPH_CACHE_SIZE = 8192;
     private static final int MORPH_CACHE_MASK = MORPH_CACHE_SIZE - 1;
 
-    private static final int[][] SCARLET_DILATE_OFFSETS = buildSortedQuartOffsets(SCARLET_DILATE_QUARTS);
     private static final int[][] SWAMP_DILATE_OFFSETS = buildSortedQuartOffsets(SWAMP_DILATE_QUARTS);
-    private static final int[][] VILE_DILATE_OFFSETS = buildSortedQuartOffsets(VILE_DILATE_QUARTS);
-    private static final int[][] ARID_DILATE_OFFSETS = buildSortedQuartOffsets(ARID_DILATE_QUARTS);
-    private static final int[][] SCARLET_CORE_PROBES = buildCoreProbes(SCARLET_CORE_RADIUS, true);
     private static final int[][] SWAMP_CORE_PROBES = buildCoreProbes(SWAMP_CORE_RADIUS, false);
-    private static final int[][] VILE_CORE_PROBES = buildCoreProbes(VILE_CORE_RADIUS, true);
-    private static final int[][] ARID_CORE_PROBES = buildCoreProbes(ARID_CORE_RADIUS, true);
-    private static final int[][] BORDER_SAMPLE_DIRS = {
-            { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },
-            { 1, 1 }, { -1, 1 }, { 1, -1 }, { -1, -1 }
-    };
-    private static final int[] BORDER_SAMPLE_RADII = { 14, 28, 44, 64 };
+
+    // Unified macro-region morphological filter (~150-block minimum diameter across all
+    // major land biomes: Elderwoods, Scarlet, Arid/Savanna/Desert, Vile Plains, Highlands).
+    private static final byte REGION_NONE = 0;
+    private static final byte REGION_ELDERWOODS = 1;
+    private static final byte REGION_SCARLET = 2;
+    private static final byte REGION_ARID = 3;
+    private static final byte REGION_VILE = 4;
+    private static final byte REGION_HIGHLANDS = 5;
+
+    private static final int MACRO_GRID_STEP = 16;
+    private static final int MACRO_CORE_RADIUS = 72; // ~144-160 blocks minimum biome diameter
+    private static final int[][] MACRO_CORE_PROBES = buildMacroCoreProbes(MACRO_CORE_RADIUS);
+    private static final int[][] MACRO_DILATE_OFFSETS = buildSortedCellOffsetsSq(6, 29); // sqrt(29)*16 = 86 blocks (>= 72 + diagonal)
+    private static final int[][] MACRO_FALLBACK_OFFSETS = buildSortedCellOffsetsSq(12, 144); // up to 192 blocks nearest-core search
 
     private static final class MorphCoreCache {
         long seed = Long.MIN_VALUE;
         final long[] keys = new long[MORPH_CACHE_SIZE];
-        // 0 = empty, 1 = not core, 2 = core
+        // 0 = empty, 1 = not core, 2 = core (or for macro caches: 0 = empty, 1 = none, 2..6 = region+1)
         final byte[] states = new byte[MORPH_CACHE_SIZE];
     }
 
-    private final ThreadLocal<MorphCoreCache> scarletCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
     private final ThreadLocal<MorphCoreCache> swampCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
-    private final ThreadLocal<MorphCoreCache> vileCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
-    private final ThreadLocal<MorphCoreCache> aridCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
+    private final ThreadLocal<MorphCoreCache> macroCoreCache = ThreadLocal.withInitial(MorphCoreCache::new);
+    private final ThreadLocal<MorphCoreCache> macroResolvedCache = ThreadLocal.withInitial(MorphCoreCache::new);
+
+    private static int[][] buildSortedCellOffsetsSq(int maxCells, int maxDistSq) {
+        java.util.List<int[]> list = new java.util.ArrayList<>();
+        for (int dx = -maxCells; dx <= maxCells; dx++) {
+            for (int dz = -maxCells; dz <= maxCells; dz++) {
+                int d2 = dx * dx + dz * dz;
+                if (d2 <= maxDistSq) {
+                    list.add(new int[] { dx, dz, d2 });
+                }
+            }
+        }
+        list.sort(java.util.Comparator.comparingInt(a -> a[2]));
+        int[][] arr = new int[list.size()][2];
+        for (int i = 0; i < list.size(); i++) {
+            arr[i][0] = list.get(i)[0];
+            arr[i][1] = list.get(i)[1];
+        }
+        return arr;
+    }
+
+    private static int[][] buildMacroCoreProbes(int r) {
+        java.util.List<int[]> pts = new java.util.ArrayList<>(21);
+        pts.add(new int[] { 0, 0 });
+        int mid = r / 2;
+        for (int i = 0; i < 8; i++) {
+            double ang = i * (Math.PI / 4.0);
+            pts.add(new int[] { (int) Math.round(Math.cos(ang) * mid), (int) Math.round(Math.sin(ang) * mid) });
+        }
+        for (int i = 0; i < 12; i++) {
+            double ang = i * (Math.PI / 6.0);
+            pts.add(new int[] { (int) Math.round(Math.cos(ang) * r), (int) Math.round(Math.sin(ang) * r) });
+        }
+        return pts.toArray(new int[0][]);
+    }
 
     private static int[][] buildSortedQuartOffsets(int maxQuarts) {
         int maxSq = maxQuarts * maxQuarts;
@@ -887,7 +918,10 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         // Strictly zero Elysian Abyss or other biomes inside Scarlet Caves territory.
         // Elysian Abyss caverns taper closed smoothly in rock before humNoise reaches
         // 0.44.
-        if (col.humNoise > 0.46 && y >= col.scarletBottomY) {
+        boolean isScarletSurface = col.surfaceBiome == scarletForestBiome
+                || col.surfaceBiome == scarletSwampBiome
+                || col.surfaceBiome == scarletKarstBiome;
+        if ((isScarletSurface || col.humNoise > 0.46) && y >= col.scarletBottomY) {
             return scarletCavesBiome;
         }
         if (col.caveNoise > 0.20 && col.humNoise <= 0.44 && col.surfaceBiome != vilePlainsBiome) {
@@ -928,47 +962,286 @@ public class ElderwoodsBiomeSource extends BiomeSource {
     private Holder<Biome> computeSurfaceBiome(int x, int z) {
         Holder<Biome> raw = computeRawSurfaceBiome(x, z);
 
-        // Filter out tiny isolated Golden Savanna / Golden Desert micro-blobs so temperature
-        // noise ripples never punch small yellow savanna puddles inside Scarlet or Elderwoods.
-        if (isAridBiome(raw)) {
-            final MorphCoreCache aridCache = aridCoreCache.get();
-            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.045f,
-                    (cx, cz) -> hasAridMorphCoreNear(cx, cz, aridCache))) {
-                raw = computeNonAridFallbackBiome(x, z);
-            }
+        // Exempt oceans, Elder Valley rivers, coastal Beaches, and sheltered Lagoons
+        // from the ~150-block minimum diameter macro-biome rule.
+        if (raw == silentOceansBiome || raw == silentDepthsBiome || raw == sunkenTrenchesBiome
+                || raw == elderValleyBiome || raw == elderLagoonBiome || raw == elderBeachBiome) {
+            return raw;
         }
 
-        if (raw == scarletSwampBiome) {
-            final MorphCoreCache swampCache = swampCoreCache.get();
-            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.055f,
-                    (cx, cz) -> hasMorphCoreNear(cx, cz, true, swampCache, SWAMP_DILATE_OFFSETS, SWAMP_CORE_PROBES))) {
-                raw = scarletForestBiome;
-            }
+        byte macroRegion = resolveSmoothMacroRegion(x, z);
+        return resolveSurfaceBiomeForMacroRegion(x, z, macroRegion);
+    }
+
+    /**
+     * Classifies the underlying raw macro land climate domain at (x, z), ignoring
+     * linear rivers (elder_valley) and coastal beach/lagoon strips so narrow hydrological
+     * features never fragment valid >=150-block continents.
+     */
+    private byte computeRawMacroRegion(int x, int z) {
+        double contNoise = sampleContinentalness(x, z);
+        if (contNoise < -0.02) {
+            return REGION_NONE;
+        }
+        double tempNoise = sampleTemperatureNoise(x, z);
+        if (tempNoise > 0.09) {
+            return REGION_ARID;
+        }
+        double humNoise = sampleHumidityNoise(x, z);
+        double wx = sampleWarpedX(x, z);
+        double wz = sampleWarpedZ(x, z);
+        double effectiveHighland = computeEffectiveHighland(wx, wz, contNoise, tempNoise, humNoise);
+        if (effectiveHighland > 0.04) {
+            return REGION_HIGHLANDS;
+        }
+        double highlandNoise = sampleWarpedHighlandNoise(wx, wz);
+        if (contNoise > 0.26 && tempNoise < -0.02 && highlandNoise > 0.04 && humNoise <= 0.46) {
+            return REGION_ELDERWOODS;
+        }
+        if (humNoise > 0.46) {
+            return REGION_SCARLET;
+        }
+        if (tempNoise < VILE_TEMP_THRESHOLD && contNoise >= 0.055) {
+            return REGION_VILE;
+        }
+        return REGION_ELDERWOODS;
+    }
+
+    /**
+     * Returns the macro region ID (1..5) if cell (gx, gz) is the center of a solid
+     * ~150-block-diameter disk (radius 72 blocks) belonging to that single region, or 0 otherwise.
+     */
+    private byte getMacroCoreCellRegion(int gx, int gz, MorphCoreCache cache) {
+        if (cache.seed != syncedSeed) {
+            Arrays.fill(cache.states, (byte) 0);
+            cache.seed = syncedSeed;
+        }
+        long key = (((long) gx) << 32) ^ (gz & 0xFFFFFFFFL);
+        int slot = ((gx * 73856093) ^ (gz * 19349663)) & MORPH_CACHE_MASK;
+        byte cached = cache.states[slot];
+        if (cached != 0 && cache.keys[slot] == key) {
+            return (byte) (cached - 1);
         }
 
-        if (raw == scarletForestBiome || raw == scarletKarstBiome || raw == scarletSwampBiome) {
-            final MorphCoreCache scarletCache = scarletCoreCache.get();
-            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.045f,
-                    (cx, cz) -> hasMorphCoreNear(cx, cz, false, scarletCache, SCARLET_DILATE_OFFSETS,
-                            SCARLET_CORE_PROBES))) {
-                int surfaceY = computeSurfaceHeight(x, z, null);
-                Holder<Biome> fallback = pickBorderingNonScarletBiome(x, z, surfaceY);
-                if (fallback == elderBeachBiome && sampleContinentalness(x, z) >= 0.055) {
-                    return elderwoodsBiome;
+        int bx = gx * MACRO_GRID_STEP + (MACRO_GRID_STEP >> 1);
+        int bz = gz * MACRO_GRID_STEP + (MACRO_GRID_STEP >> 1);
+        byte centerRegion = computeRawMacroRegion(bx, bz);
+        byte coreRegion = REGION_NONE;
+        if (centerRegion != REGION_NONE) {
+            boolean allMatch = true;
+            for (int i = 1; i < MACRO_CORE_PROBES.length; i++) {
+                if (computeRawMacroRegion(bx + MACRO_CORE_PROBES[i][0], bz + MACRO_CORE_PROBES[i][1]) != centerRegion) {
+                    allMatch = false;
+                    break;
                 }
-                return fallback;
+            }
+            if (allMatch) {
+                coreRegion = centerRegion;
             }
         }
 
-        if (raw == vilePlainsBiome) {
-            final MorphCoreCache vileCache = vileCoreCache.get();
-            if (!ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.045f,
-                    (cx, cz) -> hasVileMorphCoreNear(cx, cz, vileCache))) {
-                return elderwoodsBiome;
+        cache.keys[slot] = key;
+        cache.states[slot] = (byte) (coreRegion + 1);
+        return coreRegion;
+    }
+
+    /**
+     * Resolves the winning >=150-block-diameter macro region for coarse grid cell (gx, gz):
+     * - If the cell's raw region has a confirmed 150-block core within dilation distance, keep it.
+     * - Otherwise (mini-biome < ~150 blocks across), adopt the nearest surviving 150-block core's region.
+     */
+    private byte resolveMacroRegionAtCell(int gx, int gz, MorphCoreCache coreCache, MorphCoreCache resolvedCache) {
+        if (resolvedCache.seed != syncedSeed) {
+            Arrays.fill(resolvedCache.states, (byte) 0);
+            resolvedCache.seed = syncedSeed;
+        }
+        long key = (((long) gx) << 32) ^ (gz & 0xFFFFFFFFL);
+        int slot = ((gx * 73856093) ^ (gz * 19349663)) & MORPH_CACHE_MASK;
+        byte cached = resolvedCache.states[slot];
+        if (cached != 0 && resolvedCache.keys[slot] == key) {
+            return (byte) (cached - 1);
+        }
+
+        int bx = gx * MACRO_GRID_STEP + (MACRO_GRID_STEP >> 1);
+        int bz = gz * MACRO_GRID_STEP + (MACRO_GRID_STEP >> 1);
+        byte rawRegion = computeRawMacroRegion(bx, bz);
+        byte resolved = REGION_NONE;
+
+        if (rawRegion != REGION_NONE) {
+            // 1. Dilation: keep rawRegion if a confirmed ~150-block core of rawRegion is within reach
+            boolean survived = false;
+            for (int i = 0; i < MACRO_DILATE_OFFSETS.length; i++) {
+                int nx = gx + MACRO_DILATE_OFFSETS[i][0];
+                int nz = gz + MACRO_DILATE_OFFSETS[i][1];
+                if (getMacroCoreCellRegion(nx, nz, coreCache) == rawRegion) {
+                    int cx = nx * MACRO_GRID_STEP + (MACRO_GRID_STEP >> 1);
+                    int cz = nz * MACRO_GRID_STEP + (MACRO_GRID_STEP >> 1);
+                    int dx = cx - bx;
+                    int dz = cz - bz;
+                    if (dx * dx + dz * dz <= 256 || computeRawMacroRegion((bx + cx) >> 1, (bz + cz) >> 1) == rawRegion) {
+                        survived = true;
+                        break;
+                    }
+                }
+            }
+
+            if (survived) {
+                resolved = rawRegion;
+            } else {
+                // 2. Mini-biome eliminated: adopt the nearest surviving >=150-block core region
+                for (int i = 0; i < MACRO_FALLBACK_OFFSETS.length; i++) {
+                    byte nearCore = getMacroCoreCellRegion(
+                            gx + MACRO_FALLBACK_OFFSETS[i][0],
+                            gz + MACRO_FALLBACK_OFFSETS[i][1],
+                            coreCache);
+                    if (nearCore != REGION_NONE) {
+                        resolved = nearCore;
+                        break;
+                    }
+                }
+                if (resolved == REGION_NONE) {
+                    resolved = REGION_ELDERWOODS;
+                }
             }
         }
 
-        return raw;
+        resolvedCache.keys[slot] = key;
+        resolvedCache.states[slot] = (byte) (resolved + 1);
+        return resolved;
+    }
+
+    /**
+     * Smoothly interpolates the 16-block macro region grid onto organic 1x1 block contours
+     * using low-frequency FBM domain warping and bilinear region weighting (zero grid blockiness).
+     */
+    private byte resolveSmoothMacroRegion(int x, int z) {
+        final MorphCoreCache coreCache = macroCoreCache.get();
+        final MorphCoreCache resolvedCache = macroResolvedCache.get();
+
+        double warpX = (net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) (x * 0.018f), (float) (z * 0.018f), 2) / 0.32) * 10.0;
+        double warpZ = (net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                (float) ((x + 317) * 0.018f), (float) ((z - 521) * 0.018f), 2) / 0.32) * 10.0;
+        double wx = x + warpX;
+        double wz = z + warpZ;
+
+        int halfStep = MACRO_GRID_STEP >> 1;
+        int gx0 = Math.floorDiv((int) Math.floor(wx) - halfStep, MACRO_GRID_STEP);
+        int gz0 = Math.floorDiv((int) Math.floor(wz) - halfStep, MACRO_GRID_STEP);
+        int gx1 = gx0 + 1;
+        int gz1 = gz0 + 1;
+
+        byte r00 = resolveMacroRegionAtCell(gx0, gz0, coreCache, resolvedCache);
+        byte r10 = resolveMacroRegionAtCell(gx1, gz0, coreCache, resolvedCache);
+        byte r01 = resolveMacroRegionAtCell(gx0, gz1, coreCache, resolvedCache);
+        byte r11 = resolveMacroRegionAtCell(gx1, gz1, coreCache, resolvedCache);
+
+        if (r00 == r10 && r00 == r01 && r00 == r11) {
+            return r00 != REGION_NONE ? r00 : REGION_ELDERWOODS;
+        }
+
+        double cX0 = gx0 * MACRO_GRID_STEP + halfStep;
+        double cZ0 = gz0 * MACRO_GRID_STEP + halfStep;
+        double fx = net.minecraft.util.Mth.clamp((wx - cX0) / (double) MACRO_GRID_STEP, 0.0, 1.0);
+        double fz = net.minecraft.util.Mth.clamp((wz - cZ0) / (double) MACRO_GRID_STEP, 0.0, 1.0);
+
+        double w1 = 0.0, w2 = 0.0, w3 = 0.0, w4 = 0.0, w5 = 0.0;
+        double a00 = (1.0 - fx) * (1.0 - fz);
+        double a10 = fx * (1.0 - fz);
+        double a01 = (1.0 - fx) * fz;
+        double a11 = fx * fz;
+
+        switch (r00) {
+            case REGION_ELDERWOODS -> w1 += a00;
+            case REGION_SCARLET -> w2 += a00;
+            case REGION_ARID -> w3 += a00;
+            case REGION_VILE -> w4 += a00;
+            case REGION_HIGHLANDS -> w5 += a00;
+            default -> {}
+        }
+        switch (r10) {
+            case REGION_ELDERWOODS -> w1 += a10;
+            case REGION_SCARLET -> w2 += a10;
+            case REGION_ARID -> w3 += a10;
+            case REGION_VILE -> w4 += a10;
+            case REGION_HIGHLANDS -> w5 += a10;
+            default -> {}
+        }
+        switch (r01) {
+            case REGION_ELDERWOODS -> w1 += a01;
+            case REGION_SCARLET -> w2 += a01;
+            case REGION_ARID -> w3 += a01;
+            case REGION_VILE -> w4 += a01;
+            case REGION_HIGHLANDS -> w5 += a01;
+            default -> {}
+        }
+        switch (r11) {
+            case REGION_ELDERWOODS -> w1 += a11;
+            case REGION_SCARLET -> w2 += a11;
+            case REGION_ARID -> w3 += a11;
+            case REGION_VILE -> w4 += a11;
+            case REGION_HIGHLANDS -> w5 += a11;
+            default -> {}
+        }
+
+        byte best = REGION_ELDERWOODS;
+        double bestW = w1;
+        if (w2 > bestW) { bestW = w2; best = REGION_SCARLET; }
+        if (w3 > bestW) { bestW = w3; best = REGION_ARID; }
+        if (w4 > bestW) { bestW = w4; best = REGION_VILE; }
+        if (w5 > bestW) { bestW = w5; best = REGION_HIGHLANDS; }
+        return bestW > 0.0 ? best : REGION_ELDERWOODS;
+    }
+
+    private Holder<Biome> resolveSurfaceBiomeForMacroRegion(int x, int z, byte macroRegion) {
+        return switch (macroRegion) {
+            case REGION_ARID -> {
+                double contNoise = sampleContinentalness(x, z);
+                int surfaceY = computeSurfaceHeight(x, z, null);
+                double tempNoise = sampleTemperatureNoise(x, z);
+                double humNoise = sampleHumidityNoise(x, z);
+                yield resolveAridSurfaceBiome(x, z, contNoise, tempNoise, humNoise, surfaceY);
+            }
+            case REGION_HIGHLANDS -> {
+                double contNoise = sampleContinentalness(x, z);
+                int surfaceY = computeSurfaceHeight(x, z, null);
+                double tempNoise = sampleTemperatureNoise(x, z);
+                double humNoise = sampleHumidityNoise(x, z);
+                double wx = sampleWarpedX(x, z);
+                double wz = sampleWarpedZ(x, z);
+                double effectiveHighland = computeEffectiveHighland(wx, wz, contNoise, tempNoise, humNoise);
+                double summitIntensity = computeSummitPeakIntensity(wx, wz, effectiveHighland);
+                if (summitIntensity > 0.24 && surfaceY >= 152) {
+                    yield highlandSummitBiome;
+                } else if (effectiveHighland > 0.42) {
+                    yield highlandForestBiome;
+                } else {
+                    yield highlandMeadowBiome;
+                }
+            }
+            case REGION_SCARLET -> {
+                double contNoise = sampleContinentalness(x, z);
+                double humNoise = sampleHumidityNoise(x, z);
+                if (contNoise >= 0.14 && humNoise > 0.72) {
+                    final MorphCoreCache swampCache = swampCoreCache.get();
+                    if (ElderCoastalHelper.hasSmoothMorphCore(x, z, MORPH_QUART_STEP, 0.055f,
+                            (cx, cz) -> hasMorphCoreNear(cx, cz, true, swampCache, SWAMP_DILATE_OFFSETS, SWAMP_CORE_PROBES))) {
+                        yield scarletSwampBiome;
+                    }
+                }
+                if (contNoise >= 0.14) {
+                    double wx = sampleWarpedX(x, z);
+                    double wz = sampleWarpedZ(x, z);
+                    double tempNoise = Math.min(sampleTemperatureNoise(x, z), 0.08);
+                    if (computeEffectiveKarst(wx, wz, contNoise, tempNoise, humNoise) > 0.15) {
+                        yield scarletKarstBiome;
+                    }
+                }
+                yield scarletForestBiome;
+            }
+            case REGION_VILE -> vilePlainsBiome;
+            default -> elderwoodsBiome;
+        };
     }
 
     private Holder<Biome> computeRawSurfaceBiome(int x, int z) {
@@ -1108,127 +1381,6 @@ public class ElderwoodsBiomeSource extends BiomeSource {
         }
     }
 
-    private boolean isAridMorphCoreQuart(int qx, int qz, MorphCoreCache cache) {
-        if (cache.seed != syncedSeed) {
-            Arrays.fill(cache.states, (byte) 0);
-            cache.seed = syncedSeed;
-        }
-        long key = (((long) qx) << 32) ^ (qz & 0xFFFFFFFFL);
-        int slot = ((qx * 73856093) ^ (qz * 19349663)) & MORPH_CACHE_MASK;
-        byte cached = cache.states[slot];
-        if (cached != 0 && cache.keys[slot] == key) {
-            return cached == 2;
-        }
-
-        int bx = qx * MORPH_QUART_STEP;
-        int bz = qz * MORPH_QUART_STEP;
-        boolean isCore = true;
-        for (int i = 0; i < ARID_CORE_PROBES.length; i++) {
-            if (!isAridBiome(computeRawSurfaceBiome(bx + ARID_CORE_PROBES[i][0], bz + ARID_CORE_PROBES[i][1]))) {
-                isCore = false;
-                break;
-            }
-        }
-        cache.keys[slot] = key;
-        cache.states[slot] = (byte) (isCore ? 2 : 1);
-        return isCore;
-    }
-
-    private boolean hasAridMorphCoreNear(int x, int z, MorphCoreCache cache) {
-        int baseQx = Math.floorDiv(x, MORPH_QUART_STEP);
-        int baseQz = Math.floorDiv(z, MORPH_QUART_STEP);
-        for (int i = 0; i < ARID_DILATE_OFFSETS.length; i++) {
-            int qx = baseQx + ARID_DILATE_OFFSETS[i][0];
-            int qz = baseQz + ARID_DILATE_OFFSETS[i][1];
-            if (isAridMorphCoreQuart(qx, qz, cache)) {
-                int cx = qx * MORPH_QUART_STEP;
-                int cz = qz * MORPH_QUART_STEP;
-                int dx = cx - x;
-                int dz = cz - z;
-                if (dx * dx + dz * dz <= 64
-                        || isAridBiome(computeRawSurfaceBiome((x + cx) >> 1, (z + cz) >> 1))) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Resolves the surrounding non-arid land biome when an isolated micro-blob of Golden Savanna /
-     * Desert is removed by morphological opening, seamlessly matching Scarlet, Highland, Beach, or Elderwoods.
-     */
-    private Holder<Biome> computeNonAridFallbackBiome(int x, int z) {
-        double contNoise = sampleContinentalness(x, z);
-        int surfaceY = computeSurfaceHeight(x, z, null);
-        double tempNoise = sampleTemperatureNoise(x, z);
-        double humNoise = sampleHumidityNoise(x, z);
-
-        if (surfaceY < 74 && contNoise < 0.055) {
-            return elderBeachBiome;
-        }
-        if (contNoise >= 0.14 && humNoise > 0.72) {
-            return scarletSwampBiome;
-        }
-        if (humNoise > 0.46) {
-            if (contNoise >= 0.14) {
-                double wx = sampleWarpedX(x, z);
-                double wz = sampleWarpedZ(x, z);
-                if (computeEffectiveKarst(wx, wz, contNoise, Math.min(tempNoise, 0.08), humNoise) > 0.15) {
-                    return scarletKarstBiome;
-                }
-            }
-            return scarletForestBiome;
-        }
-        return elderwoodsBiome;
-    }
-
-    private boolean isVileMorphCoreQuart(int qx, int qz, MorphCoreCache cache) {
-        if (cache.seed != syncedSeed) {
-            Arrays.fill(cache.states, (byte) 0);
-            cache.seed = syncedSeed;
-        }
-        long key = (((long) qx) << 32) ^ (qz & 0xFFFFFFFFL);
-        int slot = ((qx * 73856093) ^ (qz * 19349663)) & MORPH_CACHE_MASK;
-        byte cached = cache.states[slot];
-        if (cached != 0 && cache.keys[slot] == key) {
-            return cached == 2;
-        }
-
-        int bx = qx * MORPH_QUART_STEP;
-        int bz = qz * MORPH_QUART_STEP;
-        boolean isCore = true;
-        for (int i = 0; i < VILE_CORE_PROBES.length; i++) {
-            if (computeRawSurfaceBiome(bx + VILE_CORE_PROBES[i][0], bz + VILE_CORE_PROBES[i][1]) != vilePlainsBiome) {
-                isCore = false;
-                break;
-            }
-        }
-        cache.keys[slot] = key;
-        cache.states[slot] = (byte) (isCore ? 2 : 1);
-        return isCore;
-    }
-
-    private boolean hasVileMorphCoreNear(int x, int z, MorphCoreCache cache) {
-        int baseQx = Math.floorDiv(x, MORPH_QUART_STEP);
-        int baseQz = Math.floorDiv(z, MORPH_QUART_STEP);
-        for (int i = 0; i < VILE_DILATE_OFFSETS.length; i++) {
-            int qx = baseQx + VILE_DILATE_OFFSETS[i][0];
-            int qz = baseQz + VILE_DILATE_OFFSETS[i][1];
-            if (isVileMorphCoreQuart(qx, qz, cache)) {
-                int cx = qx * MORPH_QUART_STEP;
-                int cz = qz * MORPH_QUART_STEP;
-                int dx = cx - x;
-                int dz = cz - z;
-                if (dx * dx + dz * dz <= 64
-                        || computeRawSurfaceBiome((x + cx) >> 1, (z + cz) >> 1) == vilePlainsBiome) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     private boolean matchesMorphTarget(Holder<Biome> biome, boolean swampOnly) {
         return swampOnly
                 ? biome == scarletSwampBiome
@@ -1294,93 +1446,6 @@ public class ElderwoodsBiomeSource extends BiomeSource {
             return goldenSavannaBiome;
         }
         return goldenDesertBiome;
-    }
-
-    private Holder<Biome> pickBorderingNonScarletBiome(int x, int z, int surfaceY) {
-        int elderwoodsCount = 0;
-        int beachCount = 0;
-        int desertCount = 0;
-        int savannaCount = 0;
-        int mesaCount = 0;
-        int meadowCount = 0;
-        int forestCount = 0;
-        int valleyCount = 0;
-        int bestNonScarletDist = Integer.MAX_VALUE;
-        Holder<Biome> nearestLandBiome = null;
-
-        for (int rIdx = 0; rIdx < BORDER_SAMPLE_RADII.length; rIdx++) {
-            int r = BORDER_SAMPLE_RADII[rIdx];
-            int diagR = (int) Math.round(r * 0.7071);
-            for (int d = 0; d < BORDER_SAMPLE_DIRS.length; d++) {
-                int step = (d < 4) ? r : diagR;
-                int px = x + BORDER_SAMPLE_DIRS[d][0] * step;
-                int pz = z + BORDER_SAMPLE_DIRS[d][1] * step;
-                Holder<Biome> b = computeRawSurfaceBiome(px, pz);
-                if (b == scarletForestBiome || b == scarletKarstBiome || b == scarletSwampBiome
-                        || b == silentOceansBiome || b == silentDepthsBiome || b == sunkenTrenchesBiome) {
-                    continue;
-                }
-                if (b == elderwoodsBiome) {
-                    elderwoodsCount++;
-                } else if (b == elderValleyBiome) {
-                    valleyCount++;
-                } else if (b == elderBeachBiome) {
-                    beachCount++;
-                } else if (b == goldenDesertBiome) {
-                    desertCount++;
-                } else if (b == goldenSavannaBiome) {
-                    savannaCount++;
-                } else if (b == goldenSavannaMesaBiome) {
-                    mesaCount++;
-                } else if (b == highlandMeadowBiome) {
-                    meadowCount++;
-                } else if (b == highlandForestBiome) {
-                    forestCount++;
-                }
-                if (r < bestNonScarletDist) {
-                    bestNonScarletDist = r;
-                    nearestLandBiome = b;
-                }
-            }
-        }
-
-        if (surfaceY < 74 && beachCount > 0) {
-            return elderBeachBiome;
-        }
-        if (valleyCount > elderwoodsCount && valleyCount > 0) {
-            return elderValleyBiome;
-        }
-        if (elderwoodsCount > 0) {
-            return elderwoodsBiome;
-        }
-
-        Holder<Biome> dominant = nearestLandBiome != null ? nearestLandBiome : elderwoodsBiome;
-        int bestCount = 0;
-        if (meadowCount > bestCount) {
-            bestCount = meadowCount;
-            dominant = highlandMeadowBiome;
-        }
-        if (forestCount > bestCount) {
-            bestCount = forestCount;
-            dominant = highlandForestBiome;
-        }
-        if (savannaCount > bestCount) {
-            bestCount = savannaCount;
-            dominant = goldenSavannaBiome;
-        }
-        if (mesaCount > bestCount) {
-            bestCount = mesaCount;
-            dominant = goldenSavannaMesaBiome;
-        }
-        if (desertCount > bestCount) {
-            bestCount = desertCount;
-            dominant = goldenDesertBiome;
-        }
-        if (beachCount > bestCount) {
-            bestCount = beachCount;
-            dominant = elderBeachBiome;
-        }
-        return dominant;
     }
 
     /**
