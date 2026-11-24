@@ -110,7 +110,7 @@ public final class TornadoDisaster {
                 continue;
             }
 
-            int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(spawnX), (int) Math.floor(spawnZ));
+            int surfaceY = DisasterTornadoEntity.sampleTerrainGroundY(level, (int) Math.floor(spawnX), (int) Math.floor(spawnZ));
             BlockPos ground = new BlockPos((int) Math.floor(spawnX), surfaceY, (int) Math.floor(spawnZ));
 
             // Don't spawn directly in water

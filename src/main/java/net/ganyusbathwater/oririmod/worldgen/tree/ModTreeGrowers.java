@@ -20,7 +20,7 @@ public class ModTreeGrowers {
             Optional.empty(), Optional.of(ModConfiguredFeatures.ABYSS_CROWN_TREE_KEY), Optional.empty());
 
     public static final TreeGrower EPOCH_TREE = new TreeGrower(OririMod.MOD_ID + ":epoch_tree",
-            Optional.empty(), Optional.of(ModConfiguredFeatures.EPOCH_TREE_KEY), Optional.empty());
+            Optional.empty(), Optional.of(ModConfiguredFeatures.EPOCH_TREE_FRUITFUL_KEY), Optional.empty());
 
     public static final TreeGrower VILE_VINE = new TreeGrower(OririMod.MOD_ID + ":vile_vine",
             Optional.empty(), Optional.of(ModConfiguredFeatures.VILE_VINE_KEY), Optional.empty());

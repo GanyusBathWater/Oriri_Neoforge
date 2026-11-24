@@ -1177,6 +1177,16 @@ public class ModBlocks {
                                                         .noCollission()
                                                         .replaceable()));
 
+        public static final DeferredBlock<Block> VOLUME_FOG_SOURCE = registerBlock("volume_fog_source",
+                        () -> new net.ganyusbathwater.oririmod.block.custom.VolumeFogSourceBlock(
+                                        BlockBehaviour.Properties.of()
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.NONE)
+                                                        .strength(-1.0F, 3600000.8F)
+                                                        .noLootTable()
+                                                        .noOcclusion()
+                                                        .noCollission()
+                                                        .replaceable()));
+
         private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
                 DeferredBlock<T> toReturn = BLOCKS.register(name, block);
                 registerBlockItem(name, toReturn);
@@ -1205,14 +1215,14 @@ public class ModBlocks {
                         ModItems.ITEMS.register(name,
                                         () -> new net.ganyusbathwater.oririmod.item.custom.ForcefieldEmitterBlockItem(
                                                         block.get(), new Item.Properties()));
-                } else if (name.equals("fog_source")) {
+                } else if (name.equals("fog_source") || name.equals("volume_fog_source")) {
                         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()) {
                                 @Override
                                 public boolean doesSneakBypassUse(net.minecraft.world.item.ItemStack stack,
                                                 net.minecraft.world.level.LevelReader level,
                                                 net.minecraft.core.BlockPos pos,
                                                 net.minecraft.world.entity.player.Player player) {
-                                        return level.getBlockState(pos).is(FOG_SOURCE.get());
+                                        return level.getBlockState(pos).getBlock() instanceof net.ganyusbathwater.oririmod.block.custom.FogSourceBlock;
                                 }
                         });
                 } else {

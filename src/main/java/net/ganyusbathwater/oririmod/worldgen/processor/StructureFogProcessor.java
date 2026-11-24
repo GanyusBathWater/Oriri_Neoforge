@@ -3,6 +3,7 @@ package net.ganyusbathwater.oririmod.worldgen.processor;
 import com.mojang.serialization.MapCodec;
 import net.ganyusbathwater.oririmod.attachment.ModAttachments;
 import net.ganyusbathwater.oririmod.block.custom.FogSourceBlock;
+import net.ganyusbathwater.oririmod.block.custom.VolumeFogSourceBlock;
 import net.ganyusbathwater.oririmod.network.NetworkHandler;
 import net.ganyusbathwater.oririmod.world.fog.ChunkFogAnchors;
 import net.ganyusbathwater.oririmod.world.fog.FogAnchor;
@@ -101,9 +102,10 @@ public class StructureFogProcessor extends StructureProcessor {
             int density = state.getValue(FogSourceBlock.DENSITY);
             FogSourceBlock.FogColor color = state.getValue(FogSourceBlock.COLOR);
             boolean waterlogged = state.getValue(FogSourceBlock.WATERLOGGED);
+            boolean isVolume = state.getBlock() instanceof VolumeFogSourceBlock;
 
-            List<BlockPos> supports = pickStructuralSupports(origin, solidBlocks, solidMap);
-            FogAnchor anchor = new FogAnchor(origin, density, color, supports);
+            List<BlockPos> supports = pickStructuralSupports(origin, isVolume, solidBlocks, solidMap);
+            FogAnchor anchor = new FogAnchor(origin, density, color, isVolume, supports);
 
             ChunkAccess chunk = level.getChunk(origin);
             ChunkFogAnchors chunkAnchors = chunk.getData(ModAttachments.FOG_ANCHORS);
@@ -139,6 +141,7 @@ public class StructureFogProcessor extends StructureProcessor {
      */
     private static List<BlockPos> pickStructuralSupports(
             BlockPos origin,
+            boolean isVolume,
             List<StructureTemplate.StructureBlockInfo> solidBlocks,
             Map<BlockPos, BlockState> solidMap) {
         List<BlockPos> result = new ArrayList<>(MAX_SUPPORTS);
@@ -151,6 +154,11 @@ public class StructureFogProcessor extends StructureProcessor {
             chosen.add(floorPos);
         }
 
+        // Floating mid-air volume emitters search slightly wider/taller to capture surrounding walls/pillars/ceiling
+        int maxHoriz = isVolume ? 6 : SUPPORT_RADIUS_XZ;
+        int minDy = isVolume ? -6 : -2;
+        int maxDy = isVolume ? 6 : 3;
+
         // Collect nearby candidates separated into preferred architectural blocks vs natural soil/grass
         List<BlockPos> preferred = new ArrayList<>();
         List<BlockPos> fallback = new ArrayList<>();
@@ -162,7 +170,7 @@ public class StructureFogProcessor extends StructureProcessor {
             int dx = p.getX() - origin.getX();
             int dy = p.getY() - origin.getY();
             int dz = p.getZ() - origin.getZ();
-            if (Math.abs(dx) > SUPPORT_RADIUS_XZ || Math.abs(dz) > SUPPORT_RADIUS_XZ || dy < -2 || dy > 3) {
+            if (Math.abs(dx) > maxHoriz || Math.abs(dz) > maxHoriz || dy < minDy || dy > maxDy) {
                 continue;
             }
             if (isNaturalDirtOrGrass(cand.state())) {

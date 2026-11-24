@@ -73,6 +73,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.MAGIC_BARRIER_CORE_BLOCK);
                         output.accept(ModBlocks.TELEPORTER_BLOCK);
                         output.accept(ModBlocks.FOG_SOURCE);
+                        output.accept(ModBlocks.VOLUME_FOG_SOURCE);
 
                         // ===== ELDER PINE =====
                         output.accept(ModBlocks.ELDER_PINE_LOG);

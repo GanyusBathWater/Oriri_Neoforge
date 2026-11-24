@@ -3,10 +3,15 @@ package net.ganyusbathwater.oririmod.block.custom;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -18,11 +23,20 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class MyriadCactusBlock extends DirectionalBlock {
+public class MyriadCactusBlock extends DirectionalBlock implements BonemealableBlock {
     public static final MapCodec<MyriadCactusBlock> CODEC = simpleCodec(MyriadCactusBlock::new);
+
+    private static final int MAX_TRUNK_HEIGHT = 7;
+    private static final int MAX_ARMS = 3;
+    private static final int MAX_ARM_VERTICAL_HEIGHT = 3;
 
     public static final BooleanProperty UP = BlockStateProperties.UP;
     public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
@@ -147,5 +161,258 @@ public class MyriadCactusBlock extends DirectionalBlock {
     @Override
     protected void entityInside(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, net.minecraft.world.entity.Entity entity) {
         entity.hurt(level.damageSources().cactus(), 1.0F);
+    }
+
+    @Override
+    protected boolean isRandomlyTicking(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (!level.isAreaLoaded(pos, 3)) {
+            return;
+        }
+        // Only tick growth from tip blocks (nothing directly above) so taller cacti do not grow exponentially faster
+        if (level.getBlockState(pos.above()).is(this)) {
+            return;
+        }
+        if (random.nextInt(14) == 0) {
+            tryGrowStep(level, pos, random);
+        }
+    }
+
+    @Override
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
+        CactusStructure structure = analyzeStructure(level, pos);
+        if (structure == null) {
+            return false;
+        }
+        if (canGrowTrunk(level, structure)) {
+            return true;
+        }
+        if (!findExtendableArms(level, structure).isEmpty()) {
+            return true;
+        }
+        return !findNewArmCandidates(level, structure).isEmpty();
+    }
+
+    @Override
+    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
+        return true;
+    }
+
+    @Override
+    public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
+        tryGrowStep(level, pos, random);
+    }
+
+    private record ArmGrowthTarget(BlockPos pos, Direction facing) {}
+
+    private record NewArmCandidate(BlockPos trunkPos, Direction dir) {}
+
+    private record CactusStructure(
+            BlockPos trunkBase,
+            int trunkHeight,
+            BlockPos trunkTop,
+            int armCount,
+            Set<Direction> usedDirs,
+            Set<Integer> usedArmLevels,
+            List<BlockPos> armOrigins,
+            List<Direction> armDirs
+    ) {}
+
+    private CactusStructure analyzeStructure(LevelReader level, BlockPos startPos) {
+        // Walk backwards along parent FACING links to find the root of the cactus
+        BlockPos cur = startPos;
+        for (int step = 0; step < 24; step++) {
+            BlockState st = level.getBlockState(cur);
+            if (!st.is(this)) {
+                return null;
+            }
+            Direction parentDir = st.getValue(FACING).getOpposite();
+            BlockPos parentPos = cur.relative(parentDir);
+            if (!level.getBlockState(parentPos).is(this)) {
+                break;
+            }
+            cur = parentPos;
+        }
+
+        // If the cactus was rooted vertically, walk down any straight vertical stack to the true base
+        while (level.getBlockState(cur.below()).is(this)) {
+            cur = cur.below();
+        }
+        BlockPos trunkBase = cur;
+
+        // Measure vertical trunk height
+        int trunkHeight = 0;
+        BlockPos scan = trunkBase;
+        while (trunkHeight < MAX_TRUNK_HEIGHT + 4 && level.getBlockState(scan).is(this)) {
+            trunkHeight++;
+            scan = scan.above();
+        }
+        if (trunkHeight <= 0) {
+            return null;
+        }
+        BlockPos trunkTop = trunkBase.above(trunkHeight - 1);
+
+        // Scan existing orthogonal arms branching off the trunk
+        int armCount = 0;
+        Set<Direction> usedDirs = EnumSet.noneOf(Direction.class);
+        Set<Integer> usedArmLevels = new HashSet<>();
+        List<BlockPos> armOrigins = new ArrayList<>();
+        List<Direction> armDirs = new ArrayList<>();
+
+        for (int h = 1; h < trunkHeight; h++) {
+            BlockPos trunkNode = trunkBase.above(h);
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                BlockPos adj = trunkNode.relative(dir);
+                BlockState adjState = level.getBlockState(adj);
+                if (adjState.is(this) && adjState.getValue(FACING) == dir) {
+                    armCount++;
+                    usedDirs.add(dir);
+                    usedArmLevels.add(h);
+                    armOrigins.add(trunkNode);
+                    armDirs.add(dir);
+                }
+            }
+        }
+
+        return new CactusStructure(trunkBase, trunkHeight, trunkTop, armCount, usedDirs, usedArmLevels, armOrigins, armDirs);
+    }
+
+    private boolean canPlaceGrowthBlock(LevelReader level, BlockPos pos) {
+        if (pos.getY() >= level.getMaxBuildHeight() - 1) {
+            return false;
+        }
+        BlockState existing = level.getBlockState(pos);
+        return existing.isAir() || existing.canBeReplaced();
+    }
+
+    private boolean canGrowTrunk(LevelReader level, CactusStructure s) {
+        return s.trunkHeight() < MAX_TRUNK_HEIGHT && canPlaceGrowthBlock(level, s.trunkTop().above());
+    }
+
+    private List<ArmGrowthTarget> findExtendableArms(LevelReader level, CactusStructure s) {
+        List<ArmGrowthTarget> targets = new ArrayList<>();
+        for (int i = 0; i < s.armOrigins().size(); i++) {
+            BlockPos origin = s.armOrigins().get(i);
+            Direction dir = s.armDirs().get(i);
+            BlockPos seg1 = origin.relative(dir);
+            BlockPos seg2 = seg1.relative(dir);
+            BlockState seg2State = level.getBlockState(seg2);
+
+            if (!seg2State.is(this)) {
+                // Arm only has 1 horizontal segment so far — complete the 2-block horizontal span
+                if (canPlaceGrowthBlock(level, seg2)) {
+                    targets.add(new ArmGrowthTarget(seg2, dir));
+                }
+            } else {
+                // Arm has its 2 horizontal segments; check vertical riser up to MAX_ARM_VERTICAL_HEIGHT
+                int armVert = 0;
+                BlockPos tip = seg2.above();
+                while (armVert < MAX_ARM_VERTICAL_HEIGHT && level.getBlockState(tip).is(this)) {
+                    armVert++;
+                    tip = tip.above();
+                }
+                if (armVert < MAX_ARM_VERTICAL_HEIGHT && canPlaceGrowthBlock(level, tip)) {
+                    targets.add(new ArmGrowthTarget(tip, Direction.UP));
+                }
+            }
+        }
+        return targets;
+    }
+
+    private List<NewArmCandidate> findNewArmCandidates(LevelReader level, CactusStructure s) {
+        List<NewArmCandidate> candidates = new ArrayList<>();
+        if (s.armCount() >= MAX_ARMS || s.trunkHeight() < 3) {
+            return candidates;
+        }
+        // Branches sprout from height index >= 2 and below the trunk tip (matching MyriadCactusFeature)
+        int maxBranchH = Math.max(2, s.trunkHeight() - 2);
+        for (int h = 2; h <= maxBranchH; h++) {
+            if (s.usedArmLevels().contains(h)) {
+                continue;
+            }
+            BlockPos trunkNode = s.trunkBase().above(h);
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                if (s.usedDirs().contains(dir)) {
+                    continue;
+                }
+                BlockPos seg1 = trunkNode.relative(dir);
+                BlockPos seg2 = seg1.relative(dir);
+                if (canPlaceGrowthBlock(level, seg1) && canPlaceGrowthBlock(level, seg2)) {
+                    candidates.add(new NewArmCandidate(trunkNode, dir));
+                }
+            }
+        }
+        return candidates;
+    }
+
+    private boolean tryGrowStep(ServerLevel level, BlockPos pos, RandomSource random) {
+        CactusStructure s = analyzeStructure(level, pos);
+        if (s == null) {
+            return false;
+        }
+
+        boolean trunkCanGrow = canGrowTrunk(level, s);
+        List<ArmGrowthTarget> extendableArms = findExtendableArms(level, s);
+        List<NewArmCandidate> newArms = findNewArmCandidates(level, s);
+
+        if (!trunkCanGrow && extendableArms.isEmpty() && newArms.isEmpty()) {
+            return false;
+        }
+
+        // Grow trunk first while young (< 3 blocks tall)
+        if (s.trunkHeight() < 3 && trunkCanGrow) {
+            placeConnectedSegment(level, s.trunkTop().above(), Direction.UP);
+            return true;
+        }
+
+        // Build weighted choices among trunk growth, extending existing arms, and sprouting new arms
+        int trunkWeight = trunkCanGrow ? (s.trunkHeight() < 5 ? 5 : 3) : 0;
+        int extendWeight = !extendableArms.isEmpty() ? 4 : 0;
+        int sproutWeight = (!newArms.isEmpty() && s.trunkHeight() >= 4) ? 3 : (!newArms.isEmpty() && !trunkCanGrow ? 3 : 0);
+        int totalWeight = trunkWeight + extendWeight + sproutWeight;
+
+        if (totalWeight <= 0) {
+            if (trunkCanGrow) {
+                placeConnectedSegment(level, s.trunkTop().above(), Direction.UP);
+                return true;
+            }
+            return false;
+        }
+
+        int roll = random.nextInt(totalWeight);
+        if (roll < trunkWeight) {
+            placeConnectedSegment(level, s.trunkTop().above(), Direction.UP);
+            return true;
+        }
+        roll -= trunkWeight;
+
+        if (roll < extendWeight) {
+            ArmGrowthTarget target = extendableArms.get(random.nextInt(extendableArms.size()));
+            placeConnectedSegment(level, target.pos(), target.facing());
+            return true;
+        }
+
+        NewArmCandidate arm = newArms.get(random.nextInt(newArms.size()));
+        BlockPos seg1 = arm.trunkPos().relative(arm.dir());
+        BlockPos seg2 = seg1.relative(arm.dir());
+        placeConnectedSegment(level, seg1, arm.dir());
+        placeConnectedSegment(level, seg2, arm.dir());
+        return true;
+    }
+
+    private void placeConnectedSegment(ServerLevel level, BlockPos pos, Direction facing) {
+        BlockState placed = this.defaultBlockState()
+                .setValue(FACING, facing)
+                .setValue(UP, level.getBlockState(pos.above()).is(this))
+                .setValue(DOWN, level.getBlockState(pos.below()).is(this))
+                .setValue(NORTH, level.getBlockState(pos.north()).is(this))
+                .setValue(SOUTH, level.getBlockState(pos.south()).is(this))
+                .setValue(EAST, level.getBlockState(pos.east()).is(this))
+                .setValue(WEST, level.getBlockState(pos.west()).is(this));
+        level.setBlock(pos, placed, Block.UPDATE_ALL);
     }
 }

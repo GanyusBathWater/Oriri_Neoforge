@@ -1870,7 +1870,8 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                     int minSubY = Math.max(MIN_Y + 5, surfaceY - subDepth);
                     for (int y = surfaceY; y >= minSubY; y--) {
                         mutablePos.set(worldX, y, worldZ);
-                        if (isDepthsCurrent && y < surfaceY && chunk.getBlockState(mutablePos).is(Blocks.WATER)) {
+                        if ((isDepthsCurrent && y < surfaceY && chunk.getBlockState(mutablePos).is(Blocks.WATER))
+                                || (valleySurface.inSourceLake && chunk.getBlockState(mutablePos).is(Blocks.WATER))) {
                             break;
                         }
                         BlockState layerState = (y == surfaceY)
@@ -1998,6 +1999,82 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
             return false;
         }
         return (ebs.getDynamicAbyssThreshold(px, pz) - ebs.sampleContinentalness(px, pz)) >= 0.002;
+    }
+
+    /**
+     * Evaluates a small, deterministic water-filled karst spring cave directly beneath
+     * an Elder Valley River source lake, with a central downward entrance opening in the
+     * middle of the lake floor and 1–2 short submerged pockets safely contained inside the basin.
+     */
+    private boolean isSourceLakeSpringCave(
+            int x, int y, int z, int surfaceY,
+            ElderValleyTerrainHelper.ValleyColumnInfo valley,
+            int caveFloorY, int chamberCenterY, double chamberRadius) {
+        if (y < caveFloorY || y > surfaceY) {
+            return false;
+        }
+
+        double dx = x - valley.sourceLakeX;
+        double dz = z - valley.sourceLakeZ;
+        double rawDist = Math.hypot(dx, dz);
+        double maxHorizR = Math.min(13.0, Math.max(7.5, valley.sourceLakeRadius * 0.68));
+        if (rawDist > maxHorizR) {
+            return false;
+        }
+
+        long lSeed = valley.sourceLakeSeed;
+        double n3 = net.ganyusbathwater.oririmod.util.FastNoise.noise3D(
+                (float) (x * 0.14), (float) (y * 0.16), (float) (z * 0.14));
+
+        // 1. Central downward spring throat opening right in the middle of the lake floor
+        if (y >= chamberCenterY) {
+            double depthFromBed = Math.max(0.0, surfaceY - y);
+            double phase = (mix64(lSeed ^ 0x33A9L) & 0xFFFFL) * (Math.PI * 2.0 / 65536.0);
+            double meanderT = Mth.clamp(depthFromBed / 10.0, 0.0, 1.0);
+            double shaftCx = valley.sourceLakeX + Math.sin(depthFromBed * 0.22 + phase) * 1.35 * meanderT;
+            double shaftCz = valley.sourceLakeZ + Math.cos(depthFromBed * 0.22 + phase) * 1.35 * meanderT;
+            double shaftDist = Math.hypot(x - shaftCx, z - shaftCz);
+            double mouthFlare = Math.max(0.0, 1.0 - depthFromBed / 3.5) * 1.4;
+            double shaftRadius = 2.6 + mouthFlare + n3 * 0.65;
+            if (shaftDist <= shaftRadius) {
+                return true;
+            }
+        }
+
+        // 2. Main submerged spring chamber (kept strictly >= 4 blocks below lake bed outside the central throat)
+        if (y <= surfaceY - 4) {
+            double chamberHalfH = 4.6;
+            double dy = y - chamberCenterY;
+            double norm = (dx * dx + dz * dz) / (chamberRadius * chamberRadius)
+                    + (dy * dy) / (chamberHalfH * chamberHalfH);
+            if (norm <= 1.0 + n3 * 0.28) {
+                return true;
+            }
+        }
+
+        // 3. 1–2 short organic side pockets branching from the spring chamber
+        if (y <= surfaceY - 5) {
+            int pocketCount = 1 + (int) (mix64(lSeed ^ 0x71C3L) & 1L);
+            double baseAngle = (mix64(lSeed ^ 0xA4B1L) & 0xFFFFL) * (Math.PI * 2.0 / 65536.0);
+            for (int p = 0; p < pocketCount; p++) {
+                double ang = baseAngle + p * (Math.PI * 0.85 + 0.6);
+                double offDist = chamberRadius * 0.56;
+                double px = valley.sourceLakeX + Math.cos(ang) * offDist;
+                double pz = valley.sourceLakeZ + Math.sin(ang) * offDist;
+                double py = chamberCenterY - 1.2 - p * 0.8;
+                double pRad = (p == 0) ? 4.2 : 3.6;
+                double pHalfH = 3.2;
+                double pdx = x - px;
+                double pdz = z - pz;
+                double pdy = y - py;
+                double pNorm = (pdx * pdx + pdz * pdz) / (pRad * pRad) + (pdy * pdy) / (pHalfH * pHalfH);
+                if (pNorm <= 1.0 + n3 * 0.26) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -2194,7 +2271,34 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
                             : BASE_HEIGHT;
                     int maxY = Math.max(surfaceY, Math.max(BASE_HEIGHT, riverWaterY));
                     boolean isRiverProtected = fillValley.hasValley && fillValley.isProtectedRiverbed;
-                    int riverBedSafeMinY = fillValley.bedY - 12;
+
+                    // Elder Valley Source Lake Spring Cave parameters (hoisted once per column)
+                    boolean hasSourceLakeCave = fillValley.hasValley && fillValley.inSourceLake
+                            && fillValley.sourceLakeRadius >= 8.0;
+                    double sourceLakeRawDist = 999.0;
+                    int sourceCaveFloorY = surfaceY;
+                    int sourceCaveChamberY = surfaceY;
+                    double sourceCaveChamberR = 0.0;
+                    boolean sourceCaveHasMagmaVents = false;
+                    if (hasSourceLakeCave) {
+                        sourceLakeRawDist = Math.hypot(worldX - fillValley.sourceLakeX, worldZ - fillValley.sourceLakeZ);
+                        double maxCaveHorizR = Math.min(13.0, Math.max(7.5, fillValley.sourceLakeRadius * 0.68));
+                        if (sourceLakeRawDist > maxCaveHorizR) {
+                            hasSourceLakeCave = false;
+                        } else {
+                            long lSeed = fillValley.sourceLakeSeed;
+                            int lakeBedRefY = fillValley.sourceLakeWaterY - 4;
+                            int caveDepth = 15 + (int) Math.floorMod(mix64(lSeed ^ 0x51A7BEEFL), 9L); // 15..23 blocks below lake bed
+                            sourceCaveFloorY = Math.max(MIN_Y + 12, lakeBedRefY - caveDepth);
+                            sourceCaveChamberY = sourceCaveFloorY + 5;
+                            sourceCaveChamberR = Math.min(10.5, Math.max(6.2, fillValley.sourceLakeRadius * 0.50));
+                            // 50% plain water spring cave, 50% magma / aether magma floor vents (no hydrothermal chimneys)
+                            sourceCaveHasMagmaVents = (mix64(lSeed ^ 0x9E3779B97F4A7C15L) & 1L) == 0L;
+                        }
+                    }
+                    int riverBedSafeMinY = hasSourceLakeCave
+                            ? Math.min(fillValley.bedY - 12, sourceCaveFloorY - 8)
+                            : fillValley.bedY - 12;
 
                     // Cache column biome properties
                     Holder<Biome> surfaceBiome = (ebs != null)
@@ -2382,6 +2486,37 @@ public class ElderwoodsChunkGenerator extends ChunkGenerator {
 
                         if (y < MIN_Y + 6) {
                             chunk.setBlockState(pos, DEEPSLATE, false);
+                            continue;
+                        }
+
+                        // Small submerged spring caves beneath Elder Valley River source lakes
+                        if (hasSourceLakeCave && y >= sourceCaveFloorY && y <= surfaceY
+                                && isSourceLakeSpringCave(worldX, y, worldZ, surfaceY, fillValley,
+                                        sourceCaveFloorY, sourceCaveChamberY, sourceCaveChamberR)) {
+                            if (sourceCaveHasMagmaVents && y <= sourceCaveChamberY + 1) {
+                                pos.set(worldX, y - 1, worldZ);
+                                BlockState belowState = chunk.getBlockState(pos);
+                                if (!belowState.isAir() && !belowState.is(Blocks.WATER) && !belowState.is(Blocks.BEDROCK)) {
+                                    double ventNoise = net.ganyusbathwater.oririmod.util.FastNoise.fbm2D(
+                                            (float) (worldX * 0.21f), (float) (worldZ * 0.21f), 2) / 0.32;
+                                    double centerBias = Mth.clamp(
+                                            1.0 - (sourceLakeRawDist / Math.max(4.0, sourceCaveChamberR)), 0.0, 1.0) * 0.28;
+                                    double ventVal = ventNoise + centerBias;
+                                    if (ventVal > 0.22) {
+                                        BlockState ventBlock = (ventVal > 0.48 && AETHER_MAGMA != null)
+                                                ? AETHER_MAGMA
+                                                : MAGMA_STATE;
+                                        chunk.setBlockState(pos, ventBlock, false);
+                                        chunk.markPosForPostprocessing(pos);
+                                        pos.set(worldX, y, worldZ);
+                                        chunk.setBlockState(pos, WATER_STATE, false);
+                                        chunk.markPosForPostprocessing(pos);
+                                        continue;
+                                    }
+                                }
+                                pos.set(worldX, y, worldZ);
+                            }
+                            chunk.setBlockState(pos, WATER_STATE, false);
                             continue;
                         }
 

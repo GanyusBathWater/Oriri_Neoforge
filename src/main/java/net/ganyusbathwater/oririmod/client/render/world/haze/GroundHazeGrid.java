@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.client.render.world.haze;
 
 import net.ganyusbathwater.oririmod.block.custom.FogSourceBlock;
+import net.ganyusbathwater.oririmod.block.custom.VolumeFogSourceBlock;
 import net.ganyusbathwater.oririmod.block.entity.FogSourceBlockEntity;
 import net.ganyusbathwater.oririmod.world.fog.ClientFogAnchorCache;
 import net.ganyusbathwater.oririmod.world.fog.FogAnchor;
@@ -68,6 +69,7 @@ public final class GroundHazeGrid {
     private boolean hasAnyActiveSurfaceHaze = false;
     private int surfaceMeshVersion = 1;
     private int localMeshVersion = 1;
+    private int volumeMeshVersion = 1;
 
     // Per-vertex raw & smoothed buffers (size = gridSize * gridSize)
     float[] rawY = new float[0];
@@ -100,19 +102,27 @@ public final class GroundHazeGrid {
     // Local FogSourceBlock & chunk-attached FogAnchor patches (keyed by BlockPos.asLong())
     private final Map<Long, LocalFogPatch> localPatches = new HashMap<>();
     private final List<LocalFogPatch> activeLocalPatches = new ArrayList<>();
+    private final Map<Long, VolumeFogPatch> volumePatches = new HashMap<>();
+    private final List<VolumeFogPatch> activeVolumePatches = new ArrayList<>();
     private final BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
     private long lastAnchorCacheVersion = -1L;
     private int localRefreshCursor = 0;
+    private int volumeRefreshCursor = 0;
     private boolean localRenderDirty = true;
+    private boolean volumeRenderDirty = true;
     private int lastLocalBakeCellX = Integer.MIN_VALUE;
     private int lastLocalBakeCellZ = Integer.MIN_VALUE;
+    private int lastVolumeBakeCellX = Integer.MIN_VALUE;
+    private int lastVolumeBakeCellZ = Integer.MIN_VALUE;
 
     // Reusable unified heightfield composite grid (radius 144 -> 289x289, covers full ~140-block crater!)
     public static final int COMP_RADIUS = 144;
     public static final int COMP_SIZE = COMP_RADIUS * 2 + 1;
     private static final int COMP_CELLS = COMP_SIZE * COMP_SIZE;
     private final LocalCompositeGrid localCompositeGrid = new LocalCompositeGrid();
+    private final VolumeCompositeGrid volumeCompositeGrid = new VolumeCompositeGrid();
     private float[] compColorW;
+    private float[] volColorW;
 
     /**
      * Deduplicated 1-block-precision composite grid merging all overlapping {@code FogSourceBlock}s
@@ -151,6 +161,94 @@ public final class GroundHazeGrid {
             minFloorY = Float.MAX_VALUE;
             maxFogTopY = -Float.MAX_VALUE;
             overflowPatches.clear();
+        }
+    }
+
+    /**
+     * Deduplicated 1-block-precision 3D floating room-volume composite grid merging all nearby
+     * {@link VolumeFogSourceBlock}s and volume {@link FogAnchor}s. Arrays are allocated lazily on
+     * first volume emitter discovery so zero extra memory is used when no volume fog is present.
+     */
+    public static final class VolumeCompositeGrid {
+        public int originX;
+        public int originZ;
+        public final int size = COMP_SIZE;
+        public int dirtyMinX;
+        public int dirtyMaxX = -1;
+        public int dirtyMinZ;
+        public int dirtyMaxZ = -1;
+        public boolean hasData;
+        public float minBottomY;
+        public float maxTopY;
+
+        public float[] bottomY;
+        public float[] topY;
+        public float[] density;
+        public float[] mask;
+        public float[] r;
+        public float[] g;
+        public float[] b;
+        public int[] packedLight;
+
+        void ensureAllocated() {
+            if (bottomY != null) return;
+            bottomY = new float[COMP_CELLS];
+            topY = new float[COMP_CELLS];
+            density = new float[COMP_CELLS];
+            mask = new float[COMP_CELLS];
+            r = new float[COMP_CELLS];
+            g = new float[COMP_CELLS];
+            b = new float[COMP_CELLS];
+            packedLight = new int[COMP_CELLS];
+        }
+
+        void clear() {
+            hasData = false;
+            dirtyMinX = COMP_SIZE;
+            dirtyMaxX = -1;
+            dirtyMinZ = COMP_SIZE;
+            dirtyMaxZ = -1;
+            minBottomY = Float.MAX_VALUE;
+            maxTopY = -Float.MAX_VALUE;
+        }
+    }
+
+    /**
+     * Wall-bounded 3D floating room-filling fog patch centered on a {@link VolumeFogSourceBlock}.
+     */
+    public static final class VolumeFogPatch {
+        public final BlockPos sourcePos;
+        public final int density;
+        public final FogSourceBlock.FogColor color;
+        public final float radiusXZ;
+        public final float halfHeight;
+        public final float baseAlpha;
+        public final int gridSize;
+        public final int originX;
+        public final int originZ;
+        public final float[] bottomY;
+        public final float[] topY;
+        public final float[] alphaMask;
+        public final int[] packedLight;
+        long lastSeenTick;
+        int lightRefreshTick;
+        int geoRefreshTick;
+
+        VolumeFogPatch(BlockPos sourcePos, int density, FogSourceBlock.FogColor color, int gridSize, int originX, int originZ) {
+            this.sourcePos = sourcePos.immutable();
+            this.density = density;
+            this.color = color;
+            this.radiusXZ = VolumeFogSourceBlock.getVolumeRadiusXZ(density);
+            this.halfHeight = VolumeFogSourceBlock.getVolumeHalfHeight(density);
+            this.baseAlpha = VolumeFogSourceBlock.getVolumeAlphaForDensity(density);
+            this.gridSize = gridSize;
+            this.originX = originX;
+            this.originZ = originZ;
+            int n = gridSize * gridSize;
+            this.bottomY = new float[n];
+            this.topY = new float[n];
+            this.alphaMask = new float[n];
+            this.packedLight = new int[n];
         }
     }
 
@@ -202,17 +300,28 @@ public final class GroundHazeGrid {
         this.hasAnyActiveSurfaceHaze = false;
         this.localPatches.clear();
         this.activeLocalPatches.clear();
+        this.volumePatches.clear();
+        this.activeVolumePatches.clear();
         this.localCompositeGrid.clear();
+        this.volumeCompositeGrid.clear();
         this.localRenderDirty = true;
+        this.volumeRenderDirty = true;
         this.lastLocalBakeCellX = Integer.MIN_VALUE;
         this.lastLocalBakeCellZ = Integer.MIN_VALUE;
+        this.lastVolumeBakeCellX = Integer.MIN_VALUE;
+        this.lastVolumeBakeCellZ = Integer.MIN_VALUE;
         this.lastAnchorCacheVersion = -1L;
         this.surfaceMeshVersion++;
         this.localMeshVersion++;
+        this.volumeMeshVersion++;
     }
 
     public LocalCompositeGrid getLocalCompositeGrid() {
         return localCompositeGrid;
+    }
+
+    public VolumeCompositeGrid getVolumeCompositeGrid() {
+        return volumeCompositeGrid;
     }
 
     public int getSurfaceMeshVersion() {
@@ -221,6 +330,14 @@ public final class GroundHazeGrid {
 
     public int getLocalMeshVersion() {
         return localMeshVersion;
+    }
+
+    public int getVolumeMeshVersion() {
+        return volumeMeshVersion;
+    }
+
+    public List<VolumeFogPatch> getActiveVolumePatches() {
+        return activeVolumePatches;
     }
 
     public int getGridSize() {
@@ -330,18 +447,22 @@ public final class GroundHazeGrid {
             surfaceMeshVersion++;
         }
 
-        // 4. Discover & maintain local FogSourceBlock + chunk-attached FogAnchor patches out to ~144 blocks
+        // 4. Discover & maintain local FogSourceBlock + VolumeFogSourceBlock + chunk-attached FogAnchors
         int localScanRadius = Math.max(clampedRadius + 28, COMP_RADIUS + 8);
         long anchorVer = ClientFogAnchorCache.getVersion();
         if ((tickCounter & 3) == 0 || geometryChanged || anchorVer != lastAnchorCacheVersion) {
             lastAnchorCacheVersion = anchorVer;
             updateLocalFogPatches(level, camX, camY, camZ, localScanRadius);
-        } else if (!activeLocalPatches.isEmpty()) {
-            // Staggered refresh: refresh at most 1 patch per tick so 30+ dungeon patches NEVER stutter!
-            refreshOneStaleLocalPatch(level);
+        } else {
+            if (!activeLocalPatches.isEmpty()) {
+                refreshOneStaleLocalPatch(level);
+            }
+            if (!activeVolumePatches.isEmpty()) {
+                refreshOneStaleVolumePatch(level);
+            }
         }
 
-        // 5. Rebuild deduplicated local fog composite grid only when patches change or player moves >= 8 blocks
+        // 5. Rebuild deduplicated ground & volume composite grids only when patches change or player moves >= 8 blocks
         int bakeCellX = Math.floorDiv(Mth.floor(camX), 8);
         int bakeCellZ = Math.floorDiv(Mth.floor(camZ), 8);
         if (localRenderDirty || bakeCellX != lastLocalBakeCellX || bakeCellZ != lastLocalBakeCellZ) {
@@ -349,6 +470,13 @@ public final class GroundHazeGrid {
             lastLocalBakeCellZ = bakeCellZ;
             localRenderDirty = false;
             rebuildDeduplicatedLocalBuffer(Mth.floor(camX), Mth.floor(camZ));
+        }
+        if (volumeRenderDirty || (!activeVolumePatches.isEmpty()
+                && (bakeCellX != lastVolumeBakeCellX || bakeCellZ != lastVolumeBakeCellZ))) {
+            lastVolumeBakeCellX = bakeCellX;
+            lastVolumeBakeCellZ = bakeCellZ;
+            volumeRenderDirty = false;
+            rebuildDeduplicatedVolumeGrid(Mth.floor(camX), Mth.floor(camZ));
         }
     }
 
@@ -919,12 +1047,19 @@ public final class GroundHazeGrid {
     // ─────────────────────────────────────────────────────────────────────────────
 
     private void updateLocalFogPatches(ClientLevel level, double camX, double camY, double camZ, int scanRadius) {
-        int prevCount = activeLocalPatches.size();
-        long prevChecksum = 0L;
-        for (int i = 0; i < prevCount; i++) {
-            prevChecksum = prevChecksum * 31L + activeLocalPatches.get(i).sourcePos.asLong();
+        int prevLocalCount = activeLocalPatches.size();
+        long prevLocalChecksum = 0L;
+        for (int i = 0; i < prevLocalCount; i++) {
+            prevLocalChecksum = prevLocalChecksum * 31L + activeLocalPatches.get(i).sourcePos.asLong();
         }
         activeLocalPatches.clear();
+
+        int prevVolCount = activeVolumePatches.size();
+        long prevVolChecksum = 0L;
+        for (int i = 0; i < prevVolCount; i++) {
+            prevVolChecksum = prevVolChecksum * 31L + activeVolumePatches.get(i).sourcePos.asLong();
+        }
+        activeVolumePatches.clear();
 
         int minCx = (Mth.floor(camX) - scanRadius) >> 4;
         int maxCx = (Mth.floor(camX) + scanRadius) >> 4;
@@ -957,7 +1092,11 @@ public final class GroundHazeGrid {
 
                     int density = state.getValue(FogSourceBlock.DENSITY);
                     FogSourceBlock.FogColor color = state.getValue(FogSourceBlock.COLOR);
-                    registerActiveLocalEmitter(level, pos, density, color);
+                    if (state.getBlock() instanceof VolumeFogSourceBlock) {
+                        registerActiveVolumeEmitter(level, pos, density, color);
+                    } else {
+                        registerActiveLocalEmitter(level, pos, density, color);
+                    }
                 }
 
                 // Also include chunk-attached structure FogAnchors (converted from FogSourceBlocks on worldgen)
@@ -971,17 +1110,29 @@ public final class GroundHazeGrid {
                     if (dx * dx + dz * dz > maxDistSq || Math.abs(dy) > 148.0) {
                         continue;
                     }
-                    registerActiveLocalEmitter(level, pos, anchor.density(), anchor.color());
+                    if (anchor.isVolume()) {
+                        registerActiveVolumeEmitter(level, pos, anchor.density(), anchor.color());
+                    } else {
+                        registerActiveLocalEmitter(level, pos, anchor.density(), anchor.color());
+                    }
                 }
             }
         }
 
-        long newChecksum = 0L;
+        long newLocalChecksum = 0L;
         for (int i = 0; i < activeLocalPatches.size(); i++) {
-            newChecksum = newChecksum * 31L + activeLocalPatches.get(i).sourcePos.asLong();
+            newLocalChecksum = newLocalChecksum * 31L + activeLocalPatches.get(i).sourcePos.asLong();
         }
-        if (activeLocalPatches.size() != prevCount || newChecksum != prevChecksum) {
+        if (activeLocalPatches.size() != prevLocalCount || newLocalChecksum != prevLocalChecksum) {
             localRenderDirty = true;
+        }
+
+        long newVolChecksum = 0L;
+        for (int i = 0; i < activeVolumePatches.size(); i++) {
+            newVolChecksum = newVolChecksum * 31L + activeVolumePatches.get(i).sourcePos.asLong();
+        }
+        if (activeVolumePatches.size() != prevVolCount || newVolChecksum != prevVolChecksum) {
+            volumeRenderDirty = true;
         }
 
         if (localPatches.size() > activeLocalPatches.size() + 24) {
@@ -992,6 +1143,433 @@ public final class GroundHazeGrid {
                 }
             }
         }
+        if (volumePatches.size() > activeVolumePatches.size() + 24) {
+            Iterator<Map.Entry<Long, VolumeFogPatch>> it = volumePatches.entrySet().iterator();
+            while (it.hasNext()) {
+                if (tickCounter - it.next().getValue().lastSeenTick > 120) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    private void registerActiveVolumeEmitter(ClientLevel level, BlockPos pos, int density, FogSourceBlock.FogColor color) {
+        long key = pos.asLong();
+        VolumeFogPatch patch = volumePatches.get(key);
+        if (patch == null || patch.density != density || patch.color != color) {
+            patch = buildVolumeFogPatch(level, pos, density, color);
+            int stagger = Math.floorMod(pos.hashCode(), 40);
+            patch.lightRefreshTick = tickCounter - stagger;
+            patch.geoRefreshTick = tickCounter - stagger * 3;
+            volumePatches.put(key, patch);
+            volumeRenderDirty = true;
+        }
+        patch.lastSeenTick = tickCounter;
+        activeVolumePatches.add(patch);
+    }
+
+    private void refreshOneStaleVolumePatch(ClientLevel level) {
+        int count = activeVolumePatches.size();
+        if (count == 0) return;
+
+        int checked = Math.min(count, 4);
+        for (int i = 0; i < checked; i++) {
+            if (volumeRefreshCursor >= count) {
+                volumeRefreshCursor = 0;
+            }
+            VolumeFogPatch patch = activeVolumePatches.get(volumeRefreshCursor++);
+            if ((tickCounter - patch.geoRefreshTick) >= 240) {
+                VolumeFogPatch rebuilt = buildVolumeFogPatch(level, patch.sourcePos, patch.density, patch.color);
+                rebuilt.lastSeenTick = tickCounter;
+                rebuilt.lightRefreshTick = tickCounter;
+                rebuilt.geoRefreshTick = tickCounter;
+                volumePatches.put(patch.sourcePos.asLong(), rebuilt);
+                activeVolumePatches.set(volumeRefreshCursor - 1, rebuilt);
+                volumeRenderDirty = true;
+                return;
+            }
+            if ((tickCounter - patch.lightRefreshTick) >= 80) {
+                refreshVolumePatchLightsOnly(level, patch);
+                patch.lightRefreshTick = tickCounter;
+                volumeRenderDirty = true;
+                return;
+            }
+        }
+    }
+
+    private void refreshVolumePatchLightsOnly(ClientLevel level, VolumeFogPatch patch) {
+        int size = patch.gridSize;
+        for (int gz = 0; gz < size; gz++) {
+            int wz = patch.originZ + gz;
+            int row = gz * size;
+            for (int gx = 0; gx < size; gx++) {
+                int idx = row + gx;
+                if (patch.alphaMask[idx] <= 0.004F) continue;
+                int wx = patch.originX + gx;
+                int midY = Mth.floor((patch.bottomY[idx] + patch.topY[idx]) * 0.5F);
+                scratchPos.set(wx, midY, wz);
+                patch.packedLight[idx] = sampleLocalPackedLight(level, scratchPos);
+            }
+        }
+    }
+
+    /**
+     * Merges all active 3D floating room-volume patches into {@link VolumeCompositeGrid} (289x289,
+     * 144-block radius), allowing simultaneous rendering alongside ground-hugging fog in the same column.
+     */
+    private void rebuildDeduplicatedVolumeGrid(int centerX, int centerZ) {
+        VolumeCompositeGrid vol = this.volumeCompositeGrid;
+        vol.clear();
+        volumeMeshVersion++;
+        if (activeVolumePatches.isEmpty()) {
+            return;
+        }
+
+        vol.ensureAllocated();
+        if (volColorW == null) {
+            volColorW = new float[COMP_CELLS];
+        }
+
+        int originX = centerX - COMP_RADIUS;
+        int originZ = centerZ - COMP_RADIUS;
+        vol.originX = originX;
+        vol.originZ = originZ;
+
+        Arrays.fill(vol.mask, 0.0F);
+        Arrays.fill(vol.density, 0.0F);
+
+        int dirtyMinX = COMP_SIZE, dirtyMaxX = -1;
+        int dirtyMinZ = COMP_SIZE, dirtyMaxZ = -1;
+
+        for (int p = 0; p < activeVolumePatches.size(); p++) {
+            VolumeFogPatch patch = activeVolumePatches.get(p);
+            int pSize = patch.gridSize;
+            float pr = patch.color.r;
+            float pg = patch.color.g;
+            float pb = patch.color.b;
+
+            for (int gz = 0; gz < pSize; gz++) {
+                int wz = patch.originZ + gz;
+                int cz = wz - originZ;
+                if (cz < 0 || cz >= COMP_SIZE) continue;
+                int pRow = gz * pSize;
+                int cRow = cz * COMP_SIZE;
+
+                for (int gx = 0; gx < pSize; gx++) {
+                    int pIdx = pRow + gx;
+                    float m = patch.alphaMask[pIdx];
+                    if (m <= 0.004F) continue;
+                    float bY = patch.bottomY[pIdx];
+                    float tY = patch.topY[pIdx];
+                    if (tY <= bY + 0.1F) continue;
+
+                    int wx = patch.originX + gx;
+                    int cx = wx - originX;
+                    if (cx < 0 || cx >= COMP_SIZE) continue;
+                    int cIdx = cRow + cx;
+
+                    float existingM = vol.mask[cIdx];
+                    if (existingM <= 0.0F) {
+                        vol.bottomY[cIdx] = bY;
+                        vol.topY[cIdx] = tY;
+                        vol.density[cIdx] = patch.baseAlpha;
+                        vol.mask[cIdx] = m;
+                        vol.r[cIdx] = pr * m;
+                        vol.g[cIdx] = pg * m;
+                        vol.b[cIdx] = pb * m;
+                        volColorW[cIdx] = m;
+                        vol.packedLight[cIdx] = patch.packedLight[pIdx];
+                        if (cx < dirtyMinX) dirtyMinX = cx;
+                        if (cx > dirtyMaxX) dirtyMaxX = cx;
+                        if (cz < dirtyMinZ) dirtyMinZ = cz;
+                        if (cz > dirtyMaxZ) dirtyMaxZ = cz;
+                    } else {
+                        if (bY < vol.bottomY[cIdx]) vol.bottomY[cIdx] = bY;
+                        if (tY > vol.topY[cIdx]) vol.topY[cIdx] = tY;
+                        if (m > existingM) {
+                            vol.mask[cIdx] = m;
+                            vol.density[cIdx] = Math.max(vol.density[cIdx], patch.baseAlpha);
+                            vol.packedLight[cIdx] = patch.packedLight[pIdx];
+                        }
+                        vol.r[cIdx] += pr * m;
+                        vol.g[cIdx] += pg * m;
+                        vol.b[cIdx] += pb * m;
+                        volColorW[cIdx] += m;
+                    }
+                }
+            }
+        }
+
+        if (dirtyMaxX < dirtyMinX) {
+            return;
+        }
+
+        float minB = Float.MAX_VALUE;
+        float maxT = -Float.MAX_VALUE;
+        for (int cz = dirtyMinZ; cz <= dirtyMaxZ; cz++) {
+            int cRow = cz * COMP_SIZE;
+            for (int cx = dirtyMinX; cx <= dirtyMaxX; cx++) {
+                int cIdx = cRow + cx;
+                if (vol.mask[cIdx] <= 0.004F) continue;
+                float invW = volColorW[cIdx] > 0.0001F ? (1.0F / volColorW[cIdx]) : 1.0F;
+                vol.r[cIdx] *= invW;
+                vol.g[cIdx] *= invW;
+                vol.b[cIdx] *= invW;
+                if (vol.bottomY[cIdx] < minB) minB = vol.bottomY[cIdx];
+                if (vol.topY[cIdx] > maxT) maxT = vol.topY[cIdx];
+            }
+        }
+
+        vol.dirtyMinX = Math.max(0, dirtyMinX - 1);
+        vol.dirtyMaxX = Math.min(COMP_SIZE - 1, dirtyMaxX + 1);
+        vol.dirtyMinZ = Math.max(0, dirtyMinZ - 1);
+        vol.dirtyMaxZ = Math.min(COMP_SIZE - 1, dirtyMaxZ + 1);
+        vol.minBottomY = minB;
+        vol.maxTopY = maxT;
+        vol.hasData = true;
+    }
+
+    /**
+     * Builds a 3D wall-bounded, floating room-filling fog patch centered vertically &amp; horizontally
+     * on {@code sourcePos}. Works both inside enclosed rooms (filling cleanly floor-to-ceiling and
+     * stopping at 1-block walls) and floating mid-air (soft 3D ellipsoid cloud with feathered top/bottom).
+     */
+    private VolumeFogPatch buildVolumeFogPatch(ClientLevel level, BlockPos sourcePos, int density, FogSourceBlock.FogColor color) {
+        float radiusXZ = VolumeFogSourceBlock.getVolumeRadiusXZ(density);
+        float halfH = VolumeFogSourceBlock.getVolumeHalfHeight(density);
+        int half = Mth.ceil(radiusXZ) + 1;
+        int size = half * 2 + 1;
+        int ox = sourcePos.getX() - half;
+        int oz = sourcePos.getZ() - half;
+
+        VolumeFogPatch patch = new VolumeFogPatch(sourcePos, density, color, size, ox, oz);
+        int n = size * size;
+        boolean[] visited = new boolean[n];
+        int[] airMinArr = new int[n];
+        int[] airMaxArr = new int[n];
+        float[] rawBottom = new float[n];
+        float[] rawTop = new float[n];
+
+        int minBuild = level.getMinBuildHeight();
+        int maxBuild = level.getMaxBuildHeight() - 1;
+        int srcY = Mth.clamp(sourcePos.getY(), minBuild, maxBuild);
+        float centerY = srcY + 0.5F;
+
+        int[] queueX = new int[n];
+        int[] queueZ = new int[n];
+        int qHead = 0, qTail = 0;
+
+        float[] spanOut = new float[4]; // [0]=bottomY, [1]=topY, [2]=airMinInt, [3]=airMaxInt
+        float seedAllowMin = centerY - halfH;
+        float seedAllowMax = centerY + halfH;
+        if (!probeVolumeColumnSpan(level, sourcePos.getX(), sourcePos.getZ(), srcY, srcY, seedAllowMin, seedAllowMax, srcY, minBuild, maxBuild, spanOut)) {
+            // Even if emitter sits in a weird state, seed a small air span right at sourcePos
+            spanOut[0] = seedAllowMin;
+            spanOut[1] = seedAllowMax;
+            spanOut[2] = Mth.floor(seedAllowMin);
+            spanOut[3] = Mth.ceil(seedAllowMax);
+        }
+
+        int centerIdx = half * size + half;
+        visited[centerIdx] = true;
+        rawBottom[centerIdx] = spanOut[0];
+        rawTop[centerIdx] = spanOut[1];
+        airMinArr[centerIdx] = (int) spanOut[2];
+        airMaxArr[centerIdx] = (int) spanOut[3];
+        queueX[qTail] = half;
+        queueZ[qTail] = half;
+        qTail++;
+
+        final int[] dirX = { 1, -1, 0, 0 };
+        final int[] dirZ = { 0, 0, 1, -1 };
+
+        while (qHead < qTail) {
+            int cx = queueX[qHead];
+            int cz = queueZ[qHead];
+            qHead++;
+            int cIdx = cz * size + cx;
+            int prevMin = airMinArr[cIdx];
+            int prevMax = airMaxArr[cIdx];
+
+            for (int d = 0; d < 4; d++) {
+                int nx = cx + dirX[d];
+                int nz = cz + dirZ[d];
+                if (nx < 0 || nx >= size || nz < 0 || nz >= size) continue;
+                int nIdx = nz * size + nx;
+                if (visited[nIdx]) continue;
+
+                int wx = ox + nx;
+                int wz = oz + nz;
+                float dist = Mth.sqrt((wx - sourcePos.getX()) * (wx - sourcePos.getX())
+                        + (wz - sourcePos.getZ()) * (wz - sourcePos.getZ()));
+                if (dist > radiusXZ) continue;
+
+                float normR = dist / radiusXZ;
+                float localHalfH = halfH * Mth.sqrt(Math.max(0.08F, 1.0F - normR * normR * 0.85F));
+                float allowMin = centerY - localHalfH;
+                float allowMax = centerY + localHalfH;
+
+                if (!probeVolumeColumnSpan(level, wx, wz, prevMin, prevMax, allowMin, allowMax, srcY, minBuild, maxBuild, spanOut)) {
+                    // Completely blocked by a solid wall across the overlapping vertical band -> never leak through walls!
+                    continue;
+                }
+
+                visited[nIdx] = true;
+                rawBottom[nIdx] = spanOut[0];
+                rawTop[nIdx] = spanOut[1];
+                airMinArr[nIdx] = (int) spanOut[2];
+                airMaxArr[nIdx] = (int) spanOut[3];
+                queueX[qTail] = nx;
+                queueZ[qTail] = nz;
+                qTail++;
+            }
+        }
+
+        // Light 1-pass smoothing on bottomY/topY across visited neighbors for silky arches & stairs,
+        // plus smooth radial fade and midpoint lighting
+        for (int gz = 0; gz < size; gz++) {
+            int wz = oz + gz;
+            int row = gz * size;
+            for (int gx = 0; gx < size; gx++) {
+                int idx = row + gx;
+                if (!visited[idx]) continue;
+
+                float sumB = rawBottom[idx] * 2.0F;
+                float sumT = rawTop[idx] * 2.0F;
+                float w = 2.0F;
+                for (int dz = -1; dz <= 1; dz++) {
+                    int nz = gz + dz;
+                    if (nz < 0 || nz >= size) continue;
+                    for (int dx = -1; dx <= 1; dx++) {
+                        if (dx == 0 && dz == 0) continue;
+                        int nx = gx + dx;
+                        if (nx < 0 || nx >= size) continue;
+                        int nIdx = nz * size + nx;
+                        if (!visited[nIdx]) continue;
+                        if (Math.abs(rawBottom[nIdx] - rawBottom[idx]) <= 3.0F
+                                && Math.abs(rawTop[nIdx] - rawTop[idx]) <= 3.0F) {
+                            sumB += rawBottom[nIdx];
+                            sumT += rawTop[nIdx];
+                            w += 1.0F;
+                        }
+                    }
+                }
+                patch.bottomY[idx] = sumB / w;
+                patch.topY[idx] = sumT / w;
+
+                int wx = ox + gx;
+                float dist = Mth.sqrt((wx - sourcePos.getX()) * (wx - sourcePos.getX())
+                        + (wz - sourcePos.getZ()) * (wz - sourcePos.getZ()));
+                float radialT = Mth.clamp(1.0F - (dist / radiusXZ), 0.0F, 1.0F);
+                patch.alphaMask[idx] = radialT * radialT * (3.0F - 2.0F * radialT);
+
+                int midY = Mth.clamp(Mth.floor((airMinArr[idx] + airMaxArr[idx]) * 0.5F), minBuild, maxBuild);
+                scratchPos.set(wx, midY, wz);
+                patch.packedLight[idx] = sampleLocalPackedLight(level, scratchPos);
+            }
+        }
+
+        return patch;
+    }
+
+    /**
+     * Finds the vertical passable air span in column {@code (wx, wz)} connected to the neighbor's
+     * {@code [prevMin, prevMax]} band within {@code [allowMin, allowMax]}.
+     * Solid floors/ceilings extend 1.1 blocks into the solid surface so the shader's vertical
+     * feather fills enclosed rooms flush, while open mid-air bounds feather softly into empty air.
+     */
+    private boolean probeVolumeColumnSpan(
+            ClientLevel level,
+            int wx,
+            int wz,
+            int prevMin,
+            int prevMax,
+            float allowMin,
+            float allowMax,
+            int preferY,
+            int minBuild,
+            int maxBuild,
+            float[] out) {
+        int lo = Math.max(minBuild, Math.max(prevMin, Mth.floor(allowMin)));
+        int hi = Math.min(maxBuild, Math.min(prevMax, Mth.ceil(allowMax)));
+        if (lo > hi) {
+            return false;
+        }
+
+        // Find a passable seed Y inside the overlap band, starting closest to emitter's center Y
+        int seedY = Integer.MIN_VALUE;
+        int startY = Mth.clamp(preferY, lo, hi);
+        int maxOffset = Math.max(startY - lo, hi - startY);
+        for (int off = 0; off <= maxOffset; off++) {
+            int up = startY + off;
+            if (up <= hi && isVolumePassable(level, wx, up, wz)) {
+                seedY = up;
+                break;
+            }
+            if (off > 0) {
+                int dn = startY - off;
+                if (dn >= lo && isVolumePassable(level, wx, dn, wz)) {
+                    seedY = dn;
+                    break;
+                }
+            }
+        }
+        if (seedY == Integer.MIN_VALUE) {
+            return false;
+        }
+
+        int minScan = Math.max(minBuild, Mth.floor(allowMin));
+        int maxScan = Math.min(maxBuild, Mth.ceil(allowMax));
+
+        // Scan downward to floor or open mid-air bottom
+        float bottomY = allowMin;
+        int airMin = minScan;
+        for (int cy = seedY - 1; cy >= minScan; cy--) {
+            scratchPos.set(wx, cy, wz);
+            BlockState st = level.getBlockState(scratchPos);
+            if (!st.getFluidState().isEmpty()) {
+                bottomY = (cy + 0.88F) - 1.1F;
+                airMin = cy + 1;
+                break;
+            }
+            float topOff = getSolidFloorTopOffset(level, scratchPos, st);
+            if (topOff >= 0.0F) {
+                bottomY = (cy + topOff) - 1.1F;
+                airMin = cy + 1;
+                break;
+            }
+        }
+
+        // Scan upward to ceiling or open mid-air top
+        float topY = allowMax;
+        int airMax = maxScan;
+        for (int cy = seedY + 1; cy <= maxScan; cy++) {
+            scratchPos.set(wx, cy, wz);
+            BlockState st = level.getBlockState(scratchPos);
+            if (!isVolumePassableState(level, scratchPos, st)) {
+                topY = cy + 1.1F;
+                airMax = cy - 1;
+                break;
+            }
+        }
+
+        out[0] = bottomY;
+        out[1] = topY;
+        out[2] = airMin;
+        out[3] = airMax;
+        return true;
+    }
+
+    private boolean isVolumePassable(ClientLevel level, int wx, int wy, int wz) {
+        scratchPos.set(wx, wy, wz);
+        return isVolumePassableState(level, scratchPos, level.getBlockState(scratchPos));
+    }
+
+    private static boolean isVolumePassableState(ClientLevel level, BlockPos pos, BlockState state) {
+        if (!state.getFluidState().isEmpty()) {
+            return false;
+        }
+        return getSolidFloorTopOffset(level, pos, state) < 0.0F;
     }
 
     private void registerActiveLocalEmitter(ClientLevel level, BlockPos pos, int density, FogSourceBlock.FogColor color) {

@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,8 +20,18 @@ public class UpgradedSaplingBlock extends SaplingBlock {
 
     @Override
     public boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {
-        // Can be placed on almost any solid block, not just dirt/grass
-        return state.canOcclude() || super.mayPlaceOn(state, level, pos);
+        // Upgraded saplings can be placed and grown on any non-air, non-liquid block
+        return !state.isAir() && !(state.getBlock() instanceof LiquidBlock);
+    }
+
+    @Override
+    public void advanceTree(ServerLevel level, BlockPos pos, BlockState state, RandomSource random) {
+        IS_FORCING_GROWTH.set(true);
+        try {
+            super.advanceTree(level, pos, state, random);
+        } finally {
+            IS_FORCING_GROWTH.remove();
+        }
     }
 
     @Override

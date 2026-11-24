@@ -35,17 +35,21 @@ public class WindsweptPineTreeFeature extends Feature<NoneFeatureConfiguration> 
         BlockPos origin = context.origin();
         RandomSource random = context.random();
 
-        // 1. Ground Validation
-        BlockPos belowPos = origin.below();
-        BlockState belowState = level.getBlockState(belowPos);
-        boolean validGround = belowState.is(Blocks.GRASS_BLOCK) ||
-                belowState.is(Blocks.DIRT) ||
-                belowState.is(Blocks.PODZOL) ||
-                belowState.is(Blocks.COARSE_DIRT) ||
-                belowState.is(Blocks.STONE);
+        boolean forcingGrowth = net.ganyusbathwater.oririmod.block.custom.UpgradedSaplingBlock.IS_FORCING_GROWTH.get();
 
-        if (!validGround) {
-            return false;
+        // 1. Ground Validation
+        if (!forcingGrowth) {
+            BlockPos belowPos = origin.below();
+            BlockState belowState = level.getBlockState(belowPos);
+            boolean validGround = belowState.is(Blocks.GRASS_BLOCK) ||
+                    belowState.is(Blocks.DIRT) ||
+                    belowState.is(Blocks.PODZOL) ||
+                    belowState.is(Blocks.COARSE_DIRT) ||
+                    belowState.is(Blocks.STONE);
+
+            if (!validGround) {
+                return false;
+            }
         }
 
         if (!level.isEmptyBlock(origin) && !level.getBlockState(origin).canBeReplaced()) {
@@ -53,13 +57,15 @@ public class WindsweptPineTreeFeature extends Feature<NoneFeatureConfiguration> 
         }
 
         // Proximity check: prevent tree clumping so players can freely walk between trunks
-        for (int cx = -3; cx <= 3; cx++) {
-            for (int cz = -3; cz <= 3; cz++) {
-                if (cx == 0 && cz == 0) continue;
-                BlockPos checkPos = origin.offset(cx, 1, cz);
-                BlockState cs = level.getBlockState(checkPos);
-                if (cs.is(ModBlocks.ELDER_PINE_LOG.get()) || cs.is(ModBlocks.ELDER_PINE_WOOD.get())) {
-                    return false;
+        if (!forcingGrowth) {
+            for (int cx = -3; cx <= 3; cx++) {
+                for (int cz = -3; cz <= 3; cz++) {
+                    if (cx == 0 && cz == 0) continue;
+                    BlockPos checkPos = origin.offset(cx, 1, cz);
+                    BlockState cs = level.getBlockState(checkPos);
+                    if (cs.is(ModBlocks.ELDER_PINE_LOG.get()) || cs.is(ModBlocks.ELDER_PINE_WOOD.get())) {
+                        return false;
+                    }
                 }
             }
         }

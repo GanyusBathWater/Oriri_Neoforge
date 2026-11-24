@@ -79,16 +79,22 @@ public final class ElderValleyTerrainHelper {
         public boolean isCascadeTickCell;
         public boolean isPlungePool;
         public boolean isEstuary;
+        public boolean inSourceLake;
 
         public int waterY;
         public int stepUpstreamWaterY;
         public int bedY;
         public int surfaceY;
+        public int sourceLakeWaterY;
 
         public double valleyMask; // [0..1] terrain carving influence
         public double biomeMask; // [0..1] biome assignment strength
         public double distToWaterEdge; // signed distance (>0 on dry banks, <=0 inside channel)
         public double canopyDensity; // [0..1] riparian grove vs sunlit meadow variation
+        public double sourceLakeX;
+        public double sourceLakeZ;
+        public double sourceLakeRadius;
+        public long sourceLakeSeed;
         public RiverStyle style = RiverStyle.HYBRID;
 
         public void reset(int baseSurfaceY) {
@@ -100,14 +106,20 @@ public final class ElderValleyTerrainHelper {
             this.isCascadeTickCell = false;
             this.isPlungePool = false;
             this.isEstuary = false;
+            this.inSourceLake = false;
             this.waterY = SEA_LEVEL_Y;
             this.stepUpstreamWaterY = SEA_LEVEL_Y;
             this.bedY = baseSurfaceY;
             this.surfaceY = baseSurfaceY;
+            this.sourceLakeWaterY = SEA_LEVEL_Y;
             this.valleyMask = 0.0;
             this.biomeMask = 0.0;
             this.distToWaterEdge = 999.0;
             this.canopyDensity = 0.0;
+            this.sourceLakeX = 0.0;
+            this.sourceLakeZ = 0.0;
+            this.sourceLakeRadius = 0.0;
+            this.sourceLakeSeed = 0L;
             this.style = RiverStyle.HYBRID;
         }
 
@@ -120,14 +132,20 @@ public final class ElderValleyTerrainHelper {
             this.isCascadeTickCell = src.isCascadeTickCell;
             this.isPlungePool = src.isPlungePool;
             this.isEstuary = src.isEstuary;
+            this.inSourceLake = src.inSourceLake;
             this.waterY = src.waterY;
             this.stepUpstreamWaterY = src.stepUpstreamWaterY;
             this.bedY = src.bedY;
             this.surfaceY = src.surfaceY;
+            this.sourceLakeWaterY = src.sourceLakeWaterY;
             this.valleyMask = src.valleyMask;
             this.biomeMask = src.biomeMask;
             this.distToWaterEdge = src.distToWaterEdge;
             this.canopyDensity = src.canopyDensity;
+            this.sourceLakeX = src.sourceLakeX;
+            this.sourceLakeZ = src.sourceLakeZ;
+            this.sourceLakeRadius = src.sourceLakeRadius;
+            this.sourceLakeSeed = src.sourceLakeSeed;
             this.style = src.style;
         }
     }
@@ -185,13 +203,15 @@ public final class ElderValleyTerrainHelper {
         final boolean mergedAtTail;
         final boolean endedInOcean;
         final double lakeX, lakeZ, lakeRadius, lakeRimSpan;
+        final long lakeSeed;
         final double minX, maxX, minZ, maxZ;
 
         // 8-segment chunk bounds for O(1) segment skipping inside long polylines
         final double[] groupMinX, groupMaxX, groupMinZ, groupMaxZ;
 
         RiverPolyline(RiverNode[] nodes, StepMarker[] steps, RiverStyle style, boolean mergedAtTail,
-                boolean endedInOcean, double lakeX, double lakeZ, double lakeRadius, double lakeRimSpan) {
+                boolean endedInOcean, double lakeX, double lakeZ, double lakeRadius, double lakeRimSpan,
+                long lakeSeed) {
             this.nodes = nodes;
             this.steps = steps;
             this.style = style;
@@ -201,6 +221,7 @@ public final class ElderValleyTerrainHelper {
             this.lakeZ = lakeZ;
             this.lakeRadius = lakeRadius;
             this.lakeRimSpan = lakeRimSpan;
+            this.lakeSeed = lakeSeed;
 
             double lakePad = lakeRadius + lakeRimSpan + 24.0;
             double x0 = lakeX - lakePad;
@@ -370,6 +391,14 @@ public final class ElderValleyTerrainHelper {
         double bestCanopyBias = 0.0;
         RiverStyle bestStyle = RiverStyle.HYBRID;
         double bestScore = Double.MAX_VALUE;
+
+        boolean bestInSourceLake = false;
+        double bestSourceLakeX = 0.0;
+        double bestSourceLakeZ = 0.0;
+        double bestSourceLakeRadius = 0.0;
+        int bestSourceLakeWaterY = SEA_LEVEL_Y;
+        long bestSourceLakeSeed = 0L;
+        double bestSourceLakeDist = Double.MAX_VALUE;
 
         int dryCurveCount = 0;
 
@@ -706,6 +735,19 @@ public final class ElderValleyTerrainHelper {
                 minSignedEdgeDist = signedEdge;
             }
 
+            if (hasLakeInfluence && river.lakeRadius > 0.0) {
+                double rawDistLake = Math.hypot(x - river.lakeX, z - river.lakeZ);
+                if (rawDistLake <= river.lakeRadius * 0.88 && rawDistLake < bestSourceLakeDist) {
+                    bestInSourceLake = true;
+                    bestSourceLakeDist = rawDistLake;
+                    bestSourceLakeX = river.lakeX;
+                    bestSourceLakeZ = river.lakeZ;
+                    bestSourceLakeRadius = river.lakeRadius;
+                    bestSourceLakeWaterY = nodes[0].waterY;
+                    bestSourceLakeSeed = river.lakeSeed;
+                }
+            }
+
             if (thisWater) {
                 if (!anyWaterChannel || localWaterY < bestWaterLocalY || (localWaterY == bestWaterLocalY && thisTargetY < bestWaterTargetY)) {
                     anyWaterChannel = true;
@@ -764,14 +806,20 @@ public final class ElderValleyTerrainHelper {
         out.isCascadeTickCell = bestCascadeTick && insideWater;
         out.isPlungePool = bestInPlunge;
         out.isEstuary = bestEstuary > 0.45;
+        out.inSourceLake = bestInSourceLake;
         out.waterY = localWaterY;
         out.stepUpstreamWaterY = bestWaterUpstreamY;
         out.bedY = insideWater ? (int) Math.floor(targetY) : (int) Math.round(targetY);
         out.surfaceY = insideWater ? Math.min((int) Math.floor(targetY), localWaterY - 1) : (int) Math.round(targetY);
+        out.sourceLakeWaterY = bestSourceLakeWaterY;
         out.valleyMask = hermite01(maxVNorm);
         out.biomeMask = hermite01(maxBNorm * 1.15);
         out.distToWaterEdge = minSignedEdgeDist;
         out.canopyDensity = canopyDensity;
+        out.sourceLakeX = bestSourceLakeX;
+        out.sourceLakeZ = bestSourceLakeZ;
+        out.sourceLakeRadius = bestSourceLakeRadius;
+        out.sourceLakeSeed = bestSourceLakeSeed;
         out.style = bestStyle;
         return out;
     }
@@ -1426,7 +1474,8 @@ public final class ElderValleyTerrainHelper {
                 bestSpringX,
                 bestSpringZ,
                 bestLakeRadius,
-                lakeRimSpan));
+                lakeRimSpan,
+                cellHash));
     }
 
     private static int chooseStepSize(RiverStyle style, int currentWaterY, double highlandVal, long seedHash,

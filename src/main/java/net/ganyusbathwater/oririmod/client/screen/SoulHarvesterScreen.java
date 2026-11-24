@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -230,9 +231,9 @@ public class SoulHarvesterScreen extends AbstractContainerScreen<SoulHarvesterMe
     private void drawShardSocket(GuiGraphics gui, int slotX, int slotY, boolean hasShard, float partialTick) {
         int cx = slotX + 8;
         int cy = slotY + 8;
-        float time = (this.minecraft != null && this.minecraft.level != null)
-                ? (this.minecraft.level.getGameTime() + partialTick) * 0.08F
-                : 0.0F;
+        // Wrap phase into [0, 2*PI) using monotonic wall time so Mth.sin() never hits
+        // 32-bit float->int saturation on long-running worlds.
+        float time = (float) ((Util.getMillis() * 0.0016D) % (Math.PI * 2.0D));
 
         if (hasShard) {
             int outerR = 13;

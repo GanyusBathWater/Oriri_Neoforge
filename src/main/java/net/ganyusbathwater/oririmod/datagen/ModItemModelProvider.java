@@ -63,6 +63,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK.get());
                 withExistingParent(ModBlocks.FOG_SOURCE.getId().getPath(), mcLoc("item/generated"))
                                 .texture("layer0", modLoc("item/fog_source"));
+                withExistingParent(ModBlocks.VOLUME_FOG_SOURCE.getId().getPath(), mcLoc("item/generated"))
+                                .texture("layer0", modLoc("item/volume_fog_source"));
                 simpleBlockItem(ModBlocks.ELDER_LOG_BLOCK.get());
                 simpleBlockItem(ModBlocks.STRIPPED_ELDER_LOG_BLOCK.get());
                 simpleBlockItem(ModBlocks.CRACKED_ELDER_LOG_BLOCK.get());

@@ -52,23 +52,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Renders unified GPU heightfield volumetric ground fog for both natural biomes
- * (Scarlet Swamp, Elderwoods, Elder Beach, Vile Plains, Elder Valley) and manually placed
- * {@link net.ganyusbathwater.oririmod.block.custom.FogSourceBlock} / chunk-attached structure emitters.
- * <p>
- * Architecture:
+ * Renders unified GPU heightfield volumetric fog for:
  * <ul>
- *   <li>Runs immediately after {@code LevelRenderer.renderLevel} returns via {@code GameRendererMixin}
- *       (strictly AFTER Iris's {@code finalizeLevelRendering()}, so Iris never overrides our shader
- *       and {@code F1} GUI toggle behaves identically across all shaderpacks).</li>
- *   <li>Packs both surface biome haze and deduplicated local dungeon fog (289x289 blocks, ~144-block
- *       radius) into two tiny GPU textures ({@code RGBA16F} geometry/density + {@code RGBA8} lit color)
- *       only when geometry, patches, or lighting actually change.</li>
- *   <li>Executes ONE single 4-vertex fullscreen volumetric raymarch pass against a format-matched
- *       3D scene depth copy — working identically whether standing inside the fog, crouching, looking
- *       horizontally through a doorway from outside, or viewing a 140-block crater dungeon from afar,
- *       with zero circles, zero horizon beams, zero wall sandwich stripes, and 1x GPU overdraw.</li>
+ *   <li>Natural surface biome ground haze (Scarlet Swamp, Elderwoods, Elder Beach, Vile Plains, Elder Valley)</li>
+ *   <li>Ground-hugging {@link net.ganyusbathwater.oririmod.block.custom.FogSourceBlock} / chunk-attached structure emitters</li>
+ *   <li>3D floating &amp; room-filling {@link net.ganyusbathwater.oririmod.block.custom.VolumeFogSourceBlock} emitters</li>
  * </ul>
+ * Both layers evaluate in ONE single 4-vertex fullscreen volumetric raymarch pass post-Iris
+ * ({@code GameRendererMixin}), guaranteeing zero circles, zero horizon beams, zero wall sandwich stripes,
+ * full ~144-block visibility, and identical visuals across all shaderpacks and {@code F1} GUI toggles.
  */
 @EventBusSubscriber(modid = OririMod.MOD_ID, value = Dist.CLIENT)
 public final class GroundHazeRenderer {
@@ -94,12 +86,10 @@ public final class GroundHazeRenderer {
     private static final Matrix4f IDENTITY_MAT = new Matrix4f();
     private static boolean hasValidMatrices = false;
 
-    // Unified 289x289 GPU heightfield textures (Sampler2 = RGBA16F geo/density, Sampler3 = RGBA8 sRGB color)
+    // Layer A (Ground-Hugging) 289x289 GPU textures (Sampler2 = RGBA16F geo/density, Sampler3 = RGBA8 sRGB color)
     private static int geoTexId = 0;
     private static int colTexId = 0;
-    private static FloatBuffer geoUploadBuf = null;
-    private static ByteBuffer colUploadBuf = null;
-    private static boolean heightfieldHasData = false;
+    private static boolean groundMapHasData = false;
     private static int mapOriginX = 0;
     private static int mapOriginZ = 0;
     private static float mapBaseY = 0.0F;
@@ -107,10 +97,25 @@ public final class GroundHazeRenderer {
     private static float mapMaxFogTopY = 0.0F;
     private static int uploadedSurfaceVersion = -1;
     private static int uploadedLocalVersion = -1;
-    private static int uploadedNightBucket = Integer.MIN_VALUE;
-    private static boolean uploadedShaderActive = false;
+    private static int uploadedGroundNightBucket = Integer.MIN_VALUE;
+    private static boolean uploadedGroundShaderActive = false;
 
-    // Reusable CPU staging arrays for zero-allocation heightfield merging & 1-texel neighbor dilation
+    // Layer B (3D Floating / Room-Filling Volume) 289x289 GPU textures (Sampler4 = RGBA16F, Sampler5 = RGBA8)
+    private static int volGeoTexId = 0;
+    private static int volColTexId = 0;
+    private static boolean volumeMapHasData = false;
+    private static int volOriginX = 0;
+    private static int volOriginZ = 0;
+    private static float volBaseY = 0.0F;
+    private static float volMinY = 0.0F;
+    private static float volMaxTopY = 0.0F;
+    private static int uploadedVolumeVersion = -1;
+    private static int uploadedVolNightBucket = Integer.MIN_VALUE;
+    private static boolean uploadedVolShaderActive = false;
+
+    // Shared reusable native upload buffers & staging arrays (zero per-frame GC!)
+    private static FloatBuffer geoUploadBuf = null;
+    private static ByteBuffer colUploadBuf = null;
     private static float[] tmpFloorY;
     private static float[] tmpFogH;
     private static float[] tmpDen;
@@ -168,20 +173,25 @@ public final class GroundHazeRenderer {
 
         RenderLevelStageEvent.Stage stage = event.getStage();
 
-        // Creative Fog Source marker wireframes stay in the normal translucent world stage
+        // Creative Fog Source & Volume Fog Source marker wireframes stay in the translucent world stage
         if (stage == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             Minecraft mc = Minecraft.getInstance();
             Player player = mc.player;
             Item fogItem = ModBlocks.FOG_SOURCE.asItem();
-            if (player != null && (player.getMainHandItem().is(fogItem) || player.getOffhandItem().is(fogItem))) {
-                List<GroundHazeGrid.LocalFogPatch> patches = GRID.getActiveLocalPatches();
-                if (!patches.isEmpty()) {
+            Item volItem = ModBlocks.VOLUME_FOG_SOURCE.asItem();
+            boolean holdingFog = player != null
+                    && (player.getMainHandItem().is(fogItem) || player.getOffhandItem().is(fogItem)
+                    || player.getMainHandItem().is(volItem) || player.getOffhandItem().is(volItem));
+            if (holdingFog) {
+                List<GroundHazeGrid.LocalFogPatch> groundPatches = GRID.getActiveLocalPatches();
+                List<GroundHazeGrid.VolumeFogPatch> volPatches = GRID.getActiveVolumePatches();
+                if (!groundPatches.isEmpty() || !volPatches.isEmpty()) {
                     PoseStack poseStack = event.getPoseStack();
                     Vec3 camPos = event.getCamera().getPosition();
                     MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
                     poseStack.pushPose();
                     poseStack.translate(-camPos.x, -camPos.y, -camPos.z);
-                    renderFogSourceMarkers(poseStack, bufferSource, patches);
+                    renderFogSourceMarkers(poseStack, bufferSource, groundPatches, volPatches);
                     poseStack.popPose();
                 }
             }
@@ -229,9 +239,13 @@ public final class GroundHazeRenderer {
 
         boolean hasSurface = GRID.hasActiveSurfaceHaze();
         GroundHazeGrid.LocalCompositeGrid localComp = GRID.getLocalCompositeGrid();
-        boolean hasLocal = localComp.hasData;
-        if (!hasSurface && !hasLocal) {
-            heightfieldHasData = false;
+        GroundHazeGrid.VolumeCompositeGrid volComp = GRID.getVolumeCompositeGrid();
+        boolean hasGroundSource = hasSurface || localComp.hasData;
+        boolean hasVolumeSource = volComp.hasData;
+
+        if (!hasGroundSource && !hasVolumeSource) {
+            groundMapHasData = false;
+            volumeMapHasData = false;
             return;
         }
 
@@ -241,24 +255,44 @@ public final class GroundHazeRenderer {
         float nightFactor = GRID.getNightFactor();
         int nightBucket = Math.round(nightFactor * 40.0F);
         boolean shaderActive = ShaderDetector.isShaderActive();
-        int sVer = GRID.getSurfaceMeshVersion();
-        int lVer = GRID.getLocalMeshVersion();
 
-        // Rebuild & upload the 289x289 GPU heightfield textures ONLY when terrain/patches/lighting change
-        if (geoTexId == 0 || colTexId == 0
-                || sVer != uploadedSurfaceVersion
-                || lVer != uploadedLocalVersion
-                || nightBucket != uploadedNightBucket
-                || shaderActive != uploadedShaderActive) {
-            rebuildAndUploadHeightfield(hasSurface, localComp, camPos, nightFactor, shaderActive,
-                    OririClientConfig.getGroundHazeRadius());
-            uploadedSurfaceVersion = sVer;
-            uploadedLocalVersion = lVer;
-            uploadedNightBucket = nightBucket;
-            uploadedShaderActive = shaderActive;
+        // Update Layer A (Ground-Hugging) GPU textures only when terrain/patches/lighting change
+        if (hasGroundSource) {
+            int sVer = GRID.getSurfaceMeshVersion();
+            int lVer = GRID.getLocalMeshVersion();
+            if (geoTexId == 0 || colTexId == 0
+                    || sVer != uploadedSurfaceVersion
+                    || lVer != uploadedLocalVersion
+                    || nightBucket != uploadedGroundNightBucket
+                    || shaderActive != uploadedGroundShaderActive) {
+                rebuildAndUploadGroundHeightfield(hasSurface, localComp, camPos, nightFactor, shaderActive,
+                        OririClientConfig.getGroundHazeRadius());
+                uploadedSurfaceVersion = sVer;
+                uploadedLocalVersion = lVer;
+                uploadedGroundNightBucket = nightBucket;
+                uploadedGroundShaderActive = shaderActive;
+            }
+        } else {
+            groundMapHasData = false;
         }
 
-        if (!heightfieldHasData) {
+        // Update Layer B (3D Floating / Room-Filling Volume) GPU textures only when volume patches/lighting change
+        if (hasVolumeSource) {
+            int vVer = GRID.getVolumeMeshVersion();
+            if (volGeoTexId == 0 || volColTexId == 0
+                    || vVer != uploadedVolumeVersion
+                    || nightBucket != uploadedVolNightBucket
+                    || shaderActive != uploadedVolShaderActive) {
+                rebuildAndUploadVolumeField(volComp, nightFactor, shaderActive);
+                uploadedVolumeVersion = vVer;
+                uploadedVolNightBucket = nightBucket;
+                uploadedVolShaderActive = shaderActive;
+            }
+        } else {
+            volumeMapHasData = false;
+        }
+
+        if (!groundMapHasData && !volumeMapHasData) {
             return;
         }
 
@@ -268,7 +302,6 @@ public final class GroundHazeRenderer {
             return;
         }
 
-        // Re-bind mainRenderTarget for color output after depth blit
         mainTarget.bindWrite(false);
 
         float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
@@ -287,16 +320,22 @@ public final class GroundHazeRenderer {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, Mth.clamp(configDensity, 0.0F, 1.5F));
         RenderSystem.setShaderTexture(0, noiseTex);
         RenderSystem.setShaderTexture(1, depthCopyTex);
-        RenderSystem.setShaderTexture(2, geoTexId);
-        RenderSystem.setShaderTexture(3, colTexId);
+        RenderSystem.setShaderTexture(2, groundMapHasData ? geoTexId : 0);
+        RenderSystem.setShaderTexture(3, groundMapHasData ? colTexId : 0);
+        RenderSystem.setShaderTexture(4, volumeMapHasData ? volGeoTexId : 0);
+        RenderSystem.setShaderTexture(5, volumeMapHasData ? volColTexId : 0);
 
         Uniform uInvProjMat = shader.getUniform("InvProjMat");
         Uniform uInvViewMat = shader.getUniform("InvViewMat");
         Uniform uDepthBufSize = shader.getUniform("DepthBufferSize");
         Uniform uCamWorldPos = shader.getUniform("CamWorldPos");
         Uniform uMapRelOrigin = shader.getUniform("MapRelOrigin");
+        Uniform uVolRelOrigin = shader.getUniform("VolRelOrigin");
         Uniform uMapSize = shader.getUniform("MapSize");
         Uniform uFogYBounds = shader.getUniform("FogYBounds");
+        Uniform uVolYBounds = shader.getUniform("VolYBounds");
+        Uniform uHasGroundFog = shader.getUniform("HasGroundFog");
+        Uniform uHasVolumeFog = shader.getUniform("HasVolumeFog");
         Uniform uFogTime = shader.getUniform("FogTime");
 
         if (uInvProjMat != null) {
@@ -321,14 +360,30 @@ public final class GroundHazeRenderer {
                     (float) (mapBaseY - camPos.y),
                     (float) (mapOriginZ - camPos.z));
         }
+        if (uVolRelOrigin != null) {
+            uVolRelOrigin.set(
+                    (float) (volOriginX - camPos.x),
+                    (float) (volBaseY - camPos.y),
+                    (float) (volOriginZ - camPos.z));
+        }
         if (uMapSize != null) {
             uMapSize.set((float) MAP_SIZE);
         }
         if (uFogYBounds != null) {
-            // Slight 0.45-block bottom padding matches the shader's slab/stair tolerance
             uFogYBounds.set(
                     (float) (mapMinFogY - 0.45 - camPos.y),
                     (float) (mapMaxFogTopY + 0.15 - camPos.y));
+        }
+        if (uVolYBounds != null) {
+            uVolYBounds.set(
+                    (float) (volMinY - 0.15 - camPos.y),
+                    (float) (volMaxTopY + 0.15 - camPos.y));
+        }
+        if (uHasGroundFog != null) {
+            uHasGroundFog.set(groundMapHasData ? 1.0F : 0.0F);
+        }
+        if (uHasVolumeFog != null) {
+            uHasVolumeFog.set(volumeMapHasData ? 1.0F : 0.0F);
         }
         if (uFogTime != null) {
             uFogTime.set(timeSeconds);
@@ -359,6 +414,8 @@ public final class GroundHazeRenderer {
             RenderSystem.setShaderTexture(1, 0);
             RenderSystem.setShaderTexture(2, 0);
             RenderSystem.setShaderTexture(3, 0);
+            RenderSystem.setShaderTexture(4, 0);
+            RenderSystem.setShaderTexture(5, 0);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
@@ -369,7 +426,7 @@ public final class GroundHazeRenderer {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Unified 289x289 GPU Heightfield Texture Builder & Uploader
+    // Unified 289x289 GPU Texture Builders & Uploaders (Ground + 3D Volume)
     // ─────────────────────────────────────────────────────────────────────────────
 
     private static void ensureStagingArrays() {
@@ -386,34 +443,35 @@ public final class GroundHazeRenderer {
         colUploadBuf = BufferUtils.createByteBuffer(MAP_CELLS * 4);
     }
 
-    private static void ensureHeightfieldTextures() {
-        if (geoTexId == 0) {
-            geoTexId = GL11.glGenTextures();
-            int prev = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, geoTexId);
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL30.GL_RGBA16F, MAP_SIZE, MAP_SIZE, 0,
-                    GL11.GL_RGBA, GL11.GL_FLOAT, (ByteBuffer) null);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, prev);
-        }
-        if (colTexId == 0) {
-            colTexId = GL11.glGenTextures();
-            int prev = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, colTexId);
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, MAP_SIZE, MAP_SIZE, 0,
-                    GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) null);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, prev);
-        }
+    private static int createGeoTexture() {
+        int id = GL11.glGenTextures();
+        int prev = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL30.GL_RGBA16F, MAP_SIZE, MAP_SIZE, 0,
+                GL11.GL_RGBA, GL11.GL_FLOAT, (ByteBuffer) null);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, prev);
+        return id;
     }
 
-    private static void rebuildAndUploadHeightfield(
+    private static int createColTexture() {
+        int id = GL11.glGenTextures();
+        int prev = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, MAP_SIZE, MAP_SIZE, 0,
+                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) null);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, prev);
+        return id;
+    }
+
+    private static void rebuildAndUploadGroundHeightfield(
             boolean hasSurface,
             GroundHazeGrid.LocalCompositeGrid localComp,
             Vec3 camPos,
@@ -421,7 +479,8 @@ public final class GroundHazeRenderer {
             boolean shaderActive,
             float maxSurfaceRadius) {
         ensureStagingArrays();
-        ensureHeightfieldTextures();
+        if (geoTexId == 0) geoTexId = createGeoTexture();
+        if (colTexId == 0) colTexId = createColTexture();
 
         int oX = localComp.hasData ? localComp.originX : (Mth.floor(camPos.x) - GroundHazeGrid.COMP_RADIUS);
         int oZ = localComp.hasData ? localComp.originZ : (Mth.floor(camPos.z) - GroundHazeGrid.COMP_RADIUS);
@@ -437,7 +496,7 @@ public final class GroundHazeRenderer {
         float minY = Float.MAX_VALUE;
         float maxTopY = -Float.MAX_VALUE;
 
-        // 1. Merge natural biome surface haze (upsampled cleanly from 2-block sliding grid into 1-block map)
+        // 1. Natural biome surface haze
         if (hasSurface) {
             int sSize = GRID.getGridSize();
             if (sSize >= 2) {
@@ -512,7 +571,7 @@ public final class GroundHazeRenderer {
             }
         }
 
-        // 2. Merge deduplicated local dungeon/structure fog (1-block precision across full 289x289 map)
+        // 2. Deduplicated local ground FogSourceBlock / FogAnchor fog
         if (localComp.hasData) {
             float center = GroundHazeGrid.COMP_RADIUS + 0.5F;
             float farSpan = LOCAL_FAR_FADE_END - LOCAL_FAR_FADE_START;
@@ -575,13 +634,112 @@ public final class GroundHazeRenderer {
         }
 
         if (activeMaxX < activeMinX || minY > maxTopY) {
-            heightfieldHasData = false;
+            groundMapHasData = false;
             return;
         }
 
-        // 3. 1-texel perimeter & wall dilation: copies valid floorY, fogHeight, density, and RGB into
-        //    adjacent empty/wall texels while keeping mask = 0.0 -> guarantees 100% glitch-free bilinear
-        //    interpolation right up to curved walls & edges with ZERO leak through 1-block thin walls!
+        dilatePerimeterTexels(activeMinX, activeMaxX, activeMinZ, activeMaxZ);
+        mapBaseY = (minY + maxTopY) * 0.5F;
+        mapMinFogY = minY;
+        mapMaxFogTopY = maxTopY;
+        uploadStagingBuffersToTextures(geoTexId, colTexId, mapBaseY);
+        groundMapHasData = true;
+    }
+
+    private static void rebuildAndUploadVolumeField(
+            GroundHazeGrid.VolumeCompositeGrid volComp,
+            float nightFactor,
+            boolean shaderActive) {
+        ensureStagingArrays();
+        if (volGeoTexId == 0) volGeoTexId = createGeoTexture();
+        if (volColTexId == 0) volColTexId = createColTexture();
+
+        volOriginX = volComp.originX;
+        volOriginZ = volComp.originZ;
+
+        Arrays.fill(tmpValid, false);
+        Arrays.fill(tmpMask, 0.0F);
+        Arrays.fill(tmpDen, 0.0F);
+
+        int activeMinX = MAP_SIZE, activeMaxX = -1;
+        int activeMinZ = MAP_SIZE, activeMaxZ = -1;
+        float minY = Float.MAX_VALUE;
+        float maxTopY = -Float.MAX_VALUE;
+
+        float center = GroundHazeGrid.COMP_RADIUS + 0.5F;
+        float farSpan = LOCAL_FAR_FADE_END - LOCAL_FAR_FADE_START;
+
+        float[] bArr = volComp.bottomY;
+        float[] tArr = volComp.topY;
+        float[] dArr = volComp.density;
+        float[] mArr = volComp.mask;
+        float[] rArr = volComp.r;
+        float[] gArr = volComp.g;
+        float[] bColArr = volComp.b;
+        int[] lArr = volComp.packedLight;
+
+        for (int cz = volComp.dirtyMinZ; cz <= volComp.dirtyMaxZ; cz++) {
+            float dz = (cz + 0.5F) - center;
+            int row = cz * MAP_SIZE;
+            for (int cx = volComp.dirtyMinX; cx <= volComp.dirtyMaxX; cx++) {
+                int idx = row + cx;
+                float m = mArr[idx];
+                if (m <= 0.004F) continue;
+                float by = bArr[idx];
+                float ty = tArr[idx];
+                float vh = ty - by;
+                if (vh <= 0.1F) continue;
+
+                float dx = (cx + 0.5F) - center;
+                float dist = Mth.sqrt(dx * dx + dz * dz);
+                if (dist >= LOCAL_FAR_FADE_END) continue;
+
+                float farFade = 1.0F;
+                if (dist > LOCAL_FAR_FADE_START) {
+                    float ft = 1.0F - Mth.clamp((dist - LOCAL_FAR_FADE_START) / farSpan, 0.0F, 1.0F);
+                    farFade = ft * ft * (3.0F - 2.0F * ft);
+                }
+                float mask = m * farFade;
+                if (mask <= 0.004F) continue;
+
+                int light = lArr[idx];
+                tmpValid[idx] = true;
+                tmpFloorY[idx] = by;
+                tmpFogH[idx] = vh;
+                tmpDen[idx] = dArr[idx];
+                tmpMask[idx] = mask;
+                tmpR[idx] = applyLightR(rArr[idx], light, nightFactor, shaderActive);
+                tmpG[idx] = applyLightG(gArr[idx], light, nightFactor, shaderActive);
+                tmpB[idx] = applyLightB(bColArr[idx], light, nightFactor, shaderActive);
+
+                if (cx < activeMinX) activeMinX = cx;
+                if (cx > activeMaxX) activeMaxX = cx;
+                if (cz < activeMinZ) activeMinZ = cz;
+                if (cz > activeMaxZ) activeMaxZ = cz;
+                if (by < minY) minY = by;
+                if (ty > maxTopY) maxTopY = ty;
+            }
+        }
+
+        if (activeMaxX < activeMinX || minY > maxTopY) {
+            volumeMapHasData = false;
+            return;
+        }
+
+        dilatePerimeterTexels(activeMinX, activeMaxX, activeMinZ, activeMaxZ);
+        volBaseY = (minY + maxTopY) * 0.5F;
+        volMinY = minY;
+        volMaxTopY = maxTopY;
+        uploadStagingBuffersToTextures(volGeoTexId, volColTexId, volBaseY);
+        volumeMapHasData = true;
+    }
+
+    /**
+     * 1-texel perimeter &amp; wall dilation: copies valid height/density/RGB into adjacent empty/wall texels
+     * while keeping {@code mask = 0.0} so bilinear interpolation stays 100% glitch-free right up to curved
+     * walls with ZERO bleed through 1-block thin walls.
+     */
+    private static void dilatePerimeterTexels(int activeMinX, int activeMaxX, int activeMinZ, int activeMaxZ) {
         int dilMinX = Math.max(0, activeMinX - 1);
         int dilMaxX = Math.min(MAP_SIZE - 1, activeMaxX + 1);
         int dilMinZ = Math.max(0, activeMinZ - 1);
@@ -622,22 +780,18 @@ public final class GroundHazeRenderer {
                     tmpR[idx] = sumR * inv;
                     tmpG[idx] = sumG * inv;
                     tmpB[idx] = sumB * inv;
-                    // mask stays 0.0F so open edges & 1-block walls feather cleanly without bleeding!
                 }
             }
         }
+    }
 
-        // Center GL_RGBA16F height storage around active elevation for maximum half-float precision
-        mapBaseY = (minY + maxTopY) * 0.5F;
-        mapMinFogY = minY;
-        mapMaxFogTopY = maxTopY;
-
+    private static void uploadStagingBuffersToTextures(int targetGeoTex, int targetColTex, float baseY) {
         geoUploadBuf.clear();
         colUploadBuf.clear();
         for (int i = 0; i < MAP_CELLS; i++) {
             float m = tmpMask[i];
             if (tmpValid[i] || tmpDen[i] > 0.0F) {
-                geoUploadBuf.put(tmpFloorY[i] - mapBaseY);
+                geoUploadBuf.put(tmpFloorY[i] - baseY);
                 geoUploadBuf.put(tmpFogH[i]);
                 geoUploadBuf.put(tmpDen[i]);
                 geoUploadBuf.put(m);
@@ -661,7 +815,6 @@ public final class GroundHazeRenderer {
         geoUploadBuf.flip();
         colUploadBuf.flip();
 
-        // Reset unpack state cleanly (Minecraft font/atlas uploads can leave non-zero row length!)
         int prevRowLen = GL11.glGetInteger(GL11.GL_UNPACK_ROW_LENGTH);
         int prevSkipPix = GL11.glGetInteger(GL11.GL_UNPACK_SKIP_PIXELS);
         int prevSkipRow = GL11.glGetInteger(GL11.GL_UNPACK_SKIP_ROWS);
@@ -673,11 +826,11 @@ public final class GroundHazeRenderer {
         GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 4);
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, geoTexId);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, targetGeoTex);
         GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, MAP_SIZE, MAP_SIZE,
                 GL11.GL_RGBA, GL11.GL_FLOAT, geoUploadBuf);
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, colTexId);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, targetColTex);
         GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, MAP_SIZE, MAP_SIZE,
                 GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, colUploadBuf);
 
@@ -686,8 +839,6 @@ public final class GroundHazeRenderer {
         GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, prevSkipPix);
         GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, prevSkipRow);
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, prevAlign);
-
-        heightfieldHasData = true;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -836,19 +987,30 @@ public final class GroundHazeRenderer {
             GL11.glDeleteTextures(colTexId);
             colTexId = 0;
         }
-        heightfieldHasData = false;
+        if (volGeoTexId != 0) {
+            GL11.glDeleteTextures(volGeoTexId);
+            volGeoTexId = 0;
+        }
+        if (volColTexId != 0) {
+            GL11.glDeleteTextures(volColTexId);
+            volColTexId = 0;
+        }
+        groundMapHasData = false;
+        volumeMapHasData = false;
         uploadedSurfaceVersion = -1;
         uploadedLocalVersion = -1;
+        uploadedVolumeVersion = -1;
         releaseDepthCopy();
     }
 
     private static void renderFogSourceMarkers(
             PoseStack poseStack,
             MultiBufferSource.BufferSource bufferSource,
-            List<GroundHazeGrid.LocalFogPatch> patches) {
+            List<GroundHazeGrid.LocalFogPatch> groundPatches,
+            List<GroundHazeGrid.VolumeFogPatch> volPatches) {
         VertexConsumer lineVc = bufferSource.getBuffer(RenderType.lines());
-        for (int i = 0; i < patches.size(); i++) {
-            GroundHazeGrid.LocalFogPatch p = patches.get(i);
+        for (int i = 0; i < groundPatches.size(); i++) {
+            GroundHazeGrid.LocalFogPatch p = groundPatches.get(i);
             BlockPos pos = p.sourcePos;
             LevelRenderer.renderLineBox(
                     poseStack,
@@ -856,6 +1018,23 @@ public final class GroundHazeRenderer {
                     pos.getX() + 0.15, pos.getY() + 0.15, pos.getZ() + 0.15,
                     pos.getX() + 0.85, pos.getY() + 0.85, pos.getZ() + 0.85,
                     p.color.r, p.color.g, p.color.b, 0.90F);
+        }
+        // Double-box wireframe distinguishes 3D Volume Fog Sources from ground Fog Sources at a glance
+        for (int i = 0; i < volPatches.size(); i++) {
+            GroundHazeGrid.VolumeFogPatch p = volPatches.get(i);
+            BlockPos pos = p.sourcePos;
+            LevelRenderer.renderLineBox(
+                    poseStack,
+                    lineVc,
+                    pos.getX() + 0.08, pos.getY() + 0.08, pos.getZ() + 0.08,
+                    pos.getX() + 0.92, pos.getY() + 0.92, pos.getZ() + 0.92,
+                    p.color.r, p.color.g, p.color.b, 0.92F);
+            LevelRenderer.renderLineBox(
+                    poseStack,
+                    lineVc,
+                    pos.getX() + 0.28, pos.getY() + 0.28, pos.getZ() + 0.28,
+                    pos.getX() + 0.72, pos.getY() + 0.72, pos.getZ() + 0.72,
+                    1.0F, 1.0F, 1.0F, 0.75F);
         }
         bufferSource.endBatch(RenderType.lines());
     }

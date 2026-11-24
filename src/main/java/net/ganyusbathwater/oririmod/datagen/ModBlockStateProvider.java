@@ -43,10 +43,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 blockWithItem(ModBlocks.MAGIC_BARRIER_BLOCK, 4);
                 blockWithItem(ModBlocks.MAGIC_BARRIER_CORE_BLOCK, 4);
 
-                // Invisible technical Fog Source block (just like vanilla minecraft:light)
+                // Invisible technical Fog Source blocks (just like vanilla minecraft:light)
                 simpleBlock(ModBlocks.FOG_SOURCE.get(),
                                 models().getBuilder("fog_source")
                                                 .texture("particle", modLoc("item/fog_source")));
+                simpleBlock(ModBlocks.VOLUME_FOG_SOURCE.get(),
+                                models().getBuilder("volume_fog_source")
+                                                .texture("particle", modLoc("item/volume_fog_source")));
 
                 simpleBlockWithItem(ModBlocks.SOUL_HARVESTER.get(), models().withExistingParent("soul_harvester", modLoc("block/cube_bottom_top_inner"))
                         .texture("side", modLoc("block/soul_harvester_side_inactive"))

@@ -1,5 +1,6 @@
 package net.ganyusbathwater.oririmod.entity.custom;
 
+import net.ganyusbathwater.oririmod.block.ModBlocks;
 import net.ganyusbathwater.oririmod.config.OririConfig;
 import net.ganyusbathwater.oririmod.events.disaster.DisasterSafetyUtil;
 import net.minecraft.core.BlockPos;
@@ -13,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -27,6 +29,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,6 +53,10 @@ public class DisasterTornadoEntity extends Entity {
     private static final EntityDataAccessor<Integer> DEBRIS_BLOCK_3 = SynchedEntityData.defineId(DisasterTornadoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DEBRIS_BLOCK_4 = SynchedEntityData.defineId(DisasterTornadoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DISSIPATING = SynchedEntityData.defineId(DisasterTornadoEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Float> GROUND_SKIRT_DEPTH = SynchedEntityData.defineId(DisasterTornadoEntity.class, EntityDataSerializers.FLOAT);
+
+    private static final float MIN_SKIRT_DEPTH = 6.0f;
+    private static final float MAX_SKIRT_DEPTH = 36.0f;
 
     private int lifespan = 2400; // 2 minutes default
     private double headingAngle = 0.0;
@@ -82,6 +89,7 @@ public class DisasterTornadoEntity extends Entity {
         builder.define(DEBRIS_BLOCK_3, Block.getId(Blocks.GRASS_BLOCK.defaultBlockState()));
         builder.define(DEBRIS_BLOCK_4, Block.getId(Blocks.OAK_PLANKS.defaultBlockState()));
         builder.define(DISSIPATING, false);
+        builder.define(GROUND_SKIRT_DEPTH, 8.0f);
     }
 
     public void configure(int lifespan, float suctionRadius, float funnelHeight, float baseRadius,
@@ -202,14 +210,84 @@ public class DisasterTornadoEntity extends Entity {
             return;
         }
 
-        int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(nextX), (int) Math.floor(nextZ));
-        double targetY = surfaceY;
+        // Sample true terrain ground across the tornado's base footprint, ignoring tall Vile Vines,
+        // tree trunks/leaves, cacti, and other non-terrain obstacles so the tornado never clips onto them.
+        double sampleRadius = Math.max(4.0, getBaseRadius() * 0.85);
+        int[] samples = new int[9];
+        samples[0] = sampleTerrainGroundY(level, Mth.floor(nextX), Mth.floor(nextZ));
+        for (int i = 0; i < 8; i++) {
+            double ang = i * (Math.PI * 0.25);
+            int sx = Mth.floor(nextX + Math.cos(ang) * sampleRadius);
+            int sz = Mth.floor(nextZ + Math.sin(ang) * sampleRadius);
+            samples[i + 1] = sampleTerrainGroundY(level, sx, sz);
+        }
+        Arrays.sort(samples);
 
-        // Smooth vertical climbing
+        // Anchor to the lower-quartile terrain height (~30th percentile) so passing over a steep ridge
+        // or narrow elevation spike does not hoist the entire funnel up into midair.
+        int minGroundY = samples[0];
+        double targetY = samples[2];
+
+        // Smooth, speed-capped vertical climbing so elevation transitions never snap
         double curY = getY();
-        double lerpY = Mth.lerp(0.2, curY, targetY);
+        double desiredY = Mth.lerp(0.14, curY, targetY);
+        double deltaY = Mth.clamp(desiredY - curY, -0.5, 0.28);
+        double newY = curY + deltaY;
 
-        this.setPos(nextX, lerpY, nextZ);
+        // Extend the rendered skirt below entity Y down past the lowest terrain under the footprint
+        float neededSkirt = Mth.clamp((float) ((newY - minGroundY) + MIN_SKIRT_DEPTH), MIN_SKIRT_DEPTH, MAX_SKIRT_DEPTH);
+        float curSkirt = getGroundSkirtDepth();
+        float skirtLerp = neededSkirt > curSkirt ? 0.5f : 0.12f;
+        this.entityData.set(GROUND_SKIRT_DEPTH, Mth.lerp(skirtLerp, curSkirt, neededSkirt));
+
+        this.setPos(nextX, newY, nextZ);
+    }
+
+    /**
+     * Finds the true ground surface Y at (x, z), scanning downward past non-terrain obstacles
+     * such as Vile Vines, tree logs, leaves, cacti, fences, and vegetation.
+     */
+    public static int sampleTerrainGroundY(Level level, int x, int z) {
+        int startY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+        int minY = level.getMinBuildHeight();
+        BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos(x, startY, z);
+
+        for (int y = startY; y >= minY; y--) {
+            mpos.setY(y);
+            BlockState state = level.getBlockState(mpos);
+            if (!isNonTerrainObstacle(state)) {
+                return y + 1;
+            }
+        }
+        return minY + 1;
+    }
+
+    private static boolean isNonTerrainObstacle(BlockState state) {
+        if (state.isAir()) {
+            return true;
+        }
+        // Water / lava counts as a surface so waterspouts sit naturally on lakes and oceans
+        if (!state.getFluidState().isEmpty()) {
+            return false;
+        }
+        if (!state.blocksMotion()) {
+            return true;
+        }
+        return state.is(ModBlocks.VILE_VINE_BLOCK.get())
+                || state.is(ModBlocks.STRIPPED_VILE_VINE.get())
+                || state.is(ModBlocks.EPOCH_CACTUS.get())
+                || state.is(ModBlocks.MYRIAD_CACTUS.get())
+                || state.is(Blocks.CACTUS)
+                || state.is(Blocks.BAMBOO)
+                || state.is(BlockTags.LOGS)
+                || state.is(BlockTags.LEAVES)
+                || state.is(BlockTags.WART_BLOCKS)
+                || state.is(BlockTags.FENCES)
+                || state.is(BlockTags.WALLS)
+                || state.is(BlockTags.SAPLINGS)
+                || state.is(Blocks.MUSHROOM_STEM)
+                || state.is(Blocks.RED_MUSHROOM_BLOCK)
+                || state.is(Blocks.BROWN_MUSHROOM_BLOCK);
     }
 
     private void performSelectiveBlockStripping(ServerLevel level) {
@@ -278,7 +356,8 @@ public class DisasterTornadoEntity extends Entity {
         float radius = getSuctionRadius();
         double kbThreshold = OririConfig.COMMON.naturalDisasters.tornadoKnockbackResistanceThreshold.get();
 
-        AABB suctionBox = this.getBoundingBox().inflate(radius, getFunnelHeight() * 0.5, radius);
+        AABB suctionBox = this.getBoundingBox().inflate(radius, getFunnelHeight() * 0.5, radius)
+                .expandTowards(0.0, -getGroundSkirtDepth(), 0.0);
         List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, suctionBox,
                 e -> e.isAlive() && !(e instanceof Player p && (p.isCreative() || p.isSpectator())));
 
@@ -355,7 +434,9 @@ public class DisasterTornadoEntity extends Entity {
             double r = 4.0 + random.nextDouble() * (suctionR * 1.15);
             double px = getX() + Math.cos(angle) * r;
             double pz = getZ() + Math.sin(angle) * r;
-            double py = getY() + random.nextDouble() * 2.5;
+            int localGroundY = sampleTerrainGroundY(level(), Mth.floor(px), Mth.floor(pz));
+            double clampedGroundY = Mth.clamp(localGroundY, getY() - getGroundSkirtDepth() - 4.0, getY() + 14.0);
+            double py = clampedGroundY + random.nextDouble() * 2.5;
 
             // Inward spiral velocity
             double distRatio = Math.max(0.1, r / suctionR);
@@ -397,6 +478,7 @@ public class DisasterTornadoEntity extends Entity {
     public float getFunnelHeight() { return this.entityData.get(FUNNEL_HEIGHT); }
     public float getBaseRadius() { return this.entityData.get(BASE_RADIUS); }
     public float getTopRadius() { return this.entityData.get(TOP_RADIUS); }
+    public float getGroundSkirtDepth() { return this.entityData.get(GROUND_SKIRT_DEPTH); }
 
     public void startDissipating() {
         this.entityData.set(DISSIPATING, true);
@@ -431,6 +513,7 @@ public class DisasterTornadoEntity extends Entity {
         if (tag.contains("BaseRadius")) this.entityData.set(BASE_RADIUS, tag.getFloat("BaseRadius"));
         if (tag.contains("TopRadius")) this.entityData.set(TOP_RADIUS, tag.getFloat("TopRadius"));
         if (tag.contains("Dissipating")) this.entityData.set(DISSIPATING, tag.getBoolean("Dissipating"));
+        if (tag.contains("GroundSkirtDepth")) this.entityData.set(GROUND_SKIRT_DEPTH, tag.getFloat("GroundSkirtDepth"));
     }
 
     @Override
@@ -447,6 +530,7 @@ public class DisasterTornadoEntity extends Entity {
         tag.putFloat("BaseRadius", getBaseRadius());
         tag.putFloat("TopRadius", getTopRadius());
         tag.putBoolean("Dissipating", isDissipating());
+        tag.putFloat("GroundSkirtDepth", getGroundSkirtDepth());
     }
 }
 

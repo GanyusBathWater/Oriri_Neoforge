@@ -60,6 +60,7 @@ public class DisasterTornadoRenderer extends EntityRenderer<DisasterTornadoEntit
         float totalHeight = entity.getFunnelHeight();
         float baseRadius = entity.getBaseRadius();
         float topRadius = entity.getTopRadius();
+        float skirtDepth = Math.max(6.0f, entity.getGroundSkirtDepth());
 
         if (totalHeight <= 0.5f || baseRadius <= 0.1f) {
             return;
@@ -77,15 +78,15 @@ public class DisasterTornadoRenderer extends EntityRenderer<DisasterTornadoEntit
 
         poseStack.pushPose();
 
-        // 1. Render Inner Dust Core Cylinder (High resolution slices for massive 120m height)
+        // 1. Render Inner Dust Core Cylinder (High resolution slices + seamless downward terrain skirt)
         VertexConsumer coreConsumer = buffer.getBuffer(DUST_CORE_LAYER);
-        renderVortexCylinder(poseStack, coreConsumer, time, totalHeight,
+        renderVortexCylinder(poseStack, coreConsumer, time, totalHeight, skirtDepth,
                 baseRadius * 0.85f, topRadius * 0.82f, 36, 18,
                 currentColors[0], currentColors[1], currentColors[2], 0.84f, 0.06f, 0.035f, packedLight);
 
-        // 2. Render Outer Swirling Wind Ribbons (Depth-writing emissive vortex)
+        // 2. Render Outer Swirling Wind Ribbons (Depth-writing emissive vortex + seamless downward terrain skirt)
         VertexConsumer sheathConsumer = buffer.getBuffer(VORTEX_SHEATH_LAYER);
-        renderVortexCylinder(poseStack, sheathConsumer, time, totalHeight,
+        renderVortexCylinder(poseStack, sheathConsumer, time, totalHeight, skirtDepth,
                 baseRadius * 1.15f, topRadius * 1.05f, 40, 24,
                 currentColors[3], currentColors[4], currentColors[5], 0.68f, -0.09f, 0.055f, LightTexture.FULL_BRIGHT);
 
@@ -149,23 +150,35 @@ public class DisasterTornadoRenderer extends EntityRenderer<DisasterTornadoEntit
     }
 
     private void renderVortexCylinder(PoseStack poseStack, VertexConsumer consumer, float time,
-                                      float height, float rBase, float rTop, int verticalSlices,
+                                      float height, float skirtDepth, float rBase, float rTop, int verticalSlices,
                                       int radialSegments, float r, float g, float b, float alpha,
                                       float rotSpeed, float vSpeed, int light) {
         Matrix4f mat = poseStack.last().pose();
+        int skirtSlices = Math.max(4, Mth.ceil(skirtDepth / 2.5f));
+        int totalSlices = skirtSlices + verticalSlices;
 
-        for (int i = 0; i < verticalSlices; i++) {
-            float y0 = (i / (float) verticalSlices) * height;
-            float y1 = ((i + 1) / (float) verticalSlices) * height;
+        for (int i = 0; i < totalSlices; i++) {
+            float y0 = (i < skirtSlices)
+                    ? -skirtDepth + (i / (float) skirtSlices) * skirtDepth
+                    : ((i - skirtSlices) / (float) verticalSlices) * height;
+            float y1 = (i + 1 <= skirtSlices)
+                    ? -skirtDepth + ((i + 1) / (float) skirtSlices) * skirtDepth
+                    : (((i + 1) - skirtSlices) / (float) verticalSlices) * height;
 
             float t0 = y0 / height;
             float t1 = y1 / height;
 
-            // Curved expansion (narrow ground spout, dramatic cloud-base trumpet)
-            float rad0 = rBase + (rTop - rBase) * (float) Math.pow(t0, 1.55);
-            float rad1 = rBase + (rTop - rBase) * (float) Math.pow(t1, 1.55);
+            // Above ground: curved expansion (narrow ground spout, dramatic cloud-base trumpet).
+            // Below y=0 (terrain skirt): keep grounded at rBase with a gentle ground-hugging flare so
+            // the funnel bottom never visibly cuts off in midair on hills, slopes, or cliffs.
+            float rad0 = y0 >= 0.0f
+                    ? rBase + (rTop - rBase) * (float) Math.pow(t0, 1.55)
+                    : rBase * (1.0f + 0.06f * Mth.clamp(-y0 / Math.max(1.0f, skirtDepth), 0.0f, 1.0f));
+            float rad1 = y1 >= 0.0f
+                    ? rBase + (rTop - rBase) * (float) Math.pow(t1, 1.55)
+                    : rBase * (1.0f + 0.06f * Mth.clamp(-y1 / Math.max(1.0f, skirtDepth), 0.0f, 1.0f));
 
-            // Bending spine offsets
+            // Bending spine offsets (anchored to 0 below y=0 so the terrain skirt plunges straight down)
             float offX0 = getSpineOffsetX(time, y0);
             float offZ0 = getSpineOffsetZ(time, y0);
             float offX1 = getSpineOffsetX(time, y1);
@@ -236,10 +249,12 @@ public class DisasterTornadoRenderer extends EntityRenderer<DisasterTornadoEntit
     }
 
     private static float getSpineOffsetX(float time, float y) {
+        if (y <= 0.0f) return 0.0f;
         return (float) (Math.sin(time * 0.04 + y * 0.08) * (y * 0.14) + Math.cos(time * 0.02 + y * 0.05) * (y * 0.1));
     }
 
     private static float getSpineOffsetZ(float time, float y) {
+        if (y <= 0.0f) return 0.0f;
         return (float) (Math.cos(time * 0.035 + y * 0.07) * (y * 0.14) - Math.sin(time * 0.02 + y * 0.04) * (y * 0.1));
     }
 

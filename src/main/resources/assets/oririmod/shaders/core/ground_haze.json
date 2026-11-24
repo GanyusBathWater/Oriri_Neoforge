@@ -15,7 +15,9 @@
     { "name": "Sampler0" },
     { "name": "Sampler1" },
     { "name": "Sampler2" },
-    { "name": "Sampler3" }
+    { "name": "Sampler3" },
+    { "name": "Sampler4" },
+    { "name": "Sampler5" }
   ],
   "uniforms": [
     { "name": "ModelViewMat",    "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
@@ -26,8 +28,12 @@
     { "name": "DepthBufferSize", "type": "float",     "count": 2,  "values": [1.0, 1.0] },
     { "name": "CamWorldPos",     "type": "float",     "count": 3,  "values": [0.0, 0.0, 0.0] },
     { "name": "MapRelOrigin",    "type": "float",     "count": 3,  "values": [0.0, 0.0, 0.0] },
+    { "name": "VolRelOrigin",    "type": "float",     "count": 3,  "values": [0.0, 0.0, 0.0] },
     { "name": "MapSize",         "type": "float",     "count": 1,  "values": [289.0] },
     { "name": "FogYBounds",      "type": "float",     "count": 2,  "values": [-10.0, 10.0] },
+    { "name": "VolYBounds",      "type": "float",     "count": 2,  "values": [-10.0, 10.0] },
+    { "name": "HasGroundFog",    "type": "float",     "count": 1,  "values": [0.0] },
+    { "name": "HasVolumeFog",    "type": "float",     "count": 1,  "values": [0.0] },
     { "name": "FogTime",         "type": "float",     "count": 1,  "values": [0.0] }
   ]
 }
