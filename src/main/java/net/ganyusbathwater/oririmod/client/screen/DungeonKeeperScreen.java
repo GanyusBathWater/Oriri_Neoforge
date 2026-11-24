@@ -3,6 +3,7 @@ package net.ganyusbathwater.oririmod.client.screen;
 import net.ganyusbathwater.oririmod.network.packet.DungeonActionPayload;
 import net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -30,11 +31,20 @@ public class DungeonKeeperScreen extends Screen {
     private static final int SLOT_HEIGHT = 22;
     private static final int SLOT_GAP = 4;
     private static final int MAX_PARTY_SIZE = 4;
+    private static final int DEFAULT_PHASE_TICKS = 200; // 10s start countdown & 10s cancel cooldown
+    private static final float MAX_CLIENT_LOOKAHEAD_TICKS = 8.0F; // never outrun server by more than 0.4s
 
-    private final OpenDungeonScreenPayload data;
+    private OpenDungeonScreenPayload data;
     private final boolean isLeader;
-    private final long openClientTick;
-    private final int initialCountdownTicks;
+
+    // Monotonic phase & countdown/cooldown tracking so server lag never causes the timer or bar to flip backward
+    private int activePhase; // 0 = lobby, 1 = starting, 2 = cooldown
+    private int totalCountdownTicks;
+    private int serverRemainingTicks;
+    private float displayedRemainingTicks;
+    private int displayedSeconds;
+    private long lastRenderMillis;
+
     private EditBox inviteBox;
     private String currentSuggestion = "";
 
@@ -48,8 +58,56 @@ public class DungeonKeeperScreen extends Screen {
         Minecraft mc = Minecraft.getInstance();
         UUID myId = mc.player != null ? mc.player.getUUID() : UUID.randomUUID();
         this.isLeader = data.leaderId().equals(myId);
-        this.openClientTick = mc.level != null ? mc.level.getGameTime() : 0L;
-        this.initialCountdownTicks = Math.max(1, Math.abs(data.startTicksRemaining()));
+        this.lastRenderMillis = Util.getMillis();
+        resetPhaseTracking(data);
+    }
+
+    public boolean isSameParty(UUID partyId) {
+        return this.data != null && this.data.partyId().equals(partyId);
+    }
+
+    public void updateFromPayload(OpenDungeonScreenPayload newData) {
+        int prevPhase = this.activePhase;
+        int newPhase = computePhase(newData);
+        boolean membersChanged = !this.data.memberIds().equals(newData.memberIds())
+                || !this.data.memberStatuses().equals(newData.memberStatuses());
+
+        String savedInviteText = (this.inviteBox != null) ? this.inviteBox.getValue() : "";
+        this.data = newData;
+
+        if (newPhase != prevPhase) {
+            resetPhaseTracking(newData);
+            this.rebuildWidgets();
+            if (this.inviteBox != null && !savedInviteText.isEmpty()) {
+                this.inviteBox.setValue(savedInviteText);
+            }
+        } else {
+            int incomingRemaining = Math.abs(newData.startTicksRemaining());
+            // Keep remaining ticks strictly non-increasing within the same phase
+            this.serverRemainingTicks = Math.min(this.serverRemainingTicks, incomingRemaining);
+            if (membersChanged) {
+                this.rebuildWidgets();
+                if (this.inviteBox != null && !savedInviteText.isEmpty()) {
+                    this.inviteBox.setValue(savedInviteText);
+                }
+            }
+        }
+    }
+
+    private static int computePhase(OpenDungeonScreenPayload payload) {
+        if (payload.isStarting()) return 1;
+        if (payload.startTicksRemaining() < 0) return 2;
+        return 0;
+    }
+
+    private void resetPhaseTracking(OpenDungeonScreenPayload payload) {
+        this.activePhase = computePhase(payload);
+        int rem = Math.abs(payload.startTicksRemaining());
+        this.totalCountdownTicks = Math.max(DEFAULT_PHASE_TICKS, rem);
+        this.serverRemainingTicks = rem;
+        this.displayedRemainingTicks = rem;
+        this.displayedSeconds = Math.max(0, (int) Math.ceil(rem / 20.0));
+        this.lastRenderMillis = Util.getMillis();
     }
 
     private int getPanelW() { return Math.min(348, this.width - 20); }
@@ -341,28 +399,38 @@ public class DungeonKeeperScreen extends Screen {
     }
 
     private void renderCountdownBar(GuiGraphics gfx, int x, int y, int w, boolean starting) {
-        long currentTick = Minecraft.getInstance().level != null
-                ? Minecraft.getInstance().level.getGameTime() : openClientTick;
-        long passedTicks = currentTick - openClientTick;
+        long nowMillis = Util.getMillis();
+        float dtSec = Mth.clamp((nowMillis - this.lastRenderMillis) / 1000.0F, 0.0F, 0.1F);
+        this.lastRenderMillis = nowMillis;
 
-        int remainingTicks;
-        if (starting) {
-            remainingTicks = Math.max(0, data.startTicksRemaining() - (int) passedTicks);
-        } else {
-            int ticksLeft = Math.min(0, data.startTicksRemaining() + (int) passedTicks);
-            remainingTicks = Math.abs(ticksLeft);
+        // Smoothly glide displayedRemainingTicks strictly downward:
+        // - Catch up smoothly if behind the latest server sync
+        // - Otherwise drift at most MAX_CLIENT_LOOKAHEAD_TICKS ahead of serverRemainingTicks,
+        //   decelerating smoothly during structure-loading lag spikes instead of overshooting and flipping back.
+        float minAllowed = Math.max(0.0F, this.serverRemainingTicks - MAX_CLIENT_LOOKAHEAD_TICKS);
+        if (this.displayedRemainingTicks > this.serverRemainingTicks) {
+            float lagBehind = this.displayedRemainingTicks - this.serverRemainingTicks;
+            float speed = 20.0F + lagBehind * 4.0F;
+            this.displayedRemainingTicks = Math.max(minAllowed, this.displayedRemainingTicks - speed * dtSec);
+        } else if (this.displayedRemainingTicks > minAllowed) {
+            float headroom = (this.displayedRemainingTicks - minAllowed) / MAX_CLIENT_LOOKAHEAD_TICKS;
+            float speed = 20.0F * headroom;
+            this.displayedRemainingTicks = Math.max(minAllowed, this.displayedRemainingTicks - speed * dtSec);
         }
 
-        int secondsLeft = starting ? (int) Math.ceil(remainingTicks / 20.0) : remainingTicks / 20;
-        float progress = Mth.clamp(remainingTicks / (float) initialCountdownTicks, 0.0F, 1.0F);
+        // Strict monotonic seconds readout so the displayed number NEVER jumps upward
+        int candidateSeconds = Math.max(0, (int) Math.ceil(this.displayedRemainingTicks / 20.0D));
+        this.displayedSeconds = Math.min(this.displayedSeconds, candidateSeconds);
+
+        float progress = Mth.clamp(this.displayedRemainingTicks / (float) Math.max(1, this.totalCountdownTicks), 0.0F, 1.0F);
 
         int barColor = starting ? AMBER : CRIMSON;
         int barBright = starting ? AMBER_LIGHT : CRIMSON_LIGHT;
         int barBg = starting ? AMBER_DARK : CRIMSON_DARK;
 
         String label = starting
-                ? "Starting in " + secondsLeft + "s..."
-                : "Cooldown: " + secondsLeft + "s...";
+                ? "Starting in " + this.displayedSeconds + "s..."
+                : "Cooldown: " + this.displayedSeconds + "s...";
 
         drawRecessedWell(gfx, x, y, w, 18, barColor);
         int innerW = Math.round((w - 4) * progress);

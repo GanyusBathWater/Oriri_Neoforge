@@ -450,25 +450,23 @@ public class DungeonTickHandler {
                 );
                 
                 if (count >= totalRequired) {
-                    String table = instance.getSecretButtonLootTable();
-                    if (table == null || table.isBlank()) table = "minecraft:chests/simple_dungeon";
-                    net.minecraft.resources.ResourceLocation lootTableId = net.minecraft.resources.ResourceLocation.tryParse(table.contains(":") ? table : "minecraft:" + table);
-                    
-                    net.minecraft.world.level.block.state.BlockState chestState = net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState();
-                    net.minecraft.world.level.block.state.BlockState buttonState = level.getBlockState(pos);
-                    if (buttonState.hasProperty(net.minecraft.world.level.block.ButtonBlock.FACING)) {
-                        chestState = chestState.setValue(net.minecraft.world.level.block.ChestBlock.FACING, buttonState.getValue(net.minecraft.world.level.block.ButtonBlock.FACING));
-                    }
-                    
-                    level.setBlock(pos, chestState, 3);
-                    if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBE && lootTableId != null) {
-                        chestBE.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTableId), level.getRandom().nextLong());
-                    }
-                    
-                    event.getEntity().displayClientMessage(
-                        net.minecraft.network.chat.Component.literal("A secret has been revealed!").withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.BOLD), false
-                    );
                     level.playSound(null, pos, net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, net.minecraft.sounds.SoundSource.MASTER, 1.0f, 1.0f);
+                    level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                            pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                            24, 0.35, 0.35, 0.35, 0.06);
+
+                    // Grant 1 dungeon-bound "Wish Upon a Star" to every player in this dungeon party
+                    String dungeonId = instance.getDungeonId();
+                    String dungeonName = net.ganyusbathwater.oririmod.dungeon.data.StarWishManager.resolveDungeonDisplayName(dungeonId);
+                    for (java.util.UUID memberId : instance.getPlayers()) {
+                        net.minecraft.server.level.ServerPlayer member = level.getServer().getPlayerList().getPlayer(memberId);
+                        if (member != null) {
+                            net.ganyusbathwater.oririmod.dungeon.data.StarWishManager.awardWishItem(member, dungeonId);
+                            member.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                                    "message.oririmod.wish.secret_reward", dungeonName
+                            ).withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.BOLD));
+                        }
+                    }
                 } else {
                     level.playSound(null, pos, net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP, net.minecraft.sounds.SoundSource.MASTER, 1.0f, 1.0f);
                 }

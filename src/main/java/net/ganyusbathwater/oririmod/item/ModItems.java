@@ -769,49 +769,54 @@ public class ModItems {
         // ------------------------------------------------------Arcana-----------------------------------------------------------
 
         public static final DeferredItem<Item> THE_FOOL = ITEMS.register("the_fool",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_FOOL));
         public static final DeferredItem<Item> THE_MAGICIAN = ITEMS.register("the_magician",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_MAGICIAN));
         public static final DeferredItem<Item> THE_HIGH_PRIESTESS = ITEMS.register("the_high_priestess",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_HIGH_PRIESTESS));
         public static final DeferredItem<Item> THE_EMPRESS = ITEMS.register("the_empress",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_EMPRESS));
         public static final DeferredItem<Item> THE_EMPEROR = ITEMS.register("the_emperor",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_EMPEROR));
         public static final DeferredItem<Item> THE_HIEROPHANT = ITEMS.register("the_hierophant",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_HIEROPHANT));
         public static final DeferredItem<Item> THE_LOVERS = ITEMS.register("the_lovers",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_LOVERS));
         public static final DeferredItem<Item> THE_CHARIOT = ITEMS.register("the_chariot",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_CHARIOT));
         public static final DeferredItem<Item> STRENGTH = ITEMS.register("strength",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.STRENGTH));
         public static final DeferredItem<Item> THE_HERMIT = ITEMS.register("the_hermit",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_HERMIT));
         public static final DeferredItem<Item> WHEEL_OF_FORTUNE = ITEMS.register("wheel_of_fortune",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.WHEEL_OF_FORTUNE));
         public static final DeferredItem<Item> JUSTICE = ITEMS.register("justice",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.JUSTICE));
         public static final DeferredItem<Item> THE_HANGED_MAN = ITEMS.register("the_hanged_man",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_HANGED_MAN));
         public static final DeferredItem<Item> DEATH = ITEMS.register("death",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.DEATH));
         public static final DeferredItem<Item> TEMPERANCE = ITEMS.register("temperance",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.TEMPERANCE));
         public static final DeferredItem<Item> THE_DEVIL = ITEMS.register("the_devil",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_DEVIL));
         public static final DeferredItem<Item> THE_TOWER = ITEMS.register("the_tower",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_TOWER));
         public static final DeferredItem<Item> THE_STAR = ITEMS.register("the_star",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_STAR));
         public static final DeferredItem<Item> THE_MOON = ITEMS.register("the_moon",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_MOON));
         public static final DeferredItem<Item> THE_SUN = ITEMS.register("the_sun",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_SUN));
         public static final DeferredItem<Item> JUDGEMENT = ITEMS.register("judgement",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.JUDGEMENT));
         public static final DeferredItem<Item> THE_WORLD = ITEMS.register("the_world",
-                        () -> new ModRarityItem(new Item.Properties(), ModRarity.MAGICAL));
+                        () -> new ArcanaItem(new Item.Properties(), ModRarity.MAGICAL, ArcanaItem.ArcanaType.THE_WORLD));
+
+        // --------------------------------------------------Dungeon Secrets-------------------------------------------------------
+
+        public static final DeferredItem<Item> WISH_UPON_A_STAR = ITEMS.register("wish_upon_a_star",
+                        () -> new WishUponAStarItem(new Item.Properties().stacksTo(16), ModRarity.LEGENDARY));
 
         public static void registerDispenserBehaviors() {
                 net.minecraft.world.level.block.DispenserBlock.registerBehavior(TNT_ARROW.get(), new net.ganyusbathwater.oririmod.item.ModArrowDispenseBehavior() {

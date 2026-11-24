@@ -25,8 +25,26 @@ public record OpenDungeonScreenPayload(
         List<String> memberNames,
         List<String> memberStatuses, // "PENDING", "ACCEPTED", "DECLINED"
         boolean isStarting,
-        int startTicksRemaining
+        int startTicksRemaining,
+        boolean refreshOnly
 ) implements CustomPacketPayload {
+
+    public OpenDungeonScreenPayload(
+            int npcEntityId,
+            String dungeonId,
+            String dungeonDisplayName,
+            String dungeonDescription,
+            UUID partyId,
+            UUID leaderId,
+            List<UUID> memberIds,
+            List<String> memberNames,
+            List<String> memberStatuses,
+            boolean isStarting,
+            int startTicksRemaining
+    ) {
+        this(npcEntityId, dungeonId, dungeonDisplayName, dungeonDescription, partyId, leaderId,
+                memberIds, memberNames, memberStatuses, isStarting, startTicksRemaining, false);
+    }
 
     public static final Type<OpenDungeonScreenPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "open_dungeon_screen"));
@@ -47,6 +65,7 @@ public record OpenDungeonScreenPayload(
         for (String status : p.memberStatuses()) buf.writeUtf(status);
         buf.writeBoolean(p.isStarting());
         buf.writeInt(p.startTicksRemaining());
+        buf.writeBoolean(p.refreshOnly());
     }
 
     private static OpenDungeonScreenPayload decode(FriendlyByteBuf buf) {
@@ -65,7 +84,9 @@ public record OpenDungeonScreenPayload(
         for (int i = 0; i < count; i++) statuses.add(buf.readUtf());
         boolean isStarting = buf.readBoolean();
         int startTicksRemaining = buf.readInt();
-        return new OpenDungeonScreenPayload(npcId, dungeonId, displayName, description, partyId, leaderId, ids, names, statuses, isStarting, startTicksRemaining);
+        boolean refreshOnly = buf.readBoolean();
+        return new OpenDungeonScreenPayload(npcId, dungeonId, displayName, description, partyId, leaderId,
+                ids, names, statuses, isStarting, startTicksRemaining, refreshOnly);
     }
 
     @Override

@@ -56,6 +56,8 @@ public class DataGenerators {
                                 new ModEnchantmentTagsProvider(packOutput, datapackProvider, existingFileHelper));
 
                 generator.addProvider(event.includeServer(), new ModDataMapProvider(packOutput, lookupProvider));
+                generator.addProvider(event.includeServer(),
+                                new ModAdvancementProvider(packOutput, lookupProvider, existingFileHelper));
 
                 generator.addProvider(event.includeClient(), new ModBlockStateProvider(packOutput, existingFileHelper));
                 generator.addProvider(event.includeClient(),

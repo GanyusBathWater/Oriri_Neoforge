@@ -133,6 +133,8 @@ public class ServerEvents {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
+            net.ganyusbathwater.oririmod.item.custom.ArcanaItem.syncMasteryFromAdvancements(sp);
+            net.ganyusbathwater.oririmod.dungeon.data.StarWishManager.reapplyAllWishes(sp);
             ModManaUtil.syncToClient(sp);
             // Send current world event state to the player who just logged in
             NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
@@ -154,8 +156,18 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        ModManaUtil.copyPersistentManaData(event.getOriginal(), event.getEntity());
+    }
+
+    @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
+            net.ganyusbathwater.oririmod.item.custom.ArcanaItem.syncMasteryFromAdvancements(sp);
+            net.ganyusbathwater.oririmod.dungeon.data.StarWishManager.reapplyAllWishes(sp);
+            if (!event.isEndConquered()) {
+                sp.setHealth(sp.getMaxHealth());
+            }
             ModManaUtil.syncToClient(sp);
         }
     }
@@ -163,6 +175,8 @@ public class ServerEvents {
     @SubscribeEvent
     public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
+            net.ganyusbathwater.oririmod.item.custom.ArcanaItem.syncMasteryFromAdvancements(sp);
+            net.ganyusbathwater.oririmod.dungeon.data.StarWishManager.reapplyAllWishes(sp);
             ModManaUtil.syncToClient(sp);
             // Sync world event state to clear/update client state for the new dimension
             NetworkHandler.sendWorldEventToPlayer(sp, WorldEventManager.getActiveEvent(sp.level()),
@@ -179,6 +193,16 @@ public class ServerEvents {
                     NetworkHandler.sendNaturalDisasterToPlayer(sp,
                             net.ganyusbathwater.oririmod.events.disaster.NaturalDisasterType.NONE, 0, 0);
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onAdvancementEarn(net.neoforged.neoforge.event.entity.player.AdvancementEvent.AdvancementEarnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            net.minecraft.resources.ResourceLocation id = event.getAdvancement().id();
+            if (OririMod.MOD_ID.equals(id.getNamespace()) && id.getPath().startsWith("arcana/")) {
+                net.ganyusbathwater.oririmod.item.custom.ArcanaItem.checkAndGrantMastery(sp, true);
             }
         }
     }

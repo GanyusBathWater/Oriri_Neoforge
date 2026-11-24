@@ -14,9 +14,57 @@ public class ModManaUtil {
     private static final String NBT_MAX_KEY = "OririMaxMana";
     private static final String NBT_TICK_KEY = "OririManaTick";
     private static final String NBT_REGEN_INTERVAL_KEY = "OririRegenIntervalSeconds";
+    private static final String NBT_ARCANA_MASTERY_KEY = "OririArcanaMastery";
+    private static final String NBT_WISH_MANA_REGEN_KEY = "OririWishManaRegenStacks";
     private static final int DEFAULT_MANA = 100;
+    public static final int ARCANA_MASTERY_MAX_MANA_BONUS = 200;
+    private static final float ARCANA_MASTERY_REGEN_MULTIPLIER = 0.5f; // 2x Mana Regeneration speed
 
     private ModManaUtil() {
+    }
+
+    public static int getWishManaRegenStacks(Player player) {
+        return Math.max(0, player.getPersistentData().getInt(NBT_WISH_MANA_REGEN_KEY));
+    }
+
+    public static void setWishManaRegenStacks(Player player, int stacks) {
+        player.getPersistentData().putInt(NBT_WISH_MANA_REGEN_KEY, Math.max(0, stacks));
+    }
+
+    public static boolean hasArcanaMastery(Player player) {
+        return player.getPersistentData().getBoolean(NBT_ARCANA_MASTERY_KEY);
+    }
+
+    public static void setArcanaMastery(Player player, boolean unlocked) {
+        CompoundTag data = player.getPersistentData();
+        data.putBoolean(NBT_ARCANA_MASTERY_KEY, unlocked);
+        int max = getMaxMana(player);
+        if (getMana(player) > max) {
+            data.putInt(NBT_KEY, max);
+        }
+        if (player instanceof ServerPlayer sp) {
+            syncToClient(sp);
+        }
+    }
+
+    public static void copyPersistentManaData(Player oldPlayer, Player newPlayer) {
+        CompoundTag oldData = oldPlayer.getPersistentData();
+        CompoundTag newData = newPlayer.getPersistentData();
+        if (oldData.contains(NBT_KEY)) {
+            newData.putInt(NBT_KEY, oldData.getInt(NBT_KEY));
+        }
+        if (oldData.contains(NBT_MAX_KEY)) {
+            newData.putInt(NBT_MAX_KEY, oldData.getInt(NBT_MAX_KEY));
+        }
+        if (oldData.contains(NBT_REGEN_INTERVAL_KEY)) {
+            newData.putInt(NBT_REGEN_INTERVAL_KEY, oldData.getInt(NBT_REGEN_INTERVAL_KEY));
+        }
+        if (oldData.contains(NBT_ARCANA_MASTERY_KEY)) {
+            newData.putBoolean(NBT_ARCANA_MASTERY_KEY, oldData.getBoolean(NBT_ARCANA_MASTERY_KEY));
+        }
+        if (oldData.contains(NBT_WISH_MANA_REGEN_KEY)) {
+            newData.putInt(NBT_WISH_MANA_REGEN_KEY, oldData.getInt(NBT_WISH_MANA_REGEN_KEY));
+        }
     }
 
     private static int clamp(int value, int min, int max) {
@@ -144,7 +192,9 @@ public class ModManaUtil {
             }
         }
 
-        return baseMax + bonus;
+        int arcanaBonus = hasArcanaMastery(player) ? ARCANA_MASTERY_MAX_MANA_BONUS : 0;
+
+        return baseMax + bonus + arcanaBonus;
     }
 
     public static Integer getMaxManaIfPresent(Player player) {
@@ -156,9 +206,10 @@ public class ModManaUtil {
         int clampedMax = clamp(maxMana, 100, 100000);
         CompoundTag data = player.getPersistentData();
         data.putInt(NBT_MAX_KEY, clampedMax);
+        int effectiveMax = getMaxMana(player);
         int cur = getMana(player);
-        if (cur > clampedMax) {
-            data.putInt(NBT_KEY, clampedMax);
+        if (cur > effectiveMax) {
+            data.putInt(NBT_KEY, effectiveMax);
         }
         if (player instanceof ServerPlayer sp)
             syncToClient(sp);
@@ -253,7 +304,11 @@ public class ModManaUtil {
             effectMultiplier = 1.0f / (amplifier + 2);
         }
 
-        return Math.max(1, Math.round(baseTicks * enchantMultiplier * effectMultiplier));
+        float arcanaMultiplier = hasArcanaMastery(player) ? ARCANA_MASTERY_REGEN_MULTIPLIER : 1.0f;
+        int wishManaStacks = getWishManaRegenStacks(player);
+        float wishMultiplier = wishManaStacks > 0 ? (1.0f / (1.0f + 0.5f * wishManaStacks)) : 1.0f;
+
+        return Math.max(1, Math.round(baseTicks * enchantMultiplier * effectMultiplier * arcanaMultiplier * wishMultiplier));
     }
 
     public static void resetRegenIntervalSeconds(Player player) {

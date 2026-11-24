@@ -221,8 +221,17 @@ public class DungeonPartyActionHandler {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
-    /** Sends a refreshed OpenDungeonScreenPayload to the leader's client. */
+    /** Sends a refreshed OpenDungeonScreenPayload to the player's client (opening the screen if not open). */
     public static void refreshScreen(ServerPlayer leader, DungeonPartyManager manager, DungeonParty party) {
+        refreshScreen(leader, manager, party, false);
+    }
+
+    /**
+     * Sends an OpenDungeonScreenPayload to the player's client.
+     * When {@code refreshOnly} is true, the client only updates an already-open DungeonKeeperScreen
+     * in place and will not force-reopen a closed screen.
+     */
+    public static void refreshScreen(ServerPlayer leader, DungeonPartyManager manager, DungeonParty party, boolean refreshOnly) {
         if (party == null) return;
         var def = DungeonDefinitionRegistry.get(party.getDungeonId());
         String displayName = def != null ? def.displayName() : party.getDungeonId();
@@ -242,7 +251,8 @@ public class DungeonPartyActionHandler {
                 -1, party.getDungeonId(), displayName, description,
                 party.getPartyId(), party.getLeaderId(),
                 memberIds, memberNames, memberStatuses,
-                party.isStarting(), party.getStartTicksRemaining()
+                party.isStarting(), party.getStartTicksRemaining(),
+                refreshOnly
         ));
     }
 }

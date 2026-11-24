@@ -66,6 +66,10 @@ public final class NetworkHandler {
             "dungeon_death_action");
     public static final ResourceLocation SYNC_DUNGEON_TIME = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
             "sync_dungeon_time");
+    public static final ResourceLocation OPEN_WISH_SCREEN = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "open_wish_screen");
+    public static final ResourceLocation SELECT_WISH_ATTRIBUTE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID,
+            "select_wish_attribute");
 
     private NetworkHandler() {
     }
@@ -146,6 +150,35 @@ public final class NetworkHandler {
                     }
                 }));
 
+        // Wish Upon a Star: server -> client open attribute choice screen
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.OpenWishScreenPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.OpenWishScreenPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.minecraft.client.Minecraft.getInstance().setScreen(
+                            new net.ganyusbathwater.oririmod.client.screen.WishUponAStarScreen(
+                                    payload.dungeonId(),
+                                    payload.dungeonDisplayName(),
+                                    payload.currentAttributeId(),
+                                    payload.offhand()
+                            ));
+                }));
+
+        // Wish Upon a Star: client -> server confirm selected attribute
+        registrar.playToServer(
+                net.ganyusbathwater.oririmod.network.packet.SelectWishAttributePayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SelectWishAttributePayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    if (ctx.player() instanceof ServerPlayer sp) {
+                        net.ganyusbathwater.oririmod.dungeon.data.StarWishManager.handleWishSelection(
+                                sp,
+                                payload.dungeonId(),
+                                payload.chosenAttributeId(),
+                                payload.offhand()
+                        );
+                    }
+                }));
+
         registrar.playToServer(
                 SelectBossAttackPayload.TYPE,
                 SelectBossAttackPayload.STREAM_CODEC,
@@ -192,14 +225,19 @@ public final class NetworkHandler {
                     }
                 }));
 
-        // Dungeon Keeper: server → client open dungeon screen
+        // Dungeon Keeper: server → client open or update dungeon screen in place
         registrar.playToClient(
                 net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload.TYPE,
                 net.ganyusbathwater.oririmod.network.packet.OpenDungeonScreenPayload.STREAM_CODEC,
-                (payload, ctx) -> ctx.enqueueWork(() ->
-                        net.minecraft.client.Minecraft.getInstance()
-                                .setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonKeeperScreen(payload))
-                ));
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    var mc = net.minecraft.client.Minecraft.getInstance();
+                    if (mc.screen instanceof net.ganyusbathwater.oririmod.client.screen.DungeonKeeperScreen existing
+                            && existing.isSameParty(payload.partyId())) {
+                        existing.updateFromPayload(payload);
+                    } else if (!payload.refreshOnly()) {
+                        mc.setScreen(new net.ganyusbathwater.oririmod.client.screen.DungeonKeeperScreen(payload));
+                    }
+                }));
 
         // Dungeon Selection: server → client open selection screen
         registrar.playToClient(
@@ -556,6 +594,13 @@ public final class NetworkHandler {
     public static void sendHomewardConfirmRequest(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player,
                 new net.ganyusbathwater.oririmod.network.packet.HomewardConfirmRequestPayload());
+    }
+
+    public static void sendOpenWishScreen(ServerPlayer player, String dungeonId, String dungeonDisplayName,
+                                          String currentAttributeId, boolean offhand) {
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.OpenWishScreenPayload(
+                        dungeonId, dungeonDisplayName, currentAttributeId, offhand));
     }
 
     public static void sendOpenTeleporterScreen(ServerPlayer player, BlockPos pos, String currentId) {

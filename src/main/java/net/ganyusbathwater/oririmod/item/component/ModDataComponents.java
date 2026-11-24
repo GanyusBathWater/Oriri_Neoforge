@@ -44,6 +44,14 @@ public final class ModDataComponents {
                             .build()
             );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> WISH_DUNGEON_ID =
+            COMPONENTS.register("wish_dungeon_id", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build()
+            );
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<KitsuneColors>> KITSUNE_COLORS =
             COMPONENTS.register("kitsune_colors", () ->
                     DataComponentType.<KitsuneColors>builder()

@@ -112,16 +112,26 @@ public class DungeonPartyManager extends SavedData {
             if (party.getStartTicksRemaining() < 0) {
                 party.setStarting(false, party.getStartTicksRemaining() + 1);
                 dirty = true;
+
+                // Smoothly sync cooldown progress (and completion at 0) to any open DungeonKeeperScreen
+                if (party.getStartTicksRemaining() % 10 == 0) {
+                    for (UUID memberId : party.getAcceptedMembers()) {
+                        ServerPlayer sp = overworld.getServer().getPlayerList().getPlayer(memberId);
+                        if (sp != null) {
+                            net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyActionHandler.refreshScreen(sp, this, party, true);
+                        }
+                    }
+                }
             } else if (party.isStarting()) {
                 party.decrementStartTicks();
                 dirty = true;
 
-                // Sync time to clients every 20 ticks
-                if (party.getStartTicksRemaining() % 20 == 0) {
+                // Sync countdown every 10 ticks to already-open screens (never force-reopens closed screens)
+                if (party.getStartTicksRemaining() % 10 == 0) {
                     for (UUID memberId : party.getAcceptedMembers()) {
                         ServerPlayer sp = overworld.getServer().getPlayerList().getPlayer(memberId);
                         if (sp != null) {
-                            net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyActionHandler.refreshScreen(sp, this, party);
+                            net.ganyusbathwater.oririmod.dungeon.party.DungeonPartyActionHandler.refreshScreen(sp, this, party, true);
                         }
                     }
                 }

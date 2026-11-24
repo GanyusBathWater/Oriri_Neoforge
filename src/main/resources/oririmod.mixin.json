@@ -13,7 +13,8 @@
     "OceanMonumentStructureMixin",
     "MonumentBuildingMixin",
     "OceanMonumentPieceMixin",
-    "NetherFossilStructureMixin"
+    "NetherFossilStructureMixin",
+    "TreeNodePositionMixin"
   ],
   "client": [
     "ClientLevelMixin",
@@ -28,7 +29,9 @@
     "AbstractContainerScreenMixin",
     "VanillaContainerScreensMixin",
     "HorseInventoryScreenMixin",
-    "MerchantScreenMixin"
+    "MerchantScreenMixin",
+    "AdvancementTabMixin",
+    "ClientAdvancementsAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

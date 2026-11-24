@@ -25,11 +25,32 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
 
     @Override
     protected void doStart(ServerLevel level, DungeonInstance instance) {
-        activatedSwitchIds.clear();
+        // Keep any switch already pressed during the brief PENDING window before the trigger poll fired.
         // Spawn initial wave of enemies if any SPAWN_POINT markers exist
         for (StageDefinition.SpawnEntry entry : definition.getSpawnEntries()) {
             spawnWave(level, entry);
         }
+    }
+
+    @Override
+    public void tick(ServerLevel level, DungeonInstance instance) {
+        // If a player already activated a switch while the stage was still PENDING
+        // (e.g. before the 10-tick trigger poll fired or from outside a tight trigger box),
+        // transition to ACTIVE immediately so DungeonTickHandler runs its activation hooks
+        // and the switch activation is counted on the next tick.
+        if (this.state == StageState.PENDING && !activatedSwitchIds.isEmpty()) {
+            this.state = StageState.ACTIVE;
+            applyStartEffects(level, instance);
+            doStart(level, instance);
+            return;
+        }
+        super.tick(level, instance);
+    }
+
+    @Override
+    public void cleanup(ServerLevel level, DungeonInstance instance) {
+        activatedSwitchIds.clear();
+        super.cleanup(level, instance);
     }
 
     @Override
@@ -42,8 +63,8 @@ public class ActivateSwitchesStage extends AbstractDungeonStage {
     }
 
     /** Called by the event handler when the player interacts with a switch block. */
-    public void notifySwitchActivated(String switchId) {
-        activatedSwitchIds.add(switchId);
+    public boolean notifySwitchActivated(String switchId) {
+        return activatedSwitchIds.add(switchId);
     }
 
     private void spawnWave(ServerLevel level, StageDefinition.SpawnEntry entry) {

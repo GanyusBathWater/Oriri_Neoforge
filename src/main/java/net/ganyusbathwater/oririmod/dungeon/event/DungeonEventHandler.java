@@ -445,21 +445,23 @@ public class DungeonEventHandler {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
         if (!isInDungeon(player)) return;
-        if (player.isCreative()) return;
 
-        ItemStack stack = event.getItemStack();
-        if (isBannedItem(stack)) {
-            event.setCanceled(true);
-            if (player instanceof ServerPlayer sp) {
-                sp.displayClientMessage(
-                        Component.translatable("message.oririmod.dungeon.item_banned")
-                                .withStyle(ChatFormatting.RED),
-                        true);
+        if (!player.isCreative()) {
+            ItemStack stack = event.getItemStack();
+            if (isBannedItem(stack)) {
+                event.setCanceled(true);
+                if (player instanceof ServerPlayer sp) {
+                    sp.displayClientMessage(
+                            Component.translatable("message.oririmod.dungeon.item_banned")
+                                    .withStyle(ChatFormatting.RED),
+                            true);
+                }
+                return;
             }
-            return;
         }
 
         if (event.getLevel().isClientSide) return;
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) return;
         if (!(player instanceof ServerPlayer sp)) return;
 
         DungeonManager manager = DungeonManager.get(sp.serverLevel());
@@ -468,8 +470,9 @@ public class DungeonEventHandler {
             var def = switchStage.getDefinition();
             for (var switchEntry : def.getSwitches()) {
                 if (switchEntry.pos().equals(event.getPos())) {
-                    switchStage.notifySwitchActivated(switchEntry.switchId());
-                    sp.serverLevel().playSound(null, event.getPos(), net.minecraft.sounds.SoundEvents.LEVER_CLICK, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
+                    if (switchStage.notifySwitchActivated(switchEntry.switchId())) {
+                        sp.serverLevel().playSound(null, event.getPos(), net.minecraft.sounds.SoundEvents.LEVER_CLICK, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
+                    }
                 }
             }
         }

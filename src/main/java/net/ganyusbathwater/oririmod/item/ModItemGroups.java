@@ -655,6 +655,20 @@ public class ModItemGroups {
                         output.accept(ModItems.JUDGEMENT);
                         output.accept(ModItems.THE_WORLD);
 
+                        // -------------Dungeon Secrets-------------
+                        boolean addedWish = false;
+                        for (net.ganyusbathwater.oririmod.dungeon.DungeonDefinition def : net.ganyusbathwater.oririmod.dungeon.DungeonDefinitionRegistry.all()) {
+                            if ("tutorial_crawl".equals(def.id())) {
+                                continue;
+                            }
+                            output.accept(net.ganyusbathwater.oririmod.item.custom.WishUponAStarItem.createForDungeon(def.id()));
+                            addedWish = true;
+                        }
+                        if (!addedWish) {
+                            output.accept(net.ganyusbathwater.oririmod.item.custom.WishUponAStarItem.createForDungeon(
+                                    net.ganyusbathwater.oririmod.item.custom.WishUponAStarItem.DEFAULT_DUNGEON_ID));
+                        }
+
                     }).build());
 
     private static void acceptAllLevels(CreativeModeTab.Output output,
