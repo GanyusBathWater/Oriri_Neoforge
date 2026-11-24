@@ -70,6 +70,7 @@ public final class ManaCommands {
                                     ctx.getSource().sendSuccess(() -> Component.literal("Regen-Intervall zurückgesetzt auf " + ModManaUtil.getRegenIntervalSeconds(p) + "s (Config)"), true);
                                     return 1;
                                 })))
-                .then(SaveGridCommand.register());
+                .then(SaveGridCommand.register())
+                .then(StructurePiecesDebugCommand.register());
     }
 }

@@ -466,6 +466,33 @@ public final class NetworkHandler {
                         }
                     }
                 }));
+
+        // Chunk-attached structure fog anchors: server -> client
+        registrar.playToClient(
+                net.ganyusbathwater.oririmod.network.packet.SyncChunkFogAnchorsPayload.TYPE,
+                net.ganyusbathwater.oririmod.network.packet.SyncChunkFogAnchorsPayload.STREAM_CODEC,
+                (payload, ctx) -> ctx.enqueueWork(() -> {
+                    net.ganyusbathwater.oririmod.world.fog.ClientFogAnchorCache.updateChunk(
+                            payload.chunkX(), payload.chunkZ(), payload.anchors());
+                }));
+    }
+    
+
+    public static void sendChunkFogAnchorsToPlayer(
+            ServerPlayer player,
+            int chunkX,
+            int chunkZ,
+            java.util.List<net.ganyusbathwater.oririmod.world.fog.FogAnchor.ClientView> anchors) {
+        PacketDistributor.sendToPlayer(player,
+                new net.ganyusbathwater.oririmod.network.packet.SyncChunkFogAnchorsPayload(chunkX, chunkZ, anchors));
+    }
+
+    public static void sendChunkFogAnchorsToTracking(
+            net.minecraft.server.level.ServerLevel level,
+            net.minecraft.world.level.ChunkPos chunkPos,
+            java.util.List<net.ganyusbathwater.oririmod.world.fog.FogAnchor.ClientView> anchors) {
+        PacketDistributor.sendToPlayersTrackingChunk(level, chunkPos,
+                new net.ganyusbathwater.oririmod.network.packet.SyncChunkFogAnchorsPayload(chunkPos.x, chunkPos.z, anchors));
     }
     
 

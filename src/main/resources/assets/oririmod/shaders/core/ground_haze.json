@@ -1,0 +1,33 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
+  "vertex": "oririmod:ground_haze",
+  "fragment": "oririmod:ground_haze",
+  "attributes": [
+    "Position",
+    "UV0",
+    "Color"
+  ],
+  "samplers": [
+    { "name": "Sampler0" },
+    { "name": "Sampler1" },
+    { "name": "Sampler2" },
+    { "name": "Sampler3" }
+  ],
+  "uniforms": [
+    { "name": "ModelViewMat",    "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "ProjMat",         "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "InvProjMat",      "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "InvViewMat",      "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "ColorModulator",  "type": "float",     "count": 4,  "values": [1.0, 1.0, 1.0, 1.0] },
+    { "name": "DepthBufferSize", "type": "float",     "count": 2,  "values": [1.0, 1.0] },
+    { "name": "CamWorldPos",     "type": "float",     "count": 3,  "values": [0.0, 0.0, 0.0] },
+    { "name": "MapRelOrigin",    "type": "float",     "count": 3,  "values": [0.0, 0.0, 0.0] },
+    { "name": "MapSize",         "type": "float",     "count": 1,  "values": [289.0] },
+    { "name": "FogYBounds",      "type": "float",     "count": 2,  "values": [-10.0, 10.0] },
+    { "name": "FogTime",         "type": "float",     "count": 1,  "values": [0.0] }
+  ]
+}

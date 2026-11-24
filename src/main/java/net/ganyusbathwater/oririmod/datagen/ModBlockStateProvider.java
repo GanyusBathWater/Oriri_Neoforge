@@ -478,6 +478,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 models().cubeBottomTop("chiseled_sol_sandstone", modLoc("block/chiseled_sol_sandstone"),
                                                 modLoc("block/sol_sandstone_top"), modLoc("block/sol_sandstone_top")));
 
+                blockWithItem(ModBlocks.SOL_SANDSTONE_BRICKS, 1);
+                stairsBlock(ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get(), modLoc("block/sol_sandstone_bricks"));
+                slabBlock(ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get(), modLoc("block/sol_sandstone_bricks"), modLoc("block/sol_sandstone_bricks"));
+                wallBlock(ModBlocks.SOL_SANDSTONE_BRICK_WALL.get(), modLoc("block/sol_sandstone_bricks"));
+                blockWithItem(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS, 1);
+                stairsBlock(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS.get(), modLoc("block/mossy_sol_sandstone_bricks"));
+                slabBlock(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get(), modLoc("block/mossy_sol_sandstone_bricks"), modLoc("block/mossy_sol_sandstone_bricks"));
+                wallBlock(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL.get(), modLoc("block/mossy_sol_sandstone_bricks"));
+                blockWithItem(ModBlocks.CRACKED_SOL_SANDSTONE_BRICKS, 1);
+                blockWithItem(ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS, 1);
+
                 // ===== SWORD BLOCKS =====
                 horizontalBlock(ModBlocks.BROKEN_SWORD_BLOCK.get(),
                                 models().getExistingFile(modLoc("block/broken_sword_block")));

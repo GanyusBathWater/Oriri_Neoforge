@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.client.render;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -72,9 +73,6 @@ public class ModRenderTypes extends RenderType {
         );
     }
 
-    private static RenderType cachedGroundHazeType;
-    private static ResourceLocation cachedGroundHazeTexture;
-
     /**
      * Shader-compatible untextured additive RenderType (backed by vanilla's lightning shader).
      * Iris/Oculus shader packs automatically recognize {@code RENDERTYPE_LIGHTNING_SHADER}
@@ -82,33 +80,5 @@ public class ModRenderTypes extends RenderType {
      */
     public static RenderType getAdditiveFlare() {
         return ADDITIVE_LIGHTNING_FLARE;
-    }
-
-    /**
-     * Iris/Sodium-compatible atmospheric ground haze RenderType backed by vanilla's
-     * {@code RENDERTYPE_ENTITY_TRANSLUCENT_SHADER} with lightmap support and depth-write disabled.
-     */
-    public static RenderType getGroundHaze(ResourceLocation texture) {
-        if (cachedGroundHazeType == null || !texture.equals(cachedGroundHazeTexture)) {
-            cachedGroundHazeTexture = texture;
-            cachedGroundHazeType = RenderType.create(
-                    "oriri_ground_haze",
-                    DefaultVertexFormat.NEW_ENTITY,
-                    VertexFormat.Mode.QUADS,
-                    4096,
-                    false,
-                    false,
-                    RenderType.CompositeState.builder()
-                            .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                            .setTextureState(new RenderStateShard.TextureStateShard(texture, true, false))
-                            .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                            .setCullState(NO_CULL)
-                            .setLightmapState(LIGHTMAP)
-                            .setOverlayState(OVERLAY)
-                            .setWriteMaskState(COLOR_WRITE)
-                            .createCompositeState(false)
-            );
-        }
-        return cachedGroundHazeType;
     }
 }

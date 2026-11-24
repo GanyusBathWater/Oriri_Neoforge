@@ -75,6 +75,9 @@
     },
     {
       "processor_type": "oririmod:loot_chest_processor"
+    },
+    {
+      "processor_type": "oririmod:structure_fog"
     }
   ]
 }

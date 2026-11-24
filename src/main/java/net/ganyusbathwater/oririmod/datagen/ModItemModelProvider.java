@@ -189,6 +189,16 @@ public class ModItemModelProvider extends ItemModelProvider {
                 simpleBlockItem(ModBlocks.SOL_SANDSTONE.get());
                 simpleBlockItem(ModBlocks.CUT_SOL_SANDSTONE.get());
                 simpleBlockItem(ModBlocks.CHISELED_SOL_SANDSTONE.get());
+                simpleBlockItem(ModBlocks.SOL_SANDSTONE_BRICKS.get());
+                simpleBlockItem(ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get());
+                simpleBlockItem(ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get());
+                wallItem(ModBlocks.SOL_SANDSTONE_BRICK_WALL, ModBlocks.SOL_SANDSTONE_BRICKS);
+                simpleBlockItem(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS.get());
+                simpleBlockItem(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS.get());
+                simpleBlockItem(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get());
+                wallItem(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL, ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS);
+                simpleBlockItem(ModBlocks.CRACKED_SOL_SANDSTONE_BRICKS.get());
+                simpleBlockItem(ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS.get());
 
                 // Blood Sludge
                 simpleBlockItem(ModBlocks.BLOOD_SLUDGE.get());

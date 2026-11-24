@@ -2,6 +2,8 @@ package net.ganyusbathwater.oririmod.client.render.world.haze;
 
 import net.ganyusbathwater.oririmod.block.custom.FogSourceBlock;
 import net.ganyusbathwater.oririmod.block.entity.FogSourceBlockEntity;
+import net.ganyusbathwater.oririmod.world.fog.ClientFogAnchorCache;
+import net.ganyusbathwater.oririmod.world.fog.FogAnchor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
@@ -48,6 +50,7 @@ public final class GroundHazeGrid {
     public static final int CELL_STEP = 2;
     public static final int LOCAL_CELL_STEP = 1;
     public static final float WALL_HEIGHT_THRESHOLD = 3.0F;
+    public static final float INVALID_Y_CUTOFF = -90000.0F;
     // On a 1-block local grid, 45-degree stairs climb <= 1.0 block per step; >= 1.75 in 1 block is a vertical wall/obstacle
     private static final float LOCAL_STEP_CLIMB_MAX = 1.35F;
     private static final float INVALID_Y = -99999.0F;
@@ -63,6 +66,8 @@ public final class GroundHazeGrid {
     private ClientLevel lastLevel = null;
     private int lightSliceCursor = 0;
     private boolean hasAnyActiveSurfaceHaze = false;
+    private int surfaceMeshVersion = 1;
+    private int localMeshVersion = 1;
 
     // Per-vertex raw & smoothed buffers (size = gridSize * gridSize)
     float[] rawY = new float[0];
@@ -92,10 +97,62 @@ public final class GroundHazeGrid {
     private float smoothNight = 0.0F;
     private int tickCounter = 0;
 
-    // Local FogSourceBlock patches (keyed by BlockPos.asLong())
+    // Local FogSourceBlock & chunk-attached FogAnchor patches (keyed by BlockPos.asLong())
     private final Map<Long, LocalFogPatch> localPatches = new HashMap<>();
     private final List<LocalFogPatch> activeLocalPatches = new ArrayList<>();
     private final BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
+    private long lastAnchorCacheVersion = -1L;
+    private int localRefreshCursor = 0;
+    private boolean localRenderDirty = true;
+    private int lastLocalBakeCellX = Integer.MIN_VALUE;
+    private int lastLocalBakeCellZ = Integer.MIN_VALUE;
+
+    // Reusable unified heightfield composite grid (radius 144 -> 289x289, covers full ~140-block crater!)
+    public static final int COMP_RADIUS = 144;
+    public static final int COMP_SIZE = COMP_RADIUS * 2 + 1;
+    private static final int COMP_CELLS = COMP_SIZE * COMP_SIZE;
+    private final LocalCompositeGrid localCompositeGrid = new LocalCompositeGrid();
+    private float[] compColorW;
+
+    /**
+     * Deduplicated 1-block-precision composite grid merging all overlapping {@code FogSourceBlock}s
+     * and chunk-attached {@code FogAnchor}s across a 289x289 area around the camera (144-block radius),
+     * ready for direct upload into the GPU volumetric heightfield textures.
+     */
+    public static final class LocalCompositeGrid {
+        public int originX;
+        public int originZ;
+        public final int size = COMP_SIZE;
+        public int dirtyMinX;
+        public int dirtyMaxX = -1;
+        public int dirtyMinZ;
+        public int dirtyMaxZ = -1;
+        public boolean hasData;
+        public float minFloorY;
+        public float maxFogTopY;
+
+        public final float[] smoothY = new float[COMP_CELLS];
+        public final float[] fogHeight = new float[COMP_CELLS];
+        public final float[] maskAlpha = new float[COMP_CELLS];
+        public final float[] edgeFade = new float[COMP_CELLS];
+        public final float[] r = new float[COMP_CELLS];
+        public final float[] g = new float[COMP_CELLS];
+        public final float[] b = new float[COMP_CELLS];
+        public final int[] packedLight = new int[COMP_CELLS];
+        public final boolean[] solidWall = new boolean[COMP_CELLS];
+        public final List<LocalFogPatch> overflowPatches = new ArrayList<>();
+
+        void clear() {
+            hasData = false;
+            dirtyMinX = COMP_SIZE;
+            dirtyMaxX = -1;
+            dirtyMinZ = COMP_SIZE;
+            dirtyMaxZ = -1;
+            minFloorY = Float.MAX_VALUE;
+            maxFogTopY = -Float.MAX_VALUE;
+            overflowPatches.clear();
+        }
+    }
 
     public static final class LocalFogPatch {
         public final BlockPos sourcePos;
@@ -115,6 +172,7 @@ public final class GroundHazeGrid {
         public final int[] packedLight;
         long lastSeenTick;
         int lightRefreshTick;
+        int geoRefreshTick;
 
         LocalFogPatch(BlockPos sourcePos, int density, FogSourceBlock.FogColor color, int gridSize, int originX, int originZ) {
             this.sourcePos = sourcePos.immutable();
@@ -144,6 +202,25 @@ public final class GroundHazeGrid {
         this.hasAnyActiveSurfaceHaze = false;
         this.localPatches.clear();
         this.activeLocalPatches.clear();
+        this.localCompositeGrid.clear();
+        this.localRenderDirty = true;
+        this.lastLocalBakeCellX = Integer.MIN_VALUE;
+        this.lastLocalBakeCellZ = Integer.MIN_VALUE;
+        this.lastAnchorCacheVersion = -1L;
+        this.surfaceMeshVersion++;
+        this.localMeshVersion++;
+    }
+
+    public LocalCompositeGrid getLocalCompositeGrid() {
+        return localCompositeGrid;
+    }
+
+    public int getSurfaceMeshVersion() {
+        return surfaceMeshVersion;
+    }
+
+    public int getLocalMeshVersion() {
+        return localMeshVersion;
     }
 
     public int getGridSize() {
@@ -243,14 +320,35 @@ public final class GroundHazeGrid {
                 refreshRawAlphaFromProfiles();
             }
             rebuildSurfaceSmoothingAndEdges();
+            surfaceMeshVersion++;
         } else if ((tickCounter % 10) == 0) {
             refreshRawAlphaFromProfiles();
             smoothBiomeColorsAndAlpha();
+            surfaceMeshVersion++;
+        } else if (hasAnyActiveSurfaceHaze && lightSliceCursor == 0) {
+            // Full light-slice cycle completed -> refresh surface VBO lighting cleanly
+            surfaceMeshVersion++;
         }
 
-        // 4. Discover & maintain local FogSourceBlock patches every 4 ticks (O(1) chunk BE scan)
-        if ((tickCounter & 3) == 0 || geometryChanged) {
-            updateLocalFogPatches(level, camX, camY, camZ, clampedRadius + 18);
+        // 4. Discover & maintain local FogSourceBlock + chunk-attached FogAnchor patches out to ~144 blocks
+        int localScanRadius = Math.max(clampedRadius + 28, COMP_RADIUS + 8);
+        long anchorVer = ClientFogAnchorCache.getVersion();
+        if ((tickCounter & 3) == 0 || geometryChanged || anchorVer != lastAnchorCacheVersion) {
+            lastAnchorCacheVersion = anchorVer;
+            updateLocalFogPatches(level, camX, camY, camZ, localScanRadius);
+        } else if (!activeLocalPatches.isEmpty()) {
+            // Staggered refresh: refresh at most 1 patch per tick so 30+ dungeon patches NEVER stutter!
+            refreshOneStaleLocalPatch(level);
+        }
+
+        // 5. Rebuild deduplicated local fog composite grid only when patches change or player moves >= 8 blocks
+        int bakeCellX = Math.floorDiv(Mth.floor(camX), 8);
+        int bakeCellZ = Math.floorDiv(Mth.floor(camZ), 8);
+        if (localRenderDirty || bakeCellX != lastLocalBakeCellX || bakeCellZ != lastLocalBakeCellZ) {
+            lastLocalBakeCellX = bakeCellX;
+            lastLocalBakeCellZ = bakeCellZ;
+            localRenderDirty = false;
+            rebuildDeduplicatedLocalBuffer(Mth.floor(camX), Mth.floor(camZ));
         }
     }
 
@@ -821,6 +919,11 @@ public final class GroundHazeGrid {
     // ─────────────────────────────────────────────────────────────────────────────
 
     private void updateLocalFogPatches(ClientLevel level, double camX, double camY, double camZ, int scanRadius) {
+        int prevCount = activeLocalPatches.size();
+        long prevChecksum = 0L;
+        for (int i = 0; i < prevCount; i++) {
+            prevChecksum = prevChecksum * 31L + activeLocalPatches.get(i).sourcePos.asLong();
+        }
         activeLocalPatches.clear();
 
         int minCx = (Mth.floor(camX) - scanRadius) >> 4;
@@ -843,7 +946,7 @@ public final class GroundHazeGrid {
                     double dx = pos.getX() + 0.5 - camX;
                     double dy = pos.getY() + 0.5 - camY;
                     double dz = pos.getZ() + 0.5 - camZ;
-                    if (dx * dx + dz * dz > maxDistSq || Math.abs(dy) > 48.0) {
+                    if (dx * dx + dz * dz > maxDistSq || Math.abs(dy) > 148.0) {
                         continue;
                     }
 
@@ -854,28 +957,250 @@ public final class GroundHazeGrid {
 
                     int density = state.getValue(FogSourceBlock.DENSITY);
                     FogSourceBlock.FogColor color = state.getValue(FogSourceBlock.COLOR);
-                    long key = pos.asLong();
-                    LocalFogPatch patch = localPatches.get(key);
-                    if (patch == null || patch.density != density || patch.color != color
-                            || (tickCounter - patch.lightRefreshTick) >= 40) {
-                        patch = buildLocalFogPatch(level, pos, density, color);
-                        patch.lightRefreshTick = tickCounter;
-                        localPatches.put(key, patch);
+                    registerActiveLocalEmitter(level, pos, density, color);
+                }
+
+                // Also include chunk-attached structure FogAnchors (converted from FogSourceBlocks on worldgen)
+                List<FogAnchor.ClientView> chunkAnchors = ClientFogAnchorCache.getChunkAnchors(cx, cz);
+                for (int i = 0; i < chunkAnchors.size(); i++) {
+                    FogAnchor.ClientView anchor = chunkAnchors.get(i);
+                    BlockPos pos = anchor.origin();
+                    double dx = pos.getX() + 0.5 - camX;
+                    double dy = pos.getY() + 0.5 - camY;
+                    double dz = pos.getZ() + 0.5 - camZ;
+                    if (dx * dx + dz * dz > maxDistSq || Math.abs(dy) > 148.0) {
+                        continue;
                     }
-                    patch.lastSeenTick = tickCounter;
-                    activeLocalPatches.add(patch);
+                    registerActiveLocalEmitter(level, pos, anchor.density(), anchor.color());
                 }
             }
         }
 
-        if (localPatches.size() > activeLocalPatches.size() + 16) {
+        long newChecksum = 0L;
+        for (int i = 0; i < activeLocalPatches.size(); i++) {
+            newChecksum = newChecksum * 31L + activeLocalPatches.get(i).sourcePos.asLong();
+        }
+        if (activeLocalPatches.size() != prevCount || newChecksum != prevChecksum) {
+            localRenderDirty = true;
+        }
+
+        if (localPatches.size() > activeLocalPatches.size() + 24) {
             Iterator<Map.Entry<Long, LocalFogPatch>> it = localPatches.entrySet().iterator();
             while (it.hasNext()) {
-                if (tickCounter - it.next().getValue().lastSeenTick > 100) {
+                if (tickCounter - it.next().getValue().lastSeenTick > 120) {
                     it.remove();
                 }
             }
         }
+    }
+
+    private void registerActiveLocalEmitter(ClientLevel level, BlockPos pos, int density, FogSourceBlock.FogColor color) {
+        long key = pos.asLong();
+        LocalFogPatch patch = localPatches.get(key);
+        if (patch == null || patch.density != density || patch.color != color) {
+            patch = buildLocalFogPatch(level, pos, density, color);
+            // Stagger initial refresh timers by position hash so large dungeons never refresh in lockstep
+            int stagger = Math.floorMod(pos.hashCode(), 40);
+            patch.lightRefreshTick = tickCounter - stagger;
+            patch.geoRefreshTick = tickCounter - stagger * 3;
+            localPatches.put(key, patch);
+            localRenderDirty = true;
+        }
+        patch.lastSeenTick = tickCounter;
+        activeLocalPatches.add(patch);
+    }
+
+    /**
+     * Refreshes at most ONE stale patch per tick: fast light-only refresh every 80 ticks,
+     * and full BFS geometry rebuild every 240 ticks (catches newly broken/placed blocks with zero stutter).
+     */
+    private void refreshOneStaleLocalPatch(ClientLevel level) {
+        int count = activeLocalPatches.size();
+        if (count == 0) return;
+
+        int checked = Math.min(count, 4);
+        for (int i = 0; i < checked; i++) {
+            if (localRefreshCursor >= count) {
+                localRefreshCursor = 0;
+            }
+            LocalFogPatch patch = activeLocalPatches.get(localRefreshCursor++);
+            if ((tickCounter - patch.geoRefreshTick) >= 240) {
+                LocalFogPatch rebuilt = buildLocalFogPatch(level, patch.sourcePos, patch.density, patch.color);
+                rebuilt.lastSeenTick = tickCounter;
+                rebuilt.lightRefreshTick = tickCounter;
+                rebuilt.geoRefreshTick = tickCounter;
+                localPatches.put(patch.sourcePos.asLong(), rebuilt);
+                activeLocalPatches.set(localRefreshCursor - 1, rebuilt);
+                localRenderDirty = true;
+                return;
+            }
+            if ((tickCounter - patch.lightRefreshTick) >= 80) {
+                refreshLocalPatchLightsOnly(level, patch);
+                patch.lightRefreshTick = tickCounter;
+                localRenderDirty = true;
+                return;
+            }
+        }
+    }
+
+    private void refreshLocalPatchLightsOnly(ClientLevel level, LocalFogPatch patch) {
+        int size = patch.gridSize;
+        for (int gz = 0; gz < size; gz++) {
+            int wz = patch.originZ + gz * LOCAL_CELL_STEP;
+            int row = gz * size;
+            for (int gx = 0; gx < size; gx++) {
+                int idx = row + gx;
+                float sy = patch.smoothY[idx];
+                if (sy <= INVALID_Y + 1.0F) continue;
+                int wx = patch.originX + gx * LOCAL_CELL_STEP;
+                scratchPos.set(wx, Mth.floor(sy) + 1, wz);
+                patch.packedLight[idx] = sampleLocalPackedLight(level, scratchPos);
+            }
+        }
+    }
+
+    /**
+     * Merges all active local fog patches into ONE deduplicated {@link LocalCompositeGrid} around the camera.
+     * Overlapping {@code FogSourceBlock}s fuse seamlessly into a single non-overlapping volumetric surface
+     * (1x GPU overdraw even in massive 140-block dungeons), while multi-story floors (|dy| >= 3.0) are
+     * tracked in {@code overflowPatches} so tall towers and bridges above a foggy floor still render cleanly.
+     */
+    private void rebuildDeduplicatedLocalBuffer(int centerX, int centerZ) {
+        LocalCompositeGrid comp = this.localCompositeGrid;
+        comp.clear();
+        localMeshVersion++;
+        if (activeLocalPatches.isEmpty()) {
+            return;
+        }
+
+        if (compColorW == null) {
+            compColorW = new float[COMP_CELLS];
+        }
+
+        int originX = centerX - COMP_RADIUS;
+        int originZ = centerZ - COMP_RADIUS;
+        comp.originX = originX;
+        comp.originZ = originZ;
+
+        Arrays.fill(comp.smoothY, INVALID_Y);
+        Arrays.fill(comp.maskAlpha, 0.0F);
+        Arrays.fill(comp.edgeFade, 0.0F);
+        Arrays.fill(comp.solidWall, false);
+
+        int dirtyMinX = COMP_SIZE, dirtyMaxX = -1;
+        int dirtyMinZ = COMP_SIZE, dirtyMaxZ = -1;
+
+        for (int p = 0; p < activeLocalPatches.size(); p++) {
+            LocalFogPatch patch = activeLocalPatches.get(p);
+            int pSize = patch.gridSize;
+            float pr = patch.color.r;
+            float pg = patch.color.g;
+            float pb = patch.color.b;
+            // Tall ~2.1-2.55 block soft volumetric height band: comfortably ABOVE standing eye height (1.62)
+            // so standing/walking on the floor uses true 3D per-pixel depth-slab integration (zero flat
+            // canopy plane under the eyes, zero horizon beam!) and wraps smoothly up the bottom 2 blocks of walls.
+            float pHeight = 2.05F + 0.10F * patch.density; // 2.15 .. 2.55 blocks
+            boolean patchHasOverflow = false;
+
+            for (int gz = 0; gz < pSize; gz++) {
+                int wz = patch.originZ + gz * LOCAL_CELL_STEP;
+                int cz = wz - originZ;
+                if (cz < 0 || cz >= COMP_SIZE) continue;
+                int pRow = gz * pSize;
+                int cRow = cz * COMP_SIZE;
+
+                for (int gx = 0; gx < pSize; gx++) {
+                    int pIdx = pRow + gx;
+                    int wx = patch.originX + gx * LOCAL_CELL_STEP;
+                    int cx = wx - originX;
+                    if (cx < 0 || cx >= COMP_SIZE) continue;
+                    int cIdx = cRow + cx;
+
+                    float sy = patch.smoothY[pIdx];
+                    if (sy <= INVALID_Y + 1.0F) {
+                        if (patch.solidWall[pIdx] && comp.maskAlpha[cIdx] <= 0.0F) {
+                            comp.solidWall[cIdx] = true;
+                        }
+                        continue;
+                    }
+                    float m = patch.alphaMask[pIdx];
+                    float e = patch.openEdgeFade[pIdx];
+                    if (m <= 0.004F || e <= 0.004F) continue;
+
+                    float existingM = comp.maskAlpha[cIdx];
+                    if (existingM <= 0.0F) {
+                        comp.smoothY[cIdx] = sy;
+                        comp.fogHeight[cIdx] = pHeight;
+                        comp.maskAlpha[cIdx] = m;
+                        comp.edgeFade[cIdx] = e;
+                        comp.solidWall[cIdx] = false;
+                        float w = m * e;
+                        comp.r[cIdx] = pr * w;
+                        comp.g[cIdx] = pg * w;
+                        comp.b[cIdx] = pb * w;
+                        compColorW[cIdx] = w;
+                        comp.packedLight[cIdx] = patch.packedLight[pIdx];
+                        if (cx < dirtyMinX) dirtyMinX = cx;
+                        if (cx > dirtyMaxX) dirtyMaxX = cx;
+                        if (cz < dirtyMinZ) dirtyMinZ = cz;
+                        if (cz > dirtyMaxZ) dirtyMaxZ = cz;
+                    } else if (Math.abs(sy - comp.smoothY[cIdx]) >= 3.0F) {
+                        patchHasOverflow = true;
+                    } else {
+                        float w = m * e;
+                        if (m > existingM) {
+                            comp.maskAlpha[cIdx] = m;
+                            comp.smoothY[cIdx] = sy;
+                            comp.fogHeight[cIdx] = Math.max(comp.fogHeight[cIdx], pHeight);
+                            comp.packedLight[cIdx] = patch.packedLight[pIdx];
+                        }
+                        if (e > comp.edgeFade[cIdx]) {
+                            comp.edgeFade[cIdx] = e;
+                        }
+                        comp.r[cIdx] += pr * w;
+                        comp.g[cIdx] += pg * w;
+                        comp.b[cIdx] += pb * w;
+                        compColorW[cIdx] += w;
+                    }
+                }
+            }
+
+            if (patchHasOverflow) {
+                comp.overflowPatches.add(patch);
+            }
+        }
+
+        if (dirtyMaxX < dirtyMinX) {
+            return;
+        }
+
+        // Normalize accumulated color weights inside dirty bounds & track vertical Y bounds
+        float minY = Float.MAX_VALUE;
+        float maxTopY = -Float.MAX_VALUE;
+        for (int cz = dirtyMinZ; cz <= dirtyMaxZ; cz++) {
+            int cRow = cz * COMP_SIZE;
+            for (int cx = dirtyMinX; cx <= dirtyMaxX; cx++) {
+                int cIdx = cRow + cx;
+                if (comp.maskAlpha[cIdx] <= 0.004F) continue;
+                float invW = compColorW[cIdx] > 0.0001F ? (1.0F / compColorW[cIdx]) : 1.0F;
+                comp.r[cIdx] *= invW;
+                comp.g[cIdx] *= invW;
+                comp.b[cIdx] *= invW;
+                float sy = comp.smoothY[cIdx];
+                float topY = sy + comp.fogHeight[cIdx];
+                if (sy < minY) minY = sy;
+                if (topY > maxTopY) maxTopY = topY;
+            }
+        }
+
+        // Expand dirty bounds by 1 cell so 1-texel dilation covers perimeter neighbors cleanly
+        comp.dirtyMinX = Math.max(0, dirtyMinX - 1);
+        comp.dirtyMaxX = Math.min(COMP_SIZE - 1, dirtyMaxX + 1);
+        comp.dirtyMinZ = Math.max(0, dirtyMinZ - 1);
+        comp.dirtyMaxZ = Math.min(COMP_SIZE - 1, dirtyMaxZ + 1);
+        comp.minFloorY = minY;
+        comp.maxFogTopY = maxTopY;
+        comp.hasData = true;
     }
 
     private LocalFogPatch buildLocalFogPatch(ClientLevel level, BlockPos sourcePos, int density, FogSourceBlock.FogColor color) {

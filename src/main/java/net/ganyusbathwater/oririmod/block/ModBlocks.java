@@ -376,6 +376,47 @@ public class ModBlocks {
         public static final DeferredBlock<Block> CHISELED_SOL_SANDSTONE = registerBlock("chiseled_sol_sandstone",
                         () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CHISELED_SANDSTONE)));
 
+        public static final DeferredBlock<Block> SOL_SANDSTONE_BRICKS = registerBlock("sol_sandstone_bricks",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICKS)));
+
+        public static final DeferredBlock<StairBlock> SOL_SANDSTONE_BRICK_STAIRS = registerBlock(
+                        "sol_sandstone_brick_stairs",
+                        () -> new StairBlock(ModBlocks.SOL_SANDSTONE_BRICKS.get().defaultBlockState(),
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_STAIRS)));
+
+        public static final DeferredBlock<SlabBlock> SOL_SANDSTONE_BRICK_SLAB = registerBlock(
+                        "sol_sandstone_brick_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_SLAB)));
+
+        public static final DeferredBlock<WallBlock> SOL_SANDSTONE_BRICK_WALL = registerBlock(
+                        "sol_sandstone_brick_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_WALL)));
+
+        public static final DeferredBlock<Block> MOSSY_SOL_SANDSTONE_BRICKS = registerBlock(
+                        "mossy_sol_sandstone_bricks",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_STONE_BRICKS)));
+
+        public static final DeferredBlock<StairBlock> MOSSY_SOL_SANDSTONE_BRICK_STAIRS = registerBlock(
+                        "mossy_sol_sandstone_brick_stairs",
+                        () -> new StairBlock(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS.get().defaultBlockState(),
+                                        BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_STONE_BRICK_STAIRS)));
+
+        public static final DeferredBlock<SlabBlock> MOSSY_SOL_SANDSTONE_BRICK_SLAB = registerBlock(
+                        "mossy_sol_sandstone_brick_slab",
+                        () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_STONE_BRICK_SLAB)));
+
+        public static final DeferredBlock<WallBlock> MOSSY_SOL_SANDSTONE_BRICK_WALL = registerBlock(
+                        "mossy_sol_sandstone_brick_wall",
+                        () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.MOSSY_STONE_BRICK_WALL)));
+
+        public static final DeferredBlock<Block> CRACKED_SOL_SANDSTONE_BRICKS = registerBlock(
+                        "cracked_sol_sandstone_bricks",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CRACKED_STONE_BRICKS)));
+
+        public static final DeferredBlock<Block> CHISELED_SOL_SANDSTONE_BRICKS = registerBlock(
+                        "chiseled_sol_sandstone_bricks",
+                        () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CHISELED_STONE_BRICKS)));
+
         public static final DeferredBlock<Block> SOL_QUICKSAND = BLOCKS.register("sol_quicksand",
                         () -> new SolQuicksandBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POWDER_SNOW).sound(SoundType.SAND)));
 

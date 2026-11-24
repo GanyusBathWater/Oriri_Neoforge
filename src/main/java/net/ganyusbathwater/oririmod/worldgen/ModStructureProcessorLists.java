@@ -2,6 +2,7 @@ package net.ganyusbathwater.oririmod.worldgen;
 
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.worldgen.processor.OutpostTerrainBlendProcessor;
+import net.ganyusbathwater.oririmod.worldgen.processor.StructureFogProcessor;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
@@ -15,8 +16,16 @@ public class ModStructureProcessorLists {
             Registries.PROCESSOR_LIST,
             ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "outpost_terrain_blend"));
 
+    public static final ResourceKey<StructureProcessorList> STRUCTURE_FOG_ONLY_KEY = ResourceKey.create(
+            Registries.PROCESSOR_LIST,
+            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "structure_fog_only"));
+
     public static void bootstrap(BootstrapContext<StructureProcessorList> context) {
         context.register(OUTPOST_TERRAIN_BLEND_KEY,
-                new StructureProcessorList(List.of(OutpostTerrainBlendProcessor.INSTANCE)));
+                new StructureProcessorList(List.of(
+                        OutpostTerrainBlendProcessor.INSTANCE,
+                        StructureFogProcessor.INSTANCE)));
+        context.register(STRUCTURE_FOG_ONLY_KEY,
+                new StructureProcessorList(List.of(StructureFogProcessor.INSTANCE)));
     }
 }

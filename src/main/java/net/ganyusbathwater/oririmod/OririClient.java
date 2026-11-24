@@ -138,6 +138,18 @@ public class OririClient {
         } catch (java.io.IOException e) {
             OririMod.LOGGER.error("[OririMod] Failed to register cosmic_tooltip_bg shader: {}", e.getMessage());
         }
+        try {
+            event.registerShader(
+                    new ShaderInstance(
+                            event.getResourceProvider(),
+                            net.ganyusbathwater.oririmod.client.render.world.haze.GroundHazeRenderer.GROUND_HAZE_SHADER_LOC,
+                            DefaultVertexFormat.POSITION_TEX_COLOR
+                    ),
+                    net.ganyusbathwater.oririmod.client.render.world.haze.GroundHazeRenderer::onShaderRegistered
+            );
+        } catch (java.io.IOException e) {
+            OririMod.LOGGER.error("[OririMod] Failed to register ground_haze shader: {}", e.getMessage());
+        }
     }
 
     @SubscribeEvent

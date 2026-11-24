@@ -103,7 +103,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.POLISHED_CALICHE_WALL.get())
                                 .add(ModBlocks.CALICHE_BRICK_WALL.get())
                                 .add(ModBlocks.POLISHED_ABYSSAL_BASALT_WALL.get())
-                                .add(ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get());
+                                .add(ModBlocks.ABYSSAL_BASALT_BRICK_WALL.get())
+                                .add(ModBlocks.SOL_SANDSTONE_BRICK_WALL.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL.get());
 
                 tag(BlockTags.STAIRS)
                                 .add(ModBlocks.SCARLET_STONE_STAIRS.get())
@@ -116,7 +118,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_DEEPSLATE_BRICK_STAIRS.get())
                                 .add(ModBlocks.SCARLET_DEEPSLATE_STAIRS.get())
                                 .add(ModBlocks.SCARLET_DEEPSLATE_TILE_STAIRS.get())
-                                .add(ModBlocks.JADE_STAIRS.get());
+                                .add(ModBlocks.JADE_STAIRS.get())
+                                .add(ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS.get());
 
                 tag(BlockTags.SLABS)
                                 .add(ModBlocks.SCARLET_STONE_SLAB.get())
@@ -130,7 +134,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SCARLET_DEEPSLATE_SLAB.get())
                                 .add(ModBlocks.SCARLET_DEEPSLATE_TILE_SLAB.get())
                                 .add(ModBlocks.SMOOTH_SCARLET_STONE_SLAB.get())
-                                .add(ModBlocks.JADE_SLAB.get());
+                                .add(ModBlocks.JADE_SLAB.get())
+                                .add(ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get());
 
                 tag(BlockTags.PLANKS)
                                 .add(ModBlocks.ELDER_PLANKS.get())
@@ -413,6 +419,16 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                                 .add(ModBlocks.SOL_SANDSTONE.get())
                                 .add(ModBlocks.CUT_SOL_SANDSTONE.get())
                                 .add(ModBlocks.CHISELED_SOL_SANDSTONE.get())
+                                .add(ModBlocks.SOL_SANDSTONE_BRICKS.get())
+                                .add(ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get())
+                                .add(ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get())
+                                .add(ModBlocks.SOL_SANDSTONE_BRICK_WALL.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL.get())
+                                .add(ModBlocks.CRACKED_SOL_SANDSTONE_BRICKS.get())
+                                .add(ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS.get())
                                 .add(ModBlocks.BROKEN_SWORD_BLOCK.get())
                                 .add(ModBlocks.TILTED_BROKEN_SWORD_BLOCK.get())
                                 .add(ModBlocks.HARDENED_MANASHROOM.get())
@@ -585,6 +601,12 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 tag(BlockTags.REPLACEABLE)
                                 .add(ModBlocks.SCARLET_VINE.get());
                                 
+                tag(BlockTags.STONE_BRICKS)
+                                .add(ModBlocks.SOL_SANDSTONE_BRICKS.get())
+                                .add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS.get())
+                                .add(ModBlocks.CRACKED_SOL_SANDSTONE_BRICKS.get())
+                                .add(ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS.get());
+
                 tag(BlockTags.FALL_DAMAGE_RESETTING)
                                 .add(ModBlocks.SCARLET_VINE.get());
         }

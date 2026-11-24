@@ -1,25 +1,32 @@
 package net.ganyusbathwater.oririmod.client.render.world.haze;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 
 /**
- * Procedurally generates a 512x512 (2x2 atlas of four 256x256) soft volumetric mist-puff sprites.
- * Each sprite uses pure white RGB with a smooth radial-Gaussian x multi-octave FBM cloud alpha
- * that falls strictly to 0 well before the tile edge, guaranteeing zero quad edges, zero atlas
- * bleeding, and full compatibility across Vanilla, Sodium, and all Iris shaderpacks.
+ * Procedurally generates a seamlessly tileable 256x256 3-channel periodic FBM cloud noise texture
+ * for the volumetric {@code oririmod:ground_haze} fragment shader:
+ * <ul>
+ *   <li><b>R channel:</b> Low-frequency billowing fog banks (periods 3, 6, 12)</li>
+ *   <li><b>G channel:</b> Mid-frequency swirling atmospheric currents (periods 5, 10, 20)</li>
+ *   <li><b>B channel:</b> Fine organic vapor wisps (periods 7, 14, 28)</li>
+ * </ul>
+ * Because every octave wraps seamlessly across tile boundaries with {@code GL_REPEAT} and bilinear
+ * filtering, sampling with domain warping produces completely continuous mist with zero seams,
+ * zero circles, and zero grid artifacts at any altitude.
  */
 public final class GroundHazeTexture {
 
-    private static final int TILE_SIZE = 256;
-    private static final int ATLAS_TILES = 2;
-    private static final int ATLAS_SIZE = TILE_SIZE * ATLAS_TILES;
+    private static final int SIZE = 256;
     private static final ResourceLocation TEXTURE_ID =
-            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dynamic/ground_haze_puffs");
+            ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "dynamic/ground_haze_noise");
 
     private static boolean initialized = false;
     private static DynamicTexture dynamicTexture;
@@ -30,90 +37,94 @@ public final class GroundHazeTexture {
     public static ResourceLocation getTexture() {
         if (!initialized) {
             initialized = true;
-            NativeImage image = buildMistPuffAtlas();
+            NativeImage image = buildTileableNoise();
             dynamicTexture = new DynamicTexture(image);
-            // Bilinear smoothing ON, mipmaps OFF so atlas tile edges never bleed into neighbors
             dynamicTexture.setFilter(true, false);
             Minecraft.getInstance().getTextureManager().register(TEXTURE_ID, dynamicTexture);
+            GlStateManager._bindTexture(dynamicTexture.getId());
+            GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+            applyRepeatWrap();
         }
         return TEXTURE_ID;
     }
 
-    private static NativeImage buildMistPuffAtlas() {
-        NativeImage img = new NativeImage(NativeImage.Format.RGBA, ATLAS_SIZE, ATLAS_SIZE, false);
-        for (int ty = 0; ty < ATLAS_TILES; ty++) {
-            for (int tx = 0; tx < ATLAS_TILES; tx++) {
-                int tileIndex = ty * ATLAS_TILES + tx;
-                fillMistPuffTile(img, tx * TILE_SIZE, ty * TILE_SIZE, 137 + tileIndex * 313);
+    public static void ensureRepeatWrap() {
+        if (dynamicTexture != null) {
+            applyRepeatWrap();
+        }
+    }
+
+    private static void applyRepeatWrap() {
+        GlStateManager._bindTexture(dynamicTexture.getId());
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+    }
+
+    private static NativeImage buildTileableNoise() {
+        NativeImage img = new NativeImage(NativeImage.Format.RGBA, SIZE, SIZE, false);
+        for (int y = 0; y < SIZE; y++) {
+            double v = (double) y / SIZE;
+            for (int x = 0; x < SIZE; x++) {
+                double u = (double) x / SIZE;
+
+                // R: billowing macro cloud banks
+                double rVal = periodicFbm(u, v, 3, 137) * 0.56
+                        + periodicFbm(u, v, 6, 311) * 0.29
+                        + periodicFbm(u, v, 12, 577) * 0.15;
+
+                // G: swirling mid-scale tendrils (independent seed & coprime base period)
+                double gVal = periodicFbm(u, v, 5, 919) * 0.54
+                        + periodicFbm(u, v, 10, 1237) * 0.30
+                        + periodicFbm(u, v, 20, 1601) * 0.16;
+
+                // B: fine organic vapor texture
+                double bVal = periodicFbm(u, v, 7, 2083) * 0.52
+                        + periodicFbm(u, v, 14, 2441) * 0.31
+                        + periodicFbm(u, v, 28, 2909) * 0.17;
+
+                // Gently stretch contrast around 0.5 for rich atmospheric cloud variation
+                int rByte = toByte(0.5 + (rVal - 0.5) * 1.45);
+                int gByte = toByte(0.5 + (gVal - 0.5) * 1.45);
+                int bByte = toByte(0.5 + (bVal - 0.5) * 1.40);
+
+                // NativeImage ABGR packed int: (A << 24) | (B << 16) | (G << 8) | R
+                int abgr = (0xFF << 24) | (bByte << 16) | (gByte << 8) | rByte;
+                img.setPixelRGBA(x, y, abgr);
             }
         }
         return img;
     }
 
-    private static void fillMistPuffTile(NativeImage img, int baseX, int baseY, int seed) {
-        for (int ly = 0; ly < TILE_SIZE; ly++) {
-            double ny = (ly + 0.5) / (TILE_SIZE * 0.5) - 1.0; // -1 .. +1
-            double v = (double) ly / TILE_SIZE;
-            for (int lx = 0; lx < TILE_SIZE; lx++) {
-                double nx = (lx + 0.5) / (TILE_SIZE * 0.5) - 1.0; // -1 .. +1
-                double u = (double) lx / TILE_SIZE;
-
-                double r = Math.sqrt(nx * nx + ny * ny);
-                if (r >= 0.97) {
-                    // Strictly transparent outer margin prevents any square edges or tile bleed
-                    img.setPixelRGBA(baseX + lx, baseY + ly, 0x00FFFFFF);
-                    continue;
-                }
-
-                // Organic multi-octave FBM noise that BOTH warps the outer silhouette (no circular dots!)
-                // and modulates interior density softly so overlapping puffs fuse into continuous mist
-                double n1 = smoothNoise(u * 3.2 + 1.3, v * 3.2 + 2.7, seed);
-                double n2 = smoothNoise(u * 6.4 + 4.1, v * 6.4 + 0.9, seed + 53);
-                double n3 = smoothNoise(u * 12.0 + 2.2, v * 12.0 + 6.4, seed + 127);
-                double fbm = n1 * 0.56 + n2 * 0.30 + n3 * 0.14;
-
-                double warp = smoothNoise(u * 4.0 + (n1 - 0.5) * 0.9, v * 4.0 + (n2 - 0.5) * 0.9, seed + 211);
-                double wisp = fbm * 0.62 + warp * 0.38;
-
-                // Perturb radial boundary organically (damped to 0 near r = 0.96 so edges stay strictly 0)
-                double warpWeight = Mth.clamp((0.96 - r) / 0.25, 0.0, 1.0);
-                double rWarped = r + (wisp - 0.5) * 0.30 * warpWeight;
-
-                // Broad, flat-topped cloud plateau (no bright circular bullseye center!)
-                // Stays broadly even across r = 0..0.38, then feathers smoothly to 0 by r = 0.95
-                double plateauT = Mth.clamp((0.95 - rWarped) / 0.62, 0.0, 1.0);
-                double plateau = plateauT * plateauT * (3.0 - 2.0 * plateauT);
-
-                // Clamp strictly by hard outer safety ring so no pixel ever touches the tile border
-                double safetyT = Mth.clamp((0.97 - r) / 0.14, 0.0, 1.0);
-                double cloud = 0.68 + 0.32 * wisp;
-
-                double alphaF = Mth.clamp(plateau * safetyT * cloud, 0.0, 1.0);
-                int alpha = Mth.clamp((int) Math.round(alphaF * 255.0), 0, 255);
-
-                // NativeImage ABGR layout: alpha in top byte, pure white RGB so vertex tint & lightmap drive color
-                int abgr = (alpha << 24) | 0x00FFFFFF;
-                img.setPixelRGBA(baseX + lx, baseY + ly, abgr);
-            }
-        }
+    private static int toByte(double v) {
+        return Mth.clamp((int) Math.round(v * 255.0), 0, 255);
     }
 
-    private static double smoothNoise(double x, double y, int seed) {
-        int x0 = (int) Math.floor(x);
-        int y0 = (int) Math.floor(y);
-        double tx = x - x0;
-        double ty = y - y0;
-        double sx = tx * tx * (3.0 - 2.0 * tx);
-        double sy = ty * ty * (3.0 - 2.0 * ty);
+    private static double periodicFbm(double u, double v, int period, int seed) {
+        double fx = u * period;
+        double fy = v * period;
+        int x0 = (int) Math.floor(fx);
+        int y0 = (int) Math.floor(fy);
+        double tx = fx - x0;
+        double ty = fy - y0;
+        // Quintic C2 smoothstep prevents grid derivative creases under bilinear zoom
+        double sx = tx * tx * tx * (tx * (tx * 6.0 - 15.0) + 10.0);
+        double sy = ty * ty * ty * (ty * (ty * 6.0 - 15.0) + 10.0);
 
-        double c00 = hash01(x0, y0, seed);
-        double c10 = hash01(x0 + 1, y0, seed);
-        double c01 = hash01(x0, y0 + 1, seed);
-        double c11 = hash01(x0 + 1, y0 + 1, seed);
+        int ix0 = Math.floorMod(x0, period);
+        int ix1 = Math.floorMod(x0 + 1, period);
+        int iy0 = Math.floorMod(y0, period);
+        int iy1 = Math.floorMod(y0 + 1, period);
 
-        double ix0 = c00 + (c10 - c00) * sx;
-        double ix1 = c01 + (c11 - c01) * sx;
-        return ix0 + (ix1 - ix0) * sy;
+        double c00 = hash01(ix0, iy0, seed);
+        double c10 = hash01(ix1, iy0, seed);
+        double c01 = hash01(ix0, iy1, seed);
+        double c11 = hash01(ix1, iy1, seed);
+
+        double a = c00 + (c10 - c00) * sx;
+        double b = c01 + (c11 - c01) * sx;
+        return a + (b - a) * sy;
     }
 
     private static double hash01(int x, int y, int seed) {

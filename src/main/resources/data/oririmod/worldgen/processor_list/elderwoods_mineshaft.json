@@ -84,6 +84,9 @@
                     }
                 }
             ]
+        },
+        {
+            "processor_type": "oririmod:structure_fog"
         }
     ]
 }

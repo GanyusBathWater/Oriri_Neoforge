@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.worldgen.processor.LootTableChestProcessor;
 import net.ganyusbathwater.oririmod.worldgen.processor.OutpostTerrainBlendProcessor;
+import net.ganyusbathwater.oririmod.worldgen.processor.StructureFogProcessor;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
@@ -21,6 +22,9 @@ public class ModStructureProcessors {
 
     public static final Supplier<StructureProcessorType<OutpostTerrainBlendProcessor>> OUTPOST_TERRAIN_BLEND =
             PROCESSORS.register("outpost_terrain_blend", () -> () -> OutpostTerrainBlendProcessor.CODEC);
+
+    public static final Supplier<StructureProcessorType<StructureFogProcessor>> STRUCTURE_FOG =
+            PROCESSORS.register("structure_fog", () -> () -> StructureFogProcessor.CODEC);
 
     public static void register(IEventBus eventBus) {
         PROCESSORS.register(eventBus);

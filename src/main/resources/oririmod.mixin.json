@@ -15,6 +15,7 @@
   ],
   "client": [
     "ClientLevelMixin",
+    "GameRendererMixin",
     "LevelRendererMixin",
     "LightTextureMixin",
     "WolfRendererMixin",

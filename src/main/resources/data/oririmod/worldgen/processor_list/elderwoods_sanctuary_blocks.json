@@ -88,6 +88,9 @@
     },
     {
       "processor_type": "oririmod:outpost_terrain_blend"
+    },
+    {
+      "processor_type": "oririmod:structure_fog"
     }
   ]
 }

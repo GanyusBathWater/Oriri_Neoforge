@@ -302,6 +302,16 @@ public class ModItemGroups {
                         output.accept(ModBlocks.SOL_SANDSTONE);
                         output.accept(ModBlocks.CUT_SOL_SANDSTONE);
                         output.accept(ModBlocks.CHISELED_SOL_SANDSTONE);
+                        output.accept(ModBlocks.SOL_SANDSTONE_BRICKS);
+                        output.accept(ModBlocks.SOL_SANDSTONE_BRICK_STAIRS);
+                        output.accept(ModBlocks.SOL_SANDSTONE_BRICK_SLAB);
+                        output.accept(ModBlocks.SOL_SANDSTONE_BRICK_WALL);
+                        output.accept(ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS);
+                        output.accept(ModBlocks.CRACKED_SOL_SANDSTONE_BRICKS);
+                        output.accept(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS);
+                        output.accept(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS);
+                        output.accept(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB);
+                        output.accept(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL);
                         output.accept(ModBlocks.SOL_GLASS);
                         output.accept(ModBlocks.SOL_GLASS_PANE);
 

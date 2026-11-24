@@ -158,6 +158,16 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.SOL_SANDSTONE.get());
         dropSelf(ModBlocks.CUT_SOL_SANDSTONE.get());
         dropSelf(ModBlocks.CHISELED_SOL_SANDSTONE.get());
+        dropSelf(ModBlocks.SOL_SANDSTONE_BRICKS.get());
+        dropSelf(ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get());
+        add(ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get()));
+        dropSelf(ModBlocks.SOL_SANDSTONE_BRICK_WALL.get());
+        dropSelf(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS.get());
+        dropSelf(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS.get());
+        add(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get(), block -> createSlabItemTable(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get()));
+        dropSelf(ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL.get());
+        dropSelf(ModBlocks.CRACKED_SOL_SANDSTONE_BRICKS.get());
+        dropSelf(ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS.get());
         add(ModBlocks.SOL_QUICKSAND.get(), noDrop());
 
         add(ModBlocks.BROKEN_SWORD_BLOCK.get(), block -> createSilkTouchDispatchTable(block, this.applyExplosionDecay(block, net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(net.minecraft.world.item.Items.IRON_NUGGET).apply(net.minecraft.world.level.storage.loot.functions.SetItemCountFunction.setCount(net.minecraft.world.level.storage.loot.providers.number.UniformGenerator.between(0.0F, 3.0F))))));

@@ -609,6 +609,114 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                                 .define('B', ModBlocks.SOL_SANDSTONE)
                                 .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE)).save(recipeOutput);
 
+                // Sol Sandstone Bricks
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICKS, 4)
+                                .pattern("BB")
+                                .pattern("BB")
+                                .define('B', ModBlocks.CUT_SOL_SANDSTONE)
+                                .unlockedBy("has_cut_sol_sandstone", has(ModBlocks.CUT_SOL_SANDSTONE))
+                                .save(recipeOutput);
+
+                makeStoneRecipes(recipeOutput, "sol_sandstone_bricks",
+                                ModBlocks.SOL_SANDSTONE_BRICKS.get(),
+                                ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get(),
+                                ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get(),
+                                ModBlocks.SOL_SANDSTONE_BRICK_WALL.get());
+
+                makeStoneRecipes(recipeOutput, "mossy_sol_sandstone_bricks",
+                                ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS.get(),
+                                ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS.get(),
+                                ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get(),
+                                ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL.get());
+
+                // Chiseled Sol Sandstone Bricks (2x Sol Sandstone Brick Slabs, matching vanilla Chiseled Stone Bricks)
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS, 1)
+                                .pattern("B")
+                                .pattern("B")
+                                .define('B', ModBlocks.SOL_SANDSTONE_BRICK_SLAB)
+                                .unlockedBy("has_sol_sandstone_brick_slab", has(ModBlocks.SOL_SANDSTONE_BRICK_SLAB))
+                                .save(recipeOutput);
+
+                // Cracked Sol Sandstone Bricks (Smelting)
+                SimpleCookingRecipeBuilder
+                                .smelting(Ingredient.of(ModBlocks.SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS,
+                                                ModBlocks.CRACKED_SOL_SANDSTONE_BRICKS.get(), 0.1f, 200)
+                                .unlockedBy("has_sol_sandstone_bricks", has(ModBlocks.SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:cracked_sol_sandstone_bricks_from_smelting");
+
+                // Mossy Sol Sandstone Bricks (Vine & Moss Block, matching vanilla Mossy Stone Bricks)
+                ShapelessRecipeBuilder
+                                .shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS, 1)
+                                .requires(ModBlocks.SOL_SANDSTONE_BRICKS)
+                                .requires(Blocks.VINE)
+                                .group("mossy_sol_sandstone_bricks")
+                                .unlockedBy("has_vine", has(Blocks.VINE))
+                                .save(recipeOutput, "oririmod:mossy_sol_sandstone_bricks_from_vine");
+
+                ShapelessRecipeBuilder
+                                .shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS, 1)
+                                .requires(ModBlocks.SOL_SANDSTONE_BRICKS)
+                                .requires(Blocks.MOSS_BLOCK)
+                                .group("mossy_sol_sandstone_bricks")
+                                .unlockedBy("has_moss_block", has(Blocks.MOSS_BLOCK))
+                                .save(recipeOutput, "oririmod:mossy_sol_sandstone_bricks_from_moss_block");
+
+                // Sol Sandstone Bricks Stonecutting
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICKS.get())
+                                .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_bricks_from_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get())
+                                .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_stairs_from_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get(), 2)
+                                .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_slab_from_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_WALL.get())
+                                .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_wall_from_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS.get())
+                                .unlockedBy("has_sol_sandstone", has(ModBlocks.SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:chiseled_sol_sandstone_bricks_from_sol_sandstone_stonecutting");
+
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CUT_SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICKS.get())
+                                .unlockedBy("has_cut_sol_sandstone", has(ModBlocks.CUT_SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_bricks_from_cut_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CUT_SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get())
+                                .unlockedBy("has_cut_sol_sandstone", has(ModBlocks.CUT_SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_stairs_from_cut_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CUT_SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get(), 2)
+                                .unlockedBy("has_cut_sol_sandstone", has(ModBlocks.CUT_SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_slab_from_cut_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CUT_SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_WALL.get())
+                                .unlockedBy("has_cut_sol_sandstone", has(ModBlocks.CUT_SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_wall_from_cut_sol_sandstone_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.CUT_SOL_SANDSTONE), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS.get())
+                                .unlockedBy("has_cut_sol_sandstone", has(ModBlocks.CUT_SOL_SANDSTONE))
+                                .save(recipeOutput, "oririmod:chiseled_sol_sandstone_bricks_from_cut_sol_sandstone_stonecutting");
+
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_STAIRS.get())
+                                .unlockedBy("has_sol_sandstone_bricks", has(ModBlocks.SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_stairs_from_sol_sandstone_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_SLAB.get(), 2)
+                                .unlockedBy("has_sol_sandstone_bricks", has(ModBlocks.SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_slab_from_sol_sandstone_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.SOL_SANDSTONE_BRICK_WALL.get())
+                                .unlockedBy("has_sol_sandstone_bricks", has(ModBlocks.SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:sol_sandstone_brick_wall_from_sol_sandstone_bricks_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_SOL_SANDSTONE_BRICKS.get())
+                                .unlockedBy("has_sol_sandstone_bricks", has(ModBlocks.SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:chiseled_sol_sandstone_bricks_from_sol_sandstone_bricks_stonecutting");
+
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_STAIRS.get())
+                                .unlockedBy("has_mossy_sol_sandstone_bricks", has(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:mossy_sol_sandstone_brick_stairs_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_SLAB.get(), 2)
+                                .unlockedBy("has_mossy_sol_sandstone_bricks", has(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:mossy_sol_sandstone_brick_slab_stonecutting");
+                SingleItemRecipeBuilder.stonecutting(Ingredient.of(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS), RecipeCategory.BUILDING_BLOCKS, ModBlocks.MOSSY_SOL_SANDSTONE_BRICK_WALL.get())
+                                .unlockedBy("has_mossy_sol_sandstone_bricks", has(ModBlocks.MOSSY_SOL_SANDSTONE_BRICKS))
+                                .save(recipeOutput, "oririmod:mossy_sol_sandstone_brick_wall_stonecutting");
+
                 ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.REVIVAL_SHRINE, 1)
                                 .pattern("AAA")
                                 .pattern("ABA")
