@@ -30,6 +30,9 @@ public class ModRecipeSerializers {
     public static final Supplier<RecipeSerializer<LamiaDyeRecipe>> LAMIA_DYE = RECIPE_SERIALIZERS
             .register("lamia_dye", () -> new net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer<>(LamiaDyeRecipe::new));
 
+    public static final Supplier<RecipeSerializer<LizardScaleDyeRecipe>> LIZARD_SCALE_DYE = RECIPE_SERIALIZERS
+            .register("lizard_scale_dye", () -> new net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer<>(LizardScaleDyeRecipe::new));
+
 
     public static void register(IEventBus eventBus) {
         RECIPE_SERIALIZERS.register(eventBus);

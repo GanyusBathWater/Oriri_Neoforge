@@ -73,6 +73,16 @@ public final class ColorHandler {
         };
         event.register(silentNereidScaleItem, net.ganyusbathwater.oririmod.item.ModItems.SILENT_NEREID_SCALE.get());
 
+        ItemColor lizardScaleItem = (stack, tintIndex) -> {
+            net.ganyusbathwater.oririmod.item.component.LizardTailColors colors = stack.getOrDefault(
+                    net.ganyusbathwater.oririmod.item.component.ModDataComponents.LIZARD_TAIL_COLORS.get(),
+                    net.ganyusbathwater.oririmod.item.component.LizardTailColors.DEFAULT);
+            if (tintIndex == 0) return colors.primary() | 0xFF000000;
+            if (tintIndex == 1) return colors.secondary() | 0xFF000000;
+            return 0xFFFFFFFF;
+        };
+        event.register(lizardScaleItem, net.ganyusbathwater.oririmod.item.ModItems.LIZARD_SCALE.get());
+
 
         ItemColor teleporterItem = (stack, tintIndex) -> {
             if (tintIndex == 0) {

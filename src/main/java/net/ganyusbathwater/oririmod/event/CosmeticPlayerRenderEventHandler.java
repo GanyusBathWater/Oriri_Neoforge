@@ -25,6 +25,7 @@ public class CosmeticPlayerRenderEventHandler {
     public static net.ganyusbathwater.oririmod.client.render.entity.ElvenEarsRenderer ELVEN_EARS_RENDERER;
     public static net.ganyusbathwater.oririmod.client.render.entity.SilentNereidCosmeticRenderer SILENT_NEREID_COSMETIC_RENDERER;
     public static net.ganyusbathwater.oririmod.client.render.entity.SilentNereidHeadfinsRenderer SILENT_NEREID_HEADFINS_RENDERER;
+    public static net.ganyusbathwater.oririmod.client.render.entity.LizardTailCosmeticRenderer LIZARD_TAIL_COSMETIC_RENDERER;
 
     private static boolean hasCurioEquipped(Player player, Item item) {
         return CuriosApi.getCuriosInventory(player)
@@ -222,6 +223,20 @@ public class CosmeticPlayerRenderEventHandler {
             );
         }
 
+        if (LIZARD_TAIL_COSMETIC_RENDERER == null) {
+            LIZARD_TAIL_COSMETIC_RENDERER = new net.ganyusbathwater.oririmod.client.render.entity.LizardTailCosmeticRenderer(
+                new net.minecraft.client.renderer.entity.EntityRendererProvider.Context(
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher(),
+                    net.minecraft.client.Minecraft.getInstance().getItemRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getBlockRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer(),
+                    net.minecraft.client.Minecraft.getInstance().getResourceManager(),
+                    net.minecraft.client.Minecraft.getInstance().getEntityModels(),
+                    net.minecraft.client.Minecraft.getInstance().font
+                )
+            );
+        }
+
         for (net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
             net.minecraft.client.renderer.entity.LivingEntityRenderer<net.minecraft.client.player.AbstractClientPlayer, net.minecraft.client.model.PlayerModel<net.minecraft.client.player.AbstractClientPlayer>> renderer = event.getSkin(skin);
             if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer playerRenderer) {
@@ -230,6 +245,7 @@ public class CosmeticPlayerRenderEventHandler {
                 playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.LamiaCosmeticLayer(playerRenderer));
                 playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.ElvenEarsCosmeticLayer(playerRenderer));
                 playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.SilentNereidCosmeticLayer(playerRenderer));
+                playerRenderer.addLayer(new net.ganyusbathwater.oririmod.client.render.layer.LizardTailCosmeticLayer(playerRenderer));
             }
         }
     }

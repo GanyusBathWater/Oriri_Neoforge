@@ -84,6 +84,8 @@ public class ModItems {
                         () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.ElvenJewelryItem(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> SILENT_NEREID_SCALE = ITEMS.register("silent_nereid_scale",
                         () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.SilentNereidScaleItem(new Item.Properties().stacksTo(1).component(ModDataComponents.SILENT_NEREID_COLORS.get(), net.ganyusbathwater.oririmod.item.component.SilentNereidColors.DEFAULT)));
+        public static final DeferredItem<Item> LIZARD_SCALE = ITEMS.register("lizard_scale",
+                        () -> new net.ganyusbathwater.oririmod.item.custom.cosmetic.LizardScaleItem(new Item.Properties().stacksTo(1).component(ModDataComponents.LIZARD_TAIL_COLORS.get(), net.ganyusbathwater.oririmod.item.component.LizardTailColors.DEFAULT)));
 
         public static final DeferredItem<Item> MANA_MANIFESTATION = ITEMS.register("mana_manifestation",
                         () -> new Item(new Item.Properties()));

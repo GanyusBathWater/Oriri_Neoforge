@@ -68,6 +68,14 @@ public final class ModDataComponents {
                             .build()
             );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<LizardTailColors>> LIZARD_TAIL_COLORS =
+            COMPONENTS.register("lizard_tail_colors", () ->
+                    DataComponentType.<LizardTailColors>builder()
+                            .persistent(LizardTailColors.CODEC)
+                            .networkSynchronized(LizardTailColors.STREAM_CODEC)
+                            .build()
+            );
+
 
     public static void register(IEventBus eventBus) {
         COMPONENTS.register(eventBus);

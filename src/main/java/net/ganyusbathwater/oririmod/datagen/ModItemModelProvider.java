@@ -611,6 +611,9 @@ public class ModItemModelProvider extends ItemModelProvider {
                         .texture("layer0", modLoc("item/kitsune_bell_main"))
                         .texture("layer1", modLoc("item/kitsune_bell_primary"))
                         .texture("layer2", modLoc("item/kitsune_bell_secondary"));
+                withExistingParent(ModItems.LIZARD_SCALE.getId().getPath(), mcLoc("item/generated"))
+                        .texture("layer0", modLoc("item/lizard_scale_primary"))
+                        .texture("layer1", modLoc("item/lizard_scale_secondary"));
 
                 withExistingParent(ModItems.DEVIARTRAS_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
                 withExistingParent(ModItems.PATIENTIA_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));

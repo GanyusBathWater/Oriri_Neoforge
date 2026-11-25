@@ -494,6 +494,7 @@ public class ModItemGroups {
                         output.accept(ModItems.LAMIA_SCALE.get());
                         output.accept(ModItems.ELVEN_JEWLERY.get());
                         output.accept(ModItems.SILENT_NEREID_SCALE.get());
+                        output.accept(ModItems.LIZARD_SCALE.get());
 
                         // ------------Weapons------------
                         output.accept(ModItems.JADE_SHIELD);
