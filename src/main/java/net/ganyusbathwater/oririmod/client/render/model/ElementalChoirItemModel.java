@@ -1,8 +1,12 @@
 package net.ganyusbathwater.oririmod.client.render.model;
 
 import net.ganyusbathwater.oririmod.OririMod;
+import net.ganyusbathwater.oririmod.client.physics.ElementalChoirAnimationController;
+import net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer;
 import net.ganyusbathwater.oririmod.item.custom.ElementalChoirItem;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.model.DefaultedItemGeoModel;
 
 public class ElementalChoirItemModel extends DefaultedItemGeoModel<ElementalChoirItem> {
@@ -16,25 +20,15 @@ public class ElementalChoirItemModel extends DefaultedItemGeoModel<ElementalChoi
     }
 
     @Override
-    public void setCustomAnimations(ElementalChoirItem animatable, long instanceId, software.bernie.geckolib.animation.AnimationState<ElementalChoirItem> animationState) {
+    public void setCustomAnimations(ElementalChoirItem animatable, long instanceId, AnimationState<ElementalChoirItem> animationState) {
         super.setCustomAnimations(animatable, instanceId, animationState);
-        
-        net.minecraft.world.entity.player.Player player = net.ganyusbathwater.oririmod.client.render.item.ElementalChoirItemRenderer.currentRenderEntity;
-        if (player != null) {
-            long currentTick = player.level().getGameTime();
-            long lastSwing = net.ganyusbathwater.oririmod.item.custom.ElementalChoirItem.CLIENT_LAST_SWING_TICK.getOrDefault(player, 0L);
-            
-            // Only snap the carousel to face the player's crosshair during a left-click swing
-            if (currentTick - lastSwing < 10) {
-                software.bernie.geckolib.cache.object.GeoBone weaponsBone = getAnimationProcessor().getBone("weapons");
-                if (weaponsBone != null) {
-                    float partialTick = animationState.getPartialTick();
-                    float headRot = net.minecraft.util.Mth.lerp(partialTick, player.yHeadRotO, player.getYHeadRot());
-                    float targetYawRad = (float) Math.toRadians(180.0f - headRot);
-                    
-                    weaponsBone.setRotY(targetYawRad);
-                }
-            }
-        }
+
+        Player player = ElementalChoirItemRenderer.currentRenderEntity;
+        ElementalChoirAnimationController.applyAnimation(
+                player,
+                animatable,
+                name -> getAnimationProcessor().getBone(name),
+                animationState.getPartialTick()
+        );
     }
 }

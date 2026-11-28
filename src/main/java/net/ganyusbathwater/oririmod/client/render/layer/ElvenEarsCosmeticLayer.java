@@ -34,6 +34,10 @@ public class ElvenEarsCosmeticLayer extends RenderLayer<AbstractClientPlayer, Pl
             return;
         }
 
+        if (CosmeticVisibilityHelper.shouldHideCosmeticHead(player)) {
+            return;
+        }
+
         if (CosmeticPlayerRenderEventHandler.ELVEN_EARS_RENDERER != null) {
             poseStack.pushPose();
 

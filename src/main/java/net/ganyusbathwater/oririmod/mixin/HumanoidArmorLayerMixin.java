@@ -1,6 +1,7 @@
 package net.ganyusbathwater.oririmod.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.ganyusbathwater.oririmod.client.render.layer.CosmeticVisibilityHelper;
 import net.ganyusbathwater.oririmod.item.ModItems;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,25 +18,31 @@ import top.theillusivec4.curios.api.CuriosApi;
 @Mixin(HumanoidArmorLayer.class)
 public abstract class HumanoidArmorLayerMixin<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>> {
 
-    private boolean oririmod$shouldHideLegs(LivingEntity livingEntity, EquipmentSlot slot) {
-        if (slot == EquipmentSlot.LEGS || slot == EquipmentSlot.FEET) {
-            if (livingEntity instanceof Player player) {
-                boolean hasLamia = CuriosApi.getCuriosInventory(player)
-                        .map(inv -> inv.findFirstCurio(ModItems.LAMIA_SCALE.get()).isPresent())
-                        .orElse(false);
-                if (hasLamia) {
-                    return true;
-                }
+    private boolean oririmod$shouldHideArmor(LivingEntity livingEntity, EquipmentSlot slot) {
+        if (!(livingEntity instanceof Player player)) {
+            return false;
+        }
 
-                boolean hasAquaticScale = CuriosApi.getCuriosInventory(player)
-                        .map(inv -> inv.findFirstCurio(ModItems.MERMAID_SCALE.get()).isPresent()
-                                || inv.findFirstCurio(ModItems.SILENT_NEREID_SCALE.get()).isPresent())
-                        .orElse(false);
-                if (hasAquaticScale) {
-                    return player.isInWater() ||
-                            player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) ||
-                            player.isVisuallySwimming();
-                }
+        if (slot == EquipmentSlot.HEAD) {
+            return CosmeticVisibilityHelper.shouldHideHelmet(player);
+        }
+
+        if (slot == EquipmentSlot.LEGS || slot == EquipmentSlot.FEET) {
+            boolean hasLamia = CuriosApi.getCuriosInventory(player)
+                    .map(inv -> inv.findFirstCurio(ModItems.LAMIA_SCALE.get()).isPresent())
+                    .orElse(false);
+            if (hasLamia) {
+                return true;
+            }
+
+            boolean hasAquaticScale = CuriosApi.getCuriosInventory(player)
+                    .map(inv -> inv.findFirstCurio(ModItems.MERMAID_SCALE.get()).isPresent()
+                            || inv.findFirstCurio(ModItems.SILENT_NEREID_SCALE.get()).isPresent())
+                    .orElse(false);
+            if (hasAquaticScale) {
+                return player.isInWater() ||
+                        player.isInFluidType((fluidType, height) -> player.canSwimInFluidType(fluidType)) ||
+                        player.isVisuallySwimming();
             }
         }
         return false;
@@ -43,16 +50,16 @@ public abstract class HumanoidArmorLayerMixin<T extends LivingEntity, M extends 
 
     // NeoForge 1.21.1 12-parameter overload
     @Inject(method = "renderArmorPiece(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;ILnet/minecraft/client/model/HumanoidModel;FFFFFF)V", at = @At("HEAD"), cancellable = true)
-    private void oririmod$hideLegArmorNeoForge(PoseStack poseStack, MultiBufferSource bufferSource, T livingEntity, EquipmentSlot slot, int packedLight, A model, float f, float f1, float f2, float f3, float f4, float f5, CallbackInfo ci) {
-        if (oririmod$shouldHideLegs(livingEntity, slot)) {
+    private void oririmod$hideArmorNeoForge(PoseStack poseStack, MultiBufferSource bufferSource, T livingEntity, EquipmentSlot slot, int packedLight, A model, float f, float f1, float f2, float f3, float f4, float f5, CallbackInfo ci) {
+        if (oririmod$shouldHideArmor(livingEntity, slot)) {
             ci.cancel();
         }
     }
 
     // Vanilla 6-parameter overload
     @Inject(method = "renderArmorPiece(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;ILnet/minecraft/client/model/HumanoidModel;)V", at = @At("HEAD"), cancellable = true)
-    private void oririmod$hideLegArmorVanilla(PoseStack poseStack, MultiBufferSource bufferSource, T livingEntity, EquipmentSlot slot, int packedLight, A model, CallbackInfo ci) {
-        if (oririmod$shouldHideLegs(livingEntity, slot)) {
+    private void oririmod$hideArmorVanilla(PoseStack poseStack, MultiBufferSource bufferSource, T livingEntity, EquipmentSlot slot, int packedLight, A model, CallbackInfo ci) {
+        if (oririmod$shouldHideArmor(livingEntity, slot)) {
             ci.cancel();
         }
     }

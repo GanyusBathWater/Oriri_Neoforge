@@ -50,7 +50,8 @@ public class MermaidCosmeticLayer extends RenderLayer<AbstractClientPlayer, Play
             poseStack.popPose();
         }
         
-        if (CosmeticPlayerRenderEventHandler.MERMAID_HEADFINS_RENDERER != null) {
+        if (CosmeticPlayerRenderEventHandler.MERMAID_HEADFINS_RENDERER != null
+                && !CosmeticVisibilityHelper.shouldHideCosmeticHead(player)) {
             // HEADFINS MODEL (renders on both Land and Water)
             poseStack.pushPose();
             

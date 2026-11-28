@@ -219,8 +219,8 @@ public final class NetworkHandler {
                     var player = ctx.player();
                     if (player != null && player.level().isClientSide) {
                         net.minecraft.world.entity.Entity entity = player.level().getEntity(payload.playerId());
-                        if (entity instanceof net.minecraft.world.entity.player.Player swingingPlayer) {
-                            net.ganyusbathwater.oririmod.item.custom.ElementalChoirItem.CLIENT_LAST_SWING_TICK.put(swingingPlayer, swingingPlayer.level().getGameTime());
+                        if (entity instanceof net.minecraft.world.entity.player.Player swingingPlayer && swingingPlayer != player) {
+                            net.ganyusbathwater.oririmod.client.physics.ElementalChoirAnimationController.triggerRemoteSwing(swingingPlayer);
                         }
                     }
                 }));

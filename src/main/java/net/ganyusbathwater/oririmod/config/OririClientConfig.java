@@ -10,6 +10,19 @@ public class OririClientConfig {
     public static final ModConfigSpec SPEC;
     public static final Client CLIENT;
 
+    /**
+     * Controls how mythical head cosmetics (Kitsune ears, Elven ears, Lamia ears,
+     * Mermaid & Silent Nereid headfins) interact with equipped helmets.
+     */
+    public enum CosmeticHelmetMode {
+        /** Hide the helmet armor model when a head-cosmetic Essence is equipped (keeps stats, mythical ears always visible). */
+        HIDE_HELMET,
+        /** Keep the helmet visible and hide cosmetic ears/headfins whenever a helmet is equipped (zero clipping). */
+        HIDE_COSMETIC_HEAD,
+        /** Render both the helmet and the cosmetic ears/headfins. */
+        SHOW_BOTH
+    }
+
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         CLIENT = new Client(b);
@@ -21,6 +34,7 @@ public class OririClientConfig {
         public final ModConfigSpec.BooleanValue groundHazeEnabled;
         public final ModConfigSpec.DoubleValue groundHazeDensity;
         public final ModConfigSpec.IntValue groundHazeRadius;
+        public final ModConfigSpec.EnumValue<CosmeticHelmetMode> cosmeticHelmetMode;
 
         Client(ModConfigSpec.Builder b) {
             b.comment("Client UI & Inventory styling options").push("ui");
@@ -41,6 +55,15 @@ public class OririClientConfig {
                     .comment("Horizontal radius in blocks around the player for terrain ground haze (lower values improve FPS on low-end GPUs).")
                     .defineInRange("groundHazeRadius", 44, 24, 64);
             b.pop();
+
+            b.comment("Player Essence cosmetic visual preferences").push("cosmetics");
+            cosmeticHelmetMode = b
+                    .comment("How mythical head cosmetics (Kitsune ears, Elven ears, Lamia ears, Mermaid/Silent Nereid headfins) handle equipped helmets:",
+                            "  HIDE_HELMET        - Hide the helmet visual while a head-cosmetic Essence is equipped (armor stats still apply).",
+                            "  HIDE_COSMETIC_HEAD - Show the helmet and hide cosmetic ears/headfins while a helmet is worn (no clipping).",
+                            "  SHOW_BOTH          - Render both the helmet and the cosmetic ears/headfins.")
+                    .defineEnum("cosmeticHelmetMode", CosmeticHelmetMode.HIDE_HELMET);
+            b.pop();
         }
     }
 
@@ -58,5 +81,9 @@ public class OririClientConfig {
 
     public static int getGroundHazeRadius() {
         return SPEC.isLoaded() ? CLIENT.groundHazeRadius.get() : 44;
+    }
+
+    public static CosmeticHelmetMode getCosmeticHelmetMode() {
+        return SPEC.isLoaded() ? CLIENT.cosmeticHelmetMode.get() : CosmeticHelmetMode.HIDE_HELMET;
     }
 }

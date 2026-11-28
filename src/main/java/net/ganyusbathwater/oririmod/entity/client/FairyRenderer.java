@@ -4,14 +4,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.ganyusbathwater.oririmod.OririMod;
 import net.ganyusbathwater.oririmod.entity.custom.FairyEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
+import software.bernie.geckolib.util.RenderUtil;
 
 public class FairyRenderer extends GeoEntityRenderer<FairyEntity> {
     private static final ResourceLocation BASE_TEXTURE = ResourceLocation.fromNamespaceAndPath(OririMod.MOD_ID, "textures/entity/fairy.png");
@@ -20,33 +24,11 @@ public class FairyRenderer extends GeoEntityRenderer<FairyEntity> {
 
     public FairyRenderer(EntityRendererProvider.Context context) {
         super(context, new FairyModel());
-        
-        this.addRenderLayer(new BlockAndItemGeoLayer<>(this) {
-            @Override
-            protected net.minecraft.world.item.ItemStack getStackForBone(GeoBone bone, FairyEntity animatable) {
-                if (bone.getName().equals("item_bone") || bone.getName().equals("right_item")) {
-                    return animatable.getMainHandItem();
-                }
-                return net.minecraft.world.item.ItemStack.EMPTY;
-            }
 
-            @Override
-            protected net.minecraft.world.item.ItemDisplayContext getTransformTypeForStack(GeoBone bone, net.minecraft.world.item.ItemStack stack, FairyEntity animatable) {
-                return net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
-            }
-
-            @Override
-            protected void renderStackForBone(PoseStack poseStack, GeoBone bone, net.minecraft.world.item.ItemStack stack, FairyEntity animatable, MultiBufferSource bufferSource, float partialTick, int packedLight, int packedOverlay) {
-                poseStack.pushPose();
-                // Translate slightly to fine-tune the handle grip
-                poseStack.translate(0, 0.1, -0.1);
-                poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-90f));
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f));
-                super.renderStackForBone(poseStack, bone, stack, animatable, bufferSource, partialTick, packedLight, packedOverlay);
-                poseStack.popPose();
-            }
-        });
-
+        // Render held sword AFTER the main fairy.png pass completes so switching MultiBufferSource
+        // to the item atlas never flushes/invalidates the active buffer mid-traversal under Iris/Sodium
+        // (which previously caused bones hashed after 'arms'—left_arm and body—to disappear).
+        this.addRenderLayer(new FairyHeldItemLayer(this));
         this.addRenderLayer(new FairyTintLayer(this, HAIR_TEXTURE, FairyEntity::getHairColor));
         this.addRenderLayer(new FairyTintLayer(this, WING_TEXTURE, FairyEntity::getWingColor));
     }
@@ -74,9 +56,9 @@ public class FairyRenderer extends GeoEntityRenderer<FairyEntity> {
     }
 
     private void spawnShiningParticles(FairyEntity entity) {
-        var level = net.minecraft.client.Minecraft.getInstance().level;
+        var level = Minecraft.getInstance().level;
         if (level == null) return;
-        
+
         String[] bones = {"right_wing", "left_wing"};
         String boneName = bones[entity.getRandom().nextInt(bones.length)];
         GeoBone bone = this.getGeoModel().getAnimationProcessor().getBone(boneName);
@@ -89,7 +71,7 @@ public class FairyRenderer extends GeoEntityRenderer<FairyEntity> {
             double yawRad = Math.toRadians(-entity.yBodyRot);
             double cosYaw = Math.cos(yawRad);
             double sinYaw = Math.sin(yawRad);
-            
+
             // X is lateral, Z is forward/backward
             double worldX = entity.getX() + (boneX * cosYaw - boneZ * sinYaw);
             double worldY = entity.getY() + boneY;
@@ -98,6 +80,67 @@ public class FairyRenderer extends GeoEntityRenderer<FairyEntity> {
             level.addParticle(net.minecraft.core.particles.ParticleTypes.FIREWORK,
                     worldX, worldY, worldZ,
                     0, -0.02, 0);
+        }
+    }
+
+    /**
+     * Captures the transformed {@code item_bone} matrix during bone traversal without touching
+     * {@link MultiBufferSource}, then renders the held item in {@link #render} once the base model pass finishes.
+     */
+    private static class FairyHeldItemLayer extends GeoRenderLayer<FairyEntity> {
+        private PoseStack.Pose savedItemPose;
+
+        public FairyHeldItemLayer(GeoEntityRenderer<FairyEntity> renderer) {
+            super(renderer);
+        }
+
+        @Override
+        public void preRender(PoseStack poseStack, FairyEntity animatable, BakedGeoModel bakedModel,
+                              RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer,
+                              float partialTick, int packedLight, int packedOverlay) {
+            this.savedItemPose = null;
+        }
+
+        @Override
+        public void renderForBone(PoseStack poseStack, FairyEntity animatable, GeoBone bone, RenderType renderType,
+                                  MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick,
+                                  int packedLight, int packedOverlay) {
+            String name = bone.getName();
+            if (!name.equals("item_bone") && !name.equals("right_item")) {
+                return;
+            }
+            ItemStack stack = animatable.getMainHandItem();
+            if (stack.isEmpty()) {
+                return;
+            }
+
+            poseStack.pushPose();
+            RenderUtil.translateAndRotateMatrixForBone(poseStack, bone);
+            poseStack.translate(0.0, 0.1, -0.1);
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-90.0f));
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0f));
+            this.savedItemPose = poseStack.last().copy();
+            poseStack.popPose();
+        }
+
+        @Override
+        public void render(PoseStack poseStack, FairyEntity animatable, BakedGeoModel bakedModel,
+                           RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer,
+                           float partialTick, int packedLight, int packedOverlay) {
+            if (this.savedItemPose == null) {
+                return;
+            }
+            ItemStack stack = animatable.getMainHandItem();
+            if (!stack.isEmpty()) {
+                PoseStack itemPoseStack = new PoseStack();
+                itemPoseStack.last().pose().set(this.savedItemPose.pose());
+                itemPoseStack.last().normal().set(this.savedItemPose.normal());
+                Minecraft.getInstance().getItemRenderer().renderStatic(
+                        animatable, stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, false,
+                        itemPoseStack, bufferSource, animatable.level(), packedLight, packedOverlay, animatable.getId()
+                );
+            }
+            this.savedItemPose = null;
         }
     }
 
@@ -112,7 +155,7 @@ public class FairyRenderer extends GeoEntityRenderer<FairyEntity> {
         }
 
         @Override
-        public void render(PoseStack poseStack, FairyEntity animatable, software.bernie.geckolib.cache.object.BakedGeoModel bakedModel,
+        public void render(PoseStack poseStack, FairyEntity animatable, BakedGeoModel bakedModel,
                            RenderType renderType, MultiBufferSource bufferSource,
                            VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
 

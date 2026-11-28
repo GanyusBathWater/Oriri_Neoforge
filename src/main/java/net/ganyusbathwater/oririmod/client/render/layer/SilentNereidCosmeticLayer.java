@@ -48,7 +48,8 @@ public class SilentNereidCosmeticLayer extends RenderLayer<AbstractClientPlayer,
             poseStack.popPose();
         }
 
-        if (CosmeticPlayerRenderEventHandler.SILENT_NEREID_HEADFINS_RENDERER != null) {
+        if (CosmeticPlayerRenderEventHandler.SILENT_NEREID_HEADFINS_RENDERER != null
+                && !CosmeticVisibilityHelper.shouldHideCosmeticHead(player)) {
             poseStack.pushPose();
 
             poseStack.scale(-1.0F, -1.0F, 1.0F);

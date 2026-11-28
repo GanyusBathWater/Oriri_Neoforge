@@ -258,9 +258,9 @@ public class EmissiveClockerScreen extends Screen {
         this.renderTransparentBackground(gui);
         syncValuesFromBoxes();
 
-        float ticksNow = (this.minecraft != null && this.minecraft.level != null)
-                ? (this.minecraft.level.getGameTime() + partialTick)
-                : 0.0F;
+        // Monotonic wall-clock time (20 ticks/sec) in double precision so the oscilloscope never snaps back
+        // during tick freezes or loses 32-bit float precision on long-running worlds.
+        double ticksNow = (net.minecraft.Util.getMillis() % 86_400_000L) * 0.02D;
 
         // === 1. METALLIC & COPPER CLOCKWORK CHASSIS ===
         drawChassisPanel(gui, this.left, this.top, PANEL_W, PANEL_H);
@@ -350,7 +350,7 @@ public class EmissiveClockerScreen extends Screen {
     /**
      * Renders the live miniature Emissive Clocker lamp icon + real-time scrolling redstone waveform preview.
      */
-    private void drawSignalPreviewStrip(GuiGraphics gui, int x, int y, int w, int h, float ticksNow) {
+    private void drawSignalPreviewStrip(GuiGraphics gui, int x, int y, int w, int h, double ticksNow) {
         // Copper bezel + deep obsidian oscilloscope screen
         gui.fill(x, y, x + w, y + h, 0xFF6B3D1F);
         gui.fill(x + 1, y + 1, x + w - 1, y + h - 1, 0xFF0C0E13);
@@ -384,8 +384,8 @@ public class EmissiveClockerScreen extends Screen {
         float simOn = onTicks * timeScale;
         float simOff = offTicks * timeScale;
 
-        float simNow = ticksNow;
-        float nowPhase = ((simNow % displayPeriod) + displayPeriod) % displayPeriod;
+        double periodD = displayPeriod;
+        float nowPhase = (float) (((ticksNow % periodD) + periodD) % periodD);
         boolean currentHigh = sampleSignalHigh(nowPhase, displayPeriod, simD, simOn, simOff);
 
         // === Left: Miniature 26x26 Diamond Emissive Clocker Lamp ===
@@ -425,8 +425,8 @@ public class EmissiveClockerScreen extends Screen {
         float ticksPerPx = displayPeriod / (waveW * 0.55F);
         boolean prevHigh = currentHigh;
         for (int px = 0; px <= lastPx; px++) {
-            float sampleT = simNow + px * ticksPerPx;
-            float wrapped = ((sampleT % displayPeriod) + displayPeriod) % displayPeriod;
+            double sampleT = ticksNow + px * (double) ticksPerPx;
+            float wrapped = (float) (((sampleT % periodD) + periodD) % periodD);
             boolean high = sampleSignalHigh(wrapped, displayPeriod, simD, simOn, simOff);
             int sy = high ? highY : lowY;
 

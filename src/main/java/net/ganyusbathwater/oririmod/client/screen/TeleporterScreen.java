@@ -153,9 +153,9 @@ public class TeleporterScreen extends Screen {
     public void renderBackground(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         this.renderTransparentBackground(gui);
 
-        float time = (this.minecraft != null && this.minecraft.level != null)
-                ? (this.minecraft.level.getGameTime() + partialTick) * 0.08F
-                : 0.0F;
+        // Monotonic wall-clock time wrapped in double precision so rift/conduit animations never stall
+        // during tick freezes or lose float precision on long-running worlds.
+        float time = (float) ((net.minecraft.Util.getMillis() * 0.0016D) % (Math.PI * 200.0D));
 
         int accent = activeAccentRgb();
         int accentBright = blendRgb(accent, 0xFFFFFF, 0.45F);

@@ -302,11 +302,7 @@ public class SoulHarvesterScreen extends AbstractContainerScreen<SoulHarvesterMe
         if (entity == null) return;
 
         try {
-            if (this.minecraft != null && this.minecraft.level != null) {
-                entity.tickCount = (int) (this.minecraft.level.getGameTime() % 1_000_000L) + 20;
-            } else {
-                entity.tickCount = Math.max(20, entity.tickCount + 1);
-            }
+            entity.tickCount = (int) ((net.minecraft.Util.getMillis() / 50L) % 1_000_000L) + 20;
 
             float maxDim = Math.max(0.5F, Math.max(entity.getBbHeight(), entity.getBbWidth()));
             int scale = Mth.clamp(Math.round(34.0F / maxDim), 8, 26);

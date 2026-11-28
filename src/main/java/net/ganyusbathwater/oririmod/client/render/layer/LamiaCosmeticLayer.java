@@ -54,7 +54,8 @@ public class LamiaCosmeticLayer extends RenderLayer<AbstractClientPlayer, Player
         }
 
         // 2. Render Ears
-        if (CosmeticPlayerRenderEventHandler.LAMIA_EARS_RENDERER != null) {
+        if (CosmeticPlayerRenderEventHandler.LAMIA_EARS_RENDERER != null
+                && !CosmeticVisibilityHelper.shouldHideCosmeticHead(player)) {
             poseStack.pushPose();
             poseStack.scale(-1.0F, -1.0F, 1.0F);
             poseStack.translate(0.0F, -1.5F, 0.0F);

@@ -287,11 +287,7 @@ public class SoulCollectorScreen extends AbstractContainerScreen<SoulCollectorMe
             // Keep tickCount >= 20 and advancing with game time so custom renderers that suppress
             // spawn-frame glitches (entity.tickCount < 2, e.g. Silent Nereid / Mermaid / Deviartras /
             // Venomous Plant) render normally and GeckoLib/vanilla idle animations play cleanly.
-            if (this.minecraft != null && this.minecraft.level != null) {
-                entity.tickCount = (int) (this.minecraft.level.getGameTime() % 1_000_000L) + 20;
-            } else {
-                entity.tickCount = Math.max(20, entity.tickCount + 1);
-            }
+            entity.tickCount = (int) ((Util.getMillis() / 50L) % 1_000_000L) + 20;
 
             float bbH = Math.max(0.5F, entity.getBbHeight());
             float bbW = Math.max(0.5F, entity.getBbWidth());

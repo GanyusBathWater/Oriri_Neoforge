@@ -55,10 +55,9 @@ public class EquinoxTableScreen extends AbstractContainerScreen<EquinoxTableMenu
     }
 
     private float getAnimTime(float partialTick) {
-        if (this.minecraft != null && this.minecraft.level != null) {
-            return (this.minecraft.level.getGameTime() + partialTick) * 0.08F;
-        }
-        return (System.currentTimeMillis() % 60_000L) / 1000.0F * 1.6F;
+        // Monotonic wall-clock time wrapped in double precision (~1.6 rad/s, matching 20 tps * 0.08)
+        // so animations never stall when ticks are frozen or lose float precision on old worlds.
+        return (float) ((net.minecraft.Util.getMillis() * 0.0016D) % (Math.PI * 200.0D));
     }
 
     private int getPlayerMana() {
